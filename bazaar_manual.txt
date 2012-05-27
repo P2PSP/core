@@ -1,0 +1,64 @@
+# Identification:
+bzr whoami "Your name <your@email.address>
+
+# Who am I?:
+bzr whoami
+
+# Creating a branch (in Bazaar trunk is also a branch):
+bzr init-repo P2PSP
+bzr init P2PSP/trunk
+cd P2PSP/trunk
+
+# Adding files (in this case, python files) to a branch:
+cp source_dir/*.py .
+bzr add *.py
+
+# Branch history:
+bzr log
+
+# Commit a new branch:
+bzr launchpad-login your-name-in-lauchpad
+bzr commit -m "Creating the trunk branch"
+bzr push lp:~p2psp/p2psp/trunk
+#              |     |     |
+#              |     |     +- branch name
+#              |     +------- project name
+#              +------------- team name
+
+# Checkout of a branch (in this case, the trunk branch):
+bzr branch lp:~p2psp/p2psp/trunk
+
+# Creating your own branch (mybranch):
+bzr init-repo P2PSP
+bzr branch lp:~p2psp/p2psp/trunk P2PSP/mybranch
+cd P2PSP/mybranch
+bzr push lp:~p2psp/p2psp/mybranch
+
+# Updating your branch (mybranch) from the main branch (trunk):
+cd mybranch
+bzr merge
+
+# Updating the trunk branch with the contents of the mybranch branch
+# (only the owner of the trunk branch can do this):
+cd trunk
+bzr merge lp:~p2psp/p2psp/mybranch
+
+# Committing changes/addings:
+cd mybranch
+bzr add ...
+bzr commit -m "Comments ..."
+bzr push
+
+# File status in the mybranch branch:
+cd mybranch
+bzr status
+
+# Help:
+bzr help
+
+# More help about something ...
+bzr help something
+
+# Exporting a repository:
+cd mybranch
+bzr export directory
