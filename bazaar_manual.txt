@@ -43,7 +43,7 @@ bzr merge
 cd trunk
 bzr merge lp:~p2psp/p2psp/mybranch
 
-# Committing changes/addings:
+# Committing changes/addings of a previously created repository:
 cd mybranch
 bzr add ...
 bzr commit -m "Comments ..."
