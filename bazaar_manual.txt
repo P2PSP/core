@@ -36,7 +36,7 @@ bzr push lp:~p2psp/p2psp/mybranch
 
 # Updating your branch (mybranch) from the main branch (trunk):
 cd mybranch
-bzr merge
+bzr merge lp:~p2psp/p2psp/trunk
 
 # Updating the trunk branch with the contents of the mybranch branch
 # (only the owner of the trunk branch can do this):
