@@ -28,7 +28,6 @@ from time import gmtime, strftime
 IP_ADDR = 0
 PORT = 1
 VIDEO_HEADER_SIZE = 20 # In blocks
-BUFFER_SIZE = 512 # Borrar ... y todo lo que tenga que ver con esto
 
 listen_port = int(sys.argv[1])
 video_server_host = sys.argv[2]
@@ -81,12 +80,6 @@ class Peer_Connection_Thread(Thread):
             private_endpoint = (private_IP, private_port)
             print peer_serve_socket.getsockname(), \
                 "Private endpoint =", private_endpoint
-
-            print peer_serve_socket.getsockname(), \
-                "buffer size =", BUFFER_SIZE, "->", peer,
-            payload = struct.pack("H", socket.htons(BUFFER_SIZE))
-            peer_serve_socket.sendall(payload)
-            print "done"
 
             print peer_serve_socket.getsockname(), "Sending the list of peers"
             payload = struct.pack("H", socket.htons(len(peer_list)))

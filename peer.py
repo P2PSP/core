@@ -51,13 +51,6 @@ payload = struct.pack("4sH",
                       socket.htons(source_socket.getsockname()[PORT]))
 source_socket.sendall(payload)
 
-''' Esto sobrará '''
-buffer_size = socket.ntohs(
-    struct.unpack(
-        "H", source_socket.recv(
-            struct.calcsize("H")))[0])
-print source_socket.getsockname(), "<- Buffer size =", buffer_size
-
 buffer_size = 32
 
 number_of_peers = socket.ntohs(
