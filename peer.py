@@ -51,7 +51,7 @@ payload = struct.pack("4sH",
                       socket.htons(source_socket.getsockname()[PORT]))
 source_socket.sendall(payload)
 
-buffer_size = 32
+buffer_size = 512
 
 number_of_peers = socket.ntohs(
     struct.unpack(
@@ -72,7 +72,7 @@ while number_of_peers > 0:
     peer_insolidarity[peer] = 0
     number_of_peers -= 1
 
-print source_socket.getsockname(), "<- ", source_socket, "[Video header",
+print source_socket.getsockname(), "<- ", source_socket.getpeername(), "[Video header",
 video_header_size = socket.ntohs(
     struct.unpack(
         "H", source_socket.recv(
@@ -89,10 +89,7 @@ stream_socket.bind(source_socket.getsockname())
 # This should create a working entry in the NAT if the peer is in a
 # private network
 payload = struct.pack("4sH", "aaaa", 0)
-(source_ip, unbound_port) = (source_socket.getpeername()[0], 80)
-print source_socket.getpeername(), (source_ip, unbound_port)
 for i in xrange(2):
-    #stream_socket.sendto(payload, (source_ip, unbound_port))
     stream_socket.sendto(payload, source_socket.getpeername())
 
 class Block_buffer_element:
@@ -185,11 +182,12 @@ def send_a_block_to_the_player():
             block_buffer[block_to_play % buffer_size].number, \
             Color.blue + "=>" + Color.none, \
             player_serve_socket.getpeername()
-        sent_bytes = player_serve_socket.sendall(str(block_buffer[block_to_play % buffer_size].block))
+        sent_bytes = player_serve_socket.sendall(block_buffer[block_to_play % buffer_size].block)
         
         # buffer[block_to_play.number].empty = True
         block_buffer[block_to_play % buffer_size].empty = True
-
+    else:
+        print ("------------------------- missing block ---------------------")
     # Increment the block_to_play
     block_to_play = (block_to_play + 1) % 65536
 

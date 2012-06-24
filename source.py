@@ -211,14 +211,15 @@ def SIGHUP_handler(signum, frame):
     print Color.none
     printing_lock.release()
 
-signal.signal(signal.SIGHUP, SIGHUP_handler)
-signal.siginterrupt(signal.SIGHUP, False)
+#signal.signal(signal.SIGHUP, SIGHUP_handler)
+#signal.siginterrupt(signal.SIGHUP, False)
 
 print peer_socket.getsockname(), "Sending the rest of the stream ..."
 while True:
 
     block = video_server_socket.recv(1024)
     tries = 0
+    '''
     while len(block) < 1024:
         tries += 1
         if tries > 3:
@@ -230,12 +231,15 @@ while True:
             video_server_socket.connect((video_server_host, video_server_port))
             video_server_socket.sendall("GET /" + channel + " HTTP/1.1\r\n\r\n")
         block += video_server_socket.recv(1024-len(block))
-
+    
  #   print video_server_socket.getsockname(), \
         Color.green + "<-" + Color.none, \
         video_server_socket.getpeername(), \
         block_number
- 
+    '''
+    
+    time.sleep(0.01) #give time to helping the peer send block to player (prevents missing in peer)
+   
     peer_index_lock.acquire()
     if len(peer_list) > 0:
 #        print peer_socket.getsockname(), \
@@ -245,8 +249,11 @@ while True:
         
         payload = struct.pack("H1024s", socket.htons(block_number), block)
         peer_socket.sendto(payload, peer_list[peer_index])
-        peer_index = (peer_index + 1) % len(peer_list)
-    peer_index_lock.release()
 
+        peer_index = (peer_index + 1) % len(peer_list)
+        
+    peer_index_lock.release()
+    
     block_number = (block_number + 1) % 65536
+    
 
