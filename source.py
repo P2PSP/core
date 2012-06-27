@@ -66,8 +66,9 @@ class Peer_Connection_Thread(Thread):
 
     def __init__(self):
         Thread.__init__(self)
-
+    
     def run(self):
+        
         while True:
             peer_serve_socket, peer = peer_connection_socket.baccept()
             print peer_serve_socket.getsockname(), \
@@ -84,18 +85,26 @@ class Peer_Connection_Thread(Thread):
             print peer_serve_socket.getsockname(), "Sending the list of peers"
             payload = struct.pack("H", socket.htons(len(peer_list)))
             peer_serve_socket.sendall(payload)
+            print "Len Peer List = ",len(peer_list)
+            print "Peer List"
             for (pub,pri) in zip(peer_list,private_list):
-                print "Peer =", peer, "Private =", pri
+                print "Public =", pub, "Private =", pri
                 if peer[0] == pub[0]:
                     payload = struct.pack("4sH",
                                           socket.inet_aton(pri[IP_ADDR]),
                                           socket.htons(pri[PORT]))
                     print pri[IP_ADDR], ":", pri[PORT], "->", peer, "(private)"
                 else:
-                    payload = struct.pack("4sH",
-                                          socket.inet_aton(pub[IP_ADDR]),
+                    if pub[0].startswith('127.'):
+                       payload = struct.pack("4sH",
+                                          socket.inet_aton(peer_serve_socket.getsockname()[IP_ADDR]),
                                           socket.htons(pub[PORT]))
-                    print pub[IP_ADDR], ":", pub[PORT], "->", peer, "(public)"
+                       print peer_serve_socket.getsockname()[IP_ADDR], ":", pub[PORT], "->", peer, "(IP superpeer)" 
+                    else:                   
+                        payload = struct.pack("4sH",
+                                              socket.inet_aton(pub[IP_ADDR]),
+                                              socket.htons(pub[PORT]))
+                        print pub[IP_ADDR], ":", pub[PORT], "->", peer, "(public)"
                 peer_serve_socket.sendall(payload)
             print "done"
                 
@@ -108,14 +117,17 @@ class Peer_Connection_Thread(Thread):
             print "done"
 
             peer_serve_socket.close()
-            peer_list.append(peer)
+  
+            peer_list.append(peer)                
             private_list.append(private_endpoint)
+                
             removing_ratio[peer] = 0
             
 Peer_Connection_Thread().start()
 
 peer_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-peer_socket.bind(peer_connection_socket.getsockname())
+peer_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+peer_socket.bind(('',peer_connection_socket.getsockname()[PORT]))
 
 peer_index = 0
 

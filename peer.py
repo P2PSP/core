@@ -57,7 +57,7 @@ number_of_peers = socket.ntohs(
     struct.unpack(
         "H", source_socket.recv(
                 struct.calcsize("H")))[0])
-print source_socket.getsockname(), "<- Cluster size =", number_of_peers+1
+print source_socket.getsockname(), "<- Cluster size =", number_of_peers
 print source_socket.getsockname(), "Retrieving the list of peers ..."
 while number_of_peers > 0:
     payload = source_socket.recv(struct.calcsize("4sH"))
@@ -84,13 +84,14 @@ for i in xrange (video_header_size):
 print "] done"
 
 stream_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-stream_socket.bind(source_socket.getsockname())
+stream_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+stream_socket.bind(('',source_socket.getsockname()[PORT]))
 
 # This should create a working entry in the NAT if the peer is in a
 # private network
-payload = struct.pack("4sH", "aaaa", 0)
-for i in xrange(2):
-    stream_socket.sendto(payload, source_socket.getpeername())
+#payload = struct.pack("4sH", "aaaa", 0)
+#for i in xrange(2):
+  #  stream_socket.sendto(payload, source_socket.getpeername())
 
 class Block_buffer_element:
     def block(self):
@@ -106,11 +107,15 @@ for i in xrange(buffer_size):
 
 print "Buffering ..."
 
+counter=0
+lastpayload=None
 def receive_and_feed_the_cluster():
-    
+    global counter
+    global lastpayload
     payload, addr = stream_socket.recvfrom(struct.calcsize("H1024s"))
     number, block = struct.unpack("H1024s", payload)
     number = socket.ntohs(number)
+        
     '''
     print source_socket.getsockname(),
     if block_buffer[number % buffer_size].requested:
@@ -118,32 +123,33 @@ def receive_and_feed_the_cluster():
     else:
         print Color.green + "<-" + Color.none, 
     print number, addr
-    '''
+    
     print source_socket.getsockname(),
     print Color.green + "<-" + Color.none,
     print number, addr
-
-    if addr == source_socket.getpeername():
-        counter = 0
-        for peer in peer_list:
+    '''
+        
+    if addr == source_socket.getpeername():        
+        
+        while((counter<len(peer_list))&(counter>0)):
             print source_socket.getsockname(), \
-                number, Color.green + "->" + Color.none, peer, "(", counter, "/", len(peer_list),")"
-            counter += 1
-            stream_socket.sendto(payload, peer)
-            peer_insolidarity[peer] += 1
-            if peer_insolidarity[peer] > 32: # <- Important parameter!!
-                index_of_peer_to_remove = peer_list.index(peer)
-                peer_list.remove(peer)
-                del peer_insolidarity[peer]
+                number, Color.green + "->" + Color.none, peer_list[counter], "(", counter+1, "/", len(peer_list),")"
+            stream_socket.sendto(lastpayload, peer_list[counter])
+            peer_insolidarity[peer_list[counter]] += 1
+            if peer_insolidarity[peer_list[counter]] > 64: # <- Important parameter!!
+                del peer_insolidarity[peer_list[counter]]
                 print Color.blue
-                print "Removing", peer
+                print "Removing", peer_list[counter]
                 print Color.none
-
+                
                 payload = struct.pack("4sH",
-                                      socket.inet_aton(peer[IP_ADDR]),
-                                      socket.htons(peer[PORT]))
+                                      socket.inet_aton(peer_list[counter][IP_ADDR]),
+                                      socket.htons(peer_list[counter][PORT]))
                 stream_socket.sendto(payload, source_socket.getpeername())
-
+                peer_list.remove(peer_list[counter])
+            counter += 1
+        counter=0
+        lastpayload=payload
                 # Si este paquete se pierde, en principio no ocurre
                 # nada porque el o los super-peers van a hacer lo
                 # mismo con el nodo fuente y es prácticamente
@@ -152,10 +158,28 @@ def receive_and_feed_the_cluster():
                 # ancho de banda entre ellos está garantizado).
 
     else:
-        if not addr in peer_list:
+        
+        if addr not in peer_list:
             peer_list.append(addr)
         peer_insolidarity[addr] = 0
-
+        
+    if(counter<len(peer_list)): 
+        print source_socket.getsockname(), \
+            number, Color.green + "->" + Color.none, peer_list[counter], "(", counter+1, "/", len(peer_list),")"
+        stream_socket.sendto(lastpayload, peer_list[counter])
+        peer_insolidarity[peer_list[counter]] += 1
+        if peer_insolidarity[peer_list[counter]] > 64: # <- Important parameter!!
+            del peer_insolidarity[peer_list[counter]]
+            print Color.blue
+            print "Removing", peer_list[counter]
+            print Color.none
+                        
+            payload = struct.pack("4sH",
+                                  socket.inet_aton(peer_list[counter][IP_ADDR]),
+                                  socket.htons(peer_list[counter][PORT]))
+            stream_socket.sendto(payload, source_socket.getpeername())
+            peer_list.remove(peer_list[counter])
+        counter += 1
     block_buffer[number % buffer_size].block = block
     block_buffer[number % buffer_size].number = number
     block_buffer[number % buffer_size].empty = False
@@ -178,16 +202,18 @@ def send_a_block_to_the_player():
 
     # Only if the block has something useful inside ...
     if block_buffer[(block_to_play % buffer_size)].empty == False:
+        '''
         print player_serve_socket.getsockname(), \
             block_buffer[block_to_play % buffer_size].number, \
             Color.blue + "=>" + Color.none, \
             player_serve_socket.getpeername()
+        '''
         sent_bytes = player_serve_socket.sendall(block_buffer[block_to_play % buffer_size].block)
         
         # buffer[block_to_play.number].empty = True
         block_buffer[block_to_play % buffer_size].empty = True
-    else:
-        print ("------------------------- missing block ---------------------")
+    #else:
+       # print ("------------------------- missing block ---------------------")
     # Increment the block_to_play
     block_to_play = (block_to_play + 1) % 65536
 
