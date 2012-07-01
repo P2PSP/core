@@ -65,6 +65,11 @@ while number_of_peers > 0:
     peer_IPaddr = socket.inet_ntoa(peer_IPaddr)
     port = socket.ntohs(port)
     peer = (peer_IPaddr, port)
+    
+    #superpeers ip control            
+    if peer[0].startswith('127.'):
+        peer=(source_socket.getpeername()[IP_ADDR],port)
+    
     print source_socket.getsockname(), "<- peer", peer
     peer_list.append(peer)
 #    peer_insolidarity[peer] = -32768 # To avoid removing peers during

@@ -94,17 +94,11 @@ class Peer_Connection_Thread(Thread):
                                           socket.inet_aton(pri[IP_ADDR]),
                                           socket.htons(pri[PORT]))
                     print pri[IP_ADDR], ":", pri[PORT], "->", peer, "(private)"
-                else:
-                    if pub[0].startswith('127.'):
-                       payload = struct.pack("4sH",
-                                          socket.inet_aton(peer_serve_socket.getsockname()[IP_ADDR]),
+                else:                  
+                    payload = struct.pack("4sH",
+                                          socket.inet_aton(pub[IP_ADDR]),
                                           socket.htons(pub[PORT]))
-                       print peer_serve_socket.getsockname()[IP_ADDR], ":", pub[PORT], "->", peer, "(IP superpeer)" 
-                    else:                   
-                        payload = struct.pack("4sH",
-                                              socket.inet_aton(pub[IP_ADDR]),
-                                              socket.htons(pub[PORT]))
-                        print pub[IP_ADDR], ":", pub[PORT], "->", peer, "(public)"
+                    print pub[IP_ADDR], ":", pub[PORT], "->", peer, "(public)"
                 peer_serve_socket.sendall(payload)
             print "done"
                 
