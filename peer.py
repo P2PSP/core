@@ -134,26 +134,31 @@ def receive_and_feed_the_cluster():
     print Color.green + "<-" + Color.none,
     print number, addr
     '''
+    print "recive from ", addr, " number ", number
         
     if addr == source_socket.getpeername():        
-        
+    
         while((counter<len(peer_list))&(counter>0)):
+            peer=peer_list[counter]
+            '''
             print source_socket.getsockname(), \
                 number, Color.green + "->" + Color.none, peer_list[counter], "(", counter+1, "/", len(peer_list),")"
-            stream_socket.sendto(lastpayload, peer_list[counter])
-            peer_insolidarity[peer_list[counter]] += 1
-            if peer_insolidarity[peer_list[counter]] > 128: # <- Important parameter!!
-                del peer_insolidarity[peer_list[counter]]
+            '''
+            stream_socket.sendto(lastpayload, peer)
+            peer_insolidarity[peer] += 1
+            if peer_insolidarity[peer] > 64: # <- Important parameter!!
+                del peer_insolidarity[peer]
                 print Color.blue
-                print "Removing", peer_list[counter]
+                print "Removing", peer
                 print Color.none
                 
                 payload = struct.pack("4sH",
-                                      socket.inet_aton(peer_list[counter][IP_ADDR]),
-                                      socket.htons(peer_list[counter][PORT]))
+                                      socket.inet_aton(peer[IP_ADDR]),
+                                      socket.htons(peer[PORT]))
                 stream_socket.sendto(payload, source_socket.getpeername())
-                peer_list.remove(peer_list[counter])
+                peer_list.remove(peer)
             counter += 1
+            
         counter=0
         lastpayload=payload
                 # Si este paquete se pierde, en principio no ocurre
@@ -162,30 +167,35 @@ def receive_and_feed_the_cluster():
                 # imposible que los mensajes que se envían desde los
                 # super-peers hacia el nodo fuente se pierdan (en
                 # ancho de banda entre ellos está garantizado).
-
     else:
         
         if addr not in peer_list:
             peer_list.append(addr)
+            
         peer_insolidarity[addr] = 0
         
     if(counter<len(peer_list)): 
+        peer=peer_list[counter]
+        
+        '''
         print source_socket.getsockname(), \
             number, Color.green + "->" + Color.none, peer_list[counter], "(", counter+1, "/", len(peer_list),")"
-        stream_socket.sendto(lastpayload, peer_list[counter])
-        peer_insolidarity[peer_list[counter]] += 1
-        if peer_insolidarity[peer_list[counter]] > 64: # <- Important parameter!!
-            del peer_insolidarity[peer_list[counter]]
+        '''
+        stream_socket.sendto(lastpayload, peer)
+        peer_insolidarity[peer] += 1
+        if peer_insolidarity[peer] > 64: # <- Important parameter!!
+            del peer_insolidarity[peer]
             print Color.blue
-            print "Removing", peer_list[counter]
+            print "Removing", peer
             print Color.none
                         
             payload = struct.pack("4sH",
-                                  socket.inet_aton(peer_list[counter][IP_ADDR]),
-                                  socket.htons(peer_list[counter][PORT]))
+                                  socket.inet_aton(peer[IP_ADDR]),
+                                  socket.htons(peer[PORT]))
             stream_socket.sendto(payload, source_socket.getpeername())
-            peer_list.remove(peer_list[counter])
+            peer_list.remove(peer)
         counter += 1
+        
     block_buffer[number % buffer_size].block = block
     block_buffer[number % buffer_size].number = number
     block_buffer[number % buffer_size].empty = False
