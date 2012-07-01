@@ -112,7 +112,13 @@ lastpayload=None
 def receive_and_feed_the_cluster():
     global counter
     global lastpayload
-    payload, addr = stream_socket.recvfrom(struct.calcsize("H1024s"))
+    
+    try:
+        payload, addr = stream_socket.recvfrom(struct.calcsize("H1024s"))
+    except socket.timeout:
+        sys.stderr.write("Lost connection to the source") 
+        sys.exit(-1)
+        
     number, block = struct.unpack("H1024s", payload)
     number = socket.ntohs(number)
         
@@ -136,7 +142,7 @@ def receive_and_feed_the_cluster():
                 number, Color.green + "->" + Color.none, peer_list[counter], "(", counter+1, "/", len(peer_list),")"
             stream_socket.sendto(lastpayload, peer_list[counter])
             peer_insolidarity[peer_list[counter]] += 1
-            if peer_insolidarity[peer_list[counter]] > 64: # <- Important parameter!!
+            if peer_insolidarity[peer_list[counter]] > 128: # <- Important parameter!!
                 del peer_insolidarity[peer_list[counter]]
                 print Color.blue
                 print "Removing", peer_list[counter]
@@ -208,7 +214,11 @@ def send_a_block_to_the_player():
             Color.blue + "=>" + Color.none, \
             player_serve_socket.getpeername()
         '''
-        sent_bytes = player_serve_socket.sendall(block_buffer[block_to_play % buffer_size].block)
+        try:
+            player_serve_socket.sendall(block_buffer[block_to_play % buffer_size].block)
+        except socket.error:
+            sys.stderr.write("Conection closed by the player")
+            sys.exit(-1)
         
         # buffer[block_to_play.number].empty = True
         block_buffer[block_to_play % buffer_size].empty = True
