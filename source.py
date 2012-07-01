@@ -144,7 +144,11 @@ class Prune_The_Cluster_Thread(Thread):
         global peer_index_lock
         global printing_lock
         while True:
-            payload, complaining_peer = peer_socket.recvfrom(struct.calcsize("4sH"))
+            try:
+                payload, complaining_peer = peer_socket.recvfrom(struct.calcsize("4sH"))
+            except socket.error:
+                print("Received from a peer offline now")
+                break
             peer_to_remove_IP, peer_to_remove_port = struct.unpack("4sH", payload)
             peer_to_remove_IP = socket.inet_ntoa(peer_to_remove_IP)
             peer_to_remove_port = socket.ntohs(peer_to_remove_port)
