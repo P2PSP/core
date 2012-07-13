@@ -1,5 +1,5 @@
 # Identification:
-bzr whoami "Your name <your@email.address>
+bzr whoami "Your name <your@email.address>"
 
 # Who am I?:
 bzr whoami
