@@ -48,6 +48,9 @@ cd mybranch
 bzr add ...
 bzr commit -m "Comments ..."
 bzr push
+# or
+bzr push lp:p2psp
+# if "bzr push" complains ...
 
 # File status in the mybranch branch:
 cd mybranch
