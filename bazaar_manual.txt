@@ -4,6 +4,9 @@ bzr whoami "Your name <your@email.address>"
 # Who am I?:
 bzr whoami
 
+# Updating your branch:
+bzr update
+
 # Creating a branch (in Bazaar, trunk is also a branch):
 bzr init-repo P2PSP
 bzr init P2PSP/trunk
