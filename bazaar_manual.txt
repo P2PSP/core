@@ -1,3 +1,107 @@
+# Introducing yourself to Bazaar:
+bzr whoami "Your Name <your@email.address>"
+bzr whoami
+
+# Checkout a branch (in this case, the trunk branch of the P2PSP
+# project):
+bzr branch lp:~p2psp/p2psp/trunk
+
+# Publishing a project in Lauchpad:
+mkdir new-project
+cd new-project
+bzr init
+
+# Branch statistics:
+bzr info
+
+# Branch history:
+bzr log [-r [revision1]..[revision2]]
+
+# Inserting a <file> in the current branch:
+bzr add <file>
+
+# Deleting a <file> from the current branch:
+bzr [--force] delete <file>
+
+# Displaying the classes of <file>s:
+bzr status
+
+# Displaying the modifications:
+bzr diff [-r revision1..revision2]
+bzr diff --diff-options --side-by-side <file>
+
+# Un-versionating a <file> from the current branch:
+bzr remove <file>
+
+# Commiting changes to your local repository:
+bzr commit -m "your message" [--fixes {lp|deb|gnome}:<number>]
+bzr commit -F <file of messages>
+bzr commit . # Commit only the current directory
+
+# Reverting changes:
+bzr revert
+
+# Updating a not modified (with unpushed commits) branch:
+bzr pull
+
+# Updating a branch
+bzr merge
+
+# Resoving conflicts
+bzr resolve <file>
+
+# Creating a branch (in Bazaar, trunk is also a branch):
+bzr init-repo P2PSP
+bzr init P2PSP/trunk
+cd P2PSP/trunk
+
+# Commit a new branch:
+bzr launchpad-login your-name-in-lauchpad
+bzr commit -m "Creating the trunk branch"
+bzr push lp:~p2psp/p2psp/trunk
+#              |     |     |
+#              |     |     +- branch name
+#              |     +------- project name
+#              +------------- team name
+
+
+# Creating your own branch (mybranch):
+bzr init-repo P2PSP
+bzr branch lp:~p2psp/p2psp/trunk P2PSP/mybranch
+cd P2PSP/mybranch
+bzr push lp:~p2psp/p2psp/mybranch
+
+# Updating your branch (mybranch) from the main branch (trunk):
+cd mybranch
+bzr merge lp:~p2psp/p2psp/trunk
+
+# Updating the trunk branch with the contents of the mybranch branch
+# (only the owner of the trunk branch can do this):
+cd trunk
+bzr merge lp:~p2psp/p2psp/mybranch
+
+# Committing changes/addings of a previously created repository:
+cd mybranch
+bzr add ...
+bzr commit -m "Comments ..."
+bzr push
+# or
+bzr push lp:p2psp
+# if "bzr push" complains ...
+
+# File status in the mybranch branch:
+cd mybranch
+bzr status
+
+# Help:
+bzr help
+
+# More help about something ...
+bzr help something
+
+# Exporting a repository:
+cd mybranch
+bzr export directory
 # Identification:
 bzr whoami "Your name <your@email.address>
 
