@@ -34,6 +34,8 @@ cd trunk
 bzr merge bzr+ssh://bazaar.launchpad.net/~p2psp/p2psp/vruiz/
 ## or
 bzr merge lp:~p2psp/p2psp/vruiz
+bzr commit -m "Applying vruiz's changes"
+bzr push
 
 ## Creating the new project P2PSP (shared repository):
 bzr init-repo P2PSP
