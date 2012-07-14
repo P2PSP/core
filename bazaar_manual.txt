@@ -1,15 +1,33 @@
+##################
+## Main actions ##
+##################
+
+## Checkout a branch (in this case, the trunk branch of the P2PSP
+## project):
+bzr branch bzr+ssh://bazaar.launchpad.net/~p2psp/p2psp/trunk/
+## or ...:
+bzr branch lp:~p2psp/p2psp/trunk
+
+## Updating a branch:
+bzr pull # <- If you haven't modified your branch
+## or
+
+# Updating the trunk branch:
+bzr merge bzr+ssh://bazaar.launchpad.net/~p2psp/p2psp/trunk/
+
+## Commiting your changes:
+bzr commit -m "your message" [--fixes {lp|deb|gnome}:<number>]
+bzr commit -F <file of messages>
+bzr commit . # Commit only the current directory
+bzr push
+
+#################
+# Minor actions #
+#################
+
 # Introducing yourself to Bazaar:
 bzr whoami "Your Name <your@email.address>"
 bzr whoami
-
-# Checkout a branch (in this case, the trunk branch of the P2PSP
-# project):
-bzr branch lp:~p2psp/p2psp/trunk
-
-# Publishing a project in Lauchpad:
-mkdir new-project
-cd new-project
-bzr init
 
 # Branch statistics:
 bzr info
@@ -33,19 +51,10 @@ bzr diff --diff-options --side-by-side <file>
 # Un-versionating a <file> from the current branch:
 bzr remove <file>
 
-# Commiting changes to your local repository:
-bzr commit -m "your message" [--fixes {lp|deb|gnome}:<number>]
-bzr commit -F <file of messages>
-bzr commit . # Commit only the current directory
-
 # Reverting changes:
 bzr revert
 
-# Updating a not modified (with unpushed commits) branch:
-bzr pull
 
-# Updating a branch
-bzr merge
 
 # Resoving conflicts
 bzr resolve <file>
@@ -70,6 +79,15 @@ bzr init-repo P2PSP
 bzr branch lp:~p2psp/p2psp/trunk P2PSP/mybranch
 cd P2PSP/mybranch
 bzr push lp:~p2psp/p2psp/mybranch
+
+
+# Publishing a new project in Lauchpad (sin verificar):
+mkdir new-project
+cd new-project
+bzr init
+bzr add ...
+bzr commit -m "A new project"
+bzr push 
 
 # Updating your branch (mybranch) from the main branch (trunk):
 cd mybranch
