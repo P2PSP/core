@@ -71,8 +71,8 @@ for o, a in opts:
         listening_port = int(a)
         print sys.argv[0] + ": listening_port=" + str(listening_port)
     if o in ("-s", "--server"):
-        server_host = a[0]
-        server_port = a[1]
+        server_host = a.split(":")[0]
+        server_port = int(a.split(":")[1])
         print sys.argv[0] + ": server=" + "(" + server_host + ":" + str(server_port) + ")" 
     if o in ("-c", "--channel"):
         channel = int(a)
