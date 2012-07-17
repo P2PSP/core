@@ -5,13 +5,6 @@
 #
 # 
 
-'''
-Utilization example:
-
-oggfwd localhost 4551 1qaz /480.ogg < big_buck_bunny_480p_stereo.ogg
-python source.py 4552 localhost 4551 480.ogg
-'''
-
 # Esta versión del nodo fuente no tiene buffer porque no reenvía
 # bloques perdidos. Para saber qué peers hay en el cluster confía en
 # los mensajes que le envían los peers indicándo que un determinado
@@ -41,20 +34,37 @@ server_port = 4551
 channel = "134.ogg"
 
 def usage():
-    print sys.argv[0]
+    print "This is " + sys.argv[0] + ", the source node of a P2PSP network"
     print
-    print "This is the source node of a P2PSP network"
+    print "Parameters (and default values):"
     print
-    print "Parameters:"
-    print
-    print " -[-l]listening_port=the port that source uses to listen the peers (" + str(listening_port) + ")"
-    print " -[-s]erver=host name and port of the video/audio server ((" + server_host + ":" + str(server_port) + "))"
     print " -[-c]hannel=name of the video/audio sequence served by (" + str(channel) + ")"
+    print " -[-l]istening_port=the port that the source uses to listen the peers (" + str(listening_port) + ")"
+    print " -[-s]erver=host name and port of the video/audio server ((" + server_host + ":" + str(server_port) + "))"
+    print
+    print "Typical usage:"
+    print
+    print "oggfwd localhost 4551 1qaz /480.ogg < big_buck_bunny_480p_stereo.ogg &"
+    print "   |      |        |    |      |                   |"
+    print "   |      |        |    |      |                   +- Video file"
+    print "   |      |        |    |      +--------------------- 'Channel'"
+    print "   |      |        |    +---------------------------- Icecast password"
+    print "   |      |        +--------------------------------- Icecast port"
+    print "   |      +------------------------------------------ Icecast host"
+    print "   +------------------------------------------------- Sends a video to a Icecast server"
+    print
+    print "python source.py -l 4552 -s localhost:4551 -c 480.ogg"
+    print "   |      |           |           |              |"
+    print "   |      |           |           |              +--- 'Channel'"
+    print "   |      |           |           +------------------ Icecast end-point"
+    print "   |      |           +------------------------------ Listening port"
+    print "   |      +------------------------------------------ The source code"
+    print "   +------------------------------------------------- The Python interpreter"
 
 opts = ""
 
 try:
-    opts, extraparams = getopt.getopt(sys.argv[1:],"l:s:e:h",
+    opts, extraparams = getopt.getopt(sys.argv[1:],"l:s:c:h",
                                       ["listening_port=",
                                        "server=",
                                        "channel=",
@@ -65,7 +75,6 @@ except getopt.GetoptError, exc:
     sys.stderr.write(sys.argv[0] + ": " + exc.msg + "\n")
     sys.exit(2)
 
-
 for o, a in opts:
     if o in ("-l", "--listening_port"):
         listening_port = int(a)
@@ -75,8 +84,8 @@ for o, a in opts:
         server_port = int(a.split(":")[1])
         print sys.argv[0] + ": server=" + "(" + server_host + ":" + str(server_port) + ")" 
     if o in ("-c", "--channel"):
-        channel = int(a)
-        print sys.argv[0] + ": channel=" + int(channel)
+        channel = a
+        print sys.argv[0] + ": channel=" + channel
     if o in ("-h", "--help"):
 	usage()
 	sys.exit()
@@ -99,7 +108,7 @@ removing_ratio = {}
 
 server_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.connect((server_host, server_port))
-print server_socket.getsockname(), "Connected to Video Server at", server_socket.getpeername()
+print server_socket.getsockname(), "Connected to the video server", server_socket.getpeername()
 server_socket.sendall("GET /" + channel + " HTTP/1.1\r\n\r\n")
 print server_socket.getsockname(), "<- [Video header",
 video_header = [None]*VIDEO_HEADER_SIZE
