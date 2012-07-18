@@ -1,4 +1,4 @@
-python /home/vruiz/P2PSP/trunk/source.py -l 4554 -s localhost:4551 -c 134.ogg &
+python /home/vruiz/P2PSP/trunk/source.py -l 4554 -s localhost:4551 -c 480.ogg &
 
 # A super-peer
 python /home/vruiz/P2PSP/trunk/peer.py -s 150.214.150.68:4554 -l 9999 -p 4555 > /dev/null &
