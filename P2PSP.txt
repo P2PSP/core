@@ -1,0 +1,5 @@
+Welcome to the Peer-to-Peer Streaming Protocol (P2PSP) Project!
+
+The P2PSP is a simple (almost trivial) protocol for the streaming of
+real-time video/audio sequences. For more information about the use of
+the P2PSP, please, read the manual.txt file.
