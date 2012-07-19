@@ -3,13 +3,31 @@
 #
 # source.py
 #
-# 
 
 # Esta versión del nodo fuente no tiene buffer porque no reenvía
 # bloques perdidos. Para saber qué peers hay en el cluster confía en
 # los mensajes que le envían los peers indicándo que un determinado
-# peer ya no está entre su lista de peers. Cuando más de la mitad de
-# los peers descarta a otro, el nodo fuente hace lo mismo.
+# peer ya no está entre su lista de peers. Cuando al menos la mitad de
+# los peers descarta a otro, el nodo fuente hace lo mismo, siempre que
+# no se trate de un superpeer, que no puede expulsarse de la red.
+
+# El coste del hosting de un nodo S(source) es del mismo orden que el
+# hosting de un nodo P(peer). Atendiendo a requerimientos de la red
+# (por ejemplo, que un determinado conjunto de peers están detrás de
+# un NAT simétrico), se puede realizar un cluster P2PSP detrás de
+# dicho NAT si al menos un peer cambia su comportamiento y reenvía
+# todo lo que recibe a un nodo S que esté tras el cortefuegos. Dicho
+# cambio de comportamiento en un nodo P_x se produce simplemente si
+# dicho peer posee una lista de peers con un único nodo, el que está
+# tras el NAT. Para evitar que el resto de P's que están fuera del NAT
+# alimentando a P_x estén quejándose a su correspondiente nodo fuente
+# de la insolidaridad de P_x, lo más simple es desechar este
+# comportamiento y usar un heart-beat o considerar a estos peers
+# "especiales" como super-peers. A un super-peer, se le envía si
+# esperar nada a cambio. Los super-peers pueden ser reconocidos porque
+# alimentan a un S que está tras un NAT simétrico. Por otra parte, la política del hear-beat es la más simple porque, suponiendo que no hay "mutaciones" del código de los peers que envien el heart-beat y luego no sean solidarios, implica que S no va a recibir quejas de un super-peer.
+
+# Estudiar también la posibilidad de pedir bloques de vídeo bajo demanda, es decir, que si un peer no pide entonces no se le entrega
 
 import socket
 from blocking_socket import blocking_socket
