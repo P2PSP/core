@@ -25,9 +25,15 @@
 # comportamiento y usar un heart-beat o considerar a estos peers
 # "especiales" como super-peers. A un super-peer, se le envía si
 # esperar nada a cambio. Los super-peers pueden ser reconocidos porque
-# alimentan a un S que está tras un NAT simétrico. Por otra parte, la política del hear-beat es la más simple porque, suponiendo que no hay "mutaciones" del código de los peers que envien el heart-beat y luego no sean solidarios, implica que S no va a recibir quejas de un super-peer.
+# alimentan a un S que está tras un NAT simétrico. Por otra parte, la
+# política del hear-beat es la más simple porque, suponiendo que no
+# hay "mutaciones" del código de los peers que envien el heart-beat y
+# luego no sean solidarios, implica que S no va a recibir quejas de un
+# super-peer.
 
 # Estudiar también la posibilidad de pedir bloques de vídeo bajo demanda, es decir, que si un peer no pide entonces no se le entrega
+
+# {{{ imports
 
 import socket
 from blocking_socket import blocking_socket
@@ -41,6 +47,8 @@ from colors import Color
 import signal
 from time import gmtime, strftime
 
+# }}}
+
 IP_ADDR = 0
 PORT = 1
 VIDEO_HEADER_SIZE = 20 # In blocks
@@ -52,6 +60,8 @@ server_port = 4551
 channel = "134.ogg"
 
 def usage():
+    # {{{
+
     print "This is " + sys.argv[0] + ", the source node of a P2PSP network"
     print
     print "Parameters (and default values):"
@@ -78,6 +88,10 @@ def usage():
     print "   |      |           +------------------------------ Listening port"
     print "   |      +------------------------------------------ The source code"
     print "   +------------------------------------------------- The Python interpreter"
+
+    # }}}
+
+# {{{ Args handling
 
 opts = ""
 
@@ -108,9 +122,17 @@ for o, a in opts:
 	usage()
 	sys.exit()
 
+# }}}
+
+# {{{ obsolete
+
 print "(source) -> (peer) : Sends a block or other kind of data"
 print "(source) <~ (peer) : Receives a lost block retransmission request"
 print "(source) ~> (peer) : Sends a retransmitted block"
+
+# }}}
+
+# {{{ Waiting for peers
 
 peer_connection_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
 peer_connection_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -118,11 +140,15 @@ peer_connection_socket.bind(("", listening_port)) # We listen to any interface
 peer_connection_socket.listen(5)
 print peer_connection_socket.getsockname(), "Waiting for peers ..."
 
+# }}}
+
 number_of_peers = 0
 peer_list = []
 private_list = []
 block_number = 0
 removing_ratio = {}
+
+# {{{ Header retrieving
 
 server_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.connect((server_host, server_port))
@@ -136,7 +162,10 @@ for i in xrange(VIDEO_HEADER_SIZE):
     print "\b.",
 print "] done"
 
+# }}}
+
 class Peer_Connection_Thread(Thread):
+    # {{{
 
     def __init__(self):
         Thread.__init__(self)
@@ -191,6 +220,8 @@ class Peer_Connection_Thread(Thread):
             peer_list.append(peer)
             private_list.append(private_endpoint)
             removing_ratio[peer] = 0
+
+    # }}}
             
 Peer_Connection_Thread().start()
 
@@ -198,11 +229,11 @@ peer_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 peer_socket.bind(peer_connection_socket.getsockname())
 
 peer_index = 0
-
 peer_index_lock = Lock()
 printing_lock = Lock()
 
 class Prune_The_Cluster_Thread(Thread):
+    # {{{
 
     def __init__(self):
         Thread.__init__(self)
@@ -274,9 +305,13 @@ class Prune_The_Cluster_Thread(Thread):
                     peer_index_lock.release()
                 counter += 1
 
+    # }}}
+
 Prune_The_Cluster_Thread().start()
 
 def SIGHUP_handler(signum, frame):
+    # {{{
+
     global printing_lock
     printing_lock.acquire()
     print
@@ -290,6 +325,8 @@ def SIGHUP_handler(signum, frame):
         counter += 1
     print Color.none
     printing_lock.release()
+
+    # }}}
 
 signal.signal(signal.SIGHUP, SIGHUP_handler)
 signal.siginterrupt(signal.SIGHUP, False)
