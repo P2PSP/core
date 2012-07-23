@@ -494,7 +494,6 @@ Single
 4 0 0 50 -1 0 12 0.0000 4 135 105 4095 12285 4\001
 4 1 0 50 -1 0 12 0.0000 4 180 3900 4815 13725 Si un bloque ya se ha recibido, no se retransmite\001
 4 1 0 50 -1 0 12 0.0000 4 180 4290 4860 13995 Hay 6 peers y 2 peers en la lista de peers de cada peer\001
-4 1 0 50 -1 0 12 0.0000 4 120 60 1170 11070 t\001
 4 0 0 50 -1 0 12 0.0000 4 180 2640 675 495 Los peer no tienen lista de peers.\001
 4 0 0 50 -1 0 12 0.0000 4 180 5220 675 720 Los peers envian el bloque recibido desde S al peer que le envia.\001
 4 0 0 50 -1 0 12 0.0000 4 180 5280 675 945 S indica, en cada bloque, a que otro peer debe enviarse el bloque.\001
@@ -526,3 +525,4 @@ Single
 4 1 0 50 -1 0 12 0.0000 4 135 105 15930 10395 5\001
 4 1 0 50 -1 0 12 0.0000 4 135 105 15750 10620 1\001
 4 1 0 50 -1 0 12 0.0000 4 135 105 15390 11025 4\001
+4 1 0 50 -1 0 12 0.0000 4 180 6000 4770 14265 Hay que usar un protocolo de control entre los sources para conseguir esto\001
