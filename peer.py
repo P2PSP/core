@@ -51,7 +51,7 @@ payload = struct.pack("4sH",
                       socket.htons(source_socket.getsockname()[PORT]))
 source_socket.sendall(payload)
 
-buffer_size = 512
+buffer_size = 64
 
 number_of_peers = socket.ntohs(
     struct.unpack(

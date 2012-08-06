@@ -166,27 +166,7 @@ class Prune_The_Cluster_Thread(Thread):
             # peer que tiene la misma IP pública del peer que se queja
             # y tenga asociada dicha entrada la dir IP privada que ha
             # indicado el peer que se queja.
-            '''
-            counter = 0            
-            for x in zip(peer_list, private_list):
-                print x, peer_to_remove
-                if (x[0][0], x[1][0], x[1][1]) == \
-                        (complaining_peer[0], peer_to_remove_IP, peer_to_remove_port):
-                    printing_lock.acquire()
-                    print Color.blue + "% " + strftime("%Y-%m-%d %H:%M:%S", gmtime()) + \
-                        ": removed " +  str(peer_list[counter]) + \
-                        " " +  str(private_list[counter]) + \
-                        Color.none
-                    printing_lock.release()
-                    peer_index_lock.acquire()
-                    del peer_list[counter]
-                    del private_list[counter]
-                    if peer_index > 0:
-                       peer_index -= 1
-                    peer_index_lock.release()
-                counter += 1
-            '''
-
+            
             counter = 0
             for x in peer_list:
                 if x == peer_to_remove:
@@ -221,15 +201,15 @@ def SIGHUP_handler(signum, frame):
     print Color.none
     printing_lock.release()
 
-#signal.signal(signal.SIGHUP, SIGHUP_handler)
-#signal.siginterrupt(signal.SIGHUP, False)
+signal.signal(signal.SIGHUP, SIGHUP_handler)
+signal.siginterrupt(signal.SIGHUP, False)
 
 print peer_socket.getsockname(), "Sending the rest of the stream ..."
 while True:
 
     block = video_server_socket.recv(1024)
     tries = 0
-    '''
+    
     while len(block) < 1024:
         tries += 1
         if tries > 3:
@@ -246,7 +226,7 @@ while True:
         Color.green + "<-" + Color.none, \
         video_server_socket.getpeername(), \
         block_number
-    '''
+    
     
     time.sleep(0.01) #give time to helping the peer send block to player (prevents missing in peer)
    
