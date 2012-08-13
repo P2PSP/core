@@ -1,12 +1,9 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
-
-'''
-Utilization example:
-
-oggfwd localhost 4551 1qaz /480.ogg < big_buck_bunny_480p_stereo.ogg
-python source.py 4552 localhost 4551 480.ogg
-'''
+#
+# source.py
+#
+# 
 
 # Esta versión del nodo fuente no tiene buffer porque no reenvía
 # bloques perdidos. Para saber qué peers hay en el cluster confía en
@@ -17,6 +14,7 @@ python source.py 4552 localhost 4551 480.ogg
 import socket
 from blocking_socket import blocking_socket
 import sys
+import getopt
 import struct
 import time
 from threading import Thread
@@ -29,10 +27,67 @@ IP_ADDR = 0
 PORT = 1
 VIDEO_HEADER_SIZE = 20 # In blocks
 
-listen_port = int(sys.argv[1])
-video_server_host = sys.argv[2]
-video_server_port = int(sys.argv[3])
-channel = sys.argv[4]
+listening_port = 4552
+server_host = "150.214.150.68"
+server_port = 4551
+channel = "134.ogg"
+
+def usage():
+    print "This is " + sys.argv[0] + ", the source node of a P2PSP network"
+    print
+    print "Parameters (and default values):"
+    print
+    print " -[-c]hannel=name of the video/audio sequence served by (" + str(channel) + ")"
+    print " -[-l]istening_port=the port that the source uses to listen the peers (" + str(listening_port) + ")"
+    print " -[-s]erver=host name and port of the video/audio server ((" + server_host + ":" + str(server_port) + "))"
+    print
+    print "Typical usage:"
+    print
+    print "oggfwd localhost 4551 1qaz /480.ogg < big_buck_bunny_480p_stereo.ogg &"
+    print "   |      |        |    |      |                   |"
+    print "   |      |        |    |      |                   +- Video file"
+    print "   |      |        |    |      +--------------------- 'Channel'"
+    print "   |      |        |    +---------------------------- Icecast password"
+    print "   |      |        +--------------------------------- Icecast port"
+    print "   |      +------------------------------------------ Icecast host"
+    print "   +------------------------------------------------- Sends a video to a Icecast server"
+    print
+    print "python source.py -l 4552 -s localhost:4551 -c 480.ogg"
+    print "   |      |           |           |              |"
+    print "   |      |           |           |              +--- 'Channel'"
+    print "   |      |           |           +------------------ Icecast end-point"
+    print "   |      |           +------------------------------ Listening port"
+    print "   |      +------------------------------------------ The source code"
+    print "   +------------------------------------------------- The Python interpreter"
+
+opts = ""
+
+try:
+    opts, extraparams = getopt.getopt(sys.argv[1:],"l:s:c:h",
+                                      ["listening_port=",
+                                       "server=",
+                                       "channel=",
+                                       "help"
+                                       ])
+
+except getopt.GetoptError, exc:
+    sys.stderr.write(sys.argv[0] + ": " + exc.msg + "\n")
+    sys.exit(2)
+
+for o, a in opts:
+    if o in ("-l", "--listening_port"):
+        listening_port = int(a)
+        print sys.argv[0] + ": listening_port=" + str(listening_port)
+    if o in ("-s", "--server"):
+        server_host = a.split(":")[0]
+        server_port = int(a.split(":")[1])
+        print sys.argv[0] + ": server=" + "(" + server_host + ":" + str(server_port) + ")" 
+    if o in ("-c", "--channel"):
+        channel = a
+        print sys.argv[0] + ": channel=" + channel
+    if o in ("-h", "--help"):
+	usage()
+	sys.exit()
 
 print "(source) -> (peer) : Sends a block or other kind of data"
 print "(source) <~ (peer) : Receives a lost block retransmission request"
@@ -40,7 +95,7 @@ print "(source) ~> (peer) : Sends a retransmitted block"
 
 peer_connection_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
 peer_connection_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-peer_connection_socket.bind(("", listen_port)) # We listen to any interface
+peer_connection_socket.bind(("", listening_port)) # We listen to any interface
 peer_connection_socket.listen(5)
 print peer_connection_socket.getsockname(), "Waiting for peers ..."
 
@@ -50,14 +105,14 @@ private_list = []
 block_number = 0
 removing_ratio = {}
 
-video_server_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
-video_server_socket.connect((video_server_host, video_server_port))
-print video_server_socket.getsockname(), "Connected to Video Server at", video_server_socket.getpeername()
-video_server_socket.sendall("GET /" + channel + " HTTP/1.1\r\n\r\n")
-print video_server_socket.getsockname(), "<- [Video header",
+server_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.connect((server_host, server_port))
+print server_socket.getsockname(), "Connected to the video server", server_socket.getpeername()
+server_socket.sendall("GET /" + channel + " HTTP/1.1\r\n\r\n")
+print server_socket.getsockname(), "<- [Video header",
 video_header = [None]*VIDEO_HEADER_SIZE
 for i in xrange(VIDEO_HEADER_SIZE):
-    block = video_server_socket.brecv(1024)
+    block = server_socket.brecv(1024)
     video_header[i] = block
     print "\b.",
 print "] done"
@@ -66,7 +121,7 @@ class Peer_Connection_Thread(Thread):
 
     def __init__(self):
         Thread.__init__(self)
-    
+
     def run(self):
         
         while True:
@@ -94,7 +149,7 @@ class Peer_Connection_Thread(Thread):
                                           socket.inet_aton(pri[IP_ADDR]),
                                           socket.htons(pri[PORT]))
                     print pri[IP_ADDR], ":", pri[PORT], "->", peer, "(private)"
-                else:                  
+                else:
                     payload = struct.pack("4sH",
                                           socket.inet_aton(pub[IP_ADDR]),
                                           socket.htons(pub[PORT]))
@@ -111,10 +166,10 @@ class Peer_Connection_Thread(Thread):
             print "done"
 
             peer_serve_socket.close()
-  
-            peer_list.append(peer)                
+            
+            peer_list.append(peer)
             private_list.append(private_endpoint)
-                
+            
             removing_ratio[peer] = 0
             
 Peer_Connection_Thread().start()
@@ -166,7 +221,7 @@ class Prune_The_Cluster_Thread(Thread):
             # peer que tiene la misma IP pública del peer que se queja
             # y tenga asociada dicha entrada la dir IP privada que ha
             # indicado el peer que se queja.
-            
+
             counter = 0
             for x in peer_list:
                 if x == peer_to_remove:
@@ -207,7 +262,7 @@ signal.siginterrupt(signal.SIGHUP, False)
 print peer_socket.getsockname(), "Sending the rest of the stream ..."
 while True:
 
-    block = video_server_socket.recv(1024)
+    block = server_socket.recv(1024)
     tries = 0
     
     while len(block) < 1024:
@@ -216,20 +271,19 @@ while True:
             sys.stdout.write(".")
             sys.stdout.flush()
             time.sleep(1)
-            video_server_socket.close()
-            video_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            video_server_socket.connect((video_server_host, video_server_port))
-            video_server_socket.sendall("GET /" + channel + " HTTP/1.1\r\n\r\n")
-        block += video_server_socket.recv(1024-len(block))
-    
- #   print video_server_socket.getsockname(), \
+            server_socket.close()
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_socket.connect((server_host, server_port))
+            server_socket.sendall("GET /" + channel + " HTTP/1.1\r\n\r\n")
+        block += server_socket.recv(1024-len(block))
+
+ #   print server_socket.getsockname(), \
         Color.green + "<-" + Color.none, \
-        video_server_socket.getpeername(), \
+        server_socket.getpeername(), \
         block_number
-    
-    
+        
     time.sleep(0.01) #give time to helping the peer send block to player (prevents missing in peer)
-   
+ 
     peer_index_lock.acquire()
     if len(peer_list) > 0:
 #        print peer_socket.getsockname(), \
@@ -239,11 +293,8 @@ while True:
         
         payload = struct.pack("H1024s", socket.htons(block_number), block)
         peer_socket.sendto(payload, peer_list[peer_index])
-
         peer_index = (peer_index + 1) % len(peer_list)
-        
     peer_index_lock.release()
-    
+
     block_number = (block_number + 1) % 65536
-    
 

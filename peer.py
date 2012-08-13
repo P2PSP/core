@@ -1,15 +1,11 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 
-'''
-python peer.py 150.214.150.68 4552 9999
-vlc http://localhost:9999
-'''
-
 # No solicita retransmisión de bloques perdidos. Avisa al nodo fuente
 # de los peers eliminados de la lista de peers. Posee un buffer para
 # acomodar el jitter.
 
+import getopt
 import sys
 import socket
 from blocking_socket import blocking_socket
@@ -19,9 +15,63 @@ import struct
 IP_ADDR = 0
 PORT = 1
 
-source_name = sys.argv[1]
-source_port = int(sys.argv[2])
-player_port = int(sys.argv[3])
+source_name = "localhost"
+source_port = 4552
+player_port = 9999
+peer_port = 0 # OS default behavior will be used
+
+def usage():
+    print "This is " + sys.argv[0] + ", the peer node of a P2PSP network"
+    print
+    print "Parameters (and default values):"
+    print
+    print " -[-l]listening_port=the port that this peer uses to listen to the player (" + str(player_port) + ")"
+    print " -[-p]eer_port=the port that this peer uses to connect to the source (" + str(peer_port) + ", "
+    print "               where 0 means that this port will be selected using the OS default behavior)"
+    print " -[-s]ource=host name and port of the source node ((" + source_name + ":" + str(source_port) + "))"
+    print
+    print "Typical usage:"
+    print
+    print "python peer.py -s 150.214.150.68:4552 -l 9999 &"
+    print "  |       |                  |             |"
+    print "  |       |                  |             +- Listening port"
+    print "  |       |                  +--------------- Source's end-point"
+    print "  |       +---------------------------------- The peer code"
+    print "  +------------------------------------------ The Python interpreter"
+    print
+    print "vlc http://localhost:9999"
+    print " |          |"
+    print " |          +-------------------------------- Peer's end-point"
+    print " +------------------------------------------- The VLC player"
+
+opts = ""
+
+try:
+    opts, extraparams = getopt.getopt(sys.argv[1:],"l:p:s:h",
+                                      ["listening_port=",
+                                       "peer_port=",
+                                       "server=",
+                                       "help"
+                                       ])
+
+except getopt.GetoptError, exc:
+    sys.stderr.write(sys.argv[0] + ": " + exc.msg + "\n")
+    sys.exit(2)
+
+for o, a in opts:
+    if o in ("-l", "--listening_port"):
+        player_port = int(a)
+        print sys.argv[0] + ": listening_port=" + str(player_port)
+    if o in ("-p", "--peer_port"):
+        peer_port = int(a)
+        print sys.argv[0] + ": peer_port=" + str(peer_port)
+    if o in ("-s", "--source"):
+        source_name = a.split(":")[0]
+        source_port = int(a.split(":")[1])
+        print sys.argv[0] + ": source=" + "(" + source_name + ":" + str(source_port) + ")" 
+    if o in ("-h", "--help"):
+	usage()
+	sys.exit()
 
 peer_list = []
 peer_insolidarity = {}
@@ -35,9 +85,10 @@ player_serve_socket, player = player_listen_socket.baccept()
 player_listen_socket.setblocking(0)
 print player_serve_socket.getsockname(), "accepted connection from", player
 
-if len(sys.argv) > 4:
-    source_socket = socket.create_connection((source_name, source_port),1000,('',int(sys.argv[4])))
+if peer_port > 0:
+    source_socket = socket.create_connection((source_name, source_port),1000,('',peer_port))
 else:
+    # Maybe this is redundant
     source_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
     source_socket.connect((source_name, source_port))
 
@@ -51,13 +102,13 @@ payload = struct.pack("4sH",
                       socket.htons(source_socket.getsockname()[PORT]))
 source_socket.sendall(payload)
 
-buffer_size = 64
+buffer_size = 32
 
 number_of_peers = socket.ntohs(
     struct.unpack(
         "H", source_socket.recv(
                 struct.calcsize("H")))[0])
-print source_socket.getsockname(), "<- Cluster size =", number_of_peers
+print source_socket.getsockname(), "<- Cluster size =", number_of_peers+1
 print source_socket.getsockname(), "Retrieving the list of peers ..."
 while number_of_peers > 0:
     payload = source_socket.recv(struct.calcsize("4sH"))
@@ -69,7 +120,7 @@ while number_of_peers > 0:
     #superpeers ip control            
     if peer[0].startswith('127.'):
         peer=(source_socket.getpeername()[IP_ADDR],port)
-    
+        
     print source_socket.getsockname(), "<- peer", peer
     peer_list.append(peer)
 #    peer_insolidarity[peer] = -32768 # To avoid removing peers during
@@ -94,9 +145,11 @@ stream_socket.bind(('',source_socket.getsockname()[PORT]))
 
 # This should create a working entry in the NAT if the peer is in a
 # private network
-#payload = struct.pack("4sH", "aaaa", 0)
-#for i in xrange(2):
-  #  stream_socket.sendto(payload, source_socket.getpeername())
+payload = struct.pack("4sH", "aaaa", 0)
+(source_ip, unbound_port) = (source_socket.getpeername()[0], 80)
+print source_socket.getpeername(), (source_ip, unbound_port)
+for i in xrange(2):
+    stream_socket.sendto(payload, source_socket.getpeername())
 
 class Block_buffer_element:
     def block(self):
@@ -126,7 +179,6 @@ def receive_and_feed_the_cluster():
         
     number, block = struct.unpack("H1024s", payload)
     number = socket.ntohs(number)
-        
     '''
     print source_socket.getsockname(),
     if block_buffer[number % buffer_size].requested:
@@ -140,7 +192,7 @@ def receive_and_feed_the_cluster():
     print number, addr
     '''
     print "recive from ", addr, " number ", number
-        
+    
     if addr == source_socket.getpeername():        
     
         while((counter<len(peer_list))&(counter>0)):
