@@ -146,8 +146,6 @@ stream_socket.bind(('',source_socket.getsockname()[PORT]))
 # This should create a working entry in the NAT if the peer is in a
 # private network
 payload = struct.pack("4sH", "aaaa", 0)
-(source_ip, unbound_port) = (source_socket.getpeername()[0], 80)
-print source_socket.getpeername(), (source_ip, unbound_port)
 for i in xrange(2):
     stream_socket.sendto(payload, source_socket.getpeername())
 

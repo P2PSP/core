@@ -1,4 +1,0 @@
-python source.py 4554 localhost 4551 134.ogg &
-python peer.py 150.214.150.68 4554 9999 4555 > /dev/null &
-sleep 1
-netcat localhost 9999 > /dev/null &
