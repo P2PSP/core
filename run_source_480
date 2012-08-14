@@ -1,0 +1,9 @@
+python source.py -l 4554 -s localhost:4551 -c 134.ogg &
+
+# A super-peer
+python peer.py -s 150.214.150.68:4554 -l 9999 -p 4555 > /dev/null &
+
+sleep 1
+
+# Super-peer's client
+netcat localhost 9999 > /dev/null &
