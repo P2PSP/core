@@ -26,10 +26,9 @@ from time import gmtime, strftime
 IP_ADDR = 0
 PORT = 1
 VIDEO_HEADER_SIZE = 20 # In blocks
-BUFFER_SIZE = 512 # Borrar ... y todo lo que tenga que ver con esto
 
 listening_port = 4552
-server_host = "localhost"
+server_host = "150.214.150.68"
 server_port = 4551
 channel = "134.ogg"
 
@@ -124,6 +123,7 @@ class Peer_Connection_Thread(Thread):
         Thread.__init__(self)
 
     def run(self):
+        
         while True:
             peer_serve_socket, peer = peer_connection_socket.baccept()
             print peer_serve_socket.getsockname(), \
@@ -137,17 +137,13 @@ class Peer_Connection_Thread(Thread):
             print peer_serve_socket.getsockname(), \
                 "Private endpoint =", private_endpoint
 
-            print peer_serve_socket.getsockname(), \
-                "buffer size =", BUFFER_SIZE, "->", peer,
-            payload = struct.pack("H", socket.htons(BUFFER_SIZE))
-            peer_serve_socket.sendall(payload)
-            print "done"
-
             print peer_serve_socket.getsockname(), "Sending the list of peers"
             payload = struct.pack("H", socket.htons(len(peer_list)))
             peer_serve_socket.sendall(payload)
+            print "Len Peer List = ",len(peer_list)
+            print "Peer List"
             for (pub,pri) in zip(peer_list,private_list):
-                print "Peer =", peer, "Private =", pri
+                print "Public =", pub, "Private =", pri
                 if peer[0] == pub[0]:
                     payload = struct.pack("4sH",
                                           socket.inet_aton(pri[IP_ADDR]),
@@ -170,14 +166,17 @@ class Peer_Connection_Thread(Thread):
             print "done"
 
             peer_serve_socket.close()
+            
             peer_list.append(peer)
             private_list.append(private_endpoint)
+            
             removing_ratio[peer] = 0
             
 Peer_Connection_Thread().start()
 
 peer_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-peer_socket.bind(peer_connection_socket.getsockname())
+peer_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+peer_socket.bind(('',peer_connection_socket.getsockname()[PORT]))
 
 peer_index = 0
 
@@ -194,7 +193,11 @@ class Prune_The_Cluster_Thread(Thread):
         global peer_index_lock
         global printing_lock
         while True:
-            payload, complaining_peer = peer_socket.recvfrom(struct.calcsize("4sH"))
+            try:
+                payload, complaining_peer = peer_socket.recvfrom(struct.calcsize("4sH"))
+            except socket.error:
+                print("Received from a peer offline now - continue")
+                break
             peer_to_remove_IP, peer_to_remove_port = struct.unpack("4sH", payload)
             peer_to_remove_IP = socket.inet_ntoa(peer_to_remove_IP)
             peer_to_remove_port = socket.ntohs(peer_to_remove_port)
@@ -218,26 +221,6 @@ class Prune_The_Cluster_Thread(Thread):
             # peer que tiene la misma IP pública del peer que se queja
             # y tenga asociada dicha entrada la dir IP privada que ha
             # indicado el peer que se queja.
-            '''
-            counter = 0            
-            for x in zip(peer_list, private_list):
-                print x, peer_to_remove
-                if (x[0][0], x[1][0], x[1][1]) == \
-                        (complaining_peer[0], peer_to_remove_IP, peer_to_remove_port):
-                    printing_lock.acquire()
-                    print Color.blue + "% " + strftime("%Y-%m-%d %H:%M:%S", gmtime()) + \
-                        ": removed " +  str(peer_list[counter]) + \
-                        " " +  str(private_list[counter]) + \
-                        Color.none
-                    printing_lock.release()
-                    peer_index_lock.acquire()
-                    del peer_list[counter]
-                    del private_list[counter]
-                    if peer_index > 0:
-                       peer_index -= 1
-                    peer_index_lock.release()
-                counter += 1
-            '''
 
             counter = 0
             for x in peer_list:
@@ -281,6 +264,7 @@ while True:
 
     block = server_socket.recv(1024)
     tries = 0
+    
     while len(block) < 1024:
         tries += 1
         if tries > 3:
@@ -297,6 +281,8 @@ while True:
         Color.green + "<-" + Color.none, \
         server_socket.getpeername(), \
         block_number
+        
+    time.sleep(0.01) #give time to helping the peer send block to player (prevents missing in peer)
  
     peer_index_lock.acquire()
     if len(peer_list) > 0:
