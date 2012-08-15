@@ -1,6 +1,6 @@
 peer_port=$1
-xterm -e "python peer.py -s 150.214.150.68:4554 -l $peer_port" &
-#xterm -e "python peer.py -s localhost:4554 -l $peer_port" &
+xterm -e "./peer.py -s 150.214.150.68:4554 -l $peer_port" &
+#xterm -e "./peer.py -s localhost:4554 -l $peer_port" &
 sleep 1
 #firefox http://localhost:$peer_port &
 vlc http://localhost:$peer_port > /dev/null 2> /dev/null &

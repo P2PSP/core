@@ -1,7 +1,7 @@
-python source.py -l 4552 -s localhost:4551 -c 134.ogg &
+./source.py -l 4552 -s localhost:4551 -c 134.ogg &
 
 # A super-peer
-python peer.py -s 150.214.150.68:4552 -l 9998 -p 4553 > /dev/null &
+./peer.py -s 150.214.150.68:4552 -l 9998 -p 4553 > /dev/null &
 
 sleep 1
 
