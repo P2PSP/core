@@ -16,6 +16,8 @@ bzr branch lp:~p2psp/p2psp/trunk
 bzr status
 bzr pull # <- If you haven't modified your branch nor diverged, otherwise:
 bzr merge bzr+ssh://bazaar.launchpad.net/~p2psp/p2psp/<your_branch>/
+## or simply:
+bzr merge
 
 ## Merging your branch with the trunk branch on your branch "vruiz":
 cd vruiz
