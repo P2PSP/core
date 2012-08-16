@@ -1,7 +1,15 @@
-~/p2psp/source.py -l 4552 -s localhost:4551 -c 134.ogg &
+source_port=$1
+
+if [ -z $sourcer_port ]; then echo "Missing listening port (4552, for example)"; exit; fi
+
+~/p2psp/source.py -l $source_port -s localhost:4551 -c 134.ogg &
+
+superpeer_port=$[$source_port+1]
+
+echo "Super-peer port = " $superpeer_port
 
 # A super-peer
-~/p2psp/peer.py -s 150.214.150.68:4552 -l 9998 -p 4553 > /dev/null &
+~/p2psp/peer.py -s 150.214.150.68:$source_port -l 9998 -p $superpeer_host > /dev/null &
 
 sleep 1
 
