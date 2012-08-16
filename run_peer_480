@@ -1,6 +1,21 @@
 peer_port=$1
-xterm -e "python peer.py -s 150.214.150.68:4554 -l $peer_port" &
-#xterm -e "python peer.py -s localhost:4554 -l $peer_port" &
+
+if [ -z $peer_port ]; then
+   echo "Missing listening port";
+   exit;
+fi
+
+source=$2
+
+if [ -z $source ]; then
+   echo "Missing source end-point (150.214.150.68:4554, for example)";
+   exit;
+fi
+
+xterm -e "~/p2psp/peer.py -s $source -l $peer_port" &
+#xterm -e "~/p2psp/peer.py -s localhost:4554 -l $peer_port" &
+
 sleep 1
+
 #firefox http://localhost:$peer_port &
 vlc http://localhost:$peer_port > /dev/null 2> /dev/null &

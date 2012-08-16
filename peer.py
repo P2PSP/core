@@ -102,13 +102,6 @@ payload = struct.pack("4sH",
                       socket.htons(source_socket.getsockname()[PORT]))
 source_socket.sendall(payload)
 
-''' Esto sobrará '''
-buffer_size = socket.ntohs(
-    struct.unpack(
-        "H", source_socket.recv(
-            struct.calcsize("H")))[0])
-print source_socket.getsockname(), "<- Buffer size =", buffer_size
-
 buffer_size = 32
 
 number_of_peers = socket.ntohs(
@@ -123,6 +116,11 @@ while number_of_peers > 0:
     peer_IPaddr = socket.inet_ntoa(peer_IPaddr)
     port = socket.ntohs(port)
     peer = (peer_IPaddr, port)
+    
+    #superpeers ip control            
+    if peer[0].startswith('127.'):
+        peer=(source_socket.getpeername()[IP_ADDR],port)
+        
     print source_socket.getsockname(), "<- peer", peer
     peer_list.append(peer)
 #    peer_insolidarity[peer] = -32768 # To avoid removing peers during
@@ -130,7 +128,9 @@ while number_of_peers > 0:
     peer_insolidarity[peer] = 0
     number_of_peers -= 1
 
-print source_socket.getsockname(), "<- ", source_socket, "[Video header",
+print source_socket.getsockname(), "List of peers retrieved"
+
+print source_socket.getsockname(), "<- ", source_socket.getpeername(), "[Video header",
 video_header_size = socket.ntohs(
     struct.unpack(
         "H", source_socket.recv(
@@ -142,15 +142,13 @@ for i in xrange (video_header_size):
 print "] done"
 
 stream_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-stream_socket.bind(source_socket.getsockname())
+stream_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+stream_socket.bind(('',source_socket.getsockname()[PORT]))
 
 # This should create a working entry in the NAT if the peer is in a
 # private network
 payload = struct.pack("4sH", "aaaa", 0)
-(source_ip, unbound_port) = (source_socket.getpeername()[0], 80)
-print source_socket.getpeername(), (source_ip, unbound_port)
 for i in xrange(2):
-    #stream_socket.sendto(payload, (source_ip, unbound_port))
     stream_socket.sendto(payload, source_socket.getpeername())
 
 class Block_buffer_element:
@@ -165,11 +163,22 @@ block_buffer = [Block_buffer_element() for i in xrange(buffer_size)]
 for i in xrange(buffer_size):
     block_buffer[i].empty = True # Nothing useful inside
 
+print
 print "Buffering ..."
+print
 
+counter=0
+lastpayload=None
 def receive_and_feed_the_cluster():
+    global counter
+    global lastpayload
     
-    payload, addr = stream_socket.recvfrom(struct.calcsize("H1024s"))
+    try:
+        payload, addr = stream_socket.recvfrom(struct.calcsize("H1024s"))
+    except socket.timeout:
+        sys.stderr.write("Lost connection to the source") 
+        sys.exit(-1)
+        
     number, block = struct.unpack("H1024s", payload)
     number = socket.ntohs(number)
     '''
@@ -179,44 +188,73 @@ def receive_and_feed_the_cluster():
     else:
         print Color.green + "<-" + Color.none, 
     print number, addr
-    '''
+    
     print source_socket.getsockname(),
     print Color.green + "<-" + Color.none,
     print number, addr
-
-    if addr == source_socket.getpeername():
-        counter = 0
-        for peer in peer_list:
+    '''
+    print "recive from ", addr, " number ", number
+    
+    if addr == source_socket.getpeername():        
+    
+        while((counter<len(peer_list))&(counter>0)):
+            peer=peer_list[counter]
+            '''
             print source_socket.getsockname(), \
-                number, Color.green + "->" + Color.none, peer, "(", counter, "/", len(peer_list),")"
-            counter += 1
-            stream_socket.sendto(payload, peer)
+                number, Color.green + "->" + Color.none, peer_list[counter], "(", counter+1, "/", len(peer_list),")"
+            '''
+            stream_socket.sendto(lastpayload, peer)
             peer_insolidarity[peer] += 1
-            if peer_insolidarity[peer] > 32: # <- Important parameter!!
-                index_of_peer_to_remove = peer_list.index(peer)
-                peer_list.remove(peer)
+            if peer_insolidarity[peer] > 64: # <- Important parameter!!
                 del peer_insolidarity[peer]
                 print Color.blue
                 print "Removing", peer
                 print Color.none
-
+                
                 payload = struct.pack("4sH",
                                       socket.inet_aton(peer[IP_ADDR]),
                                       socket.htons(peer[PORT]))
                 stream_socket.sendto(payload, source_socket.getpeername())
-
+                peer_list.remove(peer)
+            counter += 1
+            
+        counter=0
+        lastpayload=payload
                 # Si este paquete se pierde, en principio no ocurre
                 # nada porque el o los super-peers van a hacer lo
                 # mismo con el nodo fuente y es prácticamente
                 # imposible que los mensajes que se envían desde los
                 # super-peers hacia el nodo fuente se pierdan (en
                 # ancho de banda entre ellos está garantizado).
-
     else:
-        if not addr in peer_list:
+        
+        if addr not in peer_list:
             peer_list.append(addr)
+            
         peer_insolidarity[addr] = 0
-
+        
+    if(counter<len(peer_list)): 
+        peer=peer_list[counter]
+        
+        '''
+        print source_socket.getsockname(), \
+            number, Color.green + "->" + Color.none, peer_list[counter], "(", counter+1, "/", len(peer_list),")"
+        '''
+        stream_socket.sendto(lastpayload, peer)
+        peer_insolidarity[peer] += 1
+        if peer_insolidarity[peer] > 64: # <- Important parameter!!
+            del peer_insolidarity[peer]
+            print Color.blue
+            print "Removing", peer
+            print Color.none
+                        
+            payload = struct.pack("4sH",
+                                  socket.inet_aton(peer[IP_ADDR]),
+                                  socket.htons(peer[PORT]))
+            stream_socket.sendto(payload, source_socket.getpeername())
+            peer_list.remove(peer)
+        counter += 1
+        
     block_buffer[number % buffer_size].block = block
     block_buffer[number % buffer_size].number = number
     block_buffer[number % buffer_size].empty = False
@@ -225,6 +263,7 @@ def receive_and_feed_the_cluster():
 
 block_to_play = receive_and_feed_the_cluster()
 for i in xrange(buffer_size/2):
+    print "Received block" + str(i) + "/" + str(buffer_size/2)
     receive_and_feed_the_cluster()
 
 # Now, reset the solidarity of the peers
@@ -239,15 +278,22 @@ def send_a_block_to_the_player():
 
     # Only if the block has something useful inside ...
     if block_buffer[(block_to_play % buffer_size)].empty == False:
+        '''
         print player_serve_socket.getsockname(), \
             block_buffer[block_to_play % buffer_size].number, \
             Color.blue + "=>" + Color.none, \
             player_serve_socket.getpeername()
-        sent_bytes = player_serve_socket.sendall(str(block_buffer[block_to_play % buffer_size].block))
+        '''
+        try:
+            player_serve_socket.sendall(block_buffer[block_to_play % buffer_size].block)
+        except socket.error:
+            sys.stderr.write("Conection closed by the player")
+            sys.exit(-1)
         
         # buffer[block_to_play.number].empty = True
         block_buffer[block_to_play % buffer_size].empty = True
-
+    #else:
+       # print ("------------------------- missing block ---------------------")
     # Increment the block_to_play
     block_to_play = (block_to_play + 1) % 65536
 

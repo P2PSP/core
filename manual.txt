@@ -22,3 +22,4 @@ To create a streaming service using the P2PSP, you need for elements:
    except that at the beginning there is a header of a known
    size. Therefore, is your responsability to select a player
    compatible with the stream.
+

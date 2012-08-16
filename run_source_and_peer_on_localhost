@@ -1,0 +1,10 @@
+./run_oggfwd_480 &
+./run_source_480 &
+
+peer_port=9998
+
+xterm -e "~/p2psp/peer.py -s localhost:4554 -l $peer_port" &
+
+sleep 1
+
+firefox http://localhost:$peer_port
