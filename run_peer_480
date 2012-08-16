@@ -1,4 +1,7 @@
 peer_port=$1
+
+if [ -z $peer_port ]; then echo "Missing listening port"; exit; fi
+
 xterm -e "~/p2psp/peer.py -s 150.214.150.68:4554 -l $peer_port" &
 #xterm -e "~/p2psp/peer.py -s localhost:4554 -l $peer_port" &
 sleep 1

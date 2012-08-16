@@ -128,6 +128,8 @@ while number_of_peers > 0:
     peer_insolidarity[peer] = 0
     number_of_peers -= 1
 
+print source_socket.getsockname(), "List of peers retrieved"
+
 print source_socket.getsockname(), "<- ", source_socket.getpeername(), "[Video header",
 video_header_size = socket.ntohs(
     struct.unpack(
@@ -161,7 +163,9 @@ block_buffer = [Block_buffer_element() for i in xrange(buffer_size)]
 for i in xrange(buffer_size):
     block_buffer[i].empty = True # Nothing useful inside
 
+print
 print "Buffering ..."
+print
 
 counter=0
 lastpayload=None
@@ -259,6 +263,7 @@ def receive_and_feed_the_cluster():
 
 block_to_play = receive_and_feed_the_cluster()
 for i in xrange(buffer_size/2):
+    print "Received block" + str(i) + "/" + str(buffer_size/2)
     receive_and_feed_the_cluster()
 
 # Now, reset the solidarity of the peers
