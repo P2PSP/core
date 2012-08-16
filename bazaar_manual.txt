@@ -4,6 +4,7 @@
 
 ## Set the Launchpad user ID:
 bzr launchpad-login your-name-in-lauchpad
+bzr config
 
 ## Checkout a branch (in this case, the trunk branch of the P2PSP
 ## project):
