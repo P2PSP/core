@@ -22,7 +22,7 @@ PORT = 1
 source_name = "150.214.150.68"
 source_port = 4552
 player_port = 9999
-peer_port = 0 # OS default behavior will be used
+peer_port = 0 # OS default behavior will be used for port binding
 
 def usage():
     # {{{
@@ -182,13 +182,21 @@ stream_socket.bind(('',source_socket.getsockname()[PORT]))
 
 # }}}
 
+# {{{ Create a working entry in the NAT, if neccesary
+
 # This should create a working entry in the NAT if the peer is in a
 # private network
 payload = struct.pack("4sH", "aaaa", 0)
 for i in xrange(2):
     stream_socket.sendto(payload, source_socket.getpeername())
 
+# }}}
+
+# {{{ Buffer creation
+
 class Block_buffer_element:
+    # {{{
+
     def block(self):
         return self[0]
     def number(self):
@@ -196,17 +204,20 @@ class Block_buffer_element:
     def empty(self):
         return self[2]
 
+    # }}}
+
 block_buffer = [Block_buffer_element() for i in xrange(buffer_size)]
 for i in xrange(buffer_size):
     block_buffer[i].empty = True # Nothing useful inside
 
-print
-print "Buffering ..."
-print
+# }}}
+
 
 counter=0
 lastpayload=None
 def receive_and_feed_the_cluster():
+    # {{{
+
     global counter
     global lastpayload
     
@@ -298,6 +309,14 @@ def receive_and_feed_the_cluster():
 
     return number
 
+    # }}}
+
+# {{{ Buffering
+
+print
+print "Buffering ..."
+print
+
 block_to_play = receive_and_feed_the_cluster()
 for i in xrange(buffer_size/2):
     print "Received block" + str(i) + "/" + str(buffer_size/2)
@@ -309,7 +328,10 @@ for p in peer_list:
 
 print "... buffering done"
 
+# }}}
+
 def send_a_block_to_the_player():
+    # {{{
 
     global block_to_play
 
@@ -333,6 +355,8 @@ def send_a_block_to_the_player():
        # print ("------------------------- missing block ---------------------")
     # Increment the block_to_play
     block_to_play = (block_to_play + 1) % 65536
+
+    # }}}
 
 while True:
     send_a_block_to_the_player()
