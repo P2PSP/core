@@ -12,8 +12,8 @@ if [ -z $source ]; then
    exit;
 fi
 
-xterm -e "~/p2psp/peer.py -s $source -l $peer_port" &
-#xterm -e "~/p2psp/peer.py -s 150.214.150.68:4552 -l $peer_port" &
+#xterm -e "~/p2psp/peer.py -s $source -l $peer_port" &
+~/p2psp/peer.py -s $source -l $peer_port &
 
 sleep 1
 

@@ -5,12 +5,16 @@
 # de los peers eliminados de la lista de peers. Posee un buffer para
 # acomodar el jitter.
 
+# {{{ Imports
+
 import getopt
 import sys
 import socket
 from blocking_socket import blocking_socket
 from colors import Color
 import struct
+
+# }}}
 
 IP_ADDR = 0
 PORT = 1
@@ -21,6 +25,8 @@ player_port = 9999
 peer_port = 0 # OS default behavior will be used
 
 def usage():
+    # {{{
+
     print "This is " + sys.argv[0] + ", the peer node of a P2PSP network"
     print
     print "Parameters (and default values):"
@@ -43,6 +49,10 @@ def usage():
     print " |          |"
     print " |          +-------------------------------- Peer's end-point"
     print " +------------------------------------------- The VLC player"
+
+    # }}}
+
+# {{{ Args handing
 
 opts = ""
 
@@ -73,8 +83,12 @@ for o, a in opts:
 	usage()
 	sys.exit()
 
+# }}}
+
 peer_list = []
 peer_insolidarity = {}
+
+# {{{ Wait for the player
 
 player_listen_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
 player_listen_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -84,6 +98,10 @@ print player_listen_socket.getsockname(), "Waiting for the player ...",
 player_serve_socket, player = player_listen_socket.baccept()
 player_listen_socket.setblocking(0)
 print player_serve_socket.getsockname(), "accepted connection from", player
+
+# }}}
+
+# {{{ Connect to the source
 
 if peer_port > 0:
     source_socket = socket.create_connection((source_name, source_port),1000,('',peer_port))
@@ -97,12 +115,21 @@ print source_socket.getsockname(), "Connected to", source_socket.getpeername()
 print source_socket.getsockname(), \
     "My IP address is" , source_socket.getsockname(), "->", \
     source_socket.getpeername()
+
+# }}}
+
+# {{{ Tell the source who I am
+
 payload = struct.pack("4sH",
                       socket.inet_aton(source_socket.getsockname()[IP_ADDR]),
                       socket.htons(source_socket.getsockname()[PORT]))
 source_socket.sendall(payload)
 
+# }}}
+
 buffer_size = 32
+
+# {{{ Retrieve the list of peer from the source
 
 number_of_peers = socket.ntohs(
     struct.unpack(
@@ -130,6 +157,10 @@ while number_of_peers > 0:
 
 print source_socket.getsockname(), "List of peers retrieved"
 
+# }}}
+
+# {{{ Receive the video header from the source
+
 print source_socket.getsockname(), "<- ", source_socket.getpeername(), "[Video header",
 video_header_size = socket.ntohs(
     struct.unpack(
@@ -141,9 +172,15 @@ for i in xrange (video_header_size):
     print "\b.",
 print "] done"
 
+# }}}
+
+# {{{ Transform the peer-source TCP socket into a UDP socket
+
 stream_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 stream_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 stream_socket.bind(('',source_socket.getsockname()[PORT]))
+
+# }}}
 
 # This should create a working entry in the NAT if the peer is in a
 # private network

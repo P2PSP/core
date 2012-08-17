@@ -90,7 +90,7 @@ def usage():
 
     # }}}
 
-# {{{ Args handling
+# {{{ Args handing
 
 opts = ""
 
