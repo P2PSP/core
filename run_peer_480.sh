@@ -1,7 +1,7 @@
 #!/bin/sh
 
 source=150.214.150.68:4554
-peer_port=9999
+peer_port=10000
 
 usage() {
     echo $0
