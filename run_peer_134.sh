@@ -7,7 +7,7 @@ usage() {
     echo $0 [-s source=$source] [-l peer_port=$peer_port] [-h]
 }
 
-echo $@
+echo $0: parsing: $@
 
 while getopts "s:l:h" opt; do
     case ${opt} in
