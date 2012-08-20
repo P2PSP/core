@@ -32,7 +32,7 @@ def usage():
     print "Parameters (and default values):"
     print
     print " -[-l]listening_port=the port that this peer uses to listen to the player (" + str(player_port) + ")"
-    print " -[-p]eer_port=the port that this peer uses to connect to the source (" + str(peer_port) + ", "
+    print " -[-p]eer_port=the local port that this peer uses to connect to the source (" + str(peer_port) + ", "
     print "               where 0 means that this port will be selected using the OS default behavior)"
     print " -[-s]ource=host name and port of the source node ((" + source_name + ":" + str(source_port) + "))"
     print
@@ -68,20 +68,24 @@ except getopt.GetoptError, exc:
     sys.stderr.write(sys.argv[0] + ": " + exc.msg + "\n")
     sys.exit(2)
 
+print sys.argv[0] + ": Parsing:" + str(opts)
+
 for o, a in opts:
     if o in ("-l", "--listening_port"):
         player_port = int(a)
         print sys.argv[0] + ": listening_port=" + str(player_port)
-    if o in ("-p", "--peer_port"):
+    elif o in ("-p", "--peer_port"):
         peer_port = int(a)
         print sys.argv[0] + ": peer_port=" + str(peer_port)
-    if o in ("-s", "--source"):
+    elif o in ("-s", "--source"):
         source_name = a.split(":")[0]
         source_port = int(a.split(":")[1])
         print sys.argv[0] + ": source=" + "(" + source_name + ":" + str(source_port) + ")" 
-    if o in ("-h", "--help"):
+    elif o in ("-h", "--help"):
 	usage()
 	sys.exit()
+    else:
+        assert False, "Undandled option!"
 
 # }}}
 

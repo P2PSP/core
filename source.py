@@ -51,7 +51,7 @@ from time import gmtime, strftime
 
 IP_ADDR = 0
 PORT = 1
-VIDEO_HEADER_SIZE = 20 # In blocks
+VIDEO_HEADER_SIZE = 100 # In blocks
 
 listening_port = 4552
 icecast_host = "150.214.150.68"
@@ -105,20 +105,24 @@ except getopt.GetoptError, exc:
     sys.stderr.write(sys.argv[0] + ": " + exc.msg + "\n")
     sys.exit(2)
 
+print sys.argv[0] + ": Parsing:" + str(opts)
+
 for o, a in opts:
     if o in ("-s", "--source_port"):
         source_port = int(a)
         print sys.argv[0] + ": source_port=" + str(source_port)
-    if o in ("-i", "--icecast"):
+    elif o in ("-i", "--icecast"):
         icecast_host = a.split(":")[0]
         icecast_port = int(a.split(":")[1])
         print sys.argv[0] + ": icecast=" + "(" + icecast_host + ":" + str(icecast_port) + ")" 
-    if o in ("-c", "--channel"):
+    elif o in ("-c", "--channel"):
         channel = a
         print sys.argv[0] + ": channel=" + channel
-    if o in ("-h", "--help"):
+    elif o in ("-h", "--help"):
 	usage()
 	sys.exit()
+    else:
+        assert False, "Undandled option!"
 
 # }}}
 
@@ -129,8 +133,6 @@ print "(source) <~ (peer) : Receives a lost block retransmission request"
 print "(source) ~> (peer) : Sends a retransmitted block"
 
 # }}}
-
-logfile = open ("source.log", 'a')
 
 # {{{ Waiting for peers
 
@@ -299,15 +301,14 @@ def SIGHUP_handler(signum, frame):
     global printing_lock
     printing_lock.acquire()
     print "Writting on source.log"
-    logfile.write("\n")
-    logfile.write("############### " + \
-        strftime("%Y-%m-%d %H:%M:%S", gmtime()) + \
-        " ###############" + "\n")
-    logfile.write("# List of peers:\n")
+    logfile = open ("source.log", 'a')
+    logfile.write(strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + " ")
+    logfile.write("List of peers:\n")
     counter = 1
     for p in zip(peer_list, private_list):
-        logfile.write('# ' + str(counter) + str(p) + "\n")
+        logfile.write(str(counter) + ": " + str(p) + "\n")
         counter += 1
+    logfile.close()
     printing_lock.release()
 
     # }}}

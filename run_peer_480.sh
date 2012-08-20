@@ -4,12 +4,12 @@ source=150.214.150.68:4554
 peer_port=9999
 
 usage() {
-    echo -n $0 [-s source=$source]
-    echo -n [-l peer_port=$peer_port]
-    echo [-h]
+    echo $0 [-s source=$source] [-l peer_port=$peer_port] [-h]
 }
 
-while getopts ":s:ph" pot; do
+echo $@
+
+while getopts "s:l:h" opt; do
     case ${opt} in
 	s)
 	    source="${OPTARG}"
@@ -34,8 +34,8 @@ while getopts ":s:ph" pot; do
     esac
 done
 
-./peer.py -s $source -l $peer_port &
-#xterm -e "~/p2psp/peer.py -s $source -l $peer_port" &
+#./peer.py -s $source -l $peer_port &
+xterm -e "./peer.py -s $source -l $peer_port" &
 #xterm -e "~/p2psp/peer.py -s localhost:4554 -l $peer_port" &
 
 sleep 1

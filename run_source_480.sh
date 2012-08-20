@@ -1,20 +1,22 @@
 #!/bin/sh
 
+#set -x
+
 icecast=localhost:4551
 source_port=4554
 
 usage() {
-    echo -n $0 [-s source_port=$source_port]
-    echo -n [-i icecast=$icecast]
-    echo [-h]
+    echo $0 [-s source_port=$source_port] [-i icecast=$icecast] [-h]
 }
 
-while getopts ":s:ih" pot; do
+echo $@
+
+while getopts "s:i:h" opt; do
     case ${opt} in
 	s)
 	    source_port="${OPTARG}"
 	    ;;
-	s)
+	i)
 	    icecast="${OPTARG}"
 	    ;;
 	h)
@@ -43,8 +45,9 @@ echo "Running super-peer at localhost:"$superpeer_port
 ./peer.py -s localhost:$source_port -l 9998 -p $superpeer_port > /dev/null &
 #~/p2psp/peer.py -s 150.214.150.68:4554 -l 9999 -p 4555 > /dev/null &
 
-
 sleep 1
 
 # Super-peer's client
 netcat localhost 9998 > /dev/null &
+
+#set +x

@@ -4,17 +4,17 @@ icecast=localhost:4551
 source_port=4552
 
 usage() {
-    echo -n $0 [-s source_port=$source_port]
-    echo -n [-i icecast=$icecast]
-    echo [-h]
+    echo $0 [-s source_port=$source_port] [-i icecast=$icecast] [-h]
 }
 
-while getopts ":s:ih" pot; do
+echo $0: parsing: $@
+
+while getopts "s:i:h" opt; do
     case ${opt} in
 	s)
 	    source_port="${OPTARG}"
 	    ;;
-	s)
+	i)
 	    icecast="${OPTARG}"
 	    ;;
 	h)
@@ -34,15 +34,13 @@ while getopts ":s:ih" pot; do
     esac
 done
 
-./source.py -s $source_port -i localhost:4551 -c 134.ogg &
+./source.py -s $source_port -i $icecast -c 134.ogg &
 
-superpeer_port=$[$source_port+1]
-echo "Super-peer port = " $superpeer_port
+superpeer_port=$(($source_port+1))
+echo "Running super-peer at localhost:"$superpeer_port
 
 # The super-peer
 ./peer.py -s localhost:$source_port -l 9998 -p $superpeer_port > /dev/null &
-
-echo "Running super-peer at localhost:9998"
 
 sleep 1
 
