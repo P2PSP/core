@@ -1,7 +1,7 @@
 peer_port=$1
 
 if [ -z $peer_port ]; then
-   echo "Missing listening port";
+   echo "Missing listening port (10000, for example)";
    exit;
 fi
 

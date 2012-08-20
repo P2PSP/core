@@ -1,10 +1,11 @@
-./run_oggfwd_480 &
-./run_source_480 &
+#./run_oggfwd_480 &
+./run_source_480 4554 &
+./run_peer_480 10000 localhost:4554 &
 
-peer_port=9998
+#peer_port=9998
 
-xterm -e "~/p2psp/peer.py -s localhost:4554 -l $peer_port" &
+#xterm -e "~/p2psp/peer.py -s localhost:4554 -l $peer_port" &
 
-sleep 1
+#sleep 1
 
-firefox http://localhost:$peer_port
+#firefox http://localhost:$peer_port
