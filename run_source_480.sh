@@ -6,10 +6,13 @@ icecast=localhost:4551
 source_port=4554
 
 usage() {
-    echo $0 [-s source_port=$source_port] [-i icecast=$icecast] [-h]
+    echo $0
+    echo "  [-s (source port, $source_port by default)]"
+    echo "  [-i (icecast end-point, $icecast by default)]"
+    echo "  [-h (help)]"
 }
 
-echo $@
+echo $0: parsing: $@
 
 while getopts "s:i:h" opt; do
     case ${opt} in

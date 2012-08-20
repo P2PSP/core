@@ -4,10 +4,13 @@ source=150.214.150.68:4554
 peer_port=9999
 
 usage() {
-    echo $0 [-s source=$source] [-l peer_port=$peer_port] [-h]
+    echo $0
+    echo "  [-s (source end-point, $source by default)]"
+    echo "  [-l (listining peer port, $peer_port by defaults)]"
+    echo "  [-h (help)]"
 }
 
-echo $@
+echo $0: parsing: $@
 
 while getopts "s:l:h" opt; do
     case ${opt} in

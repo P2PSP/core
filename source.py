@@ -302,7 +302,7 @@ def SIGHUP_handler(signum, frame):
     printing_lock.acquire()
     print "Writting on source.log"
     logfile = open ("source.log", 'a')
-    logfile.write(strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + " ")
+    logfile.write(strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + "\n")
     logfile.write("List of peers:\n")
     counter = 1
     for p in zip(peer_list, private_list):
@@ -339,7 +339,7 @@ while True:
         icecast_socket.getpeername(), \
         block_number
         
-    time.sleep(0.01) #give time to helping the peer send block to player (prevents missing in peer)
+    #time.sleep(0.01) #give time to helping the peer send block to player (prevents missing in peer)
  
     peer_index_lock.acquire()
     if len(peer_list) > 0:
