@@ -5,6 +5,8 @@
 # de los peers eliminados de la lista de peers. Posee un buffer para
 # acomodar el jitter.
 
+# {{{ Imports
+
 import getopt
 import sys
 import socket
@@ -12,21 +14,25 @@ from blocking_socket import blocking_socket
 from colors import Color
 import struct
 
+# }}}
+
 IP_ADDR = 0
 PORT = 1
 
-source_name = "localhost"
+source_name = "150.214.150.68"
 source_port = 4552
 player_port = 9999
-peer_port = 0 # OS default behavior will be used
+peer_port = 0 # OS default behavior will be used for port binding
 
 def usage():
+    # {{{
+
     print "This is " + sys.argv[0] + ", the peer node of a P2PSP network"
     print
     print "Parameters (and default values):"
     print
     print " -[-l]listening_port=the port that this peer uses to listen to the player (" + str(player_port) + ")"
-    print " -[-p]eer_port=the port that this peer uses to connect to the source (" + str(peer_port) + ", "
+    print " -[-p]eer_port=the local port that this peer uses to connect to the source (" + str(peer_port) + ", "
     print "               where 0 means that this port will be selected using the OS default behavior)"
     print " -[-s]ource=host name and port of the source node ((" + source_name + ":" + str(source_port) + "))"
     print
@@ -44,6 +50,10 @@ def usage():
     print " |          +-------------------------------- Peer's end-point"
     print " +------------------------------------------- The VLC player"
 
+    # }}}
+
+# {{{ Args handing
+
 opts = ""
 
 try:
@@ -58,23 +68,31 @@ except getopt.GetoptError, exc:
     sys.stderr.write(sys.argv[0] + ": " + exc.msg + "\n")
     sys.exit(2)
 
+print sys.argv[0] + ": Parsing:" + str(opts)
+
 for o, a in opts:
     if o in ("-l", "--listening_port"):
         player_port = int(a)
         print sys.argv[0] + ": listening_port=" + str(player_port)
-    if o in ("-p", "--peer_port"):
+    elif o in ("-p", "--peer_port"):
         peer_port = int(a)
         print sys.argv[0] + ": peer_port=" + str(peer_port)
-    if o in ("-s", "--source"):
+    elif o in ("-s", "--source"):
         source_name = a.split(":")[0]
         source_port = int(a.split(":")[1])
         print sys.argv[0] + ": source=" + "(" + source_name + ":" + str(source_port) + ")" 
-    if o in ("-h", "--help"):
+    elif o in ("-h", "--help"):
 	usage()
 	sys.exit()
+    else:
+        assert False, "Undandled option!"
+
+# }}}
 
 peer_list = []
 peer_insolidarity = {}
+
+# {{{ Wait for the player
 
 player_listen_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
 player_listen_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -84,6 +102,10 @@ print player_listen_socket.getsockname(), "Waiting for the player ...",
 player_serve_socket, player = player_listen_socket.baccept()
 player_listen_socket.setblocking(0)
 print player_serve_socket.getsockname(), "accepted connection from", player
+
+# }}}
+
+# {{{ Connect to the source
 
 if peer_port > 0:
     source_socket = socket.create_connection((source_name, source_port),1000,('',peer_port))
@@ -97,12 +119,21 @@ print source_socket.getsockname(), "Connected to", source_socket.getpeername()
 print source_socket.getsockname(), \
     "My IP address is" , source_socket.getsockname(), "->", \
     source_socket.getpeername()
+
+# }}}
+
+# {{{ Tell the source who I am
+
 payload = struct.pack("4sH",
                       socket.inet_aton(source_socket.getsockname()[IP_ADDR]),
                       socket.htons(source_socket.getsockname()[PORT]))
 source_socket.sendall(payload)
 
+# }}}
+
 buffer_size = 32
+
+# {{{ Retrieve the list of peer from the source
 
 number_of_peers = socket.ntohs(
     struct.unpack(
@@ -128,6 +159,12 @@ while number_of_peers > 0:
     peer_insolidarity[peer] = 0
     number_of_peers -= 1
 
+print source_socket.getsockname(), "List of peers retrieved"
+
+# }}}
+
+# {{{ Receive the video header from the source
+
 print source_socket.getsockname(), "<- ", source_socket.getpeername(), "[Video header",
 video_header_size = socket.ntohs(
     struct.unpack(
@@ -139,9 +176,17 @@ for i in xrange (video_header_size):
     print "\b.",
 print "] done"
 
+# }}}
+
+# {{{ Transform the peer-source TCP socket into a UDP socket
+
 stream_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 stream_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 stream_socket.bind(('',source_socket.getsockname()[PORT]))
+
+# }}}
+
+# {{{ Create a working entry in the NAT, if neccesary
 
 # This should create a working entry in the NAT if the peer is in a
 # private network
@@ -149,7 +194,13 @@ payload = struct.pack("4sH", "aaaa", 0)
 for i in xrange(2):
     stream_socket.sendto(payload, source_socket.getpeername())
 
+# }}}
+
+# {{{ Buffer creation
+
 class Block_buffer_element:
+    # {{{
+
     def block(self):
         return self[0]
     def number(self):
@@ -157,15 +208,20 @@ class Block_buffer_element:
     def empty(self):
         return self[2]
 
+    # }}}
+
 block_buffer = [Block_buffer_element() for i in xrange(buffer_size)]
 for i in xrange(buffer_size):
     block_buffer[i].empty = True # Nothing useful inside
 
-print "Buffering ..."
+# }}}
+
 
 counter=0
 lastpayload=None
 def receive_and_feed_the_cluster():
+    # {{{
+
     global counter
     global lastpayload
     
@@ -257,8 +313,17 @@ def receive_and_feed_the_cluster():
 
     return number
 
+    # }}}
+
+# {{{ Buffering
+
+print
+print "Buffering ..."
+print
+
 block_to_play = receive_and_feed_the_cluster()
 for i in xrange(buffer_size/2):
+    print "Received block" + str(i) + "/" + str(buffer_size/2)
     receive_and_feed_the_cluster()
 
 # Now, reset the solidarity of the peers
@@ -267,7 +332,10 @@ for p in peer_list:
 
 print "... buffering done"
 
+# }}}
+
 def send_a_block_to_the_player():
+    # {{{
 
     global block_to_play
 
@@ -291,6 +359,8 @@ def send_a_block_to_the_player():
        # print ("------------------------- missing block ---------------------")
     # Increment the block_to_play
     block_to_play = (block_to_play + 1) % 65536
+
+    # }}}
 
 while True:
     send_a_block_to_the_player()
