@@ -24,6 +24,8 @@ cd vruiz
 bzr merge bzr+ssh://bazaar.launchpad.net/~p2psp/p2psp/trunk/
 ## or only:
 bzr merge lp:~p2psp/p2psp/trunk
+## or even only:
+bzr merge lp:p2psp
 
 ## Commiting your changes:
 bzr commit -m "your message" [--fixes {lp|deb|gnome}:<number>]
