@@ -5,7 +5,7 @@
 
 ./run_source_134.sh -s 4552 -i "localhost:4551" &
 
-peer_port=9999
+peer_port=10000
 
 ./run_peer_134.sh -s "localhost:4552" -l $peer_port &
 
