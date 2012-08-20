@@ -37,6 +37,7 @@ bzr push lp:p2psp # if "bzr push" complains ...
 
 ## Updating the trunk branch with the "vruiz" branch:
 cd trunk
+bzr pull
 bzr merge bzr+ssh://bazaar.launchpad.net/~p2psp/p2psp/vruiz/
 ## or
 bzr merge lp:~p2psp/p2psp/vruiz
