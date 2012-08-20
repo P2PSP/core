@@ -48,6 +48,8 @@ echo "Running super-peer at localhost:"$superpeer_port
 ./peer.py -s localhost:$source_port -l 9998 -p $superpeer_port > /dev/null &
 #~/p2psp/peer.py -s 150.214.150.68:4554 -l 9999 -p 4555 > /dev/null &
 
+echo "Running super-peer at localhost:9999"
+
 sleep 1
 
 # Super-peer's client
