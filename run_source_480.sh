@@ -45,12 +45,11 @@ superpeer_port=$(($source_port+1))
 echo "Running super-peer at localhost:"$superpeer_port
 
 # The super-peer
-./peer.py -s localhost:$source_port -l 9998 -p $superpeer_port > /dev/null &
-#~/p2psp/peer.py -s 150.214.150.68:4554 -l 9999 -p 4555 > /dev/null &
+./peer.py -s localhost:$source_port -l 9999 -p $superpeer_port > /dev/null &
 
 sleep 1
 
 # Super-peer's client
-netcat localhost 9998 > /dev/null &
+netcat localhost 9999 > /dev/null &
 
 #set +x
