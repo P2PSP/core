@@ -23,6 +23,7 @@ source_name = "150.214.150.68"
 source_port = 4552
 player_port = 9999
 peer_port = 0 # OS default behavior will be used for port binding
+buffer_size = 32
 
 def usage():
     # {{{
@@ -31,24 +32,12 @@ def usage():
     print
     print "Parameters (and default values):"
     print
+    print " -[-b]uffer_size=size of the peer buffer in blocks (" + str(buffer_size) + ")"
     print " -[-l]listening_port=the port that this peer uses to listen to the player (" + str(player_port) + ")"
     print " -[-p]eer_port=the local port that this peer uses to connect to the source (" + str(peer_port) + ", "
     print "               where 0 means that this port will be selected using the OS default behavior)"
     print " -[-s]ource=host name and port of the source node ((" + source_name + ":" + str(source_port) + "))"
     print
-    print "Typical usage:"
-    print
-    print "python peer.py -s 150.214.150.68:4552 -l 9999 &"
-    print "  |       |                  |             |"
-    print "  |       |                  |             +- Listening port"
-    print "  |       |                  +--------------- Source's end-point"
-    print "  |       +---------------------------------- The peer code"
-    print "  +------------------------------------------ The Python interpreter"
-    print
-    print "vlc http://localhost:9999"
-    print " |          |"
-    print " |          +-------------------------------- Peer's end-point"
-    print " +------------------------------------------- The VLC player"
 
     # }}}
 
@@ -57,8 +46,9 @@ def usage():
 opts = ""
 
 try:
-    opts, extraparams = getopt.getopt(sys.argv[1:],"l:p:s:h",
-                                      ["listening_port=",
+    opts, extraparams = getopt.getopt(sys.argv[1:],"b:l:p:s:?",
+                                      ["buffer_size",
+                                       "listening_port=",
                                        "peer_port=",
                                        "server=",
                                        "help"
@@ -71,7 +61,10 @@ except getopt.GetoptError, exc:
 print sys.argv[0] + ": Parsing:" + str(opts)
 
 for o, a in opts:
-    if o in ("-l", "--listening_port"):
+    if o in ("-b", "--buffer_size"):
+        buffer_size = int(a)
+        print sys.argv[0] + ": buffer_size=" + str(buffer_size)
+    elif o in ("-l", "--listening_port"):
         player_port = int(a)
         print sys.argv[0] + ": listening_port=" + str(player_port)
     elif o in ("-p", "--peer_port"):
@@ -130,8 +123,6 @@ payload = struct.pack("4sH",
 source_socket.sendall(payload)
 
 # }}}
-
-buffer_size = 32
 
 # {{{ Retrieve the list of peer from the source
 
@@ -231,6 +222,9 @@ def receive_and_feed_the_cluster():
         sys.stderr.write("Lost connection to the source") 
         sys.exit(-1)
         
+    if len(payload) < 1026:
+        return 0
+
     number, block = struct.unpack("H1024s", payload)
     number = socket.ntohs(number)
     '''
@@ -276,7 +270,7 @@ def receive_and_feed_the_cluster():
                 # nada porque el o los super-peers van a hacer lo
                 # mismo con el nodo fuente y es prácticamente
                 # imposible que los mensajes que se envían desde los
-                # super-peers hacia el nodo fuente se pierdan (en
+                # super-peers hacia el nodo fuente se pierdan (el
                 # ancho de banda entre ellos está garantizado).
     else:
         
