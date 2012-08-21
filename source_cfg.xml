@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<data>
+
+  <!-- Number of blocks the source will send at the begining of the
+       transmission -->
+  <header_size_in_blocks>20</header_size_in_blocks>
+
+  <!-- The port than the server will use to communicate the peers -->
+  <listening_port>4552</listening_port>
+
+  <!-- End-point of the Icecast server and the selected channel -->
+  <icecast>
+    <host>150.214.150.68</host>
+    <port>4551</port>
+    <channel>134.ogg</channel>
+  </icecast>
+
+</data>

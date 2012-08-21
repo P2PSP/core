@@ -46,17 +46,13 @@ from threading import Lock
 from colors import Color
 import signal
 from time import gmtime, strftime
+#from daemon import Daemon
+import xml.etree.ElementTree as ET
 
 # }}}
 
 IP_ADDR = 0
 PORT = 1
-VIDEO_HEADER_SIZE = 100 # In blocks
-
-listening_port = 4552
-icecast_host = "150.214.150.68"
-icecast_port = 4551
-channel = "134.ogg"
 
 def usage():
     # {{{
@@ -133,6 +129,10 @@ print "(source) <~ (peer) : Receives a lost block retransmission request"
 print "(source) ~> (peer) : Sends a retransmitted block"
 
 # }}}
+
+tree = ET.parse('source_cfg.xml')
+root = tree.getroot()
+header_size_in_blocks = root.
 
 # {{{ Waiting for peers
 
