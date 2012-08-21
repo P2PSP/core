@@ -1,0 +1,14 @@
+Clustering:
+
+1. Un P se conecta a S y S decide que va a pertenecer al cluster
+externo.
+
+2. S le envía a P un bloque no exclusivo, y luego, nada más.
+
+3. P recibe el bloque y se lo envía al resto de peers del
+cluster. Esto va a provocar que la(s) entrada(s) en el NAT de P, si lo
+hubiera, se creen.
+
+4. Los peers del cluster comprueban que se trata de un bloque repetido
+y marcan al P como peer externo, lo que significa que le van a enviar
+los bloques sin esperar nada a cambio (no se van a quejar a S).
