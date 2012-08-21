@@ -307,7 +307,7 @@ def SIGHUP_handler(signum, frame):
     printing_lock.acquire()
     print "Writting on source.log"
     logfile = open ("source.log", 'a')
-    logfile.write(strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + "List of peers:\n")
+    logfile.write(strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + " List of peers:\n")
     counter = 1
     for p in zip(peer_list, private_list):
         logfile.write(str(counter) + ": " + str(p) + "\n")
