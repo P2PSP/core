@@ -5,22 +5,22 @@ source_port=4552
 
 usage() {
     echo $0
-    echo "  [-s (source port, $source_port by default)]"
-    echo "  [-i (icecast end-point, $icecast by default)]"
-    echo "  [-h (help)]"
+    echo "  [-l (source port, $source_port by default)]"
+    echo "  [-s (icecast end-point, $icecast by default)]"
+    echo "  [-? (help)]"
 }
 
 echo $0: parsing: $@
 
-while getopts "s:i:h" opt; do
+while getopts "l:s:?" opt; do
     case ${opt} in
-	s)
+	l)
 	    source_port="${OPTARG}"
 	    ;;
-	i)
+	s)
 	    icecast="${OPTARG}"
 	    ;;
-	h)
+	?)
 	    usage
 	    exit 0
 	    ;;
@@ -37,7 +37,7 @@ while getopts "s:i:h" opt; do
     esac
 done
 
-./source.py -s $source_port -i $icecast -c 134.ogg &
+./source.py -l $source_port -s $icecast -c 134.ogg &
 
 superpeer_port=$(($source_port+1))
 echo "Running super-peer at localhost:"$superpeer_port

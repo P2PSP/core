@@ -51,11 +51,11 @@ from time import gmtime, strftime
 
 IP_ADDR = 0
 PORT = 1
-VIDEO_HEADER_SIZE = 100 # In blocks
 
+header_size = 20
 listening_port = 4552
-icecast_host = "150.214.150.68"
-icecast_port = 4551
+server_host = "150.214.150.68"
+server_port = 4551
 channel = "134.ogg"
 
 def usage():
@@ -65,27 +65,11 @@ def usage():
     print
     print "Parameters (and default values):"
     print
-    print " -[-c]hannel=name of the video/audio sequence served by (" + str(channel) + ")"
-    print " -[-s]ource_port=the port that the source uses to communicate the peers (" + str(listening_port) + ")"
-    print " -[-s]erver=host name and port of the video/audio server ((" + icecast_host + ":" + str(icecast_port) + "))"
+    print " -[-c]hannel=name of the video/audio sequence served by (" + channel + ")"
+    print " -[-h]eader_size=number of blocks of the header of the stream (" + str(header_size) + ")"
+    print " -[-l]istening_port=the port that the source uses to communicate the peers (" + str(listening_port) + ")"
+    print " -[-s]erver=host name and port of the video/audio server ((" + server_host + ":" + str(server_port) + "))"
     print
-    print "Typical usage:"
-    print
-    print "oggfwd localhost 4551 1qaz /480.ogg < big_buck_bunny_480p_stereo.ogg &"
-    print "   |      |        |    |      |                   |"
-    print "   |      |        |    |      |                   +- Video file"
-    print "   |      |        |    |      +--------------------- Icecast channel"
-    print "   |      |        |    +---------------------------- Icecast password"
-    print "   |      |        +--------------------------------- Icecast port"
-    print "   |      +------------------------------------------ Icecast host"
-    print "   +------------------------------------------------- Sends a video to a Icecast server"
-    print
-    print "source.py -s 4552 -i localhost:4551 -c 480.ogg"
-    print "   |           |           |              |"
-    print "   |           |           |              +--- Icecast channel"
-    print "   |           |           +------------------ Icecast end-point"
-    print "   |           +------------------------------ Source listening port"
-    print "   +------------------------------------------ The source script"
 
     # }}}
 
@@ -94,10 +78,11 @@ def usage():
 opts = ""
 
 try:
-    opts, extraparams = getopt.getopt(sys.argv[1:],"s:i:c:h",
-                                      ["source_port=",
-                                       "icecast=",
-                                       "channel=",
+    opts, extraparams = getopt.getopt(sys.argv[1:],"c:h:l:s:?",
+                                      ["channel=",
+                                       "header_size=",
+                                       "listening_port=",
+                                       "server=",
                                        "help"
                                        ])
 
@@ -108,17 +93,19 @@ except getopt.GetoptError, exc:
 print sys.argv[0] + ": Parsing:" + str(opts)
 
 for o, a in opts:
-    if o in ("-s", "--source_port"):
-        source_port = int(a)
-        print sys.argv[0] + ": source_port=" + str(source_port)
-    elif o in ("-i", "--icecast"):
-        icecast_host = a.split(":")[0]
-        icecast_port = int(a.split(":")[1])
-        print sys.argv[0] + ": icecast=" + "(" + icecast_host + ":" + str(icecast_port) + ")" 
-    elif o in ("-c", "--channel"):
+    if o in ("-c", "--channel"):
         channel = a
         print sys.argv[0] + ": channel=" + channel
-    elif o in ("-h", "--help"):
+    elif o in ("-h", "--header_size"):
+        header_size = int(a)
+        print sys.argv[0] + ": header_size=" + str(header_size)
+    elif o in ("-l", "--listening_port"):
+        listening_port = int(a)
+        print sys.argv[0] + ": listening_port=" + str(listening_port)
+    elif o in ("-s", "--server"):
+        server_host = a.split(":")[0]
+        server_port = int(a.split(":")[1])
+    elif o in ("-?", "--help"):
 	usage()
 	sys.exit()
     else:
@@ -128,19 +115,25 @@ for o, a in opts:
 
 # {{{ obsolete
 
-print "(source) -> (peer) : Sends a block or other kind of data"
-print "(source) <~ (peer) : Receives a lost block retransmission request"
-print "(source) ~> (peer) : Sends a retransmitted block"
+#print "(source) -> (peer) : Sends a block or other kind of data"
+#print "(source) <~ (peer) : Receives a lost block retransmission request"
+#print "(source) ~> (peer) : Sends a retransmitted block"
 
 # }}}
+
 
 # {{{ Waiting for peers
 
 peer_connection_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
 peer_connection_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-peer_connection_socket.bind(("", source_port)) # We listen to any interface
+try:
+    peer_connection_socket.bind(("", listening_port)) # We listen to any interface
+except socket.error, msg:
+    print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()), \
+        "Can't bind", listening_port, \
+        "(already used?)"
 peer_connection_socket.listen(5)
-print peer_connection_socket.getsockname(), "Waiting for peers ..."
+print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()), peer_connection_socket.getsockname(), "Waiting for peers ..."
 
 # }}}
 
@@ -153,12 +146,14 @@ removing_ratio = {}
 # {{{ Header retrieving
 
 icecast_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
-icecast_socket.connect((icecast_host, icecast_port))
-print icecast_socket.getsockname(), "Connected to the video server", icecast_socket.getpeername()
+icecast_socket.connect((server_host, server_port))
+print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()), \
+    icecast_socket.getsockname(), "Connected to the video server", icecast_socket.getpeername()
 icecast_socket.sendall("GET /" + channel + " HTTP/1.1\r\n\r\n")
-print icecast_socket.getsockname(), "<- [Video header",
-video_header = [None]*VIDEO_HEADER_SIZE
-for i in xrange(VIDEO_HEADER_SIZE):
+print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()),\
+    icecast_socket.getsockname(), "<- [Video header",
+video_header = [None]*header_size
+for i in xrange(header_size):
     block = icecast_socket.brecv(1024)
     video_header[i] = block
     print "\b.",
@@ -166,7 +161,7 @@ print "] done"
 
 # }}}
 
-class Peer_Connection_Thread(Thread):
+class Peer_Connection(Thread):
     # {{{
 
     def __init__(self):
@@ -176,7 +171,9 @@ class Peer_Connection_Thread(Thread):
         
         while True:
             peer_serve_socket, peer = peer_connection_socket.baccept()
-            print peer_serve_socket.getsockname(), \
+            print Color.red
+            print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()), \
+                peer_serve_socket.getsockname(), \
                 "Accepted connection from:", peer
 
             payload = peer_serve_socket.recv(struct.calcsize("4sH"))
@@ -184,14 +181,18 @@ class Peer_Connection_Thread(Thread):
             private_IP = socket.inet_ntoa(private_IP)
             private_port = socket.ntohs(private_port)
             private_endpoint = (private_IP, private_port)
-            print peer_serve_socket.getsockname(), \
+            print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()), \
+                peer_serve_socket.getsockname(), \
                 "Private endpoint =", private_endpoint
 
-            print peer_serve_socket.getsockname(), "Sending the list of peers"
+            print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()), \
+                peer_serve_socket.getsockname(), "Sending the list of peers"
             payload = struct.pack("H", socket.htons(len(peer_list)))
             peer_serve_socket.sendall(payload)
-            print "Len Peer List = ",len(peer_list)
-            print "Peer List"
+            print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()), \
+                "Len Peer List = ",len(peer_list)
+            print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()), \
+                "Peer List"
             for (pub,pri) in zip(peer_list,private_list):
                 print "Public =", pub, "Private =", pri
                 if peer[0] == pub[0]:
@@ -207,10 +208,11 @@ class Peer_Connection_Thread(Thread):
                 peer_serve_socket.sendall(payload)
             print "done"
                 
-            print peer_serve_socket.getsockname(), "Video header ->", peer
-            payload = struct.pack("H", socket.htons(VIDEO_HEADER_SIZE))
+            print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()), \
+                peer_serve_socket.getsockname(), "Video header ->", peer
+            payload = struct.pack("H", socket.htons(header_size))
             peer_serve_socket.sendall(payload)
-            for i in xrange(VIDEO_HEADER_SIZE):
+            for i in xrange(header_size):
                 peer_serve_socket.sendall(video_header[i])
                 print "\b.",
             print "done"
@@ -222,9 +224,11 @@ class Peer_Connection_Thread(Thread):
             
             removing_ratio[peer] = 0
 
+            print Color.none
+
     # }}}
             
-Peer_Connection_Thread().start()
+Peer_Connection().start()
 
 peer_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 peer_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -234,7 +238,7 @@ peer_index = 0
 peer_index_lock = Lock()
 printing_lock = Lock()
 
-class Prune_The_Cluster_Thread(Thread):
+class Prune_The_Cluster(Thread):
     # {{{
 
     def __init__(self):
@@ -248,7 +252,8 @@ class Prune_The_Cluster_Thread(Thread):
             try:
                 payload, complaining_peer = peer_socket.recvfrom(struct.calcsize("4sH"))
             except socket.error:
-                print("Received from a peer offline now - continue")
+                print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()), \
+                    "Received from a peer offline now - continue"
                 break
             peer_to_remove_IP, peer_to_remove_port = struct.unpack("4sH", payload)
             peer_to_remove_IP = socket.inet_ntoa(peer_to_remove_IP)
@@ -257,8 +262,8 @@ class Prune_The_Cluster_Thread(Thread):
 
             printing_lock.acquire()
             print Color.blue + \
-                "% " + strftime("%Y-%m-%d %H:%M:%S", gmtime()) + \
-                ": ('" + peer_to_remove_IP + "', " + str(peer_to_remove_port) + \
+                strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + \
+                " ('" + peer_to_remove_IP + "', " + str(peer_to_remove_port) + \
                 ") removed in peer ('" + complaining_peer[0] + "'," + \
                 str(complaining_peer[1]) + ")" + Color.none
             printing_lock.release()
@@ -278,8 +283,8 @@ class Prune_The_Cluster_Thread(Thread):
             for x in peer_list:
                 if x == peer_to_remove:
                     printing_lock.acquire()
-                    print Color.blue + "% " + strftime("%Y-%m-%d %H:%M:%S", gmtime()) + \
-                        ": removed " +  str(peer_list[counter]) + \
+                    print Color.blue + strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + \
+                        " removed " +  str(peer_list[counter]) + \
                         " " +  str(private_list[counter]) + \
                         Color.none
                     printing_lock.release()
@@ -293,7 +298,7 @@ class Prune_The_Cluster_Thread(Thread):
 
     # }}}
 
-Prune_The_Cluster_Thread().start()
+Prune_The_Cluster().start()
 
 def SIGHUP_handler(signum, frame):
     # {{{
@@ -302,8 +307,7 @@ def SIGHUP_handler(signum, frame):
     printing_lock.acquire()
     print "Writting on source.log"
     logfile = open ("source.log", 'a')
-    logfile.write(strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + "\n")
-    logfile.write("List of peers:\n")
+    logfile.write(strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + "List of peers:\n")
     counter = 1
     for p in zip(peer_list, private_list):
         logfile.write(str(counter) + ": " + str(p) + "\n")
@@ -330,7 +334,7 @@ while True:
             time.sleep(1)
             icecast_socket.close()
             icecast_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            icecast_socket.connect((icecast_host, icecast_port))
+            icecast_socket.connect((server_host, server_port))
             icecast_socket.sendall("GET /" + channel + " HTTP/1.1\r\n\r\n")
         block += icecast_socket.recv(1024-len(block))
 
