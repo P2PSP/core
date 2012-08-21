@@ -300,7 +300,6 @@ class Prune_The_Cluster(Thread):
 
 Prune_The_Cluster().start()
 
-
 def SIGHUP_handler(signum, frame):
     # {{{
 
@@ -318,8 +317,8 @@ def SIGHUP_handler(signum, frame):
 
     # }}}
 
-signal.signal(signal.SIGHUP, SIGHUP_handler)
-signal.siginterrupt(signal.SIGHUP, False)
+#signal.signal(signal.SIGHUP, SIGHUP_handler)
+#signal.siginterrupt(signal.SIGHUP, False)
 
 print peer_socket.getsockname(), "Sending the rest of the stream ..."
 while True:
