@@ -180,10 +180,14 @@ stream_socket.bind(('',source_socket.getsockname()[PORT]))
 # {{{ Create a working entry in the NAT, if neccesary
 
 # This should create a working entry in the NAT if the peer is in a
-# private network
+# private network, and should alert to the rest of the peers of the
+# cluster that a new peer is in it.
 payload = struct.pack("4sH", "aaaa", 0)
-for i in xrange(2):
-    stream_socket.sendto(payload, source_socket.getpeername())
+for p in peer_list:
+    print "Sending an empty block to", p
+    stream_socket.sendto(payload, p)
+#for i in xrange(2):
+#    stream_socket.sendto(payload, source_socket.getpeername())
 
 # }}}
 
