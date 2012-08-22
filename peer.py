@@ -181,7 +181,9 @@ stream_socket.bind(('',source_socket.getsockname()[PORT]))
 
 # This should create a working entry in the NAT if the peer is in a
 # private network, and should alert to the rest of the peers of the
-# cluster that a new peer is in it.
+# cluster that a new peer is in it. If this peer in unreacheable and
+# the super-peer has received one of these messages, the unreacheable
+# peer should be removed by the super-peer and next, by the source.
 payload = struct.pack("4sH", "aaaa", 0)
 for p in peer_list:
     print "Sending an empty block to", p
