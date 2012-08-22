@@ -61,3 +61,19 @@ públicos. Esto último, presenta un coste añadido para S.
 Finalmente, para lidiar con la NATs simétricos, siempre podemos echar
 mano de colocar P fuera de la red privada (simétrica) y a un S dentro
 de la red.
+
+Transmutación:
+
+Si se distribuye el código del nodo fuente y del peer en uno solo y
+cuando se ejecuta, desde la línea de comandos se decide qué tipo de
+nodo se desea usar, los nodos podrían transmutar, haciendo que nodos
+que funcionan como peers en un momento determinado se conviertan en
+sources y viceversa. Esto puede ser ventajoso para crear clústeres
+privados, en redes privadas, que obtienen los datos del stream a
+través de una conexión TCP entre el nodo fuente que corre dentro de la
+red privada y un peer liberado (que no contribuye al cluster, no
+recibe desde su source, pero recibe desde el resto de peers del
+cluster). Un peer liberado se comporta, para un source, como si de un
+servidor Icecast se tratase, que es capaz de servir una copia del
+stream.
+

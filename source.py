@@ -143,12 +143,17 @@ private_list = []
 block_number = 0
 removing_ratio = {}
 
-# {{{ Header retrieving
+# {{{ Connect to the server
 
 icecast_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
 icecast_socket.connect((server_host, server_port))
 print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()), \
     icecast_socket.getsockname(), "Connected to the video server", icecast_socket.getpeername()
+
+# }}}
+
+# {{{ Header retrieving
+
 icecast_socket.sendall("GET /" + channel + " HTTP/1.1\r\n\r\n")
 print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()),\
     icecast_socket.getsockname(), "<- [Video header",
