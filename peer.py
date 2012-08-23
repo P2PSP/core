@@ -227,9 +227,6 @@ def receive_and_feed_the_cluster():
     except socket.timeout:
         sys.stderr.write("Lost connection to the source") 
         sys.exit(-1)
-        
-    if len(payload) < 1026:
-        return 0
 
     number, block = struct.unpack("H1024s", payload)
     number = socket.ntohs(number)
@@ -283,6 +280,10 @@ def receive_and_feed_the_cluster():
         if addr not in peer_list:
             peer_list.append(addr)
             
+        # Handle empty packets
+        if len(payload) < 1026:
+            return 0
+
         peer_insolidarity[addr] = 0
         
     if(counter<len(peer_list)): 
