@@ -181,7 +181,9 @@ stream_socket.bind(('',source_socket.getsockname()[PORT]))
 
 # This should create a working entry in the NAT if the peer is in a
 # private network, and should alert to the rest of the peers of the
-# cluster that a new peer is in it.
+# cluster that a new peer is in it. If this peer in unreacheable and
+# the super-peer has received one of these messages, the unreacheable
+# peer should be removed by the super-peer and next, by the source.
 payload = struct.pack("4sH", "aaaa", 0)
 for p in peer_list:
     print "Sending an empty block to", p
@@ -225,9 +227,6 @@ def receive_and_feed_the_cluster():
     except socket.timeout:
         sys.stderr.write("Lost connection to the source") 
         sys.exit(-1)
-        
-    if len(payload) < 1026:
-        return 0
 
     number, block = struct.unpack("H1024s", payload)
     number = socket.ntohs(number)
@@ -281,6 +280,10 @@ def receive_and_feed_the_cluster():
         if addr not in peer_list:
             peer_list.append(addr)
             
+        # Handle empty packets
+        if len(payload) < 1026:
+            return 0
+
         peer_insolidarity[addr] = 0
         
     if(counter<len(peer_list)): 
