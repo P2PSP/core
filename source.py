@@ -143,12 +143,17 @@ private_list = []
 block_number = 0
 removing_ratio = {}
 
-# {{{ Header retrieving
+# {{{ Connect to the server
 
 icecast_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
 icecast_socket.connect((server_host, server_port))
 print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()), \
     icecast_socket.getsockname(), "Connected to the video server", icecast_socket.getpeername()
+
+# }}}
+
+# {{{ Header retrieving
+
 icecast_socket.sendall("GET /" + channel + " HTTP/1.1\r\n\r\n")
 print strftime("[%Y-%m-%d %H:%M:%S]", gmtime()),\
     icecast_socket.getsockname(), "<- [Video header",
@@ -307,7 +312,7 @@ def SIGHUP_handler(signum, frame):
     printing_lock.acquire()
     print "Writting on source.log"
     logfile = open ("source.log", 'a')
-    logfile.write(strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + "List of peers:\n")
+    logfile.write(strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + " List of peers:\n")
     counter = 1
     for p in zip(peer_list, private_list):
         logfile.write(str(counter) + ": " + str(p) + "\n")
