@@ -7,12 +7,12 @@ usage() {
     echo $0
     echo "  [-s (source end-point, $source by default)]"
     echo "  [-l (listining peer port, $peer_port by defaults)]"
-    echo "  [-h (help)]"
+    echo "  [-? (help)]"
 }
 
 echo $0: parsing: $@
 
-while getopts "s:l:h" opt; do
+while getopts "s:l:?" opt; do
     case ${opt} in
 	s)
 	    source="${OPTARG}"
@@ -20,7 +20,7 @@ while getopts "s:l:h" opt; do
 	l)
 	    peer_port="${OPTARG}"
 	    ;;
-	h)
+	?)
 	    usage
 	    exit 0
 	    ;;
@@ -37,8 +37,8 @@ while getopts "s:l:h" opt; do
     esac
 done
 
-#./peer.py -s $source -l $peer_port &
-xterm -e "./peer.py -s $source -l $peer_port" &
+./peer.py -s $source -l $peer_port -b 128 &
+#xterm -e "./peer.py -s $source -l $peer_port" &
 #xterm -e "~/p2psp/peer.py -s localhost:4554 -l $peer_port" &
 
 sleep 1
