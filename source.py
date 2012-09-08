@@ -230,6 +230,15 @@ class Peer_Connection(Thread):
             removing_ratio[peer] = 0
 
             print Color.none
+            
+            #Introducing the new peer to all cluster
+            
+            payload = struct.pack("4sH",socket.inet_aton(peer[IP_ADDR]),socket.htons(peer[PORT]))
+            
+            for p in peer_list:                   
+                peer_socket.sendto(payload, p)
+                print peer[IP_ADDR], ":", peer[PORT], "->", p
+                
 
     # }}}
             

@@ -19,7 +19,7 @@ import struct
 IP_ADDR = 0
 PORT = 1
 
-source_name = "150.214.150.68"
+source_name = "127.0.0.1"
 source_port = 4552
 player_port = 9999
 peer_port = 0 # OS default behavior will be used for port binding
@@ -228,8 +228,24 @@ def receive_and_feed_the_cluster():
         sys.stderr.write("Lost connection to the source") 
         sys.exit(-1)
 
-    number, block = struct.unpack("H1024s", payload)
-    number = socket.ntohs(number)
+    if (len(payload)==6):
+        ip, port = struct.unpack("4sH", payload)
+        ip = socket.inet_ntoa(ip)
+        endpoint = (ip, port)
+        
+        if (port!=0):
+            if endpoint not in peer_list:
+                peer_list.append(endpoint)
+                
+            peer_insolidarity[endpoint] = 0
+        print "receive new peer ", endpoint
+        return 0
+        
+    else:  
+        number, block = struct.unpack("H1024s", payload)
+        number = socket.ntohs(number)
+        print "receive from ", addr, " number ", number
+        
     '''
     print source_socket.getsockname(),
     if block_buffer[number % buffer_size].requested:
@@ -242,7 +258,6 @@ def receive_and_feed_the_cluster():
     print Color.green + "<-" + Color.none,
     print number, addr
     '''
-    print "recive from ", addr, " number ", number
     
     if addr == source_socket.getpeername():        
     
@@ -295,6 +310,7 @@ def receive_and_feed_the_cluster():
         '''
         stream_socket.sendto(lastpayload, peer)
         peer_insolidarity[peer] += 1
+        
         if peer_insolidarity[peer] > 64: # <- Important parameter!!
             del peer_insolidarity[peer]
             print Color.blue
