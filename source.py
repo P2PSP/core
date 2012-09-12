@@ -242,7 +242,7 @@ class Peer_Connection(Thread):
             
             for p in peer_list:                   
                 peer_socket.sendto(payload, p)
-                print peer[IP_ADDR], ":", peer[PORT], "->", p
+                print "Introducing to cluster: ", peer[IP_ADDR], ":", peer[PORT], "->", p
                 
 
     # }}}
@@ -369,7 +369,6 @@ while True:
         
         payload = struct.pack("H1024s", socket.htons(block_number), block)
         peer_socket.sendto(payload, peer_list[peer_index])
-        print "SEND UDP TO: ", peer_list[peer_index]
         
         peer_index = (peer_index + 1) % len(peer_list)
     peer_index_lock.release()
