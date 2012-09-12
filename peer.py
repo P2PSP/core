@@ -174,7 +174,7 @@ print "] done"
 stream_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 stream_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 stream_socket.bind(('',source_socket.getsockname()[PORT]))
-print "UDP PORT BIND: ",source_socket.getsockname()[PORT]
+print "UDP PORT BIND: ",source_socket.getpeername()[PORT]
 
 # }}}
 
