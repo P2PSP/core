@@ -247,6 +247,7 @@ Peer_Connection().start()
 peer_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 peer_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 peer_socket.bind(('',peer_connection_socket.getsockname()[PORT]))
+print "UDP PORT BIND: ",peer_connection_socket.getsockname()[PORT]
 
 peer_index = 0
 peer_index_lock = Lock()
@@ -368,6 +369,8 @@ while True:
         
         payload = struct.pack("H1024s", socket.htons(block_number), block)
         peer_socket.sendto(payload, peer_list[peer_index])
+        print "SEND UDP TO: ", peer_list[peer_index]
+        
         peer_index = (peer_index + 1) % len(peer_list)
     peer_index_lock.release()
 

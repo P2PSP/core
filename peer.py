@@ -19,8 +19,8 @@ import struct
 IP_ADDR = 0
 PORT = 1
 
-source_name = "127.0.0.1"
-source_port = 4552
+source_name = "150.214.150.68"
+source_port = 4558
 player_port = 9999
 peer_port = 0 # OS default behavior will be used for port binding
 buffer_size = 32
@@ -174,6 +174,7 @@ print "] done"
 stream_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 stream_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 stream_socket.bind(('',source_socket.getsockname()[PORT]))
+print "UDP PORT BIND: ",source_socket.getsockname()[PORT]
 
 # }}}
 
