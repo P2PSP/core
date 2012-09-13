@@ -368,9 +368,9 @@ while True:
 #            peer_list[peer_index], "(", peer_index+1, "/", len(peer_list), ")"
         
         payload = struct.pack("H1024s", socket.htons(block_number), block)
-        #peer_socket.sendto(payload, peer_list[peer_index]) //not work with my NAT
+        peer_socket.sendto(payload, peer_list[peer_index]) #not work with my NAT
         
-        peer_socket.sendto(payload, (peer_list[peer_index][IP_ADDR],private_list[peer_index][PORT]))
+        #peer_socket.sendto(payload, (peer_list[peer_index][IP_ADDR],private_list[peer_index][PORT]))
         
         peer_index = (peer_index + 1) % len(peer_list)
     peer_index_lock.release()
