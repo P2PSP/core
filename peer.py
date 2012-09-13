@@ -188,9 +188,8 @@ payload = struct.pack("4sH", "aaaa", 0)
 for p in peer_list:
     print "Sending an empty block to", p
     stream_socket.sendto(payload, p)
-stream_socket.sendto(payload, (source_name,source_port))
-#for i in xrange(2):
-#    stream_socket.sendto(payload, source_socket.getpeername())
+for i in xrange(2):
+    stream_socket.sendto(payload, source_socket.getpeername())
 
 # }}}
 
