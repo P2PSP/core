@@ -188,6 +188,7 @@ payload = struct.pack("4sH", "aaaa", 0)
 for p in peer_list:
     print "Sending an empty block to", p
     stream_socket.sendto(payload, p)
+stream_socket.sendto(payload, (source_name,source_port))
 #for i in xrange(2):
 #    stream_socket.sendto(payload, source_socket.getpeername())
 
@@ -238,7 +239,7 @@ def receive_and_feed_the_cluster():
                 peer_list.append(endpoint)
                 
             peer_insolidarity[endpoint] = 0
-        print "receive new peer ", endpoint
+            print "receive new peer ", endpoint
         return 0
         
     else:  
