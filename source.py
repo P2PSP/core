@@ -275,14 +275,6 @@ class Prune_The_Cluster(Thread):
             peer_to_remove_port = socket.ntohs(peer_to_remove_port)
             peer_to_remove = (peer_to_remove_IP, peer_to_remove_port)
 
-            printing_lock.acquire()
-            print Color.blue + \
-                strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + \
-                " ('" + peer_to_remove_IP + "', " + str(peer_to_remove_port) + \
-                ") removed in peer ('" + complaining_peer[0] + "'," + \
-                str(complaining_peer[1]) + ")" + Color.none
-            printing_lock.release()
-
             # El problema está en que cuando un peer echa a otro en su
             # misma red privada, debe indicar a S la dir IP pública de
             # dicho peer, no la dir IP privada que está usando para
@@ -298,10 +290,11 @@ class Prune_The_Cluster(Thread):
             for x in peer_list:
                 if x == peer_to_remove:
                     printing_lock.acquire()
-                    print Color.blue + strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + \
-                        " removed " +  str(peer_list[counter]) + \
-                        " " +  str(private_list[counter]) + \
-                        Color.none
+                    print Color.blue + \
+                    strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + \
+                    " ('" + peer_to_remove_IP + "', " + str(peer_to_remove_port) + \
+                    ") removed in peer ('" + complaining_peer[0] + "'," + \
+                    str(complaining_peer[1]) + ")" + Color.none
                     printing_lock.release()
                     peer_index_lock.acquire()
                     del peer_list[counter]

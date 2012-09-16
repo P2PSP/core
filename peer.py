@@ -23,7 +23,7 @@ source_name = "150.214.150.68"
 source_port = 4558
 player_port = 9999
 peer_port = 0 # OS default behavior will be used for port binding
-buffer_size = 64
+buffer_size = 32
 
 def usage():
     # {{{
