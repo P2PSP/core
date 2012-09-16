@@ -242,7 +242,7 @@ class Peer_Connection(Thread):
             
             for p in peer_list:                   
                 peer_socket.sendto(payload, p)
-                print "Introducing to cluster: ", peer[IP_ADDR], ":", peer[PORT], "->", p
+                print "Introducing ", peer[IP_ADDR], ":", peer[PORT], " to ->", p
                 
 
     # }}}
@@ -357,9 +357,7 @@ while True:
         Color.green + "<-" + Color.none, \
         icecast_socket.getpeername(), \
         block_number
-        
-    #time.sleep(0.01) #give time to helping the peer send block to player (prevents missing in peer)
- 
+         
     peer_index_lock.acquire()
     if len(peer_list) > 0:
 #        print peer_socket.getsockname(), \
@@ -368,9 +366,7 @@ while True:
 #            peer_list[peer_index], "(", peer_index+1, "/", len(peer_list), ")"
         
         payload = struct.pack("H1024s", socket.htons(block_number), block)
-        peer_socket.sendto(payload, peer_list[peer_index]) #not work with my NAT
-        
-        #peer_socket.sendto(payload, (peer_list[peer_index][IP_ADDR],private_list[peer_index][PORT]))
+        peer_socket.sendto(payload, peer_list[peer_index])        
         
         peer_index = (peer_index + 1) % len(peer_list)
     peer_index_lock.release()
