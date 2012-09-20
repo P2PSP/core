@@ -311,7 +311,7 @@ class Prune_The_Cluster(Thread):
             '''
             counter = 0
             for (pub,pri) in zip(peer_list,private_list):
-                if pub == peer_to_remove | pri == peer_to_remove:
+                if pub == peer_to_remove or pri == peer_to_remove:
                     printing_lock.acquire()
                     print Color.blue + \
                     strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + \

@@ -368,7 +368,7 @@ def send_a_block_to_the_player():
             player_serve_socket.sendall(block_buffer[block_to_play % buffer_size].block)
         except socket.error:
             sys.stderr.write("Conection closed by the player")
-            sys.exit(-1)
+            sys.exit(0)
         
         # buffer[block_to_play.number].empty = True
         block_buffer[block_to_play % buffer_size].empty = True
