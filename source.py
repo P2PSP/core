@@ -205,7 +205,7 @@ class Peer_Connection(Thread):
                 "Peer List"
             for (pub,pri) in zip(peer_list,private_list):
                 print "Public =", pub, "Private =", pri
-                if peer[0] == pub[0]:
+                if peer[IP_ADDR] == pub[IP_ADDR]:
                     payload = struct.pack("4sH",
                                           socket.inet_aton(pri[IP_ADDR]),
                                           socket.htons(pri[PORT]))
@@ -229,12 +229,16 @@ class Peer_Connection(Thread):
 
             peer_serve_socket.close()
             
-            #Introducing the new peer to all cluster
-            payload = struct.pack("4sH",socket.inet_aton(peer[IP_ADDR]),socket.htons(peer[PORT]))
-            
-            for p in peer_list:                   
+            #Introducing the new peer to all cluster           
+            for p in peer_list:      
+                if peer[IP_ADDR] == p[IP_ADDR]:
+                    payload = struct.pack("4sH",socket.inet_aton(private_endpoint[IP_ADDR]),socket.htons(private_endpoint[PORT]))
+                    print "Introducing ", peer[IP_ADDR], ":", peer[PORT], " to ->", p
+                else:
+                    payload = struct.pack("4sH",socket.inet_aton(peer[IP_ADDR]),socket.htons(peer[PORT]))              
+                    print "Introducing ", private_endpoint[IP_ADDR], ":", private_endpoint[PORT], " to ->", p
+                    
                 peer_socket.sendto(payload, p)
-                print "Introducing ", peer[IP_ADDR], ":", peer[PORT], " to ->", p
             
             peer_list.append(peer)
             private_list.append(private_endpoint)
