@@ -233,10 +233,10 @@ class Peer_Connection(Thread):
             for p in peer_list:      
                 if peer[IP_ADDR] == p[IP_ADDR]:
                     payload = struct.pack("4sH",socket.inet_aton(private_endpoint[IP_ADDR]),socket.htons(private_endpoint[PORT]))
-                    print "Introducing ", peer[IP_ADDR], ":", peer[PORT], " to ->", p
+                    print "Introducing ", private_endpoint[IP_ADDR], ":", private_endpoint[PORT], " to ->", p
                 else:
                     payload = struct.pack("4sH",socket.inet_aton(peer[IP_ADDR]),socket.htons(peer[PORT]))              
-                    print "Introducing ", private_endpoint[IP_ADDR], ":", private_endpoint[PORT], " to ->", p
+                    print "Introducing ", peer[IP_ADDR], ":", peer[PORT], " to ->", p
                     
                 peer_socket.sendto(payload, p)
             
@@ -288,10 +288,30 @@ class Prune_The_Cluster(Thread):
             # peer que tiene la misma IP pública del peer que se queja
             # y tenga asociada dicha entrada la dir IP privada que ha
             # indicado el peer que se queja.
-
+            
+            '''
             counter = 0
             for x in peer_list:
                 if x == peer_to_remove:
+                    printing_lock.acquire()
+                    print Color.blue + \
+                    strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + \
+                    " ('" + peer_to_remove_IP + "', " + str(peer_to_remove_port) + \
+                    ") removed in peer ('" + complaining_peer[0] + "'," + \
+                    str(complaining_peer[1]) + ")" + Color.none
+                    printing_lock.release()
+                    peer_index_lock.acquire()
+                    del peer_list[counter]
+                    del private_list[counter]
+                    if peer_index > 0:
+                       peer_index -= 1
+                    peer_index_lock.release()
+                counter += 1
+            
+            '''
+            counter = 0
+            for (pub,pri) in zip(peer_list,private_list):
+                if pub == peer_to_remove | pri == peer_to_remove:
                     printing_lock.acquire()
                     print Color.blue + \
                     strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + \
