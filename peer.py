@@ -20,7 +20,7 @@ IP_ADDR = 0
 PORT = 1
 
 source_name = "150.214.150.68"
-source_port = 4558
+source_port = 4552
 player_port = 9999
 peer_port = 0 # OS default behavior will be used for port binding
 buffer_size = 32
