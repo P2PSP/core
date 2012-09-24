@@ -166,6 +166,11 @@ print "] done"
 
 # }}}
 
+peer_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+peer_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+peer_socket.bind(('',peer_connection_socket.getsockname()[PORT]))
+
+
 class Peer_Connection(Thread):
     # {{{
 
@@ -200,7 +205,7 @@ class Peer_Connection(Thread):
                 "Peer List"
             for (pub,pri) in zip(peer_list,private_list):
                 print "Public =", pub, "Private =", pri
-                if peer[0] == pub[0]:
+                if peer[IP_ADDR] == pub[IP_ADDR]:
                     payload = struct.pack("4sH",
                                           socket.inet_aton(pri[IP_ADDR]),
                                           socket.htons(pri[PORT]))
@@ -224,20 +229,28 @@ class Peer_Connection(Thread):
 
             peer_serve_socket.close()
             
+            #Introducing the new peer to all cluster           
+            for p in peer_list:      
+                if peer[IP_ADDR] == p[IP_ADDR]:
+                    payload = struct.pack("4sH",socket.inet_aton(private_endpoint[IP_ADDR]),socket.htons(private_endpoint[PORT]))
+                    print "Introducing ", private_endpoint[IP_ADDR], ":", private_endpoint[PORT], " to ->", p
+                else:
+                    payload = struct.pack("4sH",socket.inet_aton(peer[IP_ADDR]),socket.htons(peer[PORT]))              
+                    print "Introducing ", peer[IP_ADDR], ":", peer[PORT], " to ->", p
+                    
+                peer_socket.sendto(payload, p)
+            
             peer_list.append(peer)
             private_list.append(private_endpoint)
             
             removing_ratio[peer] = 0
 
-            print Color.none
+            print Color.none         
+                
 
     # }}}
             
 Peer_Connection().start()
-
-peer_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-peer_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-peer_socket.bind(('',peer_connection_socket.getsockname()[PORT]))
 
 peer_index = 0
 peer_index_lock = Lock()
@@ -264,34 +277,36 @@ class Prune_The_Cluster(Thread):
             peer_to_remove_IP = socket.inet_ntoa(peer_to_remove_IP)
             peer_to_remove_port = socket.ntohs(peer_to_remove_port)
             peer_to_remove = (peer_to_remove_IP, peer_to_remove_port)
-
-            printing_lock.acquire()
-            print Color.blue + \
-                strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + \
-                " ('" + peer_to_remove_IP + "', " + str(peer_to_remove_port) + \
-                ") removed in peer ('" + complaining_peer[0] + "'," + \
-                str(complaining_peer[1]) + ")" + Color.none
-            printing_lock.release()
-
-            # El problema está en que cuando un peer echa a otro en su
-            # misma red privada, debe indicar a S la dir IP pública de
-            # dicho peer, no la dir IP privada que está usando para
-            # comunicarse con él. S sólo eliminar peers a partir de su
-            # dirección IP pública. La otra opción, que permite que
-            # los peers no tengan que almacenar las dirs IP públicas
-            # de sus interlocutores privados es que se elimine a aquel
-            # peer que tiene la misma IP pública del peer que se queja
-            # y tenga asociada dicha entrada la dir IP privada que ha
-            # indicado el peer que se queja.
-
+            
+            '''
             counter = 0
             for x in peer_list:
                 if x == peer_to_remove:
                     printing_lock.acquire()
-                    print Color.blue + strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + \
-                        " removed " +  str(peer_list[counter]) + \
-                        " " +  str(private_list[counter]) + \
-                        Color.none
+                    print Color.blue + \
+                    strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + \
+                    " ('" + peer_to_remove_IP + "', " + str(peer_to_remove_port) + \
+                    ") removed in peer ('" + complaining_peer[0] + "'," + \
+                    str(complaining_peer[1]) + ")" + Color.none
+                    printing_lock.release()
+                    peer_index_lock.acquire()
+                    del peer_list[counter]
+                    del private_list[counter]
+                    if peer_index > 0:
+                       peer_index -= 1
+                    peer_index_lock.release()
+                counter += 1
+            
+            '''
+            counter = 0
+            for (pub,pri) in zip(peer_list,private_list):
+                if pub == peer_to_remove or pri == peer_to_remove:
+                    printing_lock.acquire()
+                    print Color.blue + \
+                    strftime("[%Y-%m-%d %H:%M:%S]", gmtime()) + \
+                    " ('" + peer_to_remove_IP + "', " + str(peer_to_remove_port) + \
+                    ") removed in peer ('" + complaining_peer[0] + "'," + \
+                    str(complaining_peer[1]) + ")" + Color.none
                     printing_lock.release()
                     peer_index_lock.acquire()
                     del peer_list[counter]
@@ -347,9 +362,7 @@ while True:
         Color.green + "<-" + Color.none, \
         icecast_socket.getpeername(), \
         block_number
-        
-    #time.sleep(0.01) #give time to helping the peer send block to player (prevents missing in peer)
- 
+         
     peer_index_lock.acquire()
     if len(peer_list) > 0:
 #        print peer_socket.getsockname(), \
@@ -358,7 +371,8 @@ while True:
 #            peer_list[peer_index], "(", peer_index+1, "/", len(peer_list), ")"
         
         payload = struct.pack("H1024s", socket.htons(block_number), block)
-        peer_socket.sendto(payload, peer_list[peer_index])
+        peer_socket.sendto(payload, peer_list[peer_index])        
+        
         peer_index = (peer_index + 1) % len(peer_list)
     peer_index_lock.release()
 

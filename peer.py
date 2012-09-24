@@ -188,8 +188,8 @@ payload = struct.pack("4sH", "aaaa", 0)
 for p in peer_list:
     print "Sending an empty block to", p
     stream_socket.sendto(payload, p)
-#for i in xrange(2):
-#    stream_socket.sendto(payload, source_socket.getpeername())
+for i in xrange(2):
+    stream_socket.sendto(payload, source_socket.getpeername())
 
 # }}}
 
@@ -228,8 +228,24 @@ def receive_and_feed_the_cluster():
         sys.stderr.write("Lost connection to the source") 
         sys.exit(-1)
 
-    number, block = struct.unpack("H1024s", payload)
-    number = socket.ntohs(number)
+    if (len(payload)==6):
+        ip, port = struct.unpack("4sH", payload)
+        ip = socket.inet_ntoa(ip)
+        endpoint = (ip, port)
+        
+        if (port!=0):
+            if endpoint not in peer_list:
+                peer_list.append(endpoint)
+                
+            peer_insolidarity[endpoint] = 0
+            print "receive new peer ", endpoint
+        return 0
+        
+    else:  
+        number, block = struct.unpack("H1024s", payload)
+        number = socket.ntohs(number)
+        print "receive from ", addr, " number ", number
+        
     '''
     print source_socket.getsockname(),
     if block_buffer[number % buffer_size].requested:
@@ -242,7 +258,6 @@ def receive_and_feed_the_cluster():
     print Color.green + "<-" + Color.none,
     print number, addr
     '''
-    print "recive from ", addr, " number ", number
     
     if addr == source_socket.getpeername():        
     
@@ -295,6 +310,7 @@ def receive_and_feed_the_cluster():
         '''
         stream_socket.sendto(lastpayload, peer)
         peer_insolidarity[peer] += 1
+        
         if peer_insolidarity[peer] > 64: # <- Important parameter!!
             del peer_insolidarity[peer]
             print Color.blue
@@ -352,7 +368,7 @@ def send_a_block_to_the_player():
             player_serve_socket.sendall(block_buffer[block_to_play % buffer_size].block)
         except socket.error:
             sys.stderr.write("Conection closed by the player")
-            sys.exit(-1)
+            sys.exit(0)
         
         # buffer[block_to_play.number].empty = True
         block_buffer[block_to_play % buffer_size].empty = True
