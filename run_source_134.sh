@@ -1,7 +1,7 @@
 #!/bin/sh
 
 icecast=localhost:4551
-source_port=4558
+source_port=4552
 
 usage() {
     echo $0
