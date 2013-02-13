@@ -229,6 +229,9 @@ def receive_and_feed_the_cluster():
         sys.exit(-1)
 
     if (len(payload)==6):
+        # Ojo, esto es un poco delicado porque si un peer malicioso se
+        # dedica a entrar y salir del tema, produce un chorro de
+        # mensajes como estos ...
         ip, port = struct.unpack("4sH", payload)
         ip = socket.inet_ntoa(ip)
         endpoint = (ip, port)
