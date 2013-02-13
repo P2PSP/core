@@ -52,7 +52,7 @@ bzr push bzr+ssh://bazaar.launchpad.net/~p2psp/p2psp/trunk/
 ## or
 bzr push lp:~p2psp/p2psp/trunk
 ##             |     |     |
-#3             |     |     +- branch name
+##             |     |     +- branch name
 ##             |     +------- project name
 ##             +------------- team name
 
