@@ -80,7 +80,7 @@ bzr log [-r [revision1]..[revision2]]
 bzr add <file>
 
 # Deleting a <file> from the current branch:
-bzr [--force] delete <file>
+bzr [--force] remove <file>
 
 # Displaying the classes of <file>s:
 bzr status
