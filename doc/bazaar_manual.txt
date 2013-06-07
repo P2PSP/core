@@ -57,6 +57,18 @@ bzr push lp:~<launchpad_username>/p2psp/<branch-name>
 
 #-------------------------------------------------------------------------
 
+# Create a +junk branch <branch-name> inside of the P2PSP project
+  (+junk branches do not show up in any project's branch listing):
+
+## Set the Launchpad user ID:
+bzr launchpad-login <launchpad_username>
+bzr config
+
+## Create the branch:
+bzr push lp:~p2psp/+junk/<branch-name>
+
+#-------------------------------------------------------------------------
+
 ## Commiting your changes:
 bzr commit -m "your message" [--fixes {lp|deb|gnome}:<number>]
 bzr commit -F <file of messages>
