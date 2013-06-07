@@ -8,8 +8,10 @@ bzr config
 
 ## Checkout a branch (in this case, the trunk branch of the P2PSP
 ## project):
+bzr lp:p2psp
+## or:
 bzr branch bzr+ssh://bazaar.launchpad.net/~p2psp/p2psp/trunk/
-## or ...:
+## or:
 bzr branch lp:~p2psp/p2psp/trunk
 
 ## Updating your branch:
