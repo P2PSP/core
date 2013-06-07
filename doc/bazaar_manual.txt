@@ -36,6 +36,8 @@ bzr commit . # Commit only the current directory
 bzr push
 ## or
 bzr push lp:p2psp # if "bzr push" complains ...
+## or
+bzr push :parent
 
 ## Updating the trunk branch with the "vruiz" branch:
 cd trunk
