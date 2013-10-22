@@ -1,387 +1,762 @@
-#!/usr/bin/python
+#!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
-# No solicita retransmisión de bloques perdidos. Avisa al nodo fuente
-# de los peers eliminados de la lista de peers. Posee un buffer para
-# acomodar el jitter.
+# Note: if you run the python interpreter in the optimzed mode (-O),
+# debug messages will be disabled.
+
+# {{{ GNU GENERAL PUBLIC LICENSE
+
+# This is the peer node of the P2PSP (Peer-to-Peer Simple Protocol)
+# <https://launchpad.net/p2psp>.
+#
+# Copyright (C) 2013 Vicente González Ruiz,
+#                    Cristóbal Medina López,
+#                    Juan Alvaro Muñoz Naranjo.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# }}}
+
+# Try running me as (you will need Internet access):
+#
+# ./peer.py &
+# vlc http://localhost:9999 &
+#
+# For getting help on the console parameters:
+#
+# ./peer.py -h
+#
+# More info about the P2PSP protocol at:
+#
+# www.p2psp.org
 
 # {{{ Imports
 
-import getopt
+import os
+if __debug__:
+    import logging
+    import churn
+    from colors import Color
+from config import Config
 import sys
 import socket
-from blocking_socket import blocking_socket
-from colors import Color
 import struct
+import time
+import argparse
 
 # }}}
 
 IP_ADDR = 0
 PORT = 1
 
-source_name = "150.214.150.68"
-source_port = 4552
-player_port = 9999
-peer_port = 0 # OS default behavior will be used for port binding
-buffer_size = 32
+buffer_size = Config.buffer_size
 
-def usage():
-    # {{{
+#cluster_port = 0 # OS default behavior will be used for port binding
+listening_port = Config.peer_port
 
-    print "This is " + sys.argv[0] + ", the peer node of a P2PSP network"
-    print
-    print "Parameters (and default values):"
-    print
-    print " -[-b]uffer_size=size of the peer buffer in blocks (" + str(buffer_size) + ")"
-    print " -[-l]listening_port=the port that this peer uses to listen to the player (" + str(player_port) + ")"
-    print " -[-p]eer_port=the local port that this peer uses to connect to the source (" + str(peer_port) + ", "
-    print "               where 0 means that this port will be selected using the OS default behavior)"
-    print " -[-s]ource=host name and port of the source node ((" + source_name + ":" + str(source_port) + "))"
-    print
+# Splitter endpoint
+splitter_hostname = Config.splitter_hostname
+#splitter_hostname = 'localhost'
+splitter_port = Config.splitter_port
 
-    # }}}
+# Number of bytes of the stream's header
+header_size = Config.header_size
+
+# Estas cuatro variables las debería indicar el splitter
+#source_hostname = '150.214.150.68'
+source_hostname = Config.source_hostname
+source_port = Config.source_port
+channel = Config.channel
+block_size = Config.block_size
+
+# Controls if the stream is sent to a player (only used for debugging
+# purposes).
+_PLAYER_ = True
+
+if __debug__:
+    # Maximun number of blocks to receive from the splitter (only used
+    # for debugging purposes).
+    number_of_blocks = 999999999
+
+    logging_levelname = 'INFO' # 'DEBUG' (default), 'INFO' (cyan),
+                               # 'WARNING' (blue), 'ERROR'
+                               # (red),'CRITICAL' (yellow)
+
+    logging_level = logging.INFO
+
+    logging_filename = ''
+
+    console_logging = True
+    file_logging = True
+
+    weibull_scale = 0   # For churn. 0 means no churn (only used for
+                        # debugging purposes).
 
 # {{{ Args handing
 
-opts = ""
+print 'Argument List:', str(sys.argv)
 
-try:
-    opts, extraparams = getopt.getopt(sys.argv[1:],"b:l:p:s:?",
-                                      ["buffer_size",
-                                       "listening_port=",
-                                       "peer_port=",
-                                       "server=",
-                                       "help"
-                                       ])
+parser = argparse.ArgumentParser(
+    description='This is a peer node of a P2PSP network.')
 
-except getopt.GetoptError, exc:
-    sys.stderr.write(sys.argv[0] + ": " + exc.msg + "\n")
-    sys.exit(2)
+parser.add_argument('--buffer_size',
+                    help='size of the video buffer in blocks. (Default = {})'.format(buffer_size))
 
-print sys.argv[0] + ": Parsing:" + str(opts)
+parser.add_argument('--block_size',
+                    help='Block size in bytes. (Default = {})'.format(block_size))
 
-for o, a in opts:
-    if o in ("-b", "--buffer_size"):
-        buffer_size = int(a)
-        print sys.argv[0] + ": buffer_size=" + str(buffer_size)
-    elif o in ("-l", "--listening_port"):
-        player_port = int(a)
-        print sys.argv[0] + ": listening_port=" + str(player_port)
-    elif o in ("-p", "--peer_port"):
-        peer_port = int(a)
-        print sys.argv[0] + ": peer_port=" + str(peer_port)
-    elif o in ("-s", "--source"):
-        source_name = a.split(":")[0]
-        source_port = int(a.split(":")[1])
-        print sys.argv[0] + ": source=" + "(" + source_name + ":" + str(source_port) + ")" 
-    elif o in ("-h", "--help"):
-	usage()
-	sys.exit()
-    else:
-        assert False, "Undandled option!"
+parser.add_argument('--channel',
+                    help='Name of the channel served by the streaming source. (Default = {})'.format(channel))
+
+parser.add_argument('--listening_port',
+                    help='Port used to communicate with the player. (Default = {})'.format(listening_port))
+
+if __debug__:
+    parser.add_argument('--logging_levelname',
+                        help='Name of the channel served by the streaming source. (Default = "{}")'.format(logging_levelname))
+
+    parser.add_argument('--logging_filename',
+                        help='Name of the logging output file. (Default = "{})'.format(logging_filename))
+
+    parser.add_argument('--number_of_blocks',
+                        help='Maximun number of blocks to receive from the splitter. (Default = {}). If not specified, the peer runs forever.'.format(number_of_blocks))
+
+    parser.add_argument('--no_player', help='Do no send the stream to a player (debugging purposes).', action="store_true")
+
+    parser.add_argument('--churn', help='Scale parameter for the Weibull function, 0 means no churn (debugging purposes). (Default = {})'.format(weibull_scale))
+
+parser.add_argument('--source_hostname',
+                    help='Hostname of the streaming source. (Default = {})'.format(source_hostname))
+
+parser.add_argument('--source_port',
+                    help='Listening port of the streaming source. (Default = {})'.format(source_port))
+
+parser.add_argument('--splitter_hostname',
+                    help='Hostname of the splitter. (Default = {})'.format(splitter_hostname))
+
+parser.add_argument('--splitter_port',
+                    help='Listening port of the splitter. (Default = {})'.format(splitter_port))
+
+args = parser.parse_known_args()[0]
+if args.buffer_size:
+    buffer_size = int(args.buffer_size)
+if args.block_size:
+    block_size = int(args.block_size)
+if args.channel:
+    channel = args.channel
+if args.listening_port:
+    listening_port = int(args.listening_port)
+if __debug__:
+    if args.logging_levelname == 'DEBUG':
+        logging_level = logging.DEBUG
+    if args.logging_levelname == 'INFO':
+        logging_level = logging.INFO
+    if args.logging_levelname == 'WARNING':
+        logging_level = logging.WARNING
+    if args.logging_levelname == 'ERROR':
+        logging_level = logging.ERROR
+    if args.logging_levelname == 'CRITICAL':
+        logging_level = logging.CRITICAL
+    if args.logging_filename:
+        logging_filename = args.logging_filename
+    if args.number_of_blocks:
+        number_of_blocks = int(args.number_of_blocks)
+    if args.no_player:
+        _PLAYER_ = False
+    if args.churn:
+        weibull_scale = int(args.churn)
+if args.source_hostname:
+    source_hostname = args.source_hostname
+if args.source_port:
+    source_port = int(args.source_port)
+if args.splitter_hostname:
+    splitter_hostname = args.splitter_hostname
+if args.splitter_port:
+    splitter_port = args.splitter_port
 
 # }}}
 
-peer_list = []
-peer_insolidarity = {}
-
-# {{{ Wait for the player
-
-player_listen_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
-player_listen_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-player_listen_socket.bind(("localhost", player_port))
-player_listen_socket.listen(1)
-print player_listen_socket.getsockname(), "Waiting for the player ...",
-player_serve_socket, player = player_listen_socket.baccept()
-player_listen_socket.setblocking(0)
-print player_serve_socket.getsockname(), "accepted connection from", player
-
-# }}}
-
-# {{{ Connect to the source
-
-if peer_port > 0:
-    source_socket = socket.create_connection((source_name, source_port),1000,('',peer_port))
+print 'This is a P2PSP peer node ...',
+if __debug__:
+    print 'running in debug mode'
 else:
-    # Maybe this is redundant
-    source_socket = blocking_socket(socket.AF_INET, socket.SOCK_STREAM)
-    source_socket.connect((source_name, source_port))
+    print 'running in release mode'
 
-print source_socket.getsockname(), "Connected to", source_socket.getpeername()
 
-print source_socket.getsockname(), \
-    "My IP address is" , source_socket.getsockname(), "->", \
-    source_socket.getpeername()
+# {{{ Logging initialization
 
-# }}}
+if __debug__:
+    # create logger
+    logger = logging.getLogger('peer (' + str(os.getpid()) + ')')
+    logger.setLevel(logging_level)
 
-# {{{ Tell the source who I am
+    # create console handler and set the level
+    if console_logging == True:
+        ch = logging.StreamHandler()
+        ch.setLevel(logging_level)
+        # create formatter
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        # add formatter to ch
+        ch.setFormatter(formatter)
+        # add ch to logger
+        logger.addHandler(ch)
 
-payload = struct.pack("4sH",
-                      socket.inet_aton(source_socket.getsockname()[IP_ADDR]),
-                      socket.htons(source_socket.getsockname()[PORT]))
-source_socket.sendall(payload)
-
-# }}}
-
-# {{{ Retrieve the list of peer from the source
-
-number_of_peers = socket.ntohs(
-    struct.unpack(
-        "H", source_socket.recv(
-                struct.calcsize("H")))[0])
-print source_socket.getsockname(), "<- Cluster size =", number_of_peers+1
-print source_socket.getsockname(), "Retrieving the list of peers ..."
-while number_of_peers > 0:
-    payload = source_socket.recv(struct.calcsize("4sH"))
-    peer_IPaddr, port = struct.unpack("4sH", payload)
-    peer_IPaddr = socket.inet_ntoa(peer_IPaddr)
-    port = socket.ntohs(port)
-    peer = (peer_IPaddr, port)
-    
-    #superpeers ip control            
-    if peer[0].startswith('127.'):
-        peer=(source_socket.getpeername()[IP_ADDR],port)
-        
-    print source_socket.getsockname(), "<- peer", peer
-    peer_list.append(peer)
-#    peer_insolidarity[peer] = -32768 # To avoid removing peers during
-#                                     # the buffering
-    peer_insolidarity[peer] = 0
-    number_of_peers -= 1
-
-print source_socket.getsockname(), "List of peers retrieved"
+    # jalvaro
+    # create file handler and set the level
+    if args.logging_filename and file_logging == False:
+        fh = logging.FileHandler('./output/peer-'+str(os.getpid()))
+        fh.setLevel(logging_level)
+        #add fh to logger
+        logger.addHandler(fh)
+    # jalvaro: create a file handler for the critical level, to store
+    # times. I know I shouldn't be using critical :D
+    fh_timing = logging.FileHandler('./timing/peer-'+str(os.getpid()))
+    fh_timing.setLevel(logging.CRITICAL)
+    logger.addHandler(fh_timing)
 
 # }}}
 
-# {{{ Receive the video header from the source
+if __debug__:
+    logger.info("Buffer size: "+str(buffer_size)+" blocks")
+    logger.info("Block size: "+str(block_size)+" bytes")
 
-print source_socket.getsockname(), "<- ", source_socket.getpeername(), "[Video header",
-video_header_size = socket.ntohs(
-    struct.unpack(
-        "H", source_socket.recv(
-            struct.calcsize("H")))[0])
-for i in xrange (video_header_size):
-    block = source_socket.recv(1024)
-    player_serve_socket.sendall(block)
-    print "\b.",
-print "] done"
+source = (source_hostname, source_port)
+splitter = (splitter_hostname, splitter_port)
 
-# }}}
+block_format_string = "H" + str(block_size) + "s" # "H1024s
 
-# {{{ Transform the peer-source TCP socket into a UDP socket
-
-stream_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-stream_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-stream_socket.bind(('',source_socket.getsockname()[PORT]))
-
-# }}}
-
-# {{{ Create a working entry in the NAT, if neccesary
-
-# This should create a working entry in the NAT if the peer is in a
-# private network, and should alert to the rest of the peers of the
-# cluster that a new peer is in it. If this peer in unreacheable and
-# the super-peer has received one of these messages, the unreacheable
-# peer should be removed by the super-peer and next, by the source.
-payload = struct.pack("4sH", "aaaa", 0)
-for p in peer_list:
-    print "Sending an empty block to", p
-    stream_socket.sendto(payload, p)
-for i in xrange(2):
-    stream_socket.sendto(payload, source_socket.getpeername())
-
-# }}}
-
-# {{{ Buffer creation
-
-class Block_buffer_element:
+def get_player_socket():
     # {{{
 
-    def block(self):
-        return self[0]
-    def number(self):
-        return self[1]
-    def empty(self):
-        return self[2]
-
-    # }}}
-
-block_buffer = [Block_buffer_element() for i in xrange(buffer_size)]
-for i in xrange(buffer_size):
-    block_buffer[i].empty = True # Nothing useful inside
-
-# }}}
-
-
-counter=0
-lastpayload=None
-def receive_and_feed_the_cluster():
-    # {{{
-
-    global counter
-    global lastpayload
+    #sock = blocking_TCP_socket.blocking_TCP_socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
     try:
-        payload, addr = stream_socket.recvfrom(struct.calcsize("H1024s"))
-    except socket.timeout:
-        sys.stderr.write("Lost connection to the source") 
-        sys.exit(-1)
+        # In Windows systems this call doesn't work!
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    except:
+        pass
+    sock.bind(('', listening_port))
+    sock.listen(0)
 
-    if (len(payload)==6):
-        # Ojo, esto es un poco delicado porque si un peer malicioso se
-        # dedica a entrar y salir del tema, produce un chorro de
-        # mensajes como estos ...
-        ip, port = struct.unpack("4sH", payload)
-        ip = socket.inet_ntoa(ip)
-        endpoint = (ip, port)
-        
-        if (port!=0):
-            if endpoint not in peer_list:
-                peer_list.append(endpoint)
-                
-            peer_insolidarity[endpoint] = 0
-            print "receive new peer ", endpoint
-        return 0
-        
-    else:  
-        number, block = struct.unpack("H1024s", payload)
-        number = socket.ntohs(number)
-        print "receive from ", addr, " number ", number
-        
-    '''
-    print source_socket.getsockname(),
-    if block_buffer[number % buffer_size].requested:
-        print Color.red + "<~" + Color.none,
-    else:
-        print Color.green + "<-" + Color.none, 
-    print number, addr
-    
-    print source_socket.getsockname(),
-    print Color.green + "<-" + Color.none,
-    print number, addr
-    '''
-    
-    if addr == source_socket.getpeername():        
-    
-        while((counter<len(peer_list))&(counter>0)):
-            peer=peer_list[counter]
-            '''
-            print source_socket.getsockname(), \
-                number, Color.green + "->" + Color.none, peer_list[counter], "(", counter+1, "/", len(peer_list),")"
-            '''
-            stream_socket.sendto(lastpayload, peer)
-            peer_insolidarity[peer] += 1
-            if peer_insolidarity[peer] > 64: # <- Important parameter!!
-                del peer_insolidarity[peer]
-                print Color.blue
-                print "Removing", peer
-                print Color.none
-                
-                payload = struct.pack("4sH",
-                                      socket.inet_aton(peer[IP_ADDR]),
-                                      socket.htons(peer[PORT]))
-                stream_socket.sendto(payload, source_socket.getpeername())
-                peer_list.remove(peer)
-            counter += 1
-            
-        counter=0
-        lastpayload=payload
-                # Si este paquete se pierde, en principio no ocurre
-                # nada porque el o los super-peers van a hacer lo
-                # mismo con el nodo fuente y es prácticamente
-                # imposible que los mensajes que se envían desde los
-                # super-peers hacia el nodo fuente se pierdan (el
-                # ancho de banda entre ellos está garantizado).
-    else:
-        
-        if addr not in peer_list:
-            peer_list.append(addr)
-            
-        # Handle empty packets
-        if len(payload) < 1026:
-            return 0
+    if __debug__:
+        logger.info(Color.cyan + '{}'.format(sock.getsockname()) + ' waiting for the player on port ' + str(listening_port) + Color.none)
 
-        peer_insolidarity[addr] = 0
-        
-    if(counter<len(peer_list)): 
-        peer=peer_list[counter]
-        
-        '''
-        print source_socket.getsockname(), \
-            number, Color.green + "->" + Color.none, peer_list[counter], "(", counter+1, "/", len(peer_list),")"
-        '''
-        stream_socket.sendto(lastpayload, peer)
-        peer_insolidarity[peer] += 1
-        
-        if peer_insolidarity[peer] > 64: # <- Important parameter!!
-            del peer_insolidarity[peer]
-            print Color.blue
-            print "Removing", peer
-            print Color.none
-                        
-            payload = struct.pack("4sH",
-                                  socket.inet_aton(peer[IP_ADDR]),
-                                  socket.htons(peer[PORT]))
-            stream_socket.sendto(payload, source_socket.getpeername())
-            peer_list.remove(peer)
-        counter += 1
-        
-    block_buffer[number % buffer_size].block = block
-    block_buffer[number % buffer_size].number = number
-    block_buffer[number % buffer_size].empty = False
+    print sock.getsockname(), 'Waiting for the player at port:', listening_port
 
-    return number
+    #sock, player = sock.baccept()
+    sock, player = sock.accept()
+    sock.setblocking(0)
+
+    print sock.getsockname(), 'Player is', sock.getpeername()
+
+    return sock
 
     # }}}
+
+if _PLAYER_:
+    player_sock = get_player_socket() # The peer is blocked until the
+                                      # player establish a connection.
+
+    # {{{ debug
+
+    if __debug__:
+        logger.debug('{}'.format(player_sock.getsockname()) +
+                     ' The player ' +
+                     '{}'.format(player_sock.getpeername()) +
+                     ' has establised a connection')
+    # }}}
+
+def communicate_the_header():
+    # {{{ 
+    source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    source_sock.connect(source)
+    GET_message = 'GET /' + channel + ' HTTP/1.1\r\n'
+    GET_message += '\r\n'
+    source_sock.sendall(GET_message)
+    print source_sock.getsockname(), 'Requesting the stream header to http://'+str(source_sock.getpeername()[0])+':'+str(source_sock.getpeername()[1])+'/'+str(channel)
+    # {{{ Receive the video header from the source and send it to the player
+
+    # Nota: este proceso puede fallar si durante la recepción de los
+    # bloques el stream se acaba. Habría que realizar de nuevo la
+    # petición HTTP (como hace el servidor).
+
+    if __debug__:
+        logger.info(Color.cyan + str(source_sock.getsockname()) + ' retrieving the header ...' + Color.none)
+
+    data = source_sock.recv(header_size)
+    total_received = len(data)
+    player_sock.sendall(data)
+    while total_received < header_size:
+        if __debug__:
+            logger.debug(str(total_received))
+        data = source_sock.recv(header_size - len(data))
+        player_sock.sendall(data)
+        total_received += len(data)
+        print "Received bytes:", total_received, "\r",
+
+    # }}}
+
+    if __debug__:
+        logger.info(Color.cyan  + str(source_sock.getsockname()) + ' done' + Color.none)
+    print source_sock.getsockname(), 'Got', total_received, 'bytes'
+
+    source_sock.close()
+    # }}}
+
+if _PLAYER_:
+    communicate_the_header() # Retrieve the header of the stream from the
+                             # source and send it to the player.
+
+# {{{ debug
+if __debug__:
+    logger.debug(" Trying to connect to the splitter at" + str(splitter))
+# }}}
+
+def connect_to_the_splitter():
+    # {{{
+    
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(splitter)
+    return sock
+
+    # }}}
+
+# COMIENZO DE BUFFERING TIME (incluye acceso al cluster)
+print "Joining to the cluster ..."
+sys.stdout.flush()
+start_latency = time.time()
+    
+splitter_sock = connect_to_the_splitter() # Connect to the splitter in
+                                          # order to tell it who the
+                                          # gatherer is.
+splitter = splitter_sock.getpeername() # "localhost" -> "127.0.0.1"
+
+if __debug__:
+    logger.info(Color.cyan + '{}'.format(splitter_sock.getsockname()) + ' connected to the splitter' + Color.none)
+
+def create_cluster_sock():
+    # {{{
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # In Windows systems this call doesn't work!
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    except:
+        pass
+    sock.bind(('',splitter_sock.getsockname()[PORT]))
+    return sock
+
+   # }}}
+cluster_sock = create_cluster_sock()
+cluster_sock.settimeout(1)
+
+# {{{ This is the list of peers of the cluster. Each peer uses this
+# structure to resend the blocks received from the splitter to these
+# nodes.  }}}
+peer_list = []
+
+# {{{ This store the insolidarity of the peers of the cluster. When
+# the solidarity exceed a threshold, the peer is deleted from the list
+# of peers.  }}}
+peer_insolidarity = {}
+
+def retrieve_the_list_of_peers():
+    # {{{
+
+    print splitter_sock.getsockname(), '->', splitter_sock.getpeername(), 'Requesting the list of peers'
+
+    number_of_peers = socket.ntohs(
+        struct.unpack("H",splitter_sock.recv(struct.calcsize("H")))[0])
+
+    print splitter_sock.getpeername(), '->', splitter_sock.getsockname(), 'The number of peers is:', number_of_peers
+
+    # {{{ debug
+    
+    if __debug__:
+        logger.debug('{}'.format(splitter_sock.getsockname()) +
+                     ' <- ' +
+                     '{}'.format(splitter_sock.getpeername()) +
+                     ' Cluster size = ' +
+                     str(number_of_peers))
+
+    # }}}
+
+    while number_of_peers > 0:
+        message = splitter_sock.recv(struct.calcsize("4sH"))
+        IP_addr, port = struct.unpack("4sH", message)
+        IP_addr = socket.inet_ntoa(IP_addr)
+        port = socket.ntohs(port)
+        peer = (IP_addr, port)
+
+        # {{{ debug
+
+        if __debug__:
+            logger.debug('{}'.format(splitter_sock.getsockname()) +
+                         ' <- ' +
+                         '{}'.format(splitter_sock.getpeername()) +
+                         ' Peer ' +
+                         str(peer))
+
+        # }}}
+
+        peer_list.append(peer)
+        peer_insolidarity[peer] = 0
+
+        # Say hello to the peer
+        cluster_sock.sendto('', peer) # Send a empty block (this
+                                      # should be fast)
+
+        number_of_peers -= 1
+
+        print splitter_sock.getsockname(), '->', splitter_sock.getpeername(), 'Received peer', peer
+
+    # }}}
+
+retrieve_the_list_of_peers()
+
+splitter_sock.close()
+
+# {{{ In this momment, most of the rest of peers of the cluster are
+# sending blocks to the new peer.
+# }}}
+
+# {{{ We define the buffer structure. Two components are needed: (1)
+# the blocks buffer that stores the received blocks (2) the received
+# buffer that stores if a block has been received or not.
+# }}}
+blocks = [None]*buffer_size
+received = [False]*buffer_size
+
+# True if the peer has received "number_of_blocks" blocks.
+blocks_exhausted = False
+
+# This variable holds the last block received from the splitter. It is
+# used below to send the "last" block in the congestion avoiding mode.
+last = ''
+
+# Number of times that the last block has been sent to the cluster (we
+# send the block each time we receive a block).
+counter = 0
+
+def receive_and_feed():
+    global last
+    global counter
+    global blocks_exhausted
+    global number_of_blocks
+
+    try:
+        # {{{ Receive and send
+        message, sender = cluster_sock.recvfrom(struct.calcsize(block_format_string))
+        if len(message) == struct.calcsize(block_format_string):
+            # {{{ Received a video block
+            number, block = struct.unpack(block_format_string, message)
+            block_number = socket.ntohs(number)
+            # {{{ debug
+            if __debug__:
+                logger.debug('{}'.format(cluster_sock.getsockname()) +
+                             " <- " +
+                             '{}'.format(block_number) +
+                             ' ' +
+                             '{}'.format(sender))
+
+            # }}}
+            blocks[block_number % buffer_size] = block
+            received[block_number % buffer_size] = True
+
+            if sender == splitter:
+                # {{{ Send the previously received block in burst mode.
+
+                while( (counter < len(peer_list)) & (counter > 0)):
+                    peer = peer_list[counter]
+                    cluster_sock.sendto(last, peer)
+    #                if not is_player_working:
+    #                    cluster_sock.sendto('', peer)
+
+                    peer_insolidarity[peer] += 1
+                    if peer_insolidarity[peer] > 64: # <- Important parameter!!
+                        del peer_insolidarity[peer]
+                        peer_list.remove(peer)
+                        print 'Removing the unsupportive peer', peer
+                        if __debug__:
+                            logger.info(Color.cyan +
+                                        str(cluster_sock.getsockname()) +
+                                        ' peer ' + str(peer) + ' removed' +
+                                        Color.none)
+
+                    counter += 1
+
+                    # {{{ debug
+                    if __debug__:
+                        logger.debug('{}'.format(cluster_sock.getsockname()) +
+                                     ' ' +
+                                     str(block_number) +
+                                     ' -> (peer) ' +
+                                     '{}'.format(peer))
+
+                    # }}}
+
+                counter = 0
+                last = message
+               # }}}
+            else:
+                # {{{ Check if the peer is new
+
+                if sender not in peer_list:
+                    # The peer is new
+                    peer_list.append(sender)
+                    print 'Added', sender, 'by data block'
+                    if __debug__:
+                        logger.info(Color.cyan + str(cluster_sock.getsockname()) + ' peer ' + str(sender) + ' added by data block' + Color.none)
+                peer_insolidarity[sender] = 0
+                
+                # }}}
+
+            if counter < len(peer_list):
+                # {{{ Send the last block in congestion avoiding mode
+
+                peer = peer_list[counter]
+                cluster_sock.sendto(last, peer)
+
+                peer_insolidarity[peer] += 1        
+                if peer_insolidarity[peer] > 64: # <- Important parameter!!
+                    del peer_insolidarity[peer]
+                    peer_list.remove(peer)
+                    print 'Removing the unsupportive peer', peer 
+                    if __debug__:
+                        logger.info(Color.cyan + str(cluster_sock.getsockname()) + ' peer ' + str(peer) + ' removed by unsupportive' + Color.none)
+
+                # {{{ debug
+                if __debug__:
+                    logger.debug('{}'.format(cluster_sock.getsockname()) +
+                                 ' ' +
+                                 str(block_number) +
+                                 ' -> (peer) ' +
+                                 '{}'.format(peer))
+
+                # }}}
+
+                counter += 1        
+
+                # }}}
+
+            if __debug__:
+                if args.number_of_blocks:
+                    number_of_blocks -= 1
+                    if number_of_blocks <= 0:
+                        blocks_exhausted = True
+
+            return block_number
+            # }}}
+        else:
+            # {{{ Received a control block
+
+            if sender not in peer_list:
+                peer_list.append(sender)
+                print 'Added', sender, 'by \"hello\" message'
+                peer_insolidarity[sender] = 0
+                if __debug__:
+                    logger.info(Color.cyan +
+                                str(cluster_sock.getsockname()) +
+                                ' peer ' + str(sender) +
+                                ' added by control block' + Color.none)
+            else:
+                peer_list.remove(sender)
+                print 'Removed', sender, 'by \"goodbye\" message'
+                if __debug__:
+                    logger.info(Color.cyan +
+                                str(cluster_sock.getsockname()) +
+                                ' peer ' + str(sender) +
+                                ' removed by control block' + Color.none)
+            return -1
+            # }}}
+        # }}}
+    except socket.timeout:
+        # {{{
+        if __debug__:
+            logger.warning(Color.red + "cluster timeout!" + Color.none) 
+        return -2
+        # }}}
+
+# {{{ debug
+if __debug__:
+    logger.debug(str(cluster_sock.getsockname()) + ' buffering ...')
+# }}}
+
+if __debug__:
+    logger.info(Color.cyan +
+                str(cluster_sock.getsockname()) +
+                ' receiving data ...' + Color.none)
+
+# WARNING!!!.  time.clock() measures the time spent by the process (so
+# the time spent waiting for an execution slot in the processor is
+# left out) time.time() measures wall time, this means execution time
+# plus waiting time
+
+last_block_number = 0
+error_counter = 0
 
 # {{{ Buffering
 
-print
-print "Buffering ..."
-print
+block_number = receive_and_feed()
+while block_number<=0:
+    block_number = receive_and_feed()
+block_to_play = block_number % buffer_size
+for x in xrange(buffer_size/2): # Fill half buffer
+    while receive_and_feed()<=0:
+        pass
 
-block_to_play = receive_and_feed_the_cluster()
-for i in xrange(buffer_size/2):
-    print "Received block" + str(i) + "/" + str(buffer_size/2)
-    receive_and_feed_the_cluster()
+# Go through the buffer
+num_errors_buf = 0
+for x in range(block_to_play, block_to_play+(buffer_size/2)):
+    if received[x%buffer_size] == False:
+        num_errors_buf += 1
 
-# Now, reset the solidarity of the peers
-for p in peer_list:
-    peer_insolidarity[p] = 0
+'''
+block_number = receive_and_feed()
+while block_number<=0:
+    block_number = receive_and_feed()
+block_to_play = block_number % buffer_size
+for x in xrange(buffer_size/2):
+    last_block_number = receive_and_feed()
+    if last_block_number <= 0:
+        error_counter += 1
+'''
 
-print "... buffering done"
+# FIN DE BUFFERING TIME
+end_latency = time.time()
+latency = end_latency - start_latency
 
+if __debug__:
+    logger.info(str(cluster_sock.getsockname()) + ' buffering done')
+    logger.info('NUM_PEERS '+str(len(peer_list)))
+
+    logger.critical('BUF_TIME '+str(latency)+' secs') # Buffering time in SECONDS
+    logger.critical('BUF_LEN '+str(buffer_size)+' bytes')
+    logger.critical('NUM_ERRORS_BUF '+str(error_counter))
+    percentage_errors_buf = float(error_counter*100)/float(buffer_size/2)
+    logger.critical('PERCENTAGE_ERRORS_BUF ' + str(percentage_errors_buf))
+    #logger.critical('PERCENTAGE_ERRORS_BUF {:.2}%'.format(percentage_errors_buf))
+    logger.critical('NUM_PEERS '+str(len(peer_list)))
 # }}}
+
+print 'Latency (joining to the cluster + buffering) =', latency, 'seconds'
+
+player_connected = True
 
 def send_a_block_to_the_player():
     # {{{
 
     global block_to_play
+    global player_sock
+    global player_connected
 
-    # Only if the block has something useful inside ...
-    if block_buffer[(block_to_play % buffer_size)].empty == False:
-        '''
-        print player_serve_socket.getsockname(), \
-            block_buffer[block_to_play % buffer_size].number, \
-            Color.blue + "=>" + Color.none, \
-            player_serve_socket.getpeername()
-        '''
-        try:
-            player_serve_socket.sendall(block_buffer[block_to_play % buffer_size].block)
-        except socket.error:
-            sys.stderr.write("Conection closed by the player")
-            sys.exit(0)
-        
-        # buffer[block_to_play.number].empty = True
-        block_buffer[block_to_play % buffer_size].empty = True
-    #else:
-       # print ("------------------------- missing block ---------------------")
-    # Increment the block_to_play
-    block_to_play = (block_to_play + 1) % 65536
+    if not received[block_to_play]:
+        message = struct.pack("!H", block_to_play)
+        cluster_sock.sendto(message, splitter)
+
+        if __debug__:
+            logger.info(Color.cyan +
+                        str(cluster_sock.getsockname()) +
+                        ' complaining about lost block ' +
+                        str(block_to_play) + Color.none)
+
+        # Parece que la mayoría de los players se sincronizan antes,
+        # si en lugar de no enviar nada se envía un bloque vacío,
+        # aunque esto habría que probarlo.
+
+    try:
+        player_sock.sendall(blocks[block_to_play])
+
+        # {{{ debug
+        if __debug__:
+            logger.debug('{}'.format(player_sock.getsockname()) +
+                         ' ' +
+                         str(block_to_play) +
+                         ' -> (player) ' +
+                         '{}'.format(player_sock.getpeername()))
+
+        # }}}
+
+    except socket.error:
+        if __debug__:
+            logger.error(Color.red + 'player disconected!' + Color.none)
+        player_connected = False
+        return
+    except Exception as detail:
+        if __debug__:
+            logger.error(Color.red + 'unhandled exception ' + str(detail) + Color.none)
+        return
+
+    received[block_to_play] = False
 
     # }}}
 
-while True:
-    send_a_block_to_the_player()
-    receive_and_feed_the_cluster()
+if __debug__:    
+    #get a death time
+    #death_time = churn.new_death_time(20)
+    death_time = churn.new_death_time(weibull_scale)
+
+'''
+#Once the buffer is half-filled, then start operating normally
+'''
+#while player_connected and not blocks_exhausted:
+while player_connected:
+    
+    if __debug__:
+        if churn.time_to_die(death_time):
+            break;
+
+    if __debug__ and death_time != churn.NEVER:
+        current_time = time.localtime()
+        logger.debug(Color.green +
+                     'Current time is ' +
+                     str(current_time.tm_hour).zfill(2) +
+                     ':' +
+                     str(current_time.tm_min).zfill(2) +
+                     ':' +
+                     str(current_time.tm_sec).zfill(2) +
+                     Color.none)
+        logger.debug(Color.green +
+                     'Scheduled death time is ' +
+                     str(time.localtime(death_time).tm_hour).zfill(2) +
+                     ':' +
+                     str(time.localtime(death_time).tm_min).zfill(2) +
+                     ':' +
+                     str(time.localtime(death_time).tm_sec).zfill(2) +
+                     Color.none)
+    
+    block_number = receive_and_feed()
+    if block_number>=0:
+        if (block_number % 256) == 0:
+            for i in peer_insolidarity:
+                peer_insolidarity[i] /= 2
+        if _PLAYER_:
+            send_a_block_to_the_player()
+            block_to_play = (block_to_play + 1) % buffer_size
+    #elif block_number == -2:    #this stops the peer after only one cluster timeout
+    #    break
+    if __debug__:
+        logger.debug('NUM PEERS '+str(len(peer_list)))
+
+print 'No player, goodbye!'
+if __debug__:
+    logger.info(Color.cyan + 'Goodbye!' + Color.none)
+#goodbye = 'bye'
+goodbye = ''
+cluster_sock.sendto(goodbye, splitter)
+for x in xrange(3):
+    receive_and_feed()
+for peer in peer_list:
+    cluster_sock.sendto(goodbye, peer)
