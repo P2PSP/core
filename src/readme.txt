@@ -11,9 +11,6 @@ protocol.
 
   http://150.215.150.68:4551/134.ogg
 
-* run_oggfwd.sh -> Shows how to run a source client for the Icecast
-  server (as the one running at 150.215.150.68:4551).
-
 More info at www.p2psp.org.
 
 Happy broadcasting!
