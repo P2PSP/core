@@ -108,7 +108,7 @@ parser.add_argument('--source_port',
                     help='Listening port of the streaming server. (Default = {})'.format(source_port))
 
 parser.add_argument('--listening_port',
-                    help='Port to talk with the gatherer and peers. (Default = {})'.format(listening_port))
+                    help='Port to talk with the peers. (Default = {})'.format(listening_port))
 
 args = parser.parse_known_args()[0]
 if args.buffer_size:
