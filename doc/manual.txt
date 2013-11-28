@@ -1,4 +1,15 @@
-Welcome to the Peer-to-Peer Streaming Protocol (P2PSP) Project!
+Welcome to the Peer-to-Peer Straightforward Protocol (P2PSP) Project!
+
+This manual describes:
+
+1. How to create a P2PSP streaming service.
+2. Play a stream.
+
+1. Creating a P2PSP streaming service.
+
+2. Playing a stream.
+
+--------------- old --------------
 
 The P2PSP is a simple (almost trivial) protocol for the streaming of
 real-time video/audio sequences. For more information about the

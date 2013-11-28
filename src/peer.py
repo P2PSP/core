@@ -1,8 +1,8 @@
 #!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
-# Note: if you run the python interpreter in the optimzed mode (-O),
-# debug messages will be disabled.
+# Note: run the python interpreter in the optimzed mode (-O) to
+# disable debug messages.
 
 # {{{ GNU GENERAL PUBLIC LICENSE
 

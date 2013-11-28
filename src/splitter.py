@@ -1,8 +1,8 @@
 #!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
-# Note: if you run the python interpreter in the optimzed mode (-O),
-# debug messages will be disabled.
+# Note: run the python interpreter in the optimzed mode (-O) to
+# disable debug messages.
 
 # {{{ GNU GENERAL PUBLIC LICENSE
 
@@ -38,7 +38,7 @@
 #
 # More info about the P2PSP protocol at:
 #
-# www.p2psp.org
+# http://www.p2psp.org
 
 # {{{ imports
 
@@ -61,10 +61,11 @@ import argparse
 
 # }}}
 
-total_blocks = long(1)     #  Starts in 1 to avoid div-by-zero issues when calculating the percentage 
-loss_percentage = float(0) # the same with the percentage of loss 
+total_blocks = long(1)     # Starts in 1 to avoid div-by-zero issues
+                           # when calculating the percentage of loss.
+loss_percentage = float(0) # Percentage of loss.
 
-# Two constants
+# Two useful constants.
 IP_ADDR = 0
 PORT = 1
 
@@ -181,13 +182,11 @@ if __debug__:
 
 source = (source_hostname, source_port)
 
-# }}} 
-               
-# The list of peers.
+# The list of peers in the cluster.
 peer_list = [] 
 
 # The number of the last received block from the streaming server.
-block_number = 0 # Ojo (long(0))
+block_number = 0 # Ojo (long(0))?
 
 # Used to find the peer to which a block has been sent.
 destination_of_block = [('0.0.0.0',0) for i in xrange(buffer_size)]
@@ -203,7 +202,7 @@ peer_index = 0
 
 # A lock to perform mutual exclusion for accesing to the list of
 # peers.
-peer_list_lock = Lock()
+#peer_list_lock = Lock()
 
 block_format_string = "H"+str(block_size)+"s" # "H1024s
 
@@ -566,6 +565,7 @@ if __debug__:
 
 while True:
 
+    # Receive data from the source
     def receive_next_block():
         # {{{
 
