@@ -210,8 +210,7 @@ if __debug__:
     logger.info("Buffer size: " + str(buffer_size) + " blocks")
     logger.info("Block size: " + str(block_size) + " bytes")
 
-# {{{ Handle a telnet session.
-
+# Handle a telnet session.
 class get_the_state(Thread):
     # {{{
 
@@ -275,6 +274,8 @@ get_the_state().start()
 # the peers.
 
 def get_peer_connection_socket():
+    # {{{
+
     #sock = blocking_TCP_socket(socket.AF_INET, socket.SOCK_STREAM)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -290,10 +291,15 @@ def get_peer_connection_socket():
 
     return sock
 
+    # }}}
+
 peer_connection_sock = get_peer_connection_socket()
 
-# {{{ Handle the arrival of a peer.
+# {{{ Handler (daemon) peer arrivals.
+
+# Handle the arrival of a peer.
 class handle_one_arrival(Thread):
+    # {{{ 
     peer_serve_socket = ""
     peer = ""
     
@@ -365,8 +371,8 @@ class handle_one_arrival(Thread):
                         ' has joined the cluster' +
                         Color.none)
     # }}}
-            
-# {{{ Main handler peer arrivals.
+
+# The daemon. 
 class handle_arrivals(Thread):
     # {{{
 
@@ -391,9 +397,9 @@ handle_arrivals().start()
 
 # }}}
 
-# {{{ Create the socket to send the blocks of stream to the peers.
-
+# Create the socket to send the blocks of stream to the peers.
 def create_cluster_sock(listening_port):
+    # {{{ 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         # This does not work in Windows systems !!
@@ -404,13 +410,11 @@ def create_cluster_sock(listening_port):
     #peer_socket.bind(('',peer_connection_sock.getsockname()[PORT]))
 
     return sock
+    # }}}
 
 cluster_sock = create_cluster_sock(listening_port)
 
-# }}}
-
 # {{{ Handle peer complains and goodbye messages.
-
 class listen_to_the_cluster(Thread):
     # {{{
 
@@ -519,10 +523,9 @@ class listen_to_the_cluster(Thread):
 listen_to_the_cluster().setDaemon(True)
 listen_to_the_cluster().daemon=True
 listen_to_the_cluster().start()
-
 # }}}
 
-# {{{ Connect to the streaming server and request the channel
+# {{{ Connect to the streaming server and request the channel.
 
 source_sock = blocking_TCP_socket(socket.AF_INET, socket.SOCK_STREAM)
 print source_sock.getsockname(), 'Connecting to the source ', source, '...',
@@ -535,6 +538,8 @@ if __debug__:
     logger.debug('{}'.format(source_sock.getsockname()) +
                  ' connected to the source ' +
                  '{}'.format(source_sock.getpeername()))
+
+# }}}
 
 # }}}
 
@@ -551,13 +556,13 @@ source_sock.sendall(GET_message)
 #print GET_message
 print source_sock.getsockname(), 'Requesting http://'+str(source_sock.getpeername()[0])+':'+str(source_sock.getpeername()[1])+'/'+str(channel)
 
-# }}}
-
 # {{{ debug
 
 if __debug__:
     logger.debug('{}'.format(cluster_sock.getsockname()) +
                  ' sending the rest of the stream ...')
+
+# }}}
 
 # }}}
 
