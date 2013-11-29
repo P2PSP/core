@@ -1,5 +1,7 @@
 #!/usr/bin/python -O
 
+# Servir captura usando "netcat -l".
+
 import time
 import sys
 import socket
