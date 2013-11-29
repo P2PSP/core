@@ -5,13 +5,12 @@
 import time
 import sys
 import socket
-from blocking_TCP_socket import blocking_TCP_socket
 
 source_hostname='150.214.150.68'
 source_port=4551
 
 source = (source_hostname, source_port)
-source_sock = blocking_TCP_socket(socket.AF_INET, socket.SOCK_STREAM)
+source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print source_sock.getsockname(), 'Connecting to the source ', source, '...',
 
 source_sock.connect(source)
