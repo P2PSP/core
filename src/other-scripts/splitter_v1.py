@@ -1,6 +1,7 @@
 #!/usr/bin/python -O
 
-# Recibe un stream y lo sirve v'ia UDP.
+# Recibe un stream y lo sirve v'ia UDP. Posee hilos de gestión del
+# cluster.
 
 import time
 import sys
@@ -79,16 +80,19 @@ unreliability = {}
 # Complaining rate of a peer.
 complains = {}
 
+# Useful definitions.
 IP_ADDR = 0
 PORT = 1
 
+# The child threads will be alive only while the main thread is alive.
 main_alive = True
 
 # When a peer want to join a cluster, first must establish a TCP
 # connection with the splitter. In that connection, the splitter sends
-# to the peer the list of peers. Notice that the transmission of the
-# list of peers (something that could need some time if the cluster is
-# big) is done in a separate thread for each incomming peer.
+# to the incomming peer the list of peers. Notice that the
+# transmission of the list of peers (something that could need some
+# time if the cluster is big) is done in a separate thread. This helps
+# to avoid a DoS (Denial-of-Service) attack.
 
 # Handle the arrival of a peer.
 class handle_one_arrival(Thread):
