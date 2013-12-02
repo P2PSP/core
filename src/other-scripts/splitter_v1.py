@@ -1,6 +1,6 @@
 #!/usr/bin/python -O
 
-# Recibe un stream y lo sirve v'ia UDP. Posee hilos de gestión del
+# Recibe un stream y lo sirve v'ia UDP. Posee hilos de gesti'on del
 # cluster.
 
 import time
@@ -96,6 +96,8 @@ main_alive = True
 
 # Handle the arrival of a peer.
 class handle_one_arrival(Thread):
+    # {{{
+
     peer_serve_socket = ""
     peer = ""
     
@@ -109,12 +111,12 @@ class handle_one_arrival(Thread):
         global unreliability
         global complains
 
-        print self.peer_serve_socket.getsockname(),
-        'Accepted connection from peer',
-        self.peer
+        print self.peer_serve_socket.getsockname(), \
+            'Accepted connection from peer', \
+            self.peer
 
-        print self.peer_serve_socket.getsockname(),
-        'Sending the list of peers ...',
+        print self.peer_serve_socket.getsockname(), \
+            'Sending the list of peers ...',
 
         message = struct.pack("H", socket.htons(len(peer_list)))
         self.peer_serve_socket.sendall(message)
@@ -133,8 +135,12 @@ class handle_one_arrival(Thread):
         unreliability[self.peer] = 0
         complains[self.peer] = 0
 
+    # }}}
+
 # The daemon. 
 class handle_arrivals(Thread):
+    # {{{
+
     def __init__(self):
         Thread.__init__(self)
 
@@ -143,15 +149,12 @@ class handle_arrivals(Thread):
             peer_serve_socket, peer = peer_connection_sock.accept()
             handle_one_arrival(peer_serve_socket, peer).start()
 
-handle_arrivals().setDaemon(True) # Setting the thread as a daemon makes
-                                  # it die when the main process
-                                  # ends. Otherwise, it'd never stop
-                                  # since it runs a while(true).
-handle_arrivals().daemon = True
+    # }}}
 handle_arrivals().start()
 
 # Administrate the cluster.
 class listen_to_the_cluster(Thread):
+    # {{{
 
     def __init__(self):
         Thread.__init__(self)
@@ -191,14 +194,15 @@ class listen_to_the_cluster(Thread):
                     # The unsupportive peer does not exit.
                     pass
             # }}}
-        print "listen_to_the_cluster has exited"
 
-listen_to_the_cluster().setDaemon(True)
-listen_to_the_cluster().daemon=True
+    # }}}
 listen_to_the_cluster().start()
 
+block_number = 0
 kbps = 0
 class compute_kbps(Thread):
+    # {{{
+
     def __init__(self):
         Thread.__init__(self)
 
@@ -207,16 +211,12 @@ class compute_kbps(Thread):
         last_block_number = 0
         while main_alive:
             kbps = (block_number - last_block_number) * 1024.0/1000 * 8
-            print kbps, last_block_number, block_number
             last_block_number = block_number
             time.sleep(1)
-        print "compute_kbps has dead"
 
-compute_kbps().setDaemon(True)
-compute_kbps().daemon=True
+    # }}}
 compute_kbps().start()
 
-block_number = 0
 peer_index = 0
 block_format_string = "H"+str(block_size)+"s" # "H1024s
 
@@ -233,16 +233,17 @@ while True:
                     sys.stdout.flush()
                     time.sleep(1)
                     source_sock.close()
-                    source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    source_sock = socket.socket(socket.AF_INET,
+                                                socket.SOCK_STREAM)
                     source_sock.connect(source)
                     source_sock.sendall(GET_message)
                 prev_block_size = len(block)
                 block += source_sock.recv(block_size - len(block))
             return block
-
         block = receive_next_block()
         block_number = (block_number + 1) % 65536
 
+        # Send the block.
         peer = peer_list[peer_index]
         message = struct.pack(block_format_string,
                               socket.htons(block_number),
@@ -260,11 +261,8 @@ while True:
         print '\r', block_number, '->', peer, '('+str(kbps)+' kbps)',
         sys.stdout.flush()
 
-    except KeyboardInterrupt, e:
-        print
-        print 'Exiting!'
-        print
-        sys.stdout.flush()
+    except KeyboardInterrupt:
+        print 'Keyboard interrupt detected ... Exiting!'
         main_alive = False
         cluster_sock.sendto('',('127.0.0.1',listening_port))
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
