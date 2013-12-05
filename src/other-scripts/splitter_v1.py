@@ -177,7 +177,6 @@ class listen_to_the_cluster(Thread):
     # }}}
 listen_to_the_cluster().start()
 
-
 block_size = 1024
 block_number = 0
 kbps = 0
