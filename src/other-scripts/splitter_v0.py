@@ -28,6 +28,7 @@ of = open('prueba.dat', 'wb')
 
 block_size = 1024
 
+# This is the main loop of the splitter
 while True:
 
     # Receive data from the source

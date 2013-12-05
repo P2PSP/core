@@ -14,26 +14,9 @@ source_port = 4551
 listening_port = 9999
 buffer_size = 256
 
-source = (source_hostname, source_port)
-source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print source_sock.getsockname(), 'Connecting to the source ', source, '...',
-
-source_sock.connect(source)
-
-print source_sock.getsockname(), 'Connected to ', source, '!'
-
-channel='480.ogg'
-#channel='134.ogg'
-GET_message = 'GET /' + channel + ' HTTP/1.1\r\n'
-GET_message += '\r\n'
-source_sock.sendall(GET_message)
-
-block_size = 1024
-
 def get_peer_connection_socket():
     # {{{
 
-    #sock = blocking_TCP_socket(socket.AF_INET, socket.SOCK_STREAM)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
@@ -49,6 +32,7 @@ def get_peer_connection_socket():
     return sock
 
     # }}}
+# Socket to manage the cluster (churn).
 peer_connection_sock = get_peer_connection_socket()
 
 def create_cluster_sock(listening_port):
@@ -64,6 +48,7 @@ def create_cluster_sock(listening_port):
 
     return sock
     # }}}
+# Socket to send the media to the cluster.
 cluster_sock = create_cluster_sock(listening_port)
 
 # The list of peers in the cluster. There will be always a peer in the
@@ -77,9 +62,6 @@ destination_of_block = [('0.0.0.0',0) for i in xrange(buffer_size)]
 # Unreliability rate of a peer.
 unreliability = {}
 
-# Complaining rate of a peer.
-complains = {}
-
 # Useful definitions.
 IP_ADDR = 0
 PORT = 1
@@ -87,7 +69,7 @@ PORT = 1
 # The child threads will be alive only while the main thread is alive.
 main_alive = True
 
-# When a peer want to join a cluster, first must establish a TCP
+# When a peer want to join a cluster, first it must establish a TCP
 # connection with the splitter. In that connection, the splitter sends
 # to the incomming peer the list of peers. Notice that the
 # transmission of the list of peers (something that could need some
@@ -109,7 +91,6 @@ class handle_one_arrival(Thread):
     def run(self):
         global peer_list
         global unreliability
-        global complains
 
         print self.peer_serve_socket.getsockname(), \
             'Accepted connection from peer', \
@@ -133,7 +114,6 @@ class handle_one_arrival(Thread):
         self.peer_serve_socket.close()
         peer_list.append(self.peer)
         unreliability[self.peer] = 0
-        complains[self.peer] = 0
 
     # }}}
 
@@ -189,7 +169,6 @@ class listen_to_the_cluster(Thread):
                             destination
                         peer_list.remove(destination)
                         del unreliability[destination]
-                        del complains[destination]
                 except:
                     # The unsupportive peer does not exit.
                     pass
@@ -197,6 +176,22 @@ class listen_to_the_cluster(Thread):
 
     # }}}
 listen_to_the_cluster().start()
+
+source = (source_hostname, source_port)
+source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+print source_sock.getsockname(), 'Connecting to the source ', source, '...',
+
+source_sock.connect(source)
+
+print source_sock.getsockname(), 'Connected to ', source, '!'
+
+channel='480.ogg'
+#channel='134.ogg'
+GET_message = 'GET /' + channel + ' HTTP/1.1\r\n'
+GET_message += '\r\n'
+source_sock.sendall(GET_message)
+
+block_size = 1024
 
 block_number = 0
 kbps = 0
@@ -220,6 +215,7 @@ compute_kbps().start()
 peer_index = 0
 block_format_string = "H"+str(block_size)+"s" # "H1024s
 
+# This is the main loop of the splitter
 while True:
     try:
         # Receive data from the source
@@ -251,12 +247,10 @@ while True:
         cluster_sock.sendto(message, peer)
         peer_index = (peer_index + 1) % len(peer_list)
 
-        # Decrement unreliability and complaints after every 256 packets
+        # Decrement unreliability after every 256 packets
         if (block_number % 256) == 0:
             for i in unreliability:
                 unreliability[i] /= 2
-            for i in complains:
-                complains[i] /= 2
 
         print '\r', block_number, '->', peer, '('+str(kbps)+' kbps)',
         sys.stdout.flush()
