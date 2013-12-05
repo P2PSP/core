@@ -177,22 +177,8 @@ class listen_to_the_cluster(Thread):
     # }}}
 listen_to_the_cluster().start()
 
-source = (source_hostname, source_port)
-source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print source_sock.getsockname(), 'Connecting to the source ', source, '...',
-
-source_sock.connect(source)
-
-print source_sock.getsockname(), 'Connected to ', source, '!'
-
-channel='480.ogg'
-#channel='134.ogg'
-GET_message = 'GET /' + channel + ' HTTP/1.1\r\n'
-GET_message += '\r\n'
-source_sock.sendall(GET_message)
 
 block_size = 1024
-
 block_number = 0
 kbps = 0
 class compute_kbps(Thread):
@@ -211,6 +197,20 @@ class compute_kbps(Thread):
 
     # }}}
 compute_kbps().start()
+
+source = (source_hostname, source_port)
+source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+print source_sock.getsockname(), 'Connecting to the source ', source, '...',
+
+source_sock.connect(source)
+
+print source_sock.getsockname(), 'Connected to ', source, '!'
+
+channel='480.ogg'
+#channel='134.ogg'
+GET_message = 'GET /' + channel + ' HTTP/1.1\r\n'
+GET_message += '\r\n'
+source_sock.sendall(GET_message)
 
 peer_index = 0
 block_format_string = "H"+str(block_size)+"s" # "H1024s
