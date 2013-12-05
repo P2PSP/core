@@ -53,13 +53,17 @@ cluster_sock = create_cluster_sock(listening_port)
 
 # The list of peers in the cluster. There will be always a peer in the
 # list of peers that is running on the same host than the splitter,
-# listening to the port listening_port+1.
+# listening to the port listening_port+1. Notice that you can replace
+# this end-point by any other you want, for example, in a different
+# host.
 peer_list = [('127.0.0.1',listening_port+1)]
 
-# Used to find the peer to which a block has been sent.
+# Indexed by a block number. Used to find the peer to which a block
+# has been sent.
 destination_of_block = [('0.0.0.0',0) for i in xrange(buffer_size)]
 
-# Unreliability rate of a peer.
+# Indexed by the end-point of the peer. Stores the number of times a
+# peer has not re-transmitted a packet..
 unreliability = {}
 
 # Useful definitions.
