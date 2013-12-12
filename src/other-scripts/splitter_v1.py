@@ -52,33 +52,41 @@ def create_cluster_sock(listening_port):
 cluster_sock = create_cluster_sock(listening_port)
 
 # The list of peers in the cluster. There will be always a peer in the
-# list of peers that is running on the same host than the splitter,
-# listening to the port listening_port+1. Notice that you can replace
-# this end-point by any other you want, for example, in a different
-# host.
+# list of peers that, by default, is running in the same host than the
+# splitter, listening to the port listening_port+1. Notice that you
+# can replace this end-point by any other you want, for example, in a
+# different host.
 peer_list = [('127.0.0.1',listening_port+1)]
 
-# Indexed by a block number. Used to find the peer to which a block
-# has been sent.
+# Destination peers of the block, indexed by a block number. Used to
+# find the peer to which a block has been sent.
 destination_of_block = [('0.0.0.0',0) for i in xrange(buffer_size)]
 
-# Indexed by the end-point of the peer. Stores the number of times a
-# peer has not re-transmitted a packet..
+# Unreliaility of the peers, indexed by (the end-point of) the
+# peer. Counts the number of times a peer has not re-transmitted a
+# packet.
 unreliability = {}
+
+# Complaining rate of a peer. Sometimes the complaining peer has not
+# enough bandwidth in his download link. In this case, the peevish
+# peers should be rejected from the cluster.
+complains = {}
 
 # Useful definitions.
 IP_ADDR = 0
 PORT = 1
 
-# The child threads will be alive only while the main thread is alive.
+# This is used to stop the child threads. They will be alive only
+# while the main thread is alive.
 main_alive = True
 
 # When a peer want to join a cluster, first it must establish a TCP
 # connection with the splitter. In that connection, the splitter sends
 # to the incomming peer the list of peers. Notice that the
 # transmission of the list of peers (something that could need some
-# time if the cluster is big) is done in a separate thread. This helps
-# to avoid a DoS (Denial-of-Service) attack.
+# time if the cluster is big or the peer is slow) is done in a
+# separate thread. This helps to avoid a DoS (Denial-of-Service)
+# attack.
 
 # Handle the arrival of a peer.
 class handle_one_arrival(Thread):
@@ -103,9 +111,11 @@ class handle_one_arrival(Thread):
         print self.peer_serve_socket.getsockname(), \
             'Sending the list of peers ...',
 
+        # Sends the size of the list of peers.
         message = struct.pack("H", socket.htons(len(peer_list)))
         self.peer_serve_socket.sendall(message)
-       
+
+        # Send the list of peers.
         for p in peer_list:
             message = struct.pack(
                 "4sH", socket.inet_aton(p[IP_ADDR]),
@@ -118,10 +128,10 @@ class handle_one_arrival(Thread):
         self.peer_serve_socket.close()
         peer_list.append(self.peer)
         unreliability[self.peer] = 0
-
+        complains[self.peer] = 0
     # }}}
 
-# The daemon. 
+# The daemon which runs the "handle_one_arrival" threads. 
 class handle_arrivals(Thread):
     # {{{
 
@@ -136,7 +146,7 @@ class handle_arrivals(Thread):
     # }}}
 handle_arrivals().start()
 
-# Administrate the cluster.
+# A new daemon to administrate the cluster.
 class listen_to_the_cluster(Thread):
     # {{{
 
@@ -147,8 +157,13 @@ class listen_to_the_cluster(Thread):
         while main_alive:
             # {{{
 
+            # Usually, peers complain about lost blocks, and a block
+            # index is stored in a "H" (unsigned short) register.
             message, sender = cluster_sock.recvfrom(struct.calcsize("H"))
 
+            # However, sometimes peers only want to go. In this case,
+            # they send a UDP datagram to the splitter with a
+            # zero-length payload.
             if len(message) == 0:
                 # An empty message is a goodbye message.
                 try:
@@ -160,7 +175,15 @@ class listen_to_the_cluster(Thread):
                     pass
             else:
                 # The sender of the packet complains, and the packet
-                # comes with the index of a lost (non-received) block.
+                # comes with the index of a lost (non-received)
+                # block. In this situation, the splitter counts the
+                # number of times a peer has not achieved to send a
+                # block to other peers. If this number exceeds a
+                # threshold, the unsupportive peer is expelled from
+                # the cluster. Moreover, if we receive too much
+                # complains from the same peer, the problem counld be
+                # in that peer and it will be expelled from the
+                # cluster.
                 lost_block = struct.unpack("!H",message)[0]
                 try:
                     destination = destination_of_block[lost_block]
@@ -168,11 +191,19 @@ class listen_to_the_cluster(Thread):
                         'complains about lost block', lost_block, \
                         'sent to', destination
                     unreliability[destination] += 1
+                    complains[sender] += 1
                     if unreliability[destination] > len(peer_list):
                         print 'Too much complains about unsupportive peer', \
                             destination
                         peer_list.remove(destination)
                         del unreliability[destination]
+                        del complains[destination]
+                    if complains[sender] > 1000:
+                        print 'Too much complains of a peevish peer', \
+                            sender
+                        peer_list.remove(sender)
+                        del complains[sender]
+                        del unreliability[sender]
                 except:
                     # The unsupportive peer does not exit.
                     pass
@@ -250,10 +281,13 @@ while True:
         cluster_sock.sendto(message, peer)
         peer_index = (peer_index + 1) % len(peer_list)
 
-        # Decrement unreliability after every 256 packets
+        # Decrement (dividing by 2) unreliability and complains after
+        # every 256 sent blocks.
         if (block_number % 256) == 0:
             for i in unreliability:
                 unreliability[i] /= 2
+            for i in complains:
+                complains[i] /= 2
 
         print '\r', block_number, '->', peer, '('+str(kbps)+' kbps)',
         sys.stdout.flush()
