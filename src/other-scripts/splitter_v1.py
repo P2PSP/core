@@ -294,8 +294,19 @@ while True:
 
     except KeyboardInterrupt:
         print 'Keyboard interrupt detected ... Exiting!'
+
+        # Say to the daemon threads that the work has been finished,
         main_alive = False
+
+        # Wake up the "listen_to_the_cluster" daemon, which is waiting
+        # in a cluster_sock.recvfrom(...).
         cluster_sock.sendto('',('127.0.0.1',listening_port))
+
+        # Wake up the "handle_arrivals" daemon, which is waiting in a
+        # peer_connection_sock.accept().
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect(('127.0.0.1',listening_port))
+
+        # Breaks this thread and returns to the parent process (usually,
+        # the shell).
         break
