@@ -8,12 +8,12 @@ import sys
 import socket
 from threading import Thread
 import struct
-from common import Common
+from config import Config
 
-source_hostname = Common.source_hostname
-source_port = Common.source_port
-splitter_port = Common.splitter_port
-buffer_size = Common.buffer_size
+source_hostname = Config.source_hostname
+source_port = Config.source_port
+splitter_port = Config.splitter_port
+buffer_size = Config.buffer_size
 
 def get_peer_connection_socket():
     # {{{
@@ -241,7 +241,7 @@ source_sock.connect(source)
 
 print source_sock.getsockname(), 'Connected to ', source, '!'
 
-channel='480.ogg'
+channel=Config.channel
 #channel='134.ogg'
 GET_message = 'GET /' + channel + ' HTTP/1.1\r\n'
 GET_message += '\r\n'

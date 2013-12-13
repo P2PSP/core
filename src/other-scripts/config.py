@@ -9,7 +9,8 @@ class Config:
     header_size = 1024*2000 # Number of bytes of the stream's
                           # header. This should be long enough for the
                           # video header.
-    channel = '134.ogg'
+    #channel = '134.ogg'
+    channel = '480.ogg'
     source_hostname = '150.214.150.68'
     #source_hostname = 'localhost'
     source_port = 4551
