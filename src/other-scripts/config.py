@@ -1,5 +1,5 @@
-# Common staff
-class Common:
+# Common configuration staff
+class Config:
 
     buffer_size = 256
     block_size = 1024

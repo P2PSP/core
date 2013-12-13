@@ -94,7 +94,8 @@ communicate_the_header() # Retrieve the header of the stream from the
                          # source and send it to the player.
 
 
-# COMIENZO DE BUFFERING TIME (incluye acceso al cluster)
+# COMIENZO DE BUFFERING TIME (incluye acceso al cluster). time.time()
+# measures wall time, this means execution time plus waiting time.
 print "Joining to the cluster ..."
 sys.stdout.flush()
 start_latency = time.time()
@@ -210,6 +211,8 @@ def receive_and_feed():
             # {{{ Received a video block
             number, block = struct.unpack(block_format_string, message)
             block_number = socket.ntohs(number)
+
+            # Insert the received block into the buffer.
             blocks[block_number % buffer_size] = block
             received[block_number % buffer_size] = True
 
@@ -283,57 +286,32 @@ def receive_and_feed():
     except socket.timeout:
         return -2
 
-# WARNING!!!.  time.clock() measures the time spent by the process (so
-# the time spent waiting for an execution slot in the processor is
-# left out) time.time() measures wall time, this means execution time
-# plus waiting time
-
 last_block_number = 0
 error_counter = 0
 
 # {{{ Buffering
 
-block_number = receive_and_feed()
-while block_number<=0:
-    block_number = receive_and_feed()
-block_to_play = block_number % buffer_size
+
+# We will send a block to the player when a new block is
+# received. Besides, those slots in the buffer that have not been
+# filled by a new block will not be send to the player. Moreover,
+# blocks can be delayed an unknown time. This means that (due to the
+# jitter) after block X, the block X+Y can be received (instead of the
+# block X+1). Alike, the block X-Y could follow the block X. Because
+# we implement the buffer as a circular queue, in order to minimize
+# the probability of a delayed block overwrites a new block that is
+# waiting for traveling the player, we wil fill only the half of the
+# buffer (the beginning of the circular queue).
 for x in xrange(buffer_size/2): # Fill half buffer
     while receive_and_feed()<=0:
+        # We discard control messages (hello and goodbye messages).
         pass
 
-# Go through the buffer
-num_errors_buf = 0
-for x in range(block_to_play, block_to_play+(buffer_size/2)):
-    if received[x%buffer_size] == False:
-        num_errors_buf += 1
-
-'''
-block_number = receive_and_feed()
-while block_number<=0:
-    block_number = receive_and_feed()
-block_to_play = block_number % buffer_size
-for x in xrange(buffer_size/2):
-    last_block_number = receive_and_feed()
-    if last_block_number <= 0:
-        error_counter += 1
-'''
+# }}}
 
 # FIN DE BUFFERING TIME
 end_latency = time.time()
 latency = end_latency - start_latency
-
-if __debug__:
-    logger.info(str(cluster_sock.getsockname()) + ' buffering done')
-    logger.info('NUM_PEERS '+str(len(peer_list)))
-
-    logger.critical('BUF_TIME '+str(latency)+' secs') # Buffering time in SECONDS
-    logger.critical('BUF_LEN '+str(buffer_size)+' bytes')
-    logger.critical('NUM_ERRORS_BUF '+str(error_counter))
-    percentage_errors_buf = float(error_counter*100)/float(buffer_size/2)
-    logger.critical('PERCENTAGE_ERRORS_BUF ' + str(percentage_errors_buf))
-    #logger.critical('PERCENTAGE_ERRORS_BUF {:.2}%'.format(percentage_errors_buf))
-    logger.critical('NUM_PEERS '+str(len(peer_list)))
-# }}}
 
 print 'Latency (joining to the cluster + buffering) =', latency, 'seconds'
 
