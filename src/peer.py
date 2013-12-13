@@ -519,7 +519,7 @@ def receive_and_feed():
                     print 'Added', sender, 'by data block'
                     if __debug__:
                         logger.info(Color.cyan + str(cluster_sock.getsockname()) + ' peer ' + str(sender) + ' added by data block' + Color.none)
-                peer_insolidarity[sender] = 0
+                    peer_insolidarity[sender] = 0
                 
                 # }}}
 

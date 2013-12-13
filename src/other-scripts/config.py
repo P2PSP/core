@@ -21,3 +21,4 @@ class Common:
     splitter_port = 8888
     block_format_string = "H" + str(block_size) + "s" # "H1024s
     cluster_timeout = 1 # Seconds
+    peer_unreliability_threshold = 64

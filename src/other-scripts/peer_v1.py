@@ -134,10 +134,10 @@ cluster_sock.settimeout(Config.cluster_timeout)
 # nodes.
 peer_list = []
 
-# This store the insolidarity of the peers of the cluster. When
-# the solidarity exceed a threshold, the peer is deleted from the list
-# of peers. unreliability???
-peer_insolidarity = {}
+# This store the insolidarity/unreliability of the peers of the
+# cluster. When the insolidarity exceed a threshold, the peer is
+# deleted from the list of peers.
+unreliability = {}
 
 def retrieve_the_list_of_peers():
     # {{{
@@ -156,7 +156,7 @@ def retrieve_the_list_of_peers():
         port = socket.ntohs(port)
         peer = (IP_addr, port)
         peer_list.append(peer)
-        peer_insolidarity[peer] = 0
+        unreliability[peer] = 0
 
         # Say hello to the peer
         cluster_sock.sendto('', peer) # Send a empty block (this
@@ -171,31 +171,36 @@ def retrieve_the_list_of_peers():
 retrieve_the_list_of_peers()
 splitter_sock.close()
 
-# In this momment, most of the rest of peers of the cluster are
-# sending blocks to the new peer.
+# In this momment, the rest of peers of the cluster are sending (or
+# going to send) blocks to the new peer.
 
-# We define the buffer structure. Two components are needed: (1)
-# the blocks buffer that stores the received blocks (2) the received
-# buffer that stores if a block has been received or not.
+# Now it is time to define the buffer of blocks, a structure that used
+# to delay the playback of the blocks in order to accommodate the
+# network jittter. Two components are needed: (1) the "blocks" buffer
+# that stores the received blocks and (2) the "received" buffer that
+# stores if a block has been received or not. Notice that each peer
+# can use a different buffer_size: the smaller the buffer size, the
+# lower start-up time, the higher block-loss ratio. However, for the
+# sake of simpliticy, all peers will use the same buffer size.
 blocks = [None]*buffer_size
 received = [False]*buffer_size
 
-# True if the peer has received "number_of_blocks" blocks.
-blocks_exhausted = False
-
-# This variable holds the last block received from the splitter. It is
-# used below to send the "last" block in the congestion avoiding mode.
-last = ''
-
-# Number of times that the last block has been sent to the cluster (we
-# send the block each time we receive a block).
-counter = 0
-
 def receive_and_feed():
-    global last
-    global counter
-    global blocks_exhausted
-    global number_of_blocks
+    # This variable holds the last block received from the
+    # splitter. It is used below to send the last received block in
+    # the congestion avoiding mode. In that mode, the peer sends a
+    # block only when it received a block from another peer or om the
+    # splitter.
+    last = ''
+
+    # Number of times that the last received block has been sent to
+    # the cluster. If this counter is smaller than the number of peers
+    # in the cluster, the last block must be sent in the burst mode
+    # because a new block from the splitter has arrived and the last
+    # received block has not been sent to all the peers of the
+    # cluster. This can happen when one o more blocks that were routed
+    # towards this peer have been lost.
+    counter = 0
 
     try:
         # {{{ Receive and send
@@ -209,14 +214,26 @@ def receive_and_feed():
             received[block_number % buffer_size] = True
 
             if sender == splitter:
-                # {{{ Send the previously received block in burst mode.
-                while( (counter < len(peer_list)) & (counter > 0)):
+                # {{{ The burst sending mode.
+
+                # A new block has arrived from the splitter and we
+                # must check if the last block was sent fo the rest of
+                # peers of the cluster.
+                while( (counter > 0) & (counter < len(peer_list)) ):
                     peer = peer_list[counter]
                     cluster_sock.sendto(last, peer)
 
-                    peer_insolidarity[peer] += 1
-                    if peer_insolidarity[peer] > 64: # <- Important parameter!!
-                        del peer_insolidarity[peer]
+                    # Each time we send a block to a peer, the
+                    # unreliability of that peer is incremented. Each
+                    # time we receive a block from a peer, the
+                    # unreliability of that peer is decremented.
+                    unreliability[peer] += 1
+
+                    # If the unreliability of a peer exceed a
+                    # threshold, the peer is removed from the list of
+                    # peers.
+                    if unreliability[peer] > peer_unreliability_threshold:
+                        del unreliability[peer]
                         peer_list.remove(peer)
                         print 'Removing the unsupportive peer', peer
                     counter += 1
@@ -224,23 +241,25 @@ def receive_and_feed():
                 last = message
                # }}}
             else:
-                # {{{ Check if the peer is new
+                # {{{ The sender is a peer, check if the peer is new.
                 if sender not in peer_list:
                     # The peer is new
                     peer_list.append(sender)
+                    unreliability[sender] = 0                
                     print 'Added', sender, 'by data block'
-                peer_insolidarity[sender] = 0                
                 # }}}
-
+                
+            # A new block has arrived and it must be forwarded to the
+            # rest of peers of the cluster.
             if counter < len(peer_list):
-                # {{{ Send the last block in congestion avoiding mode
+                # {{{ Send the last block in congestion avoiding mode.
 
                 peer = peer_list[counter]
                 cluster_sock.sendto(last, peer)
 
-                peer_insolidarity[peer] += 1        
-                if peer_insolidarity[peer] > 64: # <- Important parameter!!
-                    del peer_insolidarity[peer]
+                unreliability[peer] += 1        
+                if unreliability[peer] > peer_unreliability_threshold:
+                    del unreliability[peer]
                     peer_list.remove(peer)
                     print 'Removing the unsupportive peer', peer 
                 counter += 1        
@@ -254,7 +273,7 @@ def receive_and_feed():
             if sender not in peer_list:
                 peer_list.append(sender)
                 print 'Added', sender, 'by \"hello\" message'
-                peer_insolidarity[sender] = 0
+                unreliability[sender] = 0
             else:
                 peer_list.remove(sender)
                 print 'Removed', sender, 'by \"goodbye\" message'
@@ -405,8 +424,8 @@ while player_connected:
     block_number = receive_and_feed()
     if block_number>=0:
         if (block_number % 256) == 0:
-            for i in peer_insolidarity:
-                peer_insolidarity[i] /= 2
+            for i in unreliability:
+                unreliability[i] /= 2
         if _PLAYER_:
             send_a_block_to_the_player()
             block_to_play = (block_to_play + 1) % buffer_size
