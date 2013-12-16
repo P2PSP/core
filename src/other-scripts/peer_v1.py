@@ -256,7 +256,6 @@ def receive_and_feed():
             # rest of peers of the cluster.
             if counter < len(peer_list):
                 # {{{ Send the last block in congestion avoiding mode.
-
                 peer = peer_list[counter]
                 cluster_sock.sendto(last, peer)
 
@@ -272,7 +271,6 @@ def receive_and_feed():
             # }}}
         else:
             # {{{ Received a control block
-
             if sender not in peer_list:
                 peer_list.append(sender)
                 print 'Added', sender, 'by \"hello\" message'
