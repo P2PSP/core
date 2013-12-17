@@ -49,7 +49,6 @@ def get_player_socket():
     return sock
 
     # }}}
-
 player_sock = get_player_socket() # The peer is blocked until the
                                   # player establish a connection.
 
@@ -89,27 +88,8 @@ def communicate_the_header():
 
     source_sock.close()
     # }}}
-
 communicate_the_header() # Retrieve the header of the stream from the
                          # source and send it to the player.
-
-
-# COMIENZO DE BUFFERING TIME (incluye acceso al cluster). time.time()
-# measures wall time, this means execution time plus waiting time.
-print "Joining to the cluster ..."
-sys.stdout.flush()
-start_latency = time.time()
-    
-def connect_to_the_splitter():
-    # {{{
-    
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    splitter = (splitter_hostname, splitter_port)
-    sock.connect(splitter)
-    return sock
-
-    # }}}
-splitter_sock = connect_to_the_splitter()
 
 def create_cluster_sock():
     # {{{
@@ -125,11 +105,18 @@ def create_cluster_sock():
 
    # }}}
 cluster_sock = create_cluster_sock()
+cluster_sock.settimeout(Config.cluster_timeout) # This is the maximum
+                                                # time the peer will
+                                                # wait for a block
+                                                # (from the splitter
+                                                # or from another
+                                                # peer).
 
-# This is the maximum time the peer will wait for a block (from the
-# splitter or from another peer).
-cluster_sock.settimeout(Config.cluster_timeout)
-
+print "Joining to the cluster ..."
+sys.stdout.flush()
+start_latency = time.time() # Wall time (execution time plus waiting
+                            # time).
+    
 # This is the list of peers of the cluster. Each peer uses this
 # structure to resend the blocks received from the splitter to these
 # nodes.
@@ -139,6 +126,20 @@ peer_list = []
 # cluster. When the insolidarity exceed a threshold, the peer is
 # deleted from the list of peers.
 unreliability = {}
+
+# This should be run in a different thread in order to receive video
+# blocks while the peer is reciving the list of peers (and sending the
+# hello messages).
+def connect_to_the_splitter():
+    # {{{
+    
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    splitter = (splitter_hostname, splitter_port)
+    sock.connect(splitter)
+    return sock
+
+    # }}}
+splitter_sock = connect_to_the_splitter()
 
 def retrieve_the_list_of_peers():
     # {{{
@@ -168,7 +169,6 @@ def retrieve_the_list_of_peers():
         print splitter_sock.getsockname(), '->', splitter_sock.getpeername(), 'Received peer', peer
 
     # }}}
-
 retrieve_the_list_of_peers()
 splitter_sock.close()
 
@@ -289,7 +289,6 @@ error_counter = 0
 
 # {{{ Buffering
 
-
 # We will send a block to the player when a new block is
 # received. Besides, those slots in the buffer that have not been
 # filled by a new block will not be send to the player. Moreover,
@@ -307,10 +306,8 @@ for x in xrange(buffer_size/2): # Fill half buffer
 
 # }}}
 
-# FIN DE BUFFERING TIME
 end_latency = time.time()
 latency = end_latency - start_latency
-
 print 'Latency (joining to the cluster + buffering) =', latency, 'seconds'
 
 player_connected = True
