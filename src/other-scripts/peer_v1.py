@@ -303,14 +303,28 @@ start_latency = time.time() # Wall time (execution time plus waiting
 
 # Retrieve the first block to play.
 block_number = receive_and_feed()
+
+# The receive_and_feed() procedure returns if a packet has been
+# received or if a time-out exception has been arised. In the first
+# case, the returned value is -1 if the packet contains a
+# hello/goodbyte message and in the second one, -2. None of these
+# situations inserts a block of video in the buffer and therefore, the
+# must be ignored.
 while block_number<=0:
     block_number = receive_and_feed()
+
+# The range of the block index uses to be much larger than the buffer
+# size. Therefore, a simple hash operation (in the case, the modulo
+# operation) has been used. Because we expect that video blocks come
+# in order and the blocks are sent to the player also in order, this
+# hashing should work fine.
 block_to_play = block_number % buffer_size
 
-# Fill up tu the half of the buffer.
+# Fill up to the half of the buffer.
 for x in xrange(buffer_size/2):
     while receive_and_feed()<=0:
-        # We discard control messages (hello and goodbye messages).
+        # Again, w discard control messages (hello and goodbye
+        # messages).
         pass
 
 # }}}
@@ -329,19 +343,12 @@ def send_a_block_to_the_player():
     global player_connected
 
     if not received[block_to_play]:
+
+        # Lets complain to the splitter.
         message = struct.pack("!H", block_to_play)
         cluster_sock.sendto(message, splitter)
 
-        if __debug__:
-            logger.info(Color.cyan +
-                        str(cluster_sock.getsockname()) +
-                        ' complaining about lost block ' +
-                        str(block_to_play) + Color.none)
-
-        # Parece que la mayoría de los players se sincronizan antes,
-        # si en lugar de no enviar nada se envía un bloque vacío,
-        # aunque esto habría que probarlo.
-
+    # Ojo, probar a no enviar nada!!!
     try:
         player_sock.sendall(blocks[block_to_play])
 
@@ -356,70 +363,30 @@ def send_a_block_to_the_player():
         # }}}
 
     except socket.error:
-        if __debug__:
-            logger.error(Color.red + 'player disconected!' + Color.none)
+        print 'Player disconected'
         player_connected = False
         return
     except Exception as detail:
-        if __debug__:
-            logger.error(Color.red + 'unhandled exception ' + str(detail) + Color.none)
+        print 'unhandled exception', detail
         return
 
+    # We have fired the block.
     received[block_to_play] = False
 
     # }}}
 
-if __debug__:    
-    #get a death time
-    #death_time = churn.new_death_time(20)
-    death_time = churn.new_death_time(weibull_scale)
-
-'''
-#Once the buffer is half-filled, then start operating normally
-'''
-#while player_connected and not blocks_exhausted:
 while player_connected:
-    
-    if __debug__:
-        if churn.time_to_die(death_time):
-            break;
-
-    if __debug__ and death_time != churn.NEVER:
-        current_time = time.localtime()
-        logger.debug(Color.green +
-                     'Current time is ' +
-                     str(current_time.tm_hour).zfill(2) +
-                     ':' +
-                     str(current_time.tm_min).zfill(2) +
-                     ':' +
-                     str(current_time.tm_sec).zfill(2) +
-                     Color.none)
-        logger.debug(Color.green +
-                     'Scheduled death time is ' +
-                     str(time.localtime(death_time).tm_hour).zfill(2) +
-                     ':' +
-                     str(time.localtime(death_time).tm_min).zfill(2) +
-                     ':' +
-                     str(time.localtime(death_time).tm_sec).zfill(2) +
-                     Color.none)
     
     block_number = receive_and_feed()
     if block_number>=0:
         if (block_number % 256) == 0:
             for i in unreliability:
                 unreliability[i] /= 2
-        if _PLAYER_:
-            send_a_block_to_the_player()
-            block_to_play = (block_to_play + 1) % buffer_size
-    #elif block_number == -2:    #this stops the peer after only one cluster timeout
-    #    break
-    if __debug__:
-        logger.debug('NUM PEERS '+str(len(peer_list)))
+        send_a_block_to_the_player()
+        block_to_play = (block_to_play + 1) % buffer_size
 
+# The player has gone. Lets do a polite farewell.
 print 'No player, goodbye!'
-if __debug__:
-    logger.info(Color.cyan + 'Goodbye!' + Color.none)
-#goodbye = 'bye'
 goodbye = ''
 cluster_sock.sendto(goodbye, splitter)
 for x in xrange(3):
