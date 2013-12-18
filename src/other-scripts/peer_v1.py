@@ -8,6 +8,7 @@ import sys
 import socket
 import struct
 import time
+from threading import Thread
 from config import Config
 
 IP_ADDR = 0
@@ -51,7 +52,6 @@ def get_player_socket():
     # }}}
 player_sock = get_player_socket() # The peer is blocked until the
                                   # player establish a connection.
-
 
 def communicate_the_header():
     # {{{ 
@@ -114,8 +114,6 @@ cluster_sock.settimeout(Config.cluster_timeout) # This is the maximum
 
 print "Joining to the cluster ..."
 sys.stdout.flush()
-start_latency = time.time() # Wall time (execution time plus waiting
-                            # time).
     
 # This is the list of peers of the cluster. Each peer uses this
 # structure to resend the blocks received from the splitter to these
@@ -127,55 +125,57 @@ peer_list = []
 # deleted from the list of peers.
 unreliability = {}
 
-# This should be run in a different thread in order to receive video
-# blocks while the peer is reciving the list of peers (and sending the
-# hello messages).
-def connect_to_the_splitter():
-    # {{{
-    
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    splitter = (splitter_hostname, splitter_port)
-    sock.connect(splitter)
-    return sock
-
-    # }}}
-splitter_sock = connect_to_the_splitter()
-
-def retrieve_the_list_of_peers():
+# The list of peers is retrieved from the splitter in a different
+# thread because in this way, if the retrieving takes a long time, the
+# peer can receive the blocks that other peers are sending to it.
+class retrieve_the_list_of_peers(Thread):
     # {{{
 
-    print splitter_sock.getsockname(), '->', splitter_sock.getpeername(), 'Requesting the list of peers'
+    def __init__(self):
+        Thread.__init__(self)
 
-    number_of_peers = socket.ntohs(\
-        struct.unpack("H",splitter_sock.recv(struct.calcsize("H")))[0])
+    def run(self):
 
-    print splitter_sock.getpeername(), '->', splitter_sock.getsockname(), 'The number of peers is:', number_of_peers
+        # Connect to the splitter
+        splitter_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        splitter = (splitter_hostname, splitter_port)
+        splitter_sock.connect(splitter)
 
-    while number_of_peers > 0:
-        message = splitter_sock.recv(struct.calcsize("4sH"))
-        IP_addr, port = struct.unpack("4sH", message)
-        IP_addr = socket.inet_ntoa(IP_addr)
-        port = socket.ntohs(port)
-        peer = (IP_addr, port)
-        peer_list.append(peer)
-        unreliability[peer] = 0
+        # Request the list of peers
+        print splitter_sock.getsockname(), \
+            '->', splitter_sock.getpeername(), \
+            'Requesting the list of peers'
 
-        # Say hello to the peer
-        cluster_sock.sendto('', peer) # Send a empty block (this
-                                      # should be fast).
+        number_of_peers = socket.ntohs(\
+            struct.unpack("H",splitter_sock.recv(struct.calcsize("H")))[0])
 
-        number_of_peers -= 1
+        print splitter_sock.getpeername(), \
+            '->', splitter_sock.getsockname(), \
+            'The number of peers is:', number_of_peers
 
-        print splitter_sock.getsockname(), '->', splitter_sock.getpeername(), 'Received peer', peer
+        while number_of_peers > 0:
+            message = splitter_sock.recv(struct.calcsize("4sH"))
+            IP_addr, port = struct.unpack("4sH", message)
+            IP_addr = socket.inet_ntoa(IP_addr)
+            port = socket.ntohs(port)
+            peer = (IP_addr, port)
+            peer_list.append(peer)
+            unreliability[peer] = 0
+
+            # Say hello to the peer
+            cluster_sock.sendto('', peer) # Send a empty block (this
+                                          # should be fast).
+
+            number_of_peers -= 1
+
+            print splitter_sock.getsockname(), \
+                '->', splitter_sock.getpeername(), \
+                'Received peer', peer
 
     # }}}
-retrieve_the_list_of_peers()
-splitter_sock.close()
+retrieve_the_list_of_peers().start()
 
-# In this momment, the rest of peers of the cluster are sending (or
-# going to send) blocks to the new peer.
-
-# Now it is time to define the buffer of blocks, a structure that used
+# Now it is time to define the buffer of blocks, a structure that is used
 # to delay the playback of the blocks in order to accommodate the
 # network jittter. Two components are needed: (1) the "blocks" buffer
 # that stores the received blocks and (2) the "received" buffer that
@@ -209,6 +209,7 @@ def receive_and_feed():
             struct.calcsize(block_format_string))
         if len(message) == struct.calcsize(block_format_string):
             # {{{ Received a video block
+
             number, block = struct.unpack(block_format_string, message)
             block_number = socket.ntohs(number)
 
@@ -268,6 +269,7 @@ def receive_and_feed():
                 # }}}
 
             return block_number
+
             # }}}
         else:
             # {{{ Received a control block
@@ -284,9 +286,8 @@ def receive_and_feed():
     except socket.timeout:
         return -2
 
-last_block_number = 0
-error_counter = 0
-
+start_latency = time.time() # Wall time (execution time plus waiting
+                            # time).
 # {{{ Buffering
 
 # We will send a block to the player when a new block is
@@ -298,8 +299,16 @@ error_counter = 0
 # we implement the buffer as a circular queue, in order to minimize
 # the probability of a delayed block overwrites a new block that is
 # waiting for traveling the player, we wil fill only the half of the
-# buffer (the beginning of the circular queue).
-for x in xrange(buffer_size/2): # Fill half buffer
+# circular queue.
+
+# Retrieve the first block to play.
+block_number = receive_and_feed()
+while block_number<=0:
+    block_number = receive_and_feed()
+block_to_play = block_number % buffer_size
+
+# Fill up tu the half of the buffer.
+for x in xrange(buffer_size/2):
     while receive_and_feed()<=0:
         # We discard control messages (hello and goodbye messages).
         pass
@@ -308,7 +317,7 @@ for x in xrange(buffer_size/2): # Fill half buffer
 
 end_latency = time.time()
 latency = end_latency - start_latency
-print 'Latency (joining to the cluster + buffering) =', latency, 'seconds'
+print 'Latency (buffering) =', latency, 'seconds'
 
 player_connected = True
 
