@@ -19,6 +19,7 @@ peer_port = Config.peer_port
 splitter_hostname = Config.splitter_hostname
 splitter_port = Config.splitter_port
 header_size = Config.header_size
+#trusted_peer_port = Config.trusted_peer_port
 
 # Estas cuatro variables las debería indicar el splitter
 source_hostname = Config.source_hostname
@@ -26,6 +27,9 @@ source_port = Config.source_port
 channel = Config.channel
 block_size = Config.block_size
 block_format_string = Config.block_format_string
+
+trusted_peer_port = splitter_port + 1
+I_am_a_trusted_peer = False
 
 def get_player_socket():
     # {{{
@@ -55,6 +59,7 @@ player_sock = get_player_socket() # The peer is blocked until the
 
 def communicate_the_header():
     # {{{ 
+
     source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     source = (source_hostname, source_port)
     source_sock.connect(source)
@@ -87,10 +92,39 @@ def communicate_the_header():
     print source_sock.getsockname(), 'Got', total_received, 'bytes'
 
     source_sock.close()
+
     # }}}
 communicate_the_header() # Retrieve the header of the stream from the
                          # source and send it to the player.
 
+# We need to connecto to the splitter in order to retrieve the list of
+# peers and blocks of video.
+splitter = (splitter_hostname, splitter_port)
+def connect_to_the_splitter(splitter_hostname, splitter_port):
+    # {{{
+
+    sock = ''
+
+    try:
+        if trusted_peer_port > 0:
+            print "Connecting to the splitter at", splitter, "using the port", trusted_peer_port, "..."
+            sock = socket.create_connection((splitter_hostname, splitter_port), \
+                                       1000,('127.0.0.1',trusted_peer_port))
+        else:
+            print "Connecting to the splitter ..."
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect(splitter)
+
+        print "Connected to the splitter", splitter, "using", sock.getsockname()
+    except:
+        sys.exit("Sorry. Can't connect with the splitter at " + str(splitter))
+    return sock
+
+    # }}}
+splitter_sock = connect_to_the_splitter(splitter_hostname, splitter_port)
+
+# Now, on the same end-point than splitter_sock, we create a UDP
+# socket to communicate with the peers.
 def create_cluster_sock():
     # {{{
 
@@ -100,7 +134,8 @@ def create_cluster_sock():
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     except:
         pass
-    sock.bind(('',splitter_sock.getsockname()[PORT]))
+    #sock.bind(('',splitter_sock.getsockname()[PORT]))
+    sock.bind(('', splitter_port))
     return sock
 
    # }}}
@@ -114,7 +149,7 @@ cluster_sock.settimeout(Config.cluster_timeout) # This is the maximum
 
 print "Joining to the cluster ..."
 sys.stdout.flush()
-    
+
 # This is the list of peers of the cluster. Each peer uses this
 # structure to resend the blocks received from the splitter to these
 # nodes.
@@ -136,11 +171,6 @@ class retrieve_the_list_of_peers(Thread):
 
     def run(self):
 
-        # Connect to the splitter
-        splitter_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        splitter = (splitter_hostname, splitter_port)
-        splitter_sock.connect(splitter)
-
         # Request the list of peers
         print splitter_sock.getsockname(), \
             '->', splitter_sock.getpeername(), \
@@ -159,12 +189,15 @@ class retrieve_the_list_of_peers(Thread):
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
-            peer_list.append(peer)
-            unreliability[peer] = 0
+            if peer != splitter_sock.getsockname():
+                peer_list.append(peer)
+                unreliability[peer] = 0
 
-            # Say hello to the peer
-            cluster_sock.sendto('', peer) # Send a empty block (this
-                                          # should be fast).
+                # Say hello to the peer
+                cluster_sock.sendto('', peer) # Send a empty block (this
+                                              # should be fast).
+            else:
+                I_am_a_trusted_peer = True
 
             number_of_peers -= 1
 
@@ -185,8 +218,11 @@ retrieve_the_list_of_peers().start()
 # sake of simpliticy, all peers will use the same buffer size.
 blocks = [None]*buffer_size
 received = [False]*buffer_size
+numbers = [0]*buffer_size
 
 def receive_and_feed():
+    # {{{
+
     # This variable holds the last block received from the
     # splitter. It is used below to send the last received block in
     # the congestion avoiding mode. In that mode, the peer sends a
@@ -208,7 +244,7 @@ def receive_and_feed():
         message, sender = cluster_sock.recvfrom(\
             struct.calcsize(block_format_string))
         if len(message) == struct.calcsize(block_format_string):
-            # {{{ Received a video block
+            # {{{ A video block has been received
 
             number, block = struct.unpack(block_format_string, message)
             block_number = socket.ntohs(number)
@@ -216,6 +252,7 @@ def receive_and_feed():
             # Insert the received block into the buffer.
             blocks[block_number % buffer_size] = block
             received[block_number % buffer_size] = True
+            numbers[block_number % buffer_size] = block_number
 
             if sender == splitter:
                 # {{{ The burst sending mode.
@@ -236,13 +273,14 @@ def receive_and_feed():
                     # If the unreliability of a peer exceed a
                     # threshold, the peer is removed from the list of
                     # peers.
-                    if unreliability[peer] > peer_unreliability_threshold:
+                    if unreliability[peer] > Config.peer_unreliability_threshold:
                         del unreliability[peer]
                         peer_list.remove(peer)
                         print 'Removing the unsupportive peer', peer
                     counter += 1
                 counter = 0
                 last = message
+
                # }}}
             else:
                 # {{{ The sender is a peer, check if the peer is new.
@@ -261,7 +299,7 @@ def receive_and_feed():
                 cluster_sock.sendto(last, peer)
 
                 unreliability[peer] += 1        
-                if unreliability[peer] > peer_unreliability_threshold:
+                if unreliability[peer] > Config.peer_unreliability_threshold:
                     del unreliability[peer]
                     peer_list.remove(peer)
                     print 'Removing the unsupportive peer', peer 
@@ -272,7 +310,7 @@ def receive_and_feed():
 
             # }}}
         else:
-            # {{{ Received a control block
+            # {{{ A control block has been received
             if sender not in peer_list:
                 peer_list.append(sender)
                 print 'Added', sender, 'by \"hello\" message'
@@ -285,6 +323,8 @@ def receive_and_feed():
         # }}}
     except socket.timeout:
         return -2
+
+    # }}}
 
 start_latency = time.time() # Wall time (execution time plus waiting
                             # time).
@@ -351,17 +391,8 @@ def send_a_block_to_the_player():
     # Ojo, probar a no enviar nada!!!
     try:
         player_sock.sendall(blocks[block_to_play])
-
-        # {{{ debug
-        if __debug__:
-            logger.debug('{}'.format(player_sock.getsockname()) +
-                         ' ' +
-                         str(block_to_play) +
-                         ' -> (player) ' +
-                         '{}'.format(player_sock.getpeername()))
-
-        # }}}
-
+        print player_sock.getsockname(), "->", numbers[block_to_play], player_sock.getpeername()
+ 
     except socket.error:
         print 'Player disconected'
         player_connected = False

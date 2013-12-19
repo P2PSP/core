@@ -58,6 +58,7 @@ cluster_sock = create_cluster_sock(splitter_port)
 # can replace this end-point by any other you want, for example, in a
 # different host.
 peer_list = [('127.0.0.1',splitter_port+1)]
+#peer_list = []
 
 # Destination peers of the block, indexed by a block number. Used to
 # find the peer to which a block has been sent.
@@ -130,6 +131,10 @@ class handle_one_arrival(Thread):
         peer_list.append(self.peer)
         unreliability[self.peer] = 0
         complains[self.peer] = 0
+
+        print "The list of peers is:",
+        for p in peer_list:
+            print p
     # }}}
 
 # The daemon which runs the "handle_one_arrival" threads. 
@@ -140,8 +145,10 @@ class handle_arrivals(Thread):
         Thread.__init__(self)
 
     def run(self):
+        print "Waiting for connections at", peer_connection_sock.getsockname()
         while main_alive:
             peer_serve_socket, peer = peer_connection_sock.accept()
+            #if peer not in peer_list: # Puede que sobre
             handle_one_arrival(peer_serve_socket, peer).start()
 
     # }}}
@@ -155,6 +162,7 @@ class listen_to_the_cluster(Thread):
         Thread.__init__(self)
 
     def run(self):
+        print "Listening to the cluster at", cluster_sock.getsockname()
         while main_alive:
             # {{{
 
@@ -235,11 +243,11 @@ compute_kbps().start()
 
 source = (source_hostname, source_port)
 source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print source_sock.getsockname(), 'Connecting to the source ', source, '...',
+print source_sock.getsockname(), 'Connecting to the source', source, '...'
 
 source_sock.connect(source)
 
-print source_sock.getsockname(), 'Connected to ', source, '!'
+print source_sock.getsockname(), 'Connected to', source, '!'
 
 channel=Config.channel
 #channel='134.ogg'
@@ -249,6 +257,9 @@ source_sock.sendall(GET_message)
 
 peer_index = 0
 block_format_string = "H"+str(block_size)+"s" # "H1024s
+
+print "Using ", cluster_sock.getsockname(), \
+    "to communicate with the cluster" 
 
 # This is the main loop of the splitter
 while True:
@@ -290,7 +301,9 @@ while True:
             for i in complains:
                 complains[i] /= 2
 
-        print '\r', block_number, '->', peer, '('+str(kbps)+' kbps)',
+        #print '\r', block_number, '->', peer, '('+str(kbps)+' kbps)',
+        #print '\r', '%5d' % block_number, '->', peer, '('+str(kbps)+' kbps)',
+        sys.stdout.write('\r' + "%5s" % block_number + " -> " + '(' + "%15s" % peer[0] + ',' + "%5s" % peer[1] + ')' + " %8s" % kbps)
         sys.stdout.flush()
 
     except KeyboardInterrupt:
