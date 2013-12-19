@@ -127,10 +127,11 @@ class handle_one_arrival(Thread):
 
         print 'done'
 
-        self.peer_serve_socket.close()
-        peer_list.append(self.peer)
-        unreliability[self.peer] = 0
-        complains[self.peer] = 0
+        if self.peer not in peer_list:
+            self.peer_serve_socket.close()
+            peer_list.append(self.peer)
+            unreliability[self.peer] = 0
+            complains[self.peer] = 0
 
         print "The list of peers is:",
         for p in peer_list:

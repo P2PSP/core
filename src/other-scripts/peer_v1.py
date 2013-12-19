@@ -8,6 +8,7 @@ import sys
 import socket
 import struct
 import time
+import argparse
 from threading import Thread
 from config import Config
 
@@ -15,21 +16,48 @@ IP_ADDR = 0
 PORT = 1
 
 buffer_size = Config.buffer_size
-peer_port = Config.peer_port
+listening_port = Config.listening_port
 splitter_hostname = Config.splitter_hostname
 splitter_port = Config.splitter_port
 header_size = Config.header_size
 #trusted_peer_port = Config.trusted_peer_port
+
+trusted_peer_port = splitter_port + 1
+I_am_a_trusted_peer = False
+trusted_hostname = Config.trusted_hostname
+trusted_port = Config.trusted_port
+
+parser = argparse.ArgumentParser(
+    description='This is a peer node of a P2PSP network.')
+
+parser.add_argument('--trusted_hostname',
+                    help='Name of the host that runs the trusted peer. (Default = {})'.format(trusted_hostname))
+
+parser.add_argument('--trusted_port',
+                    help='(Client) Port used by the trusted peer. (Default = {})'.format(trusted_port))
+
+parser.add_argument('--listening_port',
+                    help='Port used to communicate with the player. (Default = {})'.format(listening_port))
+
+I_want_to_be_a_trusted_peer = False
+I_am_a_trusted_peer = False
+
+args = parser.parse_known_args()[0]
+if args.trusted_hostname:
+    trusted_hostname = int(args.trusted_hostname)
+if args.trusted_port:
+    I_want_to_be_a_trusted_peer = True
+    trusted_port = int(args.trusted_port)
+if args.listening_port:
+    listening_port = int(args.listening_port)
+
+trusted_peer = (trusted_hostname, trusted_port)
 
 # Estas cuatro variables las debería indicar el splitter
 source_hostname = Config.source_hostname
 source_port = Config.source_port
 channel = Config.channel
 block_size = Config.block_size
-block_format_string = Config.block_format_string
-
-trusted_peer_port = splitter_port + 1
-I_am_a_trusted_peer = False
 
 def get_player_socket():
     # {{{
@@ -41,10 +69,10 @@ def get_player_socket():
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     except:
         pass
-    sock.bind(('', peer_port))
+    sock.bind(('', listening_port))
     sock.listen(0)
 
-    print sock.getsockname(), 'Waiting for the player at port:', peer_port
+    print sock.getsockname(), 'Waiting for the player at port', listening_port
 
     sock, player = sock.accept()
     sock.setblocking(0)
@@ -97,7 +125,7 @@ def communicate_the_header():
 communicate_the_header() # Retrieve the header of the stream from the
                          # source and send it to the player.
 
-# We need to connecto to the splitter in order to retrieve the list of
+# We need to connect to the splitter in order to retrieve the list of
 # peers and blocks of video.
 splitter = (splitter_hostname, splitter_port)
 def connect_to_the_splitter(splitter_hostname, splitter_port):
@@ -106,14 +134,17 @@ def connect_to_the_splitter(splitter_hostname, splitter_port):
     sock = ''
 
     try:
-        if trusted_peer_port > 0:
-            print "Connecting to the splitter at", splitter, "using the port", trusted_peer_port, "..."
-            sock = socket.create_connection((splitter_hostname, splitter_port), \
-                                       1000,('127.0.0.1',trusted_peer_port))
-        else:
-            print "Connecting to the splitter ..."
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.connect(splitter)
+#        if trusted_peer_port > 0:
+#            print "Connecting to the splitter at", splitter, "using the port", trusted_peer_port, "..."
+#            sock = socket.create_connection((splitter_hostname, splitter_port), \
+#                                       1000,('127.0.0.1',trusted_peer_port))
+#        else:
+        print "Connecting to the splitter", splitter,
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if I_want_to_be_a_trusted_peer:
+            print "using the end-point", trusted_peer
+            sock.bind(trusted_peer)
+        sock.connect(splitter)
 
         print "Connected to the splitter", splitter, "using", sock.getsockname()
     except:
@@ -134,8 +165,7 @@ def create_cluster_sock():
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     except:
         pass
-    #sock.bind(('',splitter_sock.getsockname()[PORT]))
-    sock.bind(('', splitter_port))
+    sock.bind(('',splitter_sock.getsockname()[PORT]))
     return sock
 
    # }}}
@@ -242,12 +272,13 @@ def receive_and_feed():
     try:
         # {{{ Receive and send
         message, sender = cluster_sock.recvfrom(\
-            struct.calcsize(block_format_string))
-        if len(message) == struct.calcsize(block_format_string):
+            struct.calcsize(Config.block_format_string))
+        if len(message) == struct.calcsize(Config.block_format_string):
             # {{{ A video block has been received
 
-            number, block = struct.unpack(block_format_string, message)
+            number, block = struct.unpack(Config.block_format_string, message)
             block_number = socket.ntohs(number)
+            print sender, "-", block_number, "->", cluster_sock.getsockname(),
 
             # Insert the received block into the buffer.
             blocks[block_number % buffer_size] = block
@@ -255,7 +286,7 @@ def receive_and_feed():
             numbers[block_number % buffer_size] = block_number
 
             if sender == splitter:
-                # {{{ The burst sending mode.
+                # {{{ Send the last block in burst sending mode
 
                 # A new block has arrived from the splitter and we
                 # must check if the last block was sent fo the rest of
@@ -263,6 +294,7 @@ def receive_and_feed():
                 while( (counter > 0) & (counter < len(peer_list)) ):
                     peer = peer_list[counter]
                     cluster_sock.sendto(last, peer)
+                    print '\r', cluster_sock.getsockname(), "->", peer,
 
                     # Each time we send a block to a peer, the
                     # unreliability of that peer is incremented. Each
@@ -297,6 +329,7 @@ def receive_and_feed():
                 # {{{ Send the last block in congestion avoiding mode.
                 peer = peer_list[counter]
                 cluster_sock.sendto(last, peer)
+                print '\r', cluster_sock.getsockname(), "->", peer,
 
                 unreliability[peer] += 1        
                 if unreliability[peer] > Config.peer_unreliability_threshold:
@@ -311,6 +344,7 @@ def receive_and_feed():
             # }}}
         else:
             # {{{ A control block has been received
+
             if sender not in peer_list:
                 peer_list.append(sender)
                 print 'Added', sender, 'by \"hello\" message'
@@ -319,6 +353,7 @@ def receive_and_feed():
                 peer_list.remove(sender)
                 print 'Removed', sender, 'by \"goodbye\" message'
             return -1
+
             # }}}
         # }}}
     except socket.timeout:
@@ -391,7 +426,7 @@ def send_a_block_to_the_player():
     # Ojo, probar a no enviar nada!!!
     try:
         player_sock.sendall(blocks[block_to_play])
-        print player_sock.getsockname(), "->", numbers[block_to_play], player_sock.getpeername()
+        print player_sock.getsockname(), "->", numbers[block_to_play], player_sock.getpeername(), '\r',
  
     except socket.error:
         print 'Player disconected'
@@ -415,6 +450,8 @@ while player_connected:
                 unreliability[i] /= 2
         send_a_block_to_the_player()
         block_to_play = (block_to_play + 1) % buffer_size
+
+    print "\r",
 
 # The player has gone. Lets do a polite farewell.
 print 'No player, goodbye!'
