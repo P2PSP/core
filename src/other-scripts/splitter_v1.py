@@ -222,7 +222,6 @@ class listen_to_the_cluster(Thread):
     # }}}
 listen_to_the_cluster().start()
 
-block_size = 1024
 block_number = 0
 kbps = 0
 class compute_kbps(Thread):
@@ -235,7 +234,8 @@ class compute_kbps(Thread):
         global kbps
         last_block_number = 0
         while main_alive:
-            kbps = (block_number - last_block_number) * 1024.0/1000 * 8
+            kbps = (block_number - last_block_number) * \
+                Config.block_size * 8/1000
             last_block_number = block_number
             time.sleep(1)
 
@@ -257,7 +257,7 @@ GET_message += '\r\n'
 source_sock.sendall(GET_message)
 
 peer_index = 0
-block_format_string = "H"+str(block_size)+"s" # "H1024s
+block_format_string = "H"+str(Config.block_size)+"s" # "H1024s
 
 print "Using ", cluster_sock.getsockname(), \
     "to communicate with the cluster" 
@@ -268,9 +268,9 @@ while True:
         # Receive data from the source
         def receive_next_block():
             global source_sock
-            block = source_sock.recv(block_size)
+            block = source_sock.recv(Config.block_size)
             prev_block_size = 0
-            while len(block) < block_size:
+            while len(block) < Config.block_size:
                 if len(block) == prev_block_size:
                     print '\b!',
                     sys.stdout.flush()
@@ -281,7 +281,7 @@ while True:
                     source_sock.connect(source)
                     source_sock.sendall(GET_message)
                 prev_block_size = len(block)
-                block += source_sock.recv(block_size - len(block))
+                block += source_sock.recv(Config.block_size - len(block))
             return block
         block = receive_next_block()
         block_number = (block_number + 1) % 65536

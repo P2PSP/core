@@ -11,6 +11,7 @@ import time
 import argparse
 from threading import Thread
 from config import Config
+from color import Color
 
 IP_ADDR = 0
 PORT = 1
@@ -280,6 +281,8 @@ def receive_and_feed():
             block_number = socket.ntohs(number)
             print sender, "-", block_number, "->", cluster_sock.getsockname(),
 
+            total_blocks += 1
+
             # Insert the received block into the buffer.
             blocks[block_number % buffer_size] = block
             received[block_number % buffer_size] = True
@@ -408,6 +411,78 @@ end_latency = time.time()
 latency = end_latency - start_latency
 print 'Latency (buffering) =', latency, 'seconds'
 
+total_blocks = 0L
+
+# Handle a telnet session.
+class telnet_handler(Thread):
+    # {{{
+
+    global peer_list
+
+    def __init__(self):
+        Thread.__init__(self)
+
+    def run(self): 
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            # This does not work in Windows systems.
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        except:
+            pass
+        sock.bind(('', listening_port+2))
+
+        print sock.getsockname(), "telnet serving on port", listening_port+2
+
+        sock.listen(0)
+        try:
+            while True:
+                connection = sock.accept()[0]
+                message = 'a'
+                while message[0] != 'q':
+                    connection.sendall('Number of peers = ' + str(len(peer_list)) + '\n')
+                    counter = 0
+                    for p in peer_list:
+                        loss_percentage = float(unreliability[p]*100)/float(total_blocks)
+                        connection.sendall(str(counter) +
+                                           '\t' + str(p) +
+                                           '\t' + 'unreliability=' +
+                                           str(unreliability[p]) +
+                                           ' ({:.2}%)'.format(loss_percentage) +
+                                           '\n')
+                        counter += 1
+                    connection.sendall('\n Received blocks = ' + str(total_blocks))
+                    connection.sendall(Color.cyan + '\nEnter a line that beggings with "q" to exit or any other key to continue\n' + Color.none)
+                    message = connection.recv(2)
+
+                connection.close()
+
+        except:
+            pass
+
+#get_the_state().setDaemon(True)
+#get_the_state().daemon=True
+telnet_handler().start()
+
+kbps = 0
+class compute_kbps(Thread):
+    # {{{
+
+    def __init__(self):
+        Thread.__init__(self)
+
+    def run(self):
+        global kbps
+        last_total_blocks = 0
+        while main_alive:
+            kbps = (total_block - last_total_block) * \
+                Config.block_size * 8/1000
+            print "%8s" % kbps
+            last_total_block = total_block
+            time.sleep(1)
+
+    # }}}
+compute_kbps().start()
+
 player_connected = True
 
 def send_a_block_to_the_player():
@@ -423,10 +498,12 @@ def send_a_block_to_the_player():
         message = struct.pack("!H", block_to_play)
         cluster_sock.sendto(message, splitter)
 
+        print "Lost block", numbers[block_to_play]
+
     # Ojo, probar a no enviar nada!!!
     try:
         player_sock.sendall(blocks[block_to_play])
-        print player_sock.getsockname(), "->", numbers[block_to_play], player_sock.getpeername(), '\r',
+        #print player_sock.getsockname(), "->", numbers[block_to_play], player_sock.getpeername(), '\r',
  
     except socket.error:
         print 'Player disconected'
