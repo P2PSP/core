@@ -251,8 +251,12 @@ blocks = [None]*buffer_size
 received = [False]*buffer_size
 numbers = [0]*buffer_size
 
+total_blocks = 0L
+
 def receive_and_feed():
     # {{{
+
+    global total_blocks
 
     # This variable holds the last block received from the
     # splitter. It is used below to send the last received block in
@@ -279,7 +283,7 @@ def receive_and_feed():
 
             number, block = struct.unpack(Config.block_format_string, message)
             block_number = socket.ntohs(number)
-            print sender, "-", block_number, "->", cluster_sock.getsockname(),
+            #print sender, "-", block_number, "->", cluster_sock.getsockname(),
 
             total_blocks += 1
 
@@ -297,7 +301,7 @@ def receive_and_feed():
                 while( (counter > 0) & (counter < len(peer_list)) ):
                     peer = peer_list[counter]
                     cluster_sock.sendto(last, peer)
-                    print '\r', cluster_sock.getsockname(), "->", peer,
+                    #print '\r', cluster_sock.getsockname(), "->", peer,
 
                     # Each time we send a block to a peer, the
                     # unreliability of that peer is incremented. Each
@@ -332,7 +336,7 @@ def receive_and_feed():
                 # {{{ Send the last block in congestion avoiding mode.
                 peer = peer_list[counter]
                 cluster_sock.sendto(last, peer)
-                print '\r', cluster_sock.getsockname(), "->", peer,
+                #print '\r', cluster_sock.getsockname(), "->", peer,
 
                 unreliability[peer] += 1        
                 if unreliability[peer] > Config.peer_unreliability_threshold:
@@ -411,60 +415,12 @@ end_latency = time.time()
 latency = end_latency - start_latency
 print 'Latency (buffering) =', latency, 'seconds'
 
-total_blocks = 0L
-
-# Handle a telnet session.
-class telnet_handler(Thread):
-    # {{{
-
-    global peer_list
-
-    def __init__(self):
-        Thread.__init__(self)
-
-    def run(self): 
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            # This does not work in Windows systems.
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except:
-            pass
-        sock.bind(('', listening_port+2))
-
-        print sock.getsockname(), "telnet serving on port", listening_port+2
-
-        sock.listen(0)
-        try:
-            while True:
-                connection = sock.accept()[0]
-                message = 'a'
-                while message[0] != 'q':
-                    connection.sendall('Number of peers = ' + str(len(peer_list)) + '\n')
-                    counter = 0
-                    for p in peer_list:
-                        loss_percentage = float(unreliability[p]*100)/float(total_blocks)
-                        connection.sendall(str(counter) +
-                                           '\t' + str(p) +
-                                           '\t' + 'unreliability=' +
-                                           str(unreliability[p]) +
-                                           ' ({:.2}%)'.format(loss_percentage) +
-                                           '\n')
-                        counter += 1
-                    connection.sendall('\n Received blocks = ' + str(total_blocks))
-                    connection.sendall(Color.cyan + '\nEnter a line that beggings with "q" to exit or any other key to continue\n' + Color.none)
-                    message = connection.recv(2)
-
-                connection.close()
-
-        except:
-            pass
-
-#get_the_state().setDaemon(True)
-#get_the_state().daemon=True
-telnet_handler().start()
+# This is used to stop the child threads. They will be alive only
+# while the main thread is alive.
+main_alive = True
 
 kbps = 0
-class compute_kbps(Thread):
+class print_info(Thread):
     # {{{
 
     def __init__(self):
@@ -472,16 +428,27 @@ class compute_kbps(Thread):
 
     def run(self):
         global kbps
+        #global total_blocks
         last_total_blocks = 0
         while main_alive:
-            kbps = (total_block - last_total_block) * \
+            kbps = (total_blocks - last_total_blocks) * \
                 Config.block_size * 8/1000
-            print "%8s" % kbps
-            last_total_block = total_block
+            last_total_blocks = total_blocks
+
+            print "#\tPeer\tUnreliability\t% loss"
+            counter = 0
+            for p in peer_list:
+                loss_percentage = float(unreliability[p]*100)/float(total_blocks)
+                print counter, '\t', p, '\t', unreliability[p], \
+                    ' ({:.2}%)'.format(loss_percentage)
+                counter += 1
+            print "Number of received blocks:", total_blocks
+
+            print "Bit-rate: %8s" % kbps
             time.sleep(1)
 
     # }}}
-compute_kbps().start()
+print_info().start()
 
 player_connected = True
 
@@ -519,16 +486,22 @@ def send_a_block_to_the_player():
     # }}}
 
 while player_connected:
-    
-    block_number = receive_and_feed()
-    if block_number>=0:
-        if (block_number % 256) == 0:
-            for i in unreliability:
-                unreliability[i] /= 2
-        send_a_block_to_the_player()
-        block_to_play = (block_to_play + 1) % buffer_size
+    try:
+        block_number = receive_and_feed()
+        if block_number>=0:
+            if (block_number % 256) == 0:
+                for i in unreliability:
+                    unreliability[i] /= 2
+            send_a_block_to_the_player()
+            block_to_play = (block_to_play + 1) % buffer_size
 
-    print "\r",
+    except KeyboardInterrupt:
+        print 'Keyboard interrupt detected ... Exiting!'
+
+        # Say to the daemon threads that the work has been finished,
+        main_alive = False
+
+    #print "\r",
 
 # The player has gone. Lets do a polite farewell.
 print 'No player, goodbye!'
