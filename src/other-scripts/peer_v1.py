@@ -444,7 +444,7 @@ class print_info(Thread):
                 counter += 1
             print "Number of received blocks:", total_blocks
 
-            print "Bit-rate: %8s" % kbps
+            print "Bit-rate: %8s\t" % kbps
             time.sleep(1)
 
     # }}}
