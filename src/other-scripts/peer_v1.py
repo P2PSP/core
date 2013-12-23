@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
 # Recibe bloques desde el splitter y los reenv'ia a resto de peers.
@@ -225,11 +225,15 @@ class retrieve_the_list_of_peers(Thread):
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
+
+            print splitter_sock.getpeername(), \
+                "-", peer, '->', splitter_sock.getsockname()
+
             if peer != splitter_sock.getsockname():
                 peer_list.append(peer)
                 unreliability[peer] = 0
-                print cluster_sock.getsockname(), \
-                    "-", '"hello"', "->", peer
+                print Color.green, cluster_sock.getsockname(), \
+                    "-", '"hello"', "->", peer, Color.none
                 # Say hello to the peer
                 cluster_sock.sendto('', peer) # Send a empty block (this
                                               # should be fast).
@@ -238,9 +242,6 @@ class retrieve_the_list_of_peers(Thread):
 
             number_of_peers -= 1
 
-            print splitter_sock.getsockname(), \
-                '->', splitter_sock.getpeername(), \
-                'Received peer', peer
 
     # }}}
 retrieve_the_list_of_peers().start()
@@ -287,7 +288,8 @@ def receive_and_feed():
         message, sender = cluster_sock.recvfrom(\
             struct.calcsize(Config.block_format_string))
         #if __debug__:
-        #    print "Received a message from", sender, "of length", len(message)
+        #print Color.cyan, "Received a message from", sender, \
+        #    "of length", len(message), Color.none
         if len(message) == struct.calcsize(Config.block_format_string):
             # {{{ A video block has been received
 
@@ -310,7 +312,7 @@ def receive_and_feed():
                 # A new block has arrived from the splitter and we
                 # must check if the last block was sent fo the rest of
                 # peers of the cluster.
-                while( (counter > 0) & (counter < len(peer_list)) ):
+                while( (counter < len(peer_list)) and (counter > 0) ):
                     peer = peer_list[counter]
                     cluster_sock.sendto(last, peer)
                     if __debug__:
@@ -326,7 +328,7 @@ def receive_and_feed():
                     # threshold, the peer is removed from the list of
                     # peers.
                     if unreliability[peer] > Config.peer_unreliability_threshold:
-                        print Color.red, 'Removing the unsupportive peer', peer, Color.none
+                        print Color.red, 'removing the unsupportive peer', peer, Color.none
                         del unreliability[peer]
                         peer_list.remove(peer)
                     counter += 1
@@ -341,7 +343,7 @@ def receive_and_feed():
                     # The peer is new
                     peer_list.append(sender)
                     unreliability[sender] = 0                
-                    print Color.green, sender, '\badded by data block', \
+                    print Color.green, sender, 'added by data block', \
                         block_number, Color.none
                 else:
                     unreliability[sender] -= 1;
@@ -352,7 +354,7 @@ def receive_and_feed():
                 
             # A new block has arrived and it must be forwarded to the
             # rest of peers of the cluster.
-            if counter < len(peer_list):
+            if ( counter < len(peer_list) ):
                 # {{{ Send the last block in congestion avoiding mode.
 
                 peer = peer_list[counter]
@@ -377,14 +379,14 @@ def receive_and_feed():
             # }}}
         else:
             # {{{ A control block has been received
-
+            print Color.cyan, message
             if sender not in peer_list:
+                print Color.green, sender, 'added by \"hello\" message', Color.none
                 peer_list.append(sender)
-                print Color.green, sender, 'Added by \"hello\" message', Color.none
                 unreliability[sender] = 0
             else:
+                print Color.red, sender, 'removed by \"goodbye\" message', Color.none
                 peer_list.remove(sender)
-                print Color.red, sender, 'Removed by \"goodbye\" message', Color.none
             return -1
 
             # }}}
@@ -469,7 +471,10 @@ class print_info(Thread):
                     ' ({:.2}%)'.format(loss_percentage)
                 counter += 1
             '''
-            print '\r', "%8s" % total_blocks, Config.block_size, "\b-bytes blocks received,", "%8s kbps." % kbps
+            print '\r', "%8d" % total_blocks, "blocks received,", "%8d kbps." % kbps,
+            for x in xrange(0,kbps/10):
+                print "\b#",
+            print
             time.sleep(1)
 
     # }}}
