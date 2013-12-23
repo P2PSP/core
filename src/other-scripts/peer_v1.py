@@ -1,4 +1,4 @@
-#!/usr/bin/python -O
+#!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 
 # Recibe bloques desde el splitter y los reenv'ia a resto de peers.
@@ -73,12 +73,12 @@ def get_player_socket():
     sock.bind(('', listening_port))
     sock.listen(0)
 
-    print sock.getsockname(), 'Waiting for the player at port', listening_port
+    print sock.getsockname(), "waiting for the player at port", listening_port
 
     sock, player = sock.accept()
     sock.setblocking(0)
 
-    print sock.getsockname(), 'Player is', sock.getpeername()
+    print sock.getsockname(), "the player is", sock.getpeername()
 
     return sock
 
@@ -97,7 +97,7 @@ def communicate_the_header():
     source_sock.sendall(GET_message)
 
     print source_sock.getsockname(), \
-        'Requesting the stream header to http://' + \
+        "requesting the stream header via http://" + \
         str(source_sock.getpeername()[0]) + \
         ':' + str(source_sock.getpeername()[1]) + \
         '/'+str(channel)
@@ -114,11 +114,11 @@ def communicate_the_header():
         data = source_sock.recv(header_size - len(data))
         player_sock.sendall(data)
         total_received += len(data)
-        print "Received bytes:", total_received, "\r",
+        print "received bytes:", total_received, "\r",
 
     # }}}
 
-    print source_sock.getsockname(), 'Got', total_received, 'bytes'
+    print source_sock.getsockname(), 'got', total_received, 'bytes'
 
     source_sock.close()
 
@@ -140,14 +140,14 @@ def connect_to_the_splitter(splitter_hostname, splitter_port):
 #            sock = socket.create_connection((splitter_hostname, splitter_port), \
 #                                       1000,('127.0.0.1',trusted_peer_port))
 #        else:
-        print "Connecting to the splitter", splitter,
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print sock.getsockname(), "connecting to the splitter", splitter,
         if I_want_to_be_a_trusted_peer:
             print "using the end-point", trusted_peer
             sock.bind(trusted_peer)
         sock.connect(splitter)
 
-        print "Connected to the splitter", splitter, "using", sock.getsockname()
+        print sock.getsockname(), "connected to the splitter", splitter
     except:
         sys.exit("Sorry. Can't connect with the splitter at " + str(splitter))
     return sock
@@ -204,15 +204,15 @@ class retrieve_the_list_of_peers(Thread):
 
         # Request the list of peers
         print splitter_sock.getsockname(), \
-            '->', splitter_sock.getpeername(), \
-            'Requesting the list of peers'
+            "-", 'Requesting the list of peers',
+            '->', splitter_sock.getpeername()
 
         number_of_peers = socket.ntohs(\
             struct.unpack("H",splitter_sock.recv(struct.calcsize("H")))[0])
 
         print splitter_sock.getpeername(), \
-            '->', splitter_sock.getsockname(), \
-            'The number of peers is:', number_of_peers
+            "-", "the size of the list of peers is:", number_of_peers,
+            '->', splitter_sock.getsockname()
 
         while number_of_peers > 0:
             message = splitter_sock.recv(struct.calcsize("4sH"))
@@ -223,7 +223,8 @@ class retrieve_the_list_of_peers(Thread):
             if peer != splitter_sock.getsockname():
                 peer_list.append(peer)
                 unreliability[peer] = 0
-
+                print clulster_sock.getsockname(), \
+                    "-", '"hello"', "->", peer
                 # Say hello to the peer
                 cluster_sock.sendto('', peer) # Send a empty block (this
                                               # should be fast).
@@ -253,37 +254,43 @@ numbers = [0]*buffer_size
 
 total_blocks = 0L
 
+# This variable holds the last block received from the
+# splitter. It is used below to send the last received block in
+# the congestion avoiding mode. In that mode, the peer sends a
+# block only when it received a block from another peer or om the
+# splitter.
+last = ''
+
+# Number of times that the last received block has been sent to
+# the cluster. If this counter is smaller than the number of peers
+# in the cluster, the last block must be sent in the burst mode
+# because a new block from the splitter has arrived and the last
+# received block has not been sent to all the peers of the
+# cluster. This can happen when one o more blocks that were routed
+# towards this peer have been lost.
+counter = 0
+
 def receive_and_feed():
     # {{{
 
     global total_blocks
-
-    # This variable holds the last block received from the
-    # splitter. It is used below to send the last received block in
-    # the congestion avoiding mode. In that mode, the peer sends a
-    # block only when it received a block from another peer or om the
-    # splitter.
-    last = ''
-
-    # Number of times that the last received block has been sent to
-    # the cluster. If this counter is smaller than the number of peers
-    # in the cluster, the last block must be sent in the burst mode
-    # because a new block from the splitter has arrived and the last
-    # received block has not been sent to all the peers of the
-    # cluster. This can happen when one o more blocks that were routed
-    # towards this peer have been lost.
-    counter = 0
+    global last
+    global counter
 
     try:
         # {{{ Receive and send
         message, sender = cluster_sock.recvfrom(\
             struct.calcsize(Config.block_format_string))
+        #if __debug__:
+        #    print "Received a message from", sender, "of length", len(message)
         if len(message) == struct.calcsize(Config.block_format_string):
             # {{{ A video block has been received
 
             number, block = struct.unpack(Config.block_format_string, message)
             block_number = socket.ntohs(number)
-            #print sender, "-", block_number, "->", cluster_sock.getsockname(),
+
+            if __debug__:
+                print sender, "-", block_number, "->", cluster_sock.getsockname()
 
             total_blocks += 1
 
@@ -301,7 +308,8 @@ def receive_and_feed():
                 while( (counter > 0) & (counter < len(peer_list)) ):
                     peer = peer_list[counter]
                     cluster_sock.sendto(last, peer)
-                    #print '\r', cluster_sock.getsockname(), "->", peer,
+                    if __debug__:
+                        print cluster_sock.getsockname(), "-", block_number, "->", peer
 
                     # Each time we send a block to a peer, the
                     # unreliability of that peer is incremented. Each
@@ -313,9 +321,9 @@ def receive_and_feed():
                     # threshold, the peer is removed from the list of
                     # peers.
                     if unreliability[peer] > Config.peer_unreliability_threshold:
+                        print Color.red, 'Removing the unsupportive peer', peer, Color.none
                         del unreliability[peer]
                         peer_list.remove(peer)
-                        print 'Removing the unsupportive peer', peer
                     counter += 1
                 counter = 0
                 last = message
@@ -323,27 +331,36 @@ def receive_and_feed():
                # }}}
             else:
                 # {{{ The sender is a peer, check if the peer is new.
+
                 if sender not in peer_list:
                     # The peer is new
                     peer_list.append(sender)
                     unreliability[sender] = 0                
-                    print 'Added', sender, 'by data block'
+                    print Color.green, sender, 'Added by data block', \
+                        block_number, Color.none
+
                 # }}}
                 
             # A new block has arrived and it must be forwarded to the
             # rest of peers of the cluster.
             if counter < len(peer_list):
                 # {{{ Send the last block in congestion avoiding mode.
+
                 peer = peer_list[counter]
                 cluster_sock.sendto(last, peer)
-                #print '\r', cluster_sock.getsockname(), "->", peer,
+                if __debug__:
+                    print cluster_sock.getsockname(), "-", block_number, "->", peer
 
                 unreliability[peer] += 1        
                 if unreliability[peer] > Config.peer_unreliability_threshold:
+                    print Color.red, peer, 'Removed by unsupportive', \
+                        "(unreliability[", "\b", peer, "\b] = ", \
+                        unreliability[peer], ">", Config.peer_unreliability_threshold, \
+                        Color.none  
                     del unreliability[peer]
                     peer_list.remove(peer)
-                    print 'Removing the unsupportive peer', peer 
                 counter += 1        
+
                 # }}}
 
             return block_number
@@ -354,11 +371,11 @@ def receive_and_feed():
 
             if sender not in peer_list:
                 peer_list.append(sender)
-                print 'Added', sender, 'by \"hello\" message'
+                print Color.green, sender, 'Added by \"hello\" message', Color.none
                 unreliability[sender] = 0
             else:
                 peer_list.remove(sender)
-                print 'Removed', sender, 'by \"goodbye\" message'
+                print Color.red, sender, 'Removed by \"goodbye\" message', Color.none
             return -1
 
             # }}}
@@ -434,7 +451,7 @@ class print_info(Thread):
             kbps = (total_blocks - last_total_blocks) * \
                 Config.block_size * 8/1000
             last_total_blocks = total_blocks
-
+            '''
             print "#\tPeer\tUnreliability\t% loss"
             counter = 0
             for p in peer_list:
@@ -442,9 +459,8 @@ class print_info(Thread):
                 print counter, '\t', p, '\t', unreliability[p], \
                     ' ({:.2}%)'.format(loss_percentage)
                 counter += 1
-            print "Number of received blocks:", total_blocks
-
-            print "Bit-rate: %8s\t" % kbps
+            '''
+            print '\r', "%8s" % total_blocks, Config.block_size, "\b-bytes blocks received,", "%8s kbps." % kbps
             time.sleep(1)
 
     # }}}
@@ -465,7 +481,7 @@ def send_a_block_to_the_player():
         message = struct.pack("!H", block_to_play)
         cluster_sock.sendto(message, splitter)
 
-        print "Lost block", numbers[block_to_play]
+        #print Color.blue, "\bLost block:", numbers[block_to_play], Color.none
 
     # Ojo, probar a no enviar nada!!!
     try:
@@ -496,10 +512,9 @@ while player_connected:
             block_to_play = (block_to_play + 1) % buffer_size
 
     except KeyboardInterrupt:
-        print 'Keyboard interrupt detected ... Exiting!'
-
         # Say to the daemon threads that the work has been finished,
         main_alive = False
+        sys.exit('Keyboard interrupt detected ... Exiting!')
 
     #print "\r",
 
