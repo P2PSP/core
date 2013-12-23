@@ -13,6 +13,11 @@ from threading import Thread
 from config import Config
 from color import Color
 
+if __debug__:
+    print "Running in debug mode"
+else:
+    print "Running in release mode"
+
 IP_ADDR = 0
 PORT = 1
 
@@ -223,7 +228,7 @@ class retrieve_the_list_of_peers(Thread):
             if peer != splitter_sock.getsockname():
                 peer_list.append(peer)
                 unreliability[peer] = 0
-                print clulster_sock.getsockname(), \
+                print cluster_sock.getsockname(), \
                     "-", '"hello"', "->", peer
                 # Say hello to the peer
                 cluster_sock.sendto('', peer) # Send a empty block (this
@@ -336,7 +341,7 @@ def receive_and_feed():
                     # The peer is new
                     peer_list.append(sender)
                     unreliability[sender] = 0                
-                    print Color.green, sender, 'Added by data block', \
+                    print Color.green, sender, '\badded by data block', \
                         block_number, Color.none
                 else:
                     unreliability[sender] -= 1;
