@@ -204,14 +204,14 @@ class retrieve_the_list_of_peers(Thread):
 
         # Request the list of peers
         print splitter_sock.getsockname(), \
-            "-", 'Requesting the list of peers',
+            "-", 'Requesting the list of peers', \
             '->', splitter_sock.getpeername()
 
         number_of_peers = socket.ntohs(\
             struct.unpack("H",splitter_sock.recv(struct.calcsize("H")))[0])
 
         print splitter_sock.getpeername(), \
-            "-", "the size of the list of peers is:", number_of_peers,
+            "-", "the size of the list of peers is:", number_of_peers, \
             '->', splitter_sock.getsockname()
 
         while number_of_peers > 0:
@@ -338,6 +338,10 @@ def receive_and_feed():
                     unreliability[sender] = 0                
                     print Color.green, sender, 'Added by data block', \
                         block_number, Color.none
+                else:
+                    unreliability[sender] -= 1;
+                    if unreliability[sender] < 0:
+                        unreliability[sender] = 0
 
                 # }}}
                 
@@ -481,7 +485,7 @@ def send_a_block_to_the_player():
         message = struct.pack("!H", block_to_play)
         cluster_sock.sendto(message, splitter)
 
-        #print Color.blue, "\bLost block:", numbers[block_to_play], Color.none
+        print Color.blue, "\blost block:", numbers[block_to_play], Color.none
 
     # Ojo, probar a no enviar nada!!!
     try:
