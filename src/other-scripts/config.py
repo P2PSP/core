@@ -22,7 +22,8 @@ class Config:
     splitter_port = 8888
     block_format_string = "H" + str(block_size) + "s" # "H1024s
     cluster_timeout = 1 # Seconds
-    peer_unreliability_threshold = 64
+    peer_unreliability_threshold = 8
+    peer_complaining_threshold = 8
     trusted_hostname = splitter_hostname
     trusted_port = splitter_port + 1
     #trusted_peer_port = splitter_port + 1

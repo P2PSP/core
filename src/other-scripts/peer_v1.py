@@ -354,7 +354,7 @@ def receive_and_feed():
                 
             # A new block has arrived and it must be forwarded to the
             # rest of peers of the cluster.
-            if ( counter < len(peer_list) ):
+            if ( counter < len(peer_list) and ( last != '') ):
                 # {{{ Send the last block in congestion avoiding mode.
 
                 peer = peer_list[counter]
@@ -379,7 +379,7 @@ def receive_and_feed():
             # }}}
         else:
             # {{{ A control block has been received
-            print Color.cyan, message
+
             if sender not in peer_list:
                 print Color.green, sender, 'added by \"hello\" message', Color.none
                 peer_list.append(sender)
@@ -471,10 +471,11 @@ class print_info(Thread):
                     ' ({:.2}%)'.format(loss_percentage)
                 counter += 1
             '''
-            print '\r', "%8d" % total_blocks, "blocks received,", "%8d kbps." % kbps,
+            #print '\r', "%8d" % total_blocks, "blocks/s,", "%8d kbps." % kbps,
             for x in xrange(0,kbps/10):
                 print "\b#",
-            print
+            print kbps, "kbps"
+
             time.sleep(1)
 
     # }}}
@@ -506,8 +507,7 @@ def send_a_block_to_the_player():
         print 'Player disconected'
         player_connected = False
         return
-    except Exception as detail:
-        print 'unhandled exception', detail
+    finally:
         return
 
     # We have fired the block.
@@ -533,6 +533,7 @@ while player_connected:
     #print "\r",
 
 # The player has gone. Lets do a polite farewell.
+main_alive = False
 print 'No player, goodbye!'
 goodbye = ''
 cluster_sock.sendto(goodbye, splitter)

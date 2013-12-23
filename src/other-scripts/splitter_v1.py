@@ -9,6 +9,12 @@ import socket
 from threading import Thread
 import struct
 from config import Config
+from color import Color
+
+if __debug__:
+    print "Running in debug mode"
+else:
+    print "Running in release mode"
 
 source_hostname = Config.source_hostname
 source_port = Config.source_port
@@ -68,11 +74,13 @@ destination_of_block = [('0.0.0.0',0) for i in xrange(buffer_size)]
 # peer. Counts the number of times a peer has not re-transmitted a
 # packet.
 unreliability = {}
+unreliability[('127.0.0.1',splitter_port+1)] = 0
 
 # Complaining rate of a peer. Sometimes the complaining peer has not
 # enough bandwidth in his download link. In this case, the peevish
 # peers should be rejected from the cluster.
 complains = {}
+complains[('127.0.0.1',splitter_port+1)] = 0
 
 # Useful definitions.
 IP_ADDR = 0
@@ -111,19 +119,20 @@ class handle_one_arrival(Thread):
             self.peer
 
         print self.peer_serve_socket.getsockname(), \
-            'Sending the list of peers ...',
+            'sending the list of peers ...'
 
         # Sends the size of the list of peers.
         message = struct.pack("H", socket.htons(len(peer_list)))
         self.peer_serve_socket.sendall(message)
 
         # Send the list of peers.
+        counter = 1
         for p in peer_list:
             message = struct.pack(
                 "4sH", socket.inet_aton(p[IP_ADDR]),
                 socket.htons(p[PORT]))
             self.peer_serve_socket.sendall(message)
-            print p
+            print "%5d" % counter, p
 
         print 'done'
 
@@ -133,9 +142,6 @@ class handle_one_arrival(Thread):
             unreliability[self.peer] = 0
             complains[self.peer] = 0
 
-        print "The list of peers is:",
-        for p in peer_list:
-            print p
     # }}}
 
 # The daemon which runs the "handle_one_arrival" threads. 
@@ -155,6 +161,8 @@ class handle_arrivals(Thread):
     # }}}
 handle_arrivals().start()
 
+peer_index = 0
+
 # A new daemon to administrate the cluster.
 class listen_to_the_cluster(Thread):
     # {{{
@@ -163,6 +171,9 @@ class listen_to_the_cluster(Thread):
         Thread.__init__(self)
 
     def run(self):
+
+        global peer_index
+
         print "Listening to the cluster at", cluster_sock.getsockname()
         while main_alive:
             # {{{
@@ -176,13 +187,15 @@ class listen_to_the_cluster(Thread):
             # zero-length payload.
             if len(message) == 0:
                 # An empty message is a goodbye message.
-                try:
-                    peer_list.remove(sender)
-                    print sender, 'has left the cluster'
-                except:
-                    # Received a googbye message from a peer which is
-                    # not in the list of peers.
-                    pass
+                if sender != peer_list[0]:
+                    try:
+                        peer_index -= 1
+                        peer_list.remove(sender)
+                        print Color.red, sender, 'has left the cluster', Color.none
+                    except:
+                        # Received a googbye message from a peer which is
+                        # not in the list of peers.
+                        pass
             else:
                 # The sender of the packet complains, and the packet
                 # comes with the index of a lost (non-received)
@@ -191,32 +204,44 @@ class listen_to_the_cluster(Thread):
                 # block to other peers. If this number exceeds a
                 # threshold, the unsupportive peer is expelled from
                 # the cluster. Moreover, if we receive too much
-                # complains from the same peer, the problem counld be
+                # complains from the same peer, the problem could be
                 # in that peer and it will be expelled from the
                 # cluster.
                 lost_block = struct.unpack("!H",message)[0]
+                destination = destination_of_block[lost_block]
+                print Color.blue, sender, \
+                    'complains about lost block', lost_block, \
+                    'sent to', destination, Color.none
                 try:
-                    destination = destination_of_block[lost_block]
-                    print sender, \
-                        'complains about lost block', lost_block, \
-                        'sent to', destination
                     unreliability[destination] += 1
-                    complains[sender] += 1
-                    if unreliability[destination] > len(peer_list):
-                        print 'Too much complains about unsupportive peer', \
-                            destination
+                except:
+                    print "the unsupportive peer does not exit"
+                    pass
+                else:
+                    print Color.blue, "complains about", destination, \
+                        "=", unreliability[destination], Color.none
+                    if unreliability[destination] > Config.peer_unreliability_threshold:
+                        print Color.red, 'too much complains about unsupportive peer', \
+                            destination, Color.none
+                        peer_index -= 1
                         peer_list.remove(destination)
                         del unreliability[destination]
                         del complains[destination]
-                    if complains[sender] > 1000:
-                        print 'Too much complains of a peevish peer', \
-                            sender
-                        peer_list.remove(sender)
-                        del complains[sender]
-                        del unreliability[sender]
-                except:
-                    # The unsupportive peer does not exit.
-                    pass
+
+                if sender != peer_list[0]:
+                    try:
+                        complains[sender] += 1
+                    except:
+                        print "the complaining peer does not exit"
+                        pass
+                    else:
+                        if complains[sender] > Config.peer_complaining_threshold:
+                            print Color.red, 'too much complains of a peevish peer', \
+                                sender, Color.none
+                            peer_index -= 1
+                            peer_list.remove(sender)
+                            del complains[sender]
+                            del unreliability[sender]
             # }}}
 
     # }}}
@@ -224,7 +249,7 @@ listen_to_the_cluster().start()
 
 block_number = 0
 kbps = 0
-class compute_kbps(Thread):
+class print_info(Thread):
     # {{{
 
     def __init__(self):
@@ -237,10 +262,15 @@ class compute_kbps(Thread):
             kbps = (block_number - last_block_number) * \
                 Config.block_size * 8/1000
             last_block_number = block_number
+
+            for x in xrange(0,kbps/10):
+                print "\b#",
+            print kbps, "kbps"
+
             time.sleep(1)
 
     # }}}
-compute_kbps().start()
+print_info().start()
 
 source = (source_hostname, source_port)
 source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -256,11 +286,10 @@ GET_message = 'GET /' + channel + ' HTTP/1.1\r\n'
 GET_message += '\r\n'
 source_sock.sendall(GET_message)
 
-peer_index = 0
 block_format_string = "H"+str(Config.block_size)+"s" # "H1024s
 
 print "Using ", cluster_sock.getsockname(), \
-    "to communicate with the cluster" 
+    "to communicate with the cluster"
 
 # This is the main loop of the splitter
 while True:
@@ -292,6 +321,7 @@ while True:
                               socket.htons(block_number),
                               block)
         cluster_sock.sendto(message, peer)
+        destination_of_block[block_number % buffer_size] = peer
         peer_index = (peer_index + 1) % len(peer_list)
 
         # Decrement (dividing by 2) unreliability and complains after
@@ -304,8 +334,8 @@ while True:
 
         #print '\r', block_number, '->', peer, '('+str(kbps)+' kbps)',
         #print '\r', '%5d' % block_number, '->', peer, '('+str(kbps)+' kbps)',
-        sys.stdout.write('\r' + "%5s" % block_number + " -> " + '(' + "%15s" % peer[0] + ',' + "%5s" % peer[1] + ')' + " %8s" % kbps)
-        sys.stdout.flush()
+        #sys.stdout.write('\r' + "%5s" % block_number + " -> " + '(' + "%15s" % peer[0] + ',' + "%5s" % peer[1] + ')' + " %8s" % kbps)
+        #sys.stdout.flush()
 
     except KeyboardInterrupt:
         print 'Keyboard interrupt detected ... Exiting!'
