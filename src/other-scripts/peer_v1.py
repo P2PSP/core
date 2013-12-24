@@ -514,7 +514,7 @@ def send_a_block_to_the_player():
         #print player_sock.getsockname(), "->", numbers[block_to_play], player_sock.getpeername(), '\r',
  
     except socket.error:
-        print 'Player disconected'
+        print 'Player disconected,',
         player_connected = False
         return
     finally:
@@ -544,7 +544,7 @@ while player_connected:
 
 # The player has gone. Lets do a polite farewell.
 main_alive = False
-print 'No player, goodbye!'
+print 'goodbye!'
 goodbye = ''
 cluster_sock.sendto(goodbye, splitter)
 for x in xrange(3):
