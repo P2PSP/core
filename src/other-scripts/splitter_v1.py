@@ -10,16 +10,37 @@ from threading import Thread
 import struct
 from config import Config
 from color import Color
+import argparse
+
+source_hostname = Config.source_hostname
+source_port = Config.source_port
+listening_port = Config.splitter_listening_port
+buffer_size = Config.buffer_size
+
+parser = argparse.ArgumentParser(
+    description='This is the splitter node of a P2PSP network.')
+
+parser.add_argument('--source_hostname',
+                    help='Hostname of the streaming server. (Default = "{}")'.format(source_hostname))
+
+parser.add_argument('--source_port',
+                    help='Listening port of the streaming server. (Default = {})'.format(source_port))
+
+parser.add_argument('--listening_port',
+                    help='Port to talk with the peers. (Default = {})'.format(listening_port))
+
+args = parser.parse_known_args()[0]
+if args.source_hostname:
+    source_hostname = str(args.source_hostname)
+if args.source_port:
+    source_port = int(args.source_port)
+if args.listening_port:
+    listening_port = int(args.listening_port)
 
 if __debug__:
     print "Running in debug mode"
 else:
     print "Running in release mode"
-
-source_hostname = Config.source_hostname
-source_port = Config.source_port
-splitter_port = Config.splitter_port
-buffer_size = Config.buffer_size
 
 def get_peer_connection_socket():
     # {{{
@@ -32,7 +53,7 @@ def get_peer_connection_socket():
     except:
         pass
 
-    sock.bind( ('', splitter_port) )
+    sock.bind( ('', listening_port) )
     #sock.listen(5)
     sock.listen(socket.SOMAXCONN)   # Set the connection queue to the max!
 
@@ -42,7 +63,7 @@ def get_peer_connection_socket():
 # Socket to manage the cluster (churn).
 peer_connection_sock = get_peer_connection_socket()
 
-def create_cluster_sock(splitter_port):
+def create_cluster_sock(listening_port):
     # {{{ 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
@@ -50,20 +71,20 @@ def create_cluster_sock(splitter_port):
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     except:
         pass
-    sock.bind(('', splitter_port))
+    sock.bind(('', listening_port))
     #peer_socket.bind(('',peer_connection_sock.getsockname()[PORT]))
 
     return sock
     # }}}
 # Socket to send the media to the cluster.
-cluster_sock = create_cluster_sock(splitter_port)
+cluster_sock = create_cluster_sock(listening_port)
 
 # The list of peers in the cluster. There will be always a peer in the
 # list of peers that, by default, is running in the same host than the
-# splitter, listening to the port splitter_port+1. Notice that you
+# splitter, listening to the port listening_port+1. Notice that you
 # can replace this end-point by any other you want, for example, in a
 # different host.
-peer_list = [('127.0.0.1',splitter_port+1)]
+peer_list = [('127.0.0.1',listening_port+1)]
 #peer_list = []
 
 # Destination peers of the block, indexed by a block number. Used to
@@ -74,13 +95,13 @@ destination_of_block = [('0.0.0.0',0) for i in xrange(buffer_size)]
 # peer. Counts the number of times a peer has not re-transmitted a
 # packet.
 unreliability = {}
-unreliability[('127.0.0.1',splitter_port+1)] = 0
+unreliability[('127.0.0.1',listening_port+1)] = 0
 
 # Complaining rate of a peer. Sometimes the complaining peer has not
 # enough bandwidth in his download link. In this case, the peevish
 # peers should be rejected from the cluster.
 complains = {}
-complains[('127.0.0.1',splitter_port+1)] = 0
+complains[('127.0.0.1',listening_port+1)] = 0
 
 # Useful definitions.
 IP_ADDR = 0
@@ -345,12 +366,12 @@ while True:
 
         # Wake up the "listen_to_the_cluster" daemon, which is waiting
         # in a cluster_sock.recvfrom(...).
-        cluster_sock.sendto('',('127.0.0.1',splitter_port))
+        cluster_sock.sendto('',('127.0.0.1',listening_port))
 
         # Wake up the "handle_arrivals" daemon, which is waiting in a
         # peer_connection_sock.accept().
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect(('127.0.0.1',splitter_port))
+        sock.connect(('127.0.0.1',listening_port))
 
         # Breaks this thread and returns to the parent process (usually,
         # the shell).

@@ -22,9 +22,9 @@ IP_ADDR = 0
 PORT = 1
 
 buffer_size = Config.buffer_size
-listening_port = Config.listening_port
+listening_port = Config.peer_listening_port
 splitter_hostname = Config.splitter_hostname
-splitter_port = Config.splitter_port
+splitter_port = Config.splitter_listening_port
 header_size = Config.header_size
 #trusted_peer_port = Config.trusted_peer_port
 
@@ -45,6 +45,12 @@ parser.add_argument('--trusted_port',
 parser.add_argument('--listening_port',
                     help='Port used to communicate with the player. (Default = {})'.format(listening_port))
 
+parser.add_argument('--splitter_hostname',
+                    help='Hostname of the splitter. (Default = {})'.format(splitter_hostname))
+
+parser.add_argument('--splitter_port',
+                    help='Listening port of the splitter. (Default = {})'.format(splitter_port))
+
 I_want_to_be_a_trusted_peer = False
 I_am_a_trusted_peer = False
 
@@ -56,6 +62,10 @@ if args.trusted_port:
     trusted_port = int(args.trusted_port)
 if args.listening_port:
     listening_port = int(args.listening_port)
+if args.splitter_hostname:
+    splitter_hostname = args.splitter_hostname
+if args.splitter_port:
+    splitter_port = args.splitter_port
 
 trusted_peer = (trusted_hostname, trusted_port)
 

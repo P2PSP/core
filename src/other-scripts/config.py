@@ -18,8 +18,8 @@ class Config:
     #splitter_hostname = '150.214.150.68'
     splitter_hostname = '127.0.0.1'
     splitter_port = 4552
-    listening_port = 9999 # Port to communicate a peer with the player
-    splitter_port = 8888
+    peer_listening_port = 9999 # Port to communicate a peer with the player
+    splitter_listening_port = 8888
     block_format_string = "H" + str(block_size) + "s" # "H1024s
     cluster_timeout = 1 # Seconds
     peer_unreliability_threshold = 8
