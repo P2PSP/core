@@ -3,6 +3,8 @@
 # Recibe un stream y lo sirve v'ia UDP. Posee hilos de gesti'on del
 # cluster.
 
+# {{{ Imports
+
 import time
 import sys
 import socket
@@ -12,10 +14,23 @@ from config import Config
 from color import Color
 import argparse
 
+# }}}
+
+if __debug__:
+    print "Running in debug mode"
+else:
+    print "Running in release mode"
+
+# {{{ Configs
+
 source_hostname = Config.source_hostname
 source_port = Config.source_port
 listening_port = Config.splitter_listening_port
 buffer_size = Config.buffer_size
+
+# }}}
+
+# {{{ Parser
 
 parser = argparse.ArgumentParser(
     description='This is the splitter node of a P2PSP network.')
@@ -37,10 +52,7 @@ if args.source_port:
 if args.listening_port:
     listening_port = int(args.listening_port)
 
-if __debug__:
-    print "Running in debug mode"
-else:
-    print "Running in release mode"
+# }}}
 
 def get_peer_connection_socket():
     # {{{
@@ -199,11 +211,11 @@ class listen_to_the_cluster(Thread):
         while main_alive:
             # {{{
 
-            # Usually, peers complain about lost blocks, and a block
-            # index is stored in a "H" (unsigned short) register.
+            # Peers complain about lost blocks, and a block index is
+            # stored in a "H" (unsigned short) register.
             message, sender = cluster_sock.recvfrom(struct.calcsize("H"))
 
-            # However, sometimes peers only want to go. In this case,
+            # However, sometimes peers only want to exit. In this case,
             # they send a UDP datagram to the splitter with a
             # zero-length payload.
             if len(message) == 0:

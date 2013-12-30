@@ -3,6 +3,8 @@
 
 # Recibe bloques desde el splitter y los reenv'ia a resto de peers.
 
+# {{{ Imports
+
 import os
 import sys
 import socket
@@ -13,6 +15,8 @@ from threading import Thread
 from config import Config
 from color import Color
 
+# }}}
+
 if __debug__:
     print "Running in debug mode"
 else:
@@ -21,6 +25,8 @@ else:
 IP_ADDR = 0
 PORT = 1
 
+# {{{ Configs
+
 buffer_size = Config.buffer_size
 listening_port = Config.peer_listening_port
 splitter_hostname = Config.splitter_hostname
@@ -28,10 +34,14 @@ splitter_port = Config.splitter_listening_port
 header_size = Config.header_size
 #trusted_peer_port = Config.trusted_peer_port
 
+# }}}
+
 trusted_peer_port = splitter_port + 1
 I_am_a_trusted_peer = False
 trusted_hostname = Config.trusted_hostname
 trusted_port = Config.trusted_port
+
+# {{{ Parser
 
 parser = argparse.ArgumentParser(
     description='This is a peer node of a P2PSP network.')
@@ -68,6 +78,8 @@ if args.splitter_port:
     splitter_port = args.splitter_port
 
 trusted_peer = (trusted_hostname, trusted_port)
+
+# }}}
 
 # Estas cuatro variables las debería indicar el splitter
 source_hostname = Config.source_hostname
