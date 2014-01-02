@@ -21,32 +21,32 @@ if __debug__:
 else:
     print "Running in release mode"
 
-# {{{ Configs
+# {{{ Default values
 
-source_hostname = Config.source_hostname
-source_port = Config.source_port
-listening_port = Config.splitter_listening_port
-buffer_size = Config.buffer_size
+buffer_size = Config.buffer_size # Definir aqu'i y pasar a los peers
 
 # }}}
 
-# {{{ Parser
+# {{{ Args parsing
 
 parser = argparse.ArgumentParser(
     description='This is the splitter node of a P2PSP network.')
 
+source_hostname = Config.source_hostname
 parser.add_argument('--source_hostname',
                     help='Hostname of the streaming server. (Default = "{}")'.format(source_hostname))
 
+source_port = Config.source_port
 parser.add_argument('--source_port',
                     help='Listening port of the streaming server. (Default = {})'.format(source_port))
 
+listening_port = 8888
 parser.add_argument('--listening_port',
                     help='Port to talk with the peers. (Default = {})'.format(listening_port))
 
 args = parser.parse_known_args()[0]
 if args.source_hostname:
-    source_hostname = str(args.source_hostname)
+    source_hostname = args.source_hostname
 if args.source_port:
     source_port = int(args.source_port)
 if args.listening_port:
@@ -96,24 +96,24 @@ cluster_sock = create_cluster_sock(listening_port)
 # splitter, listening to the port listening_port+1. Notice that you
 # can replace this end-point by any other you want, for example, in a
 # different host.
-peer_list = [('127.0.0.1',listening_port+1)]
-#peer_list = []
+#peer_list = [('127.0.0.1',listening_port+1)]
+peer_list = []
 
-# Destination peers of the block, indexed by a block number. Used to
-# find the peer to which a block has been sent.
-destination_of_block = [('0.0.0.0',0) for i in xrange(buffer_size)]
+# Destination peers of the chunk, indexed by a chunk number. Used to
+# find the peer to which a chunk has been sent.
+destination_of_chunk = [('0.0.0.0',0) for i in xrange(buffer_size)]
 
 # Unreliaility of the peers, indexed by (the end-point of) the
 # peer. Counts the number of times a peer has not re-transmitted a
 # packet.
 unreliability = {}
-unreliability[('127.0.0.1',listening_port+1)] = 0
+#unreliability[('127.0.0.1',listening_port+1)] = 0
 
 # Complaining rate of a peer. Sometimes the complaining peer has not
 # enough bandwidth in his download link. In this case, the peevish
 # peers should be rejected from the cluster.
 complains = {}
-complains[('127.0.0.1',listening_port+1)] = 0
+#complains[('127.0.0.1',listening_port+1)] = 0
 
 # Useful definitions.
 IP_ADDR = 0
@@ -122,6 +122,44 @@ PORT = 1
 # This is used to stop the child threads. They will be alive only
 # while the main thread is alive.
 main_alive = True
+
+def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
+    print peer_serve_socket.getsockname(), \
+        'Accepted connection from peer', \
+        peer
+
+    print peer_serve_socket.getsockname(), \
+        'sending the list of peers ...'
+
+    # Sends the size of the list of peers.
+    message = struct.pack("H", socket.htons(len(peer_list)))
+    peer_serve_socket.sendall(message)
+
+    # Send the list of peers.
+    counter = 1
+    for p in peer_list:
+        message = struct.pack(
+            "4sH", socket.inet_aton(p[IP_ADDR]),
+            socket.htons(p[PORT]))
+        peer_serve_socket.sendall(message)
+        print "%5d" % counter, p
+
+    print 'done'
+
+    if peer not in peer_list:
+        peer_serve_socket.close()
+        peer_list.append(peer)
+        unreliability[peer] = 0
+        complains[peer] = 0
+
+def wait_for_the_trusted_peer(peer_connection_sock, peer_list, unreliability):
+    print "Waiting for the trusted peer ...",
+    sys.stdout.flush()
+    peer_serve_socket, peer = peer_connection_sock.accept()
+    print "accepted!"
+    arrival_handler(peer_serve_socket, peer, peer_list, unreliability)
+
+wait_for_the_trusted_peer(peer_connection_sock, peer_list, unreliability)
 
 # When a peer want to join a cluster, first it must establish a TCP
 # connection with the splitter. In that connection, the splitter sends
@@ -147,6 +185,9 @@ class handle_one_arrival(Thread):
         global peer_list
         global unreliability
 
+        if self.peer not in peer_list:
+            arrival_handler(self.peer_serve_socket, self.peer, peer_list, unreliability)
+            '''
         print self.peer_serve_socket.getsockname(), \
             'Accepted connection from peer', \
             self.peer
@@ -174,7 +215,7 @@ class handle_one_arrival(Thread):
             peer_list.append(self.peer)
             unreliability[self.peer] = 0
             complains[self.peer] = 0
-
+            '''
     # }}}
 
 # The daemon which runs the "handle_one_arrival" threads. 
@@ -211,7 +252,7 @@ class listen_to_the_cluster(Thread):
         while main_alive:
             # {{{
 
-            # Peers complain about lost blocks, and a block index is
+            # Peers complain about lost chunks, and a chunk index is
             # stored in a "H" (unsigned short) register.
             message, sender = cluster_sock.recvfrom(struct.calcsize("H"))
 
@@ -232,18 +273,18 @@ class listen_to_the_cluster(Thread):
             else:
                 # The sender of the packet complains, and the packet
                 # comes with the index of a lost (non-received)
-                # block. In this situation, the splitter counts the
+                # chunk. In this situation, the splitter counts the
                 # number of times a peer has not achieved to send a
-                # block to other peers. If this number exceeds a
+                # chunk to other peers. If this number exceeds a
                 # threshold, the unsupportive peer is expelled from
                 # the cluster. Moreover, if we receive too much
                 # complains from the same peer, the problem could be
                 # in that peer and it will be expelled from the
                 # cluster.
-                lost_block = struct.unpack("!H",message)[0]
-                destination = destination_of_block[lost_block]
+                lost_chunk = struct.unpack("!H",message)[0]
+                destination = destination_of_chunk[lost_chunk]
                 print Color.blue, sender, \
-                    'complains about lost block', lost_block, \
+                    'complains about lost chunk', lost_chunk, \
                     'sent to', destination, Color.none
                 try:
                     unreliability[destination] += 1
@@ -280,7 +321,7 @@ class listen_to_the_cluster(Thread):
     # }}}
 listen_to_the_cluster().start()
 
-block_number = 0
+chunk_number = 0
 kbps = 0
 class print_info(Thread):
     # {{{
@@ -290,15 +331,15 @@ class print_info(Thread):
 
     def run(self):
         global kbps
-        last_block_number = 0
+        last_chunk_number = 0
         while main_alive:
-            kbps = (block_number - last_block_number) * \
-                Config.block_size * 8/1000
-            last_block_number = block_number
+            kbps = (chunk_number - last_chunk_number) * \
+                Config.chunk_size * 8/1000
+            last_chunk_number = chunk_number
 
             for x in xrange(0,kbps/10):
                 print "\b#",
-            print kbps, "kbps"
+            print kbps, "kbps (\b", len(peer_list), "peers)"
 
             time.sleep(1)
 
@@ -319,7 +360,7 @@ GET_message = 'GET /' + channel + ' HTTP/1.1\r\n'
 GET_message += '\r\n'
 source_sock.sendall(GET_message)
 
-block_format_string = "H"+str(Config.block_size)+"s" # "H1024s
+chunk_format_string = "H"+str(Config.chunk_size)+"s" # "H1024s
 
 print "Using ", cluster_sock.getsockname(), \
     "to communicate with the cluster"
@@ -328,12 +369,12 @@ print "Using ", cluster_sock.getsockname(), \
 while True:
     try:
         # Receive data from the source
-        def receive_next_block():
+        def receive_next_chunk():
             global source_sock
-            block = source_sock.recv(Config.block_size)
-            prev_block_size = 0
-            while len(block) < Config.block_size:
-                if len(block) == prev_block_size:
+            chunk = source_sock.recv(Config.chunk_size)
+            prev_chunk_size = 0
+            while len(chunk) < Config.chunk_size:
+                if len(chunk) == prev_chunk_size:
                     print '\b!',
                     sys.stdout.flush()
                     time.sleep(1)
@@ -342,32 +383,37 @@ while True:
                                                 socket.SOCK_STREAM)
                     source_sock.connect(source)
                     source_sock.sendall(GET_message)
-                prev_block_size = len(block)
-                block += source_sock.recv(Config.block_size - len(block))
-            return block
-        block = receive_next_block()
-        block_number = (block_number + 1) % 65536
+                prev_chunk_size = len(chunk)
+                chunk += source_sock.recv(Config.chunk_size - len(chunk))
+            return chunk
+        chunk = receive_next_chunk()
+        chunk_number = (chunk_number + 1) % 65536
 
-        # Send the block.
-        peer = peer_list[peer_index]
-        message = struct.pack(block_format_string,
-                              socket.htons(block_number),
-                              block)
+        # Send the chunk.
+        try:
+            peer = peer_list[peer_index]
+        except:
+            print "La lista de peers est'a vac'ia!!!"
+        else:
+            peer = peer_list[0]
+        message = struct.pack(chunk_format_string,
+                              socket.htons(chunk_number),
+                              chunk)
         cluster_sock.sendto(message, peer)
-        destination_of_block[block_number % buffer_size] = peer
+        destination_of_chunk[chunk_number % buffer_size] = peer
         peer_index = (peer_index + 1) % len(peer_list)
 
         # Decrement (dividing by 2) unreliability and complains after
-        # every 256 sent blocks.
-        if (block_number % 256) == 0:
+        # every 256 sent chunks.
+        if (chunk_number % 256) == 0:
             for i in unreliability:
                 unreliability[i] /= 2
             for i in complains:
                 complains[i] /= 2
 
-        #print '\r', block_number, '->', peer, '('+str(kbps)+' kbps)',
-        #print '\r', '%5d' % block_number, '->', peer, '('+str(kbps)+' kbps)',
-        #sys.stdout.write('\r' + "%5s" % block_number + " -> " + '(' + "%15s" % peer[0] + ',' + "%5s" % peer[1] + ')' + " %8s" % kbps)
+        #print '\r', chunk_number, '->', peer, '('+str(kbps)+' kbps)',
+        #print '\r', '%5d' % chunk_number, '->', peer, '('+str(kbps)+' kbps)',
+        #sys.stdout.write('\r' + "%5s" % chunk_number + " -> " + '(' + "%15s" % peer[0] + ',' + "%5s" % peer[1] + ')' + " %8s" % kbps)
         #sys.stdout.flush()
 
     except KeyboardInterrupt:

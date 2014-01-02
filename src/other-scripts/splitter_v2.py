@@ -282,10 +282,10 @@ class listen_to_the_cluster(Thread):
                             del complains[sender]
                             del unreliability[sender]
 
-                # Finally, we count the number of times a block has
+                # Finally, we count the number of times a chunk has
                 # been claimed. If this number is larger than the size
                 # of the cluster halved by two, the destination of
-                # that block is erased and the block resent.
+                # that chunk is erased and the chunk resent.
                 lost_chunk_counter[lost_chunk] += 1
                 if lost_chunk_counter[lost_chunk] > len(peer_list)/2:
                     print Color.cyan, "the chunk", lost_chunk, "has been lost", \
