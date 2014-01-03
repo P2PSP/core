@@ -4,7 +4,6 @@
 # mitad de los peers se quejan asobre un determinado bloque, entonces
 # dicho bloque se reenv'ia al siguiente peer de la lista y el peer
 # insolidario es expulsado del cluster.
-
 # {{{ Imports
 
 import time
@@ -17,38 +16,38 @@ from color import Color
 import argparse
 
 # }}}
-
+print "Splitter running in",
 if __debug__:
-    print "Running in debug mode"
+    print "debug mode"
 else:
-    print "Running in release mode"
+    print "release mode"
 
-# {{{ Configs
+# {{{ Default values
 
-source_hostname = Config.source_hostname
-source_port = Config.source_port
-listening_port = Config.splitter_listening_port
-buffer_size = Config.buffer_size
+buffer_size = Config.buffer_size # Definir aqu'i y pasar a los peers
 
 # }}}
 
-# {{{ Parser
+# {{{ Args parsing
 
 parser = argparse.ArgumentParser(
     description='This is the splitter node of a P2PSP network.')
 
+source_hostname = Config.source_hostname
 parser.add_argument('--source_hostname',
                     help='Hostname of the streaming server. (Default = "{}")'.format(source_hostname))
 
+source_port = Config.source_port
 parser.add_argument('--source_port',
                     help='Listening port of the streaming server. (Default = {})'.format(source_port))
 
+listening_port = 8888
 parser.add_argument('--listening_port',
                     help='Port to talk with the peers. (Default = {})'.format(listening_port))
 
 args = parser.parse_known_args()[0]
 if args.source_hostname:
-    source_hostname = str(args.source_hostname)
+    source_hostname = args.source_hostname
 if args.source_port:
     source_port = int(args.source_port)
 if args.listening_port:
@@ -98,8 +97,8 @@ cluster_sock = create_cluster_sock(listening_port)
 # splitter, listening to the port listening_port+1. Notice that you
 # can replace this end-point by any other you want, for example, in a
 # different host.
-peer_list = [('127.0.0.1',listening_port+1)]
-#peer_list = []
+#peer_list = [('127.0.0.1',listening_port+1)]
+peer_list = []
 
 # Destination peers of the chunk, indexed by a chunk number. Used to
 # find the peer to which a chunk has been sent.
@@ -109,13 +108,13 @@ destination_of_chunk = [('0.0.0.0',0) for i in xrange(buffer_size)]
 # peer. Counts the number of times a peer has not re-transmitted a
 # packet.
 unreliability = {}
-unreliability[('127.0.0.1',listening_port+1)] = 0
+#unreliability[('127.0.0.1',listening_port+1)] = 0
 
 # Complaining rate of a peer. Sometimes the complaining peer has not
 # enough bandwidth in his download link. In this case, the peevish
 # peers should be rejected from the cluster.
 complains = {}
-complains[('127.0.0.1',listening_port+1)] = 0
+#complains[('127.0.0.1',listening_port+1)] = 0
 
 lost_chunk_counter = [0'''chunk_index % buffer_size''']*buffer_size
 chunks = [None]*Config.buffer_size
@@ -124,9 +123,48 @@ chunks = [None]*Config.buffer_size
 IP_ADDR = 0
 PORT = 1
 
-# This is used to stop the child threads. They will be alive only if
-# the main thread is alive.
+# This is used to stop the child threads. They will be alive only
+# if the main thread is alive.
 main_alive = True
+
+def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
+    print Color.green, peer_serve_socket.getsockname(), \
+        'accepted connection from peer', \
+        peer
+
+    print peer_serve_socket.getsockname(), \
+        'sending the list of peers ...'
+
+    # Sends the size of the list of peers.
+    message = struct.pack("H", socket.htons(len(peer_list)))
+    peer_serve_socket.sendall(message)
+
+    # Send the list of peers.
+    counter = 1
+    for p in peer_list:
+        message = struct.pack(
+            "4sH", socket.inet_aton(p[IP_ADDR]),
+            socket.htons(p[PORT]))
+        peer_serve_socket.sendall(message)
+        print "%5d" % counter, p
+
+    print 'done', Color.none
+
+    peer_serve_socket.close()
+    peer_list.append(peer)
+    unreliability[peer] = 0
+    complains[peer] = 0
+
+def wait_for_the_trusted_peer(peer_connection_sock, peer_list, unreliability):
+    print peer_connection_sock.getsockname(),\
+        "waiting for the trusted peer ..."
+    sys.stdout.flush()
+    peer_serve_socket, peer = peer_connection_sock.accept()
+    print peer_serve_socket.getsockname(), "the peer is", \
+        peer_serve_socket.getpeername()
+    arrival_handler(peer_serve_socket, peer, peer_list, unreliability)
+
+wait_for_the_trusted_peer(peer_connection_sock, peer_list, unreliability)
 
 # When a peer want to join a cluster, first it must establish a TCP
 # connection with the splitter. In that connection, the splitter sends
@@ -152,6 +190,9 @@ class handle_one_arrival(Thread):
         global peer_list
         global unreliability
 
+        if self.peer not in peer_list:
+            arrival_handler(self.peer_serve_socket, self.peer, peer_list, unreliability)
+            '''
         print self.peer_serve_socket.getsockname(), \
             'Accepted connection from peer', \
             self.peer
@@ -179,7 +220,7 @@ class handle_one_arrival(Thread):
             peer_list.append(self.peer)
             unreliability[self.peer] = 0
             complains[self.peer] = 0
-
+            '''
     # }}}
 
 # The daemon which runs the "handle_one_arrival" threads. 
@@ -190,7 +231,7 @@ class handle_arrivals(Thread):
         Thread.__init__(self)
 
     def run(self):
-        print "Waiting for connections at", peer_connection_sock.getsockname()
+        print peer_connection_sock.getsockname(), "waiting for normal peers ..." 
         while main_alive:
             peer_serve_socket, peer = peer_connection_sock.accept()
             #if peer not in peer_list: # Puede que sobre
@@ -212,7 +253,7 @@ class listen_to_the_cluster(Thread):
 
         global peer_index
 
-        print "Listening to the cluster at", cluster_sock.getsockname()
+        print cluster_sock.getsockname(), "listening to the cluster ...", 
         while main_alive:
             # {{{
 
@@ -241,7 +282,7 @@ class listen_to_the_cluster(Thread):
                 # number of times a peer has not achieved to send a
                 # chunk to other peers. If this number exceeds a
                 # threshold, the unsupportive peer is expelled from
-                # the cluster. 
+                # the cluster.
                 lost_chunk = struct.unpack("!H",message)[0]
                 lost_chunk %= Config.buffer_size # For safety
                 destination = destination_of_chunk[lost_chunk]
@@ -282,6 +323,7 @@ class listen_to_the_cluster(Thread):
                             del complains[sender]
                             del unreliability[sender]
 
+
                 # Finally, we count the number of times a chunk has
                 # been claimed. If this number is larger than the size
                 # of the cluster halved by two, the destination of
@@ -314,43 +356,46 @@ class listen_to_the_cluster(Thread):
                         except:
                             print "the unsupportive peer does not exit"
                             pass
+
             # }}}
 
     # }}}
 listen_to_the_cluster().start()
 
 chunk_number = 0
-kbps = 0
-class print_info(Thread):
-    # {{{
+if not __debug__:
 
-    def __init__(self):
-        Thread.__init__(self)
+    kbps = 0
+    class print_info(Thread):
+        # {{{
 
-    def run(self):
-        global kbps
-        last_chunk_number = 0
-        while main_alive:
-            kbps = (chunk_number - last_chunk_number) * \
-                Config.chunk_size * 8/1000
-            last_chunk_number = chunk_number
+        def __init__(self):
+            Thread.__init__(self)
 
-            for x in xrange(0,kbps/10):
-                print "\b#",
-            print kbps, "kbps"
+        def run(self):
+            global kbps
+            last_chunk_number = 0
+            while main_alive:
+                kbps = (chunk_number - last_chunk_number) * \
+                    Config.chunk_size * 8/1000
+                last_chunk_number = chunk_number
 
-            time.sleep(1)
+                for x in xrange(0,kbps/10):
+                    print "\b#",
+                print kbps, "kbps", len(peer_list), "peers"
 
-    # }}}
-print_info().start()
+                time.sleep(1)
+
+        # }}}
+    print_info().start()
 
 source = (source_hostname, source_port)
 source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print source_sock.getsockname(), 'Connecting to the source', source, '...'
+print source_sock.getsockname(), 'connecting to the source', source, '...'
 
 source_sock.connect(source)
 
-print source_sock.getsockname(), 'Connected to', source, '!'
+print source_sock.getsockname(), 'connected to', source
 
 channel=Config.channel
 #channel='134.ogg'
@@ -359,9 +404,6 @@ GET_message += '\r\n'
 source_sock.sendall(GET_message)
 
 chunk_format_string = "H"+str(Config.chunk_size)+"s" # "H1024s
-
-print "Using ", cluster_sock.getsockname(), \
-    "to communicate with the cluster"
 
 # This is the main loop of the splitter
 while True:
@@ -388,6 +430,14 @@ while True:
         chunk_number = (chunk_number + 1) % 65536
 
         # Send the chunk.
+        '''
+        try:
+            peer = peer_list[peer_index]
+        except:
+            print "La lista de peers est'a vac'ia!!!"
+        else:
+            peer = peer_list[0]
+        '''
         peer = peer_list[peer_index]
         message = struct.pack(chunk_format_string,
                               socket.htons(chunk_number),
@@ -404,10 +454,11 @@ while True:
             for i in complains:
                 complains[i] /= 2
 
-        #print '\r', chunk_number, '->', peer, '('+str(kbps)+' kbps)',
-        #print '\r', '%5d' % chunk_number, '->', peer, '('+str(kbps)+' kbps)',
-        #sys.stdout.write('\r' + "%5s" % chunk_number + " -> " + '(' + "%15s" % peer[0] + ',' + "%5s" % peer[1] + ')' + " %8s" % kbps)
-        #sys.stdout.flush()
+        if __debug__:
+            #print '\r', chunk_number, '->', peer, '('+str(kbps)+' kbps)',
+            print '%5d' % chunk_number, Color.red, '->', Color.none, peer
+            #sys.stdout.write('\r' + "%5s" % chunk_number + " -> " + '(' + "%15s" % peer[0] + ',' + "%5s" % peer[1] + ')' + " %8s" % kbps)
+            sys.stdout.flush()
 
     except KeyboardInterrupt:
         print 'Keyboard interrupt detected ... Exiting!'
