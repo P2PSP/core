@@ -17,10 +17,11 @@ from color import Color
 
 # }}}
 
+print "Peer running in",
 if __debug__:
-    print "Running in debug mode"
+    print "debug mode"
 else:
-    print "Running in release mode"
+    print "release mode"
 
 IP_ADDR = 0
 PORT = 1
@@ -77,7 +78,7 @@ def get_player_socket():
     sock.bind(('', listening_port))
     sock.listen(0)
 
-    print sock.getsockname(), "waiting for the player at port", listening_port
+    print sock.getsockname(), "waiting for the player ..."
 
     sock, player = sock.accept()
     sock.setblocking(0)
@@ -282,9 +283,6 @@ def receive_and_feed():
             number, chunk = struct.unpack(Config.chunk_format_string, message)
             chunk_number = socket.ntohs(number)
 
-            if __debug__:
-                print sender, "-", chunk_number, "->", cluster_sock.getsockname()
-
             total_chunks += 1
 
             # Insert the received chunk into the buffer.
@@ -295,6 +293,10 @@ def receive_and_feed():
             if sender == splitter:
                 # {{{ Send the last chunk in burst sending mode
 
+                if __debug__:
+                    print cluster_sock.getsockname(), \
+                        Color.red, "<-", Color.none, chunk_number, "-", sender
+
                 # A new chunk has arrived from the splitter and we
                 # must check if the last chunk was sent fo the rest of
                 # peers of the cluster.
@@ -302,7 +304,8 @@ def receive_and_feed():
                     peer = peer_list[counter]
                     cluster_sock.sendto(last, peer)
                     if __debug__:
-                        print cluster_sock.getsockname(), "-", chunk_number, "->", peer
+                        print cluster_sock.getsockname(), "-", chunk_number, \
+                            Color.green, "->", Color.none, peer
 
                     # Each time we send a chunk to a peer, the
                     # unreliability of that peer is incremented. Each
@@ -325,6 +328,10 @@ def receive_and_feed():
             else:
                 # {{{ The sender is a peer, check if the peer is new.
 
+                if __debug__:
+                    print cluster_sock.getsockname(), \
+                        Color.green, "<-", Color.none, chunk_number, "-", sender
+
                 if sender not in peer_list:
                     # The peer is new
                     peer_list.append(sender)
@@ -346,7 +353,8 @@ def receive_and_feed():
                 peer = peer_list[counter]
                 cluster_sock.sendto(last, peer)
                 if __debug__:
-                    print cluster_sock.getsockname(), "-", chunk_number, "->", peer
+                    print cluster_sock.getsockname(), "-", chunk_number,\
+                        Color.green, "->", Color.none, peer
 
                 unreliability[peer] += 1        
                 if unreliability[peer] > Config.peer_unreliability_threshold:
@@ -397,6 +405,9 @@ start_latency = time.time() # Wall time (execution time plus waiting
 # waiting for traveling the player, we wil fill only the half of the
 # circular queue.
 
+print "Buffering ..."
+sys.stdout.flush()
+
 # Retrieve the first chunk to play.
 chunk_number = receive_and_feed()
 
@@ -433,39 +444,40 @@ print 'Latency (buffering) =', latency, 'seconds'
 # while the main thread is alive.
 main_alive = True
 
-kbps = 0
-class print_info(Thread):
-    # {{{
+if not __debug__:
+    kbps = 0
+    class print_info(Thread):
+        # {{{
 
-    def __init__(self):
-        Thread.__init__(self)
+        def __init__(self):
+            Thread.__init__(self)
 
-    def run(self):
-        global kbps
-        #global total_chunks
-        last_total_chunks = 0
-        while main_alive:
-            kbps = (total_chunks - last_total_chunks) * \
-                Config.chunk_size * 8/1000
-            last_total_chunks = total_chunks
-            '''
-            print "#\tPeer\tUnreliability\t% loss"
-            counter = 0
-            for p in peer_list:
-                loss_percentage = float(unreliability[p]*100)/float(total_chunks)
-                print counter, '\t', p, '\t', unreliability[p], \
-                    ' ({:.2}%)'.format(loss_percentage)
-                counter += 1
-            '''
-            #print '\r', "%8d" % total_chunks, "chunks/s,", "%8d kbps." % kbps,
-            for x in xrange(0,kbps/10):
-                print "\b#",
-            print kbps, "kbps"
+        def run(self):
+            global kbps
+            #global total_chunks
+            last_total_chunks = 0
+            while main_alive:
+                kbps = (total_chunks - last_total_chunks) * \
+                    Config.chunk_size * 8/1000
+                last_total_chunks = total_chunks
+                '''
+                print "#\tPeer\tUnreliability\t% loss"
+                counter = 0
+                for p in peer_list:
+                    loss_percentage = float(unreliability[p]*100)/float(total_chunks)
+                    print counter, '\t', p, '\t', unreliability[p], \
+                        ' ({:.2}%)'.format(loss_percentage)
+                    counter += 1
+                '''
+                #print '\r', "%8d" % total_chunks, "chunks/s,", "%8d kbps." % kbps,
+                for x in xrange(0,kbps/10):
+                    print "\b#",
+                print kbps, "kbps"
 
-            time.sleep(1)
+                time.sleep(1)
 
-    # }}}
-print_info().start()
+        # }}}
+    print_info().start()
 
 player_connected = True
 

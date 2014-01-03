@@ -15,11 +15,11 @@ from color import Color
 import argparse
 
 # }}}
-
+print "Splitter running in",
 if __debug__:
-    print "Running in debug mode"
+    print "debug mode"
 else:
-    print "Running in release mode"
+    print "release mode"
 
 # {{{ Default values
 
@@ -124,8 +124,8 @@ PORT = 1
 main_alive = True
 
 def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
-    print peer_serve_socket.getsockname(), \
-        'Accepted connection from peer', \
+    print Color.green, peer_serve_socket.getsockname(), \
+        'accepted connection from peer', \
         peer
 
     print peer_serve_socket.getsockname(), \
@@ -144,19 +144,20 @@ def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
         peer_serve_socket.sendall(message)
         print "%5d" % counter, p
 
-    print 'done'
+    print 'done', Color.none
 
-    if peer not in peer_list:
-        peer_serve_socket.close()
-        peer_list.append(peer)
-        unreliability[peer] = 0
-        complains[peer] = 0
+    peer_serve_socket.close()
+    peer_list.append(peer)
+    unreliability[peer] = 0
+    complains[peer] = 0
 
 def wait_for_the_trusted_peer(peer_connection_sock, peer_list, unreliability):
-    print "Waiting for the trusted peer ...",
+    print peer_connection_sock.getsockname(),\
+        "waiting for the trusted peer ..."
     sys.stdout.flush()
     peer_serve_socket, peer = peer_connection_sock.accept()
-    print "accepted!"
+    print peer_serve_socket.getsockname(), "the peer is", \
+        peer_serve_socket.getpeername()
     arrival_handler(peer_serve_socket, peer, peer_list, unreliability)
 
 wait_for_the_trusted_peer(peer_connection_sock, peer_list, unreliability)
@@ -226,7 +227,7 @@ class handle_arrivals(Thread):
         Thread.__init__(self)
 
     def run(self):
-        print "Waiting for connections at", peer_connection_sock.getsockname()
+        print peer_connection_sock.getsockname(), "waiting for normal peers ..." 
         while main_alive:
             peer_serve_socket, peer = peer_connection_sock.accept()
             #if peer not in peer_list: # Puede que sobre
@@ -248,7 +249,7 @@ class listen_to_the_cluster(Thread):
 
         global peer_index
 
-        print "Listening to the cluster at", cluster_sock.getsockname()
+        print cluster_sock.getsockname(), "listening to the cluster ...", 
         while main_alive:
             # {{{
 
@@ -322,37 +323,39 @@ class listen_to_the_cluster(Thread):
 listen_to_the_cluster().start()
 
 chunk_number = 0
-kbps = 0
-class print_info(Thread):
-    # {{{
+if not __debug__:
 
-    def __init__(self):
-        Thread.__init__(self)
+    kbps = 0
+    class print_info(Thread):
+        # {{{
 
-    def run(self):
-        global kbps
-        last_chunk_number = 0
-        while main_alive:
-            kbps = (chunk_number - last_chunk_number) * \
-                Config.chunk_size * 8/1000
-            last_chunk_number = chunk_number
+        def __init__(self):
+            Thread.__init__(self)
 
-            for x in xrange(0,kbps/10):
-                print "\b#",
-            print kbps, "kbps (\b", len(peer_list), "peers)"
+        def run(self):
+            global kbps
+            last_chunk_number = 0
+            while main_alive:
+                kbps = (chunk_number - last_chunk_number) * \
+                    Config.chunk_size * 8/1000
+                last_chunk_number = chunk_number
 
-            time.sleep(1)
+                for x in xrange(0,kbps/10):
+                    print "\b#",
+                print kbps, "kbps", len(peer_list), "peers"
 
-    # }}}
-print_info().start()
+                time.sleep(1)
+
+        # }}}
+    print_info().start()
 
 source = (source_hostname, source_port)
 source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print source_sock.getsockname(), 'Connecting to the source', source, '...'
+print source_sock.getsockname(), 'connecting to the source', source, '...'
 
 source_sock.connect(source)
 
-print source_sock.getsockname(), 'Connected to', source, '!'
+print source_sock.getsockname(), 'connected to', source
 
 channel=Config.channel
 #channel='134.ogg'
@@ -361,9 +364,6 @@ GET_message += '\r\n'
 source_sock.sendall(GET_message)
 
 chunk_format_string = "H"+str(Config.chunk_size)+"s" # "H1024s
-
-print "Using ", cluster_sock.getsockname(), \
-    "to communicate with the cluster"
 
 # This is the main loop of the splitter
 while True:
@@ -390,12 +390,15 @@ while True:
         chunk_number = (chunk_number + 1) % 65536
 
         # Send the chunk.
+        '''
         try:
             peer = peer_list[peer_index]
         except:
             print "La lista de peers est'a vac'ia!!!"
         else:
             peer = peer_list[0]
+        '''
+        peer = peer_list[peer_index]
         message = struct.pack(chunk_format_string,
                               socket.htons(chunk_number),
                               chunk)
@@ -411,10 +414,11 @@ while True:
             for i in complains:
                 complains[i] /= 2
 
-        #print '\r', chunk_number, '->', peer, '('+str(kbps)+' kbps)',
-        #print '\r', '%5d' % chunk_number, '->', peer, '('+str(kbps)+' kbps)',
-        #sys.stdout.write('\r' + "%5s" % chunk_number + " -> " + '(' + "%15s" % peer[0] + ',' + "%5s" % peer[1] + ')' + " %8s" % kbps)
-        #sys.stdout.flush()
+        if __debug__:
+            #print '\r', chunk_number, '->', peer, '('+str(kbps)+' kbps)',
+            print '%5d' % chunk_number, Color.red, '->', Color.none, peer
+            #sys.stdout.write('\r' + "%5s" % chunk_number + " -> " + '(' + "%15s" % peer[0] + ',' + "%5s" % peer[1] + ')' + " %8s" % kbps)
+            sys.stdout.flush()
 
     except KeyboardInterrupt:
         print 'Keyboard interrupt detected ... Exiting!'

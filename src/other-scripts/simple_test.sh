@@ -6,7 +6,8 @@ echo "Trusted peer launched"
 
 sleep 1
 
-netcat localhost 9999 > /dev/null &
+#xterm -e 'netcat -d localhost 9999 > /dev/null' &
+netcat -d localhost 9999 > /dev/null &
 echo "Trusted listener launched"
 
 sleep 5
