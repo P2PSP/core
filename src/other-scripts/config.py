@@ -15,16 +15,16 @@ class Config:
     #channel = '480.ogg'
 
     # Host name where is Icecast server is running
-    source_hostname = '150.214.150.68'
-    #source_hostname = '127.0.0.1'
+    source_host = '150.214.150.68'
+    #source_host = '127.0.0.1'
 
     # Port where the Icecast server is listening
     source_port = 4551
     #source_port = 8000
 
-    # Hostname where the Splitter is running
-    #splitter_hostname = '150.214.150.68'
-    splitter_hostname = '127.0.0.1'
+    # Host where the Splitter is running
+    #splitter_host = '150.214.150.68'
+    splitter_host = '127.0.0.1'
 
     # Port where the Splitter is listening
     splitter_port = 4552
@@ -36,6 +36,6 @@ class Config:
     cluster_timeout = 1 # Seconds
     peer_unreliability_threshold = 8
     peer_complaining_threshold = 8
-    trusted_hostname = splitter_hostname
+    trusted_host = splitter_host
     trusted_port = splitter_port + 1
     #trusted_peer_port = splitter_port + 1

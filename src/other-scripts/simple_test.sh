@@ -1,14 +1,14 @@
 xterm -e './splitter_v1.py' &
 echo "Splitter launched"
 
-xterm -e './peer_v1.py' &
-echo "Trusted peer launched"
+xterm -e './peer_v1.py --peer_port=8889' &
+echo "Monitor peer launched"
 
 sleep 1
 
 #xterm -e 'netcat -d localhost 9999 > /dev/null' &
 netcat -d localhost 9999 > /dev/null &
-echo "Trusted listener launched"
+echo "Monitor listener launched"
 
 sleep 5
 

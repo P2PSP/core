@@ -31,36 +31,51 @@ buffer_size = Config.buffer_size # Recibir desde splitter
 # Number of bytes of the stream header
 header_size = 1024*20
 
-# {{{ Parser
+# {{{ Args parsing
 
 parser = argparse.ArgumentParser(
     description='This is a peer node of a P2PSP network.')
 
 listening_port = 9999
 parser.add_argument('--listening_port',
-                    help='Port used to communicate with the player. (Default = {})'.format(listening_port))
+                    help='Port used to communicate with the player.\
+ (Default = {})'.format(listening_port))
 
-splitter_hostname = "127.0.0.1"
-#splitter_hostname = "150.214.150.68"
-parser.add_argument('--splitter_hostname',
-                    help='Hostname of the splitter. (Default = {})'.format(splitter_hostname))
+splitter_host = "127.0.0.1"
+#splitter_host = "150.214.150.68"
+#splitter_host = "192.168.1.137"
+parser.add_argument('--splitter_host',
+                    help='Host of the splitter.\
+ (Default = {})'.format(splitter_host))
 
 splitter_port = 8888
 parser.add_argument('--splitter_port',
-                    help='Listening port of the splitter. (Default = {})'.format(splitter_port))
+                    help='Listening port of the splitter.\
+ (Default = {})'.format(splitter_port))
+
+# Incluir parametro "trusted", cuando se activa, se hace un bind a splitter_port+1 y el splitter debe anuciar cuando envia la lista de peer la IP publica del NAT, que se espeficiara tras el parametro trusted.
+
+peer_port = 0
+# 0 means that, by default, the peer uses the port that the OS will
+# select as a typical client application.
+parser.add_argument('--peer_port',
+                    help='The local port that this peer uses\
+ to communcate to the cluster. (Default = {})'.format(peer_port))
 
 args = parser.parse_known_args()[0]
 if args.listening_port:
     listening_port = int(args.listening_port)
-if args.splitter_hostname:
-    splitter_hostname = args.splitter_hostname
+if args.splitter_host:
+    splitter_host = args.splitter_host
 if args.splitter_port:
     splitter_port = args.splitter_port
+if args.peer_port:
+    peer_port = int(args.peer_port)
 
 # }}}
 
 # Estas cuatro variables las debería indicar el splitter
-source_hostname = Config.source_hostname
+source_host = Config.source_host
 source_port = Config.source_port
 channel = Config.channel
 chunk_size = Config.chunk_size
@@ -88,15 +103,24 @@ def get_player_socket():
     return sock
 
     # }}}
-player_sock = get_player_socket() # The peer is chunked until the
-                                  # player establish a connection.
+
+# The peer is blocked until the player establish a connection.
+player_sock = get_player_socket() 
+
+def get_source_socket():
+    source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    source = (source_host, source_port)
+    print source_sock.getsockname(), "connecting the source ...",
+    sys.stdout.flush()
+    source_sock.connect(source)
+    print "connected"
+    return source_sock
+
+source_sock = get_source_socket()
 
 def communicate_the_header():
     # {{{ 
 
-    source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    source = (source_hostname, source_port)
-    source_sock.connect(source)
     GET_message = 'GET /' + channel + ' HTTP/1.1\r\n'
     GET_message += '\r\n'
     source_sock.sendall(GET_message)
@@ -125,7 +149,6 @@ def communicate_the_header():
 
     print source_sock.getsockname(), 'got', total_received, 'bytes'
 
-    source_sock.close()
 
     # }}}
 communicate_the_header() # Retrieve the header of the stream from the
@@ -133,23 +156,31 @@ communicate_the_header() # Retrieve the header of the stream from the
 
 # We need to connect to the splitter in order to retrieve the list of
 # peers and chunks of video.
-splitter = (splitter_hostname, splitter_port)
-def connect_to_the_splitter(splitter_hostname, splitter_port):
+splitter = (splitter_host, splitter_port)
+def connect_to_the_splitter(splitter_host, splitter_port):
     # {{{
 
     sock = ''
 
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print sock.getsockname(), "connecting the splitter", splitter,
+    if peer_port != 0:
+        sock.bind(("", peer_port))
+        #sock.bind(("192.168.1.130", peer_port))
+        #sock.bind((splitter_host, peer_port))
+        #sock.bind((source_sock.getsockname()[0], peer_port))
     try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print sock.getsockname(), "connecting to the splitter", splitter,
         sock.connect(splitter)
-        print sock.getsockname(), "connected to the splitter", splitter
     except:
-        sys.exit("Sorry. Can't connect with the splitter at " + str(splitter))
+        sys.exit("Sorry. Can't connect with the splitter at " + str(splitter) + sys.exc_info()[0])
+    print sock.getsockname(), "connected to the splitter", splitter
     return sock
 
     # }}}
-splitter_sock = connect_to_the_splitter(splitter_hostname, splitter_port)
+
+source_sock.close()
+
+splitter_sock = connect_to_the_splitter(splitter_host, splitter_port)
 
 # Now, on the same end-point than splitter_sock, we create a UDP
 # socket to communicate with the peers.

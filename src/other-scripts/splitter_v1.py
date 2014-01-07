@@ -32,23 +32,30 @@ buffer_size = Config.buffer_size # Definir aqu'i y pasar a los peers
 parser = argparse.ArgumentParser(
     description='This is the splitter node of a P2PSP network.')
 
-source_hostname = Config.source_hostname
-parser.add_argument('--source_hostname',
-                    help='Hostname of the streaming server. (Default = "{}")'.format(source_hostname))
+source_host = Config.source_host
+parser.add_argument('--source_host',
+                    help='Host of the streaming server. (Default = "{}")'.format(source_host))
 
 source_port = Config.source_port
 parser.add_argument('--source_port',
                     help='Listening port of the streaming server. (Default = {})'.format(source_port))
+
+listening_host = "127.0.0.1"
+parser.add_argument('--listening_host',
+                    help='IP address to talk with the peers.\
+ (Default = {})'.format(listening_host))
 
 listening_port = 8888
 parser.add_argument('--listening_port',
                     help='Port to talk with the peers. (Default = {})'.format(listening_port))
 
 args = parser.parse_known_args()[0]
-if args.source_hostname:
-    source_hostname = args.source_hostname
+if args.source_host:
+    source_host = args.source_host
 if args.source_port:
     source_port = int(args.source_port)
+if args.listening_host:
+    listening_host = args.listening_host
 if args.listening_port:
     listening_port = int(args.listening_port)
 
@@ -65,7 +72,7 @@ def get_peer_connection_socket():
     except:
         pass
 
-    sock.bind( ('', listening_port) )
+    sock.bind((listening_host, listening_port))
     #sock.listen(5)
     sock.listen(socket.SOMAXCONN)   # Set the connection queue to the max!
 
@@ -83,7 +90,7 @@ def create_cluster_sock(listening_port):
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     except:
         pass
-    sock.bind(('', listening_port))
+    sock.bind((listening_host, listening_port))
     #peer_socket.bind(('',peer_connection_sock.getsockname()[PORT]))
 
     return sock
@@ -151,16 +158,26 @@ def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
     unreliability[peer] = 0
     complains[peer] = 0
 
-def wait_for_the_trusted_peer(peer_connection_sock, peer_list, unreliability):
+# The fist peer that contacts the splitter is a "monitor" peer that
+# the cluster administrator can use to monitorize the performance of
+# the streaming. This peer MUST run on the same host than the splitter
+# to avoid bandwidth consumption and usually listen to the port
+# splitter_port+1 (although this is configurable by the administrator
+# selecting a different peer_port). This peer MUST also use the same
+# public IP address that the splitter in order the rest of peers of
+# the cluster communicate with it. The splitter will use its public IP
+# address as the IP address of the monitor peer.
+def wait_for_the_monitor_peer(peer_connection_sock, peer_list, unreliability):
     print peer_connection_sock.getsockname(),\
-        "waiting for the trusted peer ..."
+        "waiting for the monitor peer ..."
     sys.stdout.flush()
     peer_serve_socket, peer = peer_connection_sock.accept()
-    print peer_serve_socket.getsockname(), "the peer is", \
+    print peer_serve_socket.getsockname(), "the monitor peer is", \
         peer_serve_socket.getpeername()
+    peer = (listening_host, peer[1])
     arrival_handler(peer_serve_socket, peer, peer_list, unreliability)
 
-wait_for_the_trusted_peer(peer_connection_sock, peer_list, unreliability)
+wait_for_the_monitor_peer(peer_connection_sock, peer_list, unreliability)
 
 # When a peer want to join a cluster, first it must establish a TCP
 # connection with the splitter. In that connection, the splitter sends
@@ -349,7 +366,7 @@ if not __debug__:
         # }}}
     print_info().start()
 
-source = (source_hostname, source_port)
+source = (source_host, source_port)
 source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print source_sock.getsockname(), 'connecting to the source', source, '...'
 
