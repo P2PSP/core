@@ -10,7 +10,7 @@ import sys
 import socket
 from threading import Thread
 import struct
-from config import Config
+#from config import Config
 from color import Color
 import argparse
 
@@ -21,43 +21,69 @@ if __debug__:
 else:
     print "release mode"
 
-# {{{ Default values
-
-buffer_size = Config.buffer_size # Definir aqu'i y pasar a los peers
-
-# }}}
-
 # {{{ Args parsing
 
 parser = argparse.ArgumentParser(
     description='This is the splitter node of a P2PSP network.')
 
-source_host = Config.source_host
+source_host = "150.214.150.68"
 parser.add_argument('--source_host',
-                    help='Host of the streaming server. (Default = "{}")'.format(source_host))
+                    help='The streaming server.\
+ (Default = "{}")'.format(source_host))
 
-source_port = Config.source_port
+source_port = 4551
 parser.add_argument('--source_port',
-                    help='Listening port of the streaming server. (Default = {})'.format(source_port))
+                    help='Port where the streaming server is listening.\
+ (Default = {})'.format(source_port))
+
+channel = '134.ogg'
+#channel = '480.ogg'
+parser.add_argument('--channel',
+                    help='Name of the channel served by the streaming source.\
+ (Default = "{}")'.format(channel))
 
 listening_host = "127.0.0.1"
 parser.add_argument('--listening_host',
                     help='IP address to talk with the peers.\
  (Default = {})'.format(listening_host))
 
-listening_port = 8888
+listening_port = 4552
 parser.add_argument('--listening_port',
-                    help='Port to talk with the peers. (Default = {})'.format(listening_port))
+                    help='Port to talk with the peers.\
+ (Default = {})'.format(listening_port))
+
+# The buffer_size depends on the stream bit-rate and the maximun
+# latency experimented by the users, and should be transmitted to the
+# peers. The buffer_size is proportional to the bit-rate and the
+# latency is proportional to the buffer_size.
+buffer_size = 256
+parser.add_argument('--buffer_size',
+                    help='size of the video buffer in blocks.\
+ (Default = {})'.format(buffer_size))
+
+# The chunk_size depends mainly on the network technology and should
+# be selected as big as possible, depending on the MTU and the
+# bit-error rate.
+chunk_size = 1024
+parser.add_argument('--chunk_size',
+                    help='Chunk size in bytes.\
+ (Default = {})'.format(chunk_size))
 
 args = parser.parse_known_args()[0]
 if args.source_host:
     source_host = args.source_host
 if args.source_port:
     source_port = int(args.source_port)
+if args.channel:
+    channel = args.channel
 if args.listening_host:
     listening_host = args.listening_host
 if args.listening_port:
     listening_port = int(args.listening_port)
+if args.buffer_size:
+    buffer_size = int(args.buffer_size)
+if args.chunk_size:
+    chunk_size = int(args.chunk_size)
 
 # }}}
 
@@ -131,9 +157,34 @@ PORT = 1
 main_alive = True
 
 def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
+
     print Color.green, peer_serve_socket.getsockname(), \
         'accepted connection from peer', \
         peer
+
+    # Send the source node IP address.
+    print source_host
+    sys.stdout.flush()
+    time.sleep(1)
+    message = struct.pack("4s", socket.inet_aton(source_host))
+    peer_serve_socket.sendall(message)
+
+    # Send the source node listening port.
+    message = struct.pack("H", socket.htons(source_port))
+    peer_serve_socket.sendall(message)
+
+    # Send the name of the channel.
+    message = struct.pack("H", socket.htons(len(channel)))    
+    peer_serve_socket.sendall(message)
+    peer_serve_socket.sendall(channel)
+
+    # Send the buffer size.
+    message = struct.pack("H", socket.htons(buffer_size))
+    peer_serve_socket.sendall(message)
+
+    # Send the chunk size.
+    message = struct.pack("H", socket.htons(chunk_size))
+    peer_serve_socket.sendall(message)
 
     print peer_serve_socket.getsockname(), \
         'sending the list of peers ...'
@@ -174,6 +225,7 @@ def wait_for_the_monitor_peer(peer_connection_sock, peer_list, unreliability):
     peer_serve_socket, peer = peer_connection_sock.accept()
     print peer_serve_socket.getsockname(), "the monitor peer is", \
         peer_serve_socket.getpeername()
+
     peer = (listening_host, peer[1])
     arrival_handler(peer_serve_socket, peer, peer_list, unreliability)
 
@@ -283,7 +335,8 @@ class listen_to_the_cluster(Thread):
                     try:
                         peer_index -= 1
                         peer_list.remove(sender)
-                        print Color.red, sender, 'has left the cluster', Color.none
+                        print Color.red, sender, 'removed by "goodbye" \
+message', Color.none
                     except:
                         # Received a googbye message from a peer which is
                         # not in the list of peers.
@@ -312,8 +365,9 @@ class listen_to_the_cluster(Thread):
                 else:
                     print Color.blue, "complains about", destination, \
                         "=", unreliability[destination], Color.none
-                    if unreliability[destination] > Config.peer_unreliability_threshold:
-                        print Color.red, 'too much complains about unsupportive peer', \
+                    if unreliability[destination] > 8:
+                        print Color.red, 'too much complains about\
+ unsupportive peer', \
                             destination, Color.none
                         peer_index -= 1
                         peer_list.remove(destination)
@@ -327,7 +381,7 @@ class listen_to_the_cluster(Thread):
                         print "the complaining peer does not exit"
                         pass
                     else:
-                        if complains[sender] > Config.peer_complaining_threshold:
+                        if complains[sender] > 8:
                             print Color.red, 'too much complains of a peevish peer', \
                                 sender, Color.none
                             peer_index -= 1
@@ -354,7 +408,7 @@ if not __debug__:
             last_chunk_number = 0
             while main_alive:
                 kbps = (chunk_number - last_chunk_number) * \
-                    Config.chunk_size * 8/1000
+                    chunk_size * 8/1000
                 last_chunk_number = chunk_number
 
                 for x in xrange(0,kbps/10):
@@ -374,13 +428,12 @@ source_sock.connect(source)
 
 print source_sock.getsockname(), 'connected to', source
 
-channel=Config.channel
 #channel='134.ogg'
 GET_message = 'GET /' + channel + ' HTTP/1.1\r\n'
 GET_message += '\r\n'
 source_sock.sendall(GET_message)
 
-chunk_format_string = "H"+str(Config.chunk_size)+"s" # "H1024s
+chunk_format_string = "H"+str(chunk_size)+"s" # "H1024s
 
 # This is the main loop of the splitter
 while True:
@@ -388,9 +441,9 @@ while True:
         # Receive data from the source
         def receive_next_chunk():
             global source_sock
-            chunk = source_sock.recv(Config.chunk_size)
+            chunk = source_sock.recv(chunk_size)
             prev_chunk_size = 0
-            while len(chunk) < Config.chunk_size:
+            while len(chunk) < chunk_size:
                 if len(chunk) == prev_chunk_size:
                     print '\b!',
                     sys.stdout.flush()
@@ -401,7 +454,7 @@ while True:
                     source_sock.connect(source)
                     source_sock.sendall(GET_message)
                 prev_chunk_size = len(chunk)
-                chunk += source_sock.recv(Config.chunk_size - len(chunk))
+                chunk += source_sock.recv(chunk_size - len(chunk))
             return chunk
         chunk = receive_next_chunk()
         chunk_number = (chunk_number + 1) % 65536

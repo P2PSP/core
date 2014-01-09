@@ -1,4 +1,4 @@
-xterm -e './splitter_v1.py' &
+xterm -e './splitter_v1.py --listening_host 150.214.150.68' &
 echo "Splitter launched"
 
 xterm -e './peer_v1.py --peer_port=8889' &
