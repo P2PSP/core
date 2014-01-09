@@ -157,15 +157,13 @@ PORT = 1
 main_alive = True
 
 def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
+    # {{{
 
     print Color.green, peer_serve_socket.getsockname(), \
         'accepted connection from peer', \
         peer
 
     # Send the source node IP address.
-    print source_host
-    sys.stdout.flush()
-    time.sleep(1)
     message = struct.pack("4s", socket.inet_aton(source_host))
     peer_serve_socket.sendall(message)
 
@@ -209,6 +207,8 @@ def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
     unreliability[peer] = 0
     complains[peer] = 0
 
+    # }}}
+
 # The fist peer that contacts the splitter is a "monitor" peer that
 # the cluster administrator can use to monitorize the performance of
 # the streaming. This peer MUST run on the same host than the splitter
@@ -219,6 +219,8 @@ def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
 # the cluster communicate with it. The splitter will use its public IP
 # address as the IP address of the monitor peer.
 def wait_for_the_monitor_peer(peer_connection_sock, peer_list, unreliability):
+    # {{{
+
     print peer_connection_sock.getsockname(),\
         "waiting for the monitor peer ..."
     sys.stdout.flush()
@@ -228,6 +230,8 @@ def wait_for_the_monitor_peer(peer_connection_sock, peer_list, unreliability):
 
     peer = (listening_host, peer[1])
     arrival_handler(peer_serve_socket, peer, peer_list, unreliability)
+
+    # }}}
 
 wait_for_the_monitor_peer(peer_connection_sock, peer_list, unreliability)
 
@@ -428,12 +432,11 @@ source_sock.connect(source)
 
 print source_sock.getsockname(), 'connected to', source
 
-#channel='134.ogg'
 GET_message = 'GET /' + channel + ' HTTP/1.1\r\n'
 GET_message += '\r\n'
 source_sock.sendall(GET_message)
 
-chunk_format_string = "H"+str(chunk_size)+"s" # "H1024s
+chunk_format_string = "H" + str(chunk_size) + "s" # "H1024s
 
 # This is the main loop of the splitter
 while True:
@@ -485,9 +488,7 @@ while True:
                 complains[i] /= 2
 
         if __debug__:
-            #print '\r', chunk_number, '->', peer, '('+str(kbps)+' kbps)',
             print '%5d' % chunk_number, Color.red, '->', Color.none, peer
-            #sys.stdout.write('\r' + "%5s" % chunk_number + " -> " + '(' + "%15s" % peer[0] + ',' + "%5s" % peer[1] + ')' + " %8s" % kbps)
             sys.stdout.flush()
 
     except KeyboardInterrupt:

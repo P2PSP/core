@@ -139,8 +139,10 @@ def create_cluster_socket():
 
    # }}}
 cluster_socket = create_cluster_socket()
-cluster_socket.settimeout(1) # This is the maximum time the peer will
+
+# This is the maximum time the peer will
 # wait for a chunk (from the splitter or from another peer).
+cluster_socket.settimeout(1) 
 
 print "Joining to the cluster ..."
 sys.stdout.flush()
@@ -154,12 +156,6 @@ peer_list = []
 # cluster. When the insolidarity exceed a threshold, the peer is
 # deleted from the list of peers.
 unreliability = {}
-
-source_host = ""
-source_port = 0
-channel = ""
-buffer_size = 0
-chunk_size = 0
 
 # The list of peers is retrieved from the splitter in a different
 # thread because in this way, if the retrieving takes a long time, the
@@ -205,44 +201,34 @@ class retrieve_the_list_of_peers(Thread):
 
     # }}}
 
-# The IP address of the source node.
+# Receive from the splitter the IP address of the source node.
 message = splitter_socket.recv(struct.calcsize("4s"))
 source_host = struct.unpack("4s", message)[0]
-print source_host
 source_host = socket.inet_ntoa(source_host)
 print splitter_socket.getsockname(), "source_host = ", source_host
 
-# The port of the source node.
+# Receive from the splitter the port of the source node.
 message = splitter_socket.recv(struct.calcsize("H"))
-print message
 source_port = struct.unpack("H", message)[0]
-print source_port
 source_port = socket.ntohs(source_port)
 print splitter_socket.getsockname(), "source_port = ", source_port
 
-# The channel name.
+# Rececive from the splitter the channel name.
 message = splitter_socket.recv(struct.calcsize("H"))
-print message
 channel_size = struct.unpack("H", message)[0]
-print channel_size
 channel_size = socket.ntohs(channel_size)
-print splitter_socket.getsockname(), "channel_size = ", channel_size
 channel = splitter_socket.recv(channel_size)
 print splitter_socket.getsockname(), "channel =", channel
 
-# The buffer size.
+# Receive from the splitter the buffer size.
 message = splitter_socket.recv(struct.calcsize("H"))
-print message
 buffer_size = struct.unpack("H", message)[0]
-print buffer_size
 buffer_size = socket.ntohs(buffer_size)
 print splitter_socket.getsockname(), "buffer_size = ", buffer_size
 
-# The chunk size.
+# Receive fron the splitter the chunk size.
 message = splitter_socket.recv(struct.calcsize("H"))
-print message
 chunk_size = struct.unpack("H", message)[0]
-print chunk_size
 chunk_size = socket.ntohs(chunk_size)
 print splitter_socket.getsockname(), "chunk_size = ", chunk_size
 
@@ -252,7 +238,7 @@ retrieve_the_list_of_peers().start()
 # because in a concatenation of videos served by the source each video
 # has a different header (another reason is that part of the load is
 # translated from the splitter to the source, which can also perform
-# managing operations such as collect statistics about the
+# managing operations such as collecting statistics about the
 # peers). This implies that, if the header of the currently streamed
 # video is served by the splitter, it must be aware of the end of a
 # video and the start of the next, and record the header to serve it
@@ -293,7 +279,7 @@ def communicate_the_header():
     # petición HTTP (como hace el servidor).
 
     # Esta(s) variable(s) la(s) deberia determinar el peer
-    header_size = 1024*20
+    header_size = 1024*5
 
     data = source_sock.recv(header_size)
     total_received = len(data)
@@ -313,10 +299,6 @@ def communicate_the_header():
 communicate_the_header() # Retrieve the header of the stream from the
                          # source and send it to the player.
 source_sock.close()
-
-# Esta(s) variable(s) la(s) deberia indicar el splitter
-#buffer_size = Config.buffer_size
-#chunk_size = Config.chunk_size
 
 # Now it is time to define the buffer of chunks, a structure that is used
 # to delay the playback of the chunks in order to accommodate the
@@ -614,8 +596,6 @@ while player_connected:
         # Say to the daemon threads that the work has been finished,
         main_alive = False
         sys.exit('Keyboard interrupt detected ... Exiting!')
-
-    #print "\r",
 
 # The player has gone. Lets do a polite farewell.
 main_alive = False

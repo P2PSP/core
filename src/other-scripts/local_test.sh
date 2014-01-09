@@ -6,8 +6,8 @@ echo "Monitor peer launched"
 
 sleep 1
 
-#xterm -e 'netcat -d localhost 9999 > /dev/null' &
-netcat -d localhost 9999 > /dev/null &
+xterm -e 'netcat -d localhost 9999  > /dev/null' &
+#netcat -d localhost 9999 > /dev/null &
 echo "Monitor listener launched"
 
 sleep 5
