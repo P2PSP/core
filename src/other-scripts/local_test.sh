@@ -12,7 +12,7 @@ echo "Monitor listener launched"
 
 sleep 5
 
-xterm -e './peer_v1.py --listening_port=10000' &
+xterm -e './peer_v1.py --player_port=10000' &
 echo "Normal peer launched"
 
 vlc http://localhost:10000 &
