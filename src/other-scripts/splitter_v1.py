@@ -69,11 +69,11 @@ parser.add_argument('--chunk_size',
                     help='Chunk size in bytes.\
  (Default = {})'.format(chunk_size))
 
-ifdef({{GRANULARITY_CHANGE}},
-granularity = 1
-parser.add_argument("--granularity",
-                    help="Round-Robing scheduling granularity.(Default = {})".format(granularity))
-)
+#ifdef({{GRANULARITY_CHANGE}},
+#granularity = 1
+#parser.add_argument("--granularity",
+#                    help="Round-Robing scheduling granularity.(Default = {})".format(granular#ity))
+#)
 
 args = parser.parse_known_args()[0]
 if args.source_host:
@@ -90,10 +90,6 @@ if args.buffer_size:
     buffer_size = int(args.buffer_size)
 if args.chunk_size:
     chunk_size = int(args.chunk_size)
-ifdef({{GRANULARITY_CHANGE}},
-if args.chunk_size:
-    granularity = int(args.granularity)
-)
 # }}}
 
 def get_peer_connection_socket():
@@ -447,9 +443,9 @@ source_sock.sendall(GET_message)
 
 chunk_format_string = "H" + str(chunk_size) + "s" # "H1024s
 
-ifdef({{GRANULARITY_CHANGE}},
-granularity_counter = 0
-)
+#ifdef({{GRANULARITY_CHANGE}},
+#granularity_counter = 0
+#)
       
 # This is the main loop of the splitter
 while True:
@@ -491,14 +487,14 @@ while True:
         cluster_sock.sendto(message, peer)
         destination_of_chunk[chunk_number % buffer_size] = peer
 
-ifdef({{GRANULARITY_CHANGE}},
-        granularity_counter += 1
-        if granularity_counter == granularity:
-            peer_index = (peer_index + 1) % len(peer_list)
-            granularity_counter = 0
-,
+#ifdef({{GRANULARITY_CHANGE}},
+#        granularity_counter += 1
+#        if granularity_counter == granularity:
+#            peer_index = (peer_index + 1) % len(peer_list)
+#            granularity_counter = 0
+#,
         peer_index = (peer_index + 1) % len(peer_list)
-)
+#)
 
         # Decrement (dividing by 2) unreliability and complains after
         # every 256 sent chunks.
