@@ -39,13 +39,13 @@ while getopts "l:s:?" opt; do
     esac
 done
 
-./source.py -l $source_port -s $icecast -c 480.ogg &
+~/p2psp/src/source.py -l $source_port -s $icecast -c 480.ogg &
 
 superpeer_port=$(($source_port+1))
 echo "Running super-peer at localhost:"$superpeer_port
 
 # The super-peer
-./peer.py -s localhost:$source_port -l 9999 -p $superpeer_port > /dev/null &
+~/p2psp/src/peer.py -s localhost:$source_port -l 9999 -p $superpeer_port > /dev/null &
 
 sleep 1
 

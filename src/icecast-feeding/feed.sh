@@ -37,6 +37,7 @@ while getopts "c:w:a:p:v:?" opt; do
 	    ;;
 	v)
 	    video="${OPTARG}"
+	    channel=$video
 	    ;;
 	?)
 	    usage
