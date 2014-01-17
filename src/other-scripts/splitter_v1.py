@@ -42,7 +42,8 @@ parser.add_argument('--channel',
                     help='Name of the channel served by the streaming source.\
  (Default = "{}")'.format(channel))
 
-listening_host = "127.0.0.1"
+#listening_host = "127.0.0.1"
+listening_host = "150.214.150.68"
 parser.add_argument('--listening_host',
                     help='IP address to talk with the peers.\
  (Default = {})'.format(listening_host))

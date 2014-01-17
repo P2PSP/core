@@ -279,7 +279,7 @@ def communicate_the_header():
     # petición HTTP (como hace el servidor).
 
     # Esta(s) variable(s) la(s) deberia determinar el peer
-    header_size = 1024*5
+    header_size = 1024*50
 
     data = source_sock.recv(header_size)
     total_received = len(data)
