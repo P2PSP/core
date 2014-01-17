@@ -284,7 +284,7 @@ def communicate_the_header():
     received = 0
     data = ""
 
-    while total_received < header_size:
+    while received < header_size:
         data = source_sock.recv(header_size - received)
         received += len(data)
         try:
