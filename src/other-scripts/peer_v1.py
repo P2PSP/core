@@ -572,7 +572,7 @@ def send_a_chunk_to_the_player():
  
     except socket.error:
         pass
-        print 'Player disconected,',
+        print 'Player disconected, ...',
         player_connected = False
         return
     finally:
