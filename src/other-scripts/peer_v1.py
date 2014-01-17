@@ -234,6 +234,13 @@ print splitter_socket.getsockname(), "chunk_size = ", chunk_size
 
 retrieve_the_list_of_peers().start()
 
+'''
+payload = struct.pack("4sH", "aaaa", 0)
+for p in peer_list:
+    print "Sending an empty block to", p
+    stream_socket.sendto(payload, p)
+'''
+
 # The video header is requested directly to the source node, mainly,
 # because in a concatenation of videos served by the source each video
 # has a different header (another reason is that part of the load is
@@ -270,8 +277,7 @@ def communicate_the_header():
     print source_sock.getsockname(), \
         "requesting the stream header via http://" + \
         str(source_sock.getpeername()[0]) + \
-        ':' + str(source_sock.getpeername()[1]) + \
-        '/'+str(channel)
+        ':' + str(source_sock.getpeername()[1]) + str(channel)
     # {{{ Receive the video header from the source and send it to the player
 
     # Nota: este proceso puede fallar si durante la recepción de los
@@ -487,20 +493,24 @@ start_latency = time.time() # Wall time (execution time plus waiting
 # waiting for traveling the player, we wil fill only the half of the
 # circular queue.
 
-print "Buffering ..."
+print "Buffering"
 sys.stdout.flush()
 
 # Retrieve the first chunk to play.
 chunk_number = receive_and_feed()
+print ".\b",
+sys.stdout.flush()
 
 # The receive_and_feed() procedure returns if a packet has been
 # received or if a time-out exception has been arised. In the first
 # case, the returned value is -1 if the packet contains a
 # hello/goodbyte message and in the second one, -2. None of these
-# situations inserts a chunk of video in the buffer and therefore, the
-# must be ignored.
+# situations inserts a chunk of video in the buffer and therefore,
+# they must be ignored.
 while chunk_number<=0:
     chunk_number = receive_and_feed()
+    print "\bo",
+    sys.stdout.flush()
 
 # The range of the chunk index uses to be much larger than the buffer
 # size. Therefore, a simple hash operation (in the case, the modulo
@@ -511,8 +521,12 @@ chunk_to_play = chunk_number % buffer_size
 
 # Fill up to the half of the buffer.
 for x in xrange(buffer_size/2):
+    print "\b.",
+    sys.stdout.flush()
     while receive_and_feed()<=0:
-        # Again, w discard control messages (hello and goodbye
+        print "\bo",
+        sys.stdout.flush()
+        # Again, discard control messages (hello and goodbye
         # messages).
         pass
 

@@ -371,7 +371,7 @@ message', Color.none
                     'complains about lost chunk', lost_chunk, \
                     'sent to', destination, Color.none
                 try:
-                    unreliability[destination] += 0#1
+                    unreliability[destination] += 1
                 except:
                     print "the unsupportive peer does not exit"
                     pass
@@ -389,7 +389,7 @@ message', Color.none
 
                 if sender != peer_list[0]:
                     try:
-                        complains[sender] += 0#1
+                        complains[sender] += 1
                     except:
                         print "the complaining peer does not exit"
                         pass

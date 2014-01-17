@@ -70,7 +70,7 @@ class Splitter:
         self.listening_host = listening_host
         self.listening_port = listening_port
 
-    def get_peer_connection_socket(host, port):
+    def listen_TCP(host, port):
         # {{{
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -89,7 +89,7 @@ class Splitter:
 
         # }}}
 
-    def create_cluster_sock(host, port):
+    def listen_UDP(host, port):
         # {{{ 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
@@ -348,6 +348,13 @@ class Splitter:
         else:
             print "release mode"
 
+
+        # Socket to manage the cluster (churn).
+        peer_connection_socket = self.listen_TCP(self.listening_host, self.listening_port)
+
+        # Socket to send the media to the cluster.
+        cluster_sock = self.listen_UDP(self.listening_host, self.listening_port)
+
         # This is the list of peers in the cluster. There will be always a
         # peer in the list of peers that, by default, is running in the
         # same host than the splitter, listening to the port
@@ -358,7 +365,7 @@ class Splitter:
 
         # Destination peers of the chunk, indexed by a chunk number. Used to
         # find the peer to which a chunk has been sent.
-        destination_of_chunk = [('0.0.0.0',0) for i in xrange(buffer_size)]
+        destination_of_chunk = [('0.0.0.0',0) for i in xrange(self.buffer_size)]
 
         # Unreliaility of the peers, indexed by (the end-point of) the
         # peer. Counts the number of times a peer has not re-transmitted a
@@ -371,12 +378,6 @@ class Splitter:
         # peers should be rejected from the cluster.
         complains = {}
         #complains[('127.0.0.1',listening_port+1)] = 0
-
-        # Socket to manage the cluster (churn).
-        peer_connection_socket = self.get_peer_connection_socket()
-
-        # Socket to send the media to the cluster.
-        cluster_sock = create_cluster_sock(listening_port)
 
         wait_for_the_monitor_peer(peer_connection_socket, peer_list, unreliability)
 
