@@ -279,7 +279,7 @@ def communicate_the_header():
     # petición HTTP (como hace el servidor).
 
     # Esta(s) variable(s) la(s) deberia determinar el peer
-    header_size = 1024*20090
+    header_size = 1024*100
 
     received = 0
     data = ""
