@@ -571,6 +571,7 @@ def send_a_chunk_to_the_player():
         #print player_sock.getsockname(), "->", numbers[chunk_to_play], player_sock.getpeername(), '\r',
  
     except socket.error:
+        pass
         print 'Player disconected,',
         player_connected = False
         return
