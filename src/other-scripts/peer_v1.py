@@ -279,7 +279,7 @@ def communicate_the_header():
     # petición HTTP (como hace el servidor).
 
     # Esta(s) variable(s) la(s) deberia determinar el peer
-    header_size = 1024*20
+    header_size = 1024*20090
 
     received = 0
     data = ""
@@ -291,7 +291,7 @@ def communicate_the_header():
             player_sock.sendall(data)
         except:
             print "error sending data to the player"
-            print "len(data)=", len(data)
+            print "len(data) =", len(data)
         print "received bytes:", received, "\r",
     '''
     data = source_sock.recv(header_size)
