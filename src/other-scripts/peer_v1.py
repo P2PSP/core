@@ -304,7 +304,7 @@ def communicate_the_header():
     '''
     # }}}
 
-    print source_sock.getsockname(), 'got', total_received, 'bytes'
+    print source_sock.getsockname(), 'got', received, 'bytes'
 
 
     # }}}
