@@ -38,8 +38,8 @@ parser.add_argument('--player_port',
                     help='Port used to communicate with the player.\
  (Default = {})'.format(player_port))
 
-splitter_host = "127.0.0.1"
-#splitter_host = "150.214.150.68"
+#splitter_host = "127.0.0.1"
+splitter_host = "150.214.150.68"
 #splitter_host = "192.168.1.137"
 parser.add_argument('--splitter_host',
                     help='Host of the splitter.\
