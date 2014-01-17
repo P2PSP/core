@@ -291,6 +291,7 @@ def communicate_the_header():
             player_sock.sendall(data)
         except:
             print "error sending data to the player"
+            print "len(data)=", len(data)
         print "received bytes:", received, "\r",
     '''
     data = source_sock.recv(header_size)
