@@ -263,7 +263,7 @@ source_sock = get_source_socket()
 def communicate_the_header():
     # {{{ 
 
-    GET_message = 'GET /' + channel + ' HTTP/1.1\r\n'
+    GET_message = 'GET ' + channel + ' HTTP/1.1\r\n'
     GET_message += '\r\n'
     source_sock.sendall(GET_message)
 
