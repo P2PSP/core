@@ -86,7 +86,7 @@ def get_player_socket():
     print sock.getsockname(), "waiting for the player ..."
 
     sock, player = sock.accept()
-    sock.setblocking(0)
+    #sock.setblocking(0)
 
     print sock.getsockname(), "the player is", sock.getpeername()
 
