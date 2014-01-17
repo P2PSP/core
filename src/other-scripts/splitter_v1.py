@@ -36,8 +36,8 @@ parser.add_argument('--source_port',
                     help='Port where the streaming server is listening.\
  (Default = {})'.format(source_port))
 
-channel = '134.ogg'
-#channel = '480.ogg'
+channel = '/root/Videos/Big_Buck_Bunny_small.ogv'
+#channel = '/root/Videos/big_buck_bunny_480p_stereo.ogg'
 parser.add_argument('--channel',
                     help='Name of the channel served by the streaming source.\
  (Default = "{}")'.format(channel))
@@ -438,7 +438,7 @@ source_sock.connect(source)
 
 print source_sock.getsockname(), 'connected to', source
 
-GET_message = 'GET /' + channel + ' HTTP/1.1\r\n'
+GET_message = 'GET ' + channel + ' HTTP/1.1\r\n'
 GET_message += '\r\n'
 source_sock.sendall(GET_message)
 
