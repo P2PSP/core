@@ -567,20 +567,16 @@ def send_a_chunk_to_the_player():
 
     # Ojo, probar a no enviar nada!!!
     player_sock.sendall(chunks[chunk_to_play])
-    '''
     try:
         player_sock.sendall(chunks[chunk_to_play])
         #print player_sock.getsockname(), "->", numbers[chunk_to_play], player_sock.getpeername(), '\r',
  
     except socket.error:
-        pass
         print 'Player disconected, ...',
         player_connected = False
         return
     finally:
-        pass
         return
-    '''
     # We have fired the chunk.
     received[chunk_to_play] = False
 
