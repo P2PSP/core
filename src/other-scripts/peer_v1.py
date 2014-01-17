@@ -576,6 +576,7 @@ def send_a_chunk_to_the_player():
         player_connected = False
         return
     finally:
+        pass
         return
 
     # We have fired the chunk.
