@@ -210,6 +210,9 @@ def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
 
     peer_serve_socket.close()
     peer_list.append(peer)
+
+    print "appended", peer
+
     unreliability[peer] = 0
     complains[peer] = 0
 

@@ -566,7 +566,6 @@ def send_a_chunk_to_the_player():
         print Color.blue, "\blost chunk:", numbers[chunk_to_play], Color.none
 
     # Ojo, probar a no enviar nada!!!
-    player_sock.sendall(chunks[chunk_to_play])
     try:
         player_sock.sendall(chunks[chunk_to_play])
         #print player_sock.getsockname(), "->", numbers[chunk_to_play], player_sock.getpeername(), '\r',
