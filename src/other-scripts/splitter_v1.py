@@ -343,7 +343,7 @@ class listen_to_the_cluster(Thread):
             # they send a UDP datagram to the splitter with a
             # zero-length payload.
             if len(message) == 0:
-                print Color.red, 'received "goodbye" from', sender
+                print Color.red, 'received "goodbye" from', sender, Color.none
                 sys.stdout.flush()
                 # An empty message is a goodbye message.
                 if sender != peer_list[0]:
@@ -379,7 +379,7 @@ class listen_to_the_cluster(Thread):
                 else:
                     print Color.blue, "complains about", destination, \
                         "=", unreliability[destination], Color.none
-                    if unreliability[destination] > 8:
+                    if unreliability[destination] > 128:
                         print Color.red, 'too much complains about\
  unsupportive peer', \
                             destination, Color.none
@@ -395,7 +395,7 @@ class listen_to_the_cluster(Thread):
                         print "the complaining peer does not exit"
                         pass
                     else:
-                        if complains[sender] > 8:
+                        if complains[sender] > 128:
                             print Color.red, 'too much complains of a peevish peer', \
                                 sender, Color.none
                             peer_index -= 1
