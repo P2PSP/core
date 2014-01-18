@@ -234,8 +234,8 @@ print splitter_socket.getsockname(), "chunk_size = ", chunk_size
 
 retrieve_the_list_of_peers().start()
 
-#payload = struct.pack("4sH", "aaaa", 0)
-cluster_socket.sendto('', splitter)
+payload = struct.pack("4sH", "0.0.0.0", 0)
+cluster_socket.sendto(payload, splitter)
 
 # The video header is requested directly to the source node, mainly,
 # because in a concatenation of videos served by the source each video
