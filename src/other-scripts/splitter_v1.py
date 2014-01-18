@@ -206,12 +206,12 @@ def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
         peer_serve_socket.sendall(message)
         print "%5d" % counter, p
 
-    print 'done', Color.none
+    print 'done'
 
     peer_serve_socket.close()
     peer_list.append(peer)
 
-    print "appended", peer
+    print "appended", peer, Color.none
 
     unreliability[peer] = 0
     complains[peer] = 0
@@ -343,13 +343,13 @@ class listen_to_the_cluster(Thread):
             # they send a UDP datagram to the splitter with a
             # zero-length payload.
             if len(message) == 0:
+                print Color.red, 'received "goodbye" from', sender
                 # An empty message is a goodbye message.
                 if sender != peer_list[0]:
                     try:
                         peer_index -= 1
                         peer_list.remove(sender)
-                        print Color.red, sender, 'removed by "goodbye" \
-message', Color.none
+                        print Color.red, sender, 'removed by "goodbye" message', Color.none
                     except:
                         # Received a googbye message from a peer which is
                         # not in the list of peers.

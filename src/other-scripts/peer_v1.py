@@ -234,12 +234,8 @@ print splitter_socket.getsockname(), "chunk_size = ", chunk_size
 
 retrieve_the_list_of_peers().start()
 
-'''
 payload = struct.pack("4sH", "aaaa", 0)
-for p in peer_list:
-    print "Sending an empty block to", p
-    stream_socket.sendto(payload, p)
-'''
+cluster_socket.sendto(payload, splitter)
 
 # The video header is requested directly to the source node, mainly,
 # because in a concatenation of videos served by the source each video
@@ -498,25 +494,25 @@ sys.stdout.flush()
 
 # Retrieve the first chunk to play.
 chunk_number = receive_and_feed()
-print ".\b",
-sys.stdout.flush()
+#print chunk_number,
+#sys.stdout.flush()
 
 # The receive_and_feed() procedure returns if a packet has been
 # received or if a time-out exception has been arised. In the first
 # case, the returned value is -1 if the packet contains a
-# hello/goodbyte message and in the second one, -2. None of these
-# situations inserts a chunk of video in the buffer and therefore,
-# they must be ignored.
+# hello/goodbyte message or a number >= 0 if a chunk has been
+# received. A -2 is returned if a time-out is has happened.
 while chunk_number<=0:
     chunk_number = receive_and_feed()
-    print "\bo",
-    sys.stdout.flush()
+    #print chunk_number,
+    #sys.stdout.flush()
 
-# The range of the chunk index uses to be much larger than the buffer
-# size. Therefore, a simple hash operation (in the case, the modulo
-# operation) has been used. Because we expect that video chunks come
-# in order and the chunks are sent to the player also in order, this
-# hashing should work fine.
+# In this moment, the variable chunk_number stores the first chunk to
+# be sent to the player. Notice that the range of the chunk index uses
+# to be much larger than the buffer size. Therefore, a simple hash
+# operation (in the case, the modulo operation) has been used. Because
+# we expect that video chunks come in order and the chunks are sent to
+# the player also in order, this hashing should work fine.
 chunk_to_play = chunk_number % buffer_size
 
 # Fill up to the half of the buffer.
@@ -524,8 +520,8 @@ for x in xrange(buffer_size/2):
     print "\b.",
     sys.stdout.flush()
     while receive_and_feed()<=0:
-        print "\bo",
-        sys.stdout.flush()
+        #print "\bo",
+        #sys.stdout.flush()
         # Again, discard control messages (hello and goodbye
         # messages).
         pass
@@ -596,7 +592,6 @@ def send_a_chunk_to_the_player():
     try:
         player_sock.sendall(chunks[chunk_to_play])
         #print player_sock.getsockname(), "->", numbers[chunk_to_play], player_sock.getpeername(), '\r',
- 
     except socket.error:
         print 'Player disconected, ...',
         player_connected = False
