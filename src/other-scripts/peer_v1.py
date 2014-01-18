@@ -623,6 +623,7 @@ main_alive = False
 print 'goodbye!'
 goodbye = ''
 cluster_socket.sendto(goodbye, splitter)
+print '"goodbye" message sent to the splitter', splitter
 for x in xrange(3):
     receive_and_feed()
 for peer in peer_list:

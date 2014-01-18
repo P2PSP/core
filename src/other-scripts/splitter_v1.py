@@ -344,6 +344,7 @@ class listen_to_the_cluster(Thread):
             # zero-length payload.
             if len(message) == 0:
                 print Color.red, 'received "goodbye" from', sender
+                sys.stdout.flush()
                 # An empty message is a goodbye message.
                 if sender != peer_list[0]:
                     try:
