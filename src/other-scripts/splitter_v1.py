@@ -42,16 +42,16 @@ parser.add_argument('--channel',
                     help='Name of the channel served by the streaming source.\
  (Default = "{}")'.format(channel))
 
-#listening_host = "127.0.0.1"
-listening_host = "150.214.150.68"
-parser.add_argument('--listening_host',
+#cluster_host = "127.0.0.1" # Don't use "localhost"
+cluster_host = "150.214.150.68"
+parser.add_argument('--cluster_host',
                     help='IP address to talk with the peers.\
- (Default = {})'.format(listening_host))
+ (Default = {})'.format(cluster_host))
 
-listening_port = 4552
-parser.add_argument('--listening_port',
+cluster_port = 4552
+parser.add_argument('--cluster_port',
                     help='Port to talk with the peers.\
- (Default = {})'.format(listening_port))
+ (Default = {})'.format(cluster_port))
 
 # The buffer_size depends on the stream bit-rate and the maximun
 # latency experimented by the users, and should be transmitted to the
@@ -78,15 +78,15 @@ parser.add_argument('--chunk_size',
 
 args = parser.parse_known_args()[0]
 if args.source_host:
-    source_host = args.source_host
+    source_host = socket.gethostbyname(args.source_host)
 if args.source_port:
     source_port = int(args.source_port)
 if args.channel:
     channel = args.channel
-if args.listening_host:
-    listening_host = args.listening_host
-if args.listening_port:
-    listening_port = int(args.listening_port)
+if args.cluster_host:
+    cluster_host = socket.gethostbyname(args.cluster_host)
+if args.cluster_port:
+    cluster_port = int(args.cluster_port)
 if args.buffer_size:
     buffer_size = int(args.buffer_size)
 if args.chunk_size:
@@ -104,7 +104,7 @@ def get_peer_connection_socket():
     except:
         pass
 
-    sock.bind((listening_host, listening_port))
+    sock.bind((cluster_host, cluster_port))
     #sock.listen(5)
     sock.listen(socket.SOMAXCONN)   # Set the connection queue to the max!
 
@@ -114,7 +114,7 @@ def get_peer_connection_socket():
 # Socket to manage the cluster (churn).
 peer_connection_sock = get_peer_connection_socket()
 
-def create_cluster_sock(listening_port):
+def create_cluster_sock(cluster_port):
     # {{{ 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
@@ -122,20 +122,20 @@ def create_cluster_sock(listening_port):
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     except:
         pass
-    sock.bind((listening_host, listening_port))
+    sock.bind((cluster_host, cluster_port))
     #peer_socket.bind(('',peer_connection_sock.getsockname()[PORT]))
 
     return sock
     # }}}
 # Socket to send the media to the cluster.
-cluster_sock = create_cluster_sock(listening_port)
+cluster_sock = create_cluster_sock(cluster_port)
 
 # The list of peers in the cluster. There will be always a peer in the
 # list of peers that, by default, is running in the same host than the
-# splitter, listening to the port listening_port+1. Notice that you
+# splitter, listening to the port cluster_port+1. Notice that you
 # can replace this end-point by any other you want, for example, in a
 # different host.
-#peer_list = [('127.0.0.1',listening_port+1)]
+#peer_list = [('127.0.0.1',cluster_port+1)]
 peer_list = []
 
 # Destination peers of the chunk, indexed by a chunk number. Used to
@@ -146,13 +146,13 @@ destination_of_chunk = [('0.0.0.0',0) for i in xrange(buffer_size)]
 # peer. Counts the number of times a peer has not re-transmitted a
 # packet.
 unreliability = {}
-#unreliability[('127.0.0.1',listening_port+1)] = 0
+#unreliability[('127.0.0.1',cluster_port+1)] = 0
 
 # Complaining rate of a peer. Sometimes the complaining peer has not
 # enough bandwidth in his download link. In this case, the peevish
 # peers should be rejected from the cluster.
 complains = {}
-#complains[('127.0.0.1',listening_port+1)] = 0
+#complains[('127.0.0.1',cluster_port+1)] = 0
 
 # Useful definitions.
 IP_ADDR = 0
@@ -165,9 +165,7 @@ main_alive = True
 def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
     # {{{
 
-    print Color.green, peer_serve_socket.getsockname(), \
-        'accepted connection from peer', \
-        peer
+    print Color.green, "\b", peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
 
     # Send the source node IP address.
     message = struct.pack("4s", socket.inet_aton(source_host))
@@ -190,28 +188,24 @@ def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
     message = struct.pack("H", socket.htons(chunk_size))
     peer_serve_socket.sendall(message)
 
-    print peer_serve_socket.getsockname(), \
-        'sending the list of peers ...'
+    print peer_serve_socket.getsockname(), '\b: sending the list of peers ...'
 
     # Sends the size of the list of peers.
     message = struct.pack("H", socket.htons(len(peer_list)))
     peer_serve_socket.sendall(message)
 
     # Send the list of peers.
-    counter = 1
+    counter = 0
     for p in peer_list:
-        message = struct.pack(
-            "4sH", socket.inet_aton(p[IP_ADDR]),
-            socket.htons(p[PORT]))
+        message = struct.pack("4sH", socket.inet_aton(p[IP_ADDR]), socket.htons(p[PORT]))
         peer_serve_socket.sendall(message)
-        print "%5d" % counter, p
+        print "[%5d]" % counter, p
+        counter += 1
 
-    print 'done'
+    print 'done', Color.none
 
     peer_serve_socket.close()
     peer_list.append(peer)
-
-    print "appended", peer, Color.none
 
     unreliability[peer] = 0
     complains[peer] = 0
@@ -222,7 +216,7 @@ def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
 # the cluster administrator can use to monitorize the performance of
 # the streaming. This peer MUST run on the same host than the splitter
 # to avoid bandwidth consumption and usually listen to the port
-# splitter_port+1 (although this is configurable by the administrator
+# cluster_port+1 (although this is configurable by the administrator
 # selecting a different peer_port). This peer MUST also use the same
 # public IP address that the splitter in order the rest of peers of
 # the cluster communicate with it. The splitter will use its public IP
@@ -230,14 +224,12 @@ def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
 def wait_for_the_monitor_peer(peer_connection_sock, peer_list, unreliability):
     # {{{
 
-    print peer_connection_sock.getsockname(),\
-        "waiting for the monitor peer ..."
+    print peer_connection_sock.getsockname(), "\b: waiting for the monitor peer ..."
     sys.stdout.flush()
     peer_serve_socket, peer = peer_connection_sock.accept()
-    print peer_serve_socket.getsockname(), "the monitor peer is", \
-        peer_serve_socket.getpeername()
+    print peer_serve_socket.getsockname(), "\b: the monitor peer is", peer_serve_socket.getpeername()
 
-    peer = (listening_host, peer[1])
+    peer = (cluster_host, peer[1])
     arrival_handler(peer_serve_socket, peer, peer_list, unreliability)
 
     # }}}
@@ -309,7 +301,7 @@ class handle_arrivals(Thread):
         Thread.__init__(self)
 
     def run(self):
-        print peer_connection_sock.getsockname(), "waiting for normal peers ..." 
+        print peer_connection_sock.getsockname(), "\b: waiting for normal peers  (TCP connections) ..." 
         while main_alive:
             peer_serve_socket, peer = peer_connection_sock.accept()
             #if peer not in peer_list: # Puede que sobre
@@ -331,7 +323,7 @@ class listen_to_the_cluster(Thread):
 
         global peer_index
 
-        print cluster_sock.getsockname(), "listening to the cluster ...", 
+        print cluster_sock.getsockname(), "\b: listening to the cluster (UDP messages) ...", 
         while main_alive:
             # {{{
 
@@ -343,14 +335,14 @@ class listen_to_the_cluster(Thread):
             # they send a UDP datagram to the splitter with a
             # zero-length payload.
             if len(message) == 0:
-                print Color.red, 'received "goodbye" from', sender, Color.none
+                print Color.red, "\b", cluster_sock.getsockname(), ': received "goodbye" from', sender, Color.none
                 sys.stdout.flush()
                 # An empty message is a goodbye message.
                 if sender != peer_list[0]:
                     try:
                         peer_index -= 1
                         peer_list.remove(sender)
-                        print Color.red, sender, 'removed by "goodbye" message', Color.none
+                        #print Color.red, "\b", sender, 'removed by "goodbye" message', Color.none
                     except:
                         # Received a googbye message from a peer which is
                         # not in the list of peers.
@@ -368,9 +360,7 @@ class listen_to_the_cluster(Thread):
                 # cluster.
                 lost_chunk = struct.unpack("!H",message)[0]
                 destination = destination_of_chunk[lost_chunk]
-                print Color.blue, sender, \
-                    'complains about lost chunk', lost_chunk, \
-                    'sent to', destination, Color.none
+                print Color.blue, "\b", sender, "complains about lost chunk", lost_chunk, "sent to", destination, Color.none
                 try:
                     unreliability[destination] += 1
                 except:
@@ -380,9 +370,7 @@ class listen_to_the_cluster(Thread):
                     print Color.blue, "complains about", destination, \
                         "=", unreliability[destination], Color.none
                     if unreliability[destination] > 128:
-                        print Color.red, 'too much complains about\
- unsupportive peer', \
-                            destination, Color.none
+                        print Color.red, "\btoo much complains about unsupportive peer", destination, Color.none
                         peer_index -= 1
                         peer_list.remove(destination)
                         del unreliability[destination]
@@ -521,12 +509,12 @@ while True:
 
         # Wake up the "listen_to_the_cluster" daemon, which is waiting
         # in a cluster_sock.recvfrom(...).
-        cluster_sock.sendto('',('127.0.0.1',listening_port))
+        cluster_sock.sendto('',('127.0.0.1',cluster_port))
 
         # Wake up the "handle_arrivals" daemon, which is waiting in a
         # peer_connection_sock.accept().
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect(('127.0.0.1',listening_port))
+        sock.connect(('127.0.0.1',cluster_port))
 
         # Breaks this thread and returns to the parent process (usually,
         # the shell).

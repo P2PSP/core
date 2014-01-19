@@ -3,6 +3,10 @@
 
 # Recibe bloques desde el splitter y los reenv'ia a resto de peers.
 
+# Problemas:
+# 1. Los goodbyes no llegan al splitter.
+# 2. Los nuevos peers no pueden contactar con los antiguos a causa del NAT.
+
 # {{{ Imports
 
 import os
@@ -38,7 +42,7 @@ parser.add_argument('--player_port',
                     help='Port used to communicate with the player.\
  (Default = {})'.format(player_port))
 
-#splitter_host = "127.0.0.1"
+#splitter_host = "127.0.0.1" # Don't use "localhost"
 splitter_host = "150.214.150.68"
 #splitter_host = "192.168.1.137"
 parser.add_argument('--splitter_host',
@@ -62,9 +66,9 @@ args = parser.parse_known_args()[0]
 if args.player_port:
     player_port = int(args.player_port)
 if args.splitter_host:
-    splitter_host = args.splitter_host
+    splitter_host = socket.gethostbyname(args.splitter_host)
 if args.splitter_port:
-    splitter_port = args.splitter_port
+    splitter_port = int(args.splitter_port)
 if args.cluster_port:
     cluster_port = int(args.cluster_port)
 
@@ -83,12 +87,12 @@ def get_player_socket():
     sock.bind(('', player_port))
     sock.listen(0)
 
-    print sock.getsockname(), "waiting for the player ..."
+    print sock.getsockname(), "\b: waiting for the player ..."
 
     sock, player = sock.accept()
     #sock.setblocking(0)
 
-    print sock.getsockname(), "the player is", sock.getpeername()
+    print sock.getsockname(), "\b: the player is", sock.getpeername()
 
     return sock
 
@@ -103,13 +107,14 @@ splitter = (splitter_host, splitter_port)
 def connect_to_the_splitter(splitter_host, splitter_port):
     # {{{
 
-    sock = ''
+    #sock = ''
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print sock.getsockname(), "connecting the splitter", splitter,
+    print sock.getsockname(), "\b: connecting with the splitter at", splitter
     if cluster_port != 0:
         #sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind(("", cluster_port))
+        #print "hola"
         #sock.bind(("192.168.1.130", cluster_port))
         #sock.bind((splitter_host, cluster_port))
         #sock.bind((source_sock.getsockname()[0], cluster_port))
@@ -117,7 +122,7 @@ def connect_to_the_splitter(splitter_host, splitter_port):
         sock.connect(splitter)
     except:
         sys.exit("Sorry. Can't connect with the splitter at " + str(splitter))
-    print sock.getsockname(), "connected to the splitter", splitter
+    print sock.getsockname(), "\b: connected to the splitter at", splitter
     return sock
 
     # }}}
@@ -144,8 +149,8 @@ cluster_socket = create_cluster_socket()
 # wait for a chunk (from the splitter or from another peer).
 cluster_socket.settimeout(1) 
 
-print "Joining to the cluster ..."
-sys.stdout.flush()
+#print cluster_socket.getsockname(), "\b: joining to the cluster ..."
+#sys.stdout.flush()
 
 # This is the list of peers of the cluster. Each peer uses this
 # structure to resend the chunks received from the splitter to these
@@ -169,16 +174,11 @@ class retrieve_the_list_of_peers(Thread):
     def run(self):
 
         # Request the list of peers.
-        print splitter_socket.getsockname(), \
-            "-", 'Requesting the list of peers', \
-            '->', splitter_socket.getpeername()
+        print Color.green, "\b", splitter_socket.getsockname(), "\b: requesting the list of peers to", splitter_socket.getpeername()
 
-        number_of_peers = socket.ntohs(\
-            struct.unpack("H",splitter_socket.recv(struct.calcsize("H")))[0])
+        number_of_peers = socket.ntohs(struct.unpack("H",splitter_socket.recv(struct.calcsize("H")))[0])
 
-        print splitter_socket.getpeername(), \
-            "-", "the size of the list of peers is:", number_of_peers, \
-            '->', splitter_socket.getsockname()
+        print splitter_socket.getpeername(), "\b: the size of the list of peers is", number_of_peers
 
         while number_of_peers > 0:
             message = splitter_socket.recv(struct.calcsize("4sH"))
@@ -187,17 +187,18 @@ class retrieve_the_list_of_peers(Thread):
             port = socket.ntohs(port)
             peer = (IP_addr, port)
 
-            print splitter_socket.getpeername(), \
-                "-", peer, '->', splitter_socket.getsockname()
+            print "[%5d]" % number_of_peers, peer
 
             peer_list.append(peer)
             unreliability[peer] = 0
-            print Color.green, cluster_socket.getsockname(), \
-                "-", '"hello"', "->", peer, Color.none
+            #print Color.green, cluster_socket.getsockname(), \
+            #    "-", '"hello"', "->", peer, Color.none
             # Say hello to the peer
             cluster_socket.sendto('', peer) # Send a empty chunk (this
                                           # should be fast).
             number_of_peers -= 1
+
+        print 'done', Color.none
 
     # }}}
 
@@ -205,37 +206,39 @@ class retrieve_the_list_of_peers(Thread):
 message = splitter_socket.recv(struct.calcsize("4s"))
 source_host = struct.unpack("4s", message)[0]
 source_host = socket.inet_ntoa(source_host)
-print splitter_socket.getsockname(), "source_host = ", source_host
+print splitter_socket.getpeername(), "\b: source_host =", source_host
 
 # Receive from the splitter the port of the source node.
 message = splitter_socket.recv(struct.calcsize("H"))
 source_port = struct.unpack("H", message)[0]
 source_port = socket.ntohs(source_port)
-print splitter_socket.getsockname(), "source_port = ", source_port
+print splitter_socket.getpeername(), "\b: source_port =", source_port
 
 # Rececive from the splitter the channel name.
 message = splitter_socket.recv(struct.calcsize("H"))
 channel_size = struct.unpack("H", message)[0]
 channel_size = socket.ntohs(channel_size)
 channel = splitter_socket.recv(channel_size)
-print splitter_socket.getsockname(), "channel =", channel
+print splitter_socket.getpeername(), "\b: channel =", channel
 
 # Receive from the splitter the buffer size.
 message = splitter_socket.recv(struct.calcsize("H"))
 buffer_size = struct.unpack("H", message)[0]
 buffer_size = socket.ntohs(buffer_size)
-print splitter_socket.getsockname(), "buffer_size = ", buffer_size
+print splitter_socket.getpeername(), "\b: buffer_size =", buffer_size
 
 # Receive fron the splitter the chunk size.
 message = splitter_socket.recv(struct.calcsize("H"))
 chunk_size = struct.unpack("H", message)[0]
 chunk_size = socket.ntohs(chunk_size)
-print splitter_socket.getsockname(), "chunk_size = ", chunk_size
+print splitter_socket.getpeername(), "\b: chunk_size =", chunk_size
 
 retrieve_the_list_of_peers().start()
 
-payload = struct.pack("4sH", "0.0.0.0", 0)
-cluster_socket.sendto(payload, splitter)
+#payload = struct.pack("4sH", "0.0.0.0", 0)
+#cluster_socket.sendto(payload, splitter)
+message = struct.pack("!H", 0)
+cluster_socket.sendto(message, splitter)
 
 # The video header is requested directly to the source node, mainly,
 # because in a concatenation of videos served by the source each video
@@ -255,10 +258,10 @@ cluster_socket.sendto(payload, splitter)
 def get_source_socket():
     source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     source = (source_host, source_port)
-    print source_socket.getsockname(), "connecting the source ", source, "...",
+    print source_socket.getsockname(), "\b: connecting with the source at", source, "..."
     sys.stdout.flush()
     source_socket.connect(source)
-    print "connected"
+    print source_socket.getsockname(), "\b: connected with", source
     return source_socket
 
 source_sock = get_source_socket()
@@ -270,10 +273,7 @@ def communicate_the_header():
     GET_message += '\r\n'
     source_sock.sendall(GET_message)
 
-    print source_sock.getsockname(), \
-        "requesting the stream header via http://" + \
-        str(source_sock.getpeername()[0]) + \
-        ':' + str(source_sock.getpeername()[1]) + str(channel)
+    print source_sock.getsockname(), "\b: requesting the stream header via http://" + str(source_sock.getpeername()[0]) + ':' + str(source_sock.getpeername()[1]) + str(channel)
     # {{{ Receive the video header from the source and send it to the player
 
     # Nota: este proceso puede fallar si durante la recepción de los
@@ -307,7 +307,7 @@ def communicate_the_header():
     '''
     # }}}
 
-    print source_sock.getsockname(), 'got', received, 'bytes'
+    print source_sock.getsockname(), '\b: sent', received, 'bytes'
 
 
     # }}}
@@ -489,7 +489,7 @@ start_latency = time.time() # Wall time (execution time plus waiting
 # waiting for traveling the player, we wil fill only the half of the
 # circular queue.
 
-print "Buffering"
+print cluster_socket.getsockname(), "\b: buffering",
 sys.stdout.flush()
 
 # Retrieve the first chunk to play.
@@ -517,7 +517,7 @@ chunk_to_play = chunk_number % buffer_size
 
 # Fill up to the half of the buffer.
 for x in xrange(buffer_size/2):
-    print "\b.",
+    print ".\b",
     sys.stdout.flush()
     while receive_and_feed()<=0:
         #print "\bo",
@@ -530,7 +530,7 @@ for x in xrange(buffer_size/2):
 
 end_latency = time.time()
 latency = end_latency - start_latency
-print 'Latency (buffering) =', latency, 'seconds'
+print 'latency =', latency, 'seconds'
 
 # This is used to stop the child threads. They will be alive only
 # while the main thread is alive.
