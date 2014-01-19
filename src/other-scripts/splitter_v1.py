@@ -57,7 +57,8 @@ parser.add_argument('--cluster_port',
 # latency experimented by the users, and should be transmitted to the
 # peers. The buffer_size is proportional to the bit-rate and the
 # latency is proportional to the buffer_size.
-buffer_size = 256
+buffer_size = 128 # Ojo, de 256 en adelante, en el bloque 92 el peer
+                  # monitor pierde algunos bloques
 parser.add_argument('--buffer_size',
                     help='size of the video buffer in blocks.\
  (Default = {})'.format(buffer_size))
@@ -337,7 +338,9 @@ class listen_to_the_cluster(Thread):
             # they send a UDP datagram to the splitter with a
             # zero-length payload.
             if len(message) == 0:
-                print Color.red, "\b", cluster_sock.getsockname(), ': received "goodbye" from', sender, Color.none
+                sys.stdout.write(Color.red)
+                print cluster_sock.getsockname(), '\b: received "goodbye" from', sender
+                sys.stdout.write(Color.none)
                 sys.stdout.flush()
                 # An empty message is a goodbye message.
                 if sender != peer_list[0]:
@@ -362,21 +365,25 @@ class listen_to_the_cluster(Thread):
                 # cluster.
                 lost_chunk = struct.unpack("!H",message)[0]
                 destination = destination_of_chunk[lost_chunk]
-                print Color.blue, "\b", sender, "complains about lost chunk", lost_chunk, "sent to", destination, Color.none
+                sys.stdout.write(Color.blue)
+                print cluster_sock.getsockname(), "\b:", sender, "complains about lost chunk", lost_chunk, "sent to", destination, Color.none
+                sys.stdout.write(Color.none)
                 try:
                     unreliability[destination] += 1
                 except:
                     print "the unsupportive peer does not exit"
                     pass
                 else:
-                    print Color.blue, "complains about", destination, \
-                        "=", unreliability[destination], Color.none
+                    #print Color.blue, "complains about", destination, \
+                    #    "=", unreliability[destination], Color.none
                     if unreliability[destination] > 128:
-                        print Color.red, "\btoo much complains about unsupportive peer", destination, Color.none
+                        sys.stdout.write(Color.red)
+                        print cluster_sock.getsockname(), "\b: too much complains about unsupportive peer", destination, "\b. Removing it"
                         peer_index -= 1
                         peer_list.remove(destination)
                         del unreliability[destination]
                         del complains[destination]
+                        sys.stdout.write(Color.none)
 
                 if sender != peer_list[0]:
                     try:
@@ -386,8 +393,9 @@ class listen_to_the_cluster(Thread):
                         pass
                     else:
                         if complains[sender] > 128:
-                            print Color.red, 'too much complains of a peevish peer', \
-                                sender, Color.none
+                            sys.stdout.write(Color.red)
+                            print cluster_socket.getsockname(), "\b: too much complains of a peevish peer", sender
+                            sys.stdout.write(Color.none)
                             peer_index -= 1
                             peer_list.remove(sender)
                             del complains[sender]
@@ -463,8 +471,8 @@ while True:
                 prev_chunk_size = len(chunk)
                 chunk += source_sock.recv(chunk_size - len(chunk))
             return chunk
+        
         chunk = receive_next_chunk()
-        chunk_number = (chunk_number + 1) % 65536
 
         # Send the chunk.
         '''
@@ -479,6 +487,7 @@ while True:
         message = struct.pack(chunk_format_string,
                               socket.htons(chunk_number),
                               chunk)
+        chunk_number = (chunk_number + 1) % 65536
         cluster_sock.sendto(message, peer)
         destination_of_chunk[chunk_number % buffer_size] = peer
 
