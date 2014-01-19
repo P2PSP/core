@@ -174,7 +174,8 @@ class retrieve_the_list_of_peers(Thread):
     def run(self):
 
         # Request the list of peers.
-        print Color.green, "\b", splitter_socket.getsockname(), "\b: requesting the list of peers to", splitter_socket.getpeername()
+        sys.stdout.write(Color.green)
+        print splitter_socket.getsockname(), "\b: requesting the list of peers to", splitter_socket.getpeername()
 
         number_of_peers = socket.ntohs(struct.unpack("H",splitter_socket.recv(struct.calcsize("H")))[0])
 
@@ -198,7 +199,8 @@ class retrieve_the_list_of_peers(Thread):
                                           # should be fast).
             number_of_peers -= 1
 
-        print 'done', Color.none
+        print 'done'
+        sys.stdout.write(Color.none)
 
     # }}}
 
@@ -489,7 +491,7 @@ start_latency = time.time() # Wall time (execution time plus waiting
 # waiting for traveling the player, we wil fill only the half of the
 # circular queue.
 
-print cluster_socket.getsockname(), "\b: buffering",
+print cluster_socket.getsockname(), "\b: buffering ",
 sys.stdout.flush()
 
 # Retrieve the first chunk to play.
@@ -517,7 +519,7 @@ chunk_to_play = chunk_number % buffer_size
 
 # Fill up to the half of the buffer.
 for x in xrange(buffer_size/2):
-    print ".\b",
+    print "\b.",
     sys.stdout.flush()
     while receive_and_feed()<=0:
         #print "\bo",
@@ -530,7 +532,7 @@ for x in xrange(buffer_size/2):
 
 end_latency = time.time()
 latency = end_latency - start_latency
-print 'latency =', latency, 'seconds'
+print ' latency =', latency, 'seconds'
 
 # This is used to stop the child threads. They will be alive only
 # while the main thread is alive.

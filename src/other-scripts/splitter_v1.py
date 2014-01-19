@@ -165,7 +165,8 @@ main_alive = True
 def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
     # {{{
 
-    print Color.green, "\b", peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
+    sys.stdout.write(Color.green)
+    print peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
 
     # Send the source node IP address.
     message = struct.pack("4s", socket.inet_aton(source_host))
@@ -202,7 +203,8 @@ def arrival_handler(peer_serve_socket, peer, peer_list, unreliability):
         print "[%5d]" % counter, p
         counter += 1
 
-    print 'done', Color.none
+    print 'done'
+    sys.stdout.write(Color.none)
 
     peer_serve_socket.close()
     peer_list.append(peer)
