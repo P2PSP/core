@@ -467,7 +467,7 @@ def receive_and_feed():
                 unreliability[sender] = 0
             else:
                 sys.stdout.write(Color.red)
-                print sender, 'removed by \"goodbye\" message'
+                print cluster_sock.getsockname(), '\b: received "goodbye" from', sender
                 sys.stdout.write(Color.none)
                 peer_list.remove(sender)
             return -1
@@ -498,7 +498,7 @@ print cluster_socket.getsockname(), "\b: buffering ",
 sys.stdout.flush()
 
 # Retrieve the first chunk to play.
-print "Primer receive_and_feed"
+#print "Primer receive_and_feed"
 chunk_number = receive_and_feed()
 #print chunk_number,
 #sys.stdout.flush()
@@ -509,7 +509,7 @@ chunk_number = receive_and_feed()
 # hello/goodbyte message or a number >= 0 if a chunk has been
 # received. A -2 is returned if a time-out is has happened.
 while chunk_number < 0:
-    print "Segundos receive_and_feed"
+    #print "Segundos receive_and_feed"
     chunk_number = receive_and_feed()
     #print chunk_number,
     #sys.stdout.flush()
@@ -526,9 +526,9 @@ chunk_to_play = chunk_number % buffer_size
 for x in xrange(buffer_size/2):
     print "\b.",
     sys.stdout.flush()
-    print "Terceros receive_and_feed", x, buffer_size/2
+    #print "Terceros receive_and_feed", x, buffer_size/2
     while receive_and_feed()<=0:
-        print "Terceros receive_and_feed < 0"
+        #print "Terceros receive_and_feed < 0"
         #print "\bo",
         #sys.stdout.flush()
         # Again, discard control messages (hello and goodbye
