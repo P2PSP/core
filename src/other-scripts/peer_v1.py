@@ -327,9 +327,9 @@ source_sock.close()
 # sake of simpliticy, all peers will use the same buffer size.
 chunks = [None]*buffer_size
 received = [False]*buffer_size
+numbers = [0]*buffer_size
 for i in xrange(0, buffer_size):
     numbers[i] = 0
-#numbers = [0]*buffer_size
 
 total_chunks = 0L
 
