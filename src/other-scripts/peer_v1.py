@@ -469,7 +469,7 @@ def receive_and_feed():
                 unreliability[sender] = 0
             else:
                 sys.stdout.write(Color.red)
-                print cluster_sock.getsockname(), '\b: received "goodbye" from', sender
+                print cluster_socket.getsockname(), '\b: received "goodbye" from', sender
                 sys.stdout.write(Color.none)
                 peer_list.remove(sender)
             return -1
