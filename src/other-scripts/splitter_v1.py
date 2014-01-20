@@ -419,7 +419,7 @@ if not __debug__:
             global kbps
             last_chunk_number = 0
             while main_alive:
-                print "[%3d]" % len(peer_list),
+                print "[%3d] " % len(peer_list),
                 kbps = (chunk_number - last_chunk_number) * \
                     chunk_size * 8/1000
                 last_chunk_number = chunk_number

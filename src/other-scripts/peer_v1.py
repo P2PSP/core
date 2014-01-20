@@ -327,7 +327,9 @@ source_sock.close()
 # sake of simpliticy, all peers will use the same buffer size.
 chunks = [None]*buffer_size
 received = [False]*buffer_size
-numbers = [0]*buffer_size
+for i in xrange(0, buffer_size):
+    numbers[i] = 0
+#numbers = [0]*buffer_size
 
 total_chunks = 0L
 
@@ -558,6 +560,7 @@ if not __debug__:
             #global total_chunks
             last_total_chunks = 0
             while main_alive:
+                print "[%3d] " % len(peer_list),
                 kbps = (total_chunks - last_total_chunks) * \
                     chunk_size * 8/1000
                 last_total_chunks = total_chunks
