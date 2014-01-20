@@ -403,7 +403,9 @@ def receive_and_feed():
                     # threshold, the peer is removed from the list of
                     # peers.
                     if unreliability[peer] > peer_unreliability_threshold:
-                        print Color.red, 'removing the unsupportive peer', peer, Color.none
+                        sys.stdout.write(Color.red)
+                        print 'removing the unsupportive peer', peer
+                        sys.stdout.write(Color.none)
                         del unreliability[peer]
                         peer_list.remove(peer)
                     counter += 1
@@ -444,10 +446,9 @@ def receive_and_feed():
 
                 unreliability[peer] += 1        
                 if unreliability[peer] > peer_unreliability_threshold:
-                    print Color.red, peer, 'Removed by unsupportive', \
-                        "(unreliability[", "\b", peer, "\b] = ", \
-                        unreliability[peer], ">", peer_unreliability_threshold, \
-                        Color.none  
+                    sys.stdout.write(Color.red)
+                    print peer, 'Removed by unsupportive', "(unreliability[", "\b", peer, "\b] = ", unreliability[peer], ">", peer_unreliability_threshold
+                    sys.stdout.write(Color.none)  
                     del unreliability[peer]
                     peer_list.remove(peer)
                 counter += 1        
@@ -465,7 +466,9 @@ def receive_and_feed():
                 peer_list.append(sender)
                 unreliability[sender] = 0
             else:
-                print Color.red, sender, 'removed by \"goodbye\" message', Color.none
+                sys.stdout.write(Color.red)
+                print sender, 'removed by \"goodbye\" message'
+                sys.stdout.write(Color.none)
                 peer_list.remove(sender)
             return -1
 
