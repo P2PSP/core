@@ -72,9 +72,9 @@ parser.add_argument('--chunk_size',
  (Default = {})'.format(chunk_size))
 
 #ifdef({{GRANULARITY_CHANGE}},
-#granularity = 1
-#parser.add_argument("--granularity",
-#                    help="Round-Robing scheduling granularity.(Default = {})".format(granular#ity))
+granularity = 1
+parser.add_argument("--granularity",
+                    help="Round-Robing scheduling granularity. (Default = {})".format(granularity))
 #)
 
 args = parser.parse_known_args()[0]
@@ -92,6 +92,8 @@ if args.buffer_size:
     buffer_size = int(args.buffer_size)
 if args.chunk_size:
     chunk_size = int(args.chunk_size)
+if args.granularity:
+    granularity = int(args.granularity)
 # }}}
 
 def get_peer_connection_socket():
@@ -448,7 +450,6 @@ source_sock.sendall(GET_message)
 chunk_format_string = "H" + str(chunk_size) + "s" # "H1024s
 
 #ifdef({{GRANULARITY_CHANGE}},
-granularity = 10
 granularity_counter = 0
 #)
       
