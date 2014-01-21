@@ -326,10 +326,10 @@ source_sock.close()
 # lower start-up time, the higher chunk-loss ratio. However, for the
 # sake of simpliticy, all peers will use the same buffer size.
 chunks = [None]*buffer_size
-received = [False]*buffer_size
+received = [True]*buffer_size
 numbers = [0]*buffer_size
 for i in xrange(0, buffer_size):
-    numbers[i] = 0
+    numbers[i] = i
 
 total_chunks = 0L
 
@@ -515,6 +515,8 @@ while chunk_number < 0:
     chunk_number = receive_and_feed()
     #print chunk_number,
     #sys.stdout.flush()
+
+#print "------------------>", chunk_number
 
 # In this moment, the variable chunk_number stores the first chunk to
 # be sent to the player. Notice that the range of the chunk index uses

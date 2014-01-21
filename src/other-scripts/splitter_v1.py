@@ -448,7 +448,8 @@ source_sock.sendall(GET_message)
 chunk_format_string = "H" + str(chunk_size) + "s" # "H1024s
 
 #ifdef({{GRANULARITY_CHANGE}},
-#granularity_counter = 0
+granularity = 10
+granularity_counter = 0
 #)
       
 # This is the main loop of the splitter
@@ -493,12 +494,12 @@ while True:
         destination_of_chunk[chunk_number % buffer_size] = peer
 
 #ifdef({{GRANULARITY_CHANGE}},
-#        granularity_counter += 1
-#        if granularity_counter == granularity:
-#            peer_index = (peer_index + 1) % len(peer_list)
-#            granularity_counter = 0
+        granularity_counter += 1
+        if granularity_counter == granularity:
+            peer_index = (peer_index + 1) % len(peer_list)
+            granularity_counter = 0
 #,
-        peer_index = (peer_index + 1) % len(peer_list)
+#        peer_index = (peer_index + 1) % len(peer_list)
 #)
 
         # Decrement (dividing by 2) unreliability and complains after
