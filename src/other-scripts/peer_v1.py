@@ -30,7 +30,7 @@ else:
 IP_ADDR = 0
 PORT = 1
 
-peer_unreliability_threshold = 128
+peer_unreliability_threshold = 12800
 
 # {{{ Args parsing
 
