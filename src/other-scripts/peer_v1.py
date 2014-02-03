@@ -110,7 +110,7 @@ def connect_to_the_splitter(splitter_host, splitter_port):
     #sock = ''
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print sock.getsockname(), "\b: connecting with the splitter at", splitter
+    print sock.getsockname(), "\b: connecting to the splitter at", splitter
     if cluster_port != 0:
         #sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind(("", cluster_port))
@@ -121,7 +121,7 @@ def connect_to_the_splitter(splitter_host, splitter_port):
     try:
         sock.connect(splitter)
     except:
-        sys.exit("Sorry. Can't connect with the splitter at " + str(splitter))
+        sys.exit("Sorry. Can't connect to the splitter at " + str(splitter))
     print sock.getsockname(), "\b: connected to the splitter at", splitter
     return sock
 
@@ -260,10 +260,10 @@ cluster_socket.sendto(message, splitter)
 def get_source_socket():
     source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     source = (source_host, source_port)
-    print source_socket.getsockname(), "\b: connecting with the source at", source, "..."
+    print source_socket.getsockname(), "\b: connecting to the source at", source, "..."
     sys.stdout.flush()
     source_socket.connect(source)
-    print source_socket.getsockname(), "\b: connected with", source
+    print source_socket.getsockname(), "\b: connected to", source
     return source_socket
 
 source_sock = get_source_socket()

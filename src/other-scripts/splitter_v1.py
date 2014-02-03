@@ -242,7 +242,7 @@ def wait_for_the_monitor_peer(peer_connection_sock, peer_list, unreliability):
 wait_for_the_monitor_peer(peer_connection_sock, peer_list, unreliability)
 
 # When a peer want to join a cluster, first it must establish a TCP
-# connection with the splitter. In that connection, the splitter sends
+# connection to the splitter. In that connection, the splitter sends
 # to the incomming peer the list of peers. Notice that the
 # transmission of the list of peers (something that could need some
 # time if the cluster is big or the peer is slow) is done in a
@@ -306,7 +306,7 @@ class handle_arrivals(Thread):
         Thread.__init__(self)
 
     def run(self):
-        print peer_connection_sock.getsockname(), "\b: waiting for normal peers  (TCP connections) ..." 
+        print peer_connection_sock.getsockname(), "\b: waiting for normal peers (TCP connections) ..." 
         while main_alive:
             peer_serve_socket, peer = peer_connection_sock.accept()
             #if peer not in peer_list: # Puede que sobre
