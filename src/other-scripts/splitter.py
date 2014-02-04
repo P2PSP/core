@@ -9,7 +9,6 @@ import sys
 import socket
 import threading
 import struct
-#from config import Config
 from color import Color
 import argparse
 
@@ -46,13 +45,6 @@ class Splitter_DBS(threading.Thread):
      # Port to talk with the peers.
      team_port = 4552
 
-     # A splitter runs 3 threads. The first one controls the peer
-     # arrivals. The second one listens to the team, for example, to
-     # re-sends lost blocks. The third one shows some information about
-     # the transmission. This variable is used to stop the child
-     # threads. They will be alive only while the main thread is alive.
-#     alive = True
-
      # Some useful definitions.
      __IP_ADDR = 0
      __PORT = 1
@@ -62,6 +54,11 @@ class Splitter_DBS(threading.Thread):
 
           threading.Thread.__init__(self)
  
+          # A splitter runs 3 threads. The first one controls the peer
+          # arrivals. The second one listens to the team, for example, to
+          # re-sends lost blocks. The third one shows some information about
+          # the transmission. This variable is used to stop the child
+          # threads. They will be alive only while the main thread is alive.
           self.alive = True
          
           print "Splitter running in",
@@ -110,12 +107,10 @@ class Splitter_DBS(threading.Thread):
      # some time if the team is big or the peer is slow) is done in a
      # separate thread. This helps to avoid a DoS (Denial-of-Service)
      # attack.
-     def handle_peer_arrival(self):
+     def handle_peer_arrival(self, (peer_serve_socket, peer)):
      #def handle_peer_arrival(peer_connection_socket''', peer_list,
      # unreliability'''):
           # {{{
-          
-          peer_serve_socket, peer = self.peer_connection_socket.accept()
           
           if peer not in self.peer_list:
 
@@ -170,12 +165,14 @@ class Splitter_DBS(threading.Thread):
 
      def handle_arrivals(self):
           while self.alive:
-               threading.Thread(target=self.handle_peer_arrival).start()
+          #while False:
+               peer_serve_socket, peer = self.peer_connection_socket.accept()
+               threading.Thread(target=self.handle_peer_arrival, args=((peer_serve_socket, peer), )).start()
 
      def moderate_the_team(self):
           # {{{
 
-          print team_sock.getsockname(), "\b: listening to the team (UDP messages) ...", 
+          print self.team_socket.getsockname(), "\b: listening to the team (UDP messages) ...", 
           while self.alive:
                # {{{
 
@@ -188,11 +185,11 @@ class Splitter_DBS(threading.Thread):
                # zero-length payload.
                if len(message) == 0:
                     sys.stdout.write(Color.red)
-                    print self.team_sock.getsockname(), '\b: received "goodbye" from', sender
+                    print self.team_socket.getsockname(), '\b: received "goodbye" from', sender
                     sys.stdout.write(Color.none)
                     sys.stdout.flush()
                     # An empty message is a goodbye message.
-                    if sender != peer_list[0]:
+                    if sender != self.peer_list[0]:
                          try:
                               self.peer_index -= 1
                               self.peer_list.remove(sender)
@@ -201,57 +198,55 @@ class Splitter_DBS(threading.Thread):
                               # Received a googbye message from a peer which is
                               # not in the list of peers.
                               pass
+               else:
+                    # The sender of the packet complains, and the
+                    # packet comes with the index of a lost
+                    # (non-received) chunk. In this situation,
+                    # the splitter counts the number of times a
+                    # peer has not achieved to send a chunk to
+                    # other peers. If this number exceeds a
+                    # threshold, the unsupportive peer is
+                    # expelled from the team. Moreover, if we
+                    # receive too much complains from the same
+                    # peer, the problem could be in that peer and
+                    # it will be expelled from the team.
+                    lost_chunk = struct.unpack("!H",message)[0]
+                    destination = self.destination_of_chunk[lost_chunk]
+                    sys.stdout.write(Color.blue)
+                    print self.team_socket.getsockname(), "\b:", sender, "complains about lost chunk", lost_chunk, "sent to", destination, Color.none
+                    sys.stdout.write(Color.none)
+                    try:
+                         self.unreliability[destination] += 1
+                    except:
+                         print "the unsupportive peer does not exit"
+                         pass
                     else:
-                         # The sender of the packet complains,
-                         # and the packet comes with the index of
-                         # a lost (non-received) chunk. In this
-                         # situation, the splitter counts the
-                         # number of times a peer has not
-                         # achieved to send a chunk to other
-                         # peers. If this number exceeds a
-                         # threshold, the unsupportive peer is
-                         # expelled from the team. Moreover, if
-                         # we receive too much complains from the
-                         # same peer, the problem could be in
-                         # that peer and it will be expelled from
-                         # the team.
-                         lost_chunk = struct.unpack("!H",message)[0]
-                         destination = self.destination_of_chunk[lost_chunk]
-                         sys.stdout.write(Color.blue)
-                         print self.team_sock.getsockname(), "\b:", sender, "complains about lost chunk", lost_chunk, "sent to", destination, Color.none
-                         sys.stdout.write(Color.none)
+                         #print Color.blue, "complains about", destination, \
+                         #    "=", unreliability[destination], Color.none
+                         if self.unreliability[destination] > 128:
+                              sys.stdout.write(Color.red)
+                              print self.team_socket.getsockname(), "\b: too much complains about unsupportive peer", destination, "\b. Removing it"
+                              self.peer_index -= 1
+                              self.peer_list.remove(destination)
+                              del self.unreliability[destination]
+                              del self.complains[destination]
+                              sys.stdout.write(Color.none)
+
+                    if sender != self.peer_list[0]:
                          try:
-                              self.unreliability[destination] += 1
+                              self.complains[sender] += 1
                          except:
-                              print "the unsupportive peer does not exit"
+                              print "the complaining peer does not exit"
                               pass
                          else:
-                              #print Color.blue, "complains about", destination, \
-                              #    "=", unreliability[destination], Color.none
-                              if self.unreliability[destination] > 128:
+                              if self.complains[sender] > 128:
                                    sys.stdout.write(Color.red)
-                                   print self.team_sock.getsockname(), "\b: too much complains about unsupportive peer", destination, "\b. Removing it"
-                                   self.peer_index -= 1
-                                   self.peer_list.remove(destination)
-                                   del unreliability[destination]
-                                   del self.complains[destination]
+                                   print self.team_socket.getsockname(), "\b: too much complains of a peevish peer", sender
                                    sys.stdout.write(Color.none)
-
-                         if sender != sefl.peer_list[0]:
-                              try:
-                                   self.complains[sender] += 1
-                              except:
-                                   print "the complaining peer does not exit"
-                                   pass
-                              else:
-                                   if self.complains[sender] > 128:
-                                        sys.stdout.write(Color.red)
-                                        print self.team_socket.getsockname(), "\b: too much complains of a peevish peer", sender
-                                        sys.stdout.write(Color.none)
-                                        self.peer_index -= 1
-                                        self.peer_list.remove(sender)
-                                        del self.complains[sender]
-                                        del self.unreliability[sender]
+                                   self.peer_index -= 1
+                                   self.peer_list.remove(sender)
+                                   del self.complains[sender]
+                                   del self.unreliability[sender]
                # }}}
 
      # }}}
@@ -301,7 +296,7 @@ class Splitter_DBS(threading.Thread):
 
           # }}}
           print self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ..."
-          self.handle_peer_arrival()
+          self.handle_peer_arrival(self.peer_connection_socket.accept())
           threading.Thread(target=self.handle_arrivals).start()
           threading.Thread(target=self.moderate_the_team).start()
           
@@ -310,7 +305,7 @@ class Splitter_DBS(threading.Thread):
                source = (self.source_host, self.source_port)
                print source_socket.getsockname(), 'connecting to the source', source, '...'
                source_socket.connect(source)
-               print source_sock.getsockname(), 'connected to', source
+               print source_socket.getsockname(), 'connected to', source
                GET_message = 'GET ' + self.channel + ' HTTP/1.1\r\n'
                GET_message += '\r\n'
                source_socket.sendall(GET_message)
@@ -320,8 +315,8 @@ class Splitter_DBS(threading.Thread):
 
           while True:
                # Receive data from the source
-               def receive_next_chunk():
-                    chunk = source_socket.recv(sefl.chunk_size)
+               def receive_next_chunk(source_socket):
+                    chunk = source_socket.recv(self.chunk_size)
                     prev_chunk_size = 0
                     while len(chunk) < self.chunk_size:
                          if len(chunk) == prev_chunk_size:
@@ -335,26 +330,26 @@ class Splitter_DBS(threading.Thread):
                          prev_chunk_size = len(chunk)
                          chunk += source_socket.recv(self.chunk_size - len(chunk))
                     return chunk
-               chunk = receive_next_chunk()
+               chunk = receive_next_chunk(source_socket)
 
-               peer = sefl.peer_list[self.peer_index]
+               peer = self.peer_list[self.peer_index]
                message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
                self.chunk_number = (self.chunk_number + 1) % 65536
                self.team_socket.sendto(message, peer)
                self.destination_of_chunk[self.chunk_number % self.buffer_size] = peer
 
-               self.peer_index = (self.peer_index + 1) % len(peer_list)
+               self.peer_index = (self.peer_index + 1) % len(self.peer_list)
 
                # Decrement (dividing by 2) unreliability and complains after
                # every 256 sent chunks.
-               if (chunk_number % 256) == 0:
-                    for i in unreliability:
-                         unreliability[i] /= 2
-                    for i in complains:
-                         complains[i] /= 2
+               if (self.chunk_number % 256) == 0:
+                    for i in self.unreliability:
+                         self.unreliability[i] /= 2
+                    for i in self.complains:
+                         self.complains[i] /= 2
 
                if __debug__:
-                    print '%5d' % chunk_number, Color.red, '->', Color.none, peer
+                    print '%5d' % self.chunk_number, Color.red, '->', Color.none, peer
                     sys.stdout.flush()
 
 #   @classmethod
@@ -411,16 +406,18 @@ def main():
                print 'Keyboard interrupt detected ... Exiting!'
 
                # Say to the daemon threads that the work has been finished,
-               main_alive = False
+               splitter.alive = False
+
+               print splitter.peer_list[0]
 
                # Wake up the "listen_to_the_cluster" daemon, which is waiting
                # in a cluster_sock.recvfrom(...).
-               splitter.team_socket.sendto('',('127.0.0.1', splitter.team_port))
+               splitter.team_socket.sendto('',splitter.peer_list[0])
 
                # Wake up the "handle_arrivals" daemon, which is waiting in a
                # peer_connection_sock.accept().
                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-               sock.connect(('127.0.0.1', splitter.team_port))
+               sock.connect(splitter.peer_list[0])
 
                # Breaks this thread and returns to the parent process (usually,
                # the shell).
