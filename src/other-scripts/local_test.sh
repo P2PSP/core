@@ -1,4 +1,4 @@
-xterm -e './splitter_v1.py --cluster_host localhost --cluster_port 4552' &
+xterm -e './splitter.py --team_host localhost --team_port 4552' &
 echo "Splitter launched"
 
 xterm -e './peer_v1.py --splitter_host localhost --splitter_port 4552 --cluster_port 4553 --player_port 9998' &
