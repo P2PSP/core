@@ -14,6 +14,10 @@ import argparse
 
 # }}}
 
+# Some useful definitions.
+IP_ADDR = 0
+PORT = 1
+
 class Splitter_DBS(threading.Thread):
 
      # The buffer_size depends on the stream bit-rate and
@@ -45,9 +49,6 @@ class Splitter_DBS(threading.Thread):
      # Port to talk with the peers.
      team_port = 4552
 
-     # Some useful definitions.
-     __IP_ADDR = 0
-     __PORT = 1
      
      def __init__(self):
           # {{{
@@ -166,6 +167,8 @@ class Splitter_DBS(threading.Thread):
      def handle_arrivals(self):
           while self.alive:
           #while False:
+               print "-------------->", self.alive
+               sys.stdout.flush()
                peer_serve_socket, peer = self.peer_connection_socket.accept()
                threading.Thread(target=self.handle_peer_arrival, args=((peer_serve_socket, peer), )).start()
 
@@ -178,8 +181,9 @@ class Splitter_DBS(threading.Thread):
 
                # Peers complain about lost chunks, and a chunk index is
                # stored in a "H" (unsigned short) register.
+               print "-------------->", self.alive
+               sys.stdout.flush()
                message, sender = self.team_socket.recvfrom(struct.calcsize("H"))
-
                # However, sometimes peers only want to exit. In this case,
                # they send a UDP datagram to the splitter with a
                # zero-length payload.
@@ -313,7 +317,7 @@ class Splitter_DBS(threading.Thread):
 
           chunk_format_string = "H" + str(self.chunk_size) + "s" # "H1024s
 
-          while True:
+          while self.alive:
                # Receive data from the source
                def receive_next_chunk(source_socket):
                     chunk = source_socket.recv(self.chunk_size)
@@ -412,12 +416,25 @@ def main():
 
                # Wake up the "listen_to_the_cluster" daemon, which is waiting
                # in a cluster_sock.recvfrom(...).
-               splitter.team_socket.sendto('',splitter.peer_list[0])
+               splitter.team_socket.sendto('',('127.0.0.1',splitter.team_port))
 
                # Wake up the "handle_arrivals" daemon, which is waiting in a
                # peer_connection_sock.accept().
                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-               sock.connect(splitter.peer_list[0])
+               sock.connect(('127.0.0.1',splitter.team_port))
+               sock.recv(struct.calcsize("4s")) # IP address of the source node
+               sock.recv(struct.calcsize("H")) # Port of the source node
+               message = sock.recv(struct.calcsize("H"))
+               channel_size = struct.unpack("H", message)[0]
+               channel_size = socket.ntohs(channel_size)
+               channel = sock.recv(channel_size) # Channel name
+               sock.recv(struct.calcsize("H")) # Buffer size
+               sock.recv(struct.calcsize("H")) # Chunk size
+               number_of_peers = socket.ntohs(struct.unpack("H",sock.recv(struct.calcsize("H")))[0])
+               # Receive the list
+               while number_of_peers > 0:
+                    sock.recv(struct.calcsize("4sH"))
+                    number_of_peers -= 1
 
                # Breaks this thread and returns to the parent process (usually,
                # the shell).
