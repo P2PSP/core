@@ -1,6 +1,31 @@
 #!/usr/bin/python -O
+# -*- coding: iso-8859-15 -*-
 
-# This code implements the DBS of the P2PSP.
+# {{{ GNU GENERAL PUBLIC LICENSE
+
+# This is the splitter node of the P2PSP (Peer-to-Peer Simple Protocol)
+# <https://launchpad.net/p2psp>.
+#
+# Copyright (C) 2014 Vicente González Ruiz,
+#                    Cristóbal Medina López,
+#                    Juan Alvaro Muñoz Naranjo.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# }}}
+
+# This code implements the DBS splitter side of the P2PSP.
 
 # {{{ Imports
 
@@ -9,8 +34,8 @@ import sys
 import socket
 import threading
 import struct
-from color import Color
 import argparse
+from color import Color
 
 # }}}
 
@@ -49,7 +74,6 @@ class Splitter_DBS(threading.Thread):
      # Port to talk with the peers.
      team_port = 4552
 
-     
      def __init__(self):
           # {{{
 
@@ -109,8 +133,6 @@ class Splitter_DBS(threading.Thread):
      # separate thread. This helps to avoid a DoS (Denial-of-Service)
      # attack.
      def handle_peer_arrival(self, (peer_serve_socket, peer)):
-     #def handle_peer_arrival(peer_connection_socket''', peer_list,
-     # unreliability'''):
           # {{{
           
           if peer not in self.peer_list:
@@ -165,34 +187,29 @@ class Splitter_DBS(threading.Thread):
           # }}}
 
      def handle_arrivals(self):
+          # {{{
+
           while self.alive:
-          #while False:
-               print "-------------->", self.alive
-               sys.stdout.flush()
                peer_serve_socket, peer = self.peer_connection_socket.accept()
                threading.Thread(target=self.handle_peer_arrival, args=((peer_serve_socket, peer), )).start()
+
+          # }}}
 
      def moderate_the_team(self):
           # {{{
 
-          print self.team_socket.getsockname(), "\b: listening to the team (UDP messages) ...", 
           while self.alive:
                # {{{
 
-               # Peers complain about lost chunks, and a chunk index is
-               # stored in a "H" (unsigned short) register.
-               print "-------------->", self.alive
-               sys.stdout.flush()
                message, sender = self.team_socket.recvfrom(struct.calcsize("H"))
-               # However, sometimes peers only want to exit. In this case,
-               # they send a UDP datagram to the splitter with a
-               # zero-length payload.
                if len(message) == 0:
+                    # {{{ The peer wants to leave the team
+
+                    # A zero-length payload means that the peer wants to go away
                     sys.stdout.write(Color.red)
                     print self.team_socket.getsockname(), '\b: received "goodbye" from', sender
                     sys.stdout.write(Color.none)
                     sys.stdout.flush()
-                    # An empty message is a goodbye message.
                     if sender != self.peer_list[0]:
                          try:
                               self.peer_index -= 1
@@ -202,18 +219,22 @@ class Splitter_DBS(threading.Thread):
                               # Received a googbye message from a peer which is
                               # not in the list of peers.
                               pass
+
+                    # }}}
                else:
+                    # {{{ The peer complains about a lost chunk
+
                     # The sender of the packet complains, and the
                     # packet comes with the index of a lost
-                    # (non-received) chunk. In this situation,
-                    # the splitter counts the number of times a
-                    # peer has not achieved to send a chunk to
-                    # other peers. If this number exceeds a
-                    # threshold, the unsupportive peer is
-                    # expelled from the team. Moreover, if we
-                    # receive too much complains from the same
-                    # peer, the problem could be in that peer and
-                    # it will be expelled from the team.
+                    # (non-received) chunk. In this situation, the
+                    # splitter counts the number of times a peer has
+                    # not achieved to send a chunk to other peers. If
+                    # this number exceeds a threshold, the
+                    # unsupportive peer is expelled from the
+                    # team. Moreover, if we receive too much complains
+                    # from the same peer, the problem could be in that
+                    # peer and it will be expelled from the team.
+
                     lost_chunk = struct.unpack("!H",message)[0]
                     destination = self.destination_of_chunk[lost_chunk]
                     sys.stdout.write(Color.blue)
@@ -222,7 +243,7 @@ class Splitter_DBS(threading.Thread):
                     try:
                          self.unreliability[destination] += 1
                     except:
-                         print "the unsupportive peer does not exit"
+                         print "the unsupportive peer does not exist ???"
                          pass
                     else:
                          #print Color.blue, "complains about", destination, \
@@ -240,7 +261,7 @@ class Splitter_DBS(threading.Thread):
                          try:
                               self.complains[sender] += 1
                          except:
-                              print "the complaining peer does not exit"
+                              print "the complaining peer does not exit ???"
                               pass
                          else:
                               if self.complains[sender] > 128:
@@ -251,12 +272,12 @@ class Splitter_DBS(threading.Thread):
                                    self.peer_list.remove(sender)
                                    del self.complains[sender]
                                    del self.unreliability[sender]
-               # }}}
 
-     # }}}
+                    # }}}
+               # }}}
+          # }}}
 
      def run(self):
-
           # {{{ Setup "peer_connection_socket"
 
           # peer_connection_socket is used to listen to the incomming peers.
@@ -356,23 +377,20 @@ class Splitter_DBS(threading.Thread):
                     print '%5d' % self.chunk_number, Color.red, '->', Color.none, peer
                     sys.stdout.flush()
 
-#   @classmethod
-#     def start(self):
-#          self.run()
-
 def main():
-     splitter = Splitter_DBS()
 
      # {{{ Args parsing
      
      parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP network.')
-     parser.add_argument('--source_host', help='The streaming server. (Default = "{}")'.format(splitter.source_host))
-     parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(splitter.source_port))
-     parser.add_argument('--channel', help='Name of the channel served by the streaming source. (Default = "{}")'.format(splitter.channel))
-     parser.add_argument('--team_host', help='IP address to talk with the peers. (Default = "{}")'.format(splitter.team_host))
-     parser.add_argument('--team_port', help='Port to talk with the peers. (Default = {})'.format(splitter.team_port))
-     parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(splitter.buffer_size))
-     parser.add_argument('--chunk_size', help='Chunk size in bytes. (Default = {})'.format(splitter.chunk_size))
+     parser.add_argument('--source_host', help='The streaming server. (Default = "{}")'.format(Splitter_DBS.source_host))
+     parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(Splitter_DBS.source_port))
+     parser.add_argument('--channel', help='Name of the channel served by the streaming source. (Default = "{}")'.format(Splitter_DBS.channel))
+     parser.add_argument('--team_host', help='IP address to talk with the peers. (Default = "{}")'.format(Splitter_DBS.team_host))
+     parser.add_argument('--team_port', help='Port to talk with the peers. (Default = {})'.format(Splitter_DBS.team_port))
+     parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(Splitter_DBS.buffer_size))
+     parser.add_argument('--chunk_size', help='Chunk size in bytes. (Default = {})'.format(Splitter_DBS.chunk_size))
+
+     splitter = Splitter_DBS()
 
      args = parser.parse_known_args()[0]
      if args.source_host:
