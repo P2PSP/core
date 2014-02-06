@@ -81,7 +81,8 @@ class Peer_DBS(threading.Thread):
         self.player_alive = True
         self.chunk_number = 0
         self.chunk_size = 0
-
+        self.receive_and_feed_counter = 0
+        self.receive_and_feed_last = ""
         # }}}
 
     def retrieve_the_list_of_peers(self, splitter_socket, team_socket):
@@ -306,9 +307,7 @@ class Peer_DBS(threading.Thread):
 
         # }}}
 
-        receive_and_feed_counter = 0
-        receive_and_feed_last = ""
-        def receive_and_feed(self):
+        def receive_and_feed():
             # {{{
 
             try:
@@ -326,7 +325,7 @@ class Peer_DBS(threading.Thread):
                     number, chunk = struct.unpack(chunk_format_string, message)
                     chunk_number = socket.ntohs(number)
 
-                    total_chunks += 1
+#                    total_chunks += 1
 
                     # Insert the received chunk into the buffer.
                     chunks[chunk_number % buffer_size] = chunk
@@ -343,9 +342,9 @@ class Peer_DBS(threading.Thread):
                         # A new chunk has arrived from the splitter
                         # and we must check if the last chunk was sent
                         # fo the rest of peers of the cluster.
-                        while( (receive_and_feed_counter < len(peer_list)) and (receive_and_feed_counter > 0) ):
-                            peer = peer_list[receive_and_feed_counter]
-                            cluster_socket.sendto(receive_and_feed_last, peer)
+                        while( (self.receive_and_feed_counter < len(self.peer_list)) and (self.receive_and_feed_counter > 0) ):
+                            peer = self.peer_list[self.receive_and_feed_counter]
+                            cluster_socket.sendto(self.receive_and_feed_last, peer)
                             if __debug__:
                                 print self.team_socket.getsockname(), "-", chunk_number, \
                                     Color.green, "->", Color.none, peer
@@ -364,10 +363,10 @@ class Peer_DBS(threading.Thread):
                                 print 'removing the unsupportive peer', peer
                                 sys.stdout.write(Color.none)
                                 del unreliability[peer]
-                                peer_list.remove(peer)
-                            receive_and_feed_counter += 1
-                        receive_and_feed_counter = 0
-                        receive_and_feed_last = message
+                                self.peer_list.remove(peer)
+                            self.receive_and_feed_counter += 1
+                        self.receive_and_feed_counter = 0
+                        self.receive_and_feed_last = message
 
                        # }}}
                     else:
@@ -377,9 +376,9 @@ class Peer_DBS(threading.Thread):
                             print self.team_socket.getsockname(), \
                                 Color.green, "<-", Color.none, chunk_number, "-", sender
 
-                        if sender not in peer_list:
+                        if sender not in self.peer_list:
                             # The peer is new
-                            peer_list.append(sender)
+                            self.peer_list.append(sender)
                             unreliability[sender] = 0                
                             print Color.green, sender, 'added by data chunk', \
                                 chunk_number, Color.none
@@ -392,11 +391,11 @@ class Peer_DBS(threading.Thread):
 
                     # A new chunk has arrived and it must be forwarded to the
                     # rest of peers of the cluster.
-                    if ( receive_and_feed_counter < len(peer_list) and ( receive_and_feed_last != '') ):
+                    if ( self.receive_and_feed_counter < len(self.peer_list) and ( self.receive_and_feed_last != '') ):
                         # {{{ Send the last chunk in congestion avoiding mode.
 
-                        peer = peer_list[receive_and_feed_counter]
-                        team_socket.sendto(receive_and_feed_last, peer)
+                        peer = self.peer_list[self.receive_and_feed_counter]
+                        team_socket.sendto(self.receive_and_feed_last, peer)
                         if __debug__:
                             print team_socket.getsockname(), "-", chunk_number,\
                                 Color.green, "->", Color.none, peer
@@ -407,8 +406,8 @@ class Peer_DBS(threading.Thread):
                             print peer, 'Removed by unsupportive', "(unreliability[", "\b", peer, "\b] = ", unreliability[peer], ">", self.unreliability_threshold
                             sys.stdout.write(Color.none)  
                             del unreliability[peer]
-                            peer_list.remove(peer)
-                        receive_and_feed_counter += 1        
+                            self.peer_list.remove(peer)
+                        self.receive_and_feed_counter += 1        
 
                         # }}}
 
@@ -418,15 +417,15 @@ class Peer_DBS(threading.Thread):
                 else:
                     # {{{ A control chunk has been received
 
-                    if sender not in peer_list:
+                    if sender not in self.peer_list:
                         print Color.green, sender, 'added by \"hello\" message', Color.none
-                        peer_list.append(sender)
+                        self.peer_list.append(sender)
                         unreliability[sender] = 0
                     else:
                         sys.stdout.write(Color.red)
                         print team_socket.getsockname(), '\b: received "goodbye" from', sender
                         sys.stdout.write(Color.none)
-                        peer_list.remove(sender)
+                        self.peer_list.remove(sender)
                     return -1
 
                     # }}}
@@ -502,7 +501,7 @@ class Peer_DBS(threading.Thread):
 
         print 'latency =', time.time() - start_latency, 'seconds'
 
-        def send_a_chunk_to_the_player(self):
+        def send_a_chunk_to_the_player():
             # {{{
 
             if not received[chunk_to_play]:
