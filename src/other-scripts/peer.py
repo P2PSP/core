@@ -1,13 +1,14 @@
 #!/usr/bin/python -O
+# -*- coding: iso-8859-15 -*-
 
 # {{{ GNU GENERAL PUBLIC LICENSE
 
 # This is the splitter node of the P2PSP (Peer-to-Peer Simple Protocol)
 # <https://launchpad.net/p2psp>.
 #
-# Copyright (C) 2014 Vicente GonzÃ¡lez Ruiz,
-#                    CristÃ³bal Medina LÃ³pez,
-#                    Juan Alvaro MuÃ±oz Naranjo.
+# Copyright (C) 2014 Vicente González Ruiz,
+#                    Cristóbal Medina López,
+#                    Juan Alvaro Muñoz Naranjo.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,7 +43,7 @@ from color import Color
 IP_ADDR = 0
 PORT = 1
 
-class peer_DBS(threading.Thread):
+class Peer_DBS(threading.Thread):
     player_port = 9999
     splitter_host = "150.214.150.68"
     splitter_port = 4552
@@ -79,10 +80,11 @@ class peer_DBS(threading.Thread):
         #self.splitter_socket = ""
         self.player_alive = True
         self.chunk_number = 0
+        self.chunk_size = 0
 
         # }}}
 
-    def retrieve_the_list_of_peers(self):
+    def retrieve_the_list_of_peers(self, splitter_socket, team_socket):
         # {{{
 
         # The list of peers should be retrieved from the splitter in a
@@ -91,24 +93,23 @@ class peer_DBS(threading.Thread):
         # other peers are sending to it.
 
         sys.stdout.write(Color.green)
-        print self.splitter_socket.getsockname(), "\b: requesting the list of peers to", self.splitter_socket.getpeername()
-        number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
-        print self.splitter_socket.getpeername(), "\b: the size of the list of peers is", number_of_peers
+        print splitter_socket.getsockname(), "\b: requesting the list of peers to", splitter_socket.getpeername()
+        number_of_peers = socket.ntohs(struct.unpack("H",splitter_socket.recv(struct.calcsize("H")))[0])
+        print splitter_socket.getpeername(), "\b: the size of the list of peers is", number_of_peers
 
         while number_of_peers > 0:
-            message = self.splitter_socket.recv(struct.calcsize("4sH"))
+            message = splitter_socket.recv(struct.calcsize("4sH"))
             IP_addr, port = struct.unpack("4sH", message)
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
             print "[%5d]" % number_of_peers, peer
             self.peer_list.append(peer)
-            self.unreliability[peer] = 0
+            unreliability[peer] = 0
             #print Color.green, cluster_socket.getsockname(), \
             #    "-", '"hello"', "->", peer, Color.none
             # Say hello to the peer
-            self.team_socket.sendto('', peer) # Send a empty chunk
-                                              # (this should be fast).
+            team_socket.sendto('', peer) # Send a empty chunk (this should be fast).
             number_of_peers -= 1
 
         print 'done'
@@ -140,12 +141,12 @@ class peer_DBS(threading.Thread):
         print splitter_socket.getsockname(), "\b: connecting to the splitter at", splitter
         if self.team_port != 0:
                 #sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sock.bind(("", self.team_port))
+            splitter_socket.bind(("", self.team_port))
         try:
-            sock.connect(splitter)
+            splitter_socket.connect(splitter)
         except:
             sys.exit("Sorry. Can't connect to the splitter at " + str(splitter))
-        print sock.getsockname(), "\b: connected to the splitter at", splitter
+        print splitter_socket.getsockname(), "\b: connected to the splitter at", splitter
 
         # }}}
         # {{{ Setup "team_socket"
@@ -165,58 +166,58 @@ class peer_DBS(threading.Thread):
         # }}}
         # {{{ Receive from the splitter the IP address of the source node
 
-        source_host = ""
         def _():
             message = splitter_socket.recv(struct.calcsize("4s"))
             source_host = struct.unpack("4s", message)[0]
             source_host = socket.inet_ntoa(source_host)
-        _()
+            return source_host
+        source_host = _()
         print splitter_socket.getpeername(), "\b: source_host =", source_host
 
         # }}}
         # {{{ Receive from the splitter the port of the source node
 
-        source_port = 0
         def _():
             message = splitter_socket.recv(struct.calcsize("H"))
             source_port = struct.unpack("H", message)[0]
             source_port = socket.ntohs(source_port)
-        _()
+            return source_port
+        source_port = _()
         print splitter_socket.getpeername(), "\b: source_port =", source_port
 
         # }}}
         # {{{ Receive from the splitter the channel name
 
-        channel = ""
         def _():
             message = splitter_socket.recv(struct.calcsize("H"))
             channel_size = struct.unpack("H", message)[0]
             channel_size = socket.ntohs(channel_size)
             channel = splitter_socket.recv(channel_size)
-        _()
+            return channel
+        channel = _()
         print splitter_socket.getpeername(), "\b: channel =", channel
 
         # }}}
         # {{{ Receive from the splitter the buffer size
 
-        buffer_size = 0
         def _():
             message = splitter_socket.recv(struct.calcsize("H"))
             buffer_size = struct.unpack("H", message)[0]
             buffer_size = socket.ntohs(buffer_size)
-        _()
+            return buffer_size
+        buffer_size = _()
         print splitter_socket.getpeername(), "\b: buffer_size =", buffer_size
 
         # }}}
         # {{{ Receive fron the splitter the chunk size
 
-        chunk_size = 0
         def _():
             message = splitter_socket.recv(struct.calcsize("H"))
             chunk_size = struct.unpack("H", message)[0]
-            chunk_size = socket.ntohs(chunk_size)
-        _()
-        print splitter_socket.getpeername(), "\b: chunk_size =", chunk_size
+            chunk_size = socket.ntohs(self.chunk_size)
+            return chunk_size
+        self.chunk_size = _()
+        print splitter_socket.getpeername(), "\b: chunk_size =", self.chunk_size
 
         # }}}
         # {{{ Define the buffer of chunks structure
@@ -245,7 +246,7 @@ class peer_DBS(threading.Thread):
 
         # {{{ Retrieve the list of peers and sends the [Hello] messages
 
-        threading.Thread(target=self.retrieve_the_list_of_peers).start()
+        threading.Thread(target=self.retrieve_the_list_of_peers, args=(splitter_socket, team_socket,) ).start()
 
         # }}}
 
@@ -270,9 +271,9 @@ class peer_DBS(threading.Thread):
         # restart the conection with the streaming service, using
         # again the TCP.
 
-        def relay_the_header_to_the_player():
+        def relay_the_header_to_the_player(source, player_sock):
             source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            source = (self.source_host, self.source_port)
+            #source = (source_host, source_port)
             print source_sock.getsockname(), "\b: connecting to the source at", source, "..."
             sys.stdout.flush()
             source_sock.connect(source)
@@ -301,7 +302,7 @@ class peer_DBS(threading.Thread):
             print source_sock.getsockname(), '\b: sent', received, 'bytes'
             source_sock.close()
 
-        relay_the_header_to_the_player()
+        relay_the_header_to_the_player((source_host, source_port), player_socket)
 
         # }}}
 
@@ -311,7 +312,7 @@ class peer_DBS(threading.Thread):
             # {{{
 
             try:
-                chunk_format_string = "H" + str(chunk_size) + "s"
+                chunk_format_string = "H" + str(self.chunk_size) + "s"
                 # {{{ Receive and send
 
                 message, sender = team_socket.recvfrom(struct.calcsize(chunk_format_string))
@@ -562,16 +563,16 @@ def main():
      peer = Peer_DBS()
 
      args = parser.parse_known_args()[0]
-    if args.player_port:
-        player_port = int(args.player_port)
-    if args.splitter_host:
-        splitter_host = socket.gethostbyname(args.splitter_host)
-    if args.splitter_port:
-        splitter_port = int(args.splitter_port)
-    if args.team_port:
-        team_port = int(args.team_port)
-    if args.unreliability_threshold:
-        unreliability_threshold = int(args.unreliability_threshold)
+     if args.player_port:
+         peer.player_port = int(args.player_port)
+     if args.splitter_host:
+         peer.splitter_host = socket.gethostbyname(args.splitter_host)
+     if args.splitter_port:
+         peer.splitter_port = int(args.splitter_port)
+     if args.team_port:
+         peer.team_port = int(args.team_port)
+     if args.unreliability_threshold:
+         peer.unreliability_threshold = int(args.unreliability_threshold)
 
      # }}}
 
@@ -580,7 +581,7 @@ def main():
      while peer.player_alive:
            print "[%3d] " % len(peer.peer_list),
            kbps = (peer.chunk_number - last_chunk_number) * \
-               splitter.chunk_size * 8/1000
+               peer.chunk_size * 8/1000
            last_chunk_number = peer.chunk_number
 
            for x in xrange(0,kbps/10):
