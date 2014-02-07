@@ -273,6 +273,7 @@ class Splitter_DBS(threading.Thread):
                               print "the complaining peer does not exit ???"
                               pass
                          else:
+                              #print "------------__", self.peer_list[0]
                               self.complains[sender] += 1
                               if self.complains[sender] > self.complains_threshold:
                                    sys.stdout.write(Color.red)

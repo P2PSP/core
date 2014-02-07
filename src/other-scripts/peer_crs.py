@@ -48,7 +48,7 @@ class Peer_DBS(threading.Thread):
     splitter_host = "150.214.150.68"
     splitter_port = 4552
     team_port = 0
-    unreliability_threshold = 128
+    losses_threshold = 8
 
     def __init__(self):
         # {{{
@@ -66,10 +66,10 @@ class Peer_DBS(threading.Thread):
         # splitter to these nodes.
         #peer_list = []
         self.peer_list = []
-        # This store the insolidarity/unreliability of the peers of
+        # This store the insolidarity/losses of the peers of
         # the team. When the insolidarity exceed a threshold, the
         # peer is deleted from the list of peers.
-        self.unreliability = {}
+        self.losses = {}
         #self.player_socket = ""
         #self.source_host = ""
         #self.source_port = 0
@@ -108,7 +108,7 @@ class Peer_DBS(threading.Thread):
             peer = (IP_addr, port)
             print "[%5d]" % number_of_peers, peer
             self.peer_list.append(peer)
-            self.unreliability[peer] = 0
+            self.losses[peer] = 0
             #print Color.green, cluster_socket.getsockname(), \
             #    "-", '"hello"', "->", peer, Color.none
             # Say hello to the peer
@@ -355,19 +355,19 @@ class Peer_DBS(threading.Thread):
                                     Color.green, "->", Color.none, peer
 
                             # Each time we send a chunk to a peer, the
-                            # unreliability of that peer is incremented. Each
+                            # losses of that peer is incremented. Each
                             # time we receive a chunk from a peer, the
-                            # unreliability of that peer is decremented.
-                                self.unreliability[peer] += 1
+                            # losses of that peer is decremented.
+                                self.losses[peer] += 1
 
-                            # If the unreliability of a peer exceed a
+                            # If the losses of a peer exceed a
                             # threshold, the peer is removed from the list of
                             # peers.
-                            if self.unreliability[peer] > self.unreliability_threshold:
+                            if self.losses[peer] > self.losses_threshold:
                                 sys.stdout.write(Color.red)
                                 print 'removing the unsupportive peer', peer
                                 sys.stdout.write(Color.none)
-                                del self.unreliability[peer]
+                                del self.losses[peer]
                                 self.peer_list.remove(peer)
                             self.receive_and_feed_counter += 1
                         self.receive_and_feed_counter = 0
@@ -384,13 +384,13 @@ class Peer_DBS(threading.Thread):
                         if sender not in self.peer_list:
                             # The peer is new
                             self.peer_list.append(sender)
-                            self.unreliability[sender] = 0                
+                            self.losses[sender] = 0                
                             print Color.green, sender, 'added by data chunk', \
                                 chunk_number, Color.none
                         else:
-                            self.unreliability[sender] -= 1;
-                            if self.unreliability[sender] < 0:
-                                self.unreliability[sender] = 0
+                            self.losses[sender] -= 1;
+                            if self.losses[sender] < 0:
+                                self.losses[sender] = 0
 
                         # }}}
 
@@ -405,12 +405,12 @@ class Peer_DBS(threading.Thread):
                             print team_socket.getsockname(), "-", chunk_number,\
                                 Color.green, "->", Color.none, peer
 
-                        self.unreliability[peer] += 1        
-                        if self.unreliability[peer] > self.unreliability_threshold:
+                        self.losses[peer] += 1        
+                        if self.losses[peer] > self.losses_threshold:
                             sys.stdout.write(Color.red)
-                            print peer, 'Removed by unsupportive', "(unreliability[", "\b", peer, "\b] = ", self.unreliability[peer], ">", self.unreliability_threshold
+                            print peer, 'Removed by unsupportive', "(losses[", "\b", peer, "\b] = ", self.losses[peer], ">", self.losses_threshold
                             sys.stdout.write(Color.none)  
-                            del self.unreliability[peer]
+                            del self.losses[peer]
                             self.peer_list.remove(peer)
                         self.receive_and_feed_counter += 1        
 
@@ -425,7 +425,7 @@ class Peer_DBS(threading.Thread):
                     if sender not in self.peer_list:
                         print Color.green, sender, 'added by \"hello\" message', Color.none
                         self.peer_list.append(sender)
-                        self.unreliability[sender] = 0
+                        self.losses[sender] = 0
                     else:
                         sys.stdout.write(Color.red)
                         print team_socket.getsockname(), '\b: received "goodbye" from', sender
@@ -543,8 +543,8 @@ class Peer_DBS(threading.Thread):
             #print "Received", self.chunk_number
             if self.chunk_number >= 0:
                 if (self.chunk_number % 256) == 0:
-                    for i in self.unreliability:
-                        self.unreliability[i] /= 2
+                    for i in self.losses:
+                        self.losses[i] /= 2
                 send_a_chunk_to_the_player(player_socket)
                 chunk_to_play = (chunk_to_play + 1) % buffer_size
 
@@ -567,7 +567,7 @@ def main():
      parser.add_argument('--splitter_host', help='Host of the splitter. (Default = {})'.format(Peer_DBS.splitter_host))
      parser.add_argument('--splitter_port', help='Listening port of the splitter. (Default = {})'.format(Peer_DBS.splitter_port))
      parser.add_argument('--team_port', help='Port to talk with the peers. (Default = {})'.format(Peer_DBS.team_port))
-     parser.add_argument('--unreliability_threshold', help='Number of times a peer can be unsupportive. (Default = {})'.format(Peer_DBS.unreliability_threshold))
+     parser.add_argument('--losses_threshold', help='Number of times a peer can be unsupportive. (Default = {})'.format(Peer_DBS.losses_threshold))
 
      peer = Peer_DBS()
 
@@ -580,8 +580,8 @@ def main():
          peer.splitter_port = int(args.splitter_port)
      if args.team_port:
          peer.team_port = int(args.team_port)
-     if args.unreliability_threshold:
-         peer.unreliability_threshold = int(args.unreliability_threshold)
+     if args.losses_threshold:
+         peer.losses_threshold = int(args.losses_threshold)
 
      # }}}
 
