@@ -135,52 +135,52 @@ class Splitter_DBS(threading.Thread):
      def handle_peer_arrival(self, (peer_serve_socket, peer)):
           # {{{
           
+
+          sys.stdout.write(Color.green)
+          print peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
+
+          # Send the source node IP address.
+          message = struct.pack("4s", socket.inet_aton(self.source_host))
+          peer_serve_socket.sendall(message)
+
+          # Send the source node listening port.
+          message = struct.pack("H", socket.htons(self.source_port))
+          peer_serve_socket.sendall(message)
+
+          # Send the name of the channel.
+          message = struct.pack("H", socket.htons(len(self.channel)))    
+          peer_serve_socket.sendall(message)
+          peer_serve_socket.sendall(self.channel)
+
+          # Send the buffer size.
+          message = struct.pack("H", socket.htons(self.buffer_size))
+          peer_serve_socket.sendall(message)
+
+          # Send the chunk size.
+          message = struct.pack("H", socket.htons(self.chunk_size))
+          peer_serve_socket.sendall(message)
+
+          print peer_serve_socket.getsockname(), '\b: sending the list of peers ...'
+
+          # Sends the size of the list of peers.
+          message = struct.pack("H", socket.htons(len(self.peer_list)))
+          peer_serve_socket.sendall(message)
+
+          # Send the list of peers.
+          counter = 0
+          for p in self.peer_list:
+                message = struct.pack("4sH", socket.inet_aton(p[IP_ADDR]), socket.htons(p[PORT]))
+                peer_serve_socket.sendall(message)
+                print "[%5d]" % counter, p
+                counter += 1
+
+          print 'done'
+          sys.stdout.write(Color.none)
+
+          peer_serve_socket.close()
+
           if peer not in self.peer_list:
-
-               sys.stdout.write(Color.green)
-               print peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
-
-               # Send the source node IP address.
-               message = struct.pack("4s", socket.inet_aton(self.source_host))
-               peer_serve_socket.sendall(message)
-
-               # Send the source node listening port.
-               message = struct.pack("H", socket.htons(self.source_port))
-               peer_serve_socket.sendall(message)
-
-               # Send the name of the channel.
-               message = struct.pack("H", socket.htons(len(self.channel)))    
-               peer_serve_socket.sendall(message)
-               peer_serve_socket.sendall(self.channel)
-               
-               # Send the buffer size.
-               message = struct.pack("H", socket.htons(self.buffer_size))
-               peer_serve_socket.sendall(message)
-
-               # Send the chunk size.
-               message = struct.pack("H", socket.htons(self.chunk_size))
-               peer_serve_socket.sendall(message)
-
-               print peer_serve_socket.getsockname(), '\b: sending the list of peers ...'
-
-               # Sends the size of the list of peers.
-               message = struct.pack("H", socket.htons(len(self.peer_list)))
-               peer_serve_socket.sendall(message)
-
-               # Send the list of peers.
-               counter = 0
-               for p in self.peer_list:
-                     message = struct.pack("4sH", socket.inet_aton(p[IP_ADDR]), socket.htons(p[PORT]))
-                     peer_serve_socket.sendall(message)
-                     print "[%5d]" % counter, p
-                     counter += 1
-
-               print 'done'
-               sys.stdout.write(Color.none)
-
-               peer_serve_socket.close()
-               self.peer_list.append(peer)
-                 
+               self.peer_list.append(peer)                 
                self.unreliability[peer] = 0
                self.complains[peer] = 0
 
@@ -350,7 +350,7 @@ class Splitter_DBS(threading.Thread):
                               time.sleep(1)
                               source_socket.close()
                               source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                              source_socket.connect(self.source_host, self.source_port)
+                              source_socket.connect((self.source_host, self.source_port))
                               source_socket.sendall(GET_message)
                          prev_chunk_size = len(chunk)
                          chunk += source_socket.recv(self.chunk_size - len(chunk))

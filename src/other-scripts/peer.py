@@ -66,8 +66,10 @@ class Peer_DBS(threading.Thread):
         # splitter to these nodes.
         #peer_list = []
         self.peer_list = []
-
-        #self.unreliability = {}
+        # This store the insolidarity/unreliability of the peers of
+        # the team. When the insolidarity exceed a threshold, the
+        # peer is deleted from the list of peers.
+        self.unreliability = {}
         #self.player_socket = ""
         #self.source_host = ""
         #self.source_port = 0
@@ -106,7 +108,7 @@ class Peer_DBS(threading.Thread):
             peer = (IP_addr, port)
             print "[%5d]" % number_of_peers, peer
             self.peer_list.append(peer)
-            unreliability[peer] = 0
+            self.unreliability[peer] = 0
             #print Color.green, cluster_socket.getsockname(), \
             #    "-", '"hello"', "->", peer, Color.none
             # Say hello to the peer
@@ -141,7 +143,10 @@ class Peer_DBS(threading.Thread):
         splitter = (self.splitter_host, self.splitter_port)
         print splitter_socket.getsockname(), "\b: connecting to the splitter at", splitter
         if self.team_port != 0:
-                #sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            try:
+                splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            except:
+                pass
             splitter_socket.bind(("", self.team_port))
         try:
             splitter_socket.connect(splitter)
@@ -215,7 +220,7 @@ class Peer_DBS(threading.Thread):
         def _():
             message = splitter_socket.recv(struct.calcsize("H"))
             chunk_size = struct.unpack("H", message)[0]
-            chunk_size = socket.ntohs(self.chunk_size)
+            chunk_size = socket.ntohs(chunk_size)
             return chunk_size
         self.chunk_size = _()
         print splitter_socket.getpeername(), "\b: chunk_size =", self.chunk_size
@@ -232,18 +237,14 @@ class Peer_DBS(threading.Thread):
         # buffer_size: the smaller the buffer size, the lower start-up
         # time, the higher chunk-loss ratio. However, for the sake of
         # simpliticy, all peers will use the same buffer size.
-        chunks = [None]*buffer_size
+        #chunks = [None]*buffer_size
+        chunks = [""]*buffer_size
         received = [True]*buffer_size
         numbers = [0]*buffer_size
         for i in xrange(0, buffer_size):
             numbers[i] = i
 
         # }}}
-
-        # This store the insolidarity/unreliability of the peers of
-        # the team. When the insolidarity exceed a threshold, the
-        # peer is deleted from the list of peers.
-        unreliability = {}
 
         # {{{ Retrieve the list of peers and sends the [Hello] messages
 
@@ -328,6 +329,7 @@ class Peer_DBS(threading.Thread):
 #                    total_chunks += 1
 
                     # Insert the received chunk into the buffer.
+                    #print "------------", chunk_number, buffer_size, len(message), len(chunk)
                     chunks[chunk_number % buffer_size] = chunk
                     received[chunk_number % buffer_size] = True
                     numbers[chunk_number % buffer_size] = chunk_number
@@ -353,16 +355,16 @@ class Peer_DBS(threading.Thread):
                             # unreliability of that peer is incremented. Each
                             # time we receive a chunk from a peer, the
                             # unreliability of that peer is decremented.
-                                unreliability[peer] += 1
+                                self.unreliability[peer] += 1
 
                             # If the unreliability of a peer exceed a
                             # threshold, the peer is removed from the list of
                             # peers.
-                            if unreliability[peer] > self.unreliability_threshold:
+                            if self.unreliability[peer] > self.unreliability_threshold:
                                 sys.stdout.write(Color.red)
                                 print 'removing the unsupportive peer', peer
                                 sys.stdout.write(Color.none)
-                                del unreliability[peer]
+                                del self.unreliability[peer]
                                 self.peer_list.remove(peer)
                             self.receive_and_feed_counter += 1
                         self.receive_and_feed_counter = 0
@@ -379,13 +381,13 @@ class Peer_DBS(threading.Thread):
                         if sender not in self.peer_list:
                             # The peer is new
                             self.peer_list.append(sender)
-                            unreliability[sender] = 0                
+                            self.unreliability[sender] = 0                
                             print Color.green, sender, 'added by data chunk', \
                                 chunk_number, Color.none
                         else:
-                            unreliability[sender] -= 1;
-                            if unreliability[sender] < 0:
-                                unreliability[sender] = 0
+                            self.unreliability[sender] -= 1;
+                            if self.unreliability[sender] < 0:
+                                self.unreliability[sender] = 0
 
                         # }}}
 
@@ -400,12 +402,12 @@ class Peer_DBS(threading.Thread):
                             print team_socket.getsockname(), "-", chunk_number,\
                                 Color.green, "->", Color.none, peer
 
-                        unreliability[peer] += 1        
-                        if unreliability[peer] > self.unreliability_threshold:
+                        self.unreliability[peer] += 1        
+                        if self.unreliability[peer] > self.unreliability_threshold:
                             sys.stdout.write(Color.red)
-                            print peer, 'Removed by unsupportive', "(unreliability[", "\b", peer, "\b] = ", unreliability[peer], ">", self.unreliability_threshold
+                            print peer, 'Removed by unsupportive', "(unreliability[", "\b", peer, "\b] = ", self.unreliability[peer], ">", self.unreliability_threshold
                             sys.stdout.write(Color.none)  
-                            del unreliability[peer]
+                            del self.unreliability[peer]
                             self.peer_list.remove(peer)
                         self.receive_and_feed_counter += 1        
 
@@ -420,7 +422,7 @@ class Peer_DBS(threading.Thread):
                     if sender not in self.peer_list:
                         print Color.green, sender, 'added by \"hello\" message', Color.none
                         self.peer_list.append(sender)
-                        unreliability[sender] = 0
+                        self.unreliability[sender] = 0
                     else:
                         sys.stdout.write(Color.red)
                         print team_socket.getsockname(), '\b: received "goodbye" from', sender
@@ -501,7 +503,7 @@ class Peer_DBS(threading.Thread):
 
         print 'latency =', time.time() - start_latency, 'seconds'
 
-        def send_a_chunk_to_the_player():
+        def send_a_chunk_to_the_player(player_socket):
             # {{{
 
             if not received[chunk_to_play]:
@@ -515,15 +517,19 @@ class Peer_DBS(threading.Thread):
                 sys.stdout.write(Color.none)
 
             # Ojo, probar a no enviar nada!!!
+            #print player_socket.getsockname(), "->", numbers[chunk_to_play], player_socket.getpeername()
             try:
                 player_socket.sendall(chunks[chunk_to_play])
-                #print player_sock.getsockname(), "->", numbers[chunk_to_play], player_sock.getpeername(), '\r',
             except socket.error:
                 print 'Player disconected, ...',
-                player_alive = False
+                self.player_alive = False
                 return
+            '''
             finally:
+                #print chunk_to_play, len(chunks[chunk_to_play])
+                print "finally"
                 return
+            '''
             # We have fired the chunk.
             received[chunk_to_play] = False
 
@@ -531,22 +537,23 @@ class Peer_DBS(threading.Thread):
 
         while self.player_alive:
             self.chunk_number = receive_and_feed()
+            #print "Received", self.chunk_number
             if self.chunk_number >= 0:
                 if (self.chunk_number % 256) == 0:
-                    for i in unreliability:
-                        unreliability[i] /= 2
-                send_a_chunk_to_the_player()
+                    for i in self.unreliability:
+                        self.unreliability[i] /= 2
+                send_a_chunk_to_the_player(player_socket)
                 chunk_to_play = (chunk_to_play + 1) % buffer_size
 
         # The player has gone. Lets do a polite farewell.
         print 'goodbye!'
         goodbye = ''
-        cluster_socket.sendto(goodbye, splitter)
+        team_socket.sendto(goodbye, splitter)
         print '"goodbye" message sent to the splitter', splitter
         for x in xrange(3):
             receive_and_feed()
-        for peer in peer_list:
-            cluster_socket.sendto(goodbye, peer)
+        for peer in self.peer_list:
+            team_socket.sendto(goodbye, peer)
 
 def main():
 
@@ -578,7 +585,7 @@ def main():
      peer.start()
      last_chunk_number = 0
      while peer.player_alive:
-           print "[%3d] " % len(peer.peer_list),
+           print "[%3d] " % (len(peer.peer_list)+1),
            kbps = (peer.chunk_number - last_chunk_number) * \
                peer.chunk_size * 8/1000
            last_chunk_number = peer.chunk_number

@@ -613,6 +613,7 @@ def send_a_chunk_to_the_player():
         player_connected = False
         return
     finally:
+        print "finally"
         return
     # We have fired the chunk.
     received[chunk_to_play] = False
