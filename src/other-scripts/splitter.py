@@ -74,6 +74,12 @@ class Splitter_DBS(threading.Thread):
      # Port to talk with the peers.
      team_port = 4552
 
+     # Maximum number of lost chunks for an unsupportive peer.
+     losses_threshold = 8
+
+     # Maximum number of complains for a peevish peer.
+     complains_threshold = 8
+
      def __init__(self):
           # {{{
 
@@ -103,8 +109,8 @@ class Splitter_DBS(threading.Thread):
           # Unreliaility of the peers, indexed by (the end-point of) the
           # peer. Counts the number of times a peer has not re-transmitted a
           # packet.
-          self.unreliability = {}
-          #unreliability[('127.0.0.1',team_port+1)] = 0
+          self.losses = {}
+          #losses[('127.0.0.1',team_port+1)] = 0
 
           # Complaining rate of a peer. Sometimes the complaining peer has not
           # enough bandwidth in his download link. In this case, the peevish
@@ -181,7 +187,7 @@ class Splitter_DBS(threading.Thread):
 
           if peer not in self.peer_list:
                self.peer_list.append(peer)                 
-               self.unreliability[peer] = 0
+               self.losses[peer] = 0
                self.complains[peer] = 0
 
           # }}}
@@ -241,40 +247,46 @@ class Splitter_DBS(threading.Thread):
                     print self.team_socket.getsockname(), "\b:", sender, "complains about lost chunk", lost_chunk, "sent to", destination, Color.none
                     sys.stdout.write(Color.none)
                     try:
-                         self.unreliability[destination] += 1
+                         self.losses[destination]
                     except:
                          print "the unsupportive peer does not exist ???"
                          pass
                     else:
+                         self.losses[destination] += 1
                          #print Color.blue, "complains about", destination, \
-                         #    "=", unreliability[destination], Color.none
-                         if self.unreliability[destination] > 128:
+                         #    "=", losses[destination], Color.none
+                         if self.losses[destination] > self.losses_threshold:
                               sys.stdout.write(Color.red)
-                              print self.team_socket.getsockname(), "\b: too much complains about unsupportive peer", destination, "\b. Removing it"
+                              print self.team_socket.getsockname(), "\b: too much complains about unsupportive peer", destination, "\b. Removing it!"
                               self.peer_index -= 1
                               self.peer_list.remove(destination)
-                              del self.unreliability[destination]
+                              del self.losses[destination]
                               del self.complains[destination]
                               sys.stdout.write(Color.none)
+                    finally:
+                         pass
 
                     if sender != self.peer_list[0]:
                          try:
-                              self.complains[sender] += 1
+                              self.complains[sender]
                          except:
                               print "the complaining peer does not exit ???"
                               pass
                          else:
-                              if self.complains[sender] > 128:
+                              self.complains[sender] += 1
+                              if self.complains[sender] > self.complains_threshold:
                                    sys.stdout.write(Color.red)
-                                   print self.team_socket.getsockname(), "\b: too much complains of a peevish peer", sender
+                                   print self.team_socket.getsockname(), "\b: too much complains of a peevish peer", sender, "\b. Removing it!"
                                    sys.stdout.write(Color.none)
                                    self.peer_index -= 1
                                    self.peer_list.remove(sender)
                                    del self.complains[sender]
-                                   del self.unreliability[sender]
-
+                                   del self.losses[sender]
+                         finally:
+                              pass
                     # }}}
                # }}}
+
           # }}}
 
      def run(self):
@@ -317,7 +329,7 @@ class Splitter_DBS(threading.Thread):
           # the team communicate with it. The splitter will use its
           # public IP address as the IP address of the monitor peer.
 
-          #handle_peer_arrival(peer_connection_socket, peer_list, unreliability)
+          #handle_peer_arrival(peer_connection_socket, peer_list, losses)
 
           # }}}
           print self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ..."
@@ -326,13 +338,14 @@ class Splitter_DBS(threading.Thread):
           threading.Thread(target=self.moderate_the_team).start()
           
           source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+          GET_message = 'GET ' + self.channel + ' HTTP/1.1\r\n'
+          GET_message += '\r\n'
           def _():
                source = (self.source_host, self.source_port)
                print source_socket.getsockname(), 'connecting to the source', source, '...'
                source_socket.connect(source)
                print source_socket.getsockname(), 'connected to', source
-               GET_message = 'GET ' + self.channel + ' HTTP/1.1\r\n'
-               GET_message += '\r\n'
+
                source_socket.sendall(GET_message)
           _()
 
@@ -345,6 +358,10 @@ class Splitter_DBS(threading.Thread):
                     prev_chunk_size = 0
                     while len(chunk) < self.chunk_size:
                          if len(chunk) == prev_chunk_size:
+                              # This section of code is reached when
+                              # the streaming server (Icecast)
+                              # finishes a stream and starts with the
+                              # following one.
                               print '\b!',
                               sys.stdout.flush()
                               time.sleep(1)
@@ -359,17 +376,17 @@ class Splitter_DBS(threading.Thread):
 
                peer = self.peer_list[self.peer_index]
                message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
-               self.chunk_number = (self.chunk_number + 1) % 65536
                self.team_socket.sendto(message, peer)
                self.destination_of_chunk[self.chunk_number % self.buffer_size] = peer
+               self.chunk_number = (self.chunk_number + 1) % 65536
 
                self.peer_index = (self.peer_index + 1) % len(self.peer_list)
 
-               # Decrement (dividing by 2) unreliability and complains after
+               # Decrement (dividing by 2) losses and complains after
                # every 256 sent chunks.
                if (self.chunk_number % 256) == 0:
-                    for i in self.unreliability:
-                         self.unreliability[i] /= 2
+                    for i in self.losses:
+                         self.losses[i] /= 2
                     for i in self.complains:
                          self.complains[i] /= 2
 
@@ -389,6 +406,8 @@ def main():
      parser.add_argument('--team_port', help='Port to talk with the peers. (Default = {})'.format(Splitter_DBS.team_port))
      parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(Splitter_DBS.buffer_size))
      parser.add_argument('--chunk_size', help='Chunk size in bytes. (Default = {})'.format(Splitter_DBS.chunk_size))
+     parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. (Default = {})'.format(Splitter_DBS.losses_threshold))
+     parser.add_argument('--complains_threshold', help='Maximum number of complains for a peevish peer. (Default = {})'.format(Splitter_DBS.complains_threshold))
 
      splitter = Splitter_DBS()
 

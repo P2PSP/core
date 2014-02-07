@@ -340,6 +340,8 @@ class listen_to_the_cluster(Thread):
             # they send a UDP datagram to the splitter with a
             # zero-length payload.
             if len(message) == 0:
+                # {{{ The peer wants to leave the team
+
                 sys.stdout.write(Color.red)
                 print cluster_sock.getsockname(), '\b: received "goodbye" from', sender
                 sys.stdout.write(Color.none)
@@ -354,7 +356,11 @@ class listen_to_the_cluster(Thread):
                         # Received a googbye message from a peer which is
                         # not in the list of peers.
                         pass
+
+                # }}}
             else:
+                # {{{ The peer complains about a lost chunk
+
                 # The sender of the packet complains, and the packet
                 # comes with the index of a lost (non-received)
                 # chunk. In this situation, the splitter counts the
@@ -371,21 +377,24 @@ class listen_to_the_cluster(Thread):
                 print cluster_sock.getsockname(), "\b:", sender, "complains about lost chunk", lost_chunk, "sent to", destination, Color.none
                 sys.stdout.write(Color.none)
                 try:
-                    unreliability[destination] += 1
+                    unreliability[destination]
                 except:
-                    print "the unsupportive peer does not exit"
+                    print "the unsupportive peer does not exit: disregarding the complain"
                     pass
                 else:
                     #print Color.blue, "complains about", destination, \
                     #    "=", unreliability[destination], Color.none
-                    if unreliability[destination] > 128:
+                    unreliability[destination] += 1
+                    if unreliability[destination] > 8:
                         sys.stdout.write(Color.red)
-                        print cluster_sock.getsockname(), "\b: too much complains about unsupportive peer", destination, "\b. Removing it"
+                        print cluster_sock.getsockname(), "\b: too much complains about the unsupportive peer", destination, "\b. Removing it!"
                         peer_index -= 1
                         peer_list.remove(destination)
                         del unreliability[destination]
                         del complains[destination]
                         sys.stdout.write(Color.none)
+                finally:
+                    pass
 
                 if sender != peer_list[0]:
                     try:
@@ -402,6 +411,8 @@ class listen_to_the_cluster(Thread):
                             peer_list.remove(sender)
                             del complains[sender]
                             del unreliability[sender]
+
+# }}}
             # }}}
 
     # }}}
@@ -490,9 +501,9 @@ while True:
         message = struct.pack(chunk_format_string,
                               socket.htons(chunk_number),
                               chunk)
+        destination_of_chunk[chunk_number % buffer_size] = peer
         chunk_number = (chunk_number + 1) % 65536
         cluster_sock.sendto(message, peer)
-        destination_of_chunk[chunk_number % buffer_size] = peer
 
 #ifdef({{GRANULARITY_CHANGE}},
         granularity_counter += 1

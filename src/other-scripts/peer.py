@@ -147,6 +147,9 @@ class Peer_DBS(threading.Thread):
                 splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             except:
                 pass
+            sys.stdout.write(Color.purple)
+            print splitter_socket.getsockname(), "\b: I'm using port the port", self.team_port
+            sys.stdout.write(Color.none)
             splitter_socket.bind(("", self.team_port))
         try:
             splitter_socket.connect(splitter)
@@ -513,7 +516,7 @@ class Peer_DBS(threading.Thread):
                 team_socket.sendto(message, splitter)
 
                 sys.stdout.write(Color.blue)
-                print "lost chunk:", numbers[chunk_to_play]
+                print "lost chunk:", numbers[chunk_to_play], chunk_to_play
                 sys.stdout.write(Color.none)
 
             # Ojo, probar a no enviar nada!!!
