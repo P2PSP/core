@@ -358,7 +358,7 @@ class Peer_DBS(threading.Thread):
                             # losses of that peer is incremented. Each
                             # time we receive a chunk from a peer, the
                             # losses of that peer is decremented.
-                                self.losses[peer] += 1
+                            self.losses[peer] += 1
 
                             # If the losses of a peer exceed a
                             # threshold, the peer is removed from the list of
