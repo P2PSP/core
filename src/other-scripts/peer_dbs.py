@@ -48,7 +48,7 @@ class Peer_DBS(threading.Thread):
     splitter_host = "150.214.150.68"
     splitter_port = 4552
     team_port = 0
-    losses_threshold = 8
+    debt_threshold = 10
 
     def __init__(self):
         # {{{
@@ -66,10 +66,10 @@ class Peer_DBS(threading.Thread):
         # splitter to these nodes.
         #peer_list = []
         self.peer_list = []
-        # This store the insolidarity/losses of the peers of
+        # This store the insolidarity/debt of the peers of
         # the team. When the insolidarity exceed a threshold, the
         # peer is deleted from the list of peers.
-        self.losses = {}
+        self.debt = {}
         #self.player_socket = ""
         #self.source_host = ""
         #self.source_port = 0
@@ -84,7 +84,8 @@ class Peer_DBS(threading.Thread):
         self.chunk_number = 0
         self.chunk_size = 0
         self.receive_and_feed_counter = 0
-        self.receive_and_feed_last = ""
+        self.receive_and_feed_previous = ""
+        self.xxxx = 2
         # }}}
 
     def retrieve_the_list_of_peers(self, splitter_socket, team_socket):
@@ -102,17 +103,17 @@ class Peer_DBS(threading.Thread):
 
         while number_of_peers > 0:
             message = splitter_socket.recv(struct.calcsize("4sH"))
-            IP_addr, port = struct.unpack("4sH", message)
+            IP_addr, port = struct.unpack("4sH", message) # Ojo, !H ????
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
             print "[%5d]" % number_of_peers, peer
             self.peer_list.append(peer)
-            self.losses[peer] = 0
+            self.debt[peer] = 0
             #print Color.green, cluster_socket.getsockname(), \
             #    "-", '"hello"', "->", peer, Color.none
             # Say hello to the peer
-            team_socket.sendto('', peer) # Send a empty chunk (this should be fast).
+            #team_socket.sendto('', peer) # Send a empty chunk (this should be fast).
             number_of_peers -= 1
 
         print 'done'
@@ -315,13 +316,16 @@ class Peer_DBS(threading.Thread):
             # {{{
 
             try:
-                chunk_format_string = "H" + str(self.chunk_size) + "s"
                 # {{{ Receive and send
 
+                chunk_format_string = "H" + str(self.chunk_size) + "s"
                 message, sender = team_socket.recvfrom(struct.calcsize(chunk_format_string))
+
+                # {{{ debug
                 if __debug__:
                     print Color.cyan, "Received a message from", sender, \
                         "of length", len(message), Color.none
+                # }}}
 
                 if len(message) == struct.calcsize(chunk_format_string):
                     # {{{ A video chunk has been received
@@ -329,93 +333,135 @@ class Peer_DBS(threading.Thread):
                     number, chunk = struct.unpack(chunk_format_string, message)
                     chunk_number = socket.ntohs(number)
 
-#                    total_chunks += 1
-
-                    # Insert the received chunk into the buffer.
-                    #print "------------", chunk_number, buffer_size, len(message), len(chunk)
                     chunks[chunk_number % buffer_size] = chunk
                     received[chunk_number % buffer_size] = True
                     numbers[chunk_number % buffer_size] = chunk_number
 
                     if sender == splitter:
-                        # {{{ Send the last chunk in burst sending mode
+                        # {{{ Send the previous chunk in burst sending
+                        # mode if the chunk has not been sent to all
+                        # the peers of the list of peers.
+
+                        # {{{ debug
 
                         if __debug__:
                             print cluster_socket.getsockname(), \
                                 Color.red, "<-", Color.none, chunk_number, "-", sender
 
-                        # A new chunk has arrived from the splitter
-                        # and we must check if the last chunk was sent
-                        # fo the rest of peers of the cluster.
+                        # }}}
+
                         while( (self.receive_and_feed_counter < len(self.peer_list)) and (self.receive_and_feed_counter > 0) ):
                             peer = self.peer_list[self.receive_and_feed_counter]
-                            cluster_socket.sendto(self.receive_and_feed_last, peer)
+                            cluster_socket.sendto(self.receive_and_feed_previous, peer)
+
+                            # {{{ debug
                             if __debug__:
                                 print self.team_socket.getsockname(), "-", chunk_number, \
                                     Color.green, "->", Color.none, peer
+                            # }}}
 
                             # Each time we send a chunk to a peer, the
-                            # losses of that peer is incremented. Each
+                            # debt of that peer is incremented. Each
                             # time we receive a chunk from a peer, the
-                            # losses of that peer is decremented.
-                            self.losses[peer] += 1
+                            # debt of that peer is decremented.
+                            self.debt[peer] += 1
 
-                            # If the losses of a peer exceed a
+                            self.receive_and_feed_counter += 1
+
+                        # Peers sent the last chunk received from the
+                        # splitter to the peers in the list of peers
+                        # whenever a new chunk comes from any
+                        # peer. Therefore, the transmission order of
+                        # the chunks is not decided based on what
+                        # peers are sending but according to the
+                        # content of the list of peers. This means
+                        # that if after touring the list of peers
+                        # (initially using containment mode congestion
+                        # and then using the burst mode) a peer has a
+                        # negative transmissionn debt, then this peer
+                        # has been unsupportive.
+
+                        for peer in self.peer_list:
+                            # {{{ If the debt of a peer exceeds a
                             # threshold, the peer is removed from the list of
                             # peers.
-                            if self.losses[peer] > self.losses_threshold:
+                            print self.debt[peer], 
+                            if self.debt[peer] > self.debt_threshold:
                                 sys.stdout.write(Color.red)
-                                print 'removing the unsupportive peer', peer
+                                print peer, 'was removed by unsupportive'
                                 sys.stdout.write(Color.none)
-                                del self.losses[peer]
+                                del self.debt[peer]
                                 self.peer_list.remove(peer)
-                            self.receive_and_feed_counter += 1
+
+                                # Tell the splitter
+                                message = struct.pack("4sH", socket.inet_aton(peer[IP_ADDR]), socket.htons(peer[PORT]))
+                                team_socket.sendto(message, splitter)
+                            # }}}
+                            #self.debt[peer] /= 2
+
                         self.receive_and_feed_counter = 0
-                        self.receive_and_feed_last = message
+                        self.receive_and_feed_previous = message
 
                        # }}}
                     else:
-                        # {{{ The sender is a peer, check if the peer is new.
+                        # {{{ The sender is a peer
+
+                        # {{{ debug
 
                         if __debug__:
                             print self.team_socket.getsockname(), \
                                 Color.green, "<-", Color.none, chunk_number, "-", sender
 
+                        # }}}
+
                         if sender not in self.peer_list:
                             # The peer is new
                             self.peer_list.append(sender)
-                            self.losses[sender] = 0                
+                            self.debt[sender] = 0                
                             print Color.green, sender, 'added by data chunk', \
                                 chunk_number, Color.none
                         else:
-                            self.losses[sender] -= 1;
-                            if self.losses[sender] < 0:
-                                self.losses[sender] = 0
-
+                            self.debt[sender] -= 1;
+                            '''
+                            if self.debt[sender] < 0:
+                                self.debt[sender] = 0
+                            '''
                         # }}}
 
-                    # A new chunk has arrived and it must be forwarded to the
-                    # rest of peers of the cluster.
-                    if ( self.receive_and_feed_counter < len(self.peer_list) and ( self.receive_and_feed_last != '') ):
-                        # {{{ Send the last chunk in congestion avoiding mode.
+                    # {{{ A new chunk has arrived from a peer and the
+                    # previous must be forwarded to next peer of the
+                    # list of peers.
+                    if ( self.receive_and_feed_counter < len(self.peer_list) and ( self.receive_and_feed_previous != '') ):
+                        # {{{ Send the previous chunk in congestion avoiding mode.
 
                         peer = self.peer_list[self.receive_and_feed_counter]
-                        team_socket.sendto(self.receive_and_feed_last, peer)
+                        team_socket.sendto(self.receive_and_feed_previous, peer)
+
+                        # {{{ debug
                         if __debug__:
                             print team_socket.getsockname(), "-", chunk_number,\
                                 Color.green, "->", Color.none, peer
+                        # }}}
 
-                        self.losses[peer] += 1        
-                        if self.losses[peer] > self.losses_threshold:
+                        self.debt[peer] += 1        
+                        '''
+                        if self.debt[peer] > self.debt_threshold:
                             sys.stdout.write(Color.red)
-                            print peer, 'Removed by unsupportive', "(losses[", "\b", peer, "\b] = ", self.losses[peer], ">", self.losses_threshold
+                            print peer, 'was removed by unsupportive*'
                             sys.stdout.write(Color.none)  
-                            del self.losses[peer]
+                            del self.debt[peer]
                             self.peer_list.remove(peer)
+
+                            # Tell the splitter
+                            message = struct.pack("4sH", socket.inet_aton(peer[IP_ADDR]), socket.htons(peer[PORT]))
+                            print "---------------", len(message)
+                            team_socket.sendto(message, splitter)
+                        '''
+
                         self.receive_and_feed_counter += 1        
 
                         # }}}
-
+                    # }}}
                     return chunk_number
 
                     # }}}
@@ -425,7 +471,7 @@ class Peer_DBS(threading.Thread):
                     if sender not in self.peer_list:
                         print Color.green, sender, 'added by \"hello\" message', Color.none
                         self.peer_list.append(sender)
-                        self.losses[sender] = 0
+                        self.debt[sender] = 0
                     else:
                         sys.stdout.write(Color.red)
                         print team_socket.getsockname(), '\b: received "goodbye" from', sender
@@ -441,18 +487,18 @@ class Peer_DBS(threading.Thread):
 
             # }}}
 
-        # This "private and static" variable holds the last chunk
-        # received from the splitter. It is used to send the last
+        # This "private and static" variable holds the previous chunk
+        # received from the splitter. It is used to send the previous
         # received chunk in the congestion avoiding mode. In that
         # mode, the peer sends a chunk only when it received a chunk
         # from another peer or om the splitter.
-        #receive_and_feed.last = ''
+        #receive_and_feed.previous = ''
 
-        # Number of times that the last received chunk has been sent
+        # Number of times that the previous received chunk has been sent
         # to the cluster. If this counter is smaller than the number
-        # of peers in the cluster, the last chunk must be sent in the
+        # of peers in the cluster, the previous chunk must be sent in the
         # burst mode because a new chunk from the splitter has arrived
-        # and the last received chunk has not been sent to all the
+        # and the previous received chunk has not been sent to all the
         # peers of the cluster. This can happen when one o more chunks
         # that were routed towards this peer have been lost.
         #receive_and_feed.counter = 0
@@ -478,7 +524,8 @@ class Peer_DBS(threading.Thread):
 
         # Retrieve the first chunk to play.
         self.chunk_number = receive_and_feed()
-
+        for i in self.peer_list:
+            self.debt[i] = 0
         # The receive_and_feed() procedure returns if a packet has been
         # received or if a time-out exception has been arised. In the first
         # case, the returned value is -1 if the packet contains a
@@ -486,6 +533,8 @@ class Peer_DBS(threading.Thread):
         # received. A -2 is returned if a time-out is has happened.
         while self.chunk_number < 0:
             self.chunk_number = receive_and_feed()
+            for i in self.peer_list:
+                self.debt[i] = 0
 
         # In this moment, the variable chunk_number stores the first chunk to
         # be sent to the player. Notice that the range of the chunk index uses
@@ -501,7 +550,8 @@ class Peer_DBS(threading.Thread):
             sys.stdout.flush()
             while receive_and_feed()<=0:
                 pass
-
+            for i in self.peer_list:
+                self.debt[i] = 0
         # }}}
 
         print 'latency =', time.time() - start_latency, 'seconds'
@@ -512,8 +562,8 @@ class Peer_DBS(threading.Thread):
             if not received[chunk_to_play]:
 
                 # Lets complain to the splitter.
-                message = struct.pack("!H", chunk_to_play)
-                team_socket.sendto(message, splitter)
+                #message = struct.pack("!H", chunk_to_play)
+                #team_socket.sendto(message, splitter)
 
                 sys.stdout.write(Color.blue)
                 print "lost chunk:", numbers[chunk_to_play], chunk_to_play
@@ -543,8 +593,8 @@ class Peer_DBS(threading.Thread):
             #print "Received", self.chunk_number
             if self.chunk_number >= 0:
                 if (self.chunk_number % 256) == 0:
-                    for i in self.losses:
-                        self.losses[i] /= 2
+                    for i in self.debt:
+                        self.debt[i] /= 2
                 send_a_chunk_to_the_player(player_socket)
                 chunk_to_play = (chunk_to_play + 1) % buffer_size
 
@@ -567,7 +617,7 @@ def main():
      parser.add_argument('--splitter_host', help='Host of the splitter. (Default = {})'.format(Peer_DBS.splitter_host))
      parser.add_argument('--splitter_port', help='Listening port of the splitter. (Default = {})'.format(Peer_DBS.splitter_port))
      parser.add_argument('--team_port', help='Port to talk with the peers. (Default = {})'.format(Peer_DBS.team_port))
-     parser.add_argument('--losses_threshold', help='Number of times a peer can be unsupportive. (Default = {})'.format(Peer_DBS.losses_threshold))
+     parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. (Default = {})'.format(Peer_DBS.debt_threshold))
 
      peer = Peer_DBS()
 
@@ -580,8 +630,8 @@ def main():
          peer.splitter_port = int(args.splitter_port)
      if args.team_port:
          peer.team_port = int(args.team_port)
-     if args.losses_threshold:
-         peer.losses_threshold = int(args.losses_threshold)
+     if args.debt_threshold:
+         peer.debt_threshold = int(args.debt_threshold)
 
      # }}}
 
