@@ -75,7 +75,7 @@ class Splitter_DBS(threading.Thread):
      port = 4552
 
      # Maximum number of lost chunks for an unsupportive peer.
-     losses_threshold = 3
+     losses_threshold = 1
 
      # Maximum number of complains for a peevish peer.
      #complaining_threshold = 8
@@ -262,17 +262,18 @@ class Splitter_DBS(threading.Thread):
                     else:
                          self.losses[destination] += 1
                          print Color.blue, destination, "has loss", self.losses[destination], "chunks", Color.none
-                         if self.losses[destination] > self.losses_threshold:
-                              sys.stdout.write(Color.red)
-                              print self.team_socket.getsockname(), "\b: too much complains about unsupportive peer", destination, "\b. Removing it!"
-                              self.peer_index -= 1
-                              try:
-                                   self.peer_list.remove(destination)
-                                   del self.losses[destination]
-                                   del self.deletions[destination]
-                              except:
-                                   pass
-                              sys.stdout.write(Color.none)
+                         if destination != self.peer_list[0]:
+                              if self.losses[destination] > self.losses_threshold:
+                                   sys.stdout.write(Color.red)
+                                   print self.team_socket.getsockname(), "\b: too much complains about unsupportive peer", destination, "\b. Removing it!"
+                                   self.peer_index -= 1
+                                   try:
+                                        self.peer_list.remove(destination)
+                                        del self.losses[destination]
+                                        del self.deletions[destination]
+                                   except:
+                                        pass
+                                   sys.stdout.write(Color.none)
                     finally:
                          pass
 
@@ -296,17 +297,18 @@ class Splitter_DBS(threading.Thread):
                          self.deletions[erased] += 1
                          #print Color.blue, "complains about", destination, \
                          #    "=", deletions[destination], Color.none
-                         if self.deletions[erased] >= len(self.peer_list)/2:
-                              sys.stdout.write(Color.red)
-                              print self.team_socket.getsockname(), "\b: removing", erased
-                              self.peer_index -= 1
-                              try:
-                                   self.peer_list.remove(erased)
-                                   del self.deletions[erased]
-                                   #del self.complains[erased]
-                              except:
-                                   pass
-                              sys.stdout.write(Color.none)
+                         if erased != self.peer_list[0]:
+                              if self.deletions[erased] >= len(self.peer_list)/2:
+                                   sys.stdout.write(Color.red)
+                                   print self.team_socket.getsockname(), "\b: removing", erased
+                                   self.peer_index -= 1
+                                   try:
+                                        self.peer_list.remove(erased)
+                                        del self.deletions[erased]
+                                        #del self.complains[erased]
+                                   except:
+                                        pass
+                                   sys.stdout.write(Color.none)
                     finally:
                          pass
 
@@ -428,7 +430,12 @@ class Splitter_DBS(threading.Thread):
 
                chunk, source_socket = receive_next_chunk(source_socket)
 
-               peer = self.peer_list[self.peer_index]
+               try:
+                    self.peer_list[self.peer_index]
+               except:
+                    pass
+               else:
+                    peer = self.peer_list[self.peer_index]
                message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
                self.team_socket.sendto(message, peer)
                self.destination_of_chunk[self.chunk_number % self.buffer_size] = peer
