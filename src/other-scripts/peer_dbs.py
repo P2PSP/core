@@ -48,7 +48,7 @@ class Peer_DBS(threading.Thread):
     splitter_host = "150.214.150.68"
     splitter_port = 4552
     team_port = 0
-    debt_threshold = 10
+    debt_threshold = 32
 
     def __init__(self):
         # {{{
@@ -110,7 +110,7 @@ class Peer_DBS(threading.Thread):
             print "[%5d]" % number_of_peers, peer
             self.peer_list.append(peer)
             self.debt[peer] = 0
-            #print Color.green, cluster_socket.getsockname(), \
+            #print Color.green, team_socket.getsockname(), \
             #    "-", '"hello"', "->", peer, Color.none
             # Say hello to the peer
             #team_socket.sendto('', peer) # Send a empty chunk (this should be fast).
@@ -345,14 +345,14 @@ class Peer_DBS(threading.Thread):
                         # {{{ debug
 
                         if __debug__:
-                            print cluster_socket.getsockname(), \
+                            print team_socket.getsockname(), \
                                 Color.red, "<-", Color.none, chunk_number, "-", sender
 
                         # }}}
 
                         while( (self.receive_and_feed_counter < len(self.peer_list)) and (self.receive_and_feed_counter > 0) ):
                             peer = self.peer_list[self.receive_and_feed_counter]
-                            cluster_socket.sendto(self.receive_and_feed_previous, peer)
+                            team_socket.sendto(self.receive_and_feed_previous, peer)
 
                             # {{{ debug
                             if __debug__:
@@ -364,7 +364,7 @@ class Peer_DBS(threading.Thread):
                             # debt of that peer is incremented. Each
                             # time we receive a chunk from a peer, the
                             # debt of that peer is decremented.
-                            self.debt[peer] += 1
+                            self.debt[peer] += 2
 
                             self.receive_and_feed_counter += 1
 
@@ -386,7 +386,7 @@ class Peer_DBS(threading.Thread):
                             # threshold, the peer is removed from the list of
                             # peers.
                             print self.debt[peer], 
-                            if self.debt[peer] > self.debt_threshold:
+                            if self.debt[peer] > 2: #self.debt_threshold:
                                 sys.stdout.write(Color.red)
                                 print peer, 'was removed by unsupportive'
                                 sys.stdout.write(Color.none)
@@ -397,7 +397,10 @@ class Peer_DBS(threading.Thread):
                                 message = struct.pack("4sH", socket.inet_aton(peer[IP_ADDR]), socket.htons(peer[PORT]))
                                 team_socket.sendto(message, splitter)
                             # }}}
-                            #self.debt[peer] /= 2
+                            try:
+                                self.debt[peer] /= 2
+                            except:
+                                pass
 
                         self.receive_and_feed_counter = 0
                         self.receive_and_feed_previous = message
@@ -421,7 +424,7 @@ class Peer_DBS(threading.Thread):
                             print Color.green, sender, 'added by data chunk', \
                                 chunk_number, Color.none
                         else:
-                            self.debt[sender] -= 1;
+                            self.debt[sender] -= 2;
                             '''
                             if self.debt[sender] < 0:
                                 self.debt[sender] = 0
@@ -443,7 +446,7 @@ class Peer_DBS(threading.Thread):
                                 Color.green, "->", Color.none, peer
                         # }}}
 
-                        self.debt[peer] += 1        
+                        self.debt[peer] += 2      
                         '''
                         if self.debt[peer] > self.debt_threshold:
                             sys.stdout.write(Color.red)
@@ -495,11 +498,11 @@ class Peer_DBS(threading.Thread):
         #receive_and_feed.previous = ''
 
         # Number of times that the previous received chunk has been sent
-        # to the cluster. If this counter is smaller than the number
-        # of peers in the cluster, the previous chunk must be sent in the
+        # to the team. If this counter is smaller than the number
+        # of peers in the team, the previous chunk must be sent in the
         # burst mode because a new chunk from the splitter has arrived
         # and the previous received chunk has not been sent to all the
-        # peers of the cluster. This can happen when one o more chunks
+        # peers of the team. This can happen when one o more chunks
         # that were routed towards this peer have been lost.
         #receive_and_feed.counter = 0
 
@@ -562,8 +565,8 @@ class Peer_DBS(threading.Thread):
             if not received[chunk_to_play]:
 
                 # Lets complain to the splitter.
-                #message = struct.pack("!H", chunk_to_play)
-                #team_socket.sendto(message, splitter)
+                message = struct.pack("!H", chunk_to_play)
+                team_socket.sendto(message, splitter)
 
                 sys.stdout.write(Color.blue)
                 print "lost chunk:", numbers[chunk_to_play], chunk_to_play
@@ -592,9 +595,11 @@ class Peer_DBS(threading.Thread):
             self.chunk_number = receive_and_feed()
             #print "Received", self.chunk_number
             if self.chunk_number >= 0:
+                '''
                 if (self.chunk_number % 256) == 0:
                     for i in self.debt:
                         self.debt[i] /= 2
+                '''
                 send_a_chunk_to_the_player(player_socket)
                 chunk_to_play = (chunk_to_play + 1) % buffer_size
 
