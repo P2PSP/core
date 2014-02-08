@@ -1,8 +1,11 @@
-xterm -e './splitter.py --team_host localhost --team_port 4552' &
-#xterm -e './splitter_v1.py --cluster_host localhost --cluster_port 4552' &
+export SPLITTER_PORT=4552
+export MONITOR_PORT=4553
+
+xterm -e './splitter.py --addr localhost --port $SPLITTER_PORT' &
+#xterm -e './splitter_v1.py --cluster_host localhost --cluster_port $TEAM_PORT' &
 echo "Splitter launched"
 
-xterm -e './peer.py --splitter_host localhost --splitter_port 4552 --team_port 4553 --player_port 9998' &
+xterm -e './peer.py --splitter_host localhost --splitter_port $SPLITTER_PORT --team_port $MONITOR_PORT --player_port 9998' &
 echo "Monitor peer launched"
 
 sleep 1
@@ -14,7 +17,7 @@ echo "Monitor listener launched"
 
 sleep 5
 
-xterm -e './peer.py --splitter_host localhost --splitter_port 4552 --player_port 9999' &
+xterm -e './peer.py --splitter_host localhost --splitter_port $SPLITTER_PORT --player_port 9999' &
 echo "Normal peer launched"
 
 vlc http://localhost:9999 &

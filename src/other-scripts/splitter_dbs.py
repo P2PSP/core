@@ -69,10 +69,10 @@ class Splitter_DBS(threading.Thread):
 
      # IP address to talk with the peers (a host can use
      # several network adapters).
-     team_host = "150.214.150.68"
+     addr = "150.214.150.68"
 
      # Port to talk with the peers.
-     team_port = 4552
+     port = 4552
 
      # Maximum number of lost chunks for an unsupportive peer.
      losses_threshold = 8
@@ -100,7 +100,7 @@ class Splitter_DBS(threading.Thread):
                
           # The list of peers in the team.
           self.peer_list = []
-          #peer_list = [('127.0.0.1',team_port+1)]
+          #peer_list = [('127.0.0.1',port+1)]
 
           # Destination peers of the chunk, indexed by a chunk number. Used to
           # find the peer to which a chunk has been sent.
@@ -114,7 +114,7 @@ class Splitter_DBS(threading.Thread):
           # enough bandwidth in his download link. In this case, the peevish
           # peers should be rejected from the team.
           #self.complains = {}
-          #complains[('127.0.0.1',team_port+1)] = 0
+          #complains[('127.0.0.1',port+1)] = 0
 
           self.chunk_number = 0
 
@@ -228,7 +228,7 @@ class Splitter_DBS(threading.Thread):
 
                     # }}}
 
-               elif len(message) == 4:
+               elif len(message) == 2:
 
                     # {{{ The peer complains about a lost chunk
 
@@ -269,7 +269,7 @@ class Splitter_DBS(threading.Thread):
                          pass
 
 
-               else:
+               elif len(message) == 6:
                     # {{{ The peer sends an "erased" peer
 
                     erased_addr, erased_port = struct.unpack("4sH", message)
@@ -338,7 +338,13 @@ class Splitter_DBS(threading.Thread):
                self.peer_connection_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
           except:
                pass
-          self.peer_connection_socket.bind((self.team_host, self.team_port))
+          try:
+               self.peer_connection_socket.bind((self.addr, self.port))
+          except:
+               print self.peer_connection_socket.getsockname(), "\b: unable to bind", (self.addr, self.port)
+               print
+               return
+               
           self.peer_connection_socket.listen(socket.SOMAXCONN) # Set the connection queue to the max!
 
           # }}}
@@ -351,7 +357,7 @@ class Splitter_DBS(threading.Thread):
                self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
           except:
                pass
-          self.team_socket.bind((self.team_host, self.team_port))
+          self.team_socket.bind((self.addr, self.port))
 
           # }}}
 
@@ -361,7 +367,7 @@ class Splitter_DBS(threading.Thread):
           # peer that the team administrator can use to monitorize the
           # performance of the streaming. This peer MUST run on the
           # same host than the splitter to avoid bandwidth consumption
-          # and usually listen to the port team_port+1 (although this
+          # and usually listen to the port port+1 (although this
           # is configurable by the administrator selecting a different
           # peer_port). This peer MUST also use the same public IP
           # address that the splitter in order the rest of peers of
@@ -443,8 +449,8 @@ def main():
      parser.add_argument('--source_host', help='The streaming server. (Default = "{}")'.format(Splitter_DBS.source_host))
      parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(Splitter_DBS.source_port))
      parser.add_argument('--channel', help='Name of the channel served by the streaming source. (Default = "{}")'.format(Splitter_DBS.channel))
-     parser.add_argument('--team_host', help='IP address to talk with the peers. (Default = "{}")'.format(Splitter_DBS.team_host))
-     parser.add_argument('--team_port', help='Port to talk with the peers. (Default = {})'.format(Splitter_DBS.team_port))
+     parser.add_argument('--addr', help='IP address to talk with the peers. (Default = "{}")'.format(Splitter_DBS.addr))
+     parser.add_argument('--port', help='Port to talk with the peers. (Default = {})'.format(Splitter_DBS.port))
      parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(Splitter_DBS.buffer_size))
      parser.add_argument('--chunk_size', help='Chunk size in bytes. (Default = {})'.format(Splitter_DBS.chunk_size))
      parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. (Default = {})'.format(Splitter_DBS.losses_threshold))
@@ -459,10 +465,10 @@ def main():
           splitter.source_port = int(args.source_port)
      if args.channel:
           splitter.channel = args.channel
-     if args.team_host:
-          splitter.team_host = socket.gethostbyname(args.team_host)
-     if args.team_port:
-          splitter.team_port = int(args.team_port)
+     if args.addr:
+          splitter.addr = socket.gethostbyname(args.addr)
+     if args.port:
+          splitter.port = int(args.port)
      if args.buffer_size:
           splitter.buffer_size = int(args.buffer_size)
      if args.chunk_size:
@@ -499,12 +505,12 @@ def main():
 
                # Wake up the "listen_to_the_cluster" daemon, which is waiting
                # in a cluster_sock.recvfrom(...).
-               splitter.team_socket.sendto('',('127.0.0.1',splitter.team_port))
+               splitter.team_socket.sendto('',('127.0.0.1', splitter.port))
 
                # Wake up the "handle_arrivals" daemon, which is waiting in a
                # peer_connection_sock.accept().
                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-               sock.connect(('127.0.0.1',splitter.team_port))
+               sock.connect(('127.0.0.1',splitter.port))
                sock.recv(struct.calcsize("4s")) # IP address of the source node
                sock.recv(struct.calcsize("H")) # Port of the source node
                message = sock.recv(struct.calcsize("H"))
@@ -513,7 +519,7 @@ def main():
                channel = sock.recv(channel_size) # Channel name
                sock.recv(struct.calcsize("H")) # Buffer size
                sock.recv(struct.calcsize("H")) # Chunk size
-               number_of_peers = socket.ntohs(struct.unpack("H",sock.recv(struct.calcsize("H")))[0])
+               number_of_peers = socket.ntohs(struct.unpack("H", sock.recv(struct.calcsize("H")))[0])
                # Receive the list
                while number_of_peers > 0:
                     sock.recv(struct.calcsize("4sH"))
