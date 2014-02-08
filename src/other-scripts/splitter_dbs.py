@@ -75,7 +75,7 @@ class Splitter_DBS(threading.Thread):
      port = 4552
 
      # Maximum number of lost chunks for an unsupportive peer.
-     losses_threshold = 8
+     losses_threshold = 3
 
      # Maximum number of complains for a peevish peer.
      #complaining_threshold = 8
@@ -250,20 +250,28 @@ class Splitter_DBS(threading.Thread):
                     sys.stdout.write(Color.none)
                     try:
                          self.losses[destination]
+                         #self.peer_list[destination]
+                         #self.deletions[destination]
                     except:
-                         print "the unsupportive peer does not exist ???"
+                         print "the unsupportive peer ", destination, "does not exist ???"
+                         for p in self.peer_list:
+                              print p,
+                         print
+                         #print Color.blue, destination, "has loss", self.losses[destination], "chunks", Color.none
                          pass
                     else:
                          self.losses[destination] += 1
-                         #print Color.blue, "complains about", destination, \
-                         #    "=", losses[destination], Color.none
+                         print Color.blue, destination, "has loss", self.losses[destination], "chunks", Color.none
                          if self.losses[destination] > self.losses_threshold:
                               sys.stdout.write(Color.red)
                               print self.team_socket.getsockname(), "\b: too much complains about unsupportive peer", destination, "\b. Removing it!"
                               self.peer_index -= 1
-                              self.peer_list.remove(destination)
-                              del self.losses[destination]
-                              del self.complains[destination]
+                              try:
+                                   self.peer_list.remove(destination)
+                                   del self.losses[destination]
+                                   del self.deletions[destination]
+                              except:
+                                   pass
                               sys.stdout.write(Color.none)
                     finally:
                          pass
