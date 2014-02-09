@@ -12,12 +12,7 @@ This is a description of the files/directories:
 
 * source-feeding: scripts to send a stream to the streaming server.
 
-* 
-
-* test_p2psp.sh -> A simple P2PSP cluster consisting a splitter, a
-  peer and a player. the splitter connects by default to:
-
-  http://150.215.150.68:4551/134.ogg
+* test: scripts to test the implementation of the P2PSP.
 
 More info at www.p2psp.org.
 
