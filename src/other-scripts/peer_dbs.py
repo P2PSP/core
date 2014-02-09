@@ -45,7 +45,7 @@ PORT = 1
 
 class Peer_DBS(threading.Thread):
     player_port = 9999
-    splitter_host = "150.214.150.68"
+    splitter_addr = "150.214.150.68"
     splitter_port = 4552
     port = 0
     debt_threshold = 32
@@ -71,7 +71,7 @@ class Peer_DBS(threading.Thread):
         # peer is deleted from the list of peers.
         self.debt = {}
         #self.player_socket = ""
-        #self.source_host = ""
+        #self.source_addr = ""
         #self.source_port = 0
         #self.channel = ""
         #self.buffer_size = 0
@@ -141,7 +141,7 @@ class Peer_DBS(threading.Thread):
         # {{{ Setup "splitter" and "splitter_socket"
 
         splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        splitter = (self.splitter_host, self.splitter_port)
+        splitter = (self.splitter_addr, self.splitter_port)
         print splitter_socket.getsockname(), "\b: connecting to the splitter at", splitter
         if self.port != 0:
             try:
@@ -178,11 +178,11 @@ class Peer_DBS(threading.Thread):
 
         def _():
             message = splitter_socket.recv(struct.calcsize("4s"))
-            source_host = struct.unpack("4s", message)[0]
-            source_host = socket.inet_ntoa(source_host)
-            return source_host
-        source_host = _()
-        print splitter_socket.getpeername(), "\b: source_host =", source_host
+            source_addr = struct.unpack("4s", message)[0]
+            source_addr = socket.inet_ntoa(source_addr)
+            return source_addr
+        source_addr = _()
+        print splitter_socket.getpeername(), "\b: source_addr =", source_addr
 
         # }}}
         # {{{ Receive from the splitter the port of the source node
@@ -252,7 +252,8 @@ class Peer_DBS(threading.Thread):
 
         # {{{ Retrieve the list of peers and sends the [Hello] messages
 
-        threading.Thread(target=self.retrieve_the_list_of_peers, args=(splitter_socket, team_socket,) ).start()
+        #threading.Thread(target=self.retrieve_the_list_of_peers, args=(splitter_socket, team_socket,) ).start()
+        self.retrieve_the_list_of_peers(splitter_socket, team_socket)
 
         # }}}
 
@@ -279,7 +280,7 @@ class Peer_DBS(threading.Thread):
 
         def relay_the_header_to_the_player(source, player_sock):
             source_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            #source = (source_host, source_port)
+            #source = (source_addr, source_port)
             print source_sock.getsockname(), "\b: connecting to the source at", source, "..."
             sys.stdout.flush()
             source_sock.connect(source)
@@ -308,7 +309,7 @@ class Peer_DBS(threading.Thread):
             print source_sock.getsockname(), '\b: sent', received, 'bytes'
             source_sock.close()
 
-        relay_the_header_to_the_player((source_host, source_port), player_socket)
+        relay_the_header_to_the_player((source_addr, source_port), player_socket)
 
         # }}}
 
@@ -621,7 +622,7 @@ def main():
      parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. (Default = {})'.format(Peer_DBS.debt_threshold))
      parser.add_argument('--player_port', help='Port used to communicate with the player. (Default = "{}")'.format(Peer_DBS.player_port))
      parser.add_argument('--port', help='Port to talk with the peers. (Default = {})'.format(Peer_DBS.port))
-     parser.add_argument('--splitter_host', help='Host of the splitter. (Default = {})'.format(Peer_DBS.splitter_host))
+     parser.add_argument('--splitter_addr', help='IP address of the splitter. (Default = {})'.format(Peer_DBS.splitter_addr))
      parser.add_argument('--splitter_port', help='Listening port of the splitter. (Default = {})'.format(Peer_DBS.splitter_port))
 
      peer = Peer_DBS()
@@ -629,8 +630,8 @@ def main():
      args = parser.parse_known_args()[0]
      if args.player_port:
          peer.player_port = int(args.player_port)
-     if args.splitter_host:
-         peer.splitter_host = socket.gethostbyname(args.splitter_host)
+     if args.splitter_addr:
+         peer.splitter_addr = socket.gethostbyname(args.splitter_addr)
      if args.splitter_port:
          peer.splitter_port = int(args.splitter_port)
      if args.port:

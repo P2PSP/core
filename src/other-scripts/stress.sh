@@ -80,7 +80,7 @@ done
 set -x
 xterm -e './splitter.py  --addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
 sleep 1
-xterm -e './peer.py --debt_threshold=$DEBT_THRESHOLD --player_port 9998 --port $MONITOR_PORT --splitter_host localhost --splitter_port $SPLITTER_PORT' &
+xterm -e './peer.py --debt_threshold=$DEBT_THRESHOLD --player_port 9998 --port $MONITOR_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
 vlc http://localhost:9998 &
 
 x=1
@@ -89,7 +89,7 @@ do
     sleep 1
     TIME=`shuf -i 1-10 -n 1`
     export PORT=`shuf -i 2000-65000 -n 1`
-    timelimit -t $TIME xterm -e './peer.py --debt_threshold=$DEBT_THRESHOLD  --player_port $PORT --splitter_host localhost --splitter_port $SPLITTER_PORT' &
+    timelimit -t $TIME xterm -e './peer.py --debt_threshold=$DEBT_THRESHOLD  --player_port $PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
     TIME=`shuf -i 1-10 -n 1`
     timelimit -t $TIME vlc http://localhost:$PORT &
     x=$(( $x + 1 ))

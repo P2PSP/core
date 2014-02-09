@@ -29,7 +29,7 @@ usage() {
 
 echo $0: parsing: $@
 
-while getopts "b:c:u:w:d:l:m:s:o:p:?" opt; do
+while getopts "b:c:u:w:d:l:m:s:o:p:t:?" opt; do
     case ${opt} in
 	b)
 	    BUFFER_SIZE="${OPTARG}"
@@ -84,7 +84,7 @@ done
 set -x
 xterm -e './splitter.py  --addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
 sleep 1
-xterm -e './peer.py --debt_threshold=$DEBT_THRESHOLD --player_port 9998 --port $MONITOR_PORT --splitter_host localhost --splitter_port $SPLITTER_PORT' &
+xterm -e './peer.py --debt_threshold=$DEBT_THRESHOLD --player_port 9998 --port $MONITOR_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
 vlc http://localhost:9998 &
 
 x=1
@@ -92,7 +92,7 @@ while [ $x -le $CROWD ]
 do
     sleep 1
     export PORT=`shuf -i 2000-65000 -n 1`
-    xterm -e './peer.py --debt_threshold=$DEBT_THRESHOLD  --player_port $PORT --splitter_host localhost --splitter_port $SPLITTER_PORT' &
+    xterm -e './peer.py --debt_threshold=$DEBT_THRESHOLD  --player_port $PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
     timelimit -t $TIME vlc http://localhost:$PORT &
     x=$(( $x + 1 ))
 done
