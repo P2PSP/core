@@ -62,7 +62,7 @@ class Splitter_DBS(threading.Thread):
      channel = "/root/Videos/Big_Buck_Bunny_small.ogv"
 
      # The streaming server.
-     source_host = "150.214.150.68"
+     source_addr = "150.214.150.68"
 
      # Port where the streaming server is listening.
      source_port = 4551
@@ -144,7 +144,7 @@ class Splitter_DBS(threading.Thread):
           print peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
 
           # Send the source node IP address.
-          message = struct.pack("4s", socket.inet_aton(self.source_host))
+          message = struct.pack("4s", socket.inet_aton(self.source_addr))
           peer_serve_socket.sendall(message)
 
           # Send the source node listening port.
@@ -396,7 +396,7 @@ class Splitter_DBS(threading.Thread):
           GET_message = 'GET ' + self.channel + ' HTTP/1.1\r\n'
           GET_message += '\r\n'
           def _():
-               source = (self.source_host, self.source_port)
+               source = (self.source_addr, self.source_port)
                print source_socket.getsockname(), 'connecting to the source', source, '...'
                source_socket.connect(source)
                print source_socket.getsockname(), 'connected to', source
@@ -422,7 +422,7 @@ class Splitter_DBS(threading.Thread):
                               time.sleep(1)
                               source_socket.close()
                               source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                              source_socket.connect((self.source_host, self.source_port))
+                              source_socket.connect((self.source_addr, self.source_port))
                               source_socket.sendall(GET_message)
                          prev_chunk_size = len(chunk)
                          chunk += source_socket.recv(self.chunk_size - len(chunk))
@@ -461,21 +461,21 @@ def main():
      # {{{ Args parsing
      
      parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP network.')
-     parser.add_argument('--source_host', help='The streaming server. (Default = "{}")'.format(Splitter_DBS.source_host))
-     parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(Splitter_DBS.source_port))
-     parser.add_argument('--channel', help='Name of the channel served by the streaming source. (Default = "{}")'.format(Splitter_DBS.channel))
      parser.add_argument('--addr', help='IP address to talk with the peers. (Default = "{}")'.format(Splitter_DBS.addr))
-     parser.add_argument('--port', help='Port to talk with the peers. (Default = {})'.format(Splitter_DBS.port))
      parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(Splitter_DBS.buffer_size))
+     parser.add_argument('--channel', help='Name of the channel served by the streaming source. (Default = "{}")'.format(Splitter_DBS.channel))
      parser.add_argument('--chunk_size', help='Chunk size in bytes. (Default = {})'.format(Splitter_DBS.chunk_size))
+     parser.add_argument('--port', help='Port to talk with the peers. (Default = {})'.format(Splitter_DBS.port))
      parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. (Default = {})'.format(Splitter_DBS.losses_threshold))
+     parser.add_argument('--source_addr', help='IP address of the streaming server. (Default = "{}")'.format(Splitter_DBS.source_addr))
+     parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(Splitter_DBS.source_port))
      #parser.add_argument('--complaining_threshold', help='Maximum number of complains for a peevish peer. (Default = {})'.format(Splitter_DBS.complaining_threshold))
 
      splitter = Splitter_DBS()
 
      args = parser.parse_known_args()[0]
-     if args.source_host:
-          splitter.source_host = socket.gethostbyname(args.source_host)
+     if args.source_addr:
+          splitter.source_addr = socket.gethostbyname(args.source_addr)
      if args.source_port:
           splitter.source_port = int(args.source_port)
      if args.channel:
@@ -489,7 +489,7 @@ def main():
      if args.chunk_size:
           splitter.chunk_size = int(args.chunk_size)
      if args.losses_threshold:
-          splitter.losses_threshold = int(losses_threshold)
+          splitter.losses_threshold = int(args.losses_threshold)
      #if args.complaining_threshold:
      #     splitter.complaining_threshold = int(complaining_threshold)
      

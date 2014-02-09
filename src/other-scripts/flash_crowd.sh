@@ -3,21 +3,22 @@
 export BUFFER_SIZE=256
 export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv"
 export CHUNK_SIZE=1024
+export CROWD=10
 export DEBT_THRESHOLD=32
-export ITERATIONS=10
 export LOSSES_THRESHOLD=1
 export MONITOR_PORT=4553
 export SOURCE_ADDR="150.214.150.68"
 export SOURCE_PORT=4551
 export SPLITTER_PORT=4552
+export TIME=60
 
 usage() {
     echo $0
     echo "  [-b buffer size ($BUFFER_SIZE)]"
     echo "  [-c channel ($CHANNEL)]"
     echo "  [-u chunks size ($CHUNK_SIZE)]"
+    echo "  [-w crowd ($CROWD)]"
     echo "  [-d debt threshold ($DEB_THRESHOLD)]"
-    echo "  [-i iterations ($ITERATIONS)]"
     echo "  [-l losses threshold ($LOSSES_THRESHOLD)]"
     echo "  [-m monitor IP address ($MONITOR_PORT)]"
     echo "  [-s source IP address, ($SOURCE_ADDR)]"
@@ -28,7 +29,7 @@ usage() {
 
 echo $0: parsing: $@
 
-while getopts "b:c:u:d:i:l:m:s:o:p:?" opt; do
+while getopts "b:c:u:w:d:l:m:s:o:p:?" opt; do
     case ${opt} in
 	b)
 	    BUFFER_SIZE="${OPTARG}"
@@ -39,11 +40,11 @@ while getopts "b:c:u:d:i:l:m:s:o:p:?" opt; do
 	u)
 	    CHUNK_SIZE="${OPTARG}"
 	    ;;
+	w)
+	    CROWD="${OPTARG}"
+	    ;;
 	d)
 	    DEBT_THRESHOLD="${OPTARG}"
-	    ;;
-	i)
-	    ITERATIONS="${OPTARG}"
 	    ;;
 	l)
 	    LOSSES_THRESHOLD="${OPTARG}"
@@ -59,6 +60,9 @@ while getopts "b:c:u:d:i:l:m:s:o:p:?" opt; do
 	    ;;
 	p)
 	    SPLITTER_PORT="${OPTARG}"
+	    ;;
+	t)
+	    TIME="${OPTARG}"
 	    ;;
 	?)
 	    usage
@@ -84,13 +88,11 @@ xterm -e './peer.py --debt_threshold=$DEBT_THRESHOLD --player_port 9998 --port $
 vlc http://localhost:9998 &
 
 x=1
-while [ $x -le $ITERATIONS ]
+while [ $x -le $CROWD ]
 do
     sleep 1
-    TIME=`shuf -i 1-10 -n 1`
     export PORT=`shuf -i 2000-65000 -n 1`
-    timelimit -t $TIME xterm -e './peer.py --debt_threshold=$DEBT_THRESHOLD  --player_port $PORT --splitter_host localhost --splitter_port $SPLITTER_PORT' &
-    TIME=`shuf -i 1-10 -n 1`
+    xterm -e './peer.py --debt_threshold=$DEBT_THRESHOLD  --player_port $PORT --splitter_host localhost --splitter_port $SPLITTER_PORT' &
     timelimit -t $TIME vlc http://localhost:$PORT &
     x=$(( $x + 1 ))
 done

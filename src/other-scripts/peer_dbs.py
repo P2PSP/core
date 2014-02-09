@@ -47,7 +47,7 @@ class Peer_DBS(threading.Thread):
     player_port = 9999
     splitter_host = "150.214.150.68"
     splitter_port = 4552
-    team_port = 0
+    port = 0
     debt_threshold = 32
 
     def __init__(self):
@@ -143,15 +143,15 @@ class Peer_DBS(threading.Thread):
         splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         splitter = (self.splitter_host, self.splitter_port)
         print splitter_socket.getsockname(), "\b: connecting to the splitter at", splitter
-        if self.team_port != 0:
+        if self.port != 0:
             try:
                 splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             except:
                 pass
             sys.stdout.write(Color.purple)
-            print splitter_socket.getsockname(), "\b: I'm using port the port", self.team_port
+            print splitter_socket.getsockname(), "\b: I'm using port the port", self.port
             sys.stdout.write(Color.none)
-            splitter_socket.bind(("", self.team_port))
+            splitter_socket.bind(("", self.port))
         try:
             splitter_socket.connect(splitter)
         except:
@@ -618,11 +618,11 @@ def main():
      # {{{ Args parsing
      
      parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP network.')
+     parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. (Default = {})'.format(Peer_DBS.debt_threshold))
      parser.add_argument('--player_port', help='Port used to communicate with the player. (Default = "{}")'.format(Peer_DBS.player_port))
+     parser.add_argument('--port', help='Port to talk with the peers. (Default = {})'.format(Peer_DBS.port))
      parser.add_argument('--splitter_host', help='Host of the splitter. (Default = {})'.format(Peer_DBS.splitter_host))
      parser.add_argument('--splitter_port', help='Listening port of the splitter. (Default = {})'.format(Peer_DBS.splitter_port))
-     parser.add_argument('--team_port', help='Port to talk with the peers. (Default = {})'.format(Peer_DBS.team_port))
-     parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. (Default = {})'.format(Peer_DBS.debt_threshold))
 
      peer = Peer_DBS()
 
@@ -633,8 +633,8 @@ def main():
          peer.splitter_host = socket.gethostbyname(args.splitter_host)
      if args.splitter_port:
          peer.splitter_port = int(args.splitter_port)
-     if args.team_port:
-         peer.team_port = int(args.team_port)
+     if args.port:
+         peer.port = int(args.port)
      if args.debt_threshold:
          peer.debt_threshold = int(args.debt_threshold)
 
