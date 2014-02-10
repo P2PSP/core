@@ -14,7 +14,9 @@ This is a description of the files/directories:
 
 * test: scripts to test the implementation of the P2PSP.
 
-More info at www.p2psp.org.
+More information at:
+
+www.p2psp.org.
 
 Happy broadcasting!
 
