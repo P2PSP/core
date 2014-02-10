@@ -514,7 +514,7 @@ class Peer_DBS(threading.Thread):
         # {{{ Buffering
 
         original_debt_threshold = self.debt_threshold
-        self.debt_threshold = self.buffer_size
+        self.debt_threshold = buffer_size
 
         # We will send a chunk to the player when a new chunk is
         # received. Besides, those slots in the buffer that have not been
