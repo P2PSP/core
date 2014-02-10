@@ -1,5 +1,3 @@
-Thanks for downloading the P2PSP!
-
 This is a description of the files/directories:
 
 * readme.txt: this file.
@@ -10,8 +8,3 @@ This is a description of the files/directories:
 
 * join_a_team.sh: runs a peer and a player (VLC).
 
-More info at www.p2psp.org.
-
-Happy broadcasting!
-
-The P2PSP team.

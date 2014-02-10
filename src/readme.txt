@@ -1,5 +1,3 @@
-Thanks for downloading the P2PSP!
-
 This is a description of the files/directories:
 
 * readme.txt: this file.
@@ -10,14 +8,6 @@ This is a description of the files/directories:
 
 * color.py: a class to print colorized messages in the console.
 
-* source-feeding: scripts to send a stream to the streaming server.
+* source-feeding: scripts to send a stream to a streaming server.
 
-* test: scripts to test the implementation of the P2PSP.
-
-More information at:
-
-www.p2psp.org.
-
-Happy broadcasting!
-
-The P2PSP team.
+* tests: scripts to test the implementation of the P2PSP.
