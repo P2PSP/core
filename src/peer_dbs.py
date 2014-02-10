@@ -398,11 +398,12 @@ class Peer_DBS(threading.Thread):
                                 message = struct.pack("4sH", socket.inet_aton(peer[IP_ADDR]), socket.htons(peer[PORT]))
                                 team_socket.sendto(message, splitter)
                             # }}}
+                            '''
                             try:
-                                #self.debt[peer] /= 2
+                                self.debt[peer] /= 2
                             except:
                                 pass
-
+                            '''
                         self.receive_and_feed_counter = 0
                         self.receive_and_feed_previous = message
 
