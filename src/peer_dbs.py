@@ -85,7 +85,7 @@ class Peer_DBS(threading.Thread):
         self.chunk_size = 0
         self.receive_and_feed_counter = 0
         self.receive_and_feed_previous = ""
-        self.xxxx = 2
+        self.debt_threshold = 32
         # }}}
 
     def retrieve_the_list_of_peers(self, splitter_socket, team_socket):
@@ -386,7 +386,7 @@ class Peer_DBS(threading.Thread):
                             # threshold, the peer is removed from the list of
                             # peers.
                             print self.debt[peer], 
-                            if self.debt[peer] > 20: #self.debt_threshold:
+                            if self.debt[peer] > self.debt_threshold:
                                 
                                 sys.stdout.write(Color.red)
                                 print peer, 'was removed by unsupportive'
@@ -513,6 +513,9 @@ class Peer_DBS(threading.Thread):
 
         # {{{ Buffering
 
+        original_debt_threshold = self.debt_threshold
+        self.debt_threshold = self.buffer_size
+
         # We will send a chunk to the player when a new chunk is
         # received. Besides, those slots in the buffer that have not been
         # filled by a new chunk will not be send to the player. Moreover,
@@ -529,7 +532,7 @@ class Peer_DBS(threading.Thread):
 
         # Retrieve the first chunk to play.
         self.chunk_number = receive_and_feed()
-        for i in self.peer_list:
+        for i in self.peer_list: # OJO
             self.debt[i] = 0
         # The receive_and_feed() procedure returns if a packet has been
         # received or if a time-out exception has been arised. In the first
@@ -538,7 +541,7 @@ class Peer_DBS(threading.Thread):
         # received. A -2 is returned if a time-out is has happened.
         while self.chunk_number < 0:
             self.chunk_number = receive_and_feed()
-            for i in self.peer_list:
+            for i in self.peer_list: # OJO
                 self.debt[i] = 0
 
         # In this moment, the variable chunk_number stores the first chunk to
@@ -555,8 +558,11 @@ class Peer_DBS(threading.Thread):
             sys.stdout.flush()
             while receive_and_feed()<=0:
                 pass
-            for i in self.peer_list:
+            for i in self.peer_list: # OJO
                 self.debt[i] = 0
+
+        self.debt_threshold = original_debt_threshold
+
         # }}}
 
         print 'latency =', time.time() - start_latency, 'seconds'
