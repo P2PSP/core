@@ -47,5 +47,11 @@ while getopts "d:p:s:l:?" opt; do
     esac
 done
 
+echo
+echo "Please, close the VLC to leave the team (don't kill the peer)!"
+echo
+echo "Hit <enter> to continue ..." 
+read
+
 xterm -e './peer.py --debt_threshold=$DEBT_THRESHOLD  --player_port $PLAYER_PORT --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT' &
 vlc http://localhost:$PLAYER_PORT &

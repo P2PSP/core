@@ -8,7 +8,7 @@ This is a description of the files/directories:
 
 * strees.sh: simulates a stressful scenario.
 
-* join_a_team.sh: runs a peer and a player.
+* join_a_team.sh: runs a peer and a player (VLC).
 
 More info at www.p2psp.org.
 

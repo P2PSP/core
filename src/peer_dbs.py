@@ -249,8 +249,7 @@ class Peer_DBS(threading.Thread):
             numbers[i] = i
 
         # }}}
-
-        # {{{ Retrieve the list of peers and sends the [Hello] messages
+        # {{{ Retrieve the list of peers
 
         #threading.Thread(target=self.retrieve_the_list_of_peers, args=(splitter_socket, team_socket,) ).start()
         self.retrieve_the_list_of_peers(splitter_socket, team_socket)
