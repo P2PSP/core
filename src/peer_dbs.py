@@ -386,7 +386,8 @@ class Peer_DBS(threading.Thread):
                             # threshold, the peer is removed from the list of
                             # peers.
                             print self.debt[peer], 
-                            if self.debt[peer] > 2: #self.debt_threshold:
+                            if self.debt[peer] > 20: #self.debt_threshold:
+                                
                                 sys.stdout.write(Color.red)
                                 print peer, 'was removed by unsupportive'
                                 sys.stdout.write(Color.none)
@@ -398,7 +399,7 @@ class Peer_DBS(threading.Thread):
                                 team_socket.sendto(message, splitter)
                             # }}}
                             try:
-                                self.debt[peer] /= 2
+                                #self.debt[peer] /= 2
                             except:
                                 pass
 

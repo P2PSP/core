@@ -525,6 +525,7 @@ def main():
                # Wake up the "handle_arrivals" daemon, which is waiting in a
                # peer_connection_sock.accept().
                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+               print splitter.addr, splitter.port
                sock.connect((splitter.addr, splitter.port))
                sock.recv(struct.calcsize("4s")) # IP address of the source node
                sock.recv(struct.calcsize("H")) # Port of the source node
