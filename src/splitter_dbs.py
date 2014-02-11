@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
 # {{{ GNU GENERAL PUBLIC LICENSE
@@ -291,7 +291,6 @@ class Splitter_DBS(threading.Thread):
                                    sys.stdout.write(Color.none)
                     finally:
                          pass
-
 
                elif len(message) == 6:
                     # {{{ The peer sends an "erased" peer

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
 # {{{ GNU GENERAL PUBLIC LICENSE
@@ -48,7 +48,7 @@ class Peer_DBS(threading.Thread):
     splitter_addr = "150.214.150.68"
     splitter_port = 4552
     port = 0
-    debt_threshold = 32
+    #debt_threshold = 32
 
     def __init__(self):
         # {{{
@@ -73,12 +73,12 @@ class Peer_DBS(threading.Thread):
         # This store the insolidarity/debt of the peers of
         # the team. When the insolidarity exceed a threshold, the
         # peer is deleted from the list of peers.
-        self.debt = {}
+        #self.debt = {}
         #self.player_socket = ""
         #self.source_addr = ""
         #self.source_port = 0
         #self.channel = ""
-        #self.buffer_size = 0
+        self.buffer_size = 0
         #self.total_chunks = 0L
         #self.splitter = ""
         #self.player_socket = ""
@@ -89,7 +89,8 @@ class Peer_DBS(threading.Thread):
         self.chunk_size = 0
         self.receive_and_feed_counter = 0
         self.receive_and_feed_previous = ""
-        self.debt_threshold = 32
+        self.received = []
+        #self.debt_threshold = 32
         # }}}
 
     #def retrieve_the_list_of_peers(self, splitter_socket, team_socket):
@@ -114,7 +115,7 @@ class Peer_DBS(threading.Thread):
             peer = (IP_addr, port)
             print "[%5d]" % number_of_peers, peer
             self.peer_list.append(peer)
-            self.debt[peer] = 0
+            #self.debt[peer] = 0
             #print Color.green, team_socket.getsockname(), \
             #    "-", '"hello"', "->", peer, Color.none
             # Say hello to the peer
@@ -286,8 +287,8 @@ class Peer_DBS(threading.Thread):
             buffer_size = struct.unpack("H", message)[0]
             buffer_size = socket.ntohs(buffer_size)
             return buffer_size
-        buffer_size = _()
-        print splitter_socket.getpeername(), "\b: buffer_size =", buffer_size
+        self.buffer_size = _()
+        print splitter_socket.getpeername(), "\b: buffer_size =", self.buffer_size
 
         # }}}
 
@@ -324,9 +325,9 @@ class Peer_DBS(threading.Thread):
         # simpliticy, all peers will use the same buffer size.
         #chunks = [None]*buffer_size
         chunks = [""]*buffer_size
-        received = [False]*buffer_size
-        numbers = [0]*buffer_size
-        for i in xrange(0, buffer_size):
+        self.received = [False]*self.buffer_size
+        numbers = [0]*self.buffer_size
+        for i in xrange(0, self.buffer_size):
             numbers[i] = 0
 
         # }}}
@@ -371,20 +372,18 @@ class Peer_DBS(threading.Thread):
                     number, chunk = struct.unpack(chunk_format_string, message)
                     chunk_number = socket.ntohs(number)
 
-                    chunks[chunk_number % buffer_size] = chunk
-                    received[chunk_number % buffer_size] = True
-                    numbers[chunk_number % buffer_size] = chunk_number
+                    chunks[chunk_number % self.buffer_size] = chunk
+                    self.received[chunk_number % self.buffer_size] = True
+                    numbers[chunk_number % self.buffer_size] = chunk_number
 
-                    if __debug__:
-                        for i in xrange(buffer_size):
-                            if received[i]:
-                                sys.stdout.write('T')
-                            else:
-                                sys.stdout.write('F')
-                        print
-                        for i in xrange(buffer_size):
-                            print numbers[i],
-                        print
+                    '''
+                    for i in xrange(buffer_size):
+                        if received[i]:
+                            sys.stdout.write('O')
+                        else:
+                            sys.stdout.write('.')
+                    print
+                    '''
 
                     if sender == splitter:
                         # {{{ Send the previous chunk in burst sending
@@ -603,11 +602,11 @@ class Peer_DBS(threading.Thread):
         self.chunk_number = receive_and_feed()
         while self.chunk_number < 0:
             self.chunk_number = receive_and_feed()
-        chunk_to_play = self.chunk_number % buffer_size
+        chunk_to_play = self.chunk_number % self.buffer_size
         print self.chunk_number, chunk_to_play
 
         # Fill up to the half of the buffer
-        for x in xrange(buffer_size/2):
+        for x in xrange(self.buffer_size/2):
             print "\b.",
             sys.stdout.flush()
             while receive_and_feed() < 0:
@@ -653,7 +652,7 @@ class Peer_DBS(threading.Thread):
         def send_a_chunk_to_the_player(player_socket):
             # {{{
 
-            if not received[chunk_to_play]:
+            if not self.received[(chunk_to_play+self.buffer_size/2-10)%self.buffer_size]:
 
                 # Lets complain to the splitter.
                 message = struct.pack("!H", chunk_to_play)
@@ -678,7 +677,7 @@ class Peer_DBS(threading.Thread):
                 return
             '''
             # We have fired the chunk.
-            received[chunk_to_play] = False
+            self.received[chunk_to_play] = False
 
             # }}}
 
@@ -692,7 +691,7 @@ class Peer_DBS(threading.Thread):
                         self.debt[i] /= 2
                 '''
                 send_a_chunk_to_the_player(player_socket)
-                chunk_to_play = (chunk_to_play + 1) % buffer_size
+                chunk_to_play = (chunk_to_play + 1) % self.buffer_size
 
         # The player has gone. Lets do a polite farewell.
         print 'goodbye!'
@@ -709,7 +708,7 @@ def main():
      # {{{ Args parsing
      
      parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP network.')
-     parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. (Default = {})'.format(Peer_DBS.debt_threshold))
+     #parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. (Default = {})'.format(Peer_DBS.debt_threshold))
      parser.add_argument('--player_port', help='Port used to communicate with the player. (Default = "{}")'.format(Peer_DBS.player_port))
      parser.add_argument('--port', help='Port to talk with the peers. (Default = {})'.format(Peer_DBS.port))
      parser.add_argument('--splitter_addr', help='IP address of the splitter. (Default = {})'.format(Peer_DBS.splitter_addr))
@@ -724,8 +723,8 @@ def main():
          Peer_DBS.splitter_port = int(args.splitter_port)
      if args.port:
          Peer_DBS.port = int(args.port)
-     if args.debt_threshold:
-         Peer_DBS.debt_threshold = int(args.debt_threshold)
+     #if args.debt_threshold:
+         #Peer_DBS.debt_threshold = int(args.debt_threshold)
 
      # }}}
 
@@ -733,7 +732,16 @@ def main():
      peer.start()
      last_chunk_number = 0
      while peer.player_alive:
-           print "[%3d] " % (len(peer.peer_list)+1),
+         sys.stdout.write("\033[2J\033[;H")
+         for i in xrange(peer.buffer_size):
+             if peer.received[i]:
+                 sys.stdout.write('O')
+             else:
+                 sys.stdout.write('.')
+                 print
+         print "Team size =", len(peer.peer_list)+1
+         '''
+          print "[%3d] " % (len(peer.peer_list)+1),
            kbps = (peer.chunk_number - last_chunk_number) * \
                peer.chunk_size * 8/1000
            last_chunk_number = peer.chunk_number
@@ -741,8 +749,8 @@ def main():
            for x in xrange(0,kbps/10):
                 print "\b#",
            print kbps, "kbps"
-
-           time.sleep(1)
+          '''
+         time.sleep(1)
 
 if __name__ == "__main__":
      main()
