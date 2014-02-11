@@ -398,11 +398,13 @@ class Splitter_DBS(threading.Thread):
                source_socket.sendall(GET_message)
           _()
 
-          def receive_next_chunk(source_socket, chunk_size):
-               chunk = source_socket.recv(chunk_size)
-               prev_chunk_size = 0
-               while len(chunk) < chunk_size:
-                    if len(chunk) == prev_chunk_size:
+          source = (self.source_addr, self.source_port)
+
+          def receive_next_chunk(GET, source, sock, size):
+               data = sock.recv(size)
+               prev_size = 0
+               while len(data) < size:
+                    if len(data) == prev_size:
                          # This section of code is reached when
                          # the streaming server (Icecast)
                          # finishes a stream and starts with the
@@ -411,14 +413,14 @@ class Splitter_DBS(threading.Thread):
                          print '\b!',
                          sys.stdout.flush()
                          time.sleep(1)
-                         source_socket.close()
-                         source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                         source_socket.connect((self.source_addr, self.source_port))
-                         source_socket.sendall(GET_message)
-                    prev_chunk_size = len(chunk)
-                    chunk += source_socket.recv(chunk_size - len(chunk))
-               return chunk, source_socket
-          self.header, source_socket = receive_next_chunk(source_socket, 20*1024)
+                         sock.close()
+                         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                         sock.connect(source)
+                         sock.sendall(GET)
+                    prev_size = len(data)
+                    data += sock.recv(size - len(data))
+               return data, sock
+          self.header, source_socket = receive_next_chunk(GET_message, source, source_socket, 20*1024)
 
           # {{{ Wait for the monitor peer
 
@@ -445,7 +447,7 @@ class Splitter_DBS(threading.Thread):
 
           while self.alive:
                # Receive data from the source
-               chunk, source_socket = receive_next_chunk(source_socket, self.chunk_size)
+               chunk, source_socket = receive_next_chunk(GET_message, source, source_socket, self.chunk_size)
 
                try:
                     self.peer_list[self.peer_index]
