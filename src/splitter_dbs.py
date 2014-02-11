@@ -50,7 +50,7 @@ class Splitter_DBS(threading.Thread):
      # must be transmitted to the peers. The buffer_size
      # is proportional to the bit-rate and the latency is
      # proportional to the buffer_size.
-     buffer_size = 256
+     buffer_size = 512
      
      # The chunk_size depends mainly on the network
      # technology and should be selected as big as
@@ -85,6 +85,14 @@ class Splitter_DBS(threading.Thread):
 
           threading.Thread.__init__(self)
  
+          print "Buffer size =", self.buffer_size
+          print "Chunk size =", self.chunk_size
+          print "Channel =", self.channel
+          print "Source IP address =", self.source_addr
+          print "Source port =", self.source_port
+          print "(Team) IP address =", self.addr
+          print "(Team) Port =", self.port
+
           # A splitter runs 3 threads. The first one controls the peer
           # arrivals. The second one listens to the team, for example, to
           # re-sends lost blocks. The third one shows some information about
@@ -438,6 +446,7 @@ class Splitter_DBS(threading.Thread):
                     peer = self.peer_list[self.peer_index]
                message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
                self.team_socket.sendto(message, peer)
+               #print "Chunk", self.chunk_number, "sent to", peer
                self.destination_of_chunk[self.chunk_number % self.buffer_size] = peer
                self.chunk_number = (self.chunk_number + 1) % 65536
 
@@ -471,30 +480,29 @@ def main():
      parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(Splitter_DBS.source_port))
      #parser.add_argument('--complaining_threshold', help='Maximum number of complains for a peevish peer. (Default = {})'.format(Splitter_DBS.complaining_threshold))
 
-     splitter = Splitter_DBS()
-
      args = parser.parse_known_args()[0]
      if args.source_addr:
-          splitter.source_addr = socket.gethostbyname(args.source_addr)
+          Splitter_DBS.source_addr = socket.gethostbyname(args.source_addr)
      if args.source_port:
-          splitter.source_port = int(args.source_port)
+          Splitter_DBS.source_port = int(args.source_port)
      if args.channel:
-          splitter.channel = args.channel
+          Splitter_DBS.channel = args.channel
      if args.addr:
-          splitter.addr = socket.gethostbyname(args.addr)
+          Splitter_DBS.addr = socket.gethostbyname(args.addr)
      if args.port:
-          splitter.port = int(args.port)
+          Splitter_DBS.port = int(args.port)
      if args.buffer_size:
-          splitter.buffer_size = int(args.buffer_size)
+          Splitter_DBS.buffer_size = int(args.buffer_size)
      if args.chunk_size:
-          splitter.chunk_size = int(args.chunk_size)
+          Splitter_DBS.chunk_size = int(args.chunk_size)
      if args.losses_threshold:
-          splitter.losses_threshold = int(args.losses_threshold)
+          Splitter_DBS.losses_threshold = int(args.losses_threshold)
      #if args.complaining_threshold:
      #     splitter.complaining_threshold = int(complaining_threshold)
      
      # }}}
 
+     splitter = Splitter_DBS()
      splitter.start()
      last_chunk_number = 0
      while splitter.alive:

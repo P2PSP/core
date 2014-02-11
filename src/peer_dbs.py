@@ -61,6 +61,10 @@ class Peer_DBS(threading.Thread):
         else:
             print "release mode"
 
+        print "Player port =", self.player_port
+        print "Splitter IP address =", self.splitter_addr
+        print "Splitter port =", self.splitter_port
+        print "(Team) Port =", self.port
         # This is the list of peers of the team. Each peer uses
         # this structure to resend the chunks received from the
         # splitter to these nodes.
@@ -230,6 +234,13 @@ class Peer_DBS(threading.Thread):
         print splitter_socket.getpeername(), "\b: chunk_size =", self.chunk_size
 
         # }}}
+
+        # {{{ Retrieve the list of peers
+
+        #threading.Thread(target=self.retrieve_the_list_of_peers, args=(splitter_socket, team_socket,) ).start()
+        self.retrieve_the_list_of_peers(splitter_socket, team_socket)
+
+        # }}}
         # {{{ Define the buffer of chunks structure
 
         # Now it is time to define the buffer of chunks, a structure
@@ -243,21 +254,12 @@ class Peer_DBS(threading.Thread):
         # simpliticy, all peers will use the same buffer size.
         #chunks = [None]*buffer_size
         chunks = [""]*buffer_size
-        received = [True]*buffer_size
+        received = [False]*buffer_size
         numbers = [0]*buffer_size
         for i in xrange(0, buffer_size):
-            numbers[i] = i
+            numbers[i] = 0
 
         # }}}
-        # {{{ Retrieve the list of peers
-
-        #threading.Thread(target=self.retrieve_the_list_of_peers, args=(splitter_socket, team_socket,) ).start()
-        self.retrieve_the_list_of_peers(splitter_socket, team_socket)
-
-        # }}}
-
-        total_chunks = 0
-
         # {{{ Relay the header to the player
 
         # The video header is requested directly to the source node,
@@ -312,6 +314,8 @@ class Peer_DBS(threading.Thread):
 
         # }}}
 
+        total_chunks = 0
+
         def receive_and_feed():
             # {{{
 
@@ -337,6 +341,18 @@ class Peer_DBS(threading.Thread):
                     received[chunk_number % buffer_size] = True
                     numbers[chunk_number % buffer_size] = chunk_number
 
+                    '''
+                    for i in xrange(buffer_size):
+                        if received[i]:
+                            sys.stdout.write('T')
+                        else:
+                            sys.stdout.write('F')
+                    print
+                    for i in xrange(buffer_size):
+                        print numbers[i],
+                    print
+                    '''
+
                     if sender == splitter:
                         # {{{ Send the previous chunk in burst sending
                         # mode if the chunk has not been sent to all
@@ -353,10 +369,12 @@ class Peer_DBS(threading.Thread):
                         while( (self.receive_and_feed_counter < len(self.peer_list)) and (self.receive_and_feed_counter > 0) ):
                             peer = self.peer_list[self.receive_and_feed_counter]
                             team_socket.sendto(self.receive_and_feed_previous, peer)
+                            #print "*Chunk", socket.ntohs(struct.unpack(chunk_format_string, self.receive_and_feed_previous)[0]), "sent to", peer
 
                             # {{{ debug
                             if __debug__:
-                                print self.team_socket.getsockname(), "-", chunk_number, \
+                                print self.team_socket.getsockname(), "-",\
+                                    socket.ntohs(struct.unpack(chunk_format_string, self.receive_and_feed_previous)[0]),\
                                     Color.green, "->", Color.none, peer
                             # }}}
 
@@ -364,10 +382,13 @@ class Peer_DBS(threading.Thread):
                             # debt of that peer is incremented. Each
                             # time we receive a chunk from a peer, the
                             # debt of that peer is decremented.
+                            '''
                             self.debt[peer] += 2
+                            '''
 
                             self.receive_and_feed_counter += 1
 
+                        '''
                         # Peers sent the last chunk received from the
                         # splitter to the peers in the list of peers
                         # whenever a new chunk comes from any
@@ -398,12 +419,14 @@ class Peer_DBS(threading.Thread):
                                 message = struct.pack("4sH", socket.inet_aton(peer[IP_ADDR]), socket.htons(peer[PORT]))
                                 team_socket.sendto(message, splitter)
                             # }}}
-                            '''
+                        '''
+                        '''
                             try:
                                 self.debt[peer] /= 2
                             except:
                                 pass
-                            '''
+                        '''
+                            
                         self.receive_and_feed_counter = 0
                         self.receive_and_feed_previous = message
 
@@ -422,11 +445,15 @@ class Peer_DBS(threading.Thread):
                         if sender not in self.peer_list:
                             # The peer is new
                             self.peer_list.append(sender)
+                            '''
                             self.debt[sender] = 0                
+                            '''
                             print Color.green, sender, 'added by data chunk', \
                                 chunk_number, Color.none
                         else:
+                            '''
                             self.debt[sender] -= 2;
+                            '''
                             '''
                             if self.debt[sender] < 0:
                                 self.debt[sender] = 0
@@ -441,14 +468,19 @@ class Peer_DBS(threading.Thread):
 
                         peer = self.peer_list[self.receive_and_feed_counter]
                         team_socket.sendto(self.receive_and_feed_previous, peer)
+                        #print "Chunk", socket.ntohs(struct.unpack(chunk_format_string, self.receive_and_feed_previous)[0]), "sent to", peer
+                        #print "Chunk", socket.ntohs(struct.unpack(chunk_format_string, message)[0]), "sent to", peer
 
                         # {{{ debug
                         if __debug__:
-                            print team_socket.getsockname(), "-", chunk_number,\
+                            print team_socket.getsockname(), "-", \
+                                socket.ntohs(struct.unpack(chunk_format_string, self.receive_and_feed_previous)[0]),\
                                 Color.green, "->", Color.none, peer
                         # }}}
 
-                        self.debt[peer] += 2      
+                        '''
+                        self.debt[peer] += 2
+                        '''
                         '''
                         if self.debt[peer] > self.debt_threshold:
                             sys.stdout.write(Color.red)
@@ -476,7 +508,9 @@ class Peer_DBS(threading.Thread):
                     if sender not in self.peer_list:
                         print Color.green, sender, 'added by \"hello\" message', Color.none
                         self.peer_list.append(sender)
+                        '''
                         self.debt[sender] = 0
+                        '''
                     else:
                         sys.stdout.write(Color.red)
                         print team_socket.getsockname(), '\b: received "goodbye" from', sender
@@ -513,8 +547,10 @@ class Peer_DBS(threading.Thread):
 
         # {{{ Buffering
 
+        '''
         original_debt_threshold = self.debt_threshold
         self.debt_threshold = buffer_size
+        '''
 
         # We will send a chunk to the player when a new chunk is
         # received. Besides, those slots in the buffer that have not been
@@ -530,6 +566,20 @@ class Peer_DBS(threading.Thread):
         print team_socket.getsockname(), "\b: buffering ",
         sys.stdout.flush()
 
+        # First chunk
+        self.chunk_number = receive_and_feed()
+        while self.chunk_number < 0:
+            self.chunk_number = receive_and_feed()
+        chunk_to_play = self.chunk_number % buffer_size
+        print self.chunk_number, chunk_to_play
+
+        # Fill up to the half of the buffer
+        for x in xrange(buffer_size/2):
+            print "\b.",
+            sys.stdout.flush()
+            while receive_and_feed() < 0:
+                pass
+        '''
         # Retrieve the first chunk to play.
         self.chunk_number = receive_and_feed()
         for i in self.peer_list: # OJO
@@ -562,7 +612,7 @@ class Peer_DBS(threading.Thread):
                 self.debt[i] = 0
 
         self.debt_threshold = original_debt_threshold
-
+        '''
         # }}}
 
         print 'latency =', time.time() - start_latency, 'seconds'
@@ -632,22 +682,21 @@ def main():
      parser.add_argument('--splitter_addr', help='IP address of the splitter. (Default = {})'.format(Peer_DBS.splitter_addr))
      parser.add_argument('--splitter_port', help='Listening port of the splitter. (Default = {})'.format(Peer_DBS.splitter_port))
 
-     peer = Peer_DBS()
-
      args = parser.parse_known_args()[0]
      if args.player_port:
-         peer.player_port = int(args.player_port)
+         Peer_DBS.player_port = int(args.player_port)
      if args.splitter_addr:
-         peer.splitter_addr = socket.gethostbyname(args.splitter_addr)
+         Peer_DBS.splitter_addr = socket.gethostbyname(args.splitter_addr)
      if args.splitter_port:
-         peer.splitter_port = int(args.splitter_port)
+         Peer_DBS.splitter_port = int(args.splitter_port)
      if args.port:
-         peer.port = int(args.port)
+         Peer_DBS.port = int(args.port)
      if args.debt_threshold:
-         peer.debt_threshold = int(args.debt_threshold)
+         Peer_DBS.debt_threshold = int(args.debt_threshold)
 
      # }}}
 
+     peer = Peer_DBS()
      peer.start()
      last_chunk_number = 0
      while peer.player_alive:

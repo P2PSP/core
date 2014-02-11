@@ -77,7 +77,6 @@ while getopts "b:c:u:d:i:l:m:s:o:p:?" opt; do
     esac
 done
 
-set -x
 xterm -e './splitter.py  --addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
 sleep 1
 xterm -e './peer.py --debt_threshold=$DEBT_THRESHOLD --player_port 9998 --port $MONITOR_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
