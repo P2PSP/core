@@ -1,4 +1,4 @@
-#!/usr/bin/python -O
+#!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 
 # {{{ GNU GENERAL PUBLIC LICENSE
@@ -50,7 +50,7 @@ class Splitter_DBS(threading.Thread):
      # must be transmitted to the peers. The buffer_size
      # is proportional to the bit-rate and the latency is
      # proportional to the buffer_size.
-     buffer_size = 512
+     buffer_size = 256
      
      # The chunk_size depends mainly on the network
      # technology and should be selected as big as
@@ -446,7 +446,9 @@ class Splitter_DBS(threading.Thread):
                     peer = self.peer_list[self.peer_index]
                message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
                self.team_socket.sendto(message, peer)
-               #print "Chunk", self.chunk_number, "sent to", peer
+               if __debug__:
+                    print '%5d' % self.chunk_number, Color.red, '->', Color.none, peer
+                    sys.stdout.flush()
                self.destination_of_chunk[self.chunk_number % self.buffer_size] = peer
                self.chunk_number = (self.chunk_number + 1) % 65536
 
@@ -461,9 +463,6 @@ class Splitter_DBS(threading.Thread):
                     for i in self.complains:
                          self.complains[i] /= 2
                     '''
-               if __debug__:
-                    print '%5d' % self.chunk_number, Color.red, '->', Color.none, peer
-                    sys.stdout.flush()
 
 def main():
 

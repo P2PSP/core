@@ -1,4 +1,4 @@
-#!/usr/bin/python -O
+#!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 
 # {{{ GNU GENERAL PUBLIC LICENSE
@@ -341,17 +341,16 @@ class Peer_DBS(threading.Thread):
                     received[chunk_number % buffer_size] = True
                     numbers[chunk_number % buffer_size] = chunk_number
 
-                    '''
-                    for i in xrange(buffer_size):
-                        if received[i]:
-                            sys.stdout.write('T')
-                        else:
-                            sys.stdout.write('F')
-                    print
-                    for i in xrange(buffer_size):
-                        print numbers[i],
-                    print
-                    '''
+                    if __debug__:
+                        for i in xrange(buffer_size):
+                            if received[i]:
+                                sys.stdout.write('T')
+                            else:
+                                sys.stdout.write('F')
+                        print
+                        for i in xrange(buffer_size):
+                            print numbers[i],
+                        print
 
                     if sender == splitter:
                         # {{{ Send the previous chunk in burst sending
@@ -373,7 +372,7 @@ class Peer_DBS(threading.Thread):
 
                             # {{{ debug
                             if __debug__:
-                                print self.team_socket.getsockname(), "-",\
+                                print team_socket.getsockname(), "-",\
                                     socket.ntohs(struct.unpack(chunk_format_string, self.receive_and_feed_previous)[0]),\
                                     Color.green, "->", Color.none, peer
                             # }}}
@@ -437,7 +436,7 @@ class Peer_DBS(threading.Thread):
                         # {{{ debug
 
                         if __debug__:
-                            print self.team_socket.getsockname(), \
+                            print team_socket.getsockname(), \
                                 Color.green, "<-", Color.none, chunk_number, "-", sender
 
                         # }}}
