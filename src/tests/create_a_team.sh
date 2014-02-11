@@ -1,8 +1,8 @@
 #!/bin/sh
 
-export BUFFER_SIZE=512
-#export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv"
-export CHANNEL="/root/Audios/The_Last_of_the_Mohicans-Promentory.ogg"
+export BUFFER_SIZE=256
+export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv"
+#export CHANNEL="/root/Audios/The_Last_of_the_Mohicans-Promentory.ogg"
 export CHUNK_SIZE=1024
 export DEBT_THRESHOLD=32
 export LOSSES_THRESHOLD=1
@@ -58,12 +58,14 @@ done
 #xterm -e '../splitter.py  --addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT > splitter' &
 xterm -e '../splitter.py  --addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
 
+read
+
 sleep 1
 #xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --player_port 9998 --port $MONITOR_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT > monitor' &
 xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --player_port 9998 --port $MONITOR_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
 vlc http://localhost:9998 &
 
-sleep 5
+sleep 10
 #xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD  --player_port $PLAYER_PORT --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT > peer' &
 xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD  --player_port $PLAYER_PORT --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT' &
 vlc http://localhost:$PLAYER_PORT &

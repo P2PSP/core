@@ -134,6 +134,8 @@ class Splitter_DBS(threading.Thread):
 
           self.peer_index = 0
 
+          self.header = ""
+
           # }}}
 
      # Handle the arrival of a peer. When a peer
@@ -151,6 +153,7 @@ class Splitter_DBS(threading.Thread):
           sys.stdout.write(Color.green)
           print peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
 
+          '''
           # Send the source node IP address.
           message = struct.pack("4s", socket.inet_aton(self.source_addr))
           peer_serve_socket.sendall(message)
@@ -163,6 +166,10 @@ class Splitter_DBS(threading.Thread):
           message = struct.pack("H", socket.htons(len(self.channel)))    
           peer_serve_socket.sendall(message)
           peer_serve_socket.sendall(self.channel)
+          '''
+
+          # Send the header
+          peer_serve_socket.sendall(self.header)
 
           # Send the buffer size.
           message = struct.pack("H", socket.htons(self.buffer_size))
@@ -379,6 +386,40 @@ class Splitter_DBS(threading.Thread):
 
           # }}}
 
+          source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+          GET_message = 'GET ' + self.channel + ' HTTP/1.1\r\n'
+          GET_message += '\r\n'
+          def _():
+               source = (self.source_addr, self.source_port)
+               print source_socket.getsockname(), 'connecting to the source', source, '...'
+               source_socket.connect(source)
+               print source_socket.getsockname(), 'connected to', source
+
+               source_socket.sendall(GET_message)
+          _()
+
+          def receive_next_chunk(source_socket, chunk_size):
+               chunk = source_socket.recv(chunk_size)
+               prev_chunk_size = 0
+               while len(chunk) < chunk_size:
+                    if len(chunk) == prev_chunk_size:
+                         # This section of code is reached when
+                         # the streaming server (Icecast)
+                         # finishes a stream and starts with the
+                         # following one.
+                         self.header = ""
+                         print '\b!',
+                         sys.stdout.flush()
+                         time.sleep(1)
+                         source_socket.close()
+                         source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                         source_socket.connect((self.source_addr, self.source_port))
+                         source_socket.sendall(GET_message)
+                    prev_chunk_size = len(chunk)
+                    chunk += source_socket.recv(chunk_size - len(chunk))
+               return chunk, source_socket
+          self.header, source_socket = receive_next_chunk(source_socket, 20*1024)
+
           # {{{ Wait for the monitor peer
 
           # The fist peer that contacts the splitter is a "monitor"
@@ -399,44 +440,12 @@ class Splitter_DBS(threading.Thread):
           self.handle_peer_arrival(self.peer_connection_socket.accept())
           threading.Thread(target=self.handle_arrivals).start()
           threading.Thread(target=self.moderate_the_team).start()
-          
-          source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-          GET_message = 'GET ' + self.channel + ' HTTP/1.1\r\n'
-          GET_message += '\r\n'
-          def _():
-               source = (self.source_addr, self.source_port)
-               print source_socket.getsockname(), 'connecting to the source', source, '...'
-               source_socket.connect(source)
-               print source_socket.getsockname(), 'connected to', source
-
-               source_socket.sendall(GET_message)
-          _()
 
           chunk_format_string = "H" + str(self.chunk_size) + "s" # "H1024s
 
           while self.alive:
                # Receive data from the source
-               def receive_next_chunk(source_socket):
-                    chunk = source_socket.recv(self.chunk_size)
-                    prev_chunk_size = 0
-                    while len(chunk) < self.chunk_size:
-                         if len(chunk) == prev_chunk_size:
-                              # This section of code is reached when
-                              # the streaming server (Icecast)
-                              # finishes a stream and starts with the
-                              # following one.
-                              print '\b!',
-                              sys.stdout.flush()
-                              time.sleep(1)
-                              source_socket.close()
-                              source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                              source_socket.connect((self.source_addr, self.source_port))
-                              source_socket.sendall(GET_message)
-                         prev_chunk_size = len(chunk)
-                         chunk += source_socket.recv(self.chunk_size - len(chunk))
-                    return chunk, source_socket
-
-               chunk, source_socket = receive_next_chunk(source_socket)
+               chunk, source_socket = receive_next_chunk(source_socket, self.chunk_size)
 
                try:
                     self.peer_list[self.peer_index]
@@ -444,14 +453,16 @@ class Splitter_DBS(threading.Thread):
                     pass
                else:
                     peer = self.peer_list[self.peer_index]
+
                message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
                self.team_socket.sendto(message, peer)
+
                if __debug__:
                     print '%5d' % self.chunk_number, Color.red, '->', Color.none, peer
                     sys.stdout.flush()
+
                self.destination_of_chunk[self.chunk_number % self.buffer_size] = peer
                self.chunk_number = (self.chunk_number + 1) % 65536
-
                self.peer_index = (self.peer_index + 1) % len(self.peer_list)
 
                # Decrement (dividing by 2) complains after

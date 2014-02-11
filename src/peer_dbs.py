@@ -92,7 +92,8 @@ class Peer_DBS(threading.Thread):
         self.debt_threshold = 32
         # }}}
 
-    def retrieve_the_list_of_peers(self, splitter_socket, team_socket):
+    #def retrieve_the_list_of_peers(self, splitter_socket, team_socket):
+    def retrieve_the_list_of_peers(self, splitter_socket):
         # {{{
 
         # The list of peers should be retrieved from the splitter in a
@@ -126,6 +127,7 @@ class Peer_DBS(threading.Thread):
         # }}}
 
     def run(self):
+
         # {{{ Setup "player_socket" and wait for the player
 
         player_socket =  socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
@@ -142,6 +144,7 @@ class Peer_DBS(threading.Thread):
         print player_socket.getsockname(), "\b: the player is", player_socket.getpeername()
 
         # }}}
+
         # {{{ Setup "splitter" and "splitter_socket"
 
         splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -163,21 +166,8 @@ class Peer_DBS(threading.Thread):
         print splitter_socket.getsockname(), "\b: connected to the splitter at", splitter
 
         # }}}
-        # {{{ Setup "team_socket"
 
-        team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        try:
-            # In Windows systems this call doesn't work!
-            team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except:
-            pass
-        team_socket.bind(('',splitter_socket.getsockname()[PORT]))
-
-        # This is the maximum time the peer will wait for a chunk
-        # (from the splitter or from another peer).
-        team_socket.settimeout(1)
-
-        # }}}
+        '''
         # {{{ Receive from the splitter the IP address of the source node
 
         def _():
@@ -189,6 +179,7 @@ class Peer_DBS(threading.Thread):
         print splitter_socket.getpeername(), "\b: source_addr =", source_addr
 
         # }}}
+
         # {{{ Receive from the splitter the port of the source node
 
         def _():
@@ -200,6 +191,7 @@ class Peer_DBS(threading.Thread):
         print splitter_socket.getpeername(), "\b: source_port =", source_port
 
         # }}}
+
         # {{{ Receive from the splitter the channel name
 
         def _():
@@ -212,54 +204,7 @@ class Peer_DBS(threading.Thread):
         print splitter_socket.getpeername(), "\b: channel =", channel
 
         # }}}
-        # {{{ Receive from the splitter the buffer size
 
-        def _():
-            message = splitter_socket.recv(struct.calcsize("H"))
-            buffer_size = struct.unpack("H", message)[0]
-            buffer_size = socket.ntohs(buffer_size)
-            return buffer_size
-        buffer_size = _()
-        print splitter_socket.getpeername(), "\b: buffer_size =", buffer_size
-
-        # }}}
-        # {{{ Receive fron the splitter the chunk size
-
-        def _():
-            message = splitter_socket.recv(struct.calcsize("H"))
-            chunk_size = struct.unpack("H", message)[0]
-            chunk_size = socket.ntohs(chunk_size)
-            return chunk_size
-        self.chunk_size = _()
-        print splitter_socket.getpeername(), "\b: chunk_size =", self.chunk_size
-
-        # }}}
-
-        # {{{ Retrieve the list of peers
-
-        #threading.Thread(target=self.retrieve_the_list_of_peers, args=(splitter_socket, team_socket,) ).start()
-        self.retrieve_the_list_of_peers(splitter_socket, team_socket)
-
-        # }}}
-        # {{{ Define the buffer of chunks structure
-
-        # Now it is time to define the buffer of chunks, a structure
-        # that is used to delay the playback of the chunks in order to
-        # accommodate the network jittter. Two components are needed:
-        # (1) the "chunks" buffer that stores the received chunks and
-        # (2) the "received" buffer that stores if a chunk has been
-        # received or not. Notice that each peer can use a different
-        # buffer_size: the smaller the buffer size, the lower start-up
-        # time, the higher chunk-loss ratio. However, for the sake of
-        # simpliticy, all peers will use the same buffer size.
-        #chunks = [None]*buffer_size
-        chunks = [""]*buffer_size
-        received = [False]*buffer_size
-        numbers = [0]*buffer_size
-        for i in xrange(0, buffer_size):
-            numbers[i] = 0
-
-        # }}}
         # {{{ Relay the header to the player
 
         # The video header is requested directly to the source node,
@@ -311,6 +256,95 @@ class Peer_DBS(threading.Thread):
             source_sock.close()
 
         relay_the_header_to_the_player((source_addr, source_port), player_socket)
+
+        # }}}
+        '''
+
+        def _(splitter_socket, player_sock):
+            header_size = 1024*20
+            received = 0
+            data = ""
+            while received < header_size:
+                data = splitter_socket.recv(header_size - received)
+                received += len(data)
+                try:
+                    player_sock.sendall(data)
+                except:
+                    print "error sending data to the player"
+                    print "len(data) =", len(data)
+                print "received bytes:", received, "\r",
+
+            print splitter_socket.getsockname(), '\b: sent', received, 'bytes'
+            #source_sock.close()
+        _(splitter_socket, player_socket)
+        
+
+        # {{{ Receive from the splitter the buffer size
+
+        def _():
+            message = splitter_socket.recv(struct.calcsize("H"))
+            buffer_size = struct.unpack("H", message)[0]
+            buffer_size = socket.ntohs(buffer_size)
+            return buffer_size
+        buffer_size = _()
+        print splitter_socket.getpeername(), "\b: buffer_size =", buffer_size
+
+        # }}}
+
+        # {{{ Receive fron the splitter the chunk size
+
+        def _():
+            message = splitter_socket.recv(struct.calcsize("H"))
+            chunk_size = struct.unpack("H", message)[0]
+            chunk_size = socket.ntohs(chunk_size)
+            return chunk_size
+        self.chunk_size = _()
+        print splitter_socket.getpeername(), "\b: chunk_size =", self.chunk_size
+
+        # }}}
+
+        # {{{ Retrieve the list of peers
+
+        #threading.Thread(target=self.retrieve_the_list_of_peers, args=(splitter_socket, team_socket,) ).start()
+        #self.retrieve_the_list_of_peers(splitter_socket, team_socket)
+        self.retrieve_the_list_of_peers(splitter_socket)
+
+        # }}}
+
+        # {{{ Define the buffer of chunks structure
+
+        # Now it is time to define the buffer of chunks, a structure
+        # that is used to delay the playback of the chunks in order to
+        # accommodate the network jittter. Two components are needed:
+        # (1) the "chunks" buffer that stores the received chunks and
+        # (2) the "received" buffer that stores if a chunk has been
+        # received or not. Notice that each peer can use a different
+        # buffer_size: the smaller the buffer size, the lower start-up
+        # time, the higher chunk-loss ratio. However, for the sake of
+        # simpliticy, all peers will use the same buffer size.
+        #chunks = [None]*buffer_size
+        chunks = [""]*buffer_size
+        received = [False]*buffer_size
+        numbers = [0]*buffer_size
+        for i in xrange(0, buffer_size):
+            numbers[i] = 0
+
+        # }}}
+
+        # {{{ Convert "splitter_socket" (TCP) into "team_socket" (UDP)
+
+        team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            # In Windows systems this call doesn't work!
+            team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        except:
+            pass
+        team_socket.bind(('',splitter_socket.getsockname()[PORT]))
+        splitter_socket.close()
+
+        # This is the maximum time the peer will wait for a chunk
+        # (from the splitter or from another peer).
+        team_socket.settimeout(1)
 
         # }}}
 
