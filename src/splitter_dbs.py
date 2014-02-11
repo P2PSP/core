@@ -108,7 +108,6 @@ class Splitter_DBS(threading.Thread):
                
           # The list of peers in the team.
           self.peer_list = []
-          #peer_list = [('127.0.0.1',port+1)]
 
           # Destination peers of the chunk, indexed by a chunk number. Used to
           # find the peer to which a chunk has been sent.
@@ -152,21 +151,6 @@ class Splitter_DBS(threading.Thread):
 
           sys.stdout.write(Color.green)
           print peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
-
-          '''
-          # Send the source node IP address.
-          message = struct.pack("4s", socket.inet_aton(self.source_addr))
-          peer_serve_socket.sendall(message)
-
-          # Send the source node listening port.
-          message = struct.pack("H", socket.htons(self.source_port))
-          peer_serve_socket.sendall(message)
-
-          # Send the name of the channel.
-          message = struct.pack("H", socket.htons(len(self.channel)))    
-          peer_serve_socket.sendall(message)
-          peer_serve_socket.sendall(self.channel)
-          '''
 
           # Send the header
           peer_serve_socket.sendall(self.header)
@@ -222,7 +206,6 @@ class Splitter_DBS(threading.Thread):
                # {{{
 
                message, sender = self.team_socket.recvfrom(struct.calcsize("4sH"))
-               print "---------------", len(message)
                if len(message) == 0:
                     # {{{ The peer wants to leave the team
 
@@ -235,10 +218,11 @@ class Splitter_DBS(threading.Thread):
                          try:
                               self.peer_index -= 1
                               self.peer_list.remove(sender)
-                              #print Color.red, "\b", sender, 'removed by "goodbye" message', Color.none
+                              if __debug__:
+                                   print Color.red, "\b", sender, 'removed by "goodbye" message', Color.none
                          except:
-                              # Received a googbye message from a peer which is
-                              # not in the list of peers.
+                              # Received a googbye message from a peer
+                              # which is not in the list of peers.
                               pass
 
                     # }}}
@@ -265,14 +249,11 @@ class Splitter_DBS(threading.Thread):
                     sys.stdout.write(Color.none)
                     try:
                          self.losses[destination]
-                         #self.peer_list[destination]
-                         #self.deletions[destination]
                     except:
                          print "the unsupportive peer ", destination, "does not exist ???"
                          for p in self.peer_list:
                               print p,
                          print
-                         #print Color.blue, destination, "has loss", self.losses[destination], "chunks", Color.none
                          pass
                     else:
                          self.losses[destination] += 1
@@ -292,62 +273,6 @@ class Splitter_DBS(threading.Thread):
                     finally:
                          pass
 
-               elif len(message) == 6:
-                    # {{{ The peer sends an "erased" peer
-
-                    erased_addr, erased_port = struct.unpack("4sH", message)
-                    erased_addr = socket.inet_ntoa(erased_addr)
-                    erased_port = socket.ntohs(erased_port)
-                    erased = (erased_addr, erased_port)
-                    sys.stdout.write(Color.blue)
-                    print self.team_socket.getsockname(), "\b:", sender, "says that", erased, "was removed from the team"
-                    sys.stdout.write(Color.none)
-                    try:
-                         self.deletions[erased]
-                    except:
-                         print "the erased peer does not exist ???"
-                         pass
-                    else:
-                         self.deletions[erased] += 1
-                         #print Color.blue, "complains about", destination, \
-                         #    "=", deletions[destination], Color.none
-                         if erased != self.peer_list[0]:
-                              if self.deletions[erased] >= len(self.peer_list)/2:
-                                   sys.stdout.write(Color.red)
-                                   print self.team_socket.getsockname(), "\b: removing", erased
-                                   self.peer_index -= 1
-                                   try:
-                                        self.peer_list.remove(erased)
-                                        del self.deletions[erased]
-                                        #del self.complains[erased]
-                                   except:
-                                        pass
-                                   sys.stdout.write(Color.none)
-                    finally:
-                         pass
-
-                    '''
-                    if sender != self.peer_list[0]:
-                         try:
-                              self.complains[sender]
-                         except:
-                              print "the complaining peer does not exit ???"
-                              pass
-                         else:
-                              #print "------------__", self.peer_list[0]
-                              self.complains[sender] += 1
-                              if self.complains[sender] > self.complaining_threshold:
-                                   sys.stdout.write(Color.red)
-                                   print self.team_socket.getsockname(), "\b: too much complains of a peevish peer", sender, "\b. Removing it!"
-                                   sys.stdout.write(Color.none)
-                                   self.peer_index -= 1
-                                   self.peer_list.remove(sender)
-                                   del self.complains[sender]
-                                   del self.deletions[sender]
-                         finally:
-                              pass
-                    '''
-                    # }}}
                # }}}
 
           # }}}
@@ -421,22 +346,6 @@ class Splitter_DBS(threading.Thread):
                return data, sock
           self.header, source_socket = receive_next_chunk(GET_message, source, source_socket, 20*1024)
 
-          # {{{ Wait for the monitor peer
-
-          # The fist peer that contacts the splitter is a "monitor"
-          # peer that the team administrator can use to monitorize the
-          # performance of the streaming. This peer MUST run on the
-          # same host than the splitter to avoid bandwidth consumption
-          # and usually listen to the port port+1 (although this
-          # is configurable by the administrator selecting a different
-          # peer_port). This peer MUST also use the same public IP
-          # address that the splitter in order the rest of peers of
-          # the team communicate with it. The splitter will use its
-          # public IP address as the IP address of the monitor peer.
-
-          #handle_peer_arrival(peer_connection_socket, peer_list, deletions)
-
-          # }}}
           print self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ..."
           self.handle_peer_arrival(self.peer_connection_socket.accept())
           threading.Thread(target=self.handle_arrivals).start()
@@ -489,7 +398,6 @@ def main():
      parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. (Default = {})'.format(Splitter_DBS.losses_threshold))
      parser.add_argument('--source_addr', help='IP address of the streaming server. (Default = "{}")'.format(Splitter_DBS.source_addr))
      parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(Splitter_DBS.source_port))
-     #parser.add_argument('--complaining_threshold', help='Maximum number of complains for a peevish peer. (Default = {})'.format(Splitter_DBS.complaining_threshold))
 
      args = parser.parse_known_args()[0]
      if args.source_addr:
@@ -508,8 +416,6 @@ def main():
           Splitter_DBS.chunk_size = int(args.chunk_size)
      if args.losses_threshold:
           Splitter_DBS.losses_threshold = int(args.losses_threshold)
-     #if args.complaining_threshold:
-     #     splitter.complaining_threshold = int(complaining_threshold)
      
      # }}}
 
