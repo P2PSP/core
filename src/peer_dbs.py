@@ -205,9 +205,11 @@ class Peer_DBS(threading.Thread):
         # {{{ Retrieve the list of peers
 
         self.retrieve_the_list_of_peers(splitter_socket, team_socket)
-        splitter_socket.close()
 
         # }}}
+
+        splitter_socket.close()
+        self.say_hello(splitter, team_socket)
 
         # {{{ Define the buffer of chunks structure
 
