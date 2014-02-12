@@ -344,7 +344,8 @@ class Splitter_DBS(threading.Thread):
                     prev_size = len(data)
                     data += sock.recv(size - len(data))
                return data, sock
-          self.header, source_socket = receive_next_chunk(GET_message, source, source_socket, 20*1024)
+          self.header, source_socket = receive_next_chunk(GET_message, source, source_socket, 10*1024)
+          print "Retrieved", len(self.header), "bytes from the source", source
 
           print self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ..."
           self.handle_peer_arrival(self.peer_connection_socket.accept())
