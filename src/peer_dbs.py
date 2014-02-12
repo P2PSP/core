@@ -502,7 +502,8 @@ class Peer_DBS(threading.Thread):
 
         while self.player_alive:
             self.chunk_number = receive_and_feed()
-            if self.chunk_number >= 0:
+#            if self.chunk_number >= 0:
+            if True:
                 send_a_chunk_to_the_player2(player_socket)
                 chunk_to_play = (chunk_to_play + 1) % self.buffer_size
                 if (self.chunk_number % 256) == 0:
