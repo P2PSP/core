@@ -385,6 +385,9 @@ class Splitter_DBS(threading.Thread):
                          self.complains[i] /= 2
                     '''
 
+def Spliter_EMS(Splitter_DBS):
+     pass
+
 def main():
 
      # {{{ Args parsing

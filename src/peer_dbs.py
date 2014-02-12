@@ -75,13 +75,16 @@ class Peer_DBS(threading.Thread):
 
         # }}}
 
-    def retrieve_the_list_of_peers(self, splitter_socket):
+    def say_hello(self, peer, team_socket):
+        pass
+
+    def retrieve_the_list_of_peers(self, splitter_socket, team_socket):
         # {{{
 
         sys.stdout.write(Color.green)
-        print splitter_socket.getsockname(), "\b: requesting the list of peers to", splitter_socket.getpeername()
+        print "Requesting the list of peers to", splitter_socket.getpeername()
         number_of_peers = socket.ntohs(struct.unpack("H",splitter_socket.recv(struct.calcsize("H")))[0])
-        print splitter_socket.getpeername(), "\b: the size of the list of peers is", number_of_peers
+        print "The size of the team is", number_of_peers, "(apart from me)"
 
         while number_of_peers > 0:
             message = splitter_socket.recv(struct.calcsize("4sH"))
@@ -89,12 +92,13 @@ class Peer_DBS(threading.Thread):
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
+            self.say_hello(peer, team_socket)
             print "[%5d]" % number_of_peers, peer
             self.peer_list.append(peer)
             self.debt[peer] = 0
             number_of_peers -= 1
 
-        print 'done'
+        print "List of peers received"
         sys.stdout.write(Color.none)
 
         # }}}
@@ -111,10 +115,10 @@ class Peer_DBS(threading.Thread):
             pass
         player_socket.bind(('', self.player_port))
         player_socket.listen(0)
-        print player_socket.getsockname(), "\b: waiting for the player ..."
+        print "Waiting for the player at", player_socket.getsockname()
         player_socket = player_socket.accept()[0]
         #self.player_socket.setblocking(0)
-        print player_socket.getsockname(), "\b: the player is", player_socket.getpeername()
+        print "The player is", player_socket.getpeername()
 
         # }}}
 
@@ -122,21 +126,21 @@ class Peer_DBS(threading.Thread):
 
         splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         splitter = (self.splitter_addr, self.splitter_port)
-        print splitter_socket.getsockname(), "\b: connecting to the splitter at", splitter
+        print "Connecting to the splitter at", splitter
         if self.port != 0:
             try:
                 splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             except:
                 pass
             sys.stdout.write(Color.purple)
-            print splitter_socket.getsockname(), "\b: I'm using port the port", self.port
+            print "I'm using port the port", self.port
             sys.stdout.write(Color.none)
             splitter_socket.bind(("", self.port))
         try:
             splitter_socket.connect(splitter)
         except:
             sys.exit("Sorry. Can't connect to the splitter at " + str(splitter))
-        print splitter_socket.getsockname(), "\b: connected to the splitter at", splitter
+        print "Connected to the splitter at", splitter
 
         # }}}
 
@@ -154,9 +158,8 @@ class Peer_DBS(threading.Thread):
                     print "len(data) =", len(data)
                 print "received bytes:", received, "\r",
 
-            print splitter_socket.getsockname(), '\b: sent', received, 'bytes'
+            print "Received", received, "bytes of header"
         _(splitter_socket, player_socket)
-        
 
         # {{{ Receive from the splitter the buffer size
 
@@ -166,7 +169,7 @@ class Peer_DBS(threading.Thread):
             buffer_size = socket.ntohs(buffer_size)
             return buffer_size
         self.buffer_size = _()
-        print splitter_socket.getpeername(), "\b: buffer_size =", self.buffer_size
+        print "buffer_size =", self.buffer_size
 
         # }}}
 
@@ -178,13 +181,31 @@ class Peer_DBS(threading.Thread):
             chunk_size = socket.ntohs(chunk_size)
             return chunk_size
         self.chunk_size = _()
-        print splitter_socket.getpeername(), "\b: chunk_size =", self.chunk_size
+        print "chunk_size =", self.chunk_size
+
+        # }}}
+
+
+        # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
+
+        team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            # In Windows systems this call doesn't work!
+            team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        except:
+            pass
+        team_socket.bind(('',splitter_socket.getsockname()[PORT]))
+
+        # This is the maximum time the peer will wait for a chunk
+        # (from the splitter or from another peer).
+        team_socket.settimeout(1)
 
         # }}}
 
         # {{{ Retrieve the list of peers
 
-        self.retrieve_the_list_of_peers(splitter_socket)
+        self.retrieve_the_list_of_peers(splitter_socket, team_socket)
+        splitter_socket.close()
 
         # }}}
 
@@ -205,23 +226,6 @@ class Peer_DBS(threading.Thread):
         numbers = [0]*self.buffer_size
         for i in xrange(0, self.buffer_size):
             numbers[i] = 0
-
-        # }}}
-
-        # {{{ Convert "splitter_socket" (TCP) into "team_socket" (UDP)
-
-        team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        try:
-            # In Windows systems this call doesn't work!
-            team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except:
-            pass
-        team_socket.bind(('',splitter_socket.getsockname()[PORT]))
-        splitter_socket.close()
-
-        # This is the maximum time the peer will wait for a chunk
-        # (from the splitter or from another peer).
-        team_socket.settimeout(1)
 
         # }}}
 
@@ -343,9 +347,10 @@ class Peer_DBS(threading.Thread):
                     # {{{ A control chunk has been received
 
                     if sender not in self.peer_list:
-                        print Color.green, sender, 'added by \"hello\" message', Color.none
-                        self.peer_list.append(sender)
-                        self.debt[sender] = 0
+                        #print Color.green, sender, 'added by \"hello\" message', Color.none
+                        #self.peer_list.append(sender)
+                        #self.debt[sender] = 0
+                        pass
                     else:
                         sys.stdout.write(Color.red)
                         print team_socket.getsockname(), '\b: received "goodbye" from', sender
@@ -412,7 +417,7 @@ class Peer_DBS(threading.Thread):
 
         # Fill up to the half of the buffer
         for x in xrange(self.buffer_size/2):
-            print "\b.",
+            print "\b!",
             sys.stdout.flush()
             while receive_and_feed() < 0:
                 pass
@@ -466,6 +471,11 @@ class Peer_DBS(threading.Thread):
             receive_and_feed()
         for peer in self.peer_list:
             team_socket.sendto(goodbye, peer)
+
+def Peer_EMS(Peer_DBS):
+
+    def say_hello(self, peer, team_socket):
+        team_socket.sendto('', peer)
 
 def main():
 
