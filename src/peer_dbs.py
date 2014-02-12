@@ -78,6 +78,9 @@ class Peer_DBS(threading.Thread):
     def say_hello(self, peer, team_socket):
         pass
 
+    def say_goodbye(self, peer, team_socket):
+        pass
+
     def retrieve_the_list_of_peers(self, splitter_socket, team_socket):
         # {{{
 
@@ -467,17 +470,22 @@ class Peer_DBS(threading.Thread):
         # The player has gone. Lets do a polite farewell.
         print 'goodbye!'
         goodbye = ''
-        team_socket.sendto(goodbye, splitter)
+        self.say_goodbye(splitter, team_socket)
+        #team_socket.sendto(goodbye, splitter)
         print '"goodbye" message sent to the splitter', splitter
         for x in xrange(3):
             receive_and_feed()
         for peer in self.peer_list:
-            team_socket.sendto(goodbye, peer)
+            self.say_goodbye(splitter, team_socket)
+            #team_socket.sendto(goodbye, peer)
 
-def Peer_EMS(Peer_DBS):
+class Peer_EMS(Peer_DBS):
 
     def say_hello(self, peer, team_socket):
-        team_socket.sendto('', peer)
+        team_socket.sendto('H', peer)
+
+    def say_goodbye(self, peer, team_socket):
+        team_socket.sendto('G', peer)
 
 def main():
 
@@ -501,7 +509,8 @@ def main():
 
      # }}}
 
-     peer = Peer_DBS()
+     peer = Peer_EMS()
+#     peer = Peer_DBS()
      peer.start()
      last_chunk_number = 0
      while peer.player_alive:

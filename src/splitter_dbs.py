@@ -205,29 +205,8 @@ class Splitter_DBS(threading.Thread):
           while self.alive:
                # {{{
 
-               message, sender = self.team_socket.recvfrom(struct.calcsize("4sH"))
-               if len(message) == 0:
-                    # {{{ The peer wants to leave the team
-
-                    # A zero-length payload means that the peer wants to go away
-                    sys.stdout.write(Color.red)
-                    print self.team_socket.getsockname(), '\b: received "goodbye" from', sender
-                    sys.stdout.write(Color.none)
-                    sys.stdout.flush()
-                    if sender != self.peer_list[0]:
-                         try:
-                              self.peer_index -= 1
-                              self.peer_list.remove(sender)
-                              if __debug__:
-                                   print Color.red, "\b", sender, 'removed by "goodbye" message', Color.none
-                         except:
-                              # Received a googbye message from a peer
-                              # which is not in the list of peers.
-                              pass
-
-                    # }}}
-
-               elif len(message) == 2:
+               message, sender = self.team_socket.recvfrom(struct.calcsize("H"))
+               if len(message) == 2:
 
                     # {{{ The peer complains about a lost chunk
 
@@ -273,7 +252,28 @@ class Splitter_DBS(threading.Thread):
                     finally:
                          pass
 
-               # }}}
+                    # }}}
+
+               else:
+                    # {{{ The peer wants to leave the team
+
+                    # A zero-length payload means that the peer wants to go away
+                    sys.stdout.write(Color.red)
+                    print self.team_socket.getsockname(), '\b: received "goodbye" from', sender
+                    sys.stdout.write(Color.none)
+                    sys.stdout.flush()
+                    if sender != self.peer_list[0]:
+                         try:
+                              self.peer_index -= 1
+                              self.peer_list.remove(sender)
+                              if __debug__:
+                                   print Color.red, "\b", sender, 'removed by "goodbye" message', Color.none
+                         except:
+                              # Received a googbye message from a peer
+                              # which is not in the list of peers.
+                              pass
+
+                    # }}}
 
           # }}}
 
@@ -375,7 +375,7 @@ class Splitter_DBS(threading.Thread):
                self.chunk_number = (self.chunk_number + 1) % 65536
                self.peer_index = (self.peer_index + 1) % len(self.peer_list)
 
-               # Decrement (dividing by 2) complains after
+               # Decrement (dividing by 2) the number of losses after
                # every 256 sent chunks.
                if (self.chunk_number % 256) == 0:
                     for i in self.losses:
@@ -385,8 +385,89 @@ class Splitter_DBS(threading.Thread):
                          self.complains[i] /= 2
                     '''
 
-def Spliter_EMS(Splitter_DBS):
-     pass
+class Splitter_EMS(Splitter_DBS):
+
+     def moderate_the_team(self):
+          # {{{
+
+          while self.alive:
+               # {{{
+
+               message, sender = self.team_socket.recvfrom(struct.calcsize("H"))
+               if len(message) == 2:
+
+                    # {{{ The peer complains about a lost chunk
+
+                    # The sender of the packet complains, and the
+                    # packet comes with the index of a lost
+                    # (non-received) chunk. In this situation, the
+                    # splitter counts the number of times a peer has
+                    # not achieved to send a chunk to other peers. If
+                    # this number exceeds a threshold, the
+                    # unsupportive peer is expelled from the
+                    # team. Moreover, if we receive too much complains
+                    # from the same peer, the problem could be in that
+                    # peer and it will be expelled from the team.
+
+                    lost_chunk = struct.unpack("!H",message)[0]
+                    destination = self.destination_of_chunk[lost_chunk]
+                    sys.stdout.write(Color.blue)
+                    print self.team_socket.getsockname(), "\b:", sender, "complains about lost chunk", lost_chunk, "sent to", destination, Color.none
+                    sys.stdout.write(Color.none)
+                    try:
+                         self.losses[destination]
+                    except:
+                         print "the unsupportive peer ", destination, "does not exist ???"
+                         for p in self.peer_list:
+                              print p,
+                         print
+                         pass
+                    else:
+                         self.losses[destination] += 1
+                         print Color.blue, destination, "has loss", self.losses[destination], "chunks", Color.none
+                         if destination != self.peer_list[0]:
+                              if self.losses[destination] > self.losses_threshold:
+                                   sys.stdout.write(Color.red)
+                                   print self.team_socket.getsockname(), "\b: too much complains about unsupportive peer", destination, "\b. Removing it!"
+                                   self.peer_index -= 1
+                                   try:
+                                        self.peer_list.remove(destination)
+                                        del self.losses[destination]
+                                        del self.deletions[destination]
+                                   except:
+                                        pass
+                                   sys.stdout.write(Color.none)
+                    finally:
+                         pass
+
+                    # }}}
+
+               else:
+
+                    if  struct.unpack("s", message)[0] == "H":
+                         pass
+                    else:
+                    # {{{ The peer wants to leave the team
+
+                         # A zero-length payload means that the peer wants to go away
+                         sys.stdout.write(Color.red)
+                         print self.team_socket.getsockname(), '\b: received "goodbye" from', sender
+                         sys.stdout.write(Color.none)
+                         sys.stdout.flush()
+                         if sender != self.peer_list[0]:
+                              try:
+                                   self.peer_index -= 1
+                                   self.peer_list.remove(sender)
+                                   if __debug__:
+                                        print Color.red, "\b", sender, 'removed by "goodbye" message', Color.none
+                              except:
+                                   # Received a googbye message from a peer
+                                   # which is not in the list of peers.
+                                   pass
+
+                    # }}}
+
+          # }}}
 
 def main():
 
@@ -422,7 +503,8 @@ def main():
      
      # }}}
 
-     splitter = Splitter_DBS()
+#     splitter = Splitter_DBS()
+     splitter = Splitter_EMS()
      splitter.start()
      last_chunk_number = 0
      while splitter.alive:
