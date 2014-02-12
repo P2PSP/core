@@ -153,6 +153,7 @@ class Splitter_DBS(threading.Thread):
           print peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
 
           # Send the header
+          print "Sending", len(self.header), "bytes!!!!!!!!!"
           peer_serve_socket.sendall(self.header)
 
           # Send the buffer size.
