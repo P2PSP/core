@@ -149,7 +149,7 @@ class Peer_DBS(threading.Thread):
         # }}}
 
         def _(splitter_socket, player_sock):
-            header_size = 1024*20
+            header_size = 1024*10
             received = 0
             data = ""
             while received < header_size:
