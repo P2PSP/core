@@ -58,6 +58,7 @@ class Peer_DBS(threading.Thread):
             print "debug mode"
         else:
             print "release mode"
+        print "DBS implemented"
 
         print "Player port =", self.player_port
         print "Splitter IP address =", self.splitter_addr
@@ -286,7 +287,7 @@ class Peer_DBS(threading.Thread):
                             # }}}
 
                             self.debt[peer] += 1
-                            if self.debt[peer] > 10:
+                            if self.debt[peer] > 16:
                                 del self.debt[peer]
                                 self.peer_list.remove(peer)
                                 print Color.red, peer, 'removed by unsupportive', Color.none
@@ -456,6 +457,14 @@ class Peer_DBS(threading.Thread):
             # We have fired the chunk.
             self.received[chunk_to_play] = False
 
+            sys.stdout.write("\033[2J\033[;H")
+            for i in xrange(self.buffer_size):
+                if self.received[i]:
+                    sys.stdout.write('O')
+                else:
+                    sys.stdout.write('.')
+            print
+
             # }}}
 
         while self.player_alive:
@@ -480,6 +489,10 @@ class Peer_DBS(threading.Thread):
             #team_socket.sendto(goodbye, peer)
 
 class Peer_EMS(Peer_DBS):
+
+    def __init__(self):
+        Peer_DBS.__init__(self)
+        print "EMS implemented"
 
     def say_hello(self, peer, team_socket):
         team_socket.sendto('H', peer)
@@ -509,11 +522,12 @@ def main():
 
      # }}}
 
-     peer = Peer_EMS()
-#     peer = Peer_DBS()
+     peer = Peer_DBS()
+#     peer = Peer_EMS()
      peer.start()
      last_chunk_number = 0
      while peer.player_alive:
+         '''
          #sys.stdout.write("\033[2J\033[;H")
          for i in xrange(peer.buffer_size):
              if peer.received[i]:
@@ -522,6 +536,7 @@ def main():
                  sys.stdout.write('.')
          print
          print "Team size =", len(peer.peer_list)+1
+         '''
          time.sleep(1)
 
 if __name__ == "__main__":

@@ -224,7 +224,7 @@ class Splitter_DBS(threading.Thread):
                     lost_chunk = struct.unpack("!H",message)[0]
                     destination = self.destination_of_chunk[lost_chunk]
                     sys.stdout.write(Color.blue)
-                    print self.team_socket.getsockname(), "\b:", sender, "complains about lost chunk", lost_chunk, "sent to", destination, Color.none
+                    print sender, "complains about lost chunk", lost_chunk, "sent to", destination, Color.none
                     sys.stdout.write(Color.none)
                     try:
                          self.losses[destination]
@@ -236,11 +236,11 @@ class Splitter_DBS(threading.Thread):
                          pass
                     else:
                          self.losses[destination] += 1
-                         print Color.blue, destination, "has loss", self.losses[destination], "chunks", Color.none
+                         print Color.blue, "\b", destination, "has loss", self.losses[destination], "chunks", Color.none
                          if destination != self.peer_list[0]:
                               if self.losses[destination] > self.losses_threshold:
                                    sys.stdout.write(Color.red)
-                                   print self.team_socket.getsockname(), "\b: too much complains about unsupportive peer", destination, "\b. Removing it!"
+                                   print "Too much complains about unsupportive peer", destination, "\b. Removing it!"
                                    self.peer_index -= 1
                                    try:
                                         self.peer_list.remove(destination)
@@ -387,6 +387,10 @@ class Splitter_DBS(threading.Thread):
 
 class Splitter_EMS(Splitter_DBS):
 
+     def __init__(self):
+          Splitter_DBS.__init__(self)
+          print "EMS implemented"
+
      def moderate_the_team(self):
           # {{{
 
@@ -503,8 +507,8 @@ def main():
      
      # }}}
 
-#     splitter = Splitter_DBS()
-     splitter = Splitter_EMS()
+     splitter = Splitter_DBS()
+#     splitter = Splitter_EMS()
      splitter.start()
      last_chunk_number = 0
      while splitter.alive:
