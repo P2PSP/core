@@ -47,7 +47,8 @@ class Peer_DBS(threading.Thread):
     splitter_addr = "150.214.150.68"
     splitter_port = 4552
     port = 0
-    debt_threshold = 16
+    debt_threshold = 8 # This value depends on debt_memory
+    debt_memory = 256
 
     def __init__(self):
         # {{{
@@ -545,7 +546,7 @@ class Peer_DBS(threading.Thread):
 
                 played_chunk = send_next_chunk_to_the_player(player_socket)
 
-                if (self.chunk_number % 256) == 0:
+                if (self.chunk_number % self.debt_memory) == 0:
                     for i in self.debt:
                         self.debt[i] /= 2
 

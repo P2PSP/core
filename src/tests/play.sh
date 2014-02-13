@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export DEBT_THRESHOLD=32
+export DEBT_THRESHOLD=8
 export SPLITTER_ADDR="150.214.150.68"
 export SPLITTER_PORT=4552
 
@@ -43,5 +43,5 @@ while getopts "d:p:s:l:?" opt; do
 done
 
 export PLAYER_PORT=`shuf -i 2000-65000 -n 1`
-xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD  --player_port $PLAYER_PORT --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT' &
+xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --port 4552 --player_port $PLAYER_PORT --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT' &
 vlc http://localhost:$PLAYER_PORT &
