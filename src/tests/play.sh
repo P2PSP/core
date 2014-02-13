@@ -1,8 +1,8 @@
 #!/bin/sh
 
 export DEBT_THRESHOLD=32
-export SPLITTER_ADDR="localhost"
-export SPLITTER_PORT=5555
+export SPLITTER_ADDR="150.214.150.68"
+export SPLITTER_PORT=4552
 
 usage() {
     echo $0
