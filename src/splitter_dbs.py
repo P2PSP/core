@@ -75,7 +75,7 @@ class Splitter_DBS(threading.Thread):
      port = 4552
 
      # Maximum number of lost chunks for an unsupportive peer.
-     losses_threshold = 1
+     losses_threshold = 16
 
      # Maximum number of complains for a peevish peer.
      #complaining_threshold = 8
@@ -543,12 +543,7 @@ def main():
                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                print splitter.addr, splitter.port
                sock.connect((splitter.addr, splitter.port))
-               sock.recv(struct.calcsize("4s")) # IP address of the source node
-               sock.recv(struct.calcsize("H")) # Port of the source node
-               message = sock.recv(struct.calcsize("H"))
-               channel_size = struct.unpack("H", message)[0]
-               channel_size = socket.ntohs(channel_size)
-               channel = sock.recv(channel_size) # Channel name
+               sock.recv(1024*10) # Header
                sock.recv(struct.calcsize("H")) # Buffer size
                sock.recv(struct.calcsize("H")) # Chunk size
                number_of_peers = socket.ntohs(struct.unpack("H", sock.recv(struct.calcsize("H")))[0])
