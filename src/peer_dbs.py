@@ -47,6 +47,7 @@ class Peer_DBS(threading.Thread):
     splitter_addr = "150.214.150.68"
     splitter_port = 4552
     port = 0
+    debt_threshold = 16
 
     def __init__(self):
         # {{{
@@ -64,6 +65,7 @@ class Peer_DBS(threading.Thread):
         print "Splitter IP address =", self.splitter_addr
         print "Splitter port =", self.splitter_port
         print "(Team) Port =", self.port
+
         self.peer_list = []
         self.buffer_size = 0
         self.player_alive = True
@@ -287,7 +289,7 @@ class Peer_DBS(threading.Thread):
                             # }}}
 
                             self.debt[peer] += 1
-                            if self.debt[peer] > 16:
+                            if self.debt[peer] > self.debt_threshold:
                                 del self.debt[peer]
                                 self.peer_list.remove(peer)
                                 print Color.red, peer, 'removed by unsupportive', Color.none
@@ -585,12 +587,15 @@ def main():
      # {{{ Args parsing
      
      parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP network.')
+     parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. (Default = {})'.format(Peer_DBS.debt_threshold))
      parser.add_argument('--player_port', help='Port used to communicate with the player. (Default = "{}")'.format(Peer_DBS.player_port))
      parser.add_argument('--port', help='Port to talk with the peers. (Default = {})'.format(Peer_DBS.port))
      parser.add_argument('--splitter_addr', help='IP address of the splitter. (Default = {})'.format(Peer_DBS.splitter_addr))
      parser.add_argument('--splitter_port', help='Listening port of the splitter. (Default = {})'.format(Peer_DBS.splitter_port))
 
      args = parser.parse_known_args()[0]
+     if args.debt_threshold:
+         Peer_DBS.debt_threshold = int(args.debt_threshold)
      if args.player_port:
          Peer_DBS.player_port = int(args.player_port)
      if args.splitter_addr:

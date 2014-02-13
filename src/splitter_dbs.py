@@ -325,6 +325,12 @@ class Splitter_DBS(threading.Thread):
 
           source = (self.source_addr, self.source_port)
 
+          def retrieve_header(GET, source, sock, size):
+               data = sock.recv(size)
+               while len(data) < size:
+                    data += sock.recv(size - len(data))
+               return data
+
           def receive_next_chunk(GET, source, sock, size):
                data = sock.recv(size)
                prev_size = 0
@@ -334,7 +340,6 @@ class Splitter_DBS(threading.Thread):
                          # the streaming server (Icecast)
                          # finishes a stream and starts with the
                          # following one.
-                         self.header = ""
                          print '\b!',
                          sys.stdout.flush()
                          time.sleep(1)
@@ -342,10 +347,11 @@ class Splitter_DBS(threading.Thread):
                          sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                          sock.connect(source)
                          sock.sendall(GET)
+                         self.header = retrieve_header(GET, source, sock, 10*1024)
                     prev_size = len(data)
                     data += sock.recv(size - len(data))
                return data, sock
-          self.header, source_socket = receive_next_chunk(GET_message, source, source_socket, 10*1024)
+          self.header = retrieve_header(GET_message, source, source_socket, 10*1024)
           print "Retrieved", len(self.header), "bytes from the source", source
 
           print self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ..."
