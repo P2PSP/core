@@ -501,11 +501,24 @@ class Peer_DBS(threading.Thread):
 
             # }}}
 
+        def complain(chunk):
+
+            # Complain to the splitter.
+            message = struct.pack("!H", chunk)
+            team_socket.sendto(message, splitter)
+
+            sys.stdout.write(Color.blue)
+            print "lost chunk:", numbers[chunk], chunk
+            sys.stdout.write(Color.none)            
+
         def send_next_chunk_to_the_player(player_socket):
             # {{{
 
             while not self.received[self.chunk_to_play % self.buffer_size]:
                 self.chunk_to_play = (self.chunk_to_play + 1) % self.buffer_size
+                checked_chunk = (self.chunk_to_play+self.buffer_size/2-10)%self.buffer_size
+                if not self.received[checked_chunk]:
+                    complain(checked_chunk)
 
             try:
                 player_socket.sendall(chunks[self.chunk_to_play % self.buffer_size])
@@ -516,20 +529,9 @@ class Peer_DBS(threading.Thread):
             # We have fired the chunk.
             self.received[self.chunk_to_play % self.buffer_size] = False
 
+            return self.chunk_to_play
+
             # }}}
-
-        def check_lost_chunk():
-
-            if not self.received[(self.chunk_to_play+self.buffer_size/2-10)%self.buffer_size]:
-
-                # Lets complain to the splitter.
-                message = struct.pack("!H", self.chunk_to_play)
-                team_socket.sendto(message, splitter)
-
-                sys.stdout.write(Color.blue)
-                print "lost chunk:", numbers[self.chunk_to_play], self.chunk_to_play
-                sys.stdout.write(Color.none)
-
 
         while self.player_alive:
 
@@ -537,8 +539,7 @@ class Peer_DBS(threading.Thread):
 
             if self.chunk_number >= 0:
 
-                send_next_chunk_to_the_player(player_socket)
-                check_lost_chunk()
+                played_chunk = send_next_chunk_to_the_player(player_socket)
 
                 if (self.chunk_number % 256) == 0:
                     for i in self.debt:
