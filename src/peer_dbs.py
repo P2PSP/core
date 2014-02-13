@@ -536,6 +536,8 @@ class Peer_DBS(threading.Thread):
         while self.player_alive:
 
             self.chunk_number = receive_and_feed()
+            while (self.chunk_number - self.chunk_to_play) < self.buffer_size/2:
+                self.chunk_number = receive_and_feed()
 
             if self.chunk_number >= 0:
 
