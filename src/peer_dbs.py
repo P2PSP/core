@@ -47,7 +47,7 @@ class Peer_DBS(threading.Thread):
     splitter_addr = "150.214.150.68"
     splitter_port = 4552
     port = 0
-    debt_threshold = 32 # This value depends on debt_memory
+    debt_threshold = 10 # This value depends on debt_memory
     debt_memory = 1024
 
     def __init__(self):
