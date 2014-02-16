@@ -1,12 +1,12 @@
 #!/bin/sh
 
-#export DEBT_THRESHOLD=8
+export DEBT_THRESHOLD=1024
 export SPLITTER_ADDR="150.214.150.68"
 export SPLITTER_PORT=4552
 
 usage() {
     echo $0
-#    echo "  [-d debt threshold ($DEB_THRESHOLD)]"
+    echo "  [-d debt threshold ($DEB_THRESHOLD)]"
     echo "  [-s splitter IP address ($SPLITTER_ADDR)]"
     echo "  [-l splitter port ($SPLITTER_PORT)]"
     echo "  [-? help]"
@@ -16,9 +16,9 @@ echo $0: parsing: $@
 
 while getopts "s:l:?" opt; do
     case ${opt} in
-#	d)
-#	    DEBT_THRESHOLD="${OPTARG}"
-#	    ;;
+	d)
+	    DEBT_THRESHOLD="${OPTARG}"
+	    ;;
 	s)
 	    SPLITTER_ADDR="${OPTARG}"
 	    ;;
