@@ -34,7 +34,7 @@ import socket
 import struct
 import time
 import argparse
-import threading
+#import threading
 from color import Color
 
 # }}}
@@ -42,7 +42,7 @@ from color import Color
 IP_ADDR = 0
 PORT = 1
 
-class Peer_DBS(threading.Thread):
+class Peer_DBS():
     player_port = 9999
     splitter_addr = "150.214.150.68"
     splitter_port = 4552
@@ -52,8 +52,6 @@ class Peer_DBS(threading.Thread):
 
     def __init__(self):
         # {{{
-
-        threading.Thread.__init__(self)
         
         print "Peer running in",
         if __debug__:
@@ -466,6 +464,9 @@ class Peer_DBS(threading.Thread):
                     sys.stdout.write('O')
                 else:
                     sys.stdout.write('.')
+            print len(self.peer_list)
+            for p in self.peer_list:
+                print p,
             print
 
             # }}}
@@ -557,7 +558,12 @@ class Peer_DBS(threading.Thread):
                     else:
                         sys.stdout.write('.')
                 print
-
+                sys.stdout.write(Color.cyan)
+                print "Number of peers in the team:", len(self.peer_list)
+                for p in self.peer_list:
+                    print p,
+                print
+                sys.stdout.write(Color.none)
 
         # The player has gone. Lets do a polite farewell.
         print 'goodbye!'
@@ -610,20 +616,7 @@ def main():
 
      peer = Peer_DBS()
 #     peer = Peer_EMS()
-     peer.start()
-     last_chunk_number = 0
-     while peer.player_alive:
-         '''
-         #sys.stdout.write("\033[2J\033[;H")
-         for i in xrange(peer.buffer_size):
-             if peer.received[i]:
-                 sys.stdout.write('O')
-             else:
-                 sys.stdout.write('.')
-         print
-         print "Team size =", len(peer.peer_list)+1
-         '''
-         time.sleep(1)
+     peer.run()
 
 if __name__ == "__main__":
      main()
