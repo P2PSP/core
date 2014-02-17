@@ -76,6 +76,7 @@ class Splitter_DBS(threading.Thread):
 
      # Maximum number of lost chunks for an unsupportive peer.
      losses_threshold = 128
+     losses_memory = 1024
 
      # Maximum number of complains for a peevish peer.
      #complaining_threshold = 8
@@ -134,6 +135,7 @@ class Splitter_DBS(threading.Thread):
           self.peer_index = 0
 
           self.header = ""
+
 
           # }}}
 
@@ -385,7 +387,7 @@ class Splitter_DBS(threading.Thread):
 
                # Decrement (dividing by 2) the number of losses after
                # every 256 sent chunks.
-               if (self.chunk_number % 256) == 0:
+               if (self.chunk_number % Splitter_DBS.losses_memory) == 0:
                     for i in self.losses:
                          self.losses[i] /= 2
                     '''
@@ -521,6 +523,10 @@ def main():
      last_chunk_number = 0
      while splitter.alive:
           try:
+               print len(splitter.peer_list),
+               for p in splitter.peer_list:
+                    print p,
+               print
                '''
                print "[%3d] " % len(splitter.peer_list),
                kbps = (splitter.chunk_number - last_chunk_number) * \

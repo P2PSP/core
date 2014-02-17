@@ -470,13 +470,13 @@ class Peer_DBS():
 
             #sys.stdout.write("\033[2J\033[;H")
             self.chunk_number = receive_and_feed(self.team_socket)
-            print self.chunk_number, self.chunk_to_play
-            print self.chunk_number - self.chunk_to_play
+            #print self.chunk_number, self.chunk_to_play
+            #print self.chunk_number - self.chunk_to_play
             while (self.chunk_number - self.chunk_to_play) < self.buffer_size/2:
-                sys.stdout.write(Color.yellow)
-                print "*\b",
+                #sys.stdout.write(Color.yellow)
+                #print "*\b",
                 self.chunk_number = receive_and_feed(self.team_socket)
-            sys.stdout.write(Color.none)
+            #sys.stdout.write(Color.none)
 
             if self.chunk_number >= 0:
 
