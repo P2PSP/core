@@ -74,6 +74,7 @@ class Peer_DBS():
         self.receive_and_feed_previous = ""
         self.received = []
         self.debt = {}
+        self.team_socket = ""
 
         # }}}
 
@@ -193,28 +194,28 @@ class Peer_DBS():
 
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
-        team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             # In Windows systems this call doesn't work!
-            team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         except:
             pass
-        team_socket.bind(('',splitter_socket.getsockname()[PORT]))
+        self.team_socket.bind(('',splitter_socket.getsockname()[PORT]))
 
         # This is the maximum time the peer will wait for a chunk
         # (from the splitter or from another peer).
-        team_socket.settimeout(1)
+        self.team_socket.settimeout(1)
 
         # }}}
 
         # {{{ Retrieve the list of peers
 
-        self.retrieve_the_list_of_peers(splitter_socket, team_socket)
+        self.retrieve_the_list_of_peers(splitter_socket, self.team_socket)
 
         # }}}
 
         splitter_socket.close()
-        self.say_hello(splitter, team_socket)
+        self.say_hello(splitter, self.team_socket)
 
         # {{{ Define the buffer of chunks structure
 
@@ -238,7 +239,7 @@ class Peer_DBS():
 
         total_chunks = 0
 
-        def receive_and_feed():
+        def receive_and_feed(team_socket):
             # {{{
 
             try:
@@ -406,11 +407,11 @@ class Peer_DBS():
         # waiting for traveling the player, we wil fill only the half of the
         # circular queue.
 
-        print team_socket.getsockname(), "\b: buffering ",
+        print self.team_socket.getsockname(), "\b: buffering ",
         sys.stdout.flush()
 
         # First chunk to be sent to the player.
-        self.chunk_number = receive_and_feed()
+        self.chunk_number = receive_and_feed(self.team_socket)
 
         # The receive_and_feed() procedure returns if a packet has been
         # received or if a time-out exception has been arised. In the first
@@ -418,7 +419,7 @@ class Peer_DBS():
         # hello/goodbyte message or a number >= 0 if a chunk has been
         # received. A -2 is returned if a time-out is has happened.
         while self.chunk_number < 0:
-            self.chunk_number = receive_and_feed()
+            self.chunk_number = receive_and_feed(self.team_socket)
         self.chunk_to_play = self.chunk_number
         print "First chunk to play", self.chunk_to_play
 
@@ -426,90 +427,18 @@ class Peer_DBS():
         for x in xrange(self.buffer_size/2):
             print "\b!",
             sys.stdout.flush()
-            while receive_and_feed() < 0:
+            while receive_and_feed(self.team_socket) < 0:
                 pass
 
         # }}}
 
         print 'latency =', time.time() - start_latency, 'seconds'
 
-        def send_a_chunk_to_the_player(player_socket):
-            # {{{
-
-            if not self.received[(self.chunk_to_play+self.buffer_size/2-10)%self.buffer_size]:
-
-                # Lets complain to the splitter.
-                message = struct.pack("!H", self.chunk_to_play)
-                team_socket.sendto(message, splitter)
-
-                sys.stdout.write(Color.blue)
-                print "lost chunk:", numbers[self.chunk_to_play], self.chunk_to_play
-                sys.stdout.write(Color.none)
-
-            # Ojo, probar a no enviar nada!!!
-            #print player_socket.getsockname(), "->", numbers[self.chunk_to_play], player_socket.getpeername()
-            try:
-                player_socket.sendall(chunks[self.chunk_to_play])
-            except socket.error:
-                print 'Player disconected, ...',
-                self.player_alive = False
-                return
-
-            # We have fired the chunk.
-            self.received[self.chunk_to_play] = False
-
-            sys.stdout.write("\033[2J\033[;H")
-            for i in xrange(self.buffer_size):
-                if self.received[i]:
-                    sys.stdout.write('O')
-                else:
-                    sys.stdout.write('.')
-            print len(self.peer_list)
-            for p in self.peer_list:
-                print p,
-            print
-
-            # }}}
-
-        def send_a_chunk_to_the_player2(player_socket):
-            # {{{
-
-            if not self.received[(self.chunk_to_play+self.buffer_size/2-10)%self.buffer_size]:
-
-                # Lets complain to the splitter.
-                message = struct.pack("!H", self.chunk_to_play)
-                team_socket.sendto(message, splitter)
-
-                sys.stdout.write(Color.blue)
-                print "lost chunk:", numbers[self.chunk_to_play], self.chunk_to_play
-                sys.stdout.write(Color.none)
-
-            if self.received[self.chunk_to_play]:
-                try:
-                    player_socket.sendall(chunks[self.chunk_to_play])
-                except socket.error:
-                    print 'Player disconected, ...',
-                    self.player_alive = False
-
-            # We have fired the chunk.
-            self.received[self.chunk_to_play] = False
-            self.chunk_to_play = (self.chunk_to_play + 1) % self.buffer_size
-
-            sys.stdout.write("\033[2J\033[;H")
-            for i in xrange(self.buffer_size):
-                if self.received[i]:
-                    sys.stdout.write('O')
-                else:
-                    sys.stdout.write('.')
-            print
-
-            # }}}
-
         def complain(chunk):
 
             # Complain to the splitter.
             message = struct.pack("!H", chunk)
-            team_socket.sendto(message, splitter)
+            self.team_socket.sendto(message, splitter)
 
             sys.stdout.write(Color.blue)
             print "lost chunk:", numbers[chunk], chunk
@@ -519,8 +448,8 @@ class Peer_DBS():
             # {{{
 
             while not self.received[self.chunk_to_play % self.buffer_size]:
-                self.chunk_to_play = (self.chunk_to_play + 1) % self.buffer_size
-                checked_chunk = (self.chunk_to_play+self.buffer_size/2-10)%self.buffer_size
+                self.chunk_to_play = (self.chunk_to_play + 1) % 65536
+                checked_chunk = (self.chunk_to_play + self.buffer_size/2 - 10) % self.buffer_size
                 if not self.received[checked_chunk]:
                     complain(checked_chunk)
 
@@ -539,19 +468,25 @@ class Peer_DBS():
 
         while self.player_alive:
 
-            self.chunk_number = receive_and_feed()
+            #sys.stdout.write("\033[2J\033[;H")
+            self.chunk_number = receive_and_feed(self.team_socket)
+            print self.chunk_number, self.chunk_to_play
+            print self.chunk_number - self.chunk_to_play
             while (self.chunk_number - self.chunk_to_play) < self.buffer_size/2:
-                self.chunk_number = receive_and_feed()
+                sys.stdout.write(Color.yellow)
+                print "*\b",
+                self.chunk_number = receive_and_feed(self.team_socket)
+            sys.stdout.write(Color.none)
 
             if self.chunk_number >= 0:
 
-                played_chunk = send_next_chunk_to_the_player(player_socket)
+                while (self.chunk_number - self.chunk_to_play) > self.buffer_size/2:
+                    played_chunk = send_next_chunk_to_the_player(player_socket)
 
                 if (self.chunk_number % self.debt_memory) == 0:
                     for i in self.debt:
                         self.debt[i] /= 2
 
-                sys.stdout.write("\033[2J\033[;H")
                 for i in xrange(self.buffer_size):
                     if self.received[i]:
                         sys.stdout.write(str(i%10))
@@ -559,7 +494,8 @@ class Peer_DBS():
                         sys.stdout.write('.')
                 print
                 sys.stdout.write(Color.cyan)
-                print "Number of peers in the team:", len(self.peer_list)
+                print "Number of peers in the team:", len(self.peer_list)+1
+                print self.team_socket.getsockname(),
                 for p in self.peer_list:
                     print p,
                 print
@@ -568,13 +504,13 @@ class Peer_DBS():
         # The player has gone. Lets do a polite farewell.
         print 'goodbye!'
         goodbye = ''
-        self.say_goodbye(splitter, team_socket)
-        #team_socket.sendto(goodbye, splitter)
+        self.say_goodbye(splitter, self.team_socket)
+        #self.team_socket.sendto(goodbye, splitter)
         print '"goodbye" message sent to the splitter', splitter
         for x in xrange(3):
-            receive_and_feed()
+            receive_and_feed(self.team_socket)
         for peer in self.peer_list:
-            self.say_goodbye(splitter, team_socket)
+            self.say_goodbye(splitter, self.team_socket)
             #team_socket.sendto(goodbye, peer)
 
 class Peer_EMS(Peer_DBS):
