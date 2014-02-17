@@ -523,7 +523,7 @@ def main():
      last_chunk_number = 0
      while splitter.alive:
           try:
-               print len(splitter.peer_list),
+               print "P:", len(splitter.peer_list),
                for p in splitter.peer_list:
                     print p,
                print
