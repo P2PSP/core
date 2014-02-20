@@ -526,8 +526,8 @@ def main():
      
      # }}}
 
-     splitter = Splitter_DBS()
-#     splitter = Splitter_EMS()
+#     splitter = Splitter_DBS()
+     splitter = Splitter_EMS()
      splitter.start()
      last_chunk_number = 0
      while splitter.alive:
