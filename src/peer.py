@@ -43,12 +43,12 @@ IP_ADDR = 0
 PORT = 1
 
 class Peer_DBS():
-    player_port = 9999
-    splitter_addr = "150.214.150.68"
-    splitter_port = 4552
-    port = 0
-    debt_threshold = 10 # This value depends on debt_memory
-    debt_memory = 1024
+    PLAYER_PORT = 9999
+    SPLITTER_ADDR = "150.214.150.68"
+    SPLITTER_PORT = 4552
+    PORT = 0
+    DEBT_THRESHOLD = 10 # This value depends on debt_memory
+    DEBT_MEMORY = 1024
 
     def __init__(self):
         # {{{
@@ -60,10 +60,10 @@ class Peer_DBS():
             print "release mode"
         print "DBS implemented"
 
-        print "Player port =", self.player_port
-        print "Splitter IP address =", self.splitter_addr
-        print "Splitter port =", self.splitter_port
-        print "(Team) Port =", self.port
+        print "Player port =", self.PLAYER_PORT
+        print "Splitter IP address =", self.SPLITTER_ADDR
+        print "Splitter port =", self.SPLITTER_PORT
+        print "(Team) Port =", self.PORT
 
         self.peer_list = []
         self.buffer_size = 0
@@ -119,7 +119,7 @@ class Peer_DBS():
             player_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         except:
             pass
-        player_socket.bind(('', self.player_port))
+        player_socket.bind(('', self.PLAYER_PORT))
         player_socket.listen(0)
         print "Waiting for the player at", player_socket.getsockname()
         player_socket = player_socket.accept()[0]
@@ -131,17 +131,17 @@ class Peer_DBS():
         # {{{ Setup "splitter" and "splitter_socket"
 
         splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        splitter = (self.splitter_addr, self.splitter_port)
+        splitter = (self.SPLITTER_ADDR, self.SPLITTER_PORT)
         print "Connecting to the splitter at", splitter
-        if self.port != 0:
+        if self.PORT != 0:
             try:
                 splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             except:
                 pass
             sys.stdout.write(Color.purple)
-            print "I'm using port the port", self.port
+            print "I'm using port the port", self.PORT
             sys.stdout.write(Color.none)
-            splitter_socket.bind(("", self.port))
+            splitter_socket.bind(("", self.PORT))
         try:
             splitter_socket.connect(splitter)
         except:
@@ -289,7 +289,7 @@ class Peer_DBS():
                             # }}}
 
                             self.debt[peer] += 1
-                            if self.debt[peer] > self.debt_threshold:
+                            if self.debt[peer] > self.DEBT_THRESHOLD:
                                 del self.debt[peer]
                                 self.peer_list.remove(peer)
                                 print Color.red, peer, 'removed by unsupportive', Color.none
@@ -483,7 +483,7 @@ class Peer_DBS():
                 while (self.chunk_number - self.chunk_to_play) > self.buffer_size/2:
                     played_chunk = send_next_chunk_to_the_player(player_socket)
 
-                if (self.chunk_number % self.debt_memory) == 0:
+                if (self.chunk_number % self.DEBT_MEMORY) == 0:
                     for i in self.debt:
                         self.debt[i] /= 2
 
@@ -530,24 +530,27 @@ def main():
      # {{{ Args parsing
      
      parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP network.')
-     parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. ({})'.format(Peer_DBS.debt_threshold))
-     parser.add_argument('--player_port', help='Port used to communicate with the player. ("{}")'.format(Peer_DBS.player_port))
-     parser.add_argument('--port', help='Port to talk with the peers. ({})'.format(Peer_DBS.port))
-     parser.add_argument('--splitter_addr', help='IP address of the splitter. ({})'.format(Peer_DBS.splitter_addr))
-     parser.add_argument('--splitter_port', help='Listening port of the splitter. ({})'.format(Peer_DBS.splitter_port))
+     parser.add_argument('--debt_memory', help='Number of chunks to receive to divide by two the debts counter. ({})'.format(Peer_DBS.DEBT_MEMORY))
+     parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. ({})'.format(Peer_DBS.DEBT_THRESHOLD))
+     parser.add_argument('--player_port', help='Port used to communicate with the player. ("{}")'.format(Peer_DBS.PLAYER_PORT))
+     parser.add_argument('--port', help='Port to talk with the peers. ({})'.format(Peer_DBS.PORT))
+     parser.add_argument('--splitter_addr', help='IP address of the splitter. ({})'.format(Peer_DBS.SPLITTER_ADDR))
+     parser.add_argument('--splitter_port', help='Listening port of the splitter. ({})'.format(Peer_DBS.SPLITTER_PORT))
 
      args = parser.parse_known_args()[0]
 
+     if args.debt_memory:
+         Peer_DBS.DEBT_MEMORY = int(args.debt_memory)
      if args.debt_threshold:
-         Peer_DBS.debt_threshold = int(args.debt_threshold)
+         Peer_DBS.DEBT_THRESHOLD = int(args.debt_threshold)
      if args.player_port:
-         Peer_DBS.player_port = int(args.player_port)
+         Peer_DBS.PLAYER_PORT = int(args.player_port)
      if args.splitter_addr:
-         Peer_DBS.splitter_addr = socket.gethostbyname(args.splitter_addr)
+         Peer_DBS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
      if args.splitter_port:
-         Peer_DBS.splitter_port = int(args.splitter_port)
+         Peer_DBS.SPLITTER_PORT = int(args.splitter_port)
      if args.port:
-         Peer_DBS.port = int(args.port)
+         Peer_DBS.PORT = int(args.port)
 
      # }}}
 

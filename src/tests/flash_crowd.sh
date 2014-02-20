@@ -3,8 +3,8 @@
 export BUFFER_SIZE=256
 export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv"
 export CHUNK_SIZE=1024
-export DEBT_THRESHOLD=32
-export LOSSES_THRESHOLD=1
+export DEBT_THRESHOLD=1024
+export LOSSES_THRESHOLD=64
 export MONITOR_PORT=4553
 export POPULATION=10
 export SOURCE_ADDR="150.214.150.68"
@@ -49,7 +49,7 @@ while getopts "b:c:u:d:l:m:w:s:o:p:t:?" opt; do
 	m)
 	    MONITOR_PORT="${OPTARG}"
 	    ;;
-	p)
+	w)
 	    POPULATION="${OPTARG}"
 	    ;;
 	s)
@@ -83,13 +83,14 @@ done
 
 set -x
 xterm -e '../splitter.py  --addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
-sleep 1
 xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --player_port 9998 --port $MONITOR_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
 vlc http://localhost:9998 &
+sleep 1
 
 x=1
 while [ $x -le $POPULATION ]
 do
+    #sleep 5
     export PORT=`shuf -i 2000-65000 -n 1`
     xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD  --player_port $PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
     timelimit -t $TIME vlc http://localhost:$PORT &
