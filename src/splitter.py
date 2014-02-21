@@ -359,12 +359,12 @@ class Splitter_DBS(threading.Thread):
                          header_length = self.HEADER_LENGTH
                     prev_size = len(data)
                     data += sock.recv(size - len(data))
-               return data, sock
+               return data, sock, header_length
 
-          header_lendth = 0
+          header_length = 0
 
           for i in xrange(10):
-               self.header += receive_next_chunk(GET_message, source, source_socket, 1024, header_lendth)[0]
+               self.header += receive_next_chunk(GET_message, source, source_socket, 1024, header_length)[0]
 
           header_length = 0
 
@@ -377,11 +377,11 @@ class Splitter_DBS(threading.Thread):
 
           while self.alive:
                # Receive data from the source
-               chunk, source_socket = receive_next_chunk(GET_message, source, source_socket, self.CHUNK_SIZE, header_length)
+               chunk, source_socket, header_length = receive_next_chunk(GET_message, source, source_socket, self.CHUNK_SIZE, header_length)
 
                if header_length > 0:
                     self.header += chunk
-                    header_lendth -= 1
+                    header_length -= 1
 
                try:
                     self.peer_list[self.peer_index]
@@ -535,7 +535,7 @@ def main():
 
      # {{{ Prints information until keyboard interrupt
 
-     last_chunk_number = 0
+     #last_chunk_number = 0
      while splitter.alive:
           try:
                print "P:", len(splitter.peer_list),

@@ -109,6 +109,7 @@ class Peer_DBS():
         # }}}
 
     def run(self):
+        # {{{
 
         # {{{ Setup "player_socket" and wait for the player
 
@@ -512,6 +513,8 @@ class Peer_DBS():
             self.say_goodbye(splitter, self.team_socket)
         for peer in self.peer_list:
             self.say_goodbye(peer, self.team_socket)
+
+        # }}}
 
     # }}}
 
