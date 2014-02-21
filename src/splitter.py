@@ -43,7 +43,9 @@ from color import Color
 IP_ADDR = 0
 PORT = 1
 
+# Data Broadcasting Set of rules
 class Splitter_DBS(threading.Thread):
+     # {{{
 
      # The buffer_size depends on the stream bit-rate and
      # the maximun latency experimented by the users, and
@@ -87,7 +89,11 @@ class Splitter_DBS(threading.Thread):
           # {{{
 
           threading.Thread.__init__(self)
- 
+          
+          sys.stdout.write(Color.yellow)
+          print "Using DBS"
+          sys.stdout.write(Color.none)
+
           print "Buffer size =", self.BUFFER_SIZE
           print "Chunk size =", self.CHUNK_SIZE
           print "Channel =", self.CHANNEL
@@ -264,7 +270,7 @@ class Splitter_DBS(threading.Thread):
 
                     # A zero-length payload means that the peer wants to go away
                     sys.stdout.write(Color.red)
-                    print self.team_socket.getsockname(), '\b: received "goodbye" from', sender
+                    print 'Received "goodbye" from', sender
                     sys.stdout.write(Color.none)
                     sys.stdout.flush()
                     if sender != self.peer_list[0]:
@@ -401,11 +407,18 @@ class Splitter_DBS(threading.Thread):
                          self.complains[i] /= 2
                     '''
 
-class Splitter_EMS(Splitter_DBS):
+     # }}}
+
+# Full-cone Nat Set of rules
+class Splitter_FNS(Splitter_DBS):
+     # {{{
 
      def __init__(self):
           Splitter_DBS.__init__(self)
-          print "EMS implemented"
+
+          sys.stdout.write(Color.yellow)
+          print "Using FNS"
+          sys.stdout.write(Color.none)
 
      def moderate_the_team(self):
           # {{{
@@ -417,22 +430,10 @@ class Splitter_EMS(Splitter_DBS):
                if len(message) == 2:
 
                     # {{{ The peer complains about a lost chunk
-
-                    # The sender of the packet complains, and the
-                    # packet comes with the index of a lost
-                    # (non-received) chunk. In this situation, the
-                    # splitter counts the number of times a peer has
-                    # not achieved to send a chunk to other peers. If
-                    # this number exceeds a threshold, the
-                    # unsupportive peer is expelled from the
-                    # team. Moreover, if we receive too much complains
-                    # from the same peer, the problem could be in that
-                    # peer and it will be expelled from the team.
-
                     lost_chunk = struct.unpack("!H",message)[0]
                     destination = self.destination_of_chunk[lost_chunk]
                     sys.stdout.write(Color.blue)
-                    print self.team_socket.getsockname(), "\b:", sender, "complains about lost chunk", lost_chunk, "sent to", destination, Color.none
+                    print sender, "complains about lost chunk", lost_chunk, "sent to", destination, Color.none
                     sys.stdout.write(Color.none)
                     try:
                          self.losses[destination]
@@ -444,11 +445,11 @@ class Splitter_EMS(Splitter_DBS):
                          pass
                     else:
                          self.losses[destination] += 1
-                         print Color.blue, destination, "has loss", self.losses[destination], "chunks", Color.none
+                         print Color.blue, "\b", destination, "has loss", self.losses[destination], "chunks", Color.none
                          if destination != self.peer_list[0]:
                               if self.losses[destination] > self.LOSSES_THRESHOLD:
                                    sys.stdout.write(Color.red)
-                                   print self.team_socket.getsockname(), "\b: too much complains about unsupportive peer", destination, "\b. Removing it!"
+                                   print "Too much complains about unsupportive peer", destination, "\b. Removing it!"
                                    self.peer_index -= 1
                                    try:
                                         self.peer_list.remove(destination)
@@ -464,14 +465,12 @@ class Splitter_EMS(Splitter_DBS):
 
                else:
 
-                    if  struct.unpack("s", message)[0] == "H":
-                         pass
-                    else:
-                    # {{{ The peer wants to leave the team
+                    print "-------------------------->", struct.unpack("s", message)[0]
+                    if struct.unpack("s", message)[0] == 'G': # <G>oodbye
+                         # {{{ The peer wants to leave the team
 
-                         # A zero-length payload means that the peer wants to go away
                          sys.stdout.write(Color.red)
-                         print self.team_socket.getsockname(), '\b: received "goodbye" from', sender
+                         print 'Received "goodbye" from', sender
                          sys.stdout.write(Color.none)
                          sys.stdout.flush()
                          if sender != self.peer_list[0]:
@@ -481,13 +480,13 @@ class Splitter_EMS(Splitter_DBS):
                                    if __debug__:
                                         print Color.red, "\b", sender, 'removed by "goodbye" message', Color.none
                               except:
-                                   # Received a googbye message from a peer
-                                   # which is not in the list of peers.
                                    pass
 
-                    # }}}
+                         # }}}
 
           # }}}
+
+     # }}}
 
 def main():
 
@@ -526,9 +525,12 @@ def main():
      
      # }}}
 
-     splitter = Splitter_DBS()
-#     splitter = Splitter_EMS()
+#     splitter = Splitter_DBS()
+     splitter = Splitter_FNS()
      splitter.start()
+
+     # {{{ Prints information until keyboard interrupt
+
      last_chunk_number = 0
      while splitter.alive:
           try:
@@ -577,6 +579,8 @@ def main():
                # Breaks this thread and returns to the parent process (usually,
                # the shell).
                break
+
+     # }}}
 
 if __name__ == "__main__":
      main()
