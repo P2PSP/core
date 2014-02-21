@@ -525,8 +525,8 @@ def main():
      
      # }}}
 
-     splitter = Splitter_DBS()
-#     splitter = Splitter_FNS()
+#     splitter = Splitter_DBS()
+     splitter = Splitter_FNS()
      splitter.start()
 
      # {{{ Prints information until keyboard interrupt
