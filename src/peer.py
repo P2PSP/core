@@ -43,6 +43,8 @@ IP_ADDR = 0
 PORT = 1
 
 class Peer_DBS():
+    # {{{
+
     PLAYER_PORT = 9999
     SPLITTER_ADDR = "150.214.150.68"
     SPLITTER_PORT = 4552
@@ -79,7 +81,7 @@ class Peer_DBS():
         pass
 
     def say_goodbye(self, node, sock):
-        sock.sendto('', nosw)
+        sock.sendto('', node)
 
     def retrieve_the_list_of_peers(self, splitter_socket, team_socket):
         # {{{
@@ -176,7 +178,7 @@ class Peer_DBS():
 
         # }}}
 
-        # {{{ Receive fron the splitter the chunk size
+        # {{{ Receive from the splitter the chunk size
 
         def _():
             message = splitter_socket.recv(struct.calcsize("H"))
@@ -187,7 +189,6 @@ class Peer_DBS():
         print "chunk_size =", self.chunk_size
 
         # }}}
-
 
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
@@ -512,20 +513,23 @@ class Peer_DBS():
         for peer in self.peer_list:
             self.say_goodbye(peer, self.team_socket)
 
-class Peer_EMS(Peer_DBS):
+    # }}}
+
+class Peer_FNS(Peer_DBS):
+    # {{{
 
     def __init__(self):
         Peer_DBS.__init__(self)
 
         sys.stdout.write(Color.yellow)
-        print "Using EMS"
+        print "Using FNS"
         sys.stdout.write(Color.none)
 
-    def say_hello(self, peer, team_socket):
-        team_socket.sendto('H', peer)
+    def say_hello(self, node, sock):
+        sock.sendto('H', node)
 
-    def say_goodbye(self, peer, team_socket):
-        team_socket.sendto('G', peer)
+    def say_goodbye(self, node, sock):
+        sock.sendto('G', node)
 
     def run(self):
 
@@ -926,6 +930,8 @@ class Peer_EMS(Peer_DBS):
         for peer in self.peer_list:
             self.say_goodbye(peer, self.team_socket)
 
+    # }}}
+
 def main():
 
      # {{{ Args parsing
@@ -955,8 +961,8 @@ def main():
 
      # }}}
 
-     peer = Peer_DBS()
-#     peer = Peer_EMS()
+#     peer = Peer_DBS()
+     peer = Peer_FNS()
      peer.run()
 
 if __name__ == "__main__":

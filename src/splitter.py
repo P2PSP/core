@@ -45,6 +45,7 @@ PORT = 1
 
 # Data Broadcasting Set of rules
 class Splitter_DBS(threading.Thread):
+     # {{{
 
      # The buffer_size depends on the stream bit-rate and
      # the maximun latency experimented by the users, and
@@ -406,14 +407,17 @@ class Splitter_DBS(threading.Thread):
                          self.complains[i] /= 2
                     '''
 
+     # }}}
+
 # Full-cone Nat Set of rules
 class Splitter_FNS(Splitter_DBS):
+     # {{{
 
      def __init__(self):
           Splitter_DBS.__init__(self)
 
           sys.stdout.write(Color.yellow)
-          print "Using EMS"
+          print "Using FNS"
           sys.stdout.write(Color.none)
 
      def moderate_the_team(self):
@@ -482,6 +486,8 @@ class Splitter_FNS(Splitter_DBS):
 
           # }}}
 
+     # }}}
+
 def main():
 
      # {{{ Args parsing
@@ -519,9 +525,11 @@ def main():
      
      # }}}
 
-     splitter = Splitter_DBS()
-#     splitter = Splitter_EMS()
+#     splitter = Splitter_DBS()
+     splitter = Splitter_FNS()
      splitter.start()
+
+     # {{{ Prints information until keyboard interrupt
 
      last_chunk_number = 0
      while splitter.alive:
@@ -571,6 +579,8 @@ def main():
                # Breaks this thread and returns to the parent process (usually,
                # the shell).
                break
+
+     # }}}
 
 if __name__ == "__main__":
      main()
