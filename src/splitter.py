@@ -45,7 +45,7 @@ PORT = 1
 
 # Data Broadcasting Set of rules
 class Splitter_DBS(threading.Thread):
-     # {{{
+     # {{{ 
 
      # The buffer_size depends on the stream bit-rate and
      # the maximun latency experimented by the users, and
@@ -163,7 +163,7 @@ class Splitter_DBS(threading.Thread):
           print peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
 
           # Send the header
-          print "Sending", len(self.header), "bytes!!!!!!!!!"
+          print "Sending", len(self.header), "bytes"
           peer_serve_socket.sendall(self.header)
 
           # Send the buffer size.
@@ -288,7 +288,11 @@ class Splitter_DBS(threading.Thread):
 
           # }}}
 
+          # }}}
+
      def run(self):
+          # {{{
+
           # {{{ Setup "peer_connection_socket"
 
           # peer_connection_socket is used to listen to the incomming peers.
@@ -407,7 +411,7 @@ class Splitter_DBS(threading.Thread):
                          self.complains[i] /= 2
                     '''
 
-     # }}}
+          # }}}
 
 # Full-cone Nat Set of rules
 class Splitter_FNS(Splitter_DBS):
