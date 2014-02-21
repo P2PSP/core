@@ -213,7 +213,7 @@ class Peer_DBS():
         # }}}
 
         splitter_socket.close()
-        #self.say_hello(splitter, self.team_socket)
+        self.say_hello(splitter, self.team_socket)
 
         # {{{ Define the buffer of chunks structure
 
