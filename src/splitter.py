@@ -350,23 +350,19 @@ class Splitter_DBS(threading.Thread):
                          # following one.
                          print '\b!',
                          sys.stdout.flush()
-                         time.sleep(1)
+                         #time.sleep(1)
                          sock.close()
                          sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                          sock.connect(source)
                          sock.sendall(GET)
-                         self.header = ""
+                         #self.header = ""
                          header_length = self.HEADER_LENGTH
                     prev_size = len(data)
                     data += sock.recv(size - len(data))
                return data, sock, header_length
 
-          header_length = 0
-
-          for i in xrange(10):
-               self.header += receive_next_chunk(GET_message, source, source_socket, 1024, header_length)[0]
-
-          header_length = 0
+          for i in xrange(self.HEADER_LENGTH):
+               self.header += receive_next_chunk(GET_message, source, source_socket, 1024, 0)[0]
 
           print self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ..."
           self.handle_peer_arrival(self.peer_connection_socket.accept())
@@ -375,12 +371,15 @@ class Splitter_DBS(threading.Thread):
 
           chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
 
+          header_length = 0
+
           while self.alive:
                # Receive data from the source
                chunk, source_socket, header_length = receive_next_chunk(GET_message, source, source_socket, self.CHUNK_SIZE, header_length)
 
                if header_length > 0:
-                    self.header += chunk
+                    print "Header length =", header_length
+                    #self.header += chunk
                     header_length -= 1
 
                try:

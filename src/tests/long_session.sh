@@ -5,7 +5,7 @@ export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv"
 export CHUNK_SIZE=1024
 export DEBT_MEMORY=1024
 export DEBT_THRESHOLD=10
-export ITERATIONS=10
+export TIME=10
 export LOSSES_MEMORY=8192
 export LOSSES_THRESHOLD=64
 export MONITOR_PORT=4553
@@ -20,19 +20,19 @@ usage() {
     echo "  [-u chunks size ($CHUNK_SIZE)]"
     echo "  [-m debt memory ($DEB_MEMORY)]"
     echo "  [-d debt threshold ($DEB_THRESHOLD)]"
-    echo "  [-i iterations ($ITERATIONS)]"
     echo "  [-e losses memory ($LOSSES_MEMORY)]"
     echo "  [-l losses threshold ($LOSSES_THRESHOLD)]"
-    echo "  [-m monitor IP address ($MONITOR_PORT)]" # Quitar
+    echo "  [-m monitor IP address ($MONITOR_PORT)]"
     echo "  [-s source IP address, ($SOURCE_ADDR)]"
     echo "  [-o source port ($SOURCE_PORT)]"
     echo "  [-p splitter port ($SPLITTER_PORT)]"
+    echo "  [-t time ($TIME)]"
     echo "  [-? help]"
 }
 
 echo $0: parsing: $@
 
-while getopts "b:c:u:m:d:i:e:l:m:s:o:p:?" opt; do
+while getopts "b:c:u:m:d:e:l:m:s:o:p:t:?" opt; do
     case ${opt} in
 	b)
 	    BUFFER_SIZE="${OPTARG}"
@@ -48,9 +48,6 @@ while getopts "b:c:u:m:d:i:e:l:m:s:o:p:?" opt; do
 	    ;;
 	d)
 	    DEBT_THRESHOLD="${OPTARG}"
-	    ;;
-	i)
-	    ITERATIONS="${OPTARG}"
 	    ;;
 	e)
 	    LOSSES_MEMORY="${OPTARG}"
@@ -69,6 +66,9 @@ while getopts "b:c:u:m:d:i:e:l:m:s:o:p:?" opt; do
 	    ;;
 	p)
 	    SPLITTER_PORT="${OPTARG}"
+	    ;;
+	t)
+	    TIME="${OPTARG}"
 	    ;;
 	?)
 	    usage
@@ -89,8 +89,9 @@ done
 
 xterm -e '../splitter.py  --addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
 sleep 1
-xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
-vlc http://localhost:9998 &
+TIME=`shuf -i 1-$TIME -n 1`
+xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --port $MONITOR_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
+timelimit -t $TIME vlc http://localhost:9998 &
 
 sleep 5
 
