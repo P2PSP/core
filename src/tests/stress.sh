@@ -23,7 +23,7 @@ usage() {
     echo "  [-i iterations ($ITERATIONS)]"
     echo "  [-e losses memory ($LOSSES_MEMORY)]"
     echo "  [-l losses threshold ($LOSSES_THRESHOLD)]"
-    echo "  [-m monitor IP address ($MONITOR_PORT)]"
+    echo "  [-m monitor IP address ($MONITOR_PORT)]" # Quitar
     echo "  [-s source IP address, ($SOURCE_ADDR)]"
     echo "  [-o source port ($SOURCE_PORT)]"
     echo "  [-p splitter port ($SPLITTER_PORT)]"
@@ -89,7 +89,7 @@ done
 
 xterm -e '../splitter.py  --addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
 sleep 1
-xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --port $MONITOR_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
+xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
 vlc http://localhost:9998 &
 
 sleep 5

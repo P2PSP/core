@@ -45,7 +45,7 @@ PORT = 1
 
 # Data Broadcasting Set of rules
 class Splitter_DBS(threading.Thread):
-     # {{{
+     # {{{ 
 
      # The buffer_size depends on the stream bit-rate and
      # the maximun latency experimented by the users, and
@@ -163,7 +163,7 @@ class Splitter_DBS(threading.Thread):
           print peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
 
           # Send the header
-          print "Sending", len(self.header), "bytes!!!!!!!!!"
+          print "Sending", len(self.header), "bytes"
           peer_serve_socket.sendall(self.header)
 
           # Send the buffer size.
@@ -288,7 +288,11 @@ class Splitter_DBS(threading.Thread):
 
           # }}}
 
+          # }}}
+
      def run(self):
+          # {{{
+
           # {{{ Setup "peer_connection_socket"
 
           # peer_connection_socket is used to listen to the incomming peers.
@@ -346,23 +350,20 @@ class Splitter_DBS(threading.Thread):
                          # following one.
                          print '\b!',
                          sys.stdout.flush()
-                         time.sleep(1)
+                         #time.sleep(1)
                          sock.close()
                          sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                          sock.connect(source)
                          sock.sendall(GET)
                          self.header = ""
                          header_length = self.HEADER_LENGTH
+                         data = ""
                     prev_size = len(data)
                     data += sock.recv(size - len(data))
-               return data, sock
+               return data, sock, header_length
 
-          header_lendth = 0
-
-          for i in xrange(10):
-               self.header += receive_next_chunk(GET_message, source, source_socket, 1024, header_lendth)[0]
-
-          header_length = 0
+          for i in xrange(self.HEADER_LENGTH):
+               self.header += receive_next_chunk(GET_message, source, source_socket, 1024, 0)[0]
 
           print self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ..."
           self.handle_peer_arrival(self.peer_connection_socket.accept())
@@ -371,13 +372,16 @@ class Splitter_DBS(threading.Thread):
 
           chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
 
+          header_length = 0
+
           while self.alive:
                # Receive data from the source
-               chunk, source_socket = receive_next_chunk(GET_message, source, source_socket, self.CHUNK_SIZE, header_length)
+               chunk, source_socket, header_length = receive_next_chunk(GET_message, source, source_socket, self.CHUNK_SIZE, header_length)
 
                if header_length > 0:
+                    print "Header length =", header_length
                     self.header += chunk
-                    header_lendth -= 1
+                    header_length -= 1
 
                try:
                     self.peer_list[self.peer_index]
@@ -407,7 +411,7 @@ class Splitter_DBS(threading.Thread):
                          self.complains[i] /= 2
                     '''
 
-     # }}}
+          # }}}
 
 # Full-cone Nat Set of rules
 class Splitter_FNS(Splitter_DBS):
@@ -531,7 +535,7 @@ def main():
 
      # {{{ Prints information until keyboard interrupt
 
-     last_chunk_number = 0
+     #last_chunk_number = 0
      while splitter.alive:
           try:
                print "P:", len(splitter.peer_list),

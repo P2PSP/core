@@ -109,6 +109,7 @@ class Peer_DBS():
         # }}}
 
     def run(self):
+        # {{{
 
         # {{{ Setup "player_socket" and wait for the player
 
@@ -513,6 +514,8 @@ class Peer_DBS():
         for peer in self.peer_list:
             self.say_goodbye(peer, self.team_socket)
 
+        # }}}
+
     # }}}
 
 class Peer_FNS(Peer_DBS):
@@ -532,6 +535,7 @@ class Peer_FNS(Peer_DBS):
         sock.sendto('G', node)
 
     def run(self):
+        # {{{
 
         # {{{ Setup "player_socket" and wait for the player
 
@@ -613,7 +617,6 @@ class Peer_FNS(Peer_DBS):
 
         # }}}
 
-
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
         self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -637,7 +640,7 @@ class Peer_FNS(Peer_DBS):
         # }}}
 
         splitter_socket.close()
-        #self.say_hello(splitter, self.team_socket)
+        self.say_hello(splitter, self.team_socket)
 
         # {{{ Define the buffer of chunks structure
 
@@ -929,6 +932,8 @@ class Peer_FNS(Peer_DBS):
             receive_and_feed(self.team_socket)
         for peer in self.peer_list:
             self.say_goodbye(peer, self.team_socket)
+
+        # }}}
 
     # }}}
 
