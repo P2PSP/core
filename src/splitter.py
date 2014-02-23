@@ -355,8 +355,9 @@ class Splitter_DBS(threading.Thread):
                          sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                          sock.connect(source)
                          sock.sendall(GET)
-                         #self.header = ""
+                         self.header = ""
                          header_length = self.HEADER_LENGTH
+                         data = ""
                     prev_size = len(data)
                     data += sock.recv(size - len(data))
                return data, sock, header_length
@@ -379,7 +380,7 @@ class Splitter_DBS(threading.Thread):
 
                if header_length > 0:
                     print "Header length =", header_length
-                    #self.header += chunk
+                    self.header += chunk
                     header_length -= 1
 
                try:
