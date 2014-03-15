@@ -47,53 +47,94 @@ PORT = 1
 class Splitter_DBS(threading.Thread):
      # {{{ 
 
+     # {{{
+
      # The buffer_size depends on the stream bit-rate and
      # the maximun latency experimented by the users, and
      # must be transmitted to the peers. The buffer_size
      # is proportional to the bit-rate and the latency is
      # proportional to the buffer_size.
+
+     # }}}
      BUFFER_SIZE = 256
      
+     # {{{
+
      # The chunk_size depends mainly on the network
      # technology and should be selected as big as
      # possible, depending on the MTU and the bit-error
      # rate.
+
+     # }}}
      CHUNK_SIZE = 1024
 
+     # {{{
+
      # Channel served by the streaming source.
+
+     # }}}
      CHANNEL = "/root/Videos/Big_Buck_Bunny_small.ogv"
 
+     # {{{
+
      # The streaming server.
+
+     # }}}
      SOURCE_ADDR = "150.214.150.68"
 
+     # {{{
+
      # Port where the streaming server is listening.
+
+     # }}}
      SOURCE_PORT = 4551
+
+     # {{{
 
      # IP address to talk with the peers (a host can use
      # several network adapters).
+
+     # }}}
      ADDR = "150.214.150.68"
 
+     # {{{
+
      # Port to talk with the peers.
+
+     # }}}
      PORT = 4552
 
+     # {{{
+
      # Maximum number of lost chunks for an unsupportive peer.
+
+     # }}}
      LOSSES_THRESHOLD = 128
      LOSSES_MEMORY = 1024
 
      HEADER_LENGTH = 10 # In chunks
 
-     # Maximum number of complains for a peevish peer.
-     #complaining_threshold = 8
+     def print_modulename(self):
+          # {{{
+
+          sys.stdout.write(Color.yellow)
+          print "Using DBS"
+          sys.stdout.write(Color.none)
+
+          # }}}
 
      def __init__(self):
           # {{{
 
           threading.Thread.__init__(self)
-          
-          sys.stdout.write(Color.yellow)
-          print "Using DBS"
-          sys.stdout.write(Color.none)
 
+          print "Splitter running in",
+          if __debug__:
+               print "debug mode"
+          else:
+               print "release mode"
+               
+          print_modulename()
           print "Buffer size =", self.BUFFER_SIZE
           print "Chunk size =", self.CHUNK_SIZE
           print "Channel =", self.CHANNEL
@@ -102,85 +143,131 @@ class Splitter_DBS(threading.Thread):
           print "(Team) IP address =", self.ADDR
           print "(Team) Port =", self.PORT
 
+          # {{{
+
           # A splitter runs 3 threads. The first one controls the peer
           # arrivals. The second one listens to the team, for example, to
           # re-sends lost blocks. The third one shows some information about
           # the transmission. This variable is used to stop the child
           # threads. They will be alive only while the main thread is alive.
+
+          # }}}
           self.alive = True
          
-          print "Splitter running in",
-          if __debug__:
-               print "debug mode"
-          else:
-               print "release mode"
-               
+          # {{{
+
           # The list of peers in the team.
+
+          # }}}
           self.peer_list = []
+
+          # {{{
 
           # Destination peers of the chunk, indexed by a chunk number. Used to
           # find the peer to which a chunk has been sent.
+
+          # }}}
           self.destination_of_chunk = [('0.0.0.0',0) for i in xrange(self.BUFFER_SIZE)]
           self.losses = {}
 
-          # Counts the number of times a peer has ben removed from the team.
-          self.deletions = {}
+          # {{{
 
-          # Complaining rate of a peer. Sometimes the complaining peer has not
-          # enough bandwidth in his download link. In this case, the peevish
-          # peers should be rejected from the team.
-          #self.complains = {}
-          #complains[('127.0.0.1',port+1)] = 0
+          # Counts the number of times a peer has ben removed from the team.
+
+          # }}}
+          self.deletions = {}
 
           self.chunk_number = 0
 
+          # {{{
+
           # Used to listen to the incomming peers.
+
+          # }}}
           self.peer_connection_socket = ""
 
+          # {{{
+
           # Used to listen the team messages.
+
+          # }}}
           self.team_socket = ""
 
           self.peer_index = 0
 
           self.header = ""
 
+          # }}}
+
+     def send_haeder(self):
+          # {{{
+
+          peer_serve_socket.sendall(self.header)
 
           # }}}
 
-     # Handle the arrival of a peer. When a peer
-     # want to join a team, first it must establish a TCP connection
-     # with the splitter. In that connection, the splitter sends to
-     # the incomming peer the list of peers. Notice that the
-     # transmission of the list of peers (something that could need
-     # some time if the team is big or the peer is slow) is done in a
-     # separate thread. This helps to avoid a DoS (Denial-of-Service)
-     # attack.
+     def send_buffersize(self):
+          # {{{
+
+          message = struct.pack("H", socket.htons(self.BUFFER_SIZE))
+          peer_serve_socket.sendall(message)
+
+          # }}}
+          
+     def send_shunksize(self):
+          # {{{
+
+          message = struct.pack("H", socket.htons(self.CHUNK_SIZE))
+          peer_serve_socket.sendall(message)
+
+          # }}}
+
+
      def handle_peer_arrival(self, (peer_serve_socket, peer)):
           # {{{
-          
+
+          # {{{
+
+          # Handle the arrival of a peer. When a peer want to join a
+          # team, first it must establish a TCP connection with the
+          # splitter. In that connection, the splitter sends to the
+          # incomming peer the list of peers. Notice that the
+          # transmission of the list of peers (something that could
+          # need some time if the team is big or the peer is slow) is
+          # done in a separate thread. This helps to avoid a DoS
+          # (Denial-of-Service) attack.
+
+          # }}}          
 
           sys.stdout.write(Color.green)
           print peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
 
-          # Send the header
-          print "Sending", len(self.header), "bytes"
-          peer_serve_socket.sendall(self.header)
+          print "Sending a header of", len(self.header), "bytes"
+          send_header(self)
 
-          # Send the buffer size.
-          message = struct.pack("H", socket.htons(self.BUFFER_SIZE))
-          peer_serve_socket.sendall(message)
+          print "Sending a buffer_size of", self.BUFFER_SIZE, "bytes"
+          send_buffersize(self)
+
+          # {{{
 
           # Send the chunk size.
-          message = struct.pack("H", socket.htons(self.CHUNK_SIZE))
-          peer_serve_socket.sendall(message)
+
+          # }}}
+          print "Sending a chunk_size of", self.CHUNK_SIZE, "bytes"
+          send_chunksize(self)
 
           print peer_serve_socket.getsockname(), '\b: sending the list of peers ...'
 
+          # {{{
+
           # Sends the size of the list of peers.
+
+          # }}}
+          print "Sending a list of peers whose size is", len(self.peer_list)
           message = struct.pack("H", socket.htons(len(self.peer_list)))
           peer_serve_socket.sendall(message)
 
-          # Send the list of peers.
+          print "Sending the list of peers"
           counter = 0
           for p in self.peer_list:
                 message = struct.pack("4sH", socket.inet_aton(p[IP_ADDR]), socket.htons(p[PORT]))
@@ -197,7 +284,6 @@ class Splitter_DBS(threading.Thread):
                self.peer_list.append(peer)                 
                self.deletions[peer] = 0
                self.losses[peer] = 0
-               #self.complains[peer] = 0
 
           # }}}
 
@@ -492,6 +578,228 @@ class Splitter_FNS(Splitter_DBS):
 
      # }}}
 
+# Super-Monitor Set of rules
+class Splitter_SMS(Splitter_FNS):
+
+     def __init__(self):
+          Splitter_FNS.__init__(self)
+
+          sys.stdout.write(Color.yellow)
+          print "Using SMS"
+          sys.stdout.write(Color.none)
+
+     def handle_peer_arrival(self, (peer_serve_socket, peer)):
+          # {{{
+
+          sys.stdout.write(Color.green)
+          print peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
+
+          # Send the header
+          print "Sending", len(self.header), "bytes"
+          peer_serve_socket.sendall(self.header)
+
+          # Send the buffer size.
+          message = struct.pack("H", socket.htons(self.BUFFER_SIZE))
+          peer_serve_socket.sendall(message)
+
+          # Send the chunk size.
+          message = struct.pack("H", socket.htons(self.CHUNK_SIZE))
+          peer_serve_socket.sendall(message)
+
+          print peer_serve_socket.getsockname(), '\b: sending the list of peers ...'
+
+          # Sends the size of the list of peers.
+          message = struct.pack("H", socket.htons(len(self.peer_list)))
+          peer_serve_socket.sendall(message)
+
+          # Send the list of peers.
+          counter = 0
+          prev = ""
+          for p in self.peer_list:
+               if p != prev:
+                     message = struct.pack("4sH", socket.inet_aton(p[IP_ADDR]), socket.htons(p[PORT]))
+                     peer_serve_socket.sendall(message)
+                     print "[%5d]" % counter, p
+                     counter += 1
+
+          print 'done'
+          sys.stdout.write(Color.none)
+
+          peer_serve_socket.close()
+
+          self.peer_list.append(peer)                 
+          self.deletions[peer] = 0
+          self.losses[peer] = 0
+
+          # }}}
+
+     def run(self):
+          # {{{
+
+          # {{{ Setup "peer_connection_socket"
+
+          # peer_connection_socket is used to listen to the incomming peers.
+          self.peer_connection_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+          try:
+               # This does not work in Windows systems.
+               self.peer_connection_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+          except:
+               pass
+          try:
+               self.peer_connection_socket.bind((self.ADDR, self.PORT))
+          except:
+               print self.peer_connection_socket.getsockname(), "\b: unable to bind", (self.ADDR, self.PORT)
+               print
+               return
+               
+          self.peer_connection_socket.listen(socket.SOMAXCONN) # Set the connection queue to the max!
+
+          # }}}
+          # {{{ Setup "team_socket"
+
+          # "team_socket" is used to talk to the peers of the team.
+          self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+          try:
+               # This does not work in Windows systems !!
+               self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+          except:
+               pass
+          self.team_socket.bind((self.ADDR, self.PORT))
+
+          # }}}
+
+          source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+          GET_message = 'GET ' + self.CHANNEL + ' HTTP/1.1\r\n'
+          GET_message += '\r\n'
+          def _():
+               source = (self.SOURCE_ADDR, self.SOURCE_PORT)
+               print source_socket.getsockname(), 'connecting to the source', source, '...'
+               source_socket.connect(source)
+               print source_socket.getsockname(), 'connected to', source
+
+               source_socket.sendall(GET_message)
+          _()
+
+          source = (self.SOURCE_ADDR, self.SOURCE_PORT)
+
+          def receive_next_chunk(GET, source, sock, size, header_length):
+               data = sock.recv(size)
+               prev_size = 0
+               while len(data) < size:
+                    if len(data) == prev_size:
+                         # This section of code is reached when
+                         # the streaming server (Icecast)
+                         # finishes a stream and starts with the
+                         # following one.
+                         print '\b!',
+                         sys.stdout.flush()
+                         #time.sleep(1)
+                         sock.close()
+                         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                         sock.connect(source)
+                         sock.sendall(GET)
+                         self.header = ""
+                         header_length = self.HEADER_LENGTH
+                         data = ""
+                    prev_size = len(data)
+                    data += sock.recv(size - len(data))
+               return data, sock, header_length
+
+          for i in xrange(self.HEADER_LENGTH):
+               self.header += receive_next_chunk(GET_message, source, source_socket, 1024, 0)[0]
+
+          print self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ..."
+          self.handle_peer_arrival(self.peer_connection_socket.accept())
+          '''
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          self.peer_list.append(self.peer_list[0]) # <----- New
+          '''
+          # MM1MM2
+          # MMMM12
+          threading.Thread(target=self.handle_arrivals).start()
+          threading.Thread(target=self.moderate_the_team).start()
+
+          chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
+
+          header_length = 0
+
+          while self.alive:
+               # Receive data from the source
+               chunk, source_socket, header_length = receive_next_chunk(GET_message, source, source_socket, self.CHUNK_SIZE, header_length)
+
+               if header_length > 0:
+                    print "Header length =", header_length
+                    self.header += chunk
+                    header_length -= 1
+
+               try:
+                    self.peer_list[self.peer_index]
+               except:
+                    pass
+               else:
+                    peer = self.peer_list[self.peer_index]
+
+               message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
+               self.team_socket.sendto(message, peer)
+
+               if __debug__:
+                    print '%5d' % self.chunk_number, Color.red, '->', Color.none, peer
+                    sys.stdout.flush()
+
+               self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
+               self.chunk_number = (self.chunk_number + 1) % 65536
+               self.peer_index = (self.peer_index + 1) % len(self.peer_list)
+
+               # Decrement (dividing by 2) the number of losses after
+               # every 256 sent chunks.
+               if (self.chunk_number % Splitter_DBS.LOSSES_MEMORY) == 0:
+                    for i in self.losses:
+                         self.losses[i] /= 2
+                    '''
+                    for i in self.complains:
+                         self.complains[i] /= 2
+                    '''
+
+          # }}}
+
 def main():
 
      # {{{ Args parsing
@@ -530,7 +838,8 @@ def main():
      # }}}
 
 #     splitter = Splitter_DBS()
-     splitter = Splitter_FNS()
+#     splitter = Splitter_FNS()
+     splitter = Splitter_SMS()
      splitter.start()
 
      # {{{ Prints information until keyboard interrupt

@@ -16,7 +16,7 @@ export SOURCE_ADDR="150.214.150.68"
 export SOURCE_PORT=4551
 export SPLITTER_PORT=5555
 export LIFE=60
-export BIRTHDAY=30
+export BIRTHDAY=10
 
 usage() {
     echo $0
