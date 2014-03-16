@@ -199,29 +199,62 @@ class Splitter_DBS(threading.Thread):
 
           # }}}
 
-     def send_haeder(self):
+     def send_header(self, peer_serve_socket):
           # {{{
 
+          print "Sending a header of", len(self.header), "bytes"
           peer_serve_socket.sendall(self.header)
 
           # }}}
 
-     def send_buffersize(self):
+     def send_buffersize(self, peer_serve_socket):
           # {{{
 
+          print "Sending a buffer_size of", self.BUFFER_SIZE, "bytes"
           message = struct.pack("H", socket.htons(self.BUFFER_SIZE))
           peer_serve_socket.sendall(message)
 
           # }}}
           
-     def send_shunksize(self):
+     def send_chunksize(self, peer_serve_socket):
           # {{{
 
+          print "Sending a chunk_size of", self.CHUNK_SIZE, "bytes"
           message = struct.pack("H", socket.htons(self.CHUNK_SIZE))
           peer_serve_socket.sendall(message)
 
           # }}}
 
+     def send_listsize(self, peer_serve_socket):
+          # {{{
+
+          print "Sending a list of peers whose size is", len(self.peer_list)
+          message = struct.pack("H", socket.htons(len(self.peer_list)))
+          peer_serve_socket.sendall(message)
+
+          # }}}
+
+     def send_list(self, peer_serve_socket):
+          # {{{
+
+          counter = 0
+          for p in self.peer_list:
+                message = struct.pack("4sH", socket.inet_aton(p[IP_ADDR]), socket.htons(p[PORT]))
+                peer_serve_socket.sendall(message)
+                print "[%5d]" % counter, p
+                counter += 1
+
+          # }}}
+
+     def append_peer(self, peer):
+          # {{{
+
+          if peer not in self.peer_list:
+               self.peer_list.append(peer)                 
+               self.deletions[peer] = 0
+               self.losses[peer] = 0
+
+          # }}}
 
      def handle_peer_arrival(self, (peer_serve_socket, peer)):
           # {{{
@@ -241,49 +274,14 @@ class Splitter_DBS(threading.Thread):
 
           sys.stdout.write(Color.green)
           print peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer
-
-          print "Sending a header of", len(self.header), "bytes"
-          send_header(self)
-
-          print "Sending a buffer_size of", self.BUFFER_SIZE, "bytes"
-          send_buffersize(self)
-
-          # {{{
-
-          # Send the chunk size.
-
-          # }}}
-          print "Sending a chunk_size of", self.CHUNK_SIZE, "bytes"
-          send_chunksize(self)
-
-          print peer_serve_socket.getsockname(), '\b: sending the list of peers ...'
-
-          # {{{
-
-          # Sends the size of the list of peers.
-
-          # }}}
-          print "Sending a list of peers whose size is", len(self.peer_list)
-          message = struct.pack("H", socket.htons(len(self.peer_list)))
-          peer_serve_socket.sendall(message)
-
-          print "Sending the list of peers"
-          counter = 0
-          for p in self.peer_list:
-                message = struct.pack("4sH", socket.inet_aton(p[IP_ADDR]), socket.htons(p[PORT]))
-                peer_serve_socket.sendall(message)
-                print "[%5d]" % counter, p
-                counter += 1
-
-          print 'done'
+          self.send_header(peer_serve_socket)
+          self.send_buffersize(peer_serve_socket)
+          self.send_chunksize(peer_serve_socket)
+          self.send_listsize(peer_serve_socket)
+          self.send_list(peer_serve_socket)
+          self.peer_serve_socket.close()
+          self.append_peer(peer)
           sys.stdout.write(Color.none)
-
-          peer_serve_socket.close()
-
-          if peer not in self.peer_list:
-               self.peer_list.append(peer)                 
-               self.deletions[peer] = 0
-               self.losses[peer] = 0
 
           # }}}
 
@@ -296,48 +294,48 @@ class Splitter_DBS(threading.Thread):
 
           # }}}
 
+     def receive_message(self):
+          # {{{
+
+          return self.team_socket.recvfrom(struct.calcsize("H"))
+
+          # }}}
+
      def moderate_the_team(self):
           # {{{
 
           while self.alive:
                # {{{
 
-               message, sender = self.team_socket.recvfrom(struct.calcsize("H"))
+               message, sender = self.receive_message()
+
                if len(message) == 2:
 
-                    # {{{ The peer complains about a lost chunk
+                    # {{{ The peer complains about a lost chunk.
 
-                    # The sender of the packet complains, and the
-                    # packet comes with the index of a lost
-                    # (non-received) chunk. In this situation, the
-                    # splitter counts the number of times a peer has
-                    # not achieved to send a chunk to other peers. If
-                    # this number exceeds a threshold, the
-                    # unsupportive peer is expelled from the
-                    # team. Moreover, if we receive too much complains
-                    # from the same peer, the problem could be in that
-                    # peer and it will be expelled from the team.
+                    # In this situation, the splitter counts the
+                    # number of times a peer has not achieved to send
+                    # a chunk to other peers. If this number exceeds a
+                    # threshold, the unsupportive peer is expelled
+                    # from the team. Moreover, if we receive too much
+                    # complains from the same peer, the problem could
+                    # be in that peer and it will be expelled from the
+                    # team.
 
                     lost_chunk = struct.unpack("!H",message)[0]
                     destination = self.destination_of_chunk[lost_chunk]
                     sys.stdout.write(Color.blue)
-                    print sender, "complains about lost chunk", lost_chunk, "sent to", destination, Color.none
+                    print sender, "complains about lost chunk", lost_chunk, "sent to", destination
                     sys.stdout.write(Color.none)
                     try:
-                         self.losses[destination]
-                    except:
-                         print "the unsupportive peer ", destination, "does not exist ???"
-                         for p in self.peer_list:
-                              print p,
-                         print
-                         pass
-                    else:
                          self.losses[destination] += 1
-                         print Color.blue, "\b", destination, "has loss", self.losses[destination], "chunks", Color.none
-                         if destination != self.peer_list[0]:
+                         sys.stdout.write(Color.blue)
+                         print destination, "has loss", self.losses[destination], "chunks"
+                         sys.stdout.write(Color.none)
+                         if destination != self.peer_list[0]: # Check it!!!!!
                               if self.losses[destination] > self.LOSSES_THRESHOLD:
                                    sys.stdout.write(Color.red)
-                                   print "Too much complains about unsupportive peer", destination, "\b. Removing it!"
+                                   print "Too much complains about the unsupportive peer", destination, "\b. Removing it!"
                                    self.peer_index -= 1
                                    try:
                                         self.peer_list.remove(destination)
@@ -346,15 +344,24 @@ class Splitter_DBS(threading.Thread):
                                    except:
                                         pass
                                    sys.stdout.write(Color.none)
+                    except KeyError:
+                         print "the unsupportive peer ", destination, "does not exist!"
+                         for p in self.peer_list:
+                              print p,
+                         print
+                    else:
+                         pass
                     finally:
                          pass
 
                     # }}}
 
                else:
-                    # {{{ The peer wants to leave the team
+                    # {{{ The peer wants to leave the team.
 
-                    # A zero-length payload means that the peer wants to go away
+                    # A !2-length payload means that the peer wants to
+                    # go away.
+
                     sys.stdout.write(Color.red)
                     print 'Received "goodbye" from', sender
                     sys.stdout.write(Color.none)
