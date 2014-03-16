@@ -114,7 +114,7 @@ class Splitter_DBS(threading.Thread):
 
      HEADER_LENGTH = 10 # In chunks
 
-     def print_modulename(self):
+     def __print_modulename__(self):
           # {{{
 
           sys.stdout.write(Color.yellow)
@@ -134,7 +134,7 @@ class Splitter_DBS(threading.Thread):
           else:
                print "release mode"
                
-          self.print_modulename()
+          self.__print_modulename__()
           print "Buffer size =", self.BUFFER_SIZE
           print "Chunk size =", self.CHUNK_SIZE
           print "Channel =", self.CHANNEL
@@ -569,12 +569,14 @@ class Splitter_DBS(threading.Thread):
 class Splitter_FNS(Splitter_DBS):
      # {{{
 
-     def __init__(self):
-          Splitter_DBS.__init__(self)
+     def __print_modulename__(self):
+          # {{{
 
           sys.stdout.write(Color.yellow)
           print "Using FNS"
           sys.stdout.write(Color.none)
+
+          # }}}
 
      def moderate_the_team(self):
           # {{{
