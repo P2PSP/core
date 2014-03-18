@@ -366,7 +366,7 @@ class Splitter_DBS(threading.Thread):
 
           # }}}
 
-     def __process_lost_chunk__(self, message):
+     def __process_lost_chunk__(self, message, sender):
           # {{{
 
           lost_chunk = self.__get_lost_chunk_index__(message)
@@ -414,7 +414,7 @@ class Splitter_DBS(threading.Thread):
                     # be in that peer and it will be expelled from the
                     # team.
 
-                    self.__process_lost_chunk__(self, message)
+                    self.__process_lost_chunk__(message, sender)
 
                     # }}}
 
@@ -706,8 +706,8 @@ def main():
      
      # }}}
 
-#     splitter = Splitter_DBS()
-     splitter = Splitter_FNS()
+     splitter = Splitter_DBS()
+#     splitter = Splitter_FNS()
 #     splitter = Splitter_SMS()
      splitter.start()
 
