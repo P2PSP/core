@@ -640,7 +640,8 @@ class Splitter_SMS(Splitter_FNS):
      def __init__(self):
           Splitter_FNS.__init__(self)
 
-          self.frequency = {}
+          self.period = {}
+          self.period_counter = {}
 
      def __print_modulename__(self):
           # {{{
@@ -655,19 +656,114 @@ class Splitter_SMS(Splitter_FNS):
           # {{{
 
           Splitter_DBS.__append_peer__(peer)
-          self.frequency[peer] = 1
+          self.period[peer] self.period_counter[peer] = 1
 
           # }}}
 
      def __increment_unsupportivity_of_peer__(self, peer):
           Splitter_DBS.__increment_unsupportivity_of_peer__(self, peer)
           try:
-               self.frequency[peer] -= 1
+               self.period[peer] += 1
+               self.period_counter[peer] = self.period[peer]
           except KeyError:
                pass
-          else:
-               if self.frequency[peer] < 1:
-                    self.frequency[peer] = 1
+
+     def __remove_peer__(self, peer):
+          # {{{
+
+          Splitter_DBS.__remove_peer__(peer)
+          try:
+               del self.period[peer]
+          except KeyError:
+               pass
+          try:
+               del self.period_counter[peer]
+          except KeyError:
+               pass
+
+          # }}}
+
+     def run(self):
+          # {{{
+
+          try:
+               self.__setup_peer_connection_socket__()
+          except: # Falta averiguar excepcion
+               print self.peer_connection_socket.getsockname(), "\b: unable to bind", (self.ADDR, self.PORT)
+               sys.exit('')
+
+          try:
+               self.__setup_team_socket__()
+          except: # Falta averiguar excepcion
+               print self.peer_team_socket.getsockname(), "\b: unable to bind", (self.ADDR, self.PORT)
+               sys.exit('')
+
+          source = (self.SOURCE_ADDR, self.SOURCE_PORT)
+          GET_message = 'GET ' + self.CHANNEL + ' HTTP/1.1\r\n'
+          GET_message += '\r\n'
+          source_socket = self.__request_video__(source, GET_message)
+
+          for i in xrange(self.HEADER_LENGTH):
+               self.header += self.__receive_next_chunk__(GET_message, source, source_socket, 1024, 0)[0]
+
+          print self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ..."
+          self.__handle_peer_arrival__(self.peer_connection_socket.accept())
+          threading.Thread(target=self.__handle_arrivals__).start()
+          threading.Thread(target=self.__moderate_the_team__).start()
+
+          chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
+
+          header_length = 0
+
+          while self.alive:
+               # Receive data from the source
+               chunk, source_socket, header_length = \
+                   self.__receive_next_chunk__(GET_message, source, source_socket, self.CHUNK_SIZE, \
+                                                    header_length)
+
+               if header_length > 0:
+                    print "Header length =", header_length
+                    self.header += chunk
+                    header_length -= 1
+
+               try:
+                    self.peer_list[self.peer_index]
+               except KeyError:
+                    pass
+               else:
+                    peer = self.peer_list[self.peer_index]
+
+               message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
+               self.team_socket.sendto(message, peer)
+
+               if __debug__:
+                    print '%5d' % self.chunk_number, Color.red, '->', Color.none, peer
+                    sys.stdout.flush()
+
+               self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
+               self.chunk_number = (self.chunk_number + 1) % 65536
+
+               while self.period_counter[self.peer_index] != 0:
+                    self.period_counter[self.peer_index] -= 1
+                    self.peer_index = (self.peer_index + 1) % len(self.peer_list)
+               #self.period_counter[self.peer_index] = self.period[self.peer_index]
+
+               # Decrement (dividing by 2) the number of losses after
+               # every 256 sent chunks.
+               if (self.chunk_number % Splitter_DBS.LOSSES_MEMORY) == 0:
+                    for i in self.losses:
+                         self.losses[i] /= 2
+                    '''
+                    for i in self.complains:
+                         self.complains[i] /= 2
+                    '''
+
+               if (self.chunk_number % 1024) == 0:
+                    for i in self.period:
+                         self.period[i] = ( self.period[i] + 1 ) / 2
+                         self.period_counter[i] = self.period[i]
+
+          # }}}
 
 def main():
 
@@ -707,8 +803,8 @@ def main():
      # }}}
 
 #     splitter = Splitter_DBS()
-     splitter = Splitter_FNS()
-#     splitter = Splitter_SMS()
+#     splitter = Splitter_FNS()
+     splitter = Splitter_SMS()
      splitter.start()
 
      # {{{ Prints information until keyboard interrupt
