@@ -616,7 +616,7 @@ class Splitter_FNS(Splitter_DBS):
                     # be in that peer and it will be expelled from the
                     # team.
 
-                    self.__process_lost_chunk__(self, message)
+                    self.__process_lost_chunk__(message, sender)
 
                     # }}}
 
@@ -706,8 +706,8 @@ def main():
      
      # }}}
 
-     splitter = Splitter_DBS()
-#     splitter = Splitter_FNS()
+#     splitter = Splitter_DBS()
+     splitter = Splitter_FNS()
 #     splitter = Splitter_SMS()
      splitter.start()
 

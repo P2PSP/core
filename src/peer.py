@@ -108,7 +108,7 @@ class Peer_DBS():
 
         # }}}
 
-    def run(self):
+    def start(self):
         # {{{
 
         # {{{ Setup "player_socket" and wait for the player
@@ -534,7 +534,7 @@ class Peer_FNS(Peer_DBS):
     def say_goodbye(self, node, sock):
         sock.sendto('G', node)
 
-    def run(self):
+    def start(self):
         # {{{
 
         # {{{ Setup "player_socket" and wait for the player
@@ -966,9 +966,9 @@ def main():
 
      # }}}
 
-     peer = Peer_DBS()
-#     peer = Peer_FNS()
-     peer.run()
+#     peer = Peer_DBS()
+     peer = Peer_FNS()
+     peer.start()
 
 if __name__ == "__main__":
      main()
