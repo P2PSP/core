@@ -816,10 +816,10 @@ def main():
           try:
                print "P:", len(splitter.peer_list),
                for p in splitter.peer_list:
-                    print p, '\b,', splitter.lossess[p],
+                    print p, '\b,', splitter.losses[p],
                     try:
                          print '\b,', splitter.period[p],
-                    except KeyError:
+                    except AttributeError:
                          pass
                print
                '''
