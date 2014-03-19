@@ -804,9 +804,9 @@ def main():
      
      # }}}
 
-#     splitter = Splitter_DBS()
+     splitter = Splitter_DBS()
 #     splitter = Splitter_FNS()
-     splitter = Splitter_SMS()
+#     splitter = Splitter_SMS()
      splitter.start()
 
      # {{{ Prints information until keyboard interrupt
@@ -814,7 +814,7 @@ def main():
      #last_chunk_number = 0
      while splitter.alive:
           try:
-               print "P:", len(splitter.peer_list),
+               print '%5d'% splitter.chunk_number, splitter.len(splitter.peer_list),
                for p in splitter.peer_list:
                     print p, '\b,', splitter.losses[p],
                     try:

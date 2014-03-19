@@ -966,8 +966,8 @@ def main():
 
      # }}}
 
-#     peer = Peer_DBS()
-     peer = Peer_FNS()
+     peer = Peer_DBS()
+#     peer = Peer_FNS()
      peer.start()
 
 if __name__ == "__main__":
