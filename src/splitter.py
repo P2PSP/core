@@ -817,6 +817,10 @@ def main():
                print "P:", len(splitter.peer_list),
                for p in splitter.peer_list:
                     print p,
+                    try:
+                         print '\b,', splitter.period[p],
+                    except KeyError:
+                         pass
                print
                '''
                print "[%3d] " % len(splitter.peer_list),
