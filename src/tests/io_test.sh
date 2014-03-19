@@ -1,7 +1,8 @@
 #!/bin/bash
 
 export BUFFER_SIZE=512
-export CHANNEL="/root/Videos/big_buck_bunny_480p_stereo.ogg"
+#export CHANNEL="/root/Videos/big_buck_bunny_480p_stereo.ogg"
+export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv "
 export SOURCE_ADDR="150.214.150.68"
 export SOURCE_PORT=4551
 export SPLITTER_PORT=4558
