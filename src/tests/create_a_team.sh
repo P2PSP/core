@@ -102,7 +102,7 @@ do
     sleep $BIRTHDAY
     export PORT=`shuf -i 2000-65000 -n 1`
 
-    xterm -sl 10000 q-e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
+    xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
 
     TIME=`shuf -i 1-$LIFE -n 1`
     timelimit -t $TIME vlc http://localhost:$PORT &
