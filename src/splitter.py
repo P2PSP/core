@@ -766,7 +766,7 @@ class Splitter_SMS(Splitter_FNS):
                          self.complains[i] /= 2
                     '''
 
-               if (self.chunk_number % 1024) == 0:
+               if (self.chunk_number % 128) == 0:
                     for i in self.period:
                          self.period[i] = ( self.period[i] + 1 ) / 2
                          self.period_counter[i] = self.period[i]
@@ -811,8 +811,8 @@ def main():
      # }}}
 
 #     splitter = Splitter_DBS()
-     splitter = Splitter_FNS()
-#     splitter = Splitter_SMS()
+#     splitter = Splitter_FNS()
+     splitter = Splitter_SMS()
      splitter.start()
 
      # {{{ Prints information until keyboard interrupt
@@ -850,7 +850,7 @@ def main():
 
                # Wake up the "moderate_the_team" daemon, which is waiting
                # in a cluster_sock.recvfrom(...).
-               splitter.say_goodbye(('127.0.0.1', splitter.PORT), splitter.team_socket)
+               splitter.say_goodbye((splitter.ADDR, splitter.PORT), splitter.team_socket)
 
                # Wake up the "handle_arrivals" daemon, which is waiting in a
                # peer_connection_sock.accept().
