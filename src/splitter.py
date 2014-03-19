@@ -168,7 +168,7 @@ class Splitter_DBS(threading.Thread):
           # Counts the number of times a peer has ben removed from the team.
 
           # }}}
-          self.deletions = {}
+          #self.deletions = {}
 
           self.chunk_number = 0
 
@@ -253,7 +253,7 @@ class Splitter_DBS(threading.Thread):
 
           if peer not in self.peer_list:
                self.peer_list.append(peer)                 
-          self.deletions[peer] = 0
+          #self.deletions[peer] = 0
           self.losses[peer] = 0
 
           # }}}
@@ -332,10 +332,10 @@ class Splitter_DBS(threading.Thread):
           except KeyError:
                pass
 
-          try:
-               del self.deletions[peer]
-          except KeyError:
-               pass
+          #try:
+          #     del self.deletions[peer]
+          #except KeyError:
+          #     pass
 
           # }}}
 
@@ -816,7 +816,7 @@ def main():
           try:
                print "P:", len(splitter.peer_list),
                for p in splitter.peer_list:
-                    print p,
+                    print p, '\b,', splitter.lossess[p],
                     try:
                          print '\b,', splitter.period[p],
                     except KeyError:
