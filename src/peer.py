@@ -452,12 +452,13 @@ class Peer_DBS():
         def send_next_chunk_to_the_player(player_socket):
             # {{{
 
+            self.chunk_to_play = (self.chunk_to_play + 1) % 65536
             while not self.received[self.chunk_to_play % self.buffer_size]:
-                self.chunk_to_play = (self.chunk_to_play + 1) % 65536
                 #checked_chunk = (self.chunk_to_play + self.buffer_size/2 - 10) % self.buffer_size
-                checked_chunk = chunk_to_play
+                checked_chunk = self.chunk_to_play % self.buffer_size
                 if not self.received[checked_chunk]:
                     complain(checked_chunk)
+                self.chunk_to_play = (self.chunk_to_play + 1) % 65536
 
             try:
                 player_socket.sendall(chunks[self.chunk_to_play % self.buffer_size])
@@ -915,7 +916,14 @@ class Peer_FNS(Peer_DBS):
 
                 for i in xrange(self.buffer_size):
                     if self.received[i]:
-                        sys.stdout.write(str(i%10))
+                        #print i, ((self.chunk_to_play-1) % self.buffer_size)
+                        if (i == ((self.chunk_to_play+1) % self.buffer_size)):
+                            sys.stdout.write(Color.yellow)
+                            sys.stdout.write('O')
+                            sys.stdout.write(Color.none)
+                        else:
+                            sys.stdout.write('o')
+#                        sys.stdout.write(str(i%10))
                     else:
                         sys.stdout.write('.')
                 print

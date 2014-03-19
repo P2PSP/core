@@ -201,6 +201,9 @@ class Splitter_DBS(threading.Thread):
 
           # }}}
 
+     def say_goodbye(self, node, sock):
+          sock.sendto('', node)
+
      def send_header(self, peer_serve_socket):
           # {{{
 
@@ -595,6 +598,9 @@ class Splitter_FNS(Splitter_DBS):
 
           # }}}
 
+     def say_goodbye(self, node, sock):
+          sock.sendto('G', node)
+
      def moderate_the_team(self):
           # {{{
 
@@ -842,9 +848,9 @@ def main():
 
                print splitter.peer_list[0]
 
-               # Wake up the "listen_to_the_cluster" daemon, which is waiting
+               # Wake up the "moderate_the_team" daemon, which is waiting
                # in a cluster_sock.recvfrom(...).
-               splitter.team_socket.sendto('',('127.0.0.1', splitter.PORT))
+               splitter.say_goodbye(('127.0.0.1', splitter.PORT), splitter.team_socket)
 
                # Wake up the "handle_arrivals" daemon, which is waiting in a
                # peer_connection_sock.accept().
