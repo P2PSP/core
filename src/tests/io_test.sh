@@ -4,7 +4,7 @@ export BUFFER_SIZE=256
 export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv"
 export SOURCE_ADDR="150.214.150.68"
 export SOURCE_PORT=4551
-export SPLITTER_PORT=4557
+export SPLITTER_PORT=4558
 
 usage() {
     echo $0
@@ -53,12 +53,12 @@ while getopts "b:c:s:o:p:?" opt; do
 done
 
 
-xterm -e '../splitter.py --buffer_size=$BUFFER_SIZE --channel $CHANNEL' &
+xterm -e '../splitter.py --buffer_size=$BUFFER_SIZE --channel $CHANNEL --port $SPLITTER_PORT' &
 
 sleep 1
 
-monitor_port=$(( $SPLITTER_PORT + 1 ))
-xterm -e '../peer.py --port $monitor_port --player_port 9998 --splitter_port $SPLITTER_PORT' &
+monitor_port=$[$SPLITTER_PORT+1]
+xterm -e '../peer.py --port $monitor_port --player_port 19999 --splitter_port $SPLITTER_PORT' &
 
-xterm -e 'netcat localhost $monitor_port  > /dev/null' &
+xterm -e 'netcat localhost 19999  > /dev/null' &
 
