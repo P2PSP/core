@@ -944,8 +944,8 @@ def main():
      parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP network.')
      parser.add_argument('--debt_memory', help='Number of chunks to receive to divide by two the debts counter. ({})'.format(Peer_DBS.DEBT_MEMORY))
      parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. ({})'.format(Peer_DBS.DEBT_THRESHOLD))
-     parser.add_argument('--player_port', help='Port used to communicate with the player. ("{}")'.format(Peer_DBS.PLAYER_PORT))
-     parser.add_argument('--port', help='Port to talk with the peers. ({})'.format(Peer_DBS.PORT))
+     parser.add_argument('--player_port', help='Port to communicate with the player. ({})'.format(Peer_DBS.PLAYER_PORT))
+     parser.add_argument('--port', help='Port to communicate with the peers. ({})'.format(Peer_DBS.PORT))
      parser.add_argument('--splitter_addr', help='IP address of the splitter. ({})'.format(Peer_DBS.SPLITTER_ADDR))
      parser.add_argument('--splitter_port', help='Listening port of the splitter. ({})'.format(Peer_DBS.SPLITTER_PORT))
 
