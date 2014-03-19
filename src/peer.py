@@ -454,7 +454,8 @@ class Peer_DBS():
 
             while not self.received[self.chunk_to_play % self.buffer_size]:
                 self.chunk_to_play = (self.chunk_to_play + 1) % 65536
-                checked_chunk = (self.chunk_to_play + self.buffer_size/2 - 10) % self.buffer_size
+                #checked_chunk = (self.chunk_to_play + self.buffer_size/2 - 10) % self.buffer_size
+                checked_chunk = chunk_to_play
                 if not self.received[checked_chunk]:
                     complain(checked_chunk)
 
