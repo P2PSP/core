@@ -53,12 +53,14 @@ while getopts "b:c:s:o:p:?" opt; do
 done
 
 
-xterm -e '../splitter.py --buffer_size=$BUFFER_SIZE --channel $CHANNEL --port $SPLITTER_PORT --losses_threshold 1024' &
+xterm -e '../splitter.py --buffer_size=$BUFFER_SIZE --channel $CHANNEL --port $SPLITTER_PORT --losses_threshold 256' &
 
 sleep 1
 
 export monitor_port=$[$SPLITTER_PORT+1]
-xterm -e '../peer.py --port $monitor_port --player_port 19999 --splitter_port $SPLITTER_PORT --debt_threshold 1024' &
+xterm -e '../peer.py --port $monitor_port --player_port 19999 --splitter_port $SPLITTER_PORT --debt_threshold 100' &
 
-xterm -e 'netcat localhost 19999  > /dev/null' &
+sleep 1
+
+xterm -e '/bin/netcat localhost 19999  > /dev/null' &
 
