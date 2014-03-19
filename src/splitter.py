@@ -383,7 +383,8 @@ class Splitter_DBS(threading.Thread):
                print sender, "complains about lost chunk", lost_chunk, "sent to", destination
                sys.stdout.write(Color.none)
 
-          self.increment_unsupportivity_of_peer(destination)
+          if (destination != self.peer_list[0]):
+               self.increment_unsupportivity_of_peer(destination)
 
           # }}}
 
