@@ -804,8 +804,8 @@ def main():
      
      # }}}
 
-     splitter = Splitter_DBS()
-#     splitter = Splitter_FNS()
+#     splitter = Splitter_DBS()
+     splitter = Splitter_FNS()
 #     splitter = Splitter_SMS()
      splitter.start()
 
@@ -816,9 +816,9 @@ def main():
           try:
                print '%5d'% splitter.chunk_number, len(splitter.peer_list),
                for p in splitter.peer_list:
-                    print p, '\b,', splitter.losses[p],
+                    print p, splitter.losses[p],
                     try:
-                         print '\b,', splitter.period[p],
+                         print splitter.period[p],
                     except AttributeError:
                          pass
                print
