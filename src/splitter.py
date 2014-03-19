@@ -353,9 +353,10 @@ class Splitter_DBS(threading.Thread):
                     print p,
                print
           else:
-               sys.stdout.write(Color.blue)
-               print peer, "has loss", self.losses[peer], "chunks"
-               sys.stdout.write(Color.none)
+               if __debug__:
+                    sys.stdout.write(Color.blue)
+                    print peer, "has loss", self.losses[peer], "chunks"
+                    sys.stdout.write(Color.none)
                if peer != self.peer_list[0]: # Check it!!!!!
                     if self.losses[peer] > self.LOSSES_THRESHOLD:
 
@@ -377,9 +378,10 @@ class Splitter_DBS(threading.Thread):
           lost_chunk = self.get_lost_chunk_index(message)
           destination = self.get_losser(lost_chunk)
 
-          sys.stdout.write(Color.blue)
-          print sender, "complains about lost chunk", lost_chunk, "sent to", destination
-          sys.stdout.write(Color.none)
+          if __debug__:
+               sys.stdout.write(Color.blue)
+               print sender, "complains about lost chunk", lost_chunk, "sent to", destination
+               sys.stdout.write(Color.none)
 
           self.increment_unsupportivity_of_peer(destination)
 
