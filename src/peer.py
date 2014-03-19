@@ -874,11 +874,13 @@ class Peer_FNS(Peer_DBS):
         def send_next_chunk_to_the_player(player_socket):
             # {{{
 
+            self.chunk_to_play = (self.chunk_to_play + 1) % 65536
             while not self.received[self.chunk_to_play % self.buffer_size]:
-                self.chunk_to_play = (self.chunk_to_play + 1) % 65536
-                checked_chunk = (self.chunk_to_play + self.buffer_size/2 - 10) % self.buffer_size
+                #checked_chunk = (self.chunk_to_play + self.buffer_size/2 - 10) % self.buffer_size
+                checked_chunk = self.chunk_to_play % self.buffer_size
                 if not self.received[checked_chunk]:
                     complain(checked_chunk)
+                self.chunk_to_play = (self.chunk_to_play + 1) % 65536
 
             try:
                 player_socket.sendall(chunks[self.chunk_to_play % self.buffer_size])
