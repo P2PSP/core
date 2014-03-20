@@ -921,19 +921,22 @@ class Peer_FNS(Peer_DBS):
                     for i in self.debt:
                         self.debt[i] /= 2
 
-                for i in xrange(self.buffer_size):
-                    if self.received[i]:
-                        #print i, ((self.chunk_to_play-1) % self.buffer_size)
-                        if (i == ((self.chunk_to_play+1) % self.buffer_size)):
-                            sys.stdout.write(Color.yellow)
-                            sys.stdout.write('O')
-                            sys.stdout.write(Color.none)
+                show_buffer = False
+                if show_buffer:
+                    for i in xrange(self.buffer_size):
+                        if self.received[i]:
+                            #print i, ((self.chunk_to_play-1) % self.buffer_size)
+                            if (i == ((self.chunk_to_play+1) % self.buffer_size)):
+                                sys.stdout.write(Color.yellow)
+                                sys.stdout.write('O')
+                                sys.stdout.write(Color.none)
+                            else:
+                                sys.stdout.write('o')
+    #                        sys.stdout.write(str(i%10))
                         else:
-                            sys.stdout.write('o')
-#                        sys.stdout.write(str(i%10))
-                    else:
-                        sys.stdout.write('.')
-                print
+                            sys.stdout.write('.')
+                    print
+
                 sys.stdout.write(Color.cyan)
                 print "Number of peers in the team:", len(self.peer_list)+1
                 print self.team_socket.getsockname(),
