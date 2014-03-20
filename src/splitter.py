@@ -777,7 +777,7 @@ class Splitter_SMS(Splitter_FNS):
                          self.complains[i] /= 2
                     '''
 
-               if (self.chunk_number % 1024) == 0:
+               if (self.chunk_number % 256) == 0:
                     for i in self.period:
                          self.period[i] = ( self.period[i] + 1 ) / 2
                          self.period_counter[i] = self.period[i]
