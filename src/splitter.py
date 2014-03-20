@@ -750,6 +750,10 @@ class Splitter_SMS(Splitter_FNS):
                message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
                self.team_socket.sendto(message, peer)
                self.number_of_sent_chunks_per_peer[peer] += 1
+               self.period[peer] -= 1
+               if self.period[peer] <1:
+                    self.period[peer] = 1
+               self.period_counter[peer] = self.period[peer]
 
                if __debug__:
                     print '%5d' % self.chunk_number, Color.red, '->', Color.none, peer
@@ -777,10 +781,12 @@ class Splitter_SMS(Splitter_FNS):
                          self.complains[i] /= 2
                     '''
 
+               '''
                if (self.chunk_number % 1024) == 0:
                     for i in self.period:
                          self.period[i] = ( self.period[i] + 1 ) / 2
                          self.period_counter[i] = self.period[i]
+               '''
 
           # }}}
 
