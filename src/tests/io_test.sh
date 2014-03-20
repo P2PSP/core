@@ -59,9 +59,9 @@ xterm -e '../splitter.py --buffer_size=$BUFFER_SIZE --channel $CHANNEL --port $S
 sleep 1
 
 export monitor_port=$[$SPLITTER_PORT+1]
-xterm -e '../peer.py --port $monitor_port --player_port 19999 --splitter_port $SPLITTER_PORT --debt_threshold 100' &
+xterm -e '../peer.py --port $monitor_port --player_port 19999 --splitter_port $SPLITTER_PORT --debt_threshold 10000 > /dev/null' &
 
 sleep 1
 
-xterm -e '/bin/netcat localhost 19999  > /dev/null' &
+xterm -e '/bin/netcat localhost 19999 > /dev/null' &
 
