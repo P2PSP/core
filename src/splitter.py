@@ -836,6 +836,7 @@ def main():
                     print p, splitter.losses[p],
                     try:
                          print splitter.period[p], splitter.number_of_sent_chunks_per_peer[p],
+                         splitter.number_of_sent_chunks_per_peer[p] = 0
                     except AttributeError:
                          pass
                print
