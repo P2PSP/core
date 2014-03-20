@@ -651,6 +651,7 @@ class Splitter_SMS(Splitter_FNS):
 
           self.period = {}
           self.period_counter = {}
+          self.number_of_sent_chunks_per_peer = {}
 
      def print_modulename(self):
           # {{{
@@ -666,6 +667,7 @@ class Splitter_SMS(Splitter_FNS):
 
           Splitter_DBS.append_peer(self, peer)
           self.period[peer] = self.period_counter[peer] = 1
+          self.number_of_sent_chunks_per_peer[peer] = 0
 
           # }}}
 
@@ -687,6 +689,11 @@ class Splitter_SMS(Splitter_FNS):
                pass
           try:
                del self.period_counter[peer]
+          except KeyError:
+               pass
+
+          try:
+               del self.number_of_sent_chunks_per_peer[peer]
           except KeyError:
                pass
 
@@ -742,6 +749,7 @@ class Splitter_SMS(Splitter_FNS):
 
                message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
                self.team_socket.sendto(message, peer)
+               self.number_of_sent_chunks_per_peer[peer] += 1
 
                if __debug__:
                     print '%5d' % self.chunk_number, Color.red, '->', Color.none, peer
@@ -827,7 +835,7 @@ def main():
                for p in splitter.peer_list:
                     print p, splitter.losses[p],
                     try:
-                         print splitter.period[p],
+                         print splitter.period[p], splitter.number_of_sent_chunks_per_peer[p],
                     except AttributeError:
                          pass
                print
