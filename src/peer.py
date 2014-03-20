@@ -331,7 +331,7 @@ class Peer_DBS():
                         team_socket.sendto(self.receive_and_feed_previous, peer)
 
                         self.debt[peer] += 1
-                        if self.debt[peer] > 10:
+                        if self.debt[peer] > self.DEBT_THRESHOLD:
                             del self.debt[peer]
                             self.peer_list.remove(peer)
                             print Color.red, peer, 'removed by unsupportive', Color.none
@@ -759,7 +759,7 @@ class Peer_FNS(Peer_DBS):
                         team_socket.sendto(self.receive_and_feed_previous, peer)
 
                         self.debt[peer] += 1
-                        if self.debt[peer] > 10:
+                        if self.debt[peer] > self.DEBT_THRESHOLD:
                             del self.debt[peer]
                             self.peer_list.remove(peer)
                             print Color.red, peer, 'removed by unsupportive', Color.none
