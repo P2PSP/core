@@ -92,7 +92,7 @@ xterm -sl 10000 -e '../splitter.py  --addr localhost --buffer_size=$BUFFER_SIZE 
 
 sleep 1
 
-xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
+xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT --monitor' &
 
 vlc http://localhost:9998 &
 

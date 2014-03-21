@@ -1,6 +1,12 @@
 #!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
+# Solo el peer monitor se queja al splitter. Si un peer no posee
+# suficiente ancho de banda para recibir o transmitir, el monitor
+# dejara de recibir sus chunks y el splitter lo descubrira a traves de
+# las quejas del monitor al splitter. Un monitor es un peer que se
+# queja y ademas el splitter le hace caso.
+
 # {{{ GNU GENERAL PUBLIC LICENSE
 
 # This is the splitter node of the P2PSP (Peer-to-Peer Simple Protocol)
@@ -56,7 +62,7 @@ class Peer_DBS():
         # {{{
         
         sys.stdout.write(Color.yellow)
-        print "Using DBS"
+        print "Peer DBS"
         sys.stdout.write(Color.none)
 
         print "Player port =", self.PLAYER_PORT
@@ -105,6 +111,30 @@ class Peer_DBS():
 
         print "List of peers received"
         sys.stdout.write(Color.none)
+
+        # }}}
+
+    def send_next_chunk_to_the_player(self, player_socket, splitter):
+        # {{{
+
+        self.chunk_to_play = (self.chunk_to_play + 1) % 65536
+        while not self.received[self.chunk_to_play % self.buffer_size]:
+            #checked_chunk = (self.chunk_to_play + self.buffer_size/2 - 10) % self.buffer_size
+            checked_chunk = self.chunk_to_play % self.buffer_size
+#            if not self.received[checked_chunk]:
+#                self.complain(checked_chunk, splitter)
+            self.chunk_to_play = (self.chunk_to_play + 1) % 65536
+
+        try:
+            player_socket.sendall(self.chunks[self.chunk_to_play % self.buffer_size])
+        except socket.error:
+            print 'Player disconected, ...',
+            self.player_alive = False
+
+        # We have fired the chunk.
+        self.received[self.chunk_to_play % self.buffer_size] = False
+
+        return self.chunk_to_play
 
         # }}}
 
@@ -228,7 +258,7 @@ class Peer_DBS():
         # time, the higher chunk-loss ratio. However, for the sake of
         # simpliticy, all peers will use the same buffer size.
 
-        chunks = [""]*self.buffer_size
+        self.chunks = [""]*self.buffer_size
         self.received = [False]*self.buffer_size
         numbers = [0]*self.buffer_size
         for i in xrange(0, self.buffer_size):
@@ -259,7 +289,7 @@ class Peer_DBS():
                     number, chunk = struct.unpack(chunk_format_string, message)
                     chunk_number = socket.ntohs(number)
 
-                    chunks[chunk_number % self.buffer_size] = chunk
+                    self.chunks[chunk_number % self.buffer_size] = chunk
                     self.received[chunk_number % self.buffer_size] = True
                     numbers[chunk_number % self.buffer_size] = chunk_number
 
@@ -439,40 +469,6 @@ class Peer_DBS():
 
         print 'latency =', time.time() - start_latency, 'seconds'
 
-        def complain(chunk):
-
-            # Complain to the splitter.
-            message = struct.pack("!H", chunk)
-            self.team_socket.sendto(message, splitter)
-
-            sys.stdout.write(Color.blue)
-            print "lost chunk:", numbers[chunk], chunk
-            sys.stdout.write(Color.none)            
-
-        def send_next_chunk_to_the_player(player_socket):
-            # {{{
-
-            self.chunk_to_play = (self.chunk_to_play + 1) % 65536
-            while not self.received[self.chunk_to_play % self.buffer_size]:
-                #checked_chunk = (self.chunk_to_play + self.buffer_size/2 - 10) % self.buffer_size
-                checked_chunk = self.chunk_to_play % self.buffer_size
-                if not self.received[checked_chunk]:
-                    complain(checked_chunk)
-                self.chunk_to_play = (self.chunk_to_play + 1) % 65536
-
-            try:
-                player_socket.sendall(chunks[self.chunk_to_play % self.buffer_size])
-            except socket.error:
-                print 'Player disconected, ...',
-                self.player_alive = False
-
-            # We have fired the chunk.
-            self.received[self.chunk_to_play % self.buffer_size] = False
-
-            return self.chunk_to_play
-
-            # }}}
-
         while self.player_alive:
 
             #sys.stdout.write("\033[2J\033[;H")
@@ -488,7 +484,7 @@ class Peer_DBS():
             if self.chunk_number >= 0:
 
                 while (self.chunk_number - self.chunk_to_play) > self.buffer_size/2:
-                    played_chunk = send_next_chunk_to_the_player(player_socket)
+                    played_chunk = self.send_next_chunk_to_the_player(player_socket, splitter)
 
                 if (self.chunk_number % self.DEBT_MEMORY) == 0:
                     for i in self.debt:
@@ -519,6 +515,49 @@ class Peer_DBS():
         # }}}
 
     # }}}
+
+class Monitor_DBS(Peer_DBS):
+
+    def __init__(self):
+        Peer_DBS.__init__(self)
+
+        sys.stdout.write(Color.yellow)
+        print "Monitor DBS"
+        sys.stdout.write(Color.none)
+
+    def complain(self, chunk, splitter):
+
+        # Complain to the splitter.
+        message = struct.pack("!H", chunk)
+        self.team_socket.sendto(message, splitter)
+
+        sys.stdout.write(Color.blue)
+        print "lost chunk:", numbers[chunk], chunk
+        sys.stdout.write(Color.none)
+
+    def send_next_chunk_to_the_player(self, player_socket, splitter):
+        # {{{
+
+        self.chunk_to_play = (self.chunk_to_play + 1) % 65536
+        while not self.received[self.chunk_to_play % self.buffer_size]:
+            #checked_chunk = (self.chunk_to_play + self.buffer_size/2 - 10) % self.buffer_size
+            checked_chunk = self.chunk_to_play % self.buffer_size
+            if not self.received[checked_chunk]:
+                self.complain(checked_chunk, splitter)
+            self.chunk_to_play = (self.chunk_to_play + 1) % 65536
+
+        try:
+            player_socket.sendall(self.chunks[self.chunk_to_play % self.buffer_size])
+        except socket.error:
+            print 'Player disconected, ...',
+            self.player_alive = False
+
+        # We have fired the chunk.
+        self.received[self.chunk_to_play % self.buffer_size] = False
+
+        return self.chunk_to_play
+
+        # }}}
 
 class Peer_FNS(Peer_DBS):
     # {{{
@@ -656,7 +695,7 @@ class Peer_FNS(Peer_DBS):
         # time, the higher chunk-loss ratio. However, for the sake of
         # simpliticy, all peers will use the same buffer size.
 
-        chunks = [""]*self.buffer_size
+        self.chunks = [""]*self.buffer_size
         self.received = [False]*self.buffer_size
         numbers = [0]*self.buffer_size
         for i in xrange(0, self.buffer_size):
@@ -687,7 +726,7 @@ class Peer_FNS(Peer_DBS):
                     number, chunk = struct.unpack(chunk_format_string, message)
                     chunk_number = socket.ntohs(number)
 
-                    chunks[chunk_number % self.buffer_size] = chunk
+                    self.chunks[chunk_number % self.buffer_size] = chunk
                     self.received[chunk_number % self.buffer_size] = True
                     numbers[chunk_number % self.buffer_size] = chunk_number
 
@@ -888,7 +927,7 @@ class Peer_FNS(Peer_DBS):
                 if counter<0:
                     break
             try:
-                player_socket.sendall(chunks[self.chunk_to_play % self.buffer_size])
+                player_socket.sendall(self.chunks[self.chunk_to_play % self.buffer_size])
             except socket.error:
                 print 'Player disconected, ...',
                 self.player_alive = False
@@ -956,38 +995,50 @@ class Peer_FNS(Peer_DBS):
 
     # }}}
 
+class Monitor_FNS(Peer_FNS, Monitor_DBS):
+    pass
+
 def main():
 
-     # {{{ Args parsing
+    # {{{ Args parsing
      
-     parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP network.')
-     parser.add_argument('--debt_memory', help='Number of chunks to receive to divide by two the debts counter. ({})'.format(Peer_DBS.DEBT_MEMORY))
-     parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. ({})'.format(Peer_DBS.DEBT_THRESHOLD))
-     parser.add_argument('--player_port', help='Port to communicate with the player. ({})'.format(Peer_DBS.PLAYER_PORT))
-     parser.add_argument('--port', help='Port to communicate with the peers. ({})'.format(Peer_DBS.PORT))
-     parser.add_argument('--splitter_addr', help='IP address of the splitter. ({})'.format(Peer_DBS.SPLITTER_ADDR))
-     parser.add_argument('--splitter_port', help='Listening port of the splitter. ({})'.format(Peer_DBS.SPLITTER_PORT))
+    monitor_mode = False
 
-     args = parser.parse_known_args()[0]
+    parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP network.')
+    parser.add_argument('--debt_memory', help='Number of chunks to receive to divide by two the debts counter. ({})'.format(Peer_DBS.DEBT_MEMORY))
+    parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. ({})'.format(Peer_DBS.DEBT_THRESHOLD))
+    parser.add_argument('--player_port', help='Port to communicate with the player. ({})'.format(Peer_DBS.PLAYER_PORT))
+    parser.add_argument('--port', help='Port to communicate with the peers. ({})'.format(Peer_DBS.PORT))
+    parser.add_argument('--splitter_addr', help='IP address of the splitter. ({})'.format(Peer_DBS.SPLITTER_ADDR))
+    parser.add_argument('--splitter_port', help='Listening port of the splitter. ({})'.format(Peer_DBS.SPLITTER_PORT))
+    parser.add_argument('--monitor', help='Run the peer in the monitor mode.', action='store_true')
+    
+    args = parser.parse_known_args()[0]
+    
+    if args.debt_memory:
+        Peer_DBS.DEBT_MEMORY = int(args.debt_memory)
+    if args.debt_threshold:
+        Peer_DBS.DEBT_THRESHOLD = int(args.debt_threshold)
+    if args.player_port:
+        Peer_DBS.PLAYER_PORT = int(args.player_port)
+    if args.splitter_addr:
+        Peer_DBS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
+    if args.splitter_port:
+        Peer_DBS.SPLITTER_PORT = int(args.splitter_port)
+    if args.port:
+        Peer_DBS.PORT = int(args.port)
+    if args.monitor:
+        monitor_mode = True
 
-     if args.debt_memory:
-         Peer_DBS.DEBT_MEMORY = int(args.debt_memory)
-     if args.debt_threshold:
-         Peer_DBS.DEBT_THRESHOLD = int(args.debt_threshold)
-     if args.player_port:
-         Peer_DBS.PLAYER_PORT = int(args.player_port)
-     if args.splitter_addr:
-         Peer_DBS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
-     if args.splitter_port:
-         Peer_DBS.SPLITTER_PORT = int(args.splitter_port)
-     if args.port:
-         Peer_DBS.PORT = int(args.port)
+    # }}}
 
-     # }}}
-
-#     peer = Peer_DBS()
-     peer = Peer_FNS()
-     peer.start()
+    if (monitor_mode == False):
+#        peer = Peer_DBS()
+        peer = Peer_FNS()
+    else:
+#        peer = Monitor_DBS()
+        peer = Monitor_FNS()
+    peer.start()
 
 if __name__ == "__main__":
      main()
