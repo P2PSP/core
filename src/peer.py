@@ -260,9 +260,9 @@ class Peer_DBS():
 
         self.chunks = [""]*self.buffer_size
         self.received = [False]*self.buffer_size
-        numbers = [0]*self.buffer_size
+        self.numbers = [0]*self.buffer_size
         for i in xrange(0, self.buffer_size):
-            numbers[i] = 0
+            self.numbers[i] = 0
 
         # }}}
 
@@ -291,7 +291,7 @@ class Peer_DBS():
 
                     self.chunks[chunk_number % self.buffer_size] = chunk
                     self.received[chunk_number % self.buffer_size] = True
-                    numbers[chunk_number % self.buffer_size] = chunk_number
+                    self.numbers[chunk_number % self.buffer_size] = chunk_number
 
                     if sender == splitter:
                         # {{{ Send the previous chunk in burst sending
@@ -532,7 +532,7 @@ class Monitor_DBS(Peer_DBS):
         self.team_socket.sendto(message, splitter)
 
         sys.stdout.write(Color.blue)
-        print "lost chunk:", numbers[chunk], chunk
+        print "lost chunk:", self.numbers[chunk], chunk
         sys.stdout.write(Color.none)
 
     def send_next_chunk_to_the_player(self, player_socket, splitter):
@@ -697,9 +697,9 @@ class Peer_FNS(Peer_DBS):
 
         self.chunks = [""]*self.buffer_size
         self.received = [False]*self.buffer_size
-        numbers = [0]*self.buffer_size
+        self.numbers = [0]*self.buffer_size
         for i in xrange(0, self.buffer_size):
-            numbers[i] = 0
+            self.numbers[i] = 0
 
         # }}}
 
@@ -728,7 +728,7 @@ class Peer_FNS(Peer_DBS):
 
                     self.chunks[chunk_number % self.buffer_size] = chunk
                     self.received[chunk_number % self.buffer_size] = True
-                    numbers[chunk_number % self.buffer_size] = chunk_number
+                    self.numbers[chunk_number % self.buffer_size] = chunk_number
 
                     if sender == splitter:
                         # {{{ Send the previous chunk in burst sending
@@ -907,7 +907,7 @@ class Peer_FNS(Peer_DBS):
             self.team_socket.sendto(message, splitter)
 
             sys.stdout.write(Color.blue)
-            print "lost chunk:", numbers[chunk], chunk
+            print "lost chunk:", self.numbers[chunk], chunk
             sys.stdout.write(Color.none)            
 
         def send_next_chunk_to_the_player(player_socket):
