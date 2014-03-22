@@ -995,7 +995,7 @@ class Peer_FNS(Peer_DBS):
 
     # }}}
 
-class Monitor_FNS(Peer_FNS, Monitor_DBS):
+class Monitor_FNS(Monitor_DBS, Peer_FNS):
     pass
 
 def main():
@@ -1032,12 +1032,12 @@ def main():
 
     # }}}
 
-    if (monitor_mode == False):
-#        peer = Peer_DBS()
-        peer = Peer_FNS()
-    else:
+    if monitor_mode :
 #        peer = Monitor_DBS()
         peer = Monitor_FNS()
+    else:
+#        peer = Peer_DBS()
+        peer = Peer_FNS()
     peer.start()
 
 if __name__ == "__main__":
