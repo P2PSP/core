@@ -34,16 +34,20 @@
 # This code implements the DBS peer side of the P2PSP.
 
 # {{{ Imports
-
+from __future__ import print_function
 import sys
 import socket
 import struct
 import time
 import argparse
 #import threading
-from color import Color
 
 # }}}
+
+#def print(*args, **kwargs):
+#    if 
+#        __builtins__.print("Custom--->", *args, **kwargs)
+
 
 IP_ADDR = 0
 PORT = 1
@@ -62,13 +66,13 @@ class Peer_DBS():
         # {{{
         
         sys.stdout.write(Color.yellow)
-        print "Peer DBS"
+        print("Peer DBS")
         sys.stdout.write(Color.none)
 
-        print "Player port =", self.PLAYER_PORT
-        print "Splitter IP address =", self.SPLITTER_ADDR
-        print "Splitter port =", self.SPLITTER_PORT
-        print "(Team) Port =", self.PORT
+        print("Player port =", self.PLAYER_PORT)
+        print("Splitter IP address =", self.SPLITTER_ADDR)
+        print("Splitter port =", self.SPLITTER_PORT)
+        print("(Team) Port =", self.PORT)
 
         self.peer_list = []
         self.buffer_size = 0
@@ -93,9 +97,9 @@ class Peer_DBS():
         # {{{
 
         sys.stdout.write(Color.green)
-        print "Requesting the list of peers to", splitter_socket.getpeername()
+        print("Requesting the list of peers to", splitter_socket.getpeername())
         number_of_peers = socket.ntohs(struct.unpack("H",splitter_socket.recv(struct.calcsize("H")))[0])
-        print "The size of the team is", number_of_peers, "(apart from me)"
+        print("The size of the team is", number_of_peers, "(apart from me)")
 
         while number_of_peers > 0:
             message = splitter_socket.recv(struct.calcsize("4sH"))
@@ -104,12 +108,13 @@ class Peer_DBS():
             port = socket.ntohs(port)
             peer = (IP_addr, port)
             #self.say_hello(peer, team_socket)
-            print "[%5d]" % number_of_peers, peer
+            if __debug__:
+                print("[%5d]" % number_of_peers, peer)
             self.peer_list.append(peer)
             self.debt[peer] = 0
             number_of_peers -= 1
 
-        print "List of peers received"
+        print(1, "List of peers received")
         sys.stdout.write(Color.none)
 
         # }}}
@@ -128,7 +133,7 @@ class Peer_DBS():
         try:
             player_socket.sendall(self.chunks[self.chunk_to_play % self.buffer_size])
         except socket.error:
-            print 'Player disconected, ...',
+            print ('Player disconected, ...',)
             self.player_alive = False
 
         # We have fired the chunk.
@@ -147,14 +152,15 @@ class Peer_DBS():
         try:
             # In Windows systems this call doesn't work!
             player_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except:
+        except Exception, e:
+            print (e)
             pass
         player_socket.bind(('', self.PLAYER_PORT))
         player_socket.listen(0)
-        print "Waiting for the player at", player_socket.getsockname()
+        print ("Waiting for the player at", player_socket.getsockname())
         player_socket = player_socket.accept()[0]
         #self.player_socket.setblocking(0)
-        print "The player is", player_socket.getpeername()
+        print ("The player is", player_socket.getpeername())
 
         # }}}
 
@@ -162,21 +168,23 @@ class Peer_DBS():
 
         splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         splitter = (self.SPLITTER_ADDR, self.SPLITTER_PORT)
-        print "Connecting to the splitter at", splitter
+        print ("Connecting to the splitter at", splitter)
         if self.PORT != 0:
             try:
                 splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            except:
+            except Exception, e:
+                print (e)
                 pass
             sys.stdout.write(Color.purple)
-            print "I'm using port the port", self.PORT
+            print ("I'm using port the port", self.PORT)
             sys.stdout.write(Color.none)
             splitter_socket.bind(("", self.PORT))
         try:
             splitter_socket.connect(splitter)
-        except:
+        except Exception, e:
+            print (e)
             sys.exit("Sorry. Can't connect to the splitter at " + str(splitter))
-        print "Connected to the splitter at", splitter
+        print ("Connected to the splitter at", splitter)
 
         # }}}
 
@@ -189,12 +197,13 @@ class Peer_DBS():
                 received += len(data)
                 try:
                     player_sock.sendall(data)
-                except:
-                    print "error sending data to the player"
-                    print "len(data) =", len(data)
-                print "received bytes:", received, "\r",
+                except Exception, e:
+                    print (e)
+                    print ("error sending data to the player")
+                    print ("len(data) =", len(data))
+                print ("received bytes:", received, "\r", end=" ")
 
-            print "Received", received, "bytes of header"
+            print ("Received", received, "bytes of header")
         _(splitter_socket, player_socket)
 
         # {{{ Receive from the splitter the buffer size
@@ -205,7 +214,7 @@ class Peer_DBS():
             buffer_size = socket.ntohs(buffer_size)
             return buffer_size
         self.buffer_size = _()
-        print "buffer_size =", self.buffer_size
+        print ("buffer_size =", self.buffer_size)
 
         # }}}
 
@@ -217,7 +226,7 @@ class Peer_DBS():
             chunk_size = socket.ntohs(chunk_size)
             return chunk_size
         self.chunk_size = _()
-        print "chunk_size =", self.chunk_size
+        print ("chunk_size =", self.chunk_size)
 
         # }}}
 
@@ -227,7 +236,8 @@ class Peer_DBS():
         try:
             # In Windows systems this call doesn't work!
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except:
+        except Exception, e:
+            print (e)
             pass
         self.team_socket.bind(('',splitter_socket.getsockname()[PORT]))
 
@@ -279,8 +289,8 @@ class Peer_DBS():
 
                 # {{{ debug
                 if __debug__:
-                    print Color.cyan, "Received a message from", sender, \
-                        "of length", len(message), Color.none
+                    print (Color.cyan, "Received a message from", sender, \
+                        "of length", len(message), Color.none)
                 # }}}
 
                 if len(message) == struct.calcsize(chunk_format_string):
@@ -301,8 +311,8 @@ class Peer_DBS():
                         # {{{ debug
 
                         if __debug__:
-                            print team_socket.getsockname(), \
-                                Color.red, "<-", Color.none, chunk_number, "-", sender
+                            print (team_socket.getsockname(), \
+                                Color.red, "<-", Color.none, chunk_number, "-", sender)
 
                         # }}}
 
@@ -312,16 +322,17 @@ class Peer_DBS():
 
                             # {{{ debug
                             if __debug__:
-                                print team_socket.getsockname(), "-",\
-                                    socket.ntohs(struct.unpack(chunk_format_string, self.receive_and_feed_previous)[0]),\
-                                    Color.green, "->", Color.none, peer
+                                print (team_socket.getsockname(), "-",\
+                                    socket.ntohs(struct.unpack(chunk_format_string, \
+                                                                   self.receive_and_feed_previous)[0]),\
+                                    Color.green, "->", Color.none, peer)
                             # }}}
 
                             self.debt[peer] += 1
                             if self.debt[peer] > self.DEBT_THRESHOLD:
                                 del self.debt[peer]
                                 self.peer_list.remove(peer)
-                                print Color.red, peer, 'removed by unsupportive', Color.none
+                                print (Color.red, peer, 'removed by unsupportive', Color.none)
 
                             self.receive_and_feed_counter += 1
 
@@ -335,8 +346,8 @@ class Peer_DBS():
                         # {{{ debug
 
                         if __debug__:
-                            print team_socket.getsockname(), \
-                                Color.green, "<-", Color.none, chunk_number, "-", sender
+                            print (team_socket.getsockname(), \
+                                Color.green, "<-", Color.none, chunk_number, "-", sender)
 
                         # }}}
 
@@ -344,8 +355,8 @@ class Peer_DBS():
                             # The peer is new
                             self.peer_list.append(sender)
                             self.debt[sender] = 0
-                            print Color.green, sender, 'added by data chunk', \
-                                chunk_number, Color.none
+                            print (Color.green, sender, 'added by data chunk', \
+                                chunk_number, Color.none)
                         else:
                             self.debt[sender] -= 1
 
@@ -364,13 +375,13 @@ class Peer_DBS():
                         if self.debt[peer] > self.DEBT_THRESHOLD:
                             del self.debt[peer]
                             self.peer_list.remove(peer)
-                            print Color.red, peer, 'removed by unsupportive', Color.none
+                            print (Color.red, peer, 'removed by unsupportive', Color.none)
 
                         # {{{ debug
                         if __debug__:
-                            print team_socket.getsockname(), "-", \
+                            print (team_socket.getsockname(), "-", \
                                 socket.ntohs(struct.unpack(chunk_format_string, self.receive_and_feed_previous)[0]),\
-                                Color.green, "->", Color.none, peer
+                                Color.green, "->", Color.none, peer)
                         # }}}
 
                         self.receive_and_feed_counter += 1        
@@ -396,7 +407,7 @@ class Peer_DBS():
                         pass
                     else:
                         sys.stdout.write(Color.red)
-                        print team_socket.getsockname(), '\b: received "goodbye" from', sender
+                        print (team_socket.getsockname(), '\b: received "goodbye" from', sender)
                         sys.stdout.write(Color.none)
                         self.peer_list.remove(sender)
                         del self.debt[sender]
@@ -442,7 +453,7 @@ class Peer_DBS():
         # waiting for traveling the player, we wil fill only the half of the
         # circular queue.
 
-        print self.team_socket.getsockname(), "\b: buffering ",
+        print (self.team_socket.getsockname(), "\b: buffering ",)
         sys.stdout.flush()
 
         # First chunk to be sent to the player.
@@ -456,18 +467,18 @@ class Peer_DBS():
         while self.chunk_number < 0:
             self.chunk_number = receive_and_feed(self.team_socket)
         self.chunk_to_play = self.chunk_number
-        print "First chunk to play", self.chunk_to_play
+        print ("First chunk to play", self.chunk_to_play)
 
         # Fill up to the half of the buffer
         for x in xrange(self.buffer_size/2):
-            print "\b!",
+            print ("\b!",)
             sys.stdout.flush()
             while receive_and_feed(self.team_socket) < 0:
                 pass
 
         # }}}
 
-        print 'latency =', time.time() - start_latency, 'seconds'
+        print ('latency =', time.time() - start_latency, 'seconds')
 
         while self.player_alive:
 
@@ -497,15 +508,15 @@ class Peer_DBS():
                         sys.stdout.write('.')
                 print
                 sys.stdout.write(Color.cyan)
-                print "Number of peers in the team:", len(self.peer_list)+1
-                print self.team_socket.getsockname(),
+                print ("Number of peers in the team:", len(self.peer_list)+1)
+                print (self.team_socket.getsockname(),)
                 for p in self.peer_list:
-                    print p,
+                    print (p,)
                 print
                 sys.stdout.write(Color.none)
 
         # The player has gone. Lets do a polite farewell.
-        print 'Goodbye!'
+        print ('Goodbye!')
         for x in xrange(3):
             receive_and_feed(self.team_socket)
             self.say_goodbye(splitter, self.team_socket)
@@ -517,12 +528,13 @@ class Peer_DBS():
     # }}}
 
 class Monitor_DBS(Peer_DBS):
+    # {{{
 
     def __init__(self):
         Peer_DBS.__init__(self)
 
         sys.stdout.write(Color.yellow)
-        print "Monitor DBS"
+        print ("Monitor DBS")
         sys.stdout.write(Color.none)
 
     def complain(self, chunk, splitter):
@@ -532,7 +544,7 @@ class Monitor_DBS(Peer_DBS):
         self.team_socket.sendto(message, splitter)
 
         sys.stdout.write(Color.blue)
-        print "lost chunk:", self.numbers[chunk], chunk
+        print ("lost chunk:", self.numbers[chunk], chunk)
         sys.stdout.write(Color.none)
 
     def send_next_chunk_to_the_player(self, player_socket, splitter):
@@ -548,8 +560,9 @@ class Monitor_DBS(Peer_DBS):
 
         try:
             player_socket.sendall(self.chunks[self.chunk_to_play % self.buffer_size])
-        except socket.error:
-            print 'Player disconected, ...',
+        except socket.error, e:
+            print (e)
+            print ('Player disconected, ...',)
             self.player_alive = False
 
         # We have fired the chunk.
@@ -559,6 +572,8 @@ class Monitor_DBS(Peer_DBS):
 
         # }}}
 
+    # }}}
+
 class Peer_FNS(Peer_DBS):
     # {{{
 
@@ -566,7 +581,7 @@ class Peer_FNS(Peer_DBS):
         Peer_DBS.__init__(self)
 
         sys.stdout.write(Color.yellow)
-        print "Using FNS"
+        print ("Peer FNS")
         sys.stdout.write(Color.none)
 
     def say_hello(self, node, sock):
@@ -584,14 +599,15 @@ class Peer_FNS(Peer_DBS):
         try:
             # In Windows systems this call doesn't work!
             player_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except:
+        except Exception, e:
+            print (e)
             pass
         player_socket.bind(('', self.PLAYER_PORT))
         player_socket.listen(0)
-        print "Waiting for the player at", player_socket.getsockname()
+        print ("Waiting for the player at", player_socket.getsockname())
         player_socket = player_socket.accept()[0]
         #self.player_socket.setblocking(0)
-        print "The player is", player_socket.getpeername()
+        print ("The player is", player_socket.getpeername())
 
         # }}}
 
@@ -599,21 +615,22 @@ class Peer_FNS(Peer_DBS):
 
         splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         splitter = (self.SPLITTER_ADDR, self.SPLITTER_PORT)
-        print "Connecting to the splitter at", splitter
+        print ("Connecting to the splitter at", splitter)
         if self.PORT != 0:
             try:
                 splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            except:
+            except Exception, e:
+                print (e)
                 pass
             sys.stdout.write(Color.purple)
-            print "I'm using port the port", self.PORT
+            print ("I'm using port the port", self.PORT)
             sys.stdout.write(Color.none)
             splitter_socket.bind(("", self.PORT))
         try:
             splitter_socket.connect(splitter)
         except:
             sys.exit("Sorry. Can't connect to the splitter at " + str(splitter))
-        print "Connected to the splitter at", splitter
+        print ("Connected to the splitter at", splitter)
 
         # }}}
 
@@ -626,12 +643,13 @@ class Peer_FNS(Peer_DBS):
                 received += len(data)
                 try:
                     player_sock.sendall(data)
-                except:
-                    print "error sending data to the player"
-                    print "len(data) =", len(data)
-                print "received bytes:", received, "\r",
+                except Exception, e:
+                    print (e)
+                    print ("error sending data to the player")
+                    print ("len(data) =", len(data))
+                print ("received bytes:", received, "\r",)
 
-            print "Received", received, "bytes of header"
+            print ("Received", received, "bytes of header")
         _(splitter_socket, player_socket)
 
         # {{{ Receive from the splitter the buffer size
@@ -642,7 +660,7 @@ class Peer_FNS(Peer_DBS):
             buffer_size = socket.ntohs(buffer_size)
             return buffer_size
         self.buffer_size = _()
-        print "buffer_size =", self.buffer_size
+        print ("buffer_size =", self.buffer_size)
 
         # }}}
 
@@ -654,7 +672,7 @@ class Peer_FNS(Peer_DBS):
             chunk_size = socket.ntohs(chunk_size)
             return chunk_size
         self.chunk_size = _()
-        print "chunk_size =", self.chunk_size
+        print ("chunk_size =", self.chunk_size)
 
         # }}}
 
@@ -664,7 +682,8 @@ class Peer_FNS(Peer_DBS):
         try:
             # In Windows systems this call doesn't work!
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except:
+        except Exception, e:
+            print (e)
             pass
         self.team_socket.bind(('',splitter_socket.getsockname()[PORT]))
 
@@ -716,8 +735,8 @@ class Peer_FNS(Peer_DBS):
 
                 # {{{ debug
                 if __debug__:
-                    print Color.cyan, "Received a message from", sender, \
-                        "of length", len(message), Color.none
+                    print (Color.cyan, "Received a message from", sender, \
+                        "of length", len(message), Color.none)
                 # }}}
 
                 if len(message) == struct.calcsize(chunk_format_string):
@@ -738,8 +757,8 @@ class Peer_FNS(Peer_DBS):
                         # {{{ debug
 
                         if __debug__:
-                            print team_socket.getsockname(), \
-                                Color.red, "<-", Color.none, chunk_number, "-", sender
+                            print (team_socket.getsockname(), \
+                                Color.red, "<-", Color.none, chunk_number, "-", sender)
 
                         # }}}
 
@@ -749,16 +768,16 @@ class Peer_FNS(Peer_DBS):
 
                             # {{{ debug
                             if __debug__:
-                                print team_socket.getsockname(), "-",\
+                                print (team_socket.getsockname(), "-",\
                                     socket.ntohs(struct.unpack(chunk_format_string, self.receive_and_feed_previous)[0]),\
-                                    Color.green, "->", Color.none, peer
+                                    Color.green, "->", Color.none, peer)
                             # }}}
 
                             self.debt[peer] += 1
                             if self.debt[peer] > self.DEBT_THRESHOLD:
                                 del self.debt[peer]
                                 self.peer_list.remove(peer)
-                                print Color.red, peer, 'removed by unsupportive', Color.none
+                                print (Color.red, peer, 'removed by unsupportive', Color.none)
 
                             self.receive_and_feed_counter += 1
 
@@ -772,8 +791,8 @@ class Peer_FNS(Peer_DBS):
                         # {{{ debug
 
                         if __debug__:
-                            print team_socket.getsockname(), \
-                                Color.green, "<-", Color.none, chunk_number, "-", sender
+                            print (team_socket.getsockname(), \
+                                Color.green, "<-", Color.none, chunk_number, "-", sender)
 
                         # }}}
 
@@ -781,8 +800,8 @@ class Peer_FNS(Peer_DBS):
                             # The peer is new
                             self.peer_list.append(sender)
                             self.debt[sender] = 0
-                            print Color.green, sender, 'added by data chunk', \
-                                chunk_number, Color.none
+                            print (Color.green, sender, 'added by data chunk', \
+                                chunk_number, Color.none)
                         else:
                             self.debt[sender] -= 1
 
@@ -801,13 +820,13 @@ class Peer_FNS(Peer_DBS):
                         if self.debt[peer] > self.DEBT_THRESHOLD:
                             del self.debt[peer]
                             self.peer_list.remove(peer)
-                            print Color.red, peer, 'removed by unsupportive', Color.none
+                            print (Color.red, peer, 'removed by unsupportive', Color.none)
 
                         # {{{ debug
                         if __debug__:
-                            print team_socket.getsockname(), "-", \
+                            print (team_socket.getsockname(), "-", \
                                 socket.ntohs(struct.unpack(chunk_format_string, self.receive_and_feed_previous)[0]),\
-                                Color.green, "->", Color.none, peer
+                                Color.green, "->", Color.none, peer)
                         # }}}
 
                         self.receive_and_feed_counter += 1        
@@ -824,7 +843,7 @@ class Peer_FNS(Peer_DBS):
 
                         try:
                             sys.stdout.write(Color.red)
-                            print 'Received "goodbye" from', sender
+                            print ('Received "goodbye" from', sender)
                             sys.stdout.write(Color.none)
                             self.peer_list.remove(sender)
                             del self.debt[sender]
@@ -873,7 +892,7 @@ class Peer_FNS(Peer_DBS):
         # waiting for traveling the player, we wil fill only the half of the
         # circular queue.
 
-        print self.team_socket.getsockname(), "\b: buffering ",
+        print (self.team_socket.getsockname(), "\b: buffering ",)
         sys.stdout.flush()
 
         # First chunk to be sent to the player.
@@ -887,18 +906,18 @@ class Peer_FNS(Peer_DBS):
         while self.chunk_number < 0:
             self.chunk_number = receive_and_feed(self.team_socket)
         self.chunk_to_play = self.chunk_number
-        print "First chunk to play", self.chunk_to_play
-
+        print ("First chunk to play", self.chunk_to_play)
+        
         # Fill up to the half of the buffer
         for x in xrange(self.buffer_size/2):
-            print "\b!",
+            print ("\b!",)
             sys.stdout.flush()
             while receive_and_feed(self.team_socket) < 0:
                 pass
 
         # }}}
 
-        print 'latency =', time.time() - start_latency, 'seconds'
+        print ('latency =', time.time() - start_latency, 'seconds')
 
         def complain(chunk):
 
@@ -907,7 +926,7 @@ class Peer_FNS(Peer_DBS):
             self.team_socket.sendto(message, splitter)
 
             sys.stdout.write(Color.blue)
-            print "lost chunk:", self.numbers[chunk], chunk
+            print ("lost chunk:", self.numbers[chunk], chunk)
             sys.stdout.write(Color.none)            
 
         def send_next_chunk_to_the_player(player_socket):
@@ -928,8 +947,9 @@ class Peer_FNS(Peer_DBS):
                     break
             try:
                 player_socket.sendall(self.chunks[self.chunk_to_play % self.buffer_size])
-            except socket.error:
-                print 'Player disconected, ...',
+            except socket.error, e:
+                print (e)
+                print ('Player disconected, ...',)
                 self.player_alive = False
 
             # We have fired the chunk.
@@ -977,14 +997,14 @@ class Peer_FNS(Peer_DBS):
                     print
 
                 sys.stdout.write(Color.cyan)
-                print "Number of peers in the team:", len(self.peer_list)+1
-                print self.team_socket.getsockname(),
+                print ("Number of peers in the team:", len(self.peer_list)+1)
+                print (self.team_socket.getsockname(),)
                 for p in self.peer_list:
-                    print p,
-                print
+                    print (p,)
+                print()
                 sys.stdout.write(Color.none)
 
-        print 'Goodbye!'
+        print ('Goodbye!')
         self.say_goodbye(splitter, self.team_socket)
         for x in xrange(3):
             receive_and_feed(self.team_socket)
@@ -996,12 +1016,22 @@ class Peer_FNS(Peer_DBS):
     # }}}
 
 class Monitor_FNS(Monitor_DBS, Peer_FNS):
-    pass
+    # {{{
+
+    def __init__(self):
+        Monitor_DBS.__init__(self)
+        Peer_DBS.__init__(self)
+
+        sys.stdout.write(Color.yellow)
+        print ("Monitor FNS")
+        sys.stdout.write(Color.none)
+
+    # }}}
 
 def main():
 
     # {{{ Args parsing
-     
+
     monitor_mode = False
 
     parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP network.')
@@ -1012,7 +1042,6 @@ def main():
     parser.add_argument('--splitter_addr', help='IP address of the splitter. ({})'.format(Peer_DBS.SPLITTER_ADDR))
     parser.add_argument('--splitter_port', help='Listening port of the splitter. ({})'.format(Peer_DBS.SPLITTER_PORT))
     parser.add_argument('--monitor', help='Run the peer in the monitor mode.', action='store_true')
-    
     args = parser.parse_known_args()[0]
     
     if args.debt_memory:
