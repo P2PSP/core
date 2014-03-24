@@ -119,7 +119,7 @@ class Splitter_DBS(threading.Thread):
 
           threading.Thread.__init__(self)
 
-          print "Splitter running in",
+          print "Running in",
           if __debug__:
                print "debug mode"
           else:
@@ -196,7 +196,7 @@ class Splitter_DBS(threading.Thread):
           # {{{
 
           sys.stdout.write(Color.yellow)
-          print "Using DBS"
+          print "Splitter DBS"
           sys.stdout.write(Color.none)
 
           # }}}
@@ -233,7 +233,7 @@ class Splitter_DBS(threading.Thread):
      def send_listsize(self, peer_serve_socket):
           # {{{
 
-          print "Sending a list of peers whose size is", len(self.peer_list)
+          print "Sending a list of peers of size", len(self.peer_list)
           message = struct.pack("H", socket.htons(len(self.peer_list)))
           peer_serve_socket.sendall(message)
 
@@ -632,8 +632,13 @@ class Splitter_FNS(Splitter_DBS):
                else:
                     # {{{ The peer wants to leave the team.
 
-                    if struct.unpack("s", message)[0] == 'G': # <G>oodbye
-                         self.process_goodbye(sender)
+                    try:
+                         print(len(message))
+                         if struct.unpack("s", message)[0] == 'G': # <G>oodbye
+                              self.process_goodbye(sender)
+                    except Exception, e:
+                         print(e)
+                         print(message)
 
                     # }}}
 
@@ -823,9 +828,9 @@ def main():
      
      # }}}
 
-#     splitter = Splitter_DBS()
+     splitter = Splitter_DBS()
 #     splitter = Splitter_FNS()
-     splitter = Splitter_SMS()
+#    splitter = Splitter_SMS()
      splitter.start()
 
      # {{{ Prints information until keyboard interrupt
