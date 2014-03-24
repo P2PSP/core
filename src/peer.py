@@ -41,6 +41,7 @@ import struct
 import time
 import argparse
 from color import Color
+import threading
 
 # }}}
 
@@ -52,7 +53,7 @@ from color import Color
 IP_ADDR = 0
 PORT = 1
 
-class Peer_DBS():
+class Peer_DBS(threading.Thread):
     # {{{
 
     PLAYER_PORT = 9999
@@ -64,6 +65,8 @@ class Peer_DBS():
 
     def __init__(self):
         # {{{
+        
+        threading.Thread.__init__(self)
 
         print("Running in", end=' ')
         if __debug__:
@@ -81,13 +84,13 @@ class Peer_DBS():
         self.peer_list = []
 #        self.buffer_size = 0
         self.player_alive = True
-#        self.chunk_number = 0
-#        self.chunk_size = 0
+        self.played_chunk = 0
+        self.chunk_size = 0
         self.receive_and_feed_counter = 0
         self.receive_and_feed_previous = ""
         self.received = []
         self.debt = {}
-#        self.team_socket = ""
+        #        self.team_socket = ""
 
         # }}}
 
@@ -131,6 +134,20 @@ class Peer_DBS():
         sys.stdout.write(Color.none)
 
         # }}}
+
+    def find_next_chunk(self):
+        chunk = self.played_chunk
+        while not self.received[chunk % self.buffer_size]:
+            chunk = (chunk + 1) % 65536
+        return chunk
+
+    def play_chunk(self, chunk):
+        try:
+            self.player_socket.sendall(self.chunks[chunk % self.buffer_size])
+        except socket.error, e:
+            print(e)
+            print('Player disconected, ...', end=' ')
+            self.player_alive = False
 
     def send_next_chunk_to_the_player(self):
         # {{{
@@ -387,7 +404,7 @@ class Peer_DBS():
 
         # }}}
 
-    def start(self):
+    def run(self):
         # {{{
 
         self.wait_for_the_player()
@@ -417,9 +434,6 @@ class Peer_DBS():
         self.numbers = [0]*self.buffer_size
 
         # }}}
-
-        total_chunks = 0
-
 
         # This "private and static" variable holds the previous chunk
         # received from the splitter. It is used to send the previous
@@ -471,7 +485,7 @@ class Peer_DBS():
 
         # Fill up to the half of the buffer
         for x in xrange(self.buffer_size/2):
-            print("\b!", end=' ')
+            print("!", end='')
             sys.stdout.flush()
             while self.receive_and_feed() < 0:
                 pass
@@ -495,7 +509,11 @@ class Peer_DBS():
             if chunk_number >= 0: # ???
 
                 while (chunk_number - self.played_chunk) > self.buffer_size/2:
-                    self.send_next_chunk_to_the_player()
+                    chunk = self.find_next_chunk()
+                    self.play_chunk(chunk)
+                    self.played_chunk = chunk
+                    self.received[self.played_chunk % self.buffer_size] = False
+#                    self.send_next_chunk_to_the_player()
 
                 if (chunk_number % self.DEBT_MEMORY) == 0:
                     for i in self.debt:
@@ -538,16 +556,21 @@ class Monitor_DBS(Peer_DBS):
         print("Monitor DBS")
         sys.stdout.write(Color.none)
 
-    def complain(self, chunk, splitter):
-
-        # Complain to the splitter.
+    def complain(self, chunk):
         message = struct.pack("!H", chunk)
-        self.team_socket.sendto(message, splitter)
+        self.team_socket.sendto(message, self.splitter)
 
         sys.stdout.write(Color.blue)
-        print ("lost chunk:", self.numbers[chunk], chunk)
+        print ("lost chunk:", self.numbers[chunk], chunk, self.received[chunk])
         sys.stdout.write(Color.none)
 
+    def find_next_chunk(self):
+        chunk = (self.played_chunk + 1) % 65536
+        while not self.received[chunk % self.buffer_size]:
+            self.complain(chunk % self.buffer_size)
+            chunk = (chunk + 1) % 65536
+        return chunk
+        
     def send_next_chunk_to_the_player(self):
         # {{{
 
@@ -591,7 +614,7 @@ class Peer_FNS(Peer_DBS):
     def say_goodbye(self, node, sock):
         sock.sendto('G', node)
 
-    def start(self):
+    def run(self):
         # {{{
 
         # {{{ Setup "player_socket" and wait for the player
@@ -1070,6 +1093,20 @@ def main():
 #        peer = Peer_FNS()
     peer.start()
 
+    last_chunk_number = 0
+    while peer.player_alive:
+        kbps = (peer.played_chunk - last_chunk_number) * peer.chunk_size/1000 * 8
+        last_chunk_number = peer.played_chunk
+        print('%5d' % kbps, end=' ')
+        print('%4d' % len(peer.peer_list), end=' ')
+        counter = 0
+        for p in peer.peer_list:
+            if (counter<10):
+                print(p, end=' ')
+                counter += 1
+        print() 
+        time.sleep(1)
+        
 if __name__ == "__main__":
      main()
 

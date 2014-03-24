@@ -315,8 +315,11 @@ class Splitter_DBS(threading.Thread):
 
      def get_losser(self, lost_chunk):
           # {{{
-
-          return self.destination_of_chunk[lost_chunk]
+          try:
+              return self.destination_of_chunk[lost_chunk]
+          except IndexError, e:
+              print(lost_chunk)
+              print(e)
 
           # }}}
 
