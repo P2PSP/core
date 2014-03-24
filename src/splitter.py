@@ -831,8 +831,8 @@ def main():
      
      # }}}
 
-     splitter = Splitter_DBS()
-#     splitter = Splitter_FNS()
+#     splitter = Splitter_DBS()
+     splitter = Splitter_FNS()
 #    splitter = Splitter_SMS()
      splitter.start()
 
