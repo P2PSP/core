@@ -94,7 +94,7 @@ class Splitter_DBS(threading.Thread):
 
     # }}}
 
-    ADDR = "150.214.150.68"
+    TEAM_ADDR = "150.214.150.68"
 
     # {{{
 
@@ -130,8 +130,8 @@ class Splitter_DBS(threading.Thread):
         print "Channel =", self.CHANNEL
         print "Source IP address =", self.SOURCE_ADDR
         print "Source port =", self.SOURCE_PORT
-        print "(Team) IP address =", self.ADDR
-        print "(Team) Port =", self.PORT
+        print "(Team) IP address =", self.TEAM_ADDR
+        print "(Team) Port =", self.TEAM_PORT
 
         # {{{
 
@@ -455,7 +455,7 @@ class Splitter_DBS(threading.Thread):
             pass
 
         try:
-            self.peer_connection_socket.bind((self.ADDR, self.PORT))
+            self.peer_connection_socket.bind((self.TEAM_ADDR, self.TEAM_PORT))
         except: # Falta averiguar excepcion
             raise
                
@@ -475,7 +475,7 @@ class Splitter_DBS(threading.Thread):
         except:
             pass
         try:
-            self.team_socket.bind((self.ADDR, self.PORT))
+            self.team_socket.bind((self.TEAM_ADDR, self.TEAM_PORT))
         except: # Falta averiguar excepcion
             raise
 
@@ -525,13 +525,13 @@ class Splitter_DBS(threading.Thread):
         try:
             self.setup_peer_connection_socket()
         except:
-            print self.peer_connection_socket.getsockname(), "\b: unable to bind", (self.ADDR, self.PORT)
+            print self.peer_connection_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT)
             sys.exit('')
 
         try:
             self.setup_team_socket()
         except:
-            print self.team_socket.getsockname(), "\b: unable to bind", (self.ADDR, self.PORT)
+            print self.team_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT)
             sys.exit('')
 
         source = (self.SOURCE_ADDR, self.SOURCE_PORT)
@@ -714,13 +714,13 @@ class Splitter_SMS(Splitter_FNS):
         try:
             self.setup_peer_connection_socket()
         except:
-            print self.peer_connection_socket.getsockname(), "\b: unable to bind", (self.ADDR, self.PORT)
+            print self.peer_connection_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT)
             sys.exit('')
 
         try:
             self.setup_team_socket()
         except:
-            print self.team_socket.getsockname(), "\b: unable to bind", (self.ADDR, self.PORT)
+            print self.team_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT)
             sys.exit('')
 
         source = (self.SOURCE_ADDR, self.SOURCE_PORT)
@@ -800,11 +800,11 @@ def main():
     # {{{ Args parsing
      
     parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP network.')
-    parser.add_argument('--addr', help='IP address to talk with the peers. (Default = "{}")'.format(Splitter_DBS.ADDR))
+    parser.add_argument('--team_addr', help='IP address to talk with the peers. (Default = "{}")'.format(Splitter_DBS.TEAM_ADDR))
     parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(Splitter_DBS.BUFFER_SIZE))
     parser.add_argument('--channel', help='Name of the channel served by the streaming source. (Default = "{}")'.format(Splitter_DBS.CHANNEL))
     parser.add_argument('--chunk_size', help='Chunk size in bytes. (Default = {})'.format(Splitter_DBS.CHUNK_SIZE))
-    parser.add_argument('--port', help='Port to talk with the peers. (Default = {})'.format(Splitter_DBS.PORT))
+    parser.add_argument('--team_port', help='Port to talk with the peers. (Default = {})'.format(Splitter_DBS.TEAM_PORT))
     parser.add_argument('--losses_memory', help='Number of chunks to divide by two the losses counters. (Default = {})'.format(Splitter_DBS.LOSSES_MEMORY))
     parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. (Default = {})'.format(Splitter_DBS.LOSSES_THRESHOLD))
     parser.add_argument('--source_addr', help='IP address of the streaming server. (Default = "{}")'.format(Splitter_DBS.SOURCE_ADDR))
@@ -817,10 +817,10 @@ def main():
         Splitter_DBS.SOURCE_PORT = int(args.source_port)
     if args.channel:
         Splitter_DBS.CHANNEL = args.channel
-    if args.addr:
-        Splitter_DBS.ADDR = socket.gethostbyname(args.addr)
-    if args.port:
-        Splitter_DBS.PORT = int(args.port)
+    if args.team_addr:
+        Splitter_DBS.TEAM_ADDR = socket.gethostbyname(args.team_addr)
+    if args.team_port:
+        Splitter_DBS.TEAM_PORT = int(args.team_port)
     if args.buffer_size:
         Splitter_DBS.BUFFER_SIZE = int(args.buffer_size)
     if args.chunk_size:
