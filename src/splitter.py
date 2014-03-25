@@ -674,7 +674,7 @@ class Splitter_SMS(Splitter_FNS):
         # {{{
 
         Splitter_DBS.append_peer(self, peer)
-        self.period[peer] = self.period_counter[peer] = 0
+        self.period[peer] = self.period_counter[peer] = 1
         self.number_of_sent_chunks_per_peer[peer] = 0
 
         # }}}
