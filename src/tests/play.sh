@@ -48,5 +48,5 @@ while getopts "d:m:s:l:?" opt; do
 done
 
 export PLAYER_PORT=`shuf -i 2000-65000 -n 1`
-xterm -e '../peer.py --port 4552 --player_port $PLAYER_PORT --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT --debt_threshold $DEBT_THRESHOLD --debt_memory $DEBT_MEMORY' &
+xterm -e '../peer.py --team_port 4552 --player_port $PLAYER_PORT --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT --debt_threshold $DEBT_THRESHOLD --debt_memory $DEBT_MEMORY' &
 vlc http://localhost:$PLAYER_PORT &

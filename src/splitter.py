@@ -101,7 +101,7 @@ class Splitter_DBS(threading.Thread):
     # Port to talk with the peers.
 
     # }}}
-    PORT = 4552
+    TEAM_PORT = 4552
 
     # {{{
 
@@ -798,7 +798,7 @@ class Splitter_SMS(Splitter_FNS):
 def main():
 
     # {{{ Args parsing
-     
+
     parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP network.')
     parser.add_argument('--team_addr', help='IP address to talk with the peers. (Default = "{}")'.format(Splitter_DBS.TEAM_ADDR))
     parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(Splitter_DBS.BUFFER_SIZE))
@@ -873,13 +873,13 @@ def main():
 
             # Wake up the "moderate_the_team" daemon, which is waiting
             # in a cluster_sock.recvfrom(...).
-            splitter.say_goodbye((splitter.ADDR, splitter.PORT), splitter.team_socket)
+            splitter.say_goodbye((splitter.TEAM_ADDR, splitter.TEAM_PORT), splitter.team_socket)
 
             # Wake up the "handle_arrivals" daemon, which is waiting
             # in a peer_connection_sock.accept().
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            print splitter.ADDR, splitter.PORT
-            sock.connect((splitter.ADDR, splitter.PORT))
+            print splitter.TEAM_ADDR, splitter.TEAM_PORT
+            sock.connect((splitter.TEAM_ADDR, splitter.TEAM_PORT))
             sock.recv(1024*10) # Header
             sock.recv(struct.calcsize("H")) # Buffer size
             sock.recv(struct.calcsize("H")) # Chunk size

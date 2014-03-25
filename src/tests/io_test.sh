@@ -68,7 +68,7 @@ xterm -e '../splitter.py --buffer_size=$BUFFER_SIZE --channel $CHANNEL --team_po
 sleep 1
 
 export monitor_port=$[$SPLITTER_PORT+1]
-xterm -e '../peer.py --port $monitor_port --player_port 19999 --splitter_port $SPLITTER_PORT --debt_threshold 10000 --monitor > /dev/null' &
+xterm -e '../peer.py --team_port $monitor_port --player_port 19999 --splitter_port $SPLITTER_PORT --debt_threshold 10000 --monitor > /dev/null' &
 
 sleep 1
 
