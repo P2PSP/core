@@ -466,53 +466,57 @@ class Peer_DBS(threading.Thread):
         print('latency =', time.time() - start_latency, 'seconds')
         # }}}
 
-    def buffer_data(self):
-        #  Wall time (execution time plus waiting time).
-        start_latency = time.time()
+    ## def buffer_data(self):
+    ##     #  Wall time (execution time plus waiting time).
+    ##     start_latency = time.time()
 
-        # {{{ Buffering
+    ##     # {{{ Buffering
 
-        # We will send a chunk to the player when a new chunk is
-        # received. Besides, those slots in the buffer that have not been
-        # filled by a new chunk will not be send to the player. Moreover,
-        # chunks can be delayed an unknown time. This means that (due to the
-        # jitter) after chunk X, the chunk X+Y can be received (instead of the
-        # chunk X+1). Alike, the chunk X-Y could follow the chunk X. Because
-        # we implement the buffer as a circular queue, in order to minimize
-        # the probability of a delayed chunk overwrites a new chunk that is
-        # waiting for traveling the player, we wil fill only the half of the
-        # circular queue.
+    ##     # We will send a chunk to the player when a new chunk is
+    ##     # received. Besides, those slots in the buffer that have not been
+    ##     # filled by a new chunk will not be send to the player. Moreover,
+    ##     # chunks can be delayed an unknown time. This means that (due to the
+    ##     # jitter) after chunk X, the chunk X+Y can be received (instead of the
+    ##     # chunk X+1). Alike, the chunk X-Y could follow the chunk X. Because
+    ##     # we implement the buffer as a circular queue, in order to minimize
+    ##     # the probability of a delayed chunk overwrites a new chunk that is
+    ##     # waiting for traveling the player, we wil fill only the half of the
+    ##     # circular queue.
 
-        print (self.team_socket.getsockname(), "\b: buffering ",)
-        sys.stdout.flush()
+    ##     print (self.team_socket.getsockname(), "\b: buffering ",)
+    ##     sys.stdout.flush()
 
-        # First chunk to be sent to the player.
-        chunk_number = self.receive_and_feed()
+    ##     # First chunk to be sent to the player.
+    ##     chunk_number = self.receive_and_feed()
 
-        # The receive_and_feed() procedure returns if a packet has been
-        # received or if a time-out exception has been arised. In the first
-        # case, the returned value is -1 if the packet contains a
-        # hello/goodbyte message or a number >= 0 if a chunk has been
-        # received. A -2 is returned if a time-out is has happened.
-        while chunk_number < 0:
-            chunk_number = self.receive_and_feed()
-        self.played_chunk = chunk_number
-        print ("First chunk to play", self.played_chunk)
+    ##     # The receive_and_feed() procedure returns if a packet has been
+    ##     # received or if a time-out exception has been arised. In the first
+    ##     # case, the returned value is -1 if the packet contains a
+    ##     # hello/goodbyte message or a number >= 0 if a chunk has been
+    ##     # received. A -2 is returned if a time-out is has happened.
+    ##     while chunk_number < 0:
+    ##         chunk_number = self.receive_and_feed()
+    ##     self.played_chunk = chunk_number
+    ##     print ("First chunk to play", self.played_chunk)
 
-        # Fill up to the half of the buffer
-        for x in xrange(self.buffer_size/2):
-            print("!", end='')
-            sys.stdout.flush()
-            while self.receive_and_feed() < 0:
-                pass
+    ##     # Fill up to the half of the buffer
+    ##     for x in xrange(self.buffer_size/2):
+    ##         print("!", end='')
+    ##         sys.stdout.flush()
+    ##         while self.receive_and_feed() < 0:
+    ##             pass
 
-        print('latency =', time.time() - start_latency, 'seconds')
-        # }}}
+    ##     print('latency =', time.time() - start_latency, 'seconds')
+    ##     # }}}
 
     def keep_the_buffer_full(self):
         chunk_number = self.receive_and_feed()
+        while chunk_number < 0:
+            chunk_number = self.receive_and_feed()
         while (chunk_number - self.played_chunk) < self.buffer_size/2:
             chunk_number = self.receive_and_feed()
+            while chunk_number < 0:
+                chunk_number = self.receive_and_feed()
         while (chunk_number - self.played_chunk) > self.buffer_size/2:
             chunk = self.find_next_chunk()
             self.play_chunk(chunk)

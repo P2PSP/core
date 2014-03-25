@@ -1,11 +1,20 @@
 #!/bin/sh
 
+export BUFFER_SIZE=512
+export CHANNEL="/root/Videos/big_buck_bunny_720p_stereo.ogg"
+
+#export BUFFER_SIZE=512
+#export CHANNEL="/root/Videos/big_buck_bunny_480p_stereo.ogg"
+
 #export BUFFER_SIZE=256
 #export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv"
+
 #export BUFFER_SIZE=128
 #export CHANNEL="/root/Audios/The_Last_of_the_Mohicans-Promentory.ogg"
-export BUFFER_SIZE=128
-export CHANNEL="/root/Videos/sintel_trailer-144p.ogg"
+
+#export BUFFER_SIZE=128
+#export CHANNEL="/root/Videos/sintel_trailer-144p.ogg"
+
 export CHUNK_SIZE=1024
 export DEBT_MEMORY=1024
 export DEBT_THRESHOLD=32
