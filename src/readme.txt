@@ -8,6 +8,6 @@ This is a description of the files/directories:
 
 * color.py: a class to print colorized messages in the console.
 
-* source-feeding: scripts to send a stream to a streaming server.
+* tools: some tools.
 
 * tests: scripts to test the implementation of the P2PSP.
