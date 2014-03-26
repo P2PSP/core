@@ -367,7 +367,7 @@ class Splitter_DBS(threading.Thread):
            if peer != self.peer_list[0]: # Check it!!!!!
                 if self.losses[peer] > self.LOSSES_THRESHOLD:
                      sys.stdout.write(Color.red)
-                     print("Too much complains about the unsupportive peer", peer, "\b. Removing it!")
+                     print("Too much complains", self.losses[peer], "about the unsupportive peer.", peer, "Removing it!")
                      self.remove_peer(peer)
                      sys.stdout.write(Color.none)
         finally:
@@ -845,8 +845,8 @@ def main():
             print('%5d' % splitter.chunk_number, end=' ')
             sys.stdout.write(Color.cyan)
             print(len(splitter.peer_list), end=' ')
-            sys.stdout.write(Color.blue)
             for p in splitter.peer_list:
+                sys.stdout.write(Color.blue)
                 print(p, end= ' ')
                 sys.stdout.write(Color.red)
                 print(splitter.losses[p], '<', splitter.LOSSES_THRESHOLD, end=' ') 
