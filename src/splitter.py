@@ -355,10 +355,7 @@ class Splitter_DBS(threading.Thread):
         try:
             self.losses[peer] += 1
         except KeyError:
-            print("the unsupportive peer ", peer, "does not exist!")
-            for p in self.peer_list:
-                print (p, sep=' ')
-            print()
+            print("the unsupportive peer", peer, "does not exist!")
         else:
            if __debug__:
                 sys.stdout.write(Color.blue)

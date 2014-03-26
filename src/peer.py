@@ -657,6 +657,8 @@ class Peer_FNS(Peer_DBS):
         self.splitter_socket.close()
         ###############################
         self.say_hello(self.splitter) #
+        self.say_hello(self.splitter) #
+        self.say_hello(self.splitter) #
         ###############################
         self.create_buffer()
         self.buffer_data()
