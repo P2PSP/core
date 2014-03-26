@@ -520,9 +520,10 @@ class Splitter_DBS(threading.Thread):
 
         try:
             self.setup_peer_connection_socket()
-        except:
+        except Exception, e:
+            print(e)
             print(self.peer_connection_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT))
-            sys.exit('')
+            sys.quit('')
 
         try:
             self.setup_team_socket()
