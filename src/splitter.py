@@ -42,6 +42,8 @@ from color import Color
 # Some useful definitions.
 IP_ADDR = 0
 PORT = 1
+MAX_INDEX = 65536
+#MAX_INDEX = 512
 
 # Data Broadcasting Set of rules
 class Splitter_DBS(threading.Thread):
@@ -575,7 +577,7 @@ class Splitter_DBS(threading.Thread):
                 sys.stdout.flush()
 
             self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
-            self.chunk_number = (self.chunk_number + 1) % 65536
+            self.chunk_number = (self.chunk_number + 1) % MAX_INDEX
             self.peer_index = (self.peer_index + 1) % len(self.peer_list)
 
             # Decrement (dividing by 2) the number of losses after
@@ -767,7 +769,7 @@ class Splitter_SMS(Splitter_FNS):
                 sys.stdout.flush()
 
             self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
-            self.chunk_number = (self.chunk_number + 1) % 65536
+            self.chunk_number = (self.chunk_number + 1) % MAX_INDEX
 
             while self.period_counter[peer] != 0:
                 self.period_counter[peer] -= 1

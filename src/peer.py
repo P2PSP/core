@@ -47,6 +47,8 @@ import threading
 
 IP_ADDR = 0
 PORT = 1
+MAX_INDEX = 65536
+#MAX_INDEX = 512
 
 class Peer_DBS(threading.Thread):
     # {{{
@@ -143,7 +145,7 @@ class Peer_DBS(threading.Thread):
     def find_next_chunk(self):
         chunk = self.played_chunk
         while not self.received[chunk % self.buffer_size]:
-            chunk = (chunk + 1) % 65536
+            chunk = (chunk + 1) % MAX_INDEX
         return chunk
 
     def play_chunk(self, chunk):
@@ -160,7 +162,7 @@ class Peer_DBS(threading.Thread):
         # Find next the chunk to play
         checked_chunk = self.played_chunk
         while not self.received[checked_chunk % self.buffer_size]:
-            checked_chunk = (checked_chunk + 1) % 65536
+            checked_chunk = (checked_chunk + 1) % MAX_INDEX
         
         try:
             self.player_socket.sendall(self.chunks[checked_chunk % self.buffer_size])
@@ -513,11 +515,11 @@ class Peer_DBS(threading.Thread):
         chunk_number = self.receive_and_feed()
         while chunk_number < 0:
             chunk_number = self.receive_and_feed()
-        while (chunk_number - self.played_chunk) < self.buffer_size/2:
+        while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
             chunk_number = self.receive_and_feed()
             while chunk_number < 0:
                 chunk_number = self.receive_and_feed()
-        while (chunk_number - self.played_chunk) > self.buffer_size/2:
+        while ((chunk_number - self.played_chunk) % self.buffer_size) > self.buffer_size/2:
             chunk = self.find_next_chunk()
             self.play_chunk(chunk)
             self.played_chunk = chunk
@@ -593,22 +595,22 @@ class Monitor_DBS(Peer_DBS):
         sys.stdout.write(Color.none)
 
     def find_next_chunk(self):
-        chunk = (self.played_chunk + 1) % 65536
+        chunk = (self.played_chunk + 1) % MAX_INDEX
         while not self.received[chunk % self.buffer_size]:
             self.complain(chunk % self.buffer_size)
-            chunk = (chunk + 1) % 65536
+            chunk = (chunk + 1) % MAX_INDEX
         return chunk
         
     def send_next_chunk_to_the_player(self):
         # {{{
 
-        self.played_chunk = (self.played_chunk + 1) % 65536
+        self.played_chunk = (self.played_chunk + 1) % MAX_INDEX
         while not self.received[self.played_chunk % self.buffer_size]:
             #checked_chunk = (self.played_chunk + self.buffer_size/2 - 10) % self.buffer_size
             checked_chunk = self.played_chunk % self.buffer_size
             if not self.received[checked_chunk]:
                 self.complain(checked_chunk, splitter)
-            self.played_chunk = (self.played_chunk + 1) % 65536
+            self.played_chunk = (self.played_chunk + 1) % MAX_INDEX
 
         try:
             self.player_socket.sendall(self.chunks[self.played_chunk % self.buffer_size])
@@ -729,8 +731,9 @@ def main():
         peer = Peer_FNS()
     peer.start()
 
-    last_chunk_number = 0
+    last_chunk_number = peer.played_chunk
     while peer.player_alive:
+        time.sleep(1)
         kbps = (peer.played_chunk - last_chunk_number) * peer.chunk_size/1000 * 8
         last_chunk_number = peer.played_chunk
         print('%5d' % kbps, end=' ')
@@ -741,7 +744,6 @@ def main():
                 print(p, end=' ')
                 counter += 1
         print() 
-        time.sleep(1)
         
 if __name__ == "__main__":
      main()
