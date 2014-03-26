@@ -63,7 +63,7 @@ while getopts "b:c:s:o:p:?" opt; do
 done
 
 
-xterm -e '../splitter.py --buffer_size=$BUFFER_SIZE --channel $CHANNEL --team_port $SPLITTER_PORT --losses_threshold 256' &
+xterm -e '../splitter.py --buffer_size=$BUFFER_SIZE --channel $CHANNEL --team_port $SPLITTER_PORT --losses_threshold 10000' &
 
 sleep 1
 
