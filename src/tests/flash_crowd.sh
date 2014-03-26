@@ -82,8 +82,8 @@ while getopts "b:c:u:d:l:m:w:s:o:p:t:?" opt; do
 done
 
 set -x
-xterm -e '../splitter.py  --addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
-xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --player_port 9998 --port $MONITOR_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
+xterm -e '../splitter.py  --team_addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --team_port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
+xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --player_port 9998 --team_port $MONITOR_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
 vlc http://localhost:9998 &
 sleep 1
 

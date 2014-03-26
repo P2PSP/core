@@ -1,11 +1,20 @@
 #!/bin/sh
 
+export BUFFER_SIZE=512
+export CHANNEL="/root/Videos/big_buck_bunny_720p_stereo.ogg"
+
+#export BUFFER_SIZE=512
+#export CHANNEL="/root/Videos/big_buck_bunny_480p_stereo.ogg"
+
 #export BUFFER_SIZE=256
 #export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv"
+
 #export BUFFER_SIZE=128
 #export CHANNEL="/root/Audios/The_Last_of_the_Mohicans-Promentory.ogg"
-export BUFFER_SIZE=128
-export CHANNEL="/root/Videos/sintel_trailer-144p.ogg"
+
+#export BUFFER_SIZE=128
+#export CHANNEL="/root/Videos/sintel_trailer-144p.ogg"
+
 export CHUNK_SIZE=1024
 export DEBT_MEMORY=1024
 export DEBT_THRESHOLD=32
@@ -16,7 +25,7 @@ export SOURCE_ADDR="150.214.150.68"
 export SOURCE_PORT=4551
 export SPLITTER_PORT=5555
 export LIFE=60
-export BIRTHDAY=30
+export BIRTHDAY=10
 
 usage() {
     echo $0
@@ -88,11 +97,12 @@ while getopts "b:c:u:m:d:i:e:l:s:o:p:?" opt; do
     esac
 done
 
-xterm -e '../splitter.py  --addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
+xterm -sl 10000 -e '../splitter.py  --team_addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --team_port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
 
 sleep 1
 
-xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
+xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT --monitor' &
+
 vlc http://localhost:9998 &
 
 x=1
@@ -101,7 +111,7 @@ do
     sleep $BIRTHDAY
     export PORT=`shuf -i 2000-65000 -n 1`
 
-    xterm -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
+    xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
 
     TIME=`shuf -i 1-$LIFE -n 1`
     timelimit -t $TIME vlc http://localhost:$PORT &
