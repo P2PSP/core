@@ -501,12 +501,12 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def receive_next_chunk(self, sock, size, header_length):
+    def receive_next_chunk(self, sock, header_length):
         # {{{
 
-        data = sock.recv(size)
+        data = sock.recv(self.CHUNK_SIZE)
         prev_size = 0
-        while len(data) < size:
+        while len(data) < self.CHUNK_SIZE:
             if len(data) == prev_size:
                 # This section of code is reached when the streaming
                 # server (Icecast) finishes a stream and starts with
@@ -522,7 +522,7 @@ class Splitter_DBS(threading.Thread):
                 header_length = self.HEADER_LENGTH
                 data = ""
             prev_size = len(data)
-            data += sock.recv(size - len(data))
+            data += sock.recv(self.CHUNK_SIZE - len(data))
         return data, sock, header_length
 
         # }}}
@@ -544,13 +544,10 @@ class Splitter_DBS(threading.Thread):
             print(self.team_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT))
             sys.exit('')
 
-        #source = (self.SOURCE_ADDR, self.SOURCE_PORT)
-        #GET_message = 'GET ' + self.CHANNEL + ' HTTP/1.1\r\n'
-        #GET_message += '\r\n'
         source_socket = self.request_video()
 
         for i in xrange(self.HEADER_LENGTH):
-            self.header += self.receive_next_chunk(source_socket, 1024, 0)[0]
+            self.header += self.receive_next_chunk(source_socket, 0)[0]
 
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
         self.handle_peer_arrival(self.peer_connection_socket.accept())
@@ -563,9 +560,7 @@ class Splitter_DBS(threading.Thread):
 
         while self.alive:
             # Receive data from the source
-            chunk, source_socket, header_length = \
-              self.receive_next_chunk(source_socket, self.CHUNK_SIZE, \
-                header_length)
+            chunk, source_socket, header_length = self.receive_next_chunk(source_socket, header_length)
 
             if header_length > 0:
                 print("Header length =", header_length)
@@ -674,9 +669,9 @@ class Splitter_ACS(Splitter_FNS):
 
         Splitter_FNS.__init__(self)
 
-        self.period = {}
-        self.period_counter = {}
-        self.number_of_sent_chunks_per_peer = {}
+        self.period = {}                         # Indexed by a peer (IP address, port)
+        self.period_counter = {}                 # Indexed by a peer (IP address, port)
+        self.number_of_sent_chunks_per_peer = {} # Indexed by a peer (IP address, port)
 
         # }}}
 
@@ -746,13 +741,10 @@ class Splitter_ACS(Splitter_FNS):
             print(self.team_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT))
             sys.exit('')
 
-        #source = (self.SOURCE_ADDR, self.SOURCE_PORT)
-        #GET_message = 'GET ' + self.CHANNEL + ' HTTP/1.1\r\n'
-        #GET_message += '\r\n'
         source_socket = self.request_video()
 
         for i in xrange(self.HEADER_LENGTH):
-            self.header += self.receive_next_chunk(source_socket, 1024, 0)[0]
+            self.header += self.receive_next_chunk(source_socket, 0)[0]
 
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
         self.handle_peer_arrival(self.peer_connection_socket.accept())
@@ -765,8 +757,7 @@ class Splitter_ACS(Splitter_FNS):
 
         while self.alive:
             # Receive data from the source
-            chunk, source_socket, header_length = \
-                self.receive_next_chunk(source_socket, self.CHUNK_SIZE, header_length)
+            chunk, source_socket, header_length = self.receive_next_chunk(source_socket, header_length)
 
             if header_length > 0:
                 print("Header length =", header_length)
@@ -782,6 +773,13 @@ class Splitter_ACS(Splitter_FNS):
             self.team_socket.sendto(message, peer)
             try:
                 self.number_of_sent_chunks_per_peer[peer] += 1
+            except KeyError:
+                pass
+            try:
+                self.period[peer] -= 1
+                if self.period[peer] < 1:
+                     self.period[peer] = 1
+                self.period_counter[peer] = self.period[peer]
             except KeyError:
                 pass
             #self.period[peer] = ( self.period[peer] + 1 ) / 2
@@ -800,7 +798,7 @@ class Splitter_ACS(Splitter_FNS):
                 try:
                     peer = self.peer_list[self.peer_index]
                 except KeyError:
-                    pass  
+                    pass
             self.period_counter[peer] = self.period[peer]
 
             # Decrement (dividing by 2) the number of losses after
@@ -813,10 +811,14 @@ class Splitter_ACS(Splitter_FNS):
                 self.complains[i] /= 2
                 '''
 
-            if (self.chunk_number % 1024) == 0:
-                for i in self.period:
-                    self.period[i] = ( self.period[i] + 1 ) / 2
-                    self.period_counter[i] = self.period[i]
+            # {{{
+
+            #if (self.chunk_number % 1024) == 0:
+            #    for i in self.period:
+            #        self.period[i] = ( self.period[i] + 1 ) / 2
+            #        self.period_counter[i] = self.period[i]
+
+            # }}}
 
     # }}}
 
@@ -864,7 +866,7 @@ def main():
     splitter = Splitter_ACS()
     splitter.start()
 
-    # {{{ Prints information until keyboard interrupt
+    # {{{ Prints information until keyboard interruption
 
     #last_chunk_number = 0
     while splitter.alive:

@@ -97,6 +97,15 @@ while getopts "b:c:u:m:d:i:e:l:s:o:p:?" opt; do
     esac
 done
 
+set -x
+
+#sudo tc qdisc del dev lo root
+#sudo tc qdisc add dev lo root handle 11: htb default 500 r2q 1
+#sudo tc class add dev lo parent 11: classid 11:1 htb rate 128kbps
+#sudo tc class add dev lo parent 11:1 classid 11:101 htb rate 64kbps
+#sudo tc qdisc add dev lo parent 11:101 handle 1001: sfq
+#sudo tc filter add dev lo parent 11: protocol ip handle 101 fw classid 11:101
+
 xterm -sl 10000 -e '../splitter.py  --team_addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --team_port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
 
 sleep 1
@@ -109,11 +118,19 @@ x=1
 while [ $x -le $ITERATIONS ]
 do
     sleep $BIRTHDAY
-    export PORT=`shuf -i 2000-65000 -n 1`
+    export PLAYER_PORT=`shuf -i 2000-65000 -n 1`
+    #export TEAM_PORT=`shuf -i 2000-65000 -n 1`
 
-    xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
+    #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j MARK --set-xmark 101
+    #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j RETURN
+
+    xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
+
+    #xterm -sl 10000 -e '../peer.py --team_port $TEAM_PORT --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
 
     TIME=`shuf -i 1-$LIFE -n 1`
-    timelimit -t $TIME vlc http://localhost:$PORT &
+    timelimit -t $TIME vlc http://localhost:$PLAYER_PORT &
     x=$(( $x + 1 ))
 done
+
+set +x

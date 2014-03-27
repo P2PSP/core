@@ -42,6 +42,7 @@ import time
 import argparse
 from color import Color
 import threading
+from lossy_socket import lossy_socket
 
 # }}}
 
@@ -62,7 +63,7 @@ class Peer_DBS(threading.Thread):
 
     def __init__(self):
         # {{{
-        
+
         threading.Thread.__init__(self)
 
         print("Running in", end=' ')
@@ -70,7 +71,7 @@ class Peer_DBS(threading.Thread):
             print("debug mode")
         else:
             print("release mode")
-            
+
         self.print_modulename()
 
         print("Player port =", self.PLAYER_PORT)
@@ -110,7 +111,7 @@ class Peer_DBS(threading.Thread):
         sys.stdout.write(Color.yellow)
         print("Peer DBS")
         sys.stdout.write(Color.none)
-        
+
         # }}}
 
     def say_goodbye(self, node):
@@ -175,7 +176,7 @@ class Peer_DBS(threading.Thread):
         checked_chunk = self.played_chunk
         while not self.received[checked_chunk % self.buffer_size]:
             checked_chunk = (checked_chunk + 1) % MAX_INDEX
-        
+
         try:
             self.player_socket.sendall(self.chunks[checked_chunk % self.buffer_size])
         except socket.error, e:
@@ -193,7 +194,7 @@ class Peer_DBS(threading.Thread):
     def wait_for_the_player(self):
         # {{{ Setup "player_socket" and wait for the player
 
-        self.player_socket =  socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
+        self.player_socket =  socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             # In Windows systems this call doesn't work!
             self.player_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -399,7 +400,7 @@ class Peer_DBS(threading.Thread):
                             Color.green, "->", Color.none, peer)
                     # }}}
 
-                    self.receive_and_feed_counter += 1        
+                    self.receive_and_feed_counter += 1
 
                     # }}}
                 # }}}
@@ -610,7 +611,7 @@ class Monitor_DBS(Peer_DBS):
         return chunk
 
         # }}}
-        
+
     def send_next_chunk_to_the_player(self):
         # {{{
 
@@ -619,7 +620,7 @@ class Monitor_DBS(Peer_DBS):
             #checked_chunk = (self.played_chunk + self.buffer_size/2 - 10) % self.buffer_size
             checked_chunk = self.played_chunk % self.buffer_size
             if not self.received[checked_chunk]:
-                self.complain(checked_chunk, splitter)
+                self.complain(checked_chunk)
             self.played_chunk = (self.played_chunk + 1) % MAX_INDEX
 
         try:
@@ -730,12 +731,46 @@ class Monitor_FNS(Monitor_DBS, Peer_FNS):
 
     # }}}
 
+class Lossy_Peer(Peer_FNS):
+
+    def __init__(self):
+        # {{{
+
+        Peer_FNS.__init__(self)
+
+        sys.stdout.write(Color.yellow)
+        print ("Lossy Peer")
+        sys.stdout.write(Color.none)
+
+        # }}}
+
+    def setup_team_socket(self):
+        # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
+
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+
+        self.team_socket = lossy_socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            # In Windows systems this call doesn't work!
+            self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        except Exception, e:
+            print (e)
+            pass
+        self.team_socket.bind(('', self.splitter_socket.getsockname()[PORT]))
+
+        # This is the maximum time the peer will wait for a chunk
+        # (from the splitter or from another peer).
+        self.team_socket.settimeout(1)
+
+        # }}}
+
+
 def main():
 
     # {{{ Args parsing
 
     monitor_mode = False
-    
+
     parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP network.')
     parser.add_argument('--debt_memory', help='Number of chunks to receive to divide by two the debts counter. ({})'.format(Peer_DBS.DEBT_MEMORY))
     parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. ({})'.format(Peer_DBS.DEBT_THRESHOLD))
@@ -745,7 +780,7 @@ def main():
     parser.add_argument('--splitter_port', help='Listening port of the splitter. ({})'.format(Peer_DBS.SPLITTER_PORT))
     parser.add_argument('--monitor', help='Run the peer in the monitor mode.', action='store_true')
     args = parser.parse_known_args()[0]
-    
+
     if args.debt_memory:
         Peer_DBS.DEBT_MEMORY = int(args.debt_memory)
     if args.debt_threshold:
@@ -768,7 +803,8 @@ def main():
         peer = Monitor_FNS()
     else:
 #        peer = Peer_DBS()
-        peer = Peer_FNS()
+#        peer = Peer_FNS()
+        peer = Lossy_Peer()
     peer.start()
 
     last_chunk_number = peer.played_chunk
@@ -783,8 +819,7 @@ def main():
             if (counter<10):
                 print(p, end=' ')
                 counter += 1
-        print() 
-        
+        print()
+
 if __name__ == "__main__":
      main()
-
