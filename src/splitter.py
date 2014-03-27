@@ -50,6 +50,8 @@ MAX_INDEX = 65536
 class Splitter_DBS(threading.Thread):
     # {{{ 
     
+    # {{{ Class "constants"
+
     # {{{
 
     # The buffer_size depends on the stream bit-rate and the maximun
@@ -115,6 +117,8 @@ class Splitter_DBS(threading.Thread):
     LOSSES_MEMORY = 1024
 
     HEADER_LENGTH = 10 # In chunks
+
+    # }}}
 
     def __init__(self):
         # {{{
@@ -194,6 +198,10 @@ class Splitter_DBS(threading.Thread):
 
         self.header = ""
 
+        self.source = (self.SOURCE_ADDR, self.SOURCE_PORT)
+        self.GET_message = 'GET ' + self.CHANNEL + ' HTTP/1.1\r\n'
+        self.GET_message += '\r\n'
+
         # }}}
 
     def print_modulename(self):
@@ -206,7 +214,11 @@ class Splitter_DBS(threading.Thread):
         # }}}
 
     def say_goodbye(self, node, sock):
+        # {{{
+
         sock.sendto('', node)
+
+        # }}}
 
     def send_header(self, peer_serve_socket):
         # {{{
@@ -477,19 +489,19 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def request_video(self, source, GET_message):
+    def request_video(self):
         # {{{
 
         source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print(source_socket.getsockname(), 'connecting to the source', source, '...')
-        source_socket.connect(source)
-        print(source_socket.getsockname(), 'connected to', source)
-        source_socket.sendall(GET_message)
+        print(source_socket.getsockname(), 'connecting to the source', self.source, '...')
+        source_socket.connect(self.source)
+        print(source_socket.getsockname(), 'connected to', self.source)
+        source_socket.sendall(self.GET_message)
         return source_socket
 
         # }}}
 
-    def receive_next_chunk(self, GET, source, sock, size, header_length):
+    def receive_next_chunk(self, sock, size, header_length):
         # {{{
 
         data = sock.recv(size)
@@ -504,8 +516,8 @@ class Splitter_DBS(threading.Thread):
                 #time.sleep(1)
                 sock.close()
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.connect(source)
-                sock.sendall(GET)
+                sock.connect(self.source)
+                sock.sendall(self.GET_message)
                 self.header = ""
                 header_length = self.HEADER_LENGTH
                 data = ""
@@ -514,7 +526,7 @@ class Splitter_DBS(threading.Thread):
         return data, sock, header_length
 
         # }}}
-
+        
     def run(self):
         # {{{
 
@@ -523,21 +535,22 @@ class Splitter_DBS(threading.Thread):
         except Exception, e:
             print(e)
             print(self.peer_connection_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT))
-            sys.quit('')
+            sys.exit('')
 
         try:
             self.setup_team_socket()
-        except:
+        except Exception, e:
+            print(e)
             print(self.team_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT))
             sys.exit('')
 
-        source = (self.SOURCE_ADDR, self.SOURCE_PORT)
-        GET_message = 'GET ' + self.CHANNEL + ' HTTP/1.1\r\n'
-        GET_message += '\r\n'
-        source_socket = self.request_video(source, GET_message)
+        #source = (self.SOURCE_ADDR, self.SOURCE_PORT)
+        #GET_message = 'GET ' + self.CHANNEL + ' HTTP/1.1\r\n'
+        #GET_message += '\r\n'
+        source_socket = self.request_video()
 
         for i in xrange(self.HEADER_LENGTH):
-            self.header += self.receive_next_chunk(GET_message, source, source_socket, 1024, 0)[0]
+            self.header += self.receive_next_chunk(source_socket, 1024, 0)[0]
 
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
         self.handle_peer_arrival(self.peer_connection_socket.accept())
@@ -551,7 +564,7 @@ class Splitter_DBS(threading.Thread):
         while self.alive:
             # Receive data from the source
             chunk, source_socket, header_length = \
-              self.receive_next_chunk(GET_message, source, source_socket, self.CHUNK_SIZE, \
+              self.receive_next_chunk(source_socket, self.CHUNK_SIZE, \
                 header_length)
 
             if header_length > 0:
@@ -603,7 +616,11 @@ class Splitter_FNS(Splitter_DBS):
         # }}}
 
     def say_goodbye(self, node, sock):
+        # {{{
+
         sock.sendto('G', node)
+
+        # }}}
 
     def moderate_the_team(self):
         # {{{
@@ -650,13 +667,18 @@ class Splitter_FNS(Splitter_DBS):
 
 # Adaptive Chunk-rate Set of rules
 class Splitter_ACS(Splitter_FNS):
+    # {{{
 
     def __init__(self):
+        # {{{
+
         Splitter_FNS.__init__(self)
 
         self.period = {}
         self.period_counter = {}
         self.number_of_sent_chunks_per_peer = {}
+
+        # }}}
 
     def print_modulename(self):
         # {{{
@@ -677,12 +699,16 @@ class Splitter_ACS(Splitter_FNS):
         # }}}
 
     def increment_unsupportivity_of_peer(self, peer):
+        # {{{
+
         Splitter_DBS.increment_unsupportivity_of_peer(self, peer)
         try:
             self.period[peer] += 1
             self.period_counter[peer] = self.period[peer]
         except KeyError:
             pass
+
+        # }}}
 
     def remove_peer(self, peer):
         # {{{
@@ -720,13 +746,13 @@ class Splitter_ACS(Splitter_FNS):
             print(self.team_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT))
             sys.exit('')
 
-        source = (self.SOURCE_ADDR, self.SOURCE_PORT)
-        GET_message = 'GET ' + self.CHANNEL + ' HTTP/1.1\r\n'
-        GET_message += '\r\n'
-        source_socket = self.request_video(source, GET_message)
+        #source = (self.SOURCE_ADDR, self.SOURCE_PORT)
+        #GET_message = 'GET ' + self.CHANNEL + ' HTTP/1.1\r\n'
+        #GET_message += '\r\n'
+        source_socket = self.request_video()
 
         for i in xrange(self.HEADER_LENGTH):
-            self.header += self.receive_next_chunk(GET_message, source, source_socket, 1024, 0)[0]
+            self.header += self.receive_next_chunk(source_socket, 1024, 0)[0]
 
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
         self.handle_peer_arrival(self.peer_connection_socket.accept())
@@ -740,8 +766,7 @@ class Splitter_ACS(Splitter_FNS):
         while self.alive:
             # Receive data from the source
             chunk, source_socket, header_length = \
-                self.receive_next_chunk(GET_message, source, source_socket, self.CHUNK_SIZE, \
-                    header_length)
+                self.receive_next_chunk(source_socket, self.CHUNK_SIZE, header_length)
 
             if header_length > 0:
                 print("Header length =", header_length)
@@ -755,7 +780,10 @@ class Splitter_ACS(Splitter_FNS):
 
             message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
             self.team_socket.sendto(message, peer)
-            self.number_of_sent_chunks_per_peer[peer] += 1
+            try:
+                self.number_of_sent_chunks_per_peer[peer] += 1
+            except KeyError:
+                pass
             #self.period[peer] = ( self.period[peer] + 1 ) / 2
             #self.period_counter[peer] = self.period[peer]
 
@@ -789,6 +817,8 @@ class Splitter_ACS(Splitter_FNS):
                 for i in self.period:
                     self.period[i] = ( self.period[i] + 1 ) / 2
                     self.period_counter[i] = self.period[i]
+
+    # }}}
 
     # }}}
 

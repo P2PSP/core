@@ -715,10 +715,18 @@ class Monitor_FNS(Monitor_DBS, Peer_FNS):
         # }}}
 
     def say_goodbye(self, node):
+        # {{{
+
         Peer_FNS.say_goodbye(self, node)
 
+        # }}}
+
     def run(self):
+        # {{{
+
         Peer_FNS.run(self)
+
+        # }}}
 
     # }}}
 
