@@ -747,9 +747,7 @@ class Lossy_Peer(Peer_FNS):
     def setup_team_socket(self):
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-
-        self.team_socket = lossy_socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.team_socket = lossy_socket(100, socket.AF_INET, socket.SOCK_DGRAM)
         try:
             # In Windows systems this call doesn't work!
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

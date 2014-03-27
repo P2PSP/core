@@ -369,16 +369,15 @@ class Splitter_DBS(threading.Thread):
         except KeyError:
             print("the unsupportive peer", peer, "does not exist!")
         else:
-           if __debug__:
+            if __debug__:
                 sys.stdout.write(Color.blue)
                 print(peer, "has loss", self.losses[peer], "chunks")
                 sys.stdout.write(Color.none)
-           if peer != self.peer_list[0]: # Check it!!!!!
-                if self.losses[peer] > self.LOSSES_THRESHOLD:
-                     sys.stdout.write(Color.red)
-                     print("Too much complains", self.losses[peer], "about the unsupportive peer.", peer, "Removing it!")
-                     self.remove_peer(peer)
-                     sys.stdout.write(Color.none)
+            if self.losses[peer] > self.LOSSES_THRESHOLD:
+                sys.stdout.write(Color.red)
+                print(peer, 'removed')
+                self.remove_peer(peer)
+                sys.stdout.write(Color.none)
         finally:
            pass
 
@@ -395,8 +394,8 @@ class Splitter_DBS(threading.Thread):
             print(sender, "complains about lost chunk", lost_chunk, "sent to", destination)
             sys.stdout.write(Color.none)
 
-        if (destination != self.peer_list[0]):
-            self.increment_unsupportivity_of_peer(destination)
+        #if (destination != self.peer_list[0]):
+        self.increment_unsupportivity_of_peer(destination)
 
         # }}}
 
@@ -408,8 +407,8 @@ class Splitter_DBS(threading.Thread):
         sys.stdout.write(Color.none)
         sys.stdout.flush()
 
-        if peer != self.peer_list[0]:
-            self.remove_peer(peer)
+        #if peer != self.peer_list[0]:
+        self.remove_peer(peer)
 
         # }}}
 
@@ -779,7 +778,7 @@ class Splitter_ACS(Splitter_FNS):
                 self.period[peer] -= 1
                 if self.period[peer] < 1:
                      self.period[peer] = 1
-                self.period_counter[peer] = self.period[peer]
+                #self.period_counter[peer] = self.period[peer]
             except KeyError:
                 pass
             #self.period[peer] = ( self.period[peer] + 1 ) / 2

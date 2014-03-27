@@ -29,18 +29,30 @@ from socket import socket
 
 class lossy_socket():
 
-    counter = 0
-
-    def __init__(self, *p):
+    def __init__(self, ratio, *p):
         self._sock = socket(*p)
-        #super(lossy_socket, self).__init__(*p)
-        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
+        self.counter = 0
+        self.ratio = ratio
 
-    def sendto(self, message, peer):
-        counter += 1
-        print('.')
-        if counter % 10:
-            super(lossy_socket, self).sendto(message, peer)
-            #super(lossy_socket, self).sendto('', peer)
-            counter = 0
-            print('.', end='')
+    def sendto(self, *p):
+        self.counter += 1
+        if (self.counter % self.ratio) != 0:
+            return self._sock.sendto(*p)
+        else:
+            print('Lost chunk!')
+            self.counter = 0
+
+    def bind(self, *p):
+        return self._sock.bind(*p)
+
+    def settimeout(self, *p):
+        return self._sock.settimeout(*p)
+
+    def getsockname(self, *p):
+        return self._sock.getsockname(*p)
+
+    def recvfrom(self, *p):
+        return self._sock.recvfrom(*p)
+
+    def setsockopt(self, *p):
+        return self._sock.setsockopt(*p)
