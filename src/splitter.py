@@ -525,7 +525,12 @@ class Splitter_DBS(threading.Thread):
         return data, sock, header_length
 
         # }}}
-        
+
+    def reset_counters(self):
+        for i in self.losses:
+            self.losses[i] /= 2
+            time.sleep(1)
+
     def run(self):
         # {{{
 
@@ -552,6 +557,7 @@ class Splitter_DBS(threading.Thread):
         self.handle_peer_arrival(self.peer_connection_socket.accept())
         threading.Thread(target=self.handle_arrivals).start()
         threading.Thread(target=self.moderate_the_team).start()
+        threading.Thread(target=self.reset_counters).start()
 
         chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
 
@@ -581,16 +587,6 @@ class Splitter_DBS(threading.Thread):
             self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
             self.chunk_number = (self.chunk_number + 1) % MAX_INDEX
             self.peer_index = (self.peer_index + 1) % len(self.peer_list)
-
-            # Decrement (dividing by 2) the number of losses after
-            # every 256 sent chunks.
-            if (self.chunk_number % Splitter_DBS.LOSSES_MEMORY) == 0:
-                for i in self.losses:
-                    self.losses[i] /= 2
-                '''
-                for i in self.complains:
-                self.complains[i] /= 2
-                '''
 
         # }}}
 
@@ -725,6 +721,13 @@ class Splitter_ACS(Splitter_FNS):
 
         # }}}
 
+    def reset_counters(self):
+        Splitter_DBS.reset_counters(self)
+        for i in self.period:
+            self.period[i] = ( self.period[i] + 1 ) / 2
+            self.period_counter[i] = self.period[i]
+        print("-.--------------------------__")
+            
     def run(self):
         # {{{
 
@@ -749,6 +752,7 @@ class Splitter_ACS(Splitter_FNS):
         self.handle_peer_arrival(self.peer_connection_socket.accept())
         threading.Thread(target=self.handle_arrivals).start()
         threading.Thread(target=self.moderate_the_team).start()
+        threading.Thread(target=self.reset_counters).start()
 
         chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
 
@@ -800,26 +804,8 @@ class Splitter_ACS(Splitter_FNS):
                     pass
             self.period_counter[peer] = self.period[peer]
 
-            # Decrement (dividing by 2) the number of losses after
-            # every 256 sent chunks.
-            if (self.chunk_number % Splitter_DBS.LOSSES_MEMORY) == 0:
-                for i in self.losses:
-                    self.losses[i] /= 2
-                '''
-                for i in self.complains:
-                self.complains[i] /= 2
-                '''
 
-            # {{{
-
-            #if (self.chunk_number % 1024) == 0:
-            #    for i in self.period:
-            #        self.period[i] = ( self.period[i] + 1 ) / 2
-            #        self.period_counter[i] = self.period[i]
-
-            # }}}
-
-    # }}}
+        # }}}
 
     # }}}
 
@@ -867,6 +853,8 @@ def main():
 
     # {{{ Prints information until keyboard interruption
 
+    # #Chunk #peers { peer #losses period #chunks }
+    
     #last_chunk_number = 0
     while splitter.alive:
         try:
@@ -887,6 +875,8 @@ def main():
                     splitter.number_of_sent_chunks_per_peer[p] = 0
                 except AttributeError:
                     pass
+                sys.stdout.write(Color.none)
+                print('|', end=' ')
             print()
             '''
             print "[%3d] " % len(splitter.peer_list),
