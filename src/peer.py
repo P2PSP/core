@@ -803,8 +803,8 @@ def main():
         peer = Monitor_FNS()
     else:
 #        peer = Peer_DBS()
-#        peer = Peer_FNS()
-        peer = Lossy_Peer(5)
+        peer = Peer_FNS()
+#        peer = Lossy_Peer(5)
     peer.start()
 
     last_chunk_number = peer.played_chunk
