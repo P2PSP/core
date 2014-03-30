@@ -416,7 +416,7 @@ class Splitter_DBS(threading.Thread):
         # {{{
 
         while self.alive:
-        # {{{
+            # {{{
 
             message, sender = self.receive_message()
 
@@ -726,7 +726,6 @@ class Splitter_ACS(Splitter_FNS):
         for i in self.period:
             self.period[i] = ( self.period[i] + 1 ) / 2
             self.period_counter[i] = self.period[i]
-        print("-.--------------------------__")
             
     def run(self):
         # {{{
@@ -778,15 +777,15 @@ class Splitter_ACS(Splitter_FNS):
                 self.number_of_sent_chunks_per_peer[peer] += 1
             except KeyError:
                 pass
-            try:
-                self.period[peer] -= 1
-                if self.period[peer] < 1:
-                     self.period[peer] = 1
-                #self.period_counter[peer] = self.period[peer]
-            except KeyError:
-                pass
-            #self.period[peer] = ( self.period[peer] + 1 ) / 2
-            #self.period_counter[peer] = self.period[peer]
+            ## try:
+            ##     self.period[peer] -= 1
+            ##     if self.period[peer] < 1:
+            ##          self.period[peer] = 1
+            ##     #self.period_counter[peer] = self.period[peer]
+            ## except KeyError:
+            ##     pass
+            ## #self.period[peer] = ( self.period[peer] + 1 ) / 2
+            ## #self.period_counter[peer] = self.period[peer]
 
             if __debug__:
                 print('%5d' % self.chunk_number, Color.red, '->', Color.none, peer)
@@ -802,8 +801,7 @@ class Splitter_ACS(Splitter_FNS):
                     peer = self.peer_list[self.peer_index]
                 except KeyError:
                     pass
-            self.period_counter[peer] = self.period[peer]
-
+            self.period_counter[peer] = self.period[peer] # ojo
 
         # }}}
 

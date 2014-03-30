@@ -733,7 +733,7 @@ class Monitor_FNS(Monitor_DBS, Peer_FNS):
 
 class Lossy_Peer(Peer_FNS):
 
-    def __init__(self):
+    def __init__(self, ratio):
         # {{{
 
         Peer_FNS.__init__(self)
@@ -742,12 +742,14 @@ class Lossy_Peer(Peer_FNS):
         print ("Lossy Peer")
         sys.stdout.write(Color.none)
 
+        self.ratio = ratio
+
         # }}}
 
     def setup_team_socket(self):
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
-        self.team_socket = lossy_socket(100, socket.AF_INET, socket.SOCK_DGRAM)
+        self.team_socket = lossy_socket(self.ratio, socket.AF_INET, socket.SOCK_DGRAM)
         try:
             # In Windows systems this call doesn't work!
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -802,7 +804,7 @@ def main():
     else:
 #        peer = Peer_DBS()
 #        peer = Peer_FNS()
-        peer = Lossy_Peer()
+        peer = Lossy_Peer(5)
     peer.start()
 
     last_chunk_number = peer.played_chunk

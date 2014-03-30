@@ -3,14 +3,14 @@
 #export BUFFER_SIZE=512
 #export CHANNEL="/root/Videos/big_buck_bunny_720p_stereo.ogg"
 
-export BUFFER_SIZE=512
-export CHANNEL="/root/Videos/big_buck_bunny_480p_stereo.ogg"
+#export BUFFER_SIZE=512
+#export CHANNEL="/root/Videos/big_buck_bunny_480p_stereo.ogg"
 
 #export BUFFER_SIZE=256
 #export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv"
 
-#export BUFFER_SIZE=128
-#export CHANNEL="/root/Audios/The_Last_of_the_Mohicans-Promentory.ogg"
+export BUFFER_SIZE=32
+export CHANNEL="/root/Audios/The_Last_of_the_Mohicans-Promentory.ogg"
 
 #export BUFFER_SIZE=128
 #export CHANNEL="/root/Videos/sintel_trailer-144p.ogg"
@@ -40,12 +40,14 @@ usage() {
     echo "  [-s source IP address, ($SOURCE_ADDR)]"
     echo "  [-o source port ($SOURCE_PORT)]"
     echo "  [-p splitter port ($SPLITTER_PORT)]"
+    echo "  [-f life ($LIFE)]"
+    echo "  [-y life ($BIRTHDAY)]"
     echo "  [-? help]"
 }
 
 echo $0: parsing: $@
 
-while getopts "b:c:u:m:d:i:e:l:s:o:p:?" opt; do
+while getopts "b:c:u:m:d:i:e:l:s:o:p:f:y:?" opt; do
     case ${opt} in
 	b)
 	    BUFFER_SIZE="${OPTARG}"
@@ -79,6 +81,12 @@ while getopts "b:c:u:m:d:i:e:l:s:o:p:?" opt; do
 	    ;;
 	p)
 	    SPLITTER_PORT="${OPTARG}"
+	    ;;
+	f)
+	    LIFE="${OPTARG}"
+	    ;;
+	f)
+	    BIRTHDAY="${OPTARG}"
 	    ;;
 	?)
 	    usage
