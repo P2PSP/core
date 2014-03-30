@@ -14,7 +14,7 @@ export CHANNEL="/root/Videos/big_buck_bunny_720p_stereo.ogg"
 
 export SOURCE_ADDR="150.214.150.68"
 export SOURCE_PORT=4551
-export SPLITTER_PORT=4558
+export SPLITTER_PORT=4560
 
 usage() {
     echo $0
