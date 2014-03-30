@@ -1,10 +1,10 @@
 #!/bin/bash
 
-export BUFFER_SIZE=1024
-export CHANNEL="/root/Videos/big_buck_bunny_1080p_stereo.ogg"
+#export BUFFER_SIZE=1024
+#export CHANNEL="/root/Videos/big_buck_bunny_1080p_stereo.ogg"
 
-#export BUFFER_SIZE=512
-#export CHANNEL="/root/Videos/big_buck_bunny_720p_stereo.ogg"
+export BUFFER_SIZE=512
+export CHANNEL="/root/Videos/big_buck_bunny_720p_stereo.ogg"
 
 #export BUFFER_SIZE=512
 #export CHANNEL="/root/Videos/big_buck_bunny_480p_stereo.ogg"
