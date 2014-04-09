@@ -26,6 +26,7 @@ export SOURCE_PORT=4551
 export SPLITTER_PORT=5555
 export LIFE=60
 export BIRTHDAY=10
+export LOSS_PERIOD=10
 
 usage() {
     echo $0
@@ -41,52 +42,70 @@ usage() {
     echo "  [-o source port ($SOURCE_PORT)]"
     echo "  [-p splitter port ($SPLITTER_PORT)]"
     echo "  [-f life ($LIFE)]"
-    echo "  [-y life ($BIRTHDAY)]"
+    echo "  [-y birthday ($BIRTHDAY)]"
+    echo "  [-w loss period ($LOSS_PERIOD)]"
     echo "  [-? help]"
 }
 
 echo $0: parsing: $@
 
-while getopts "b:c:u:m:d:i:e:l:s:o:p:f:y:?" opt; do
+while getopts "b:c:u:m:d:i:e:l:s:o:p:f:y:w:?" opt; do
     case ${opt} in
 	b)
 	    BUFFER_SIZE="${OPTARG}"
+	    echo "BUFFER_SIZE="$BUFFER_SIZE
 	    ;;
 	c)
 	    CHANNEL="${OPTARG}"
+	    echo "CHANNEL="$CHANNEL
 	    ;;
 	u)
 	    CHUNK_SIZE="${OPTARG}"
+	    echo "CHUNK_SIZE="$CHUNK_SIZE
 	    ;;
 	m)
 	    DEBT_MEMORY="${OPTARG}"
+	    echo "DEBT_MEMORY="$DEBT_MEMORY
 	    ;;
 	d)
 	    DEBT_THRESHOLD="${OPTARG}"
+	    echo "DEBT_THRESHOLD="$DEBT_THRESHOLD
 	    ;;
 	i)
 	    ITERATIONS="${OPTARG}"
+	    echo "ITERATIONS="$DEBT_THRESHOLD=
 	    ;;
 	e)
 	    LOSSES_MEMORY="${OPTARG}"
+	    echo "LOSSES_MEMORY="$LOSSES_MEMORY
 	    ;;
 	l)
 	    LOSSES_THRESHOLD="${OPTARG}"
+	    echo "LOSSES_THRESHOLD="$LOSSES_THRESHOLD
 	    ;;
 	s)
 	    SOURCE_ADDR="${OPTARG}"
+	    echo "LOSSES_THRESHOLD="$SOURCE_ADDR
 	    ;;
 	o)
 	    SOURCE_PORT="${OPTARG}"
+	    echo "LOSSES_THRESHOLD="$SOURCE_ADDR
 	    ;;
 	p)
 	    SPLITTER_PORT="${OPTARG}"
+	    echo "SPLITTER_PORT="$SPLITTER_PORT
 	    ;;
 	f)
 	    LIFE="${OPTARG}"
+	    echo "LIFE="$LIFE
 	    ;;
-	f)
+	y)
 	    BIRTHDAY="${OPTARG}"
+	    echo "BIRTHDAY="$BIRTHDAY
+	    ;;
+	w)
+	    LOSS_PERIOD="${OPTARG}"
+	    echo "LOSS_PERIOD="$LOSS_PERIOD
 	    ;;
 	?)
 	    usage
@@ -132,7 +151,7 @@ do
     #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j MARK --set-xmark 101
     #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j RETURN
 
-    xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
+    xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT --packet_loss_ratio 5 --chunk_loss_period $LOSS_PERIOD' &
 
     #xterm -sl 10000 -e '../peer.py --team_port $TEAM_PORT --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
 

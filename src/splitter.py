@@ -202,6 +202,8 @@ class Splitter_DBS(threading.Thread):
         self.GET_message = 'GET ' + self.CHANNEL + ' HTTP/1.1\r\n'
         self.GET_message += '\r\n'
 
+        self.number_of_monitors = 1
+
         # }}}
 
     def print_modulename(self):
@@ -389,7 +391,7 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def process_lost_chunk(self, message, sender):
+    def process_lost_chunk(self, message, sender): # Ojo, sender solo para debugging!
         # {{{
 
         lost_chunk = self.get_lost_chunk_index(message)
@@ -414,7 +416,7 @@ class Splitter_DBS(threading.Thread):
         sys.stdout.flush()
 
         #if peer != self.peer_list[0]:
-        self.remove_peer(peer)
+        self.remove_peer(peer) # Ojo, no exception???
 
         # }}}
 
@@ -585,7 +587,7 @@ class Splitter_DBS(threading.Thread):
                 header_length -= 1
 
             try:
-                peer = self.peer_list[self.peer_index]
+                peer = self.peer_list[self.peer_index] # Ojo, esto nunca deberia provocar una excepcion
             except KeyError:
                 pass
 
@@ -812,11 +814,43 @@ class Splitter_ACS(Splitter_FNS):
                     peer = self.peer_list[self.peer_index]
                 except KeyError:
                     pass
-            self.period_counter[peer] = self.period[peer] # ojo
+            self.period_counter[peer] = self.period[peer] # ojo, inservible?
 
         # }}}
 
     # }}}
+
+# Lost chunk Recovery Set of rules
+class LRS_Splitter(Splitter_ACS):
+    
+    def __init__(self):
+        # {{{
+
+        Splitter_ACS.__init__(self)
+
+        sys.stdout.write(Color.yellow)
+        print("Using LRS")
+        sys.stdout.write(Color.none)
+
+        self.chunks = [""]*self.BUFFER_SIZE
+
+        # }}}
+
+    def process_lost_chunk(self, message, sender): # Ojo, sender solo para debugging!
+        # {{{
+
+        Splitter_ACS.process_lost_chunk(self, message, sender)
+        peer = self.peer_list[self.peer_index]
+        while self.period_counter[peer] != 0:
+            self.period_counter[peer] -= 1
+            self.peer_index = (self.peer_index + 1) % len(self.peer_list)
+            peer = self.peer_list[self.peer_index]
+        self.period_counter[peer] = self.period[peer] # ojo, inservible?
+        self.team_socket.sendto(message, peer)
+        self.number_of_sent_chunks_per_peer[peer] += 1
+        self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
+
+        # }}}
 
 def main():
 
@@ -857,7 +891,8 @@ def main():
 
 #     splitter = Splitter_DBS()
 #     splitter = Splitter_FNS()
-    splitter = Splitter_ACS()
+#    splitter = Splitter_ACS()
+    splitter = LRS_Splitter()
     splitter.start()
 
     # {{{ Prints information until keyboard interruption
