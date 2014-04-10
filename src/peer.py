@@ -148,7 +148,7 @@ class Peer_DBS(threading.Thread):
         # }}}
 
     # Tiene pinta de que los tres siguientes metodos pueden simplificarse
-        
+
     def find_next_chunk(self):
         # {{{
 
@@ -172,6 +172,15 @@ class Peer_DBS(threading.Thread):
         # }}}
 
     def send_next_chunk_to_the_player(self):
+        # {{{
+
+        self.played_chunk = self.find_next_chunk()
+        self.play_chunk(self.played_chunk)
+        self.received[self.played_chunk % self.buffer_size] = False
+
+        # }}}
+
+    def send_next_chunk_to_the_player_old(self):
         # {{{
 
         # Find next the chunk to play
@@ -578,18 +587,7 @@ class Peer_DBS(threading.Thread):
     # }}}
 
 
-class Peer_DBS_(Peer_DBS):
-    def send_next_chunk_to_the_player(self):
-        # {{{
-
-        self.played_chunk = self.find_next_chunk()
-        self.play_chunk(self.played_chunk)
-        self.received[self.played_chunk % self.buffer_size] = False
-
-        # }}}
-
-    
-class Monitor_DBS(Peer_DBS_):
+class Monitor_DBS(Peer_DBS):
     # {{{
 
     def __init__(self):
@@ -748,7 +746,7 @@ class Monitor_FNS(Monitor_DBS, Peer_FNS):
 class Lossy_Peer(Peer_FNS):
 
     CHUNK_LOSS_PERIOD = 10
-    
+
     def __init__(self):
         # {{{
 

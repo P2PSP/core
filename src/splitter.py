@@ -822,7 +822,7 @@ class Splitter_ACS(Splitter_FNS):
 
 # Lost chunk Recovery Set of rules
 class LRS_Splitter(Splitter_ACS):
-    
+
     def __init__(self):
         # {{{
 
@@ -840,12 +840,7 @@ class LRS_Splitter(Splitter_ACS):
         # {{{
 
         Splitter_ACS.process_lost_chunk(self, message, sender)
-        peer = self.peer_list[self.peer_index]
-        while self.period_counter[peer] != 0:
-            self.period_counter[peer] -= 1
-            self.peer_index = (self.peer_index + 1) % len(self.peer_list)
-            peer = self.peer_list[self.peer_index]
-        self.period_counter[peer] = self.period[peer] # ojo, inservible?
+        peer = self.peer_list[0]
         self.team_socket.sendto(message, peer)
         self.number_of_sent_chunks_per_peer[peer] += 1
         self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
