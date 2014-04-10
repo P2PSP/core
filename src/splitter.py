@@ -173,7 +173,7 @@ class Splitter_DBS(threading.Thread):
 
         # {{{
 
-        # Counts the number of times a peer has ben removed from the team.
+        # Counts the number of times a peer has been removed from the team.
 
         # }}}
         #self.deletions = {}

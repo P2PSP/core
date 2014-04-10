@@ -152,7 +152,7 @@ class Peer_DBS(threading.Thread):
     def find_next_chunk(self):
         # {{{
 
-        chunk = self.played_chunk
+        chunk = (self.played_chunk + 1) % MAX_INDEX
         while not self.received[chunk % self.buffer_size]:
             chunk = (chunk + 1) % MAX_INDEX
         return chunk
