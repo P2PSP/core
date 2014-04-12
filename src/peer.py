@@ -1,4 +1,4 @@
-#!/usr/bin/python -O
+#!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 
 # Solo el peer monitor se queja al splitter. Si un peer no posee
@@ -34,6 +34,7 @@
 # This code implements the DBS peer side of the P2PSP.
 
 # {{{ Imports
+
 from __future__ import print_function
 import sys
 import socket
@@ -171,7 +172,7 @@ class Peer_DBS(threading.Thread):
 
         # }}}
 
-    def send_next_chunk_to_the_player(self):
+    def play_next_chunk(self):
         # {{{
 
         self.played_chunk = self.find_next_chunk()
@@ -348,11 +349,13 @@ class Peer_DBS(threading.Thread):
                         self.team_socket.sendto(self.receive_and_feed_previous, peer)
 
                         # {{{ debug
+
                         if __debug__:
                             print (self.team_socket.getsockname(), "-",\
                                 socket.ntohs(struct.unpack(chunk_format_string, \
                                                                self.receive_and_feed_previous)[0]),\
                                 Color.green, "->", Color.none, peer)
+
                         # }}}
 
                         self.debt[peer] += 1
@@ -405,10 +408,12 @@ class Peer_DBS(threading.Thread):
                         print (Color.red, peer, 'removed by unsupportive', Color.none)
 
                     # {{{ debug
+
                     if __debug__:
                         print (self.team_socket.getsockname(), "-", \
                             socket.ntohs(struct.unpack(chunk_format_string, self.receive_and_feed_previous)[0]),\
                             Color.green, "->", Color.none, peer)
+
                     # }}}
 
                     self.receive_and_feed_counter += 1
@@ -507,7 +512,7 @@ class Peer_DBS(threading.Thread):
         print('latency =', time.time() - start_latency, 'seconds')
         # }}}
 
-    def keep_the_buffer_full(self):
+    def keep_the_buffer_full_old(self):
         # {{{
 
         chunk_number = self.receive_and_feed()
@@ -525,6 +530,19 @@ class Peer_DBS(threading.Thread):
             #                    self.send_next_chunk_to_the_player()
 
         # }}}
+
+    def keep_the_buffer_full(self):
+        # Receive chunks while the buffer is not full
+        chunk_number = self.receive_and_feed()
+        while chunk_number < 0:
+            chunk_number = self.receive_and_feed()
+        while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
+            chunk_number = self.receive_and_feed()
+            while chunk_number < 0:
+                chunk_number = self.receive_and_feed()
+
+        # Play the next chunk
+        self.play_next_chunk()
 
     def peers_life(self):
         # {{{
@@ -586,7 +604,6 @@ class Peer_DBS(threading.Thread):
 
     # }}}
 
-
 class Monitor_DBS(Peer_DBS):
     # {{{
 
@@ -624,7 +641,7 @@ class Monitor_DBS(Peer_DBS):
 
         # }}}
 
-    def send_next_chunk_to_the_player(self):
+    def play_next_chunk_old(self):
         # {{{
 
         self.played_chunk = (self.played_chunk + 1) % MAX_INDEX
@@ -744,6 +761,7 @@ class Monitor_FNS(Monitor_DBS, Peer_FNS):
     # }}}
 
 class Lossy_Peer(Peer_FNS):
+    # {{{
 
     CHUNK_LOSS_PERIOD = 10
 
@@ -775,6 +793,8 @@ class Lossy_Peer(Peer_FNS):
         self.team_socket.settimeout(1)
 
         # }}}
+
+    # }}}
 
 def main():
 

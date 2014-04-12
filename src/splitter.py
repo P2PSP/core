@@ -43,8 +43,9 @@ from color import Color
 # Some useful definitions.
 IP_ADDR = 0
 PORT = 1
-MAX_INDEX = 65536
-#MAX_INDEX = 512
+#MAX_INDEX = 65536
+MAX_INDEX = 2048
+COUNTERS_TIMING = 5
 
 # Data Broadcasting Set of rules
 class Splitter_DBS(threading.Thread):
@@ -374,6 +375,8 @@ class Splitter_DBS(threading.Thread):
 
         try:
             self.losses[peer] += 1
+            if peer == self.peer_list[0]:
+                print("-----------------------------------")
         except KeyError:
             print("the unsupportive peer", peer, "does not exist!")
         else:
@@ -416,7 +419,7 @@ class Splitter_DBS(threading.Thread):
         sys.stdout.flush()
 
         #if peer != self.peer_list[0]:
-        self.remove_peer(peer) # Ojo, no exception???
+        self.remove_peer(peer)
 
         # }}}
 
@@ -543,7 +546,7 @@ class Splitter_DBS(threading.Thread):
     def reset_counters_thread(self):
         while True:
             self.reset_counters()
-            time.sleep(1)
+            time.sleep(COUNTERS_TIMING)
 
     def run(self):
         # {{{
@@ -807,14 +810,15 @@ class Splitter_ACS(Splitter_FNS):
             self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
             self.chunk_number = (self.chunk_number + 1) % MAX_INDEX
 
-            while self.period_counter[peer] != 0:
-                self.period_counter[peer] -= 1
-                self.peer_index = (self.peer_index + 1) % len(self.peer_list)
-                try:
+            try:
+                while self.period_counter[peer] != 0:
+                    self.period_counter[peer] -= 1
+                    self.peer_index = (self.peer_index + 1) % len(self.peer_list)
                     peer = self.peer_list[self.peer_index]
-                except KeyError:
-                    pass
-            self.period_counter[peer] = self.period[peer] # ojo, inservible?
+                self.period_counter[peer] = self.period[peer] # ojo, inservible?
+            except KeyError:
+                pass
+
 
         # }}}
 
@@ -886,8 +890,8 @@ def main():
 
 #     splitter = Splitter_DBS()
 #     splitter = Splitter_FNS()
-#    splitter = Splitter_ACS()
-    splitter = LRS_Splitter()
+    splitter = Splitter_ACS()
+#    splitter = LRS_Splitter()
     splitter.start()
 
     # {{{ Prints information until keyboard interruption
