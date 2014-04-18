@@ -31,8 +31,6 @@
 
 # }}}
 
-# This code implements the DBS peer side of the P2PSP.
-
 # {{{ Imports
 
 from __future__ import print_function
@@ -52,6 +50,7 @@ PORT = 1
 MAX_INDEX = 65536
 #MAX_INDEX = 512
 
+# Data Broadcasting Set
 class Peer_DBS(threading.Thread):
     # {{{
 
@@ -668,6 +667,7 @@ class Monitor_DBS(Peer_DBS):
 
     # }}}
 
+# Full-cone Nat Set
 class Peer_FNS(Peer_DBS):
     # {{{
 
@@ -707,11 +707,11 @@ class Peer_FNS(Peer_DBS):
         self.setup_team_socket()
         self.retrieve_the_list_of_peers()
         self.splitter_socket.close()
-        ###############################
-        self.say_hello(self.splitter) #
-        self.say_hello(self.splitter) #
-        self.say_hello(self.splitter) #
-        ###############################
+        # BEGIN NEW
+        self.say_hello(self.splitter)
+        self.say_hello(self.splitter)
+        self.say_hello(self.splitter)
+        # END NEW
         self.create_buffer()
         self.buffer_data()
 
@@ -795,6 +795,18 @@ class Lossy_Peer(Peer_FNS):
         # }}}
 
     # }}}
+
+# Lost chunks Recovery Set
+
+# Usar el tamaño del buffer para decidir
+# tanto cuando se se envian las quejas como cuando se envian las
+# peticiones de las retransmisiones. No enviar estampa de tiempo. El
+# punto de peticion de retransmision es la mitad del buffer (se supone
+# que los chunks retransmitidos van a llejar justo antes de que sean
+# reproducidos).
+class Monitor_LRS(Monitor_FNS):
+    pass
+
 
 def main():
 

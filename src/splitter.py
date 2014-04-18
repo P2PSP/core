@@ -394,15 +394,16 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def process_lost_chunk(self, message, sender): # Ojo, sender solo para debugging!
+    #def process_lost_chunk(self, message, sender): # Ojo, sender solo para debugging!
+    def process_lost_chunk(self, lost_chunk_index, sender):
         # {{{
 
-        lost_chunk = self.get_lost_chunk_index(message)
-        destination = self.get_losser(lost_chunk)
+        #lost_chunk_index = self.get_lost_chunk_index(message)
+        destination = self.get_losser(lost_chunk_index)
 
         if __debug__:
             sys.stdout.write(Color.blue)
-            print(sender, "complains about lost chunk", lost_chunk, "sent to", destination)
+            print(sender, "complains about lost chunk", lost_chunk_index, "sent to", destination)
             sys.stdout.write(Color.none)
 
         #if (destination != self.peer_list[0]):
@@ -436,14 +437,13 @@ class Splitter_DBS(threading.Thread):
                 # {{{ The peer complains about a lost chunk.
 
                 # In this situation, the splitter counts the number of
-                # times a peer has not achieved to send a chunk to
-                # other peers. If this number exceeds a threshold, the
+                # complains. If this number exceeds a threshold, the
                 # unsupportive peer is expelled from the
-                # team. Moreover, if we receive too much complains
-                # from the same peer, the problem could be in that
-                # peer and it will be expelled from the team.
+                # team.
 
-                self.process_lost_chunk(message, sender)
+                lost_chunk_index = self.get_lost_chunk_index(message)
+                #self.process_lost_chunk(message, sender)
+                self.process_lost_chunk(lost_chunk_index, sender)
 
                 # }}}
 
@@ -642,15 +642,14 @@ class Splitter_FNS(Splitter_DBS):
                 # {{{ The peer complains about a lost chunk.
 
                 # In this situation, the splitter counts the number of
-                # times a peer has not achieved to send a chunk to
-                # other peers. If this number exceeds a threshold, the
+                # complains. If this number exceeds a threshold, the
                 # unsupportive peer is expelled from the
-                # team. Moreover, if we receive too much complains
-                # from the same peer, the problem could be in that
-                # peer and it will be expelled from the team.
+                # team.
 
-                self.process_lost_chunk(message, sender)
-
+                lost_chunk_index = self.get_lost_chunk_index(message)
+                #self.process_lost_chunk(message, sender)
+                self.process_lost_chunk(lost_chunk_index, sender)
+                
                 # }}}
 
             else:
@@ -825,7 +824,8 @@ class Splitter_ACS(Splitter_FNS):
     # }}}
 
 # Lost chunk Recovery Set of rules
-class LRS_Splitter(Splitter_ACS):
+class Splitter_LRS(Splitter_ACS):
+    # {{{
 
     def __init__(self):
         # {{{
@@ -836,20 +836,100 @@ class LRS_Splitter(Splitter_ACS):
         print("Using LRS")
         sys.stdout.write(Color.none)
 
-        self.chunks = [""]*self.BUFFER_SIZE
+        # A circular array of messages (chunk_index, chunk) in network endian
+        self.buffer = [""]*self.BUFFER_SIZE
 
         # }}}
 
-    def process_lost_chunk(self, message, sender): # Ojo, sender solo para debugging!
+    def process_lost_chunk(self, lost_chunk_index, sender): # Ojo, sender solo para debugging!
         # {{{
 
-        Splitter_ACS.process_lost_chunk(self, message, sender)
+        Splitter_ACS.process_lost_chunk(self, lost_chunk_index, sender)
+        message = self.buffer[lost_chunk_index]
         peer = self.peer_list[0]
         self.team_socket.sendto(message, peer)
         self.number_of_sent_chunks_per_peer[peer] += 1
         self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
 
         # }}}
+
+    def run(self):
+        # {{{
+
+        try:
+            self.setup_peer_connection_socket()
+        except:
+            print(self.peer_connection_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT))
+            sys.exit('')
+
+        try:
+            self.setup_team_socket()
+        except:
+            print(self.team_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT))
+            sys.exit('')
+
+        source_socket = self.request_video()
+
+        for i in xrange(self.HEADER_LENGTH):
+            self.header += self.receive_next_chunk(source_socket, 0)[0]
+
+        print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
+        self.handle_peer_arrival(self.peer_connection_socket.accept())
+        threading.Thread(target=self.handle_arrivals).start()
+        threading.Thread(target=self.moderate_the_team).start()
+        threading.Thread(target=self.reset_counters_thread).start()
+
+        # B E G I N   D I F F E R E N T
+        chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" +"F" # "H1024sF
+        # E N D   D I F F E R E N T
+        
+        header_length = 0
+
+        while self.alive:
+            # Receive data from the source
+            chunk, source_socket, header_length = self.receive_next_chunk(source_socket, header_length)
+
+            if header_length > 0:
+                print("Header length =", header_length)
+                self.header += chunk
+                header_length -= 1
+
+            try:
+                peer = self.peer_list[self.peer_index]
+            except:
+                pass
+
+            # B E G I N   D I F F E R E N T
+            message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk, time.time())
+            # E N D   D I F F E R E N T
+            self.team_socket.sendto(message, peer)
+            try:
+                self.number_of_sent_chunks_per_peer[peer] += 1
+            except KeyError:
+                pass
+            # B E G I N   N E W
+            self.buffer[self.chunk_number % self.BUFFER_SIZE] = message
+            # E N D   N E W
+
+            if __debug__:
+                print('%5d' % self.chunk_number, Color.red, '->', Color.none, peer)
+                sys.stdout.flush()
+
+            self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
+            self.chunk_number = (self.chunk_number + 1) % MAX_INDEX
+
+            try:
+                while self.period_counter[peer] != 0:
+                    self.period_counter[peer] -= 1
+                    self.peer_index = (self.peer_index + 1) % len(self.peer_list)
+                    peer = self.peer_list[self.peer_index]
+                self.period_counter[peer] = self.period[peer] # ojo, inservible?
+            except KeyError:
+                pass
+
+        # }}}
+
+    # }}}
 
 def main():
 
@@ -890,8 +970,8 @@ def main():
 
 #     splitter = Splitter_DBS()
 #     splitter = Splitter_FNS()
-    splitter = Splitter_ACS()
-#    splitter = LRS_Splitter()
+#    splitter = Splitter_ACS()
+    splitter = Splitter_LRS()
     splitter.start()
 
     # {{{ Prints information until keyboard interruption
