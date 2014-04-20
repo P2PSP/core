@@ -879,9 +879,8 @@ class Splitter_LRS(Splitter_ACS):
         threading.Thread(target=self.moderate_the_team).start()
         threading.Thread(target=self.reset_counters_thread).start()
 
-        # B E G I N   D I F F E R E N T
-        chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" +"F" # "H1024sF
-        # E N D   D I F F E R E N T
+        #chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" +"F" # "H1024sF
+        chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
         
         header_length = 0
 
@@ -899,9 +898,9 @@ class Splitter_LRS(Splitter_ACS):
             except:
                 pass
 
-            # B E G I N   D I F F E R E N T
-            message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk, time.time())
-            # E N D   D I F F E R E N T
+            #message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk, time.time())
+            message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
+
             self.team_socket.sendto(message, peer)
             try:
                 self.number_of_sent_chunks_per_peer[peer] += 1

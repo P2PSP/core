@@ -531,6 +531,8 @@ class Peer_DBS(threading.Thread):
         # }}}
 
     def keep_the_buffer_full(self):
+        # {{{
+
         # Receive chunks while the buffer is not full
         chunk_number = self.receive_and_feed()
         while chunk_number < 0:
@@ -542,6 +544,8 @@ class Peer_DBS(threading.Thread):
 
         # Play the next chunk
         self.play_next_chunk()
+
+        # }}}
 
     def peers_life(self):
         # {{{
@@ -805,8 +809,40 @@ class Lossy_Peer(Peer_FNS):
 # que los chunks retransmitidos van a llejar justo antes de que sean
 # reproducidos).
 class Monitor_LRS(Monitor_FNS):
-    pass
+    # {{{
 
+    def __init__(self):
+        # {{{
+
+        Monitor_FNS.__init__(self)
+
+        sys.stdout.write(Color.yellow)
+        print ("Monitor LRS")
+        sys.stdout.write(Color.none)
+
+        # }}}
+
+    def keep_the_buffer_full(self):
+        # {{{
+
+        # Receive chunks while the buffer is not full
+        chunk_number = self.receive_and_feed()
+        while chunk_number < 0:
+            chunk_number = self.receive_and_feed()
+        while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
+            checked_chunk = (chunk_number + self.buffer_size/4 - self.played_chunk) % self.buffer_size
+            if not self.received[checked_chunk]:
+                self.complain(checked_chunk % self.buffer_size)
+            chunk_number = self.receive_and_feed()
+            while chunk_number < 0:
+                chunk_number = self.receive_and_feed()
+
+        # Play the next chunk
+        self.play_next_chunk()
+
+        # }}}
+
+    # }}}
 
 def main():
 
@@ -862,7 +898,8 @@ def main():
 
     if monitor_mode :
         #        peer = Monitor_DBS()
-        peer = Monitor_FNS()
+        #peer = Monitor_FNS()
+        peer = Monitor_LRS()
     else:
         #        peer = Peer_DBS()
         if args.chunk_loss_period:
