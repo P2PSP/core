@@ -624,7 +624,8 @@ class Monitor_DBS(Peer_DBS):
     def complain(self, chunk_number):
         # {{{
 
-        message = struct.pack("!H", (chunk_number % self.buffer_size))
+        #message = struct.pack("!H", (chunk_number % self.buffer_size))
+        message = struct.pack("!H", chunk_number)
         self.team_socket.sendto(message, self.splitter)
 
         sys.stdout.write(Color.blue)

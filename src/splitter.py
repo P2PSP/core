@@ -43,8 +43,8 @@ from color import Color
 # Some useful definitions.
 IP_ADDR = 0
 PORT = 1
-#MAX_INDEX = 65536
-MAX_INDEX = 2048
+#MAX_CHUNK_NUMBER = 65536
+MAX_CHUNK_NUMBER = 2048
 COUNTERS_TIMING = 5
 
 # Data Broadcasting Set of rules
@@ -195,7 +195,7 @@ class Splitter_DBS(threading.Thread):
         # }}}
         self.team_socket = ""
 
-        self.peer_index = 0
+        self.peer_number = 0
 
         self.header = ""
 
@@ -205,6 +205,7 @@ class Splitter_DBS(threading.Thread):
 
         self.number_of_monitors = 1
 
+        self.chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
         # }}}
 
     def print_modulename(self):
@@ -331,19 +332,19 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def get_lost_chunk_index(self, message):
+    def get_lost_chunk_number(self, message):
         # {{{
 
         return struct.unpack("!H",message)[0]
 
         # }}}
 
-    def get_losser(self, lost_chunk):
+    def get_losser(self, lost_chunk_number):
         # {{{
         try:
-            return self.destination_of_chunk[lost_chunk]
+            return self.destination_of_chunk[lost_chunk_number % self.BUFFER_SIZE]
         except IndexError, e:
-            print(lost_chunk)
+            print("Error accesing destination_of_chunk[", lost_chunk_number, "]")
             print(e)
 
         # }}}
@@ -356,7 +357,7 @@ class Splitter_DBS(threading.Thread):
         except ValueError:
             pass
         else:
-            self.peer_index -= 1
+            self.peer_number -= 1
 
         try:
             del self.losses[peer]
@@ -395,20 +396,20 @@ class Splitter_DBS(threading.Thread):
         # }}}
 
     #def process_lost_chunk(self, message, sender): # Ojo, sender solo para debugging!
-    def process_lost_chunk(self, lost_chunk_index, sender):
+    def process_lost_chunk(self, lost_chunk_number, sender):
         # {{{
 
-        #lost_chunk_index = self.get_lost_chunk_index(message)
-        destination = self.get_losser(lost_chunk_index)
+        #lost_chunk_number = self.get_lost_chunk_number(message)
+        destination = self.get_losser(lost_chunk_number)
 
         if __debug__:
             sys.stdout.write(Color.blue)
-            print(sender, "complains about lost chunk", lost_chunk_index, "sent to", destination)
+            print(sender, "complains about lost chunk", lost_chunk_number, "sent to", destination)
             sys.stdout.write(Color.none)
 
         if ((sender == self.peer_list[0]) & (destination == self.peer_list[0])):
             print ("=============================")
-            print ("Lost chunk index =", lost_chunk_index)
+            print ("Lost chunk index =", lost_chunk_number)
             print ("=============================")
 
         self.increment_unsupportivity_of_peer(destination)
@@ -445,9 +446,9 @@ class Splitter_DBS(threading.Thread):
                 # unsupportive peer is expelled from the
                 # team.
 
-                lost_chunk_index = self.get_lost_chunk_index(message)
+                lost_chunk_number = self.get_lost_chunk_number(message)
                 #self.process_lost_chunk(message, sender)
-                self.process_lost_chunk(lost_chunk_index, sender)
+                self.process_lost_chunk(lost_chunk_number, sender)
 
                 # }}}
 
@@ -580,8 +581,6 @@ class Splitter_DBS(threading.Thread):
         threading.Thread(target=self.moderate_the_team).start()
         threading.Thread(target=self.reset_counters_thread).start()
 
-        chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
-
         header_length = 0
 
         while self.alive:
@@ -594,11 +593,11 @@ class Splitter_DBS(threading.Thread):
                 header_length -= 1
 
             try:
-                peer = self.peer_list[self.peer_index] # Ojo, esto nunca deberia provocar una excepcion
+                peer = self.peer_list[self.peer_number] # Ojo, esto nunca deberia provocar una excepcion
             except KeyError:
                 pass
 
-            message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
+            message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
             self.team_socket.sendto(message, peer)
 
             if __debug__:
@@ -606,8 +605,8 @@ class Splitter_DBS(threading.Thread):
                 sys.stdout.flush()
 
             self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
-            self.chunk_number = (self.chunk_number + 1) % MAX_INDEX
-            self.peer_index = (self.peer_index + 1) % len(self.peer_list)
+            self.chunk_number = (self.chunk_number + 1) % MAX_CHUNK_NUMBER
+            self.peer_number = (self.peer_number + 1) % len(self.peer_list)
 
         # }}}
 
@@ -650,9 +649,9 @@ class Splitter_FNS(Splitter_DBS):
                 # unsupportive peer is expelled from the
                 # team.
 
-                lost_chunk_index = self.get_lost_chunk_index(message)
+                lost_chunk_number = self.get_lost_chunk_number(message)
                 #self.process_lost_chunk(message, sender)
-                self.process_lost_chunk(lost_chunk_index, sender)
+                self.process_lost_chunk(lost_chunk_number, sender)
                 
                 # }}}
 
@@ -772,8 +771,6 @@ class Splitter_ACS(Splitter_FNS):
         threading.Thread(target=self.moderate_the_team).start()
         threading.Thread(target=self.reset_counters_thread).start()
 
-        chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
-
         header_length = 0
 
         while self.alive:
@@ -786,11 +783,11 @@ class Splitter_ACS(Splitter_FNS):
                 header_length -= 1
 
             try:
-                peer = self.peer_list[self.peer_index]
+                peer = self.peer_list[self.peer_number]
             except:
                 pass
 
-            message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
+            message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
             self.team_socket.sendto(message, peer)
             try:
                 self.number_of_sent_chunks_per_peer[peer] += 1
@@ -811,13 +808,13 @@ class Splitter_ACS(Splitter_FNS):
                 sys.stdout.flush()
 
             self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
-            self.chunk_number = (self.chunk_number + 1) % MAX_INDEX
+            self.chunk_number = (self.chunk_number + 1) % MAX_CHUNK_NUMBER
 
             try:
                 while self.period_counter[peer] != 0:
                     self.period_counter[peer] -= 1
-                    self.peer_index = (self.peer_index + 1) % len(self.peer_list)
-                    peer = self.peer_list[self.peer_index]
+                    self.peer_number = (self.peer_number + 1) % len(self.peer_list)
+                    peer = self.peer_list[self.peer_number]
                 self.period_counter[peer] = self.period[peer] # ojo, inservible?
             except KeyError:
                 pass
@@ -840,20 +837,24 @@ class Splitter_LRS(Splitter_ACS):
         print("Using LRS")
         sys.stdout.write(Color.none)
 
-        # A circular array of messages (chunk_index, chunk) in network endian
+        # A circular array of messages (chunk_number, chunk) in network endian
         self.buffer = [""]*self.BUFFER_SIZE
 
         # }}}
 
-    def process_lost_chunk(self, lost_chunk_index, sender): # Ojo, sender solo para debugging!
+    def process_lost_chunk(self, lost_chunk_number, sender): # Ojo, sender solo para debugging!
         # {{{
 
-        Splitter_ACS.process_lost_chunk(self, lost_chunk_index, sender)
-        message = self.buffer[lost_chunk_index]
+        Splitter_ACS.process_lost_chunk(self, lost_chunk_number, sender)
+        message = self.buffer[lost_chunk_number % self.BUFFER_SIZE]
         peer = self.peer_list[0]
         self.team_socket.sendto(message, peer)
         self.number_of_sent_chunks_per_peer[peer] += 1
         self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
+        # debug
+        number, chunk = struct.unpack(self.chunk_format_string, message)
+        chunk_number = socket.ntohs(number)
+        print ("Re-sent chunk", chunk_number, "towards", peer)
 
         # }}}
 
@@ -884,8 +885,6 @@ class Splitter_LRS(Splitter_ACS):
         threading.Thread(target=self.reset_counters_thread).start()
 
         #chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" +"F" # "H1024sF
-        chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
-        
         header_length = 0
 
         while self.alive:
@@ -898,12 +897,12 @@ class Splitter_LRS(Splitter_ACS):
                 header_length -= 1
 
             try:
-                peer = self.peer_list[self.peer_index]
+                peer = self.peer_list[self.peer_number]
             except:
                 pass
 
             #message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk, time.time())
-            message = struct.pack(chunk_format_string, socket.htons(self.chunk_number), chunk)
+            message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
 
             self.team_socket.sendto(message, peer)
             try:
@@ -919,13 +918,13 @@ class Splitter_LRS(Splitter_ACS):
                 sys.stdout.flush()
 
             self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
-            self.chunk_number = (self.chunk_number + 1) % MAX_INDEX
+            self.chunk_number = (self.chunk_number + 1) % MAX_CHUNK_NUMBER
 
             try:
                 while self.period_counter[peer] != 0:
                     self.period_counter[peer] -= 1
-                    self.peer_index = (self.peer_index + 1) % len(self.peer_list)
-                    peer = self.peer_list[self.peer_index]
+                    self.peer_number = (self.peer_number + 1) % len(self.peer_list)
+                    peer = self.peer_list[self.peer_number]
                 self.period_counter[peer] = self.period[peer] # ojo, inservible?
             except KeyError:
                 pass
