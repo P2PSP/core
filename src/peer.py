@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
 # Solo el peer monitor se queja al splitter. Si un peer no posee
@@ -621,14 +621,14 @@ class Monitor_DBS(Peer_DBS):
 
         # }}}
 
-    def complain(self, chunk):
+    def complain(self, chunk_number):
         # {{{
 
-        message = struct.pack("!H", chunk)
+        message = struct.pack("!H", (chunk_number % self.buffer_size))
         self.team_socket.sendto(message, self.splitter)
 
         sys.stdout.write(Color.blue)
-        print ("lost chunk:", self.numbers[chunk], chunk, self.received[chunk])
+        print ("lost chunk:", self.numbers[chunk_number % self.buffer_size], chunk_number, self.received[chunk_number % self.buffer_size])
         sys.stdout.write(Color.none)
 
         # }}}
@@ -636,11 +636,11 @@ class Monitor_DBS(Peer_DBS):
     def find_next_chunk(self):
         # {{{
 
-        chunk = (self.played_chunk + 1) % MAX_INDEX
-        while not self.received[chunk % self.buffer_size]:
-            self.complain(chunk % self.buffer_size)
-            chunk = (chunk + 1) % MAX_INDEX
-        return chunk
+        chunk_number = (self.played_chunk + 1) % MAX_INDEX
+        while not self.received[chunk_number % self.buffer_size]:
+            self.complain(chunk_number)
+            chunk_number = (chunk_number + 1) % MAX_INDEX
+        return chunk_number
 
         # }}}
 
@@ -830,9 +830,12 @@ class Monitor_LRS(Monitor_FNS):
         while chunk_number < 0:
             chunk_number = self.receive_and_feed()
         while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
-            checked_chunk = (chunk_number + self.buffer_size/4 - self.played_chunk) % self.buffer_size
-            if not self.received[checked_chunk]:
-                self.complain(checked_chunk % self.buffer_size)
+            checked_chunk = self.played_chunk + self.buffer_size/4 
+            if not self.received[checked_chunk % self.buffer_size]:
+                #print ("checked_chunk = ", checked_chunk)
+                #print ("chunk_number = ", chunk_number)
+                #print ("played_chunk = ", self.played_chunk)
+                self.complain(checked_chunk)
             chunk_number = self.receive_and_feed()
             while chunk_number < 0:
                 chunk_number = self.receive_and_feed()
@@ -915,6 +918,7 @@ def main():
         time.sleep(1)
         kbps = (peer.played_chunk - last_chunk_number) * peer.chunk_size/1000 * 8
         last_chunk_number = peer.played_chunk
+        #print ("Played chunk = ", peer.played_chunk)
         print('%5d' % kbps, end=' ')
         print('%4d' % len(peer.peer_list), end=' ')
         counter = 0

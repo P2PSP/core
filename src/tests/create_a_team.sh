@@ -3,11 +3,11 @@
 #export BUFFER_SIZE=512
 #export CHANNEL="/root/Videos/big_buck_bunny_720p_stereo.ogg"
 
-export BUFFER_SIZE=512
-export CHANNEL="/root/Videos/big_buck_bunny_480p_stereo.ogg"
+#export BUFFER_SIZE=512
+#export CHANNEL="/root/Videos/big_buck_bunny_480p_stereo.ogg"
 
-#export BUFFER_SIZE=256
-#export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv"
+export BUFFER_SIZE=256
+export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv"
 
 #export BUFFER_SIZE=32
 #export CHANNEL="/root/Audios/The_Last_of_the_Mohicans-Promentory.ogg"
@@ -24,7 +24,7 @@ export LOSSES_THRESHOLD=128
 export SOURCE_ADDR="150.214.150.68"
 export SOURCE_PORT=4551
 export SPLITTER_PORT=5555
-export LIFE=60
+export LIFE=180
 export BIRTHDAY=10
 export LOSS_PERIOD=10
 
@@ -137,6 +137,7 @@ xterm -sl 10000 -e '../splitter.py  --team_addr localhost --buffer_size=$BUFFER_
 
 sleep 1
 
+#xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT --monitor > trace' &
 xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT --monitor' &
 
 vlc http://localhost:9998 &

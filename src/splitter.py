@@ -167,7 +167,7 @@ class Splitter_DBS(threading.Thread):
         # sent.
 
         # }}}
-        self.destination_of_chunk = [('0.0.0.0',0)]*self.BUFFER_SIZE
+        self.destination_of_chunk = [('0.0.0.0',0)] * self.BUFFER_SIZE
         #for i in xrange(self.BUFFER_SIZE):
         #    self.destination_of_chunk.append(('0.0.0.0',0))
         self.losses = {}
@@ -406,7 +406,11 @@ class Splitter_DBS(threading.Thread):
             print(sender, "complains about lost chunk", lost_chunk_index, "sent to", destination)
             sys.stdout.write(Color.none)
 
-        #if (destination != self.peer_list[0]):
+        if ((sender == self.peer_list[0]) & (destination == self.peer_list[0])):
+            print ("=============================")
+            print ("Lost chunk index =", lost_chunk_index)
+            print ("=============================")
+
         self.increment_unsupportivity_of_peer(destination)
 
         # }}}
