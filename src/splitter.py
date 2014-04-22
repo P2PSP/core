@@ -395,11 +395,10 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    #def process_lost_chunk(self, message, sender): # Ojo, sender solo para debugging!
+
     def process_lost_chunk(self, lost_chunk_number, sender):
         # {{{
 
-        #lost_chunk_number = self.get_lost_chunk_number(message)
         destination = self.get_losser(lost_chunk_number)
 
         if __debug__:
@@ -407,11 +406,10 @@ class Splitter_DBS(threading.Thread):
             print(sender, "complains about lost chunk", lost_chunk_number, "sent to", destination)
             sys.stdout.write(Color.none)
 
-        #if ((sender == self.peer_list[0]) & (destination == self.peer_list[0])):
-        if destination == self.peer_list[0]:
-            print ("=============================")
-            print ("Lost chunk index =", lost_chunk_number)
-            print ("=============================")
+            if destination == self.peer_list[0]:
+                print ("=============================")
+                print ("Lost chunk index =", lost_chunk_number)
+                print ("=============================")
 
         self.increment_unsupportivity_of_peer(destination)
 
@@ -448,7 +446,6 @@ class Splitter_DBS(threading.Thread):
                 # team.
 
                 lost_chunk_number = self.get_lost_chunk_number(message)
-                #self.process_lost_chunk(message, sender)
                 self.process_lost_chunk(lost_chunk_number, sender)
 
                 # }}}
@@ -651,7 +648,6 @@ class Splitter_FNS(Splitter_DBS):
                 # team.
 
                 lost_chunk_number = self.get_lost_chunk_number(message)
-                #self.process_lost_chunk(message, sender)
                 self.process_lost_chunk(lost_chunk_number, sender)
 
                 # }}}
@@ -843,7 +839,7 @@ class Splitter_LRS(Splitter_ACS):
 
         # }}}
 
-    def process_lost_chunk(self, lost_chunk_number, sender): # Ojo, sender solo para debugging!
+    def process_lost_chunk(self, lost_chunk_number, sender):
         # {{{
 
         Splitter_ACS.process_lost_chunk(self, lost_chunk_number, sender)
@@ -852,10 +848,10 @@ class Splitter_LRS(Splitter_ACS):
         self.team_socket.sendto(message, peer)
         self.number_of_sent_chunks_per_peer[peer] += 1
         self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
-        # debug
-        number, chunk = struct.unpack(self.chunk_format_string, message)
-        chunk_number = socket.ntohs(number)
-        print ("Re-sent chunk", chunk_number, "towards", peer)
+        if __debug__:
+            number, chunk = struct.unpack(self.chunk_format_string, message)
+            chunk_number = socket.ntohs(number)
+            print ("Re-sent chunk", chunk_number, "towards", peer)
 
         # }}}
 

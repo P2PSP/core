@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
 # Solo el peer monitor se queja al splitter. Si un peer no posee
@@ -176,28 +176,6 @@ class Peer_DBS(threading.Thread):
 
         self.played_chunk = self.find_next_chunk()
         self.play_chunk(self.played_chunk)
-        self.received[self.played_chunk % self.buffer_size] = False
-
-        # }}}
-
-    def send_next_chunk_to_the_player_old(self):
-        # {{{
-
-        # Find next the chunk to play
-        checked_chunk = self.played_chunk
-        while not self.received[checked_chunk % self.buffer_size]:
-            checked_chunk = (checked_chunk + 1) % MAX_CHUNK_NUMBER
-
-        try:
-            self.player_socket.sendall(self.chunks[checked_chunk % self.buffer_size])
-        except socket.error, e:
-            print(e)
-            print('Player disconected, ...', end=' ')
-            self.player_alive = False
-
-        self.played_chunk = checked_chunk
-
-        # We have fired the chunk.
         self.received[self.played_chunk % self.buffer_size] = False
 
         # }}}
@@ -511,25 +489,6 @@ class Peer_DBS(threading.Thread):
         print('latency =', time.time() - start_latency, 'seconds')
         # }}}
 
-    def keep_the_buffer_full_old(self):
-        # {{{
-
-        chunk_number = self.receive_and_feed()
-        while chunk_number < 0:
-            chunk_number = self.receive_and_feed()
-        while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
-            chunk_number = self.receive_and_feed()
-            while chunk_number < 0:
-                chunk_number = self.receive_and_feed()
-        while ((chunk_number - self.played_chunk) % self.buffer_size) > self.buffer_size/2:
-            chunk = self.find_next_chunk()
-            self.play_chunk(chunk)
-            self.played_chunk = chunk
-            self.received[self.played_chunk % self.buffer_size] = False
-            #                    self.send_next_chunk_to_the_player()
-
-        # }}}
-
     def keep_the_buffer_full(self):
         # {{{
 
@@ -642,31 +601,6 @@ class Monitor_DBS(Peer_DBS):
             self.complain(chunk_number)
             chunk_number = (chunk_number + 1) % MAX_CHUNK_NUMBER
         return chunk_number
-
-        # }}}
-
-    def play_next_chunk_old(self):
-        # {{{
-
-        self.played_chunk = (self.played_chunk + 1) % MAX_CHUNK_NUMBER
-        while not self.received[self.played_chunk % self.buffer_size]:
-            #checked_chunk = (self.played_chunk + self.buffer_size/2 - 10) % self.buffer_size
-            checked_chunk = self.played_chunk % self.buffer_size
-            if not self.received[checked_chunk]:
-                self.complain(checked_chunk)
-            self.played_chunk = (self.played_chunk + 1) % MAX_CHUNK_NUMBER
-
-        try:
-            self.player_socket.sendall(self.chunks[self.played_chunk % self.buffer_size])
-        except socket.error, e:
-            print (e)
-            print ('Player disconected, ...',)
-            self.player_alive = False
-
-        # We have fired the chunk.
-        self.received[self.played_chunk % self.buffer_size] = False
-
-        return self.played_chunk
 
         # }}}
 
@@ -802,13 +736,6 @@ class Lossy_Peer(Peer_FNS):
     # }}}
 
 # Lost chunks Recovery Set
-
-# Usar el tamaño del buffer para decidir
-# tanto cuando se se envian las quejas como cuando se envian las
-# peticiones de las retransmisiones. No enviar estampa de tiempo. El
-# punto de peticion de retransmision es la mitad del buffer (se supone
-# que los chunks retransmitidos van a llejar justo antes de que sean
-# reproducidos).
 class Monitor_LRS(Monitor_FNS):
     # {{{
 
@@ -823,61 +750,17 @@ class Monitor_LRS(Monitor_FNS):
 
         # }}}
 
-    def find_next_chunk(self):
+    def receive_the_buffersize(self):
         # {{{
 
-        chunk_number = (self.played_chunk + 1) % MAX_CHUNK_NUMBER
-        while not self.received[chunk_number % self.buffer_size]:
-            self.complain((chunk_number + self.buffer_size/4) % MAX_CHUNK_NUMBER)
-            chunk_number = (chunk_number + 1) % MAX_CHUNK_NUMBER
-        return chunk_number
-
-        # }}}
-
-    def keep_the_buffer_full(self):
-        # {{{
-
-        # Receive chunks while the buffer is not full
-        chunk_number = self.receive_and_feed()
-        while chunk_number < 0:
-            chunk_number = self.receive_and_feed()
-        while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
-            chunk_number = self.receive_and_feed()
-            while chunk_number < 0:
-                chunk_number = self.receive_and_feed()
-
-        # Play the next chunk
-        self.play_next_chunk()
-
-        # }}}
-
-    def keep_the_buffer_full_old(self):
-        # {{{
-
-        # Receive chunks while the buffer is not full
-        chunk_number = self.receive_and_feed()
-        while chunk_number < 0:
-            chunk_number = self.receive_and_feed()
-        #print ("chunk_number =", chunk_number)
-        #print ("played_chunk =", self.played_chunk)
-        print ("todo =", (chunk_number - self.played_chunk) % self.buffer_size)
-        # .....P########C......
-        # P = Played chunk
-        # C = Chunk number
-        while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
-            print ("DENTRO!!!")
-            checked_chunk = self.played_chunk + self.buffer_size/4 
-            if not self.received[checked_chunk % self.buffer_size]:
-                print ("checked_chunk = ", checked_chunk)
-                print ("chunk_number = ", chunk_number)
-                print ("played_chunk = ", self.played_chunk)
-                self.complain(checked_chunk)
-            chunk_number = self.receive_and_feed()
-            while chunk_number < 0:
-                chunk_number = self.receive_and_feed()
-
-        # Play the next chunk
-        self.play_next_chunk()
+        message = self.splitter_socket.recv(struct.calcsize("H"))
+        buffer_size = struct.unpack("H", message)[0]
+        self.buffer_size = socket.ntohs(buffer_size)
+        print ("buffer_size =", self.buffer_size)
+        # Monitor peers that implements the LRS use a smaller buffer
+        # in order to complains before the rest of peers reach them in
+        # their buffers.
+        self.buffer_size /= 2
 
         # }}}
 
