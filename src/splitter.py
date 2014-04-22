@@ -43,8 +43,8 @@ from color import Color
 # Some useful definitions.
 IP_ADDR = 0
 PORT = 1
-#MAX_CHUNK_NUMBER = 65536
-MAX_CHUNK_NUMBER = 2048
+MAX_CHUNK_NUMBER = 65536
+#MAX_CHUNK_NUMBER = 2048
 COUNTERS_TIMING = 5
 
 # Data Broadcasting Set of rules
@@ -407,7 +407,8 @@ class Splitter_DBS(threading.Thread):
             print(sender, "complains about lost chunk", lost_chunk_number, "sent to", destination)
             sys.stdout.write(Color.none)
 
-        if ((sender == self.peer_list[0]) & (destination == self.peer_list[0])):
+        #if ((sender == self.peer_list[0]) & (destination == self.peer_list[0])):
+        if destination == self.peer_list[0]:
             print ("=============================")
             print ("Lost chunk index =", lost_chunk_number)
             print ("=============================")

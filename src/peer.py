@@ -1,4 +1,4 @@
-#!/usr/bin/python -O
+#!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 
 # Solo el peer monitor se queja al splitter. Si un peer no posee
@@ -47,8 +47,8 @@ from lossy_socket import lossy_socket
 
 IP_ADDR = 0
 PORT = 1
-MAX_INDEX = 65536
-#MAX_INDEX = 512
+MAX_CHUNK_NUMBER = 65536
+#MAX_CHUNK_NUMBER = 512
 
 # Data Broadcasting Set
 class Peer_DBS(threading.Thread):
@@ -152,10 +152,10 @@ class Peer_DBS(threading.Thread):
     def find_next_chunk(self):
         # {{{
 
-        chunk = (self.played_chunk + 1) % MAX_INDEX
-        while not self.received[chunk % self.buffer_size]:
-            chunk = (chunk + 1) % MAX_INDEX
-        return chunk
+        chunk_number = (self.played_chunk + 1) % MAX_CHUNK_NUMBER
+        while not self.received[chunk_number % self.buffer_size]:
+            chunk_number = (chunk_number + 1) % MAX_CHUNK_NUMBER
+        return chunk_number
 
         # }}}
 
@@ -186,7 +186,7 @@ class Peer_DBS(threading.Thread):
         # Find next the chunk to play
         checked_chunk = self.played_chunk
         while not self.received[checked_chunk % self.buffer_size]:
-            checked_chunk = (checked_chunk + 1) % MAX_INDEX
+            checked_chunk = (checked_chunk + 1) % MAX_CHUNK_NUMBER
 
         try:
             self.player_socket.sendall(self.chunks[checked_chunk % self.buffer_size])
@@ -637,10 +637,10 @@ class Monitor_DBS(Peer_DBS):
     def find_next_chunk(self):
         # {{{
 
-        chunk_number = (self.played_chunk + 1) % MAX_INDEX
+        chunk_number = (self.played_chunk + 1) % MAX_CHUNK_NUMBER
         while not self.received[chunk_number % self.buffer_size]:
             self.complain(chunk_number)
-            chunk_number = (chunk_number + 1) % MAX_INDEX
+            chunk_number = (chunk_number + 1) % MAX_CHUNK_NUMBER
         return chunk_number
 
         # }}}
@@ -648,13 +648,13 @@ class Monitor_DBS(Peer_DBS):
     def play_next_chunk_old(self):
         # {{{
 
-        self.played_chunk = (self.played_chunk + 1) % MAX_INDEX
+        self.played_chunk = (self.played_chunk + 1) % MAX_CHUNK_NUMBER
         while not self.received[self.played_chunk % self.buffer_size]:
             #checked_chunk = (self.played_chunk + self.buffer_size/2 - 10) % self.buffer_size
             checked_chunk = self.played_chunk % self.buffer_size
             if not self.received[checked_chunk]:
                 self.complain(checked_chunk)
-            self.played_chunk = (self.played_chunk + 1) % MAX_INDEX
+            self.played_chunk = (self.played_chunk + 1) % MAX_CHUNK_NUMBER
 
         try:
             self.player_socket.sendall(self.chunks[self.played_chunk % self.buffer_size])
@@ -823,6 +823,17 @@ class Monitor_LRS(Monitor_FNS):
 
         # }}}
 
+    def find_next_chunk(self):
+        # {{{
+
+        chunk_number = (self.played_chunk + 1) % MAX_CHUNK_NUMBER
+        while not self.received[chunk_number % self.buffer_size]:
+            self.complain((chunk_number + self.buffer_size/4) % MAX_CHUNK_NUMBER)
+            chunk_number = (chunk_number + 1) % MAX_CHUNK_NUMBER
+        return chunk_number
+
+        # }}}
+
     def keep_the_buffer_full(self):
         # {{{
 
@@ -831,11 +842,35 @@ class Monitor_LRS(Monitor_FNS):
         while chunk_number < 0:
             chunk_number = self.receive_and_feed()
         while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
+            chunk_number = self.receive_and_feed()
+            while chunk_number < 0:
+                chunk_number = self.receive_and_feed()
+
+        # Play the next chunk
+        self.play_next_chunk()
+
+        # }}}
+
+    def keep_the_buffer_full_old(self):
+        # {{{
+
+        # Receive chunks while the buffer is not full
+        chunk_number = self.receive_and_feed()
+        while chunk_number < 0:
+            chunk_number = self.receive_and_feed()
+        #print ("chunk_number =", chunk_number)
+        #print ("played_chunk =", self.played_chunk)
+        print ("todo =", (chunk_number - self.played_chunk) % self.buffer_size)
+        # .....P########C......
+        # P = Played chunk
+        # C = Chunk number
+        while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
+            print ("DENTRO!!!")
             checked_chunk = self.played_chunk + self.buffer_size/4 
             if not self.received[checked_chunk % self.buffer_size]:
-                #print ("checked_chunk = ", checked_chunk)
-                #print ("chunk_number = ", chunk_number)
-                #print ("played_chunk = ", self.played_chunk)
+                print ("checked_chunk = ", checked_chunk)
+                print ("chunk_number = ", chunk_number)
+                print ("played_chunk = ", self.played_chunk)
                 self.complain(checked_chunk)
             chunk_number = self.receive_and_feed()
             while chunk_number < 0:
