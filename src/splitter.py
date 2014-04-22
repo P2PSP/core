@@ -653,7 +653,7 @@ class Splitter_FNS(Splitter_DBS):
                 lost_chunk_number = self.get_lost_chunk_number(message)
                 #self.process_lost_chunk(message, sender)
                 self.process_lost_chunk(lost_chunk_number, sender)
-                
+
                 # }}}
 
             else:
@@ -919,6 +919,9 @@ class Splitter_LRS(Splitter_ACS):
                 sys.stdout.flush()
 
             self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
+            if __debug__:
+                for i in xrange(self.BUFFER_SIZE):
+                    print (i, self.destination_of_chunk[i])
             self.chunk_number = (self.chunk_number + 1) % MAX_CHUNK_NUMBER
 
             try:
