@@ -399,11 +399,12 @@ class Splitter_DBS(threading.Thread):
 
         destination = self.get_losser(lost_chunk_number)
 
-        sys.stdout.write(Color.cyan)
-        print(sender, "complains about lost chunk", lost_chunk_number, "sent to", destination)
-        sys.stdout.write(Color.none)
-
         if __debug__:
+            
+            sys.stdout.write(Color.cyan)
+            print(sender, "complains about lost chunk", lost_chunk_number, "sent to", destination)
+            sys.stdout.write(Color.none)
+
             if destination == self.peer_list[0]:
                 print ("=============================")
                 print ("Lost chunk index =", lost_chunk_number)
@@ -848,9 +849,10 @@ class Splitter_LRS(Splitter_ACS):
         self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
         #number, chunk = struct.unpack(self.chunk_format_string, message)
         #chunk_number = socket.ntohs(number)
-        sys.stdout.write(Color.cyan)
-        print ("Re-sending", lost_chunk_number, "to", peer)
-        sys.stdout.write(Color.none)
+        if __debug__:
+            sys.stdout.write(Color.cyan)
+            print ("Re-sending", lost_chunk_number, "to", peer)
+            sys.stdout.write(Color.none)
 
         # }}}
 
