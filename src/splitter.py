@@ -845,8 +845,8 @@ class Splitter_LRS(Splitter_ACS):
         message = self.buffer[lost_chunk_number % self.BUFFER_SIZE]
         peer = self.peer_list[0]
         self.team_socket.sendto(message, peer)
-        self.number_of_sent_chunks_per_peer[peer] += 1
-        self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
+        #self.number_of_sent_chunks_per_peer[peer] += 1
+        #self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
         #number, chunk = struct.unpack(self.chunk_format_string, message)
         #chunk_number = socket.ntohs(number)
         if __debug__:
