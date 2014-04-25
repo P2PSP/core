@@ -401,11 +401,11 @@ class Splitter_DBS(threading.Thread):
 
         destination = self.get_losser(lost_chunk_number)
 
-        if __debug__:
-            sys.stdout.write(Color.blue)
-            print(sender, "complains about lost chunk", lost_chunk_number, "sent to", destination)
-            sys.stdout.write(Color.none)
+        sys.stdout.write(Color.cyan)
+        print(sender, "complains about lost chunk", lost_chunk_number, "sent to", destination)
+        sys.stdout.write(Color.none)
 
+        if __debug__:
             if destination == self.peer_list[0]:
                 print ("=============================")
                 print ("Lost chunk index =", lost_chunk_number)
@@ -418,7 +418,7 @@ class Splitter_DBS(threading.Thread):
     def process_goodbye(self, peer):
         # {{{
 
-        sys.stdout.write(Color.red)
+        sys.stdout.write(Color.green)
         print('Received "goodbye" from', peer)
         sys.stdout.write(Color.none)
         sys.stdout.flush()
@@ -848,10 +848,11 @@ class Splitter_LRS(Splitter_ACS):
         self.team_socket.sendto(message, peer)
         self.number_of_sent_chunks_per_peer[peer] += 1
         self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
-        if __debug__:
-            number, chunk = struct.unpack(self.chunk_format_string, message)
-            chunk_number = socket.ntohs(number)
-            print ("Re-sent chunk", chunk_number, "towards", peer)
+        #number, chunk = struct.unpack(self.chunk_format_string, message)
+        #chunk_number = socket.ntohs(number)
+        sys.stdout.write(Color.cyan)
+        print ("Re-sending", lost_chunk_number, "to", peer)
+        sys.stdout.write(Color.none)
 
         # }}}
 

@@ -6,8 +6,10 @@
 #export BUFFER_SIZE=512
 #export CHANNEL="/root/Videos/big_buck_bunny_480p_stereo.ogg"
 
-export BUFFER_SIZE=256
+export BUFFER_SIZE=64
 export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv"
+export LOSSES_MEMORY=32
+export LOSSES_THRESHOLD=8
 
 #export BUFFER_SIZE=32
 #export CHANNEL="/root/Audios/The_Last_of_the_Mohicans-Promentory.ogg"
@@ -19,14 +21,13 @@ export CHUNK_SIZE=1024
 export DEBT_MEMORY=1024
 export DEBT_THRESHOLD=32
 export ITERATIONS=100
-export LOSSES_MEMORY=1024
-export LOSSES_THRESHOLD=128
+
 export SOURCE_ADDR="150.214.150.68"
 export SOURCE_PORT=4551
 export SPLITTER_PORT=5555
 export LIFE=180
 export BIRTHDAY=10
-export LOSS_PERIOD=10
+export LOSS_PERIOD=100
 
 usage() {
     echo $0
@@ -153,7 +154,7 @@ do
     #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j MARK --set-xmark 101
     #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j RETURN
 
-    xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT --packet_loss_ratio 5 --chunk_loss_period $LOSS_PERIOD' &
+    xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT --chunk_loss_period $LOSS_PERIOD' &
 
     #xterm -sl 10000 -e '../peer.py --team_port $TEAM_PORT --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
 
