@@ -760,7 +760,7 @@ class Monitor_LRS(Monitor_FNS):
         # Monitor peers that implements the LRS use a smaller buffer
         # in order to complains before the rest of peers reach them in
         # their buffers.
-        self.buffer_size /= 8
+        self.buffer_size /= 1
 
         # }}}
 

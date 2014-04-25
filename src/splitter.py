@@ -45,7 +45,7 @@ IP_ADDR = 0
 PORT = 1
 MAX_CHUNK_NUMBER = 65536
 #MAX_CHUNK_NUMBER = 2048
-COUNTERS_TIMING = 5
+COUNTERS_TIMING = 1
 
 # Data Broadcasting Set of rules
 class Splitter_DBS(threading.Thread):
