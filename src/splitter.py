@@ -736,7 +736,10 @@ class Splitter_ACS(Splitter_FNS):
     def reset_counters(self):
         Splitter_DBS.reset_counters(self)
         for i in self.period:
-            self.period[i] = ( self.period[i] + 1 ) / 2
+            #self.period[i] = ( self.period[i] + 1 ) / 2
+            self.period[i] -= 1
+            if self.period[i] < 1:
+                self.period[i] = 1
             #self.period_counter[i] = self.period[i]
 
     def run(self):
