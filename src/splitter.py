@@ -372,8 +372,7 @@ class Splitter_DBS(threading.Thread):
         # {{{
 
         try:
-            if peer != self.peer_list[0]:
-                self.losses[peer] += 1
+            self.losses[peer] += 1
         except KeyError:
             print("the unsupportive peer", peer, "does not exist!")
         else:
@@ -705,8 +704,9 @@ class Splitter_ACS(Splitter_FNS):
 
         Splitter_DBS.increment_unsupportivity_of_peer(self, peer)
         try:
-            self.period[peer] += 1
-            self.period_counter[peer] = self.period[peer]
+            if peer != self.peer_list[0]:
+                self.period[peer] += 1
+                self.period_counter[peer] = self.period[peer]
         except KeyError:
             pass
 
