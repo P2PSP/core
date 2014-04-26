@@ -341,16 +341,9 @@ class Splitter_DBS(threading.Thread):
 
     def get_losser(self, lost_chunk_number):
         # {{{
-        #try:
-        losser = self.destination_of_chunk[lost_chunk_number % self.BUFFER_SIZE]
-        #except IndexError, e:
-        #    print("Error accesing destination_of_chunk[", lost_chunk_number, "]")
-        #    print(e)
+        
+        return self.destination_of_chunk[lost_chunk_number % self.BUFFER_SIZE]
 
-        if losser != self.peer_list[0]:
-            return losser
-        else:
-            return self.destination_of_chunk[(lost_chunk_number+1) % self.BUFFER_SIZE]
         # }}}
 
     def remove_peer(self, peer):
@@ -379,7 +372,8 @@ class Splitter_DBS(threading.Thread):
         # {{{
 
         try:
-            self.losses[peer] += 1
+            if peer != self.peer_list[0]:
+                self.losses[peer] += 1
         except KeyError:
             print("the unsupportive peer", peer, "does not exist!")
         else:
