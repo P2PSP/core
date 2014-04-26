@@ -103,6 +103,8 @@ class Peer_DBS(threading.Thread):
         self.received = []
         self.debt = {}
 
+        self.sendto_counter = 0
+        
         # }}}
 
     def print_modulename(self):
@@ -324,6 +326,8 @@ class Peer_DBS(threading.Thread):
                     while( (self.receive_and_feed_counter < len(self.peer_list)) and (self.receive_and_feed_counter > 0) ):
                         peer = self.peer_list[self.receive_and_feed_counter]
                         self.team_socket.sendto(self.receive_and_feed_previous, peer)
+                        self.sendto_counter += 1
+                        self.sendto_counter %= MAX_CHUNK_NUMBER
 
                         # {{{ debug
 
@@ -377,6 +381,8 @@ class Peer_DBS(threading.Thread):
 
                     peer = self.peer_list[self.receive_and_feed_counter]
                     self.team_socket.sendto(self.receive_and_feed_previous, peer)
+                    self.sendto_counter += 1
+                    self.sendto_counter %= MAX_CHUNK_NUMBER
 
                     self.debt[peer] += 1
                     if self.debt[peer] > self.DEBT_THRESHOLD:
@@ -833,16 +839,20 @@ def main():
     peer.start()
 
     last_chunk_number = peer.played_chunk
+    last_sendto_counter = peer.sendto_counter
     while peer.player_alive:
         time.sleep(1)
         kbps = (peer.played_chunk - last_chunk_number) * peer.chunk_size/1000 * 8
+        kbps_sendto = (peer.sendto_counter - last_sendto_counter) * peer.chunk_size/1000 * 8
         last_chunk_number = peer.played_chunk
+        last_sendto_counter = peer.sendto_counter
         #print ("Played chunk = ", peer.played_chunk)
         print('%5d' % kbps, end=' ')
+        print('%5d' % kbps_sendto, end=' ')
         print('%4d' % len(peer.peer_list), end=' ')
         counter = 0
         for p in peer.peer_list:
-            if (counter<10):
+            if (counter < 10):
                 print(p, end=' ')
                 counter += 1
         print()
