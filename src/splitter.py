@@ -348,7 +348,7 @@ class Splitter_DBS(threading.Thread):
         #    print(e)
 
         if losser != self.peer_list[0]:
-            return loseer
+            return losser
         else:
             return self.destination_of_chunk[(lost_chunk_number+1) % self.BUFFER_SIZE]
         # }}}
