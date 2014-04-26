@@ -826,8 +826,8 @@ def main():
 
     if monitor_mode :
         #        peer = Monitor_DBS()
-        #peer = Monitor_FNS()
-        peer = Monitor_LRS()
+        peer = Monitor_FNS()
+        #peer = Monitor_LRS()
     else:
         #        peer = Peer_DBS()
         if args.chunk_loss_period:
