@@ -341,12 +341,16 @@ class Splitter_DBS(threading.Thread):
 
     def get_losser(self, lost_chunk_number):
         # {{{
-        try:
-            return self.destination_of_chunk[lost_chunk_number % self.BUFFER_SIZE]
-        except IndexError, e:
-            print("Error accesing destination_of_chunk[", lost_chunk_number, "]")
-            print(e)
+        #try:
+        losser = self.destination_of_chunk[lost_chunk_number % self.BUFFER_SIZE]
+        #except IndexError, e:
+        #    print("Error accesing destination_of_chunk[", lost_chunk_number, "]")
+        #    print(e)
 
+        if losser != self.peer_list[0]:
+            return loseer
+        else:
+            return self.destination_of_chunk[(lost_chunk_number+1) % self.BUFFER_SIZE]
         # }}}
 
     def remove_peer(self, peer):
