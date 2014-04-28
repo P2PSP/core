@@ -104,6 +104,7 @@ class Peer_DBS(threading.Thread):
         self.debt = {}
 
         self.sendto_counter = 0
+        self.recvfrom_counter = 0
         
         # }}}
 
@@ -293,6 +294,8 @@ class Peer_DBS(threading.Thread):
 
             chunk_format_string = "H" + str(self.chunk_size) + "s"
             message, sender = self.team_socket.recvfrom(struct.calcsize(chunk_format_string))
+            self.recvfrom_counter += 1
+            self.recvfrom_counter %= MAX_CHUNK_NUMBER
 
             # {{{ debug
             if __debug__:
@@ -838,24 +841,34 @@ def main():
         #        peer = Lossy_Peer(5)
     peer.start()
 
+    time.sleep(1)
+    print(repr("Theory").rjust(6), end=' ')
+    print(repr("Recv").rjust(6), end=' ')
+    print(repr("Sent").rjust(6), end=' ')
+    print(repr(len(peer.peer_list)).rjust(4), end=' ')
+
     last_chunk_number = peer.played_chunk
     last_sendto_counter = peer.sendto_counter
+    last_recvfrom_counter = peer.recvfrom_counter
     while peer.player_alive:
-        time.sleep(1)
-        kbps = (peer.played_chunk - last_chunk_number) * peer.chunk_size/1000 * 8
-        kbps_sendto = (peer.sendto_counter - last_sendto_counter) * peer.chunk_size/1000 * 8
+        kbps = ((peer.played_chunk - last_chunk_number) * peer.chunk_size * 8) / 1000
+        kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
+        kbps_recvfrom = ((peer.recvfrom_counter - last_recvfrom_counter) * peer.chunk_size * 8) / 1000
         last_chunk_number = peer.played_chunk
         last_sendto_counter = peer.sendto_counter
+        last_recvfrom_counter = peer.recvfrom_counter
         #print ("Played chunk = ", peer.played_chunk)
-        print('%5d' % kbps, end=' ')
-        print('%5d' % kbps_sendto, end=' ')
-        print('%4d' % len(peer.peer_list), end=' ')
+        print(repr(kbps).rjust(7), end=' ')
+        print(repr(kbps_recvfrom).rjust(6), end=' ')
+        print(repr(kbps_sendto).rjust(6), end=' ')
+        print(repr(len(peer.peer_list)).rjust(4), end=' ')
         counter = 0
         for p in peer.peer_list:
             if (counter < 10):
                 print(p, end=' ')
                 counter += 1
         print()
+        time.sleep(1)
 
 if __name__ == "__main__":
      main()
