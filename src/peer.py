@@ -105,7 +105,7 @@ class Peer_DBS(threading.Thread):
 
         self.sendto_counter = 0
         self.recvfrom_counter = 0
-        
+
         # }}}
 
     def print_modulename(self):
@@ -471,7 +471,7 @@ class Peer_DBS(threading.Thread):
         # the probability of a delayed chunk overwrites a new chunk that is
         # waiting for traveling the player, we wil fill only the half of the
         # circular queue.
-        
+
         print(self.team_socket.getsockname(), "\b: buffering ",)
         sys.stdout.flush()
 
@@ -718,7 +718,7 @@ class Lossy_Peer(Peer_FNS):
     def __init__(self, buffering):
         # {{{
 
-        Peer_FNS.__init__(self)
+        Peer_FNS.__init__(self, buffering)
 
         sys.stdout.write(Color.yellow)
         print ("Lossy Peer")
@@ -753,7 +753,7 @@ class Monitor_LRS(Monitor_FNS):
     def __init__(self, buffering):
         # {{{
 
-        Monitor_FNS.__init__(self)
+        Monitor_FNS.__init__(self, buffering)
 
         sys.stdout.write(Color.yellow)
         print ("Monitor LRS")
@@ -843,7 +843,7 @@ def main():
             peer = Peer_FNS(buffering)
         #        peer = Lossy_Peer(5)
     peer.start()
-    peer.join()
+    buffering.wait()
 
     print("Expected", end=' ')
     print("Received", end=' ')
