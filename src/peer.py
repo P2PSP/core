@@ -61,7 +61,7 @@ class Peer_DBS(threading.Thread):
     DEBT_MEMORY = 1024
     DEBT_THRESHOLD = 10 # This value depends on debt_memory
 
-    def __init__(self):
+    def __init__(self, buffering):
         # {{{
 
         threading.Thread.__init__(self)
@@ -295,7 +295,7 @@ class Peer_DBS(threading.Thread):
             chunk_format_string = "H" + str(self.chunk_size) + "s"
             message, sender = self.team_socket.recvfrom(struct.calcsize(chunk_format_string))
             self.recvfrom_counter += 1
-            self.recvfrom_counter %= MAX_CHUNK_NUMBER
+            #self.recvfrom_counter %= MAX_CHUNK_NUMBER
 
             # {{{ debug
             if __debug__:
@@ -330,7 +330,7 @@ class Peer_DBS(threading.Thread):
                         peer = self.peer_list[self.receive_and_feed_counter]
                         self.team_socket.sendto(self.receive_and_feed_previous, peer)
                         self.sendto_counter += 1
-                        self.sendto_counter %= MAX_CHUNK_NUMBER
+                        #self.sendto_counter %= MAX_CHUNK_NUMBER
 
                         # {{{ debug
 
@@ -385,7 +385,7 @@ class Peer_DBS(threading.Thread):
                     peer = self.peer_list[self.receive_and_feed_counter]
                     self.team_socket.sendto(self.receive_and_feed_previous, peer)
                     self.sendto_counter += 1
-                    self.sendto_counter %= MAX_CHUNK_NUMBER
+                    #self.sendto_counter %= MAX_CHUNK_NUMBER
 
                     self.debt[peer] += 1
                     if self.debt[peer] > self.DEBT_THRESHOLD:
@@ -471,7 +471,7 @@ class Peer_DBS(threading.Thread):
         # the probability of a delayed chunk overwrites a new chunk that is
         # waiting for traveling the player, we wil fill only the half of the
         # circular queue.
-
+        
         print(self.team_socket.getsockname(), "\b: buffering ",)
         sys.stdout.flush()
 
@@ -566,7 +566,9 @@ class Peer_DBS(threading.Thread):
         self.splitter_socket.close()
         #self.say_hello(splitter, self.team_socket)
         self.create_buffer()
+        self.buffering.acquire()
         self.buffer_data()
+        self.buffering.release()
 
         self.peers_life()
         self.polite_farewell()
@@ -578,10 +580,10 @@ class Peer_DBS(threading.Thread):
 class Monitor_DBS(Peer_DBS):
     # {{{
 
-    def __init__(self):
+    def __init__(self, buffering):
         # {{{
 
-        Peer_DBS.__init__(self)
+        Peer_DBS.__init__(self, buffering)
 
         sys.stdout.write(Color.yellow)
         print("Monitor DBS")
@@ -619,10 +621,10 @@ class Monitor_DBS(Peer_DBS):
 class Peer_FNS(Peer_DBS):
     # {{{
 
-    def __init__(self):
+    def __init__(self, buffering):
         # {{{
 
-        Peer_DBS.__init__(self)
+        Peer_DBS.__init__(self, buffering)
 
         sys.stdout.write(Color.yellow)
         print ("Peer FNS")
@@ -673,11 +675,11 @@ class Peer_FNS(Peer_DBS):
 class Monitor_FNS(Monitor_DBS, Peer_FNS):
     # {{{
 
-    def __init__(self):
+    def __init__(self, buffering):
         # {{{
 
-        Monitor_DBS.__init__(self)
-        Peer_DBS.__init__(self)
+        Monitor_DBS.__init__(self, buffering)
+        Peer_DBS.__init__(self, buffering)
 
         sys.stdout.write(Color.yellow)
         print ("Monitor FNS")
@@ -713,7 +715,7 @@ class Lossy_Peer(Peer_FNS):
 
     CHUNK_LOSS_PERIOD = 10
 
-    def __init__(self):
+    def __init__(self, buffering):
         # {{{
 
         Peer_FNS.__init__(self)
@@ -748,7 +750,7 @@ class Lossy_Peer(Peer_FNS):
 class Monitor_LRS(Monitor_FNS):
     # {{{
 
-    def __init__(self):
+    def __init__(self, buffering):
         # {{{
 
         Monitor_FNS.__init__(self)
@@ -827,48 +829,61 @@ def main():
         print ('chunk_loss_period = ', Lossy_Peer.CHUNK_LOSS_PERIOD)
     # }}}
 
+    buffering = threading.Lock()
     if monitor_mode :
         #        peer = Monitor_DBS()
         #peer = Monitor_FNS()
-        peer = Monitor_LRS()
+        peer = Monitor_LRS(buffering)
     else:
         #        peer = Peer_DBS()
         if args.chunk_loss_period:
-            peer = Lossy_Peer()
+            peer = Lossy_Peer(buffering)
             print ('chunk_loss_period =', peer.CHUNK_LOSS_PERIOD)
         else:
-            peer = Peer_FNS()
+            peer = Peer_FNS(buffering)
         #        peer = Lossy_Peer(5)
     peer.start()
+    peer.join()
 
-    time.sleep(1)
-    print(repr("Theory").rjust(6), end=' ')
-    print(repr("Recv").rjust(6), end=' ')
-    print(repr("Sent").rjust(6), end=' ')
-    print(repr(len(peer.peer_list)).rjust(4), end=' ')
+    print("Expected", end=' ')
+    print("Received", end=' ')
+    print("Sent", end=' ')
+    print("Nice", end=' ')
+    print("Team", end=' ')
 
     last_chunk_number = peer.played_chunk
     last_sendto_counter = peer.sendto_counter
     last_recvfrom_counter = peer.recvfrom_counter
     while peer.player_alive:
+        time.sleep(1)
         kbps = ((peer.played_chunk - last_chunk_number) * peer.chunk_size * 8) / 1000
         kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
         kbps_recvfrom = ((peer.recvfrom_counter - last_recvfrom_counter) * peer.chunk_size * 8) / 1000
         last_chunk_number = peer.played_chunk
         last_sendto_counter = peer.sendto_counter
         last_recvfrom_counter = peer.recvfrom_counter
+        nice = 100.0/float((float(kbps)/kbps_recvfrom)*(len(peer.peer_list)+1))
+#        print(1.0/float(nice))
         #print ("Played chunk = ", peer.played_chunk)
         print(repr(kbps).rjust(7), end=' ')
+        if kbps > kbps_recvfrom:
+            sys.stdout.write(Color.red)
+        elif kbps < kbps_recvfrom:
+            sys.stdout.write(Color.green)
         print(repr(kbps_recvfrom).rjust(6), end=' ')
+        print(("{:.1f}".format(nice)).rjust(6), end=' ')
+        sys.stdout.write(Color.none)
         print(repr(kbps_sendto).rjust(6), end=' ')
+        #print(repr(nice).ljust(1)[:6], end=' ')
         print(repr(len(peer.peer_list)).rjust(4), end=' ')
         counter = 0
         for p in peer.peer_list:
-            if (counter < 10):
+            if (counter < 5):
                 print(p, end=' ')
                 counter += 1
+            else:
+                break
         print()
-        time.sleep(1)
 
 if __name__ == "__main__":
      main()
