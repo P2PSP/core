@@ -856,11 +856,11 @@ def main():
     #while peer.buffering:
     #    time.sleep(1)
 
-    print("+-------------------------------------------------+")
-    print("| Expected = Expected kbps                        |")
-    print("| Received = Received kbps                        |")
-    print("|     Nice = % of data received from the splitter |")
+    print("+------------------------------------------------------+")
+    print("| Expected = Expected kbps                             |")
+    print("| Received = Received kbps (including retransmissions) |")
     print("|     Sent = Sent kbps                            |")
+    print("|     Nice = % of data received from the team |")
     print("+-------------------------------------------------+")
     print("Expected", end=' | ')
     print("Received", end=' | ')
@@ -873,24 +873,32 @@ def main():
     last_recvfrom_counter = peer.recvfrom_counter
     while peer.player_alive:
         time.sleep(1)
-        kbps = ((peer.played_chunk - last_chunk_number) * peer.chunk_size * 8) / 1000
-        kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
-        kbps_recvfrom = ((peer.recvfrom_counter - last_recvfrom_counter) * peer.chunk_size * 8) / 1000
+        kbps_expected_recv = ((peer.played_chunk - last_chunk_number) * peer.chunk_size * 8) / 1000
         last_chunk_number = peer.played_chunk
-        last_sendto_counter = peer.sendto_counter
+        kbps_recvfrom = ((peer.recvfrom_counter - last_recvfrom_counter) * peer.chunk_size * 8) / 1000
         last_recvfrom_counter = peer.recvfrom_counter
-        nice = 100.0/float((float(kbps)/kbps_recvfrom)*(len(peer.peer_list)+1))
+        team_ratio = len(peer.peer_list) /(len(peer.peer_list) + 1.0)
+        kbps_expected_sent = int(kbps_expected_recv*team_ratio)
+        kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
+        last_sendto_counter = peer.sendto_counter
+        nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
 #        print(1.0/float(nice))
         #print ("Played chunk = ", peer.played_chunk)
-        print(repr(kbps).rjust(8), end=' | ')
-        if kbps > kbps_recvfrom:
+        print(repr(kbps_expected_recv).rjust(8), end='')
+        if kbps_expected_recv > kbps_recvfrom:
             sys.stdout.write(Color.red)
-        elif kbps < kbps_recvfrom:
+        elif kbps_expected_recv < kbps_recvfrom:
             sys.stdout.write(Color.green)
-        print(repr(kbps_recvfrom).rjust(8), end=' | ')
-        print(("{:.1f}".format(nice)).rjust(6), end=' | ')
-        sys.stdout.write(Color.none)
-        print(repr(kbps_sendto).rjust(6), end=' | ')
+        print(('(' + repr(kbps_recvfrom) + ')').rjust(8), end=Color.none  + ' | ')
+        #print(("{:.1f}".format(nice)).rjust(6), end=' | ')
+        #sys.stdout.write(Color.none)
+        print(repr(kbps_sendto).rjust(8), end='')
+        if kbps_expected_sent < kbps_sendto:
+            sys.stdout.write(Color.red)
+        elif kbps_expected_sent > kbps_sendto:
+            sys.stdout.write(Color.green)
+        print(('(' + repr(kbps_expected_sent) + ')').rjust(8), end=Color.none  + ' | ')
+        #sys.stdout.write(Color.none)
         #print(repr(nice).ljust(1)[:6], end=' ')
         print(len(peer.peer_list), end=' ')
         counter = 0
