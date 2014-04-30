@@ -606,9 +606,10 @@ class Monitor_DBS(Peer_DBS):
         message = struct.pack("!H", chunk_number)
         self.team_socket.sendto(message, self.splitter)
 
-        sys.stdout.write(Color.blue)
-        print ("lost chunk:", self.numbers[chunk_number % self.buffer_size], chunk_number, self.received[chunk_number % self.buffer_size])
-        sys.stdout.write(Color.none)
+        if __debug__:
+            sys.stdout.write(Color.blue)
+            print ("lost chunk:", self.numbers[chunk_number % self.buffer_size], chunk_number, self.received[chunk_number % self.buffer_size])
+            sys.stdout.write(Color.none)
 
         # }}}
 
@@ -872,7 +873,7 @@ def main():
     last_recvfrom_counter = peer.recvfrom_counter
     while peer.player_alive:
         time.sleep(1)
-        kbps = ((peer.played_chunk - last_chunk_number) * peer.chunk_size * 8) / 1000
+        kbps = ((peer.played_chunk - last_chunk_number + 1) * peer.chunk_size * 8) / 1000
         kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
         kbps_recvfrom = ((peer.recvfrom_counter - last_recvfrom_counter) * peer.chunk_size * 8) / 1000
         last_chunk_number = peer.played_chunk
