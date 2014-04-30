@@ -42,6 +42,7 @@ import argparse
 from color import Color
 import threading
 from lossy_socket import lossy_socket
+#from multiprocessing import Pipe
 
 # }}}
 
@@ -61,7 +62,7 @@ class Peer_DBS(threading.Thread):
     DEBT_MEMORY = 1024
     DEBT_THRESHOLD = 10 # This value depends on debt_memory
 
-    def __init__(self, buffering):
+    def __init__(self):
         # {{{
 
         threading.Thread.__init__(self)
@@ -106,6 +107,10 @@ class Peer_DBS(threading.Thread):
         self.sendto_counter = 0
         self.recvfrom_counter = 0
 
+        #self.pipe_thread_end, self.pipe_main_end = Pipe()
+        #self.buffering = True
+        self.buffering = threading.Event()
+        
         # }}}
 
     def print_modulename(self):
@@ -495,7 +500,10 @@ class Peer_DBS(threading.Thread):
             while self.receive_and_feed() < 0:
                 pass
 
+        print()
         print('latency =', time.time() - start_latency, 'seconds')
+        sys.stdout.flush()
+
         # }}}
 
     def keep_the_buffer_full(self):
@@ -566,10 +574,10 @@ class Peer_DBS(threading.Thread):
         self.splitter_socket.close()
         #self.say_hello(splitter, self.team_socket)
         self.create_buffer()
-        self.buffering.acquire()
         self.buffer_data()
-        self.buffering.release()
-
+        #self.pipe_thread_end.send("Buffering done!")
+        #self.pipe_thread_end.close()
+        self.buffering = False
         self.peers_life()
         self.polite_farewell()
 
@@ -580,10 +588,10 @@ class Peer_DBS(threading.Thread):
 class Monitor_DBS(Peer_DBS):
     # {{{
 
-    def __init__(self, buffering):
+    def __init__(self):
         # {{{
 
-        Peer_DBS.__init__(self, buffering)
+        Peer_DBS.__init__(self)
 
         sys.stdout.write(Color.yellow)
         print("Monitor DBS")
@@ -621,10 +629,10 @@ class Monitor_DBS(Peer_DBS):
 class Peer_FNS(Peer_DBS):
     # {{{
 
-    def __init__(self, buffering):
+    def __init__(self):
         # {{{
 
-        Peer_DBS.__init__(self, buffering)
+        Peer_DBS.__init__(self)
 
         sys.stdout.write(Color.yellow)
         print ("Peer FNS")
@@ -664,7 +672,7 @@ class Peer_FNS(Peer_DBS):
         # END NEW
         self.create_buffer()
         self.buffer_data()
-
+        self.buffering.set()
         self.peers_life()
         self.polite_farewell()
 
@@ -675,11 +683,11 @@ class Peer_FNS(Peer_DBS):
 class Monitor_FNS(Monitor_DBS, Peer_FNS):
     # {{{
 
-    def __init__(self, buffering):
+    def __init__(self):
         # {{{
 
-        Monitor_DBS.__init__(self, buffering)
-        Peer_DBS.__init__(self, buffering)
+        Monitor_DBS.__init__(self)
+        Peer_DBS.__init__(self)
 
         sys.stdout.write(Color.yellow)
         print ("Monitor FNS")
@@ -715,10 +723,10 @@ class Lossy_Peer(Peer_FNS):
 
     CHUNK_LOSS_PERIOD = 10
 
-    def __init__(self, buffering):
+    def __init__(self):
         # {{{
 
-        Peer_FNS.__init__(self, buffering)
+        Peer_FNS.__init__(self)
 
         sys.stdout.write(Color.yellow)
         print ("Lossy Peer")
@@ -750,10 +758,10 @@ class Lossy_Peer(Peer_FNS):
 class Monitor_LRS(Monitor_FNS):
     # {{{
 
-    def __init__(self, buffering):
+    def __init__(self):
         # {{{
 
-        Monitor_FNS.__init__(self, buffering)
+        Monitor_FNS.__init__(self)
 
         sys.stdout.write(Color.yellow)
         print ("Monitor LRS")
@@ -829,27 +837,35 @@ def main():
         print ('chunk_loss_period = ', Lossy_Peer.CHUNK_LOSS_PERIOD)
     # }}}
 
-    buffering = threading.Lock()
     if monitor_mode :
         #        peer = Monitor_DBS()
         #peer = Monitor_FNS()
-        peer = Monitor_LRS(buffering)
+        peer = Monitor_LRS()
     else:
         #        peer = Peer_DBS()
         if args.chunk_loss_period:
-            peer = Lossy_Peer(buffering)
+            peer = Lossy_Peer()
             print ('chunk_loss_period =', peer.CHUNK_LOSS_PERIOD)
         else:
-            peer = Peer_FNS(buffering)
+            peer = Peer_FNS()
         #        peer = Lossy_Peer(5)
     peer.start()
-    buffering.wait()
+    peer.buffering.wait()
+    #peer.pipe_main_end.recv()
+    #while peer.buffering:
+    #    time.sleep(1)
 
-    print("Expected", end=' ')
-    print("Received", end=' ')
-    print("Sent", end=' ')
-    print("Nice", end=' ')
-    print("Team", end=' ')
+    print("+-------------------------------------------------+")
+    print("| Expected = Expected kbps                        |")
+    print("| Received = Received kbps                        |")
+    print("|     Nice = % of data received from the splitter |")
+    print("|     Sent = Sent kbps                            |")
+    print("+-------------------------------------------------+")
+    print("Expected", end=' | ')
+    print("Received", end=' | ')
+    print("  Nice", end=' | ')
+    print("  Sent", end=' | ')
+    print("Team description")
 
     last_chunk_number = peer.played_chunk
     last_sendto_counter = peer.sendto_counter
@@ -865,17 +881,17 @@ def main():
         nice = 100.0/float((float(kbps)/kbps_recvfrom)*(len(peer.peer_list)+1))
 #        print(1.0/float(nice))
         #print ("Played chunk = ", peer.played_chunk)
-        print(repr(kbps).rjust(7), end=' ')
+        print(repr(kbps).rjust(8), end=' | ')
         if kbps > kbps_recvfrom:
             sys.stdout.write(Color.red)
         elif kbps < kbps_recvfrom:
             sys.stdout.write(Color.green)
-        print(repr(kbps_recvfrom).rjust(6), end=' ')
-        print(("{:.1f}".format(nice)).rjust(6), end=' ')
+        print(repr(kbps_recvfrom).rjust(8), end=' | ')
+        print(("{:.1f}".format(nice)).rjust(6), end=' | ')
         sys.stdout.write(Color.none)
-        print(repr(kbps_sendto).rjust(6), end=' ')
+        print(repr(kbps_sendto).rjust(6), end=' | ')
         #print(repr(nice).ljust(1)[:6], end=' ')
-        print(repr(len(peer.peer_list)).rjust(4), end=' ')
+        print(len(peer.peer_list), end=' ')
         counter = 0
         for p in peer.peer_list:
             if (counter < 5):
