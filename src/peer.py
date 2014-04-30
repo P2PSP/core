@@ -884,20 +884,20 @@ def main():
         nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
 #        print(1.0/float(nice))
         #print ("Played chunk = ", peer.played_chunk)
-        print(repr(kbps_expected_recv).rjust(8), end='')
         if kbps_expected_recv > kbps_recvfrom:
             sys.stdout.write(Color.red)
         elif kbps_expected_recv < kbps_recvfrom:
             sys.stdout.write(Color.green)
-        print(('(' + repr(kbps_recvfrom) + ')').rjust(8), end=Color.none  + ' | ')
+        print(repr(kbps_expected_recv).rjust(8), end=Color.none)
+        print(('(' + repr(kbps_recvfrom) + ')').rjust(8), end=' | ')
         #print(("{:.1f}".format(nice)).rjust(6), end=' | ')
         #sys.stdout.write(Color.none)
-        print(repr(kbps_sendto).rjust(8), end='')
         if kbps_expected_sent < kbps_sendto:
             sys.stdout.write(Color.red)
         elif kbps_expected_sent > kbps_sendto:
             sys.stdout.write(Color.green)
-        print(('(' + repr(kbps_expected_sent) + ')').rjust(8), end=Color.none  + ' | ')
+        print(repr(kbps_sendto).rjust(8), end=Color.none)
+        print(('(' + repr(kbps_expected_sent) + ')').rjust(8), end=' | ')
         #sys.stdout.write(Color.none)
         #print(repr(nice).ljust(1)[:6], end=' ')
         print(len(peer.peer_list), end=' ')
