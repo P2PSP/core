@@ -857,13 +857,11 @@ def main():
     print("+-----------------------------------------------------+")
     print("| Received = Received kbps, including retransmissions |")
     print("|     Sent = Sent kbps                                |")
-    print("|       (Expected values are between parenthesis)     |"
+    print("|       (Expected values are between parenthesis)     |")
     print("+-----------------------------------------------------+")
-    print("Expected", end=' | ')
-    print("Received", end=' | ')
-    print("  Nice", end=' | ')
-    print("  Sent", end=' | ')
-    print("Team description")
+    print()
+    print("        Received |             Sent | Team description")
+    print("-----------------+------------------+-----------------")
 
     last_chunk_number = peer.played_chunk
     last_sendto_counter = peer.sendto_counter
