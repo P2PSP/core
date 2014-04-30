@@ -8,8 +8,8 @@ export TEAM_PORT=5555
 
 usage() {
     echo $0
-    echo "  [-m debt memory ($DEB_MEMORY)]"
-    echo "  [-d debt threshold ($DEB_THRESHOLD)]"
+    echo "  [-m debt memory ($DEBT_MEMORY)]"
+    echo "  [-d debt threshold ($DEBT_THRESHOLD)]"
     echo "  [-s splitter IP address ($SPLITTER_ADDR)]"
     echo "  [-l splitter port ($SPLITTER_PORT)]"
     echo "  [-t team port ($SPLITTER_PORT)]"
