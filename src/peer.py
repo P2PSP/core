@@ -873,7 +873,7 @@ def main():
     last_recvfrom_counter = peer.recvfrom_counter
     while peer.player_alive:
         time.sleep(1)
-        kbps = ((peer.played_chunk - last_chunk_number + 1) * peer.chunk_size * 8) / 1000
+        kbps = ((peer.played_chunk - last_chunk_number) * peer.chunk_size * 8) / 1000
         kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
         kbps_recvfrom = ((peer.recvfrom_counter - last_recvfrom_counter) * peer.chunk_size * 8) / 1000
         last_chunk_number = peer.played_chunk
