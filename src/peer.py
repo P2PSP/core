@@ -572,11 +572,9 @@ class Peer_DBS(threading.Thread):
         self.setup_team_socket()
         self.retrieve_the_list_of_peers()
         self.splitter_socket.close()
-        #self.say_hello(splitter, self.team_socket)
         self.create_buffer()
         self.buffer_data()
-        #self.pipe_thread_end.send("Buffering done!")
-        #self.pipe_thread_end.close()
+        self.buffering.set()
         self.buffering = False
         self.peers_life()
         self.polite_farewell()
@@ -856,12 +854,11 @@ def main():
     #while peer.buffering:
     #    time.sleep(1)
 
-    print("+------------------------------------------------------+")
-    print("| Expected = Expected kbps                             |")
-    print("| Received = Received kbps (including retransmissions) |")
-    print("|     Sent = Sent kbps                            |")
-    print("|     Nice = % of data received from the team |")
-    print("+-------------------------------------------------+")
+    print("+-----------------------------------------------------+")
+    print("| Received = Received kbps, including retransmissions |")
+    print("|     Sent = Sent kbps                                |")
+    print("|       (Expected values are between parenthesis)     |"
+    print("+-----------------------------------------------------+")
     print("Expected", end=' | ')
     print("Received", end=' | ')
     print("  Nice", end=' | ')
@@ -884,17 +881,17 @@ def main():
         nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
 #        print(1.0/float(nice))
         #print ("Played chunk = ", peer.played_chunk)
-        if kbps_expected_recv > kbps_recvfrom:
+        if kbps_expected_recv < kbps_recvfrom:
             sys.stdout.write(Color.red)
-        elif kbps_expected_recv < kbps_recvfrom:
+        elif kbps_expected_recv > kbps_recvfrom:
             sys.stdout.write(Color.green)
         print(repr(kbps_expected_recv).rjust(8), end=Color.none)
         print(('(' + repr(kbps_recvfrom) + ')').rjust(8), end=' | ')
         #print(("{:.1f}".format(nice)).rjust(6), end=' | ')
         #sys.stdout.write(Color.none)
-        if kbps_expected_sent < kbps_sendto:
+        if kbps_expected_sent > kbps_sendto:
             sys.stdout.write(Color.red)
-        elif kbps_expected_sent > kbps_sendto:
+        elif kbps_expected_sent < kbps_sendto:
             sys.stdout.write(Color.green)
         print(repr(kbps_sendto).rjust(8), end=Color.none)
         print(('(' + repr(kbps_expected_sent) + ')').rjust(8), end=' | ')
