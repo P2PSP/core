@@ -390,7 +390,6 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-
     def process_lost_chunk(self, lost_chunk_number, sender):
         # {{{
 
@@ -447,6 +446,7 @@ class Splitter_DBS(threading.Thread):
                 # }}}
 
             else:
+                
                 # {{{ The peer wants to leave the team.
 
                 # A !2-length payload means that the peer wants to go
@@ -539,13 +539,21 @@ class Splitter_DBS(threading.Thread):
         # }}}
 
     def reset_counters(self):
+        # {{{
+
         for i in self.losses:
             self.losses[i] /= 2
 
+        # }}}
+
     def reset_counters_thread(self):
+        # {{{
+
         while True:
             self.reset_counters()
             time.sleep(COUNTERS_TIMING)
+
+        # }}}
 
     def run(self):
         # {{{
