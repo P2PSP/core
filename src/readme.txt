@@ -11,3 +11,7 @@ This is a description of the files/directories:
 * tools: some tools.
 
 * tests: scripts to test the implementation of the P2PSP.
+
+* lossy_socket.py: overwrites the "sendto" method of the socket
+  library, in order to simulate packet loss.
+
