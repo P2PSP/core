@@ -11,7 +11,7 @@ bzr config
 
 bzr launchpad-login <launchpad_username>
 
-*. Copy of the "trunk" branch into a "trunk"-named directory:
+* Copy of the "trunk" branch into a "trunk"-named directory:
 
 bzr branch lp:p2psp trunk
 
