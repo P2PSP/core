@@ -10,7 +10,10 @@ This is a description of the files/directories:
 
 * src: the implementation and some useful scripts.
 
-More information at:
+* doc: some useful information about the repository management and use
+  of this implementation.
+
+More information about the protocol at:
 
 http://www.p2psp.org
 
