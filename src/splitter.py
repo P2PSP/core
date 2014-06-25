@@ -84,7 +84,7 @@ class Splitter_IMS(threading.Thread):
     # The streaming server.
 
     # }}}
-    SOURCE_ADDR = "150.214.150.68"
+    SOURCE_ADDR = "150.214.150.68" # Esto debería ser una IP multicast
 
     # {{{
 
