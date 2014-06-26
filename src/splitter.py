@@ -84,7 +84,7 @@ class Splitter_IMS(threading.Thread):
     # The streaming server.
 
     # }}}
-    SOURCE_ADDR = "150.214.150.68" # Esto debería ser una IP multicast
+    SOURCE_ADDR = "150.214.150.68"
 
     # {{{
 
@@ -100,7 +100,7 @@ class Splitter_IMS(threading.Thread):
 
     # }}}
 
-    TEAM_ADDR = "150.214.150.68"
+    TEAM_ADDR = "224.0.0.1" # All Systems on this Subnet
 
     # {{{
 
@@ -141,9 +141,7 @@ class Splitter_IMS(threading.Thread):
         print("(Team) IP address =", self.TEAM_ADDR)
         print("(Team) Port =", self.TEAM_PORT)
 
-        # {{{
-
-        # A splitter runs 3 threads. The first one controls the peer
+        # {{{ A splitter runs 3 threads. The first one controls the peer
         # arrivals. The second one listens to the team, for example,
         # to re-sends lost blocks. The third one shows some
         # information about the transmission. This variable is used to
@@ -153,48 +151,22 @@ class Splitter_IMS(threading.Thread):
         # }}}
         self.alive = True
 
-        # {{{
-
-        # The list of peers in the team.
-
-        # }}}
-        self.peer_list = []
-
-        # {{{
-
-        # Destination peers of the chunk, indexed by a chunk
-        # number. Used to find the peer to which a chunk has been
-        # sent.
-
-        # }}}
-        self.destination_of_chunk = [('0.0.0.0',0)] * self.BUFFER_SIZE
-        #for i in xrange(self.BUFFER_SIZE):
-        #    self.destination_of_chunk.append(('0.0.0.0',0))
-        self.losses = {}
-
-        # {{{
-
-        # Counts the number of times a peer has been removed from the team.
-
-        # }}}
-        #self.deletions = {}
-
+        # {{{ Number of the served chunk.
         self.chunk_number = 0
 
-        # {{{
-
-        # Used to listen to the incomming peers.
+        # {{{ Used to listen to the incomming peers.
 
         # }}}
         self.peer_connection_socket = ""
 
-        # {{{
-
-        # Used to listen the team messages.
+        # {{{ Used to listen the team messages.
 
         # }}}
         self.team_socket = ""
 
+        # {{{ The served peer index.
+
+        # }}}
         self.peer_number = 0
 
         self.header = ""
@@ -773,6 +745,7 @@ class Splitter_DBS(threading.Thread):
         self.number_of_monitors = 1
 
         self.chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
+
         # }}}
 
     def print_modulename(self):
