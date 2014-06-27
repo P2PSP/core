@@ -51,9 +51,11 @@ PORT = 1
 MAX_CHUNK_NUMBER = 65536
 #MAX_CHUNK_NUMBER = 512
 
-# Data Broadcasting Set
+# Data Broadcasting Set of Rules
 class Peer_DBS(threading.Thread):
     # {{{
+
+    # {{{ Class "constants"
 
     PLAYER_PORT = 9999
     SPLITTER_ADDR = "150.214.150.68"
@@ -61,6 +63,8 @@ class Peer_DBS(threading.Thread):
     TEAM_PORT = 0
     DEBT_MEMORY = 1024
     DEBT_THRESHOLD = 10 # This value depends on debt_memory
+
+    # }}}
 
     def __init__(self):
         # {{{
@@ -624,7 +628,7 @@ class Monitor_DBS(Peer_DBS):
 
     # }}}
 
-# Full-cone Nat Set
+# Full-cone Nat Set of Rules
 class Peer_FNS(Peer_DBS):
     # {{{
 
@@ -753,7 +757,7 @@ class Lossy_Peer(Peer_FNS):
 
     # }}}
 
-# Lost chunks Recovery Set
+# Lost chunks Recovery Set of Rules
 class Monitor_LRS(Monitor_FNS):
     # {{{
 

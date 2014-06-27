@@ -101,6 +101,7 @@ class Splitter_IMS(threading.Thread):
     # }}}
 
     TEAM_ADDR = "224.0.0.1" # All Systems on this Subnet
+    #TEAM_ADDR = "224.1.1.1"
 
     # {{{
 
@@ -190,6 +191,7 @@ class Splitter_IMS(threading.Thread):
         # }}}
         self.number_of_monitors = 1
 
+        self.multicast_channel = (self.TEAM_ADDR, self.TEAM_PORT)
         # }}}
 
     def print_modulename(self):
@@ -286,145 +288,9 @@ class Splitter_IMS(threading.Thread):
 
         # }}}
 
-    def receive_message(self):
-        # {{{
-
-        return self.team_socket.recvfrom(struct.calcsize("H"))
-
-        # }}}
-
-    def get_lost_chunk_number(self, message):
-        # {{{
-
-        return struct.unpack("!H",message)[0]
-
-        # }}}
-
-    def get_losser(self, lost_chunk_number):
-        # {{{
-        
-        return self.destination_of_chunk[lost_chunk_number % self.BUFFER_SIZE]
-
-        # }}}
-
-    def remove_peer(self, peer):
-        # {{{
-
-        try:
-            self.peer_list.remove(peer)
-        except ValueError:
-            pass
-        else:
-            self.peer_number -= 1
-
-        try:
-            del self.losses[peer]
-        except KeyError:
-            pass
-
-          #try:
-          #     del self.deletions[peer]
-          #except KeyError:
-          #     pass
-
-        # }}}
-
-    def increment_unsupportivity_of_peer(self, peer):
-        # {{{
-
-        try:
-            self.losses[peer] += 1
-        except KeyError:
-            print("the unsupportive peer", peer, "does not exist!")
-        else:
-            if __debug__:
-                sys.stdout.write(Color.blue)
-                print(peer, "has loss", self.losses[peer], "chunks")
-                sys.stdout.write(Color.none)
-            if self.losses[peer] > self.LOSSES_THRESHOLD:
-                sys.stdout.write(Color.red)
-                print(peer, 'removed')
-                self.remove_peer(peer)
-                sys.stdout.write(Color.none)
-        finally:
-           pass
-
-        # }}}
-
-    def process_lost_chunk(self, lost_chunk_number, sender):
-        # {{{
-
-        destination = self.get_losser(lost_chunk_number)
-
-        if __debug__:
-            
-            sys.stdout.write(Color.cyan)
-            print(sender, "complains about lost chunk", lost_chunk_number, "sent to", destination)
-            sys.stdout.write(Color.none)
-
-            if destination == self.peer_list[0]:
-                print ("=============================")
-                print ("Lost chunk index =", lost_chunk_number)
-                print ("=============================")
-
-        self.increment_unsupportivity_of_peer(destination)
-
-        # }}}
-
-    def process_goodbye(self, peer):
-        # {{{
-
-        sys.stdout.write(Color.green)
-        print('Received "goodbye" from', peer)
-        sys.stdout.write(Color.none)
-        sys.stdout.flush()
-
-        #if peer != self.peer_list[0]:
-        self.remove_peer(peer)
-
-        # }}}
-
-    def moderate_the_team(self):
-        # {{{
-
-        while self.alive:
-            # {{{
-
-            message, sender = self.receive_message()
-
-            if len(message) == 2:
-
-                # {{{ The peer complains about a lost chunk.
-
-                # In this situation, the splitter counts the number of
-                # complains. If this number exceeds a threshold, the
-                # unsupportive peer is expelled from the
-                # team.
-
-                lost_chunk_number = self.get_lost_chunk_number(message)
-                self.process_lost_chunk(lost_chunk_number, sender)
-
-                # }}}
-
-            else:
-                
-                # {{{ The peer wants to leave the team.
-
-                # A !2-length payload means that the peer wants to go
-                # away.
-
-                self.process_goodbye(sender)
-
-                # }}}
-
-            # }}}
-
-        # }}}
-
     def setup_peer_connection_socket(self):
-        # {{{
-
-        # peer_connection_socket is used to listen to the incomming peers.
+        # {{{ peer_connection_socket is used to listen to the incomming peers.
+        
         self.peer_connection_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             # This does not work in Windows systems.
@@ -460,7 +326,7 @@ class Splitter_IMS(threading.Thread):
         # }}}
 
     def request_video(self):
-        # {{{
+        # {{{ Request the video using HTML from the source node (Icecast).
 
         source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if __debug__:
@@ -499,25 +365,10 @@ class Splitter_IMS(threading.Thread):
 
         # }}}
 
-    def reset_counters(self):
-        # {{{
-
-        for i in self.losses:
-            self.losses[i] /= 2
-
-        # }}}
-
-    def reset_counters_thread(self):
-        # {{{
-
-        while True:
-            self.reset_counters()
-            time.sleep(COUNTERS_TIMING)
-
-        # }}}
-
     def run(self):
         # {{{
+
+        # {{{ setup_peer_connection_socket()
 
         try:
             self.setup_peer_connection_socket()
@@ -526,6 +377,10 @@ class Splitter_IMS(threading.Thread):
             print(self.peer_connection_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT))
             sys.exit('')
 
+        # }}}
+
+        # {{{ setup_team_socket()
+
         try:
             self.setup_team_socket()
         except Exception, e:
@@ -533,16 +388,20 @@ class Splitter_IMS(threading.Thread):
             print(self.team_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT))
             sys.exit('')
 
+        # }}}
+
         source_socket = self.request_video()
+
+        # {{{ Load the video header.
 
         for i in xrange(self.HEADER_LENGTH):
             self.header += self.receive_next_chunk(source_socket, 0)[0]
 
+        # }}}
+
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
         self.handle_peer_arrival(self.peer_connection_socket.accept())
         threading.Thread(target=self.handle_arrivals).start()
-        threading.Thread(target=self.moderate_the_team).start()
-        threading.Thread(target=self.reset_counters_thread).start()
 
         header_length = 0
 
@@ -555,21 +414,14 @@ class Splitter_IMS(threading.Thread):
                 self.header += chunk
                 header_length -= 1
 
-            try:
-                peer = self.peer_list[self.peer_number] # Ojo, esto nunca deberia provocar una excepcion
-            except KeyError:
-                pass
-
             message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
-            self.team_socket.sendto(message, peer)
+            self.team_socket.sendto(message, self.multicast_channel)
 
             if __debug__:
-                print('%5d' % self.chunk_number, Color.red, '->', Color.none, peer)
+                print('%5d' % self.chunk_number, Color.red, '->', Color.none, self.multicast_channel)
                 sys.stdout.flush()
 
-            self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
             self.chunk_number = (self.chunk_number + 1) % MAX_CHUNK_NUMBER
-            self.peer_number = (self.peer_number + 1) % len(self.peer_list)
 
         # }}}
 
@@ -1353,7 +1205,6 @@ class Splitter_ACS(Splitter_FNS):
             except KeyError:
                 pass
 
-
         # }}}
 
     # }}}
@@ -1509,10 +1360,11 @@ def main():
 
     # }}}
 
-#     splitter = Splitter_DBS()
-#     splitter = Splitter_FNS()
+    splitter = Splitter_IMS()
+#    splitter = Splitter_DBS()
+#    splitter = Splitter_FNS()
 #    splitter = Splitter_ACS()
-    splitter = Splitter_LRS()
+#    splitter = Splitter_LRS()
     splitter.start()
 
     # {{{ Prints information until keyboard interruption
@@ -1584,4 +1436,5 @@ def main():
     # }}}
 
 if __name__ == "__main__":
+
     main()
