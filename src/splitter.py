@@ -141,6 +141,10 @@ class Splitter_IMS(threading.Thread):
         print("(Team) IP address =", self.TEAM_ADDR)
         print("(Team) Port =", self.TEAM_PORT)
 
+        # {{{ The list of peers in the team (always empty in this module).
+        # }}}
+        self.peer_list = []
+
         # {{{ A splitter runs 3 threads. The first one controls the peer
         # arrivals. The second one listens to the team, for example,
         # to re-sends lost blocks. The third one shows some
@@ -152,6 +156,7 @@ class Splitter_IMS(threading.Thread):
         self.alive = True
 
         # {{{ Number of the served chunk.
+        # }}}
         self.chunk_number = 0
 
         # {{{ Used to listen to the incomming peers.
@@ -169,30 +174,30 @@ class Splitter_IMS(threading.Thread):
         # }}}
         self.peer_number = 0
 
+        # {{{ New peers need to receive the video header.
+
+        # }}}
         self.header = ""
 
+        # {{{ Some definitions.
+        # }}}
         self.source = (self.SOURCE_ADDR, self.SOURCE_PORT)
         self.GET_message = 'GET ' + self.CHANNEL + ' HTTP/1.1\r\n'
         self.GET_message += '\r\n'
+        self.chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
 
+        # {{{ At least one peer monitor is compulsory.
+        # }}}
         self.number_of_monitors = 1
 
-        self.chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
         # }}}
 
     def print_modulename(self):
         # {{{
 
         sys.stdout.write(Color.yellow)
-        print("Splitter DBS")
+        print("Splitter IMS")
         sys.stdout.write(Color.none)
-
-        # }}}
-
-    def say_goodbye(self, node, sock):
-        # {{{
-
-        sock.sendto('', node)
 
         # }}}
 
@@ -249,22 +254,8 @@ class Splitter_IMS(threading.Thread):
 
         # }}}
 
-    def append_peer(self, peer):
-        # {{{
-
-        if peer not in self.peer_list:
-            self.peer_list.append(peer)
-        #self.deletions[peer] = 0
-        self.losses[peer] = 0
-
-        # }}}
-
     def handle_peer_arrival(self, (peer_serve_socket, peer)):
-        # {{{
-
-        # {{{
-
-        # Handle the arrival of a peer. When a peer want to join a
+        # {{{ Handle the arrival of a peer. When a peer want to join a
         # team, first it must establish a TCP connection with the
         # splitter. In that connection, the splitter sends to the
         # incomming peer the list of peers. Notice that the
@@ -273,17 +264,15 @@ class Splitter_IMS(threading.Thread):
         # a separate thread. This helps to avoid a DoS
         # (Denial-of-Service) attack.
 
-        # }}}
-
         sys.stdout.write(Color.green)
         print(peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer)
         self.send_header(peer_serve_socket)
         self.send_buffersize(peer_serve_socket)
         self.send_chunksize(peer_serve_socket)
-        self.send_listsize(peer_serve_socket)
-        self.send_list(peer_serve_socket)
+        self.send_listsize(peer_serve_socket) # La lista debería estar vacía
+        self.send_list(peer_serve_socket)     # y este paso no tenría efecto
         peer_serve_socket.close()
-        self.append_peer(peer)
+        #self.append_peer(peer)
         sys.stdout.write(Color.none)
 
         # }}}
