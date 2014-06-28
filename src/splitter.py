@@ -41,7 +41,7 @@ from color import Color
 # }}}
 
 # Some useful definitions.
-IP_ADDR = 0
+ADDR = 0
 PORT = 1
 MAX_CHUNK_NUMBER = 65536
 #MAX_CHUNK_NUMBER = 2048
@@ -102,23 +102,10 @@ class Splitter_IMS(threading.Thread):
 
     TEAM_ADDR = "224.0.0.1" # All Systems on this Subnet
     #TEAM_ADDR = "224.1.1.1"
+    #MCAST_GRP = "224.0.0.1"
+    #MCAST_GRP = '224.1.1.1'
 
-    # {{{
-
-    # Port to talk with the peers.
-
-    # }}}
-    TEAM_PORT = 4552
-
-    # {{{
-
-    # Maximum number of lost chunks for an unsupportive peer.
-
-    # }}}
-    LOSSES_THRESHOLD = 128
-    LOSSES_MEMORY = 1024
-
-    HEADER_LENGTH = 10 # In chunks
+    HEADER_CHUNKS = 10
 
     # }}}
 
@@ -142,16 +129,11 @@ class Splitter_IMS(threading.Thread):
         print("(Team) IP address =", self.TEAM_ADDR)
         print("(Team) Port =", self.TEAM_PORT)
 
-        # {{{ The list of peers in the team (always empty in this module).
-        # }}}
-        self.peer_list = []
-
-        # {{{ A splitter runs 3 threads. The first one controls the peer
-        # arrivals. The second one listens to the team, for example,
-        # to re-sends lost blocks. The third one shows some
-        # information about the transmission. This variable is used to
-        # stop the child threads. They will be alive only while the
-        # main thread is alive.
+        # {{{ A IMS splitter runs 2 threads. The first one controls
+        # the peer arrivals. The second one shows some information
+        # about the transmission. This variable is used to stop the
+        # child threads. They will be alive only while the main thread
+        # is alive.
 
         # }}}
         self.alive = True
@@ -161,22 +143,18 @@ class Splitter_IMS(threading.Thread):
         self.chunk_number = 0
 
         # {{{ Used to listen to the incomming peers.
-
         # }}}
         self.peer_connection_socket = ""
 
         # {{{ Used to listen the team messages.
-
         # }}}
         self.team_socket = ""
 
         # {{{ The served peer index.
-
         # }}}
         self.peer_number = 0
 
         # {{{ New peers need to receive the video header.
-
         # }}}
         self.header = ""
 
@@ -248,7 +226,7 @@ class Splitter_IMS(threading.Thread):
         if __debug__:
             counter = 0
         for p in self.peer_list:
-            message = struct.pack("4sH", socket.inet_aton(p[IP_ADDR]), socket.htons(p[PORT]))
+            message = struct.pack("4sH", socket.inet_aton(p[ADDR]), socket.htons(p[PORT]))
             peer_serve_socket.sendall(message)
             if __debug__:
                 print("[%5d]" % counter, p)
@@ -258,6 +236,7 @@ class Splitter_IMS(threading.Thread):
 
     def handle_peer_arrival(self, (peer_serve_socket, peer)):
         # {{{ Handle the arrival of a peer. When a peer want to join a
+
         # team, first it must establish a TCP connection with the
         # splitter. In that connection, the splitter sends to the
         # incomming peer the list of peers. Notice that the
@@ -357,7 +336,7 @@ class Splitter_IMS(threading.Thread):
                 sock.connect(self.source)
                 sock.sendall(self.GET_message)
                 self.header = ""
-                header_length = self.HEADER_LENGTH
+                header_length = self.HEADER_CHUNKS
                 data = ""
             prev_size = len(data)
             data += sock.recv(self.CHUNK_SIZE - len(data))
@@ -394,7 +373,7 @@ class Splitter_IMS(threading.Thread):
 
         # {{{ Load the video header.
 
-        for i in xrange(self.HEADER_LENGTH):
+        for i in xrange(self.HEADER_CHUNKS):
             self.header += self.receive_next_chunk(source_socket, 0)[0]
 
         # }}}
@@ -497,7 +476,7 @@ class Splitter_DBS(threading.Thread):
     LOSSES_THRESHOLD = 128
     LOSSES_MEMORY = 1024
 
-    HEADER_LENGTH = 10 # In chunks
+    HEADER_CHUNKS = 10 # In chunks
 
     # }}}
 
@@ -650,7 +629,7 @@ class Splitter_DBS(threading.Thread):
         if __debug__:
             counter = 0
         for p in self.peer_list:
-            message = struct.pack("4sH", socket.inet_aton(p[IP_ADDR]), socket.htons(p[PORT]))
+            message = struct.pack("4sH", socket.inet_aton(p[ADDR]), socket.htons(p[PORT]))
             peer_serve_socket.sendall(message)
             if __debug__:
                 print("[%5d]" % counter, p)
@@ -911,7 +890,7 @@ class Splitter_DBS(threading.Thread):
                 sock.connect(self.source)
                 sock.sendall(self.GET_message)
                 self.header = ""
-                header_length = self.HEADER_LENGTH
+                header_length = self.HEADER_CHUNKS
                 data = ""
             prev_size = len(data)
             data += sock.recv(self.CHUNK_SIZE - len(data))
@@ -955,7 +934,7 @@ class Splitter_DBS(threading.Thread):
 
         source_socket = self.request_video()
 
-        for i in xrange(self.HEADER_LENGTH):
+        for i in xrange(self.HEADER_CHUNKS):
             self.header += self.receive_next_chunk(source_socket, 0)[0]
 
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
@@ -1148,7 +1127,7 @@ class Splitter_ACS(Splitter_FNS):
 
         source_socket = self.request_video()
 
-        for i in xrange(self.HEADER_LENGTH):
+        for i in xrange(self.HEADER_CHUNKS):
             self.header += self.receive_next_chunk(source_socket, 0)[0]
 
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
@@ -1262,7 +1241,7 @@ class Splitter_LRS(Splitter_ACS):
 
         source_socket = self.request_video()
 
-        for i in xrange(self.HEADER_LENGTH):
+        for i in xrange(self.HEADER_CHUNKS):
             self.header += self.receive_next_chunk(source_socket, 0)[0]
 
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
