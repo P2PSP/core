@@ -2,7 +2,7 @@
 
 icecast_name="localhost"
 icecast_port=8000
-video=~/Videos/Big_Buck_Bunny_small.ogv
+video=~/Media/Big_Buck_Bunny_small.ogv
 #video=/home/jalvaro/workspace/sim/gnagl.ogg
 #video=/home/jalvaro/workspaces-eclipse/P2PSP/Big_Buck_Bunny_small.ogv
 #video=/home/jalvaro/workspaces-eclipse/P2PSP/sample48.ogg
@@ -69,6 +69,7 @@ set -x
 while true
 do
     oggfwd $icecast_name $icecast_port $password $channel < $video
+    sleep 1
 done
 
 set +x

@@ -72,38 +72,28 @@ class Splitter_IMS(threading.Thread):
     # }}}
     CHUNK_SIZE = 1024
 
-    # {{{
-
-    # Channel served by the streaming source.
-
+    # {{{ Channel served by the streaming source.
     # }}}
     CHANNEL = "/root/Videos/Big_Buck_Bunny_small.ogv"
 
-    # {{{
-
-    # The streaming server.
-
+    # {{{ The streaming server.
     # }}}
     SOURCE_ADDR = "150.214.150.68"
 
-    # {{{
-
-    # Port where the streaming server is listening.
-
+    # {{{ Port where the streaming server is listening.
     # }}}
     SOURCE_PORT = 4551
 
-    # {{{
-
-    # IP address to talk with the peers (a host can use several
-    # network adapters).
-
+    # {{{ The multicast group
     # }}}
-
     TEAM_ADDR = "224.0.0.1" # All Systems on this Subnet
     #TEAM_ADDR = "224.1.1.1"
     #MCAST_GRP = "224.0.0.1"
     #MCAST_GRP = '224.1.1.1'
+
+    # {{{ Port to talk with the peers.
+    # }}}
+    TEAM_PORT = 4552
 
     HEADER_CHUNKS = 10
 
