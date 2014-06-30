@@ -177,6 +177,7 @@ class Splitter_IMS(threading.Thread):
         if __debug__:
             print("Sending a header of", len(self.header), "bytes")
         peer_serve_socket.sendall(self.header)
+        print("------------------> la cabecera tiene una longitud de:", len(self.header))
 
         # }}}
 
@@ -187,6 +188,7 @@ class Splitter_IMS(threading.Thread):
             print("Sending a buffer_size of", self.BUFFER_SIZE, "bytes")
         message = struct.pack("H", socket.htons(self.BUFFER_SIZE))
         peer_serve_socket.sendall(message)
+        print("----------------->",self.BUFFER_SIZE)
 
         # }}}
 
@@ -200,48 +202,15 @@ class Splitter_IMS(threading.Thread):
 
         # }}}
 
-    def send_listsize(self, peer_serve_socket):
-        # {{{
-
-        if __debug__:
-            print("Sending a list of peers of size", len(self.peer_list))
-        message = struct.pack("H", socket.htons(len(self.peer_list)))
-        peer_serve_socket.sendall(message)
-
-        # }}}
-
-    def send_list(self, peer_serve_socket):
-        # {{{
-
-        if __debug__:
-            counter = 0
-        for p in self.peer_list:
-            message = struct.pack("4sH", socket.inet_aton(p[ADDR]), socket.htons(p[PORT]))
-            peer_serve_socket.sendall(message)
-            if __debug__:
-                print("[%5d]" % counter, p)
-                counter += 1
-
-        # }}}
-
     def handle_peer_arrival(self, (peer_serve_socket, peer)):
         # {{{ Handle the arrival of a peer. When a peer want to join a
-
         # team, first it must establish a TCP connection with the
-        # splitter. In that connection, the splitter sends to the
-        # incomming peer the list of peers. Notice that the
-        # transmission of the list of peers (something that could need
-        # some time if the team is big or the peer is slow) is done in
-        # a separate thread. This helps to avoid a DoS
-        # (Denial-of-Service) attack.
-
+        # splitter.
         sys.stdout.write(Color.green)
         print(peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer)
+        self.send_chunksize(peer_serve_socket)
         self.send_header(peer_serve_socket)
         self.send_buffersize(peer_serve_socket)
-        self.send_chunksize(peer_serve_socket)
-        self.send_listsize(peer_serve_socket) # La lista debería estar vacía
-        self.send_list(peer_serve_socket)     # y este paso no tenría efecto
         peer_serve_socket.close()
         #self.append_peer(peer)
         sys.stdout.write(Color.none)
@@ -457,11 +426,6 @@ def main():
             sock.recv(1024*10) # Header
             sock.recv(struct.calcsize("H")) # Buffer size
             sock.recv(struct.calcsize("H")) # Chunk size
-            number_of_peers = socket.ntohs(struct.unpack("H", sock.recv(struct.calcsize("H")))[0])
-            # Receive the list
-            while number_of_peers > 0:
-                sock.recv(struct.calcsize("4sH"))
-                number_of_peers -= 1
 
             # Breaks this thread and returns to the parent process
             # (usually, the shell).

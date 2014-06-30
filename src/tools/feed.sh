@@ -2,11 +2,11 @@
 
 icecast_name="localhost"
 icecast_port=8000
-video=~/Media/Big_Buck_Bunny_small.ogv
+video=/home/vruiz/Media/Big_Buck_Bunny_small.ogv
 #video=/home/jalvaro/workspace/sim/gnagl.ogg
 #video=/home/jalvaro/workspaces-eclipse/P2PSP/Big_Buck_Bunny_small.ogv
 #video=/home/jalvaro/workspaces-eclipse/P2PSP/sample48.ogg
-#password=hackme
+password=hackme
 channel=$video
 
 usage() {

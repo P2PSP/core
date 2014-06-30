@@ -108,7 +108,7 @@ class Peer_IMS(threading.Thread):
         # {{{ "True" while buffering is being performed
         # }}}
         self.buffering = threading.Event()
-        
+
         # }}}
 
     def print_modulename(self):
@@ -235,6 +235,7 @@ class Peer_IMS(threading.Thread):
         chunk_size = struct.unpack("H", message)[0]
         self.chunk_size = socket.ntohs(chunk_size)
         print ("chunk_size =", self.chunk_size)
+        self.chunk_format_string = "H" + str(self.chunk_size) + "s"
 
         # }}}
 
@@ -260,14 +261,13 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def receive(self):
+    def receive_a_chunk(self):
         # {{{
-
+        print (".")
         try:
             # {{{ Receive a chunk
 
-            chunk_format_string = "H" + str(self.chunk_size) + "s"
-            message, sender = self.team_socket.recvfrom(struct.calcsize(chunk_format_string))
+            message, sender = self.team_socket.recvfrom(struct.calcsize(self.chunk_format_string))
             self.recvfrom_counter += 1
 
             # {{{ debug
@@ -276,7 +276,7 @@ class Peer_IMS(threading.Thread):
                     "of length", len(message), Color.none)
             # }}}
 
-            number, chunk = struct.unpack(chunk_format_string, message)
+            number, chunk = struct.unpack(self.chunk_format_string, message)
             chunk_number = socket.ntohs(number)
 
             self.chunks[chunk_number % self.buffer_size] = chunk
@@ -329,7 +329,7 @@ class Peer_IMS(threading.Thread):
         sys.stdout.flush()
 
         # First chunk to be sent to the player.
-        chunk_number = self.receive()
+        chunk_number = self.receive_a_chunk()
 
         # The receive_and_feed() procedure returns if a packet has been
         # received or if a time-out exception has been arised. In the first
@@ -337,7 +337,7 @@ class Peer_IMS(threading.Thread):
         # hello/goodbyte message or a number >= 0 if a chunk has been
         # received. A -2 is returned if a time-out is has happened.
         while chunk_number < 0:
-            chunk_number = self.receive()
+            chunk_number = self.receive_a_chunk()
         self.played_chunk = chunk_number
         print ("First chunk to play", self.played_chunk)
 
@@ -345,7 +345,7 @@ class Peer_IMS(threading.Thread):
         for x in xrange(self.buffer_size/2):
             print("!", end='')
             sys.stdout.flush()
-            while self.receive() < 0:
+            while self.receive_a_chunk() < 0:
                 pass
 
         print()
@@ -358,13 +358,13 @@ class Peer_IMS(threading.Thread):
         # {{{
 
         # Receive chunks while the buffer is not full
-        chunk_number = self.receive()
+        chunk_number = self.receive_a_chunk()
         while chunk_number < 0:
-            chunk_number = self.receive()
+            chunk_number = self.receive_a_chunk()
         while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
-            chunk_number = self.receive()
+            chunk_number = self.receive_a_chunk()
             while chunk_number < 0:
-                chunk_number = self.receive()
+                chunk_number = self.receive_a_chunk()
 
         # Play the next chunk
         self.play_next_chunk()
@@ -394,9 +394,9 @@ class Peer_IMS(threading.Thread):
 
         self.wait_for_the_player()
         self.connect_to_the_splitter()
+        self.receive_the_chunksize()
         self.receive_and_send_the_header()
         self.receive_the_buffersize()
-        self.receive_the_chunksize()
         self.setup_team_socket()
         self.splitter_socket.close()
         self.create_buffer()

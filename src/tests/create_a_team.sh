@@ -1,5 +1,7 @@
 #!/bin/sh
 
+SoR=IMS
+
 #export BUFFER_SIZE=512
 #export CHANNEL="/root/Videos/big_buck_bunny_720p_stereo.ogg"
 
@@ -7,7 +9,7 @@
 #export CHANNEL="/root/Videos/big_buck_bunny_480p_stereo.ogg"
 
 export BUFFER_SIZE=64
-export CHANNEL="/root/Videos/Big_Buck_Bunny_small.ogv"
+export CHANNEL="/home/vruiz/Media/Big_Buck_Bunny_small.ogv"
 export LOSSES_MEMORY=32
 export LOSSES_THRESHOLD=8
 
@@ -22,8 +24,10 @@ export DEBT_MEMORY=1024
 export DEBT_THRESHOLD=32
 export ITERATIONS=100
 
-export SOURCE_ADDR="150.214.150.68"
-export SOURCE_PORT=4551
+export SOURCE_ADDR="localhost"
+export SOURCE_PORT=8000
+#export SOURCE_ADDR="150.214.150.68"
+#export SOURCE_PORT=4551
 export SPLITTER_PORT=5555
 export LIFE=180
 export BIRTHDAY=10
@@ -127,22 +131,16 @@ done
 
 set -x
 
-#sudo tc qdisc del dev lo root
-#sudo tc qdisc add dev lo root handle 11: htb default 500 r2q 1
-#sudo tc class add dev lo parent 11: classid 11:1 htb rate 128kbps
-#sudo tc class add dev lo parent 11:1 classid 11:101 htb rate 64kbps
-#sudo tc qdisc add dev lo parent 11:101 handle 1001: sfq
-#sudo tc filter add dev lo parent 11: protocol ip handle 101 fw classid 11:101
-
-xterm -sl 10000 -e '../splitter.py  --team_addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --team_port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
+xterm -sl 10000 -e '../splitter_IMS.py -m pdb --team_addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --team_port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
 #xterm -sl 10000 -e '../splitter.py  --team_addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --team_port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT > splitter' &
 
 sleep 1
 
-xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT --monitor' &
+xterm -sl 10000 -e '../peer_IMS.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT --monitor' &
 #xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT --monitor > monitor' &
 
 vlc http://localhost:9998 &
+exit
 
 x=1
 while [ $x -le $ITERATIONS ]
@@ -154,7 +152,7 @@ do
     #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j MARK --set-xmark 101
     #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j RETURN
 
-    xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT --chunk_loss_period $LOSS_PERIOD' &
+    xterm -sl 10000 -e '../peer_$SoR.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT --chunk_loss_period $LOSS_PERIOD' &
 
     #xterm -sl 10000 -e '../peer.py --team_port $TEAM_PORT --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
 

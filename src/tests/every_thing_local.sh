@@ -7,7 +7,7 @@
 #export CHANNEL="~/Media/big_buck_bunny_480p_stereo.ogg"
 
 export BUFFER_SIZE=64
-export CHANNEL="~/Media/Big_Buck_Bunny_small.ogv"
+export CHANNEL="/home/vruiz/Media/Big_Buck_Bunny_small.ogv"
 export LOSSES_MEMORY=32
 export LOSSES_THRESHOLD=8
 
@@ -129,6 +129,9 @@ done
 set -x
 
 ../tools/feed.sh -w hackme -p 8000 -v $CHANNEL &
+
+sleep 1
+
 xterm -sl 10000 -e '../splitter_IMS.py  --team_addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --team_port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
 #xterm -sl 10000 -e '../splitter.py  --team_addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --team_port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT > splitter' &
 
