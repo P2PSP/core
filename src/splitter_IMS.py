@@ -86,15 +86,16 @@ class Splitter_IMS(threading.Thread):
 
     # {{{ The multicast group
     # }}}
-    TEAM_ADDR = "224.0.0.1" # All Systems on this Subnet
-    #TEAM_ADDR = "224.1.1.1"
+    #TEAM_ADDR = "224.0.0.1" # All Systems on this Subnet
+    TEAM_ADDR = "224.1.1.1"
     #MCAST_GRP = "224.0.0.1"
     #MCAST_GRP = '224.1.1.1'
 
     # {{{ Port to talk with the peers.
     # }}}
-    TEAM_PORT = 4552
-
+    #TEAM_PORT = 4552
+    TEAM_PORT = 5007
+    
     HEADER_CHUNKS = 10
 
     # }}}
@@ -249,8 +250,11 @@ class Splitter_IMS(threading.Thread):
         # {{{
 
         # "team_socket" is used to talk to the peers of the team.
-        self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
+        #self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        
+        self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
+        # The next code is to force a outgoing port.
         try:
             # This does not work in Windows systems !!
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -258,8 +262,9 @@ class Splitter_IMS(threading.Thread):
             pass
         try:
             self.team_socket.bind((self.TEAM_ADDR, self.TEAM_PORT))
-        except: # Falta averiguar excepcion
+        except:
             raise
+        # End of code that forces a outgoing port.
 
         # }}}
 

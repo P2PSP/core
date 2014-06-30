@@ -250,7 +250,8 @@ class Peer_IMS(threading.Thread):
         except Exception, e:
             print (e)
             pass
-        self.team_socket.bind(('', self.splitter_socket.getsockname()[PORT]))
+        self.team_socket.bind(('', 5007))
+#        self.team_socket.bind(('', self.splitter_socket.getsockname()[PORT]))
 
         mreq = struct.pack("4sl", socket.inet_aton(self.TEAM_ADDR), socket.INADDR_ANY)
         self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
