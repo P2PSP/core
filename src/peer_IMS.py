@@ -58,11 +58,11 @@ class Peer_IMS(threading.Thread):
     # {{{ Class "constants"
 
     PLAYER_PORT = 9999
-    SPLITTER_ADDR = "150.214.150.68"
+    SPLITTER_ADDR = "localhost"
     SPLITTER_PORT = 4552
-    TEAM_PORT = 0
+    TEAM_ADDR = "224.1.1.1"
+    TEAM_PORT = 5007
     HEADER_CHUNKS = 10
-    TEAM_ADDR = "224.0.0.1"
     #MCAST_GRP = '224.1.1.1'
     
     # }}}
@@ -81,9 +81,10 @@ class Peer_IMS(threading.Thread):
         self.print_modulename()
 
         print("Player port =", self.PLAYER_PORT)
-        print("Splitter IP address =", self.SPLITTER_ADDR)
+        print("Splitter address =", self.SPLITTER_ADDR)
         print("Splitter port =", self.SPLITTER_PORT)
-        print("(Team) Port =", self.TEAM_PORT)
+        print("Team address =", self.TEAM_ADDR)
+        print("Team port =", self.TEAM_PORT)
 
         # {{{ The peer dies if there is not a connected player
         # }}}
@@ -175,6 +176,8 @@ class Peer_IMS(threading.Thread):
     def connect_to_the_splitter(self):
         # {{{ Setup "splitter" and "splitter_socket"
 
+        # Nota: Ahora no reconvertimos de TCP a UDP!
+        
         self.splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.splitter = (self.SPLITTER_ADDR, self.SPLITTER_PORT)
         print ("Connecting to the splitter at", self.splitter)
@@ -250,7 +253,7 @@ class Peer_IMS(threading.Thread):
         except Exception, e:
             print (e)
             pass
-        self.team_socket.bind(('', 5007))
+        self.team_socket.bind(('', 5555))
 #        self.team_socket.bind(('', self.splitter_socket.getsockname()[PORT]))
 
         mreq = struct.pack("4sl", socket.inet_aton(self.TEAM_ADDR), socket.INADDR_ANY)
