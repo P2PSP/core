@@ -190,7 +190,6 @@ class Splitter_IMS(threading.Thread):
         if __debug__:
             print("Sending a header of", len(self.header), "bytes")
         peer_serve_socket.sendall(self.header)
-        print("------------------> la cabecera tiene una longitud de:", len(self.header))
 
         # }}}
 
@@ -201,7 +200,6 @@ class Splitter_IMS(threading.Thread):
             print("Sending a buffer_size of", self.BUFFER_SIZE, "bytes")
         message = struct.pack("H", socket.htons(self.BUFFER_SIZE))
         peer_serve_socket.sendall(message)
-        print("----------------->",self.BUFFER_SIZE)
 
         # }}}
 
@@ -374,7 +372,6 @@ class Splitter_IMS(threading.Thread):
 
             message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
             self.team_socket.sendto(message, self.multicast_channel)
-            print(self.multicast_channel)
 
             if __debug__:
                 print('%5d' % self.chunk_number, Color.red, '->', Color.none, self.multicast_channel)
@@ -422,7 +419,7 @@ def main():
     if args.splitter_addr:
         Splitter_IMS.SPLITTER_PORT = int(args.splitter_port)
     if args.team_addr:
-        Splitter_IMS.TEAM_ADDR = args.team_port
+        Splitter_IMS.TEAM_ADDR = args.team_addr
     if args.team_port:
         Splitter_IMS.TEAM_PORT = int(args.team_port)
     if args.buffer_size:

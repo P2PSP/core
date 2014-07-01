@@ -28,7 +28,10 @@ export SOURCE_ADDR="localhost"
 export SOURCE_PORT=8000
 #export SOURCE_ADDR="150.214.150.68"
 #export SOURCE_PORT=4551
-export SPLITTER_PORT=5555
+export SPLITTER_ADDR="localhost"
+export SPLITTER_PORT=4552
+export TEAM_ADDR="224.1.1.1"
+export TEAM_PORT=5007
 export LIFE=180
 export BIRTHDAY=10
 export LOSS_PERIOD=100
@@ -131,12 +134,12 @@ done
 
 set -x
 
-xterm -sl 10000 -e '../splitter_IMS.py -m pdb --team_addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --team_port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
+xterm -sl 10000 -e '../splitter_IMS.py -m pdb --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT --team_addr $TEAM_ADDR --team_port $TEAM_PORT --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
 #xterm -sl 10000 -e '../splitter.py  --team_addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --team_port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT > splitter' &
 
 sleep 1
 
-xterm -sl 10000 -e '../peer_IMS.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT --monitor' &
+xterm -sl 10000 -e '../peer_IMS.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT --team_addr $TEAM_ADDR --team_port $TEAM_PORT --monitor' &
 #xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT --monitor > monitor' &
 
 vlc http://localhost:9998 &

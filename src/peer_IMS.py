@@ -253,7 +253,7 @@ class Peer_IMS(threading.Thread):
         except Exception, e:
             print (e)
             pass
-        self.team_socket.bind(('', 5555))
+        self.team_socket.bind(('', self.TEAM_PORT))
 #        self.team_socket.bind(('', self.splitter_socket.getsockname()[PORT]))
 
         mreq = struct.pack("4sl", socket.inet_aton(self.TEAM_ADDR), socket.INADDR_ANY)
@@ -267,7 +267,6 @@ class Peer_IMS(threading.Thread):
 
     def receive_a_chunk(self):
         # {{{
-        print (".")
         try:
             # {{{ Receive a chunk
 
@@ -423,6 +422,8 @@ def main():
 
     parser.add_argument('--player_port', help='Port to communicate with the player. ({})'.format(Peer_IMS.PLAYER_PORT))
 
+    parser.add_argument('--team_addr', help='Address to communicate with the peers. ({})'.format(Peer_IMS.TEAM_PORT))
+
     parser.add_argument('--team_port', help='Port to communicate with the peers. ({})'.format(Peer_IMS.TEAM_PORT))
 
     parser.add_argument('--splitter_addr', help='IP address of the splitter. ({})'.format(Peer_IMS.SPLITTER_ADDR))
@@ -442,6 +443,9 @@ def main():
     if args.splitter_port:
         Peer_IMS.SPLITTER_PORT = int(args.splitter_port)
         print ('SPLITTER_PORT = ', Peer_IMS.SPLITTER_PORT)
+    if args.team_addr:
+        Peer_IMS.TEAM_PORT = args.team_addr
+        print ('TEAM_ADDR= ', Peer_IMS.TEAM_ADDR)
     if args.team_port:
         Peer_IMS.TEAM_PORT = int(args.team_port)
         print ('TEAM_PORT= ', Peer_IMS.TEAM_PORT)
@@ -469,9 +473,6 @@ def main():
         last_chunk_number = peer.played_chunk
         kbps_recvfrom = ((peer.recvfrom_counter - last_recvfrom_counter) * peer.chunk_size * 8) / 1000
         last_recvfrom_counter = peer.recvfrom_counter
-        team_ratio = len(peer.peer_list) /(len(peer.peer_list) + 1.0)
-        kbps_expected_sent = int(kbps_expected_recv*team_ratio)
-        nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
         if kbps_expected_recv < kbps_recvfrom:
             sys.stdout.write(Color.red)
         elif kbps_expected_recv > kbps_recvfrom:
