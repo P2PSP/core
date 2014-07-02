@@ -8,9 +8,9 @@ This is a description of the files/directories:
 
 * readme.txt: this file.
 
-* src: the implementation and some useful scripts.
+* src: the implementation and some scripts.
 
-* doc: some useful information about the repository management and use
+* doc: information about the repository management and use
   of this implementation.
 
 More information about the protocol at:
