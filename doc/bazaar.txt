@@ -90,6 +90,10 @@ https://launchpad.net/~your-lauchpad-username/+editsshkeys
 
 bzr branch lp:~your-lauchpad-username/p2psp/branch-name
 
+17. Indentificate:
+
+bzr whoami e-mail-address@host
+
 # Complex operations:
 
-1. Get an existing branch to contribute: 14 + 15 + 16.
+1. Get an existing branch to contribute: 14 + 15 + 16 + 17.

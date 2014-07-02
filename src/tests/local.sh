@@ -32,6 +32,7 @@ export LOSS_PERIOD=100
 
 usage() {
     echo $0
+    echo " Runs a team localy"
     echo "  [-b buffer size ($BUFFER_SIZE)]"
     echo "  [-c channel ($CHANNEL)]"
     echo "  [-u chunks size ($CHUNK_SIZE)]"
