@@ -36,6 +36,7 @@ export LOSS_PERIOD=100
 
 usage() {
     echo $0
+    echo " Creates a local team"
     echo "  [-b buffer size ($BUFFER_SIZE)]"
     echo "  [-c channel ($CHANNEL)]"
     echo "  [-u chunks size ($CHUNK_SIZE)]"
@@ -147,7 +148,7 @@ done
 
 set -x
 
-xterm -sl 10000 -e '../splitter_IMS.py -m pdb --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT --team_addr $TEAM_ADDR --team_port $TEAM_PORT --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
+xterm -sl 10000 -e './splitter_IMS.py -m pdb --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT --team_addr $TEAM_ADDR --team_port $TEAM_PORT --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT' &
 #xterm -sl 10000 -e '../splitter.py  --team_addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --team_port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT > splitter' &
 
 sleep 1
