@@ -57,13 +57,13 @@ class Peer_IMS(threading.Thread):
 
     # {{{ Class "constants"
 
-    PLAYER_PORT = 9999
-    SPLITTER_ADDR = "localhost"
-    SPLITTER_PORT = 4552
-    TEAM_ADDR = "224.1.1.1"
-    TEAM_PORT = 5007
+    PLAYER_PORT = 9999          # Port used to serve the player.
+    SPLITTER_ADDR = "localhost" # Address of the splitter.
+    SPLITTER_PORT = 4552        # Port of the splitter.
     HEADER_CHUNKS = 10
-    #MCAST_GRP = '224.1.1.1'
+    # Estos datos son enviados por el splitter
+    TEAM_ADDR = "224.0.0.1"     # Multicast address used to receive chunks.
+    TEAM_PORT = 8888            # Port used to talk with the team.
     
     # }}}
 

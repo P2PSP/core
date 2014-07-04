@@ -1,15 +1,16 @@
 #!/bin/sh
 
-export DEBT_MEMORY=1024
-export DEBT_THRESHOLD=1024
+#export DEBT_MEMORY=1024
+#export DEBT_THRESHOLD=1024
 export SPLITTER_ADDR="150.214.150.68"
 export SPLITTER_PORT=4552
 export TEAM_PORT=5555
 
 usage() {
     echo $0
-    echo "  [-m debt memory ($DEBT_MEMORY)]"
-    echo "  [-d debt threshold ($DEBT_THRESHOLD)]"
+    echo "Play a channel"
+    #echo "  [-m debt memory ($DEBT_MEMORY)]"
+    #echo "  [-d debt threshold ($DEBT_THRESHOLD)]"
     echo "  [-s splitter IP address ($SPLITTER_ADDR)]"
     echo "  [-l splitter port ($SPLITTER_PORT)]"
     echo "  [-t team port ($SPLITTER_PORT)]"
@@ -18,14 +19,14 @@ usage() {
 
 echo $0: parsing: $@
 
-while getopts "m:d:s:l:t:?" opt; do
+while getopts "s:l:t:?" opt; do
     case ${opt} in
-	m)
-	    DEBT_MEMORY="${OPTARG}"
-	    ;;
-	d)
-	    DEBT_THRESHOLD="${OPTARG}"
-	    ;;
+	#m)
+	#    DEBT_MEMORY="${OPTARG}"
+	#    ;;
+	#d)
+	#    DEBT_THRESHOLD="${OPTARG}"
+	#    ;;
 	s)
 	    SPLITTER_ADDR="${OPTARG}"
 	    ;;
@@ -53,5 +54,7 @@ while getopts "m:d:s:l:t:?" opt; do
 done
 
 export PLAYER_PORT=`shuf -i 2000-65000 -n 1`
-xterm -e '../peer.py --team_port $TEAM_PORT --player_port $PLAYER_PORT --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT --debt_threshold $DEBT_THRESHOLD --debt_memory $DEBT_MEMORY' &
+
+xterm -e './peer.py --team_port $TEAM_PORT --player_port $PLAYER_PORT --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT' &
+
 vlc http://localhost:$PLAYER_PORT &
