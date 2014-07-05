@@ -102,7 +102,7 @@ class Splitter_IMS(threading.Thread):
     # {{{ Port used in the multicast group.
     # }}}
     #TEAM_PORT = 4552
-    TEAM_PORT = 5007
+    TEAM_PORT = 8888
 
     # {{{ Number of chunks of the header.
     # }}}
@@ -213,6 +213,16 @@ class Splitter_IMS(threading.Thread):
 
         # }}}
 
+    def send_mcast_channel(self, peer_serve_socket):
+        # {{{
+
+        if __debug__:
+            print("Communicating the multicast channel", (self.TEAM_ADDR, self.TEAM_PORT))
+        message = struct.pack("4sH", socket.inet_aton(self.TEAM_ADDR), socket.htons(self.TEAM_PORT))
+        peer_serve_socket.sendall(message)
+
+        # }}}
+
     def handle_peer_arrival(self, (peer_serve_socket, peer)):
         # {{{ Handle the arrival of a peer. When a peer want to join a
         # team, first it must establish a TCP connection with the
@@ -222,6 +232,7 @@ class Splitter_IMS(threading.Thread):
         self.send_chunksize(peer_serve_socket)
         self.send_header(peer_serve_socket)
         self.send_buffersize(peer_serve_socket)
+        self.send_mcast_channel(peer_serve_socket)
         peer_serve_socket.close()
         #self.append_peer(peer)
         sys.stdout.write(Color.none)

@@ -12,6 +12,7 @@ channel=$video
 
 usage() {
     echo $0
+    echo "Feeds the Icecast server."
     echo "  [-c (icecast mount-point, \"$channel\" by default)]"
     echo "  [-w (icecast password, \"$password\" by default)]"
     echo "  [-a (icecast hostname, $icecast_name by default)]"

@@ -60,11 +60,9 @@ class Peer_IMS(threading.Thread):
     PLAYER_PORT = 9999          # Port used to serve the player.
     SPLITTER_ADDR = "localhost" # Address of the splitter.
     SPLITTER_PORT = 4552        # Port of the splitter.
-    HEADER_CHUNKS = 10
-    # Estos datos son enviados por el splitter
-    TEAM_ADDR = "224.0.0.1"     # Multicast address used to receive chunks.
-    TEAM_PORT = 8888            # Port used to talk with the team.
-    
+    HEADER_CHUNKS = 10          # Header size (in chunks).
+    TEAM_PORT = 0               # TCP port used to communicate the splitter.
+
     # }}}
 
     def __init__(self):
@@ -83,8 +81,8 @@ class Peer_IMS(threading.Thread):
         print("Player port =", self.PLAYER_PORT)
         print("Splitter address =", self.SPLITTER_ADDR)
         print("Splitter port =", self.SPLITTER_PORT)
-        print("Team address =", self.TEAM_ADDR)
-        print("Team port =", self.TEAM_PORT)
+#        print("Team address =", self.TEAM_ADDR)
+#        print("Team port =", self.TEAM_PORT)
 
         # {{{ The peer dies if there is not a connected player
         # }}}
@@ -181,7 +179,7 @@ class Peer_IMS(threading.Thread):
         self.splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.splitter = (self.SPLITTER_ADDR, self.SPLITTER_PORT)
         print ("Connecting to the splitter at", self.splitter)
-        if self.TEAM_PORT != 0:
+        if self.mcast_channel[PORT] != 0:
             try:
                 self.splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             except Exception, e:
@@ -239,6 +237,16 @@ class Peer_IMS(threading.Thread):
         self.chunk_size = socket.ntohs(chunk_size)
         print ("chunk_size =", self.chunk_size)
         self.chunk_format_string = "H" + str(self.chunk_size) + "s"
+
+        # }}}
+
+    def receive_the_mcast_channel(self):
+        # {{{
+
+        message = self.splitter_socket.recv(struct.calcsize("4sH"))
+        self.mcast_channel = struct.unpack("4sH", message)
+        self.mcast_channel[PORT] = socket.ntohs(self.mcast_channel[PORT])
+        print ("mcast_channel =", self.mcast_channel)
 
         # }}}
 
@@ -400,6 +408,7 @@ class Peer_IMS(threading.Thread):
         self.receive_the_chunksize()
         self.receive_and_send_the_header()
         self.receive_the_buffersize()
+        self.receive_the_mcast_channel()
         self.setup_team_socket()
         self.splitter_socket.close()
         self.create_buffer()
