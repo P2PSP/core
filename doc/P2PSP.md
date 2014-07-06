@@ -71,7 +71,7 @@ mode using the "key" to decript the stream:
 
 12. Create a local team serving the the video toos/Big_Buck_Bunny_small.ogv:
 
-    xterm -e './tools/feed.sh -c ./tools/Big_Buck_Bunny_small.ogv' & # Remember that feed loops until forever!
+    xterm -e './feed_icecast.sh -v Big_Buck_Bunny_small.ogv' & # Remember that feed loops until forever!
     ./create_a_team.sh
 
 * Create a channel (unfinished):

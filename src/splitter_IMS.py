@@ -164,7 +164,7 @@ class Splitter_IMS(threading.Thread):
         # {{{ Some definitions.
         # }}}
         self.source = (self.SOURCE_ADDR, self.SOURCE_PORT)
-        self.GET_message = 'GET ' + self.CHANNEL + ' HTTP/1.1\r\n'
+        self.GET_message = 'GET /' + self.CHANNEL + ' HTTP/1.1\r\n'
         self.GET_message += '\r\n'
         self.chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
 
@@ -302,6 +302,8 @@ class Splitter_IMS(threading.Thread):
         if __debug__:
             print(source_socket.getsockname(), 'connected to', self.source)
         source_socket.sendall(self.GET_message)
+        if __debug__:
+            print(source_socket.getsockname(), 'GET_message =', self.GET_message)
         return source_socket
 
         # }}}

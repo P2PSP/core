@@ -28,7 +28,7 @@ export SOURCE_ADDR="localhost"
 export SOURCE_PORT=8000
 export SPLITTER_ADDR="localhost"
 export SPLITTER_PORT=4552
-export TEAM_ADDR="224.1.1.1"
+#export TEAM_ADDR="224.1.1.1"
 export TEAM_PORT=5007
 export LIFE=180
 export BIRTHDAY=10
@@ -49,7 +49,7 @@ usage() {
     echo "  [-o source port ($SOURCE_PORT)]"
     echo "  [-a splitter addr ($SPLITTER_ADDR)]"
     echo "  [-p splitter port ($SPLITTER_PORT)]"
-    echo "  [-t team addr ($TEAM_ADDR)]"
+#    echo "  [-t team addr ($TEAM_ADDR)]"
     echo "  [-r team port ($SPLITTER_PORT)]"
     echo "  [-f life ($LIFE)]"
     echo "  [-y birthday ($BIRTHDAY)]"
@@ -59,7 +59,7 @@ usage() {
 
 echo $0: parsing: $@
 
-while getopts "b:c:u:m:d:i:e:l:s:o:p:t:r:f:y:w:?" opt; do
+while getopts "b:c:u:m:d:i:e:l:s:o:p:r:f:y:w:?" opt; do
     case ${opt} in
 	b)
 	    BUFFER_SIZE="${OPTARG}"
@@ -109,10 +109,10 @@ while getopts "b:c:u:m:d:i:e:l:s:o:p:t:r:f:y:w:?" opt; do
 	    SPLITTER_PORT="${OPTARG}"
 	    echo "SPLITTER_PORT="$SPLITTER_PORT
 	    ;;
-	t)
-	    TEAM_ADDR="${OPTARG}"
-	    echo "TEAM_ADDR="$TEAM_ADDR
-	    ;;
+#	t)
+#	    TEAM_ADDR="${OPTARG}"
+#	    echo "TEAM_ADDR="$TEAM_ADDR
+#	    ;;
 	r)
 	    TEAM_PORT="${OPTARG}"
 	    echo "TEAM_PORT="$TEAM_PORT
@@ -153,7 +153,7 @@ xterm -sl 10000 -e './splitter_IMS.py --splitter_addr $SPLITTER_ADDR --splitter_
 
 sleep 1
 
-xterm -sl 10000 -e '../peer_IMS.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT --team_addr $TEAM_ADDR --team_port $TEAM_PORT --monitor' &
+xterm -sl 10000 -e '../peer_IMS.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr $SPLITTER_ADDR --splitter_port $SPLITTER_PORT --team_port $TEAM_PORT --monitor' &
 #xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT --monitor > monitor' &
 
 vlc http://localhost:9998 &

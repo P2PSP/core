@@ -82,7 +82,7 @@ class Peer_IMS(threading.Thread):
         print("Splitter address =", self.SPLITTER_ADDR)
         print("Splitter port =", self.SPLITTER_PORT)
 #        print("Team address =", self.TEAM_ADDR)
-#        print("Team port =", self.TEAM_PORT)
+        print("Team port =", self.TEAM_PORT)
 
         # {{{ The peer dies if there is not a connected player
         # }}}
@@ -179,7 +179,7 @@ class Peer_IMS(threading.Thread):
         self.splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.splitter = (self.SPLITTER_ADDR, self.SPLITTER_PORT)
         print ("Connecting to the splitter at", self.splitter)
-        if self.mcast_channel[PORT] != 0:
+        if self.TEAM_PORT != 0:
             try:
                 self.splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             except Exception, e:
@@ -244,9 +244,12 @@ class Peer_IMS(threading.Thread):
         # {{{
 
         message = self.splitter_socket.recv(struct.calcsize("4sH"))
-        self.mcast_channel = struct.unpack("4sH", message)
-        self.mcast_channel[PORT] = socket.ntohs(self.mcast_channel[PORT])
-        print ("mcast_channel =", self.mcast_channel)
+        mcast_addr, mcast_port = struct.unpack("4sH", message)
+        mcast_addr = socket.inet_ntoa(mcast_addr)
+        mcast_port = socket.ntohs(mcast_port)
+        self.mcast_channel = (mcast_addr, mcast_port)
+        if __debug__:
+            print ("mcast_channel =", self.mcast_channel)
 
         # }}}
 
@@ -261,10 +264,10 @@ class Peer_IMS(threading.Thread):
         except Exception, e:
             print (e)
             pass
-        self.team_socket.bind(('', self.TEAM_PORT))
+        self.team_socket.bind(('', self.mcast_channel[PORT]))
 #        self.team_socket.bind(('', self.splitter_socket.getsockname()[PORT]))
 
-        mreq = struct.pack("4sl", socket.inet_aton(self.TEAM_ADDR), socket.INADDR_ANY)
+        mreq = struct.pack("4sl", socket.inet_aton(self.mcast_channel[ADDR]), socket.INADDR_ANY)
         self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         
         # This is the maximum time the peer will wait for a chunk
@@ -425,13 +428,11 @@ def main():
 
     # {{{ Args parsing
 
-    monitor_mode = False
-
     parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP network.')
 
     parser.add_argument('--player_port', help='Port to communicate with the player. ({})'.format(Peer_IMS.PLAYER_PORT))
 
-    parser.add_argument('--team_addr', help='Address to communicate with the peers. ({})'.format(Peer_IMS.TEAM_PORT))
+#    parser.add_argument('--team_addr', help='Address to communicate with the peers. ({})'.format(Peer_IMS.TEAM_PORT))
 
     parser.add_argument('--team_port', help='Port to communicate with the peers. ({})'.format(Peer_IMS.TEAM_PORT))
 
@@ -452,9 +453,9 @@ def main():
     if args.splitter_port:
         Peer_IMS.SPLITTER_PORT = int(args.splitter_port)
         print ('SPLITTER_PORT = ', Peer_IMS.SPLITTER_PORT)
-    if args.team_addr:
-        Peer_IMS.TEAM_PORT = args.team_addr
-        print ('TEAM_ADDR= ', Peer_IMS.TEAM_ADDR)
+#    if args.team_addr:
+#        Peer_IMS.TEAM_PORT = args.team_addr
+#        print ('TEAM_ADDR= ', Peer_IMS.TEAM_ADDR)
     if args.team_port:
         Peer_IMS.TEAM_PORT = int(args.team_port)
         print ('TEAM_PORT= ', Peer_IMS.TEAM_PORT)
@@ -465,19 +466,17 @@ def main():
     peer.start()
     peer.buffering.wait()
 
-    print("+-----------------------------------------------------+")
-    print("| Received = Received kbps, including retransmissions |")
-    print("|     Sent = Sent kbps                                |")
-    print("|       (Expected values are between parenthesis)     |")
-    print("+-----------------------------------------------------+")
+    print("+-------------------------------------------+")
+    print("| Received = Received kbps                  |")
+    print("| (Expected values are between parenthesis) |")
+    print("+-------------------------------------------+")
     print()
-    print("        Received |             Sent | Team description")
-    print("-----------------+------------------+-----------------")
+    print("        Received ")
+    print("-----------------")
 
     last_chunk_number = peer.played_chunk
     last_recvfrom_counter = peer.recvfrom_counter
     while peer.player_alive:
-        time.sleep(1)
         kbps_expected_recv = ((peer.played_chunk - last_chunk_number) * peer.chunk_size * 8) / 1000
         last_chunk_number = peer.played_chunk
         kbps_recvfrom = ((peer.recvfrom_counter - last_recvfrom_counter) * peer.chunk_size * 8) / 1000
@@ -489,6 +488,7 @@ def main():
         print(repr(kbps_expected_recv).rjust(8), end=Color.none)
         print(('(' + repr(kbps_recvfrom) + ')').rjust(8), end=' | ')
         print()
+        time.sleep(1)
 
 if __name__ == "__main__":
      main()
