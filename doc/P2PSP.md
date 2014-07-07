@@ -42,14 +42,14 @@ or simply:
     ./peer.py --monitor &
     vlc http://localhost:9999 &
 
-9. Decript a stream using the key "key":
+9. Decript a stream using the keyword "key":
 
-    ./peer.py --key key &
+    ./peer.py --keyword key &
     vlc http://localhost:9999 &
 
-11. Join a private team using the password "password":
+11. Join a private team using the password "pass":
 
-    ./peer.py --pass password &
+    ./peer.py --password pass &
     vlc http://localhost:9999 &
 
 12. Feed the local Icecast server, forever:
@@ -65,6 +65,43 @@ or simply:
     
 # Splitter manual:
 
-* Create a channel (unfinished):
+1. Create a channel using the default parameters(unfinished):
 
-./splitter &
+    splitter &
+
+2. Change the listening port to 5555:
+
+    splitter --port 5555 &
+
+3. Change the buffer size to 512 chunks:
+
+   splitter --buffer_size 512 &
+
+4. Change the source channel to "new_channel":
+
+   splitter --channel new_channel
+
+5. Change the chunk size to 512 bytes:
+
+   splitter --chunk_size 512 &
+
+6. Change the source host to "new_host":
+
+   splitter --source_addr new_host
+
+7. Change the source port to 6666:
+
+   splitter --source_port 6666
+
+8. Switch to IP multicast mode using the IP multicast address 224.0.1.1:
+
+   splitter --mcast_addr 224.0.1.1
+
+9. Create a private team using the password "pass":
+
+   splitter --password pass 
+
+10. Encrypt the stream using the keyword "key":
+
+   splitter --keyword key
+

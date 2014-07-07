@@ -942,38 +942,59 @@ class Splitter_LRS(Splitter_ACS):
 
     # }}}
 
+class Splitter(Splitter_IMS):
+    pass
+
 if __name__ == "__main__":
 
     def main():
+        # {{{
 
         # {{{ Args parsing
 
         parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP network.')
-        parser.add_argument('--team_addr', help='IP address to talk with the peers. (Default = "{}")'.format(Splitter_DBS.TEAM_ADDR))
-        parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(Splitter_DBS.BUFFER_SIZE))
-        parser.add_argument('--channel', help='Name of the channel served by the streaming source. (Default = "{}")'.format(Splitter_DBS.CHANNEL))
-        parser.add_argument('--chunk_size', help='Chunk size in bytes. (Default = {})'.format(Splitter_DBS.CHUNK_SIZE))
-        parser.add_argument('--team_port', help='Port to talk with the peers. (Default = {})'.format(Splitter_DBS.TEAM_PORT))
+        
+        #parser.add_argument('--splitter_addr', help='IP address to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR))
+    
+        parser.add_argument('--port', help='Port to serve the peers. (Default = "{}")'.format(Splitter_IMS.PORT))
+
+        parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(Splitter_IMS.BUFFER_SIZE))
+    
+        parser.add_argument('--channel', help='Name of the channel served by the streaming source. (Default = "{}")'.format(Splitter_IMS.CHANNEL))
+    
+        parser.add_argument('--chunk_size', help='Chunk size in bytes. (Default = {})'.format(Splitter_IMS.CHUNK_SIZE))
+    
+        #parser.add_argument('--team_addr', help='IP address to talk with the peers. (Default = {})'.format(Splitter_IMS.TEAM_ADDR))
+    
+        #parser.add_argument('--team_port', help='Port to send (UDP) the chunks to the peers. (Default = {})'.format(Splitter_IMS.TEAM_PORT))
+    
         parser.add_argument('--losses_memory', help='Number of chunks to divide by two the losses counters. (Default = {})'.format(Splitter_DBS.LOSSES_MEMORY))
+
         parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. (Default = {})'.format(Splitter_DBS.LOSSES_THRESHOLD))
-        parser.add_argument('--source_addr', help='IP address of the streaming server. (Default = "{}")'.format(Splitter_DBS.SOURCE_ADDR))
-        parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(Splitter_DBS.SOURCE_PORT))
+
+        parser.add_argument('--source_addr', help='IP address of the streaming server. (Default = "{}")'.format(Splitter_IMS.SOURCE_ADDR))
+    
+        parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(Splitter_IMS.SOURCE_PORT))
 
         args = parser.parse_known_args()[0]
         if args.source_addr:
-            Splitter_DBS.SOURCE_ADDR = socket.gethostbyname(args.source_addr)
+            Splitter_IMS.SOURCE_ADDR = socket.gethostbyname(args.source_addr)
         if args.source_port:
-            Splitter_DBS.SOURCE_PORT = int(args.source_port)
+            Splitter_IMS.SOURCE_PORT = int(args.source_port)
         if args.channel:
-            Splitter_DBS.CHANNEL = args.channel
+            Splitter_IMS.CHANNEL = args.channel
+        if args.splitter_addr:
+            Splitter_IMS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
+        if args.splitter_addr:
+            Splitter_IMS.SPLITTER_PORT = int(args.splitter_port)
         if args.team_addr:
-            Splitter_DBS.TEAM_ADDR = socket.gethostbyname(args.team_addr)
+            Splitter_IMS.TEAM_ADDR = args.team_addr
         if args.team_port:
-            Splitter_DBS.TEAM_PORT = int(args.team_port)
+            Splitter_IMS.TEAM_PORT = int(args.team_port)
         if args.buffer_size:
-            Splitter_DBS.BUFFER_SIZE = int(args.buffer_size)
+            Splitter_IMS.BUFFER_SIZE = int(args.buffer_size)
         if args.chunk_size:
-            Splitter_DBS.CHUNK_SIZE = int(args.chunk_size)
+            Splitter_IMS.CHUNK_SIZE = int(args.chunk_size)
         if args.losses_threshold:
             Splitter_DBS.LOSSES_THRESHOLD = int(args.losses_threshold)
         if args.losses_memory:
@@ -981,11 +1002,11 @@ if __name__ == "__main__":
 
         # }}}
 
-        splitter = Splitter_IMS()
-    #    splitter = Splitter_DBS()
-    #    splitter = Splitter_FNS()
-    #    splitter = Splitter_ACS()
-    #    splitter = Splitter_LRS()
+        splitter = Splitter()
+        #    splitter = Splitter_DBS()
+        #    splitter = Splitter_FNS()
+        #    splitter = Splitter_ACS()
+        #    splitter = Splitter_LRS()
         splitter.start()
 
         # {{{ Prints information until keyboard interruption
@@ -1053,6 +1074,8 @@ if __name__ == "__main__":
                 # Breaks this thread and returns to the parent process
                 # (usually, the shell).
                 break
+
+        # }}}
 
         # }}}
 
