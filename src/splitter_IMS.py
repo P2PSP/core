@@ -37,15 +37,13 @@ import threading
 import struct
 import argparse
 from color import Color
+import common
 
 # }}}
 
 # Some useful definitions.
 ADDR = 0
 PORT = 1
-MAX_CHUNK_NUMBER = 65536
-#MAX_CHUNK_NUMBER = 2048
-COUNTERS_TIMING = 0.1
 
 # IP Multicast Set of Rules
 class Splitter_IMS(threading.Thread):
@@ -250,7 +248,7 @@ class Splitter_IMS(threading.Thread):
 
     def setup_peer_connection_socket(self):
         # {{{ peer_connection_socket is used to listen to the incomming peers.
-        
+
         self.peer_connection_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             # This does not work in Windows systems.
@@ -390,95 +388,98 @@ class Splitter_IMS(threading.Thread):
                 print('%5d' % self.chunk_number, Color.red, '->', Color.none, self.multicast_channel)
                 sys.stdout.flush()
 
-            self.chunk_number = (self.chunk_number + 1) % MAX_CHUNK_NUMBER
+            self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
 
         # }}}
 
     # }}}
 
-def main():
-
-    # {{{ Args parsing
-
-    parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP network.')
-    
-    parser.add_argument('--splitter_addr', help='IP address to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR))
-    
-    parser.add_argument('--splitter_port', help='Port to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR))
-    
-    parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(Splitter_IMS.BUFFER_SIZE))
-    
-    parser.add_argument('--channel', help='Name of the channel served by the streaming source. (Default = "{}")'.format(Splitter_IMS.CHANNEL))
-    
-    parser.add_argument('--chunk_size', help='Chunk size in bytes. (Default = {})'.format(Splitter_IMS.CHUNK_SIZE))
-    
-    parser.add_argument('--team_addr', help='IP multicast address to send (UDP) the chunks to the peers. (Default = {})'.format(Splitter_IMS.TEAM_ADDR))
-    
-    parser.add_argument('--team_port', help='Port to send (UDP) the chunks to the peers. (Default = {})'.format(Splitter_IMS.TEAM_PORT))
-    
-    parser.add_argument('--source_addr', help='IP address of the streaming server. (Default = "{}")'.format(Splitter_IMS.SOURCE_ADDR))
-    
-    parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(Splitter_IMS.SOURCE_PORT))
-
-    args = parser.parse_known_args()[0]
-    if args.source_addr:
-        Splitter_IMS.SOURCE_ADDR = socket.gethostbyname(args.source_addr)
-    if args.source_port:
-        Splitter_IMS.SOURCE_PORT = int(args.source_port)
-    if args.channel:
-        Splitter_IMS.CHANNEL = args.channel
-    if args.splitter_addr:
-        Splitter_IMS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
-    if args.splitter_addr:
-        Splitter_IMS.SPLITTER_PORT = int(args.splitter_port)
-    if args.team_addr:
-        Splitter_IMS.TEAM_ADDR = args.team_addr
-    if args.team_port:
-        Splitter_IMS.TEAM_PORT = int(args.team_port)
-    if args.buffer_size:
-        Splitter_IMS.BUFFER_SIZE = int(args.buffer_size)
-    if args.chunk_size:
-        Splitter_IMS.CHUNK_SIZE = int(args.chunk_size)
-        
-    # }}}
-
-    splitter = Splitter_IMS()
-    splitter.start()
-
-    # {{{ Prints information until keyboard interruption
-
-    # #Chunk #peers { peer #losses period #chunks }
-
-    #last_chunk_number = 0
-    while splitter.alive:
-        try:
-            sys.stdout.write(Color.white)
-            print('%5d' % splitter.chunk_number, end=' ')
-            sys.stdout.write(Color.none)
-            print('|', end=' ')
-            print()
-            time.sleep(1)
-
-        except KeyboardInterrupt:
-            print('Keyboard interrupt detected ... Exiting!')
-
-            # Say to the daemon threads that the work has been finished,
-            splitter.alive = False
-
-            # Wake up the "handle_arrivals" daemon, which is waiting
-            # in a peer_connection_sock.accept().
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.connect((splitter.SPLITTER_ADDR, splitter.SPLITTER_PORT))
-            sock.recv(1024*10) # Header
-            sock.recv(struct.calcsize("H")) # Buffer size
-            sock.recv(struct.calcsize("H")) # Chunk size
-
-            # Breaks this thread and returns to the parent process
-            # (usually, the shell).
-            break
-
-    # }}}
-
 if __name__ == "__main__":
+
+    def main():
+        # {{{
+
+        # {{{ Args parsing
+
+        parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP network.')
+    
+        parser.add_argument('--splitter_addr', help='IP address to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR))
+    
+        parser.add_argument('--splitter_port', help='Port to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR))
+    
+        parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(Splitter_IMS.BUFFER_SIZE))
+    
+        parser.add_argument('--channel', help='Name of the channel served by the streaming source. (Default = "{}")'.format(Splitter_IMS.CHANNEL))
+    
+        parser.add_argument('--chunk_size', help='Chunk size in bytes. (Default = {})'.format(Splitter_IMS.CHUNK_SIZE))
+    
+        parser.add_argument('--team_addr', help='IP multicast address to send (UDP) the chunks to the peers. (Default = {})'.format(Splitter_IMS.TEAM_ADDR))
+    
+        parser.add_argument('--team_port', help='Port to send (UDP) the chunks to the peers. (Default = {})'.format(Splitter_IMS.TEAM_PORT))
+    
+        parser.add_argument('--source_addr', help='IP address of the streaming server. (Default = "{}")'.format(Splitter_IMS.SOURCE_ADDR))
+    
+        parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(Splitter_IMS.SOURCE_PORT))
+
+        args = parser.parse_known_args()[0]
+        if args.source_addr:
+            Splitter_IMS.SOURCE_ADDR = socket.gethostbyname(args.source_addr)
+        if args.source_port:
+            Splitter_IMS.SOURCE_PORT = int(args.source_port)
+        if args.channel:
+            Splitter_IMS.CHANNEL = args.channel
+        if args.splitter_addr:
+            Splitter_IMS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
+        if args.splitter_addr:
+            Splitter_IMS.SPLITTER_PORT = int(args.splitter_port)
+        if args.team_addr:
+            Splitter_IMS.TEAM_ADDR = args.team_addr
+        if args.team_port:
+            Splitter_IMS.TEAM_PORT = int(args.team_port)
+        if args.buffer_size:
+            Splitter_IMS.BUFFER_SIZE = int(args.buffer_size)
+        if args.chunk_size:
+            Splitter_IMS.CHUNK_SIZE = int(args.chunk_size)
+        
+        # }}}
+
+        splitter = Splitter_IMS()
+        splitter.start()
+
+        # {{{ Prints information until keyboard interruption
+
+        # #Chunk #peers { peer #losses period #chunks }
+
+        #last_chunk_number = 0
+        while splitter.alive:
+            try:
+                sys.stdout.write(Color.white)
+                print('%5d' % splitter.chunk_number, end=' ')
+                sys.stdout.write(Color.none)
+                print('|', end=' ')
+                print()
+                time.sleep(1)
+
+            except KeyboardInterrupt:
+                print('Keyboard interrupt detected ... Exiting!')
+
+                # Say to the daemon threads that the work has been finished,
+                splitter.alive = False
+
+                # Wake up the "handle_arrivals" daemon, which is waiting
+                # in a peer_connection_sock.accept().
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.connect((splitter.SPLITTER_ADDR, splitter.SPLITTER_PORT))
+                sock.recv(1024*10) # Header
+                sock.recv(struct.calcsize("H")) # Buffer size
+                sock.recv(struct.calcsize("H")) # Chunk size
+
+                # Breaks this thread and returns to the parent process
+                # (usually, the shell).
+                break
+
+    # }}}
+
+        # }}}
 
     main()

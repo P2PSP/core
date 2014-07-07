@@ -43,13 +43,12 @@ from color import Color
 import threading
 from lossy_socket import lossy_socket
 #from multiprocessing import Pipe
+import common
 
 # }}}
 
 ADDR = 0
 PORT = 1
-MAX_CHUNK_NUMBER = 65536
-#MAX_CHUNK_NUMBER = 512
 
 # IP Multicasting Set of Rules
 class Peer_IMS(threading.Thread):
@@ -124,9 +123,9 @@ class Peer_IMS(threading.Thread):
     def find_next_chunk(self):
         # {{{
 
-        chunk_number = (self.played_chunk + 1) % MAX_CHUNK_NUMBER
+        chunk_number = (self.played_chunk + 1) % common.MAX_CHUNK_NUMBER
         while not self.received[chunk_number % self.buffer_size]:
-            chunk_number = (chunk_number + 1) % MAX_CHUNK_NUMBER
+            chunk_number = (chunk_number + 1) % common.MAX_CHUNK_NUMBER
         return chunk_number
 
         # }}}
