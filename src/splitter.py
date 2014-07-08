@@ -38,7 +38,7 @@ import struct
 import argparse
 from color import Color
 import common
-import splitter_IMS
+from splitter_IMS import Splitter_IMS
 
 # }}}
 
@@ -113,10 +113,17 @@ class Splitter_DBS(threading.Thread):
     # Maximum number of lost chunks for an unsupportive peer.
 
     # }}}
-    LOSSES_THRESHOLD = 128
-    LOSSES_MEMORY = 1024
 
     HEADER_CHUNKS = 10 # In chunks
+
+    # {{{ Threshold to reject a peer from the team.
+    # }}}
+    LOSSES_THRESHOLD = 128
+
+    # {{{ Number of chunks that must be sent to divide by 2 the number
+    # of lost chunks.
+    # }}}
+    LOSSES_MEMORY = 1024
 
     # }}}
 
@@ -974,6 +981,8 @@ if __name__ == "__main__":
 
         parser.add_argument("--mcast", action="store_true", help="Enables IP multicast.")
         
+        parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks (only with --mcast). (Default = "{}")'.format(Splitter.MCAST_ADDR))
+
         parser.add_argument('--port', help='Port to serve the peers. (Default = "{}")'.format(Splitter.PORT))
 
         parser.add_argument('--source_addr', help='IP address of the streaming server. (Default = "{}")'.format(Splitter_IMS.SOURCE_ADDR))

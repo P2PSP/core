@@ -105,6 +105,15 @@ class Splitter_IMS(threading.Thread):
     #TEAM_PORT = 4552
     #TEAM_PORT = 8888
 
+    # {{{ Threshold to reject a peer from the team.
+    # }}}
+    LOSSES_THRESHOLD = 128 # Ununsed in this class
+
+    # {{{ Number of chunks that must be sent to divide by 2 the number
+    # of lost chunks.
+    # }}}
+    LOSSES_MEMORY = 1024 # Unused in this class
+
     # }}}
 
     def __init__(self):
@@ -265,23 +274,20 @@ class Splitter_IMS(threading.Thread):
         self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         
         self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
-        if __debug__:
-            # The next code is to force a outgoing port.
-            try:
-                # This does not work in Windows systems !!
-                self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            except:
-                pass
-            try:
-                self.team_socket.bind((self.TEAM_ADDR, self.TEAM_PORT))
-            except:
-                raise
-            # End of code that forces a outgoing port.
+        try:
+            # This does not work in Windows systems !!
+            self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        except:
+            pass
+        try:
+            self.team_socket.bind((socket.gethostname(), self.PORT))
+        except:
+            raise
 
         # }}}
 
     def request_video(self):
-        # {{{ Request the video using HTML from the source node (Icecast).
+        # {{{ Request the video using HTTP from the source node (Icecast).
 
         source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if __debug__:
@@ -342,7 +348,7 @@ class Splitter_IMS(threading.Thread):
             self.setup_team_socket()
         except Exception, e:
             print(e)
-            print(self.team_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT))
+            print(self.team_socket.getsockname(), "\b: unable to bind", (socket.gethostname(), self.PORT))
             sys.exit('')
 
         # }}}
