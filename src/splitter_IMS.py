@@ -52,29 +52,39 @@ class Splitter_IMS(threading.Thread):
     # {{{ Class "constants"
 
     # {{{
-
-    # The buffer_size depends on the stream bit-rate and the maximun
-    # latency experimented by the users, and must be transmitted to
-    # the peers. The buffer_size is proportional to the bit-rate and
-    # the latency is proportional to the buffer_size.
-
+    # The buffer_size (in chunks) depends on the stream bit-rate and
+    # the maximun latency bearable by the users, and must be
+    # transmitted to the peers because all peers should use the same
+    # buffer_size. Notice that the buffer_size should be proportional
+    # to the bit-rate and the latency is proportional to the
+    # buffer_size.
     # }}}
     BUFFER_SIZE = 256
-
-    # {{{
-
-    # The chunk_size depends mainly on the network technology and
-    # should be selected as big as possible, depending on the MTU and
-    # the bit-error rate.
-
-    # }}}
-    CHUNK_SIZE = 1024
 
     # {{{ Channel served by the streaming source.
     # }}}
     CHANNEL = "Big_Buck_Bunny_small.ogv"
 
-    # {{{ The streaming server.
+    # {{{
+    # The chunk_size depends mainly on the network technology and
+    # should be selected as big as possible, depending on the MTU and
+    # the bit-error rate.
+    # }}}
+    CHUNK_SIZE = 1024
+
+    # {{{ Number of chunks of the header.
+    # }}}
+    HEADER_SIZE = 10
+
+    # {{{ The unicast IP address of the splitter server.
+    # }}}
+    #SPLITTER_ADDR = "localhost"
+    
+    # {{{ Port used to serve the peers (listening port).
+    # }}}
+    PORT = 4552
+
+    # {{{ The host where the streaming server is running.
     # }}}
     SOURCE_ADDR = "localhost"
 
@@ -82,29 +92,18 @@ class Splitter_IMS(threading.Thread):
     # }}}
     SOURCE_PORT = 8000
 
-    # {{{ The unicast IP address of the splitter server.
-    # }}}
-    SPLITTER_ADDR = "localhost"
-    
-    # {{{ Port used to serve the peers the basic information.
-    # }}}
-    SPLITTER_PORT = 4552
-
     # {{{ The multicast IP address of the team, used to send the chunks.
     # }}}
     #TEAM_ADDR = "224.0.0.1" # All Systems on this Subnet
-    TEAM_ADDR = "224.1.1.1"
+    #TEAM_ADDR = "224.1.1.1"
     #MCAST_GRP = "224.0.0.1"
     #MCAST_GRP = '224.1.1.1'
+    MCAST_ADDR = "224.0.0.1" # All Systems on this Subnet
 
     # {{{ Port used in the multicast group.
     # }}}
     #TEAM_PORT = 4552
-    TEAM_PORT = 8888
-
-    # {{{ Number of chunks of the header.
-    # }}}
-    HEADER_CHUNKS = 10
+    #TEAM_PORT = 8888
 
     # }}}
 
@@ -120,22 +119,22 @@ class Splitter_IMS(threading.Thread):
             print("release mode")
 
         self.print_modulename()
-        print("Buffer size =", self.BUFFER_SIZE)
-        print("Chunk size =", self.CHUNK_SIZE)
+        print("Buffer size (chunks) =", self.BUFFER_SIZE)
+        print("Chunk size (bytes) =", self.CHUNK_SIZE)
         print("Channel =", self.CHANNEL)
+        print("Header size (chunks) =", self.CHANNEL)
+        #print("Splitter address =", self.SPLITTER_ADDR)
+        print("Listening and serving port =", self.PORT)
         print("Source IP address =", self.SOURCE_ADDR)
         print("Source port =", self.SOURCE_PORT)
-        print("Splitter address =", self.SPLITTER_ADDR)
-        print("Splitter port =", self.SPLITTER_PORT)
-        print("Team multicast address =", self.TEAM_ADDR)
-        print("Team multicast port =", self.TEAM_PORT)
+        print("Multicast address =", self.MCAST_ADDR)
+        #print("Team multicast port =", self.TEAM_PORT)
 
         # {{{ A IMS splitter runs 2 threads. The first one controls
         # the peer arrivals. The second one shows some information
         # about the transmission. This variable is used to stop the
         # child threads. They will be alive only while the main thread
         # is alive.
-
         # }}}
         self.alive = True
 
@@ -151,26 +150,17 @@ class Splitter_IMS(threading.Thread):
         # }}}
         self.team_socket = ""
 
-        # {{{ The served peer index.
-        # }}}
-        self.peer_number = 0
-
-        # {{{ New peers need to receive the video header.
+        # {{{ The video header.
         # }}}
         self.header = ""
 
-        # {{{ Some definitions.
+        # {{{ Some useful definitions.
         # }}}
         self.source = (self.SOURCE_ADDR, self.SOURCE_PORT)
         self.GET_message = 'GET /' + self.CHANNEL + ' HTTP/1.1\r\n'
         self.GET_message += '\r\n'
         self.chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
-
-        # {{{ At least one peer monitor is compulsory.
-        # }}}
-        self.number_of_monitors = 1
-
-        self.multicast_channel = (self.TEAM_ADDR, self.TEAM_PORT)
+        self.multicast_channel = (self.MCAST_ADDR, self.PORT)
         # }}}
 
     def print_modulename(self):
@@ -215,8 +205,8 @@ class Splitter_IMS(threading.Thread):
         # {{{
 
         if __debug__:
-            print("Communicating the multicast channel", (self.TEAM_ADDR, self.TEAM_PORT))
-        message = struct.pack("4sH", socket.inet_aton(self.TEAM_ADDR), socket.htons(self.TEAM_PORT))
+            print("Communicating the multicast channel", (self.MCAST_ADDR, self.PORT))
+        message = struct.pack("4sH", socket.inet_aton(self.MCAST_ADDR), socket.htons(self.PORT))
         peer_serve_socket.sendall(message)
 
         # }}}
@@ -238,7 +228,7 @@ class Splitter_IMS(threading.Thread):
         # }}}
 
     def handle_arrivals(self):
-        # {{{
+        # {{{ 
 
         while self.alive:
             peer_serve_socket, peer = self.peer_connection_socket.accept()
@@ -247,7 +237,7 @@ class Splitter_IMS(threading.Thread):
         # }}}
 
     def setup_peer_connection_socket(self):
-        # {{{ peer_connection_socket is used to listen to the incomming peers.
+        # {{{ Used to listen to the incomming peers.
 
         self.peer_connection_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
@@ -257,7 +247,7 @@ class Splitter_IMS(threading.Thread):
             pass
 
         try:
-            self.peer_connection_socket.bind((self.SPLITTER_ADDR, self.SPLITTER_PORT))
+            self.peer_connection_socket.bind((socket.gethostname(), self.PORT))
         except: # Falta averiguar excepcion
             raise
 
@@ -268,8 +258,8 @@ class Splitter_IMS(threading.Thread):
         # }}}
 
     def setup_team_socket(self):
-        # {{{ "team_socket" is used to talk to the peers of the
-        # team. In this case, it corresponds to a multicast channel.
+        # {{{ Used to talk with the peers of the team. In this case,
+        # it corresponds to a multicast channel.
         
         #self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -324,7 +314,7 @@ class Splitter_IMS(threading.Thread):
                 sock.connect(self.source)
                 sock.sendall(self.GET_message)
                 self.header = ""
-                header_length = self.HEADER_CHUNKS
+                header_length = self.HEADER_SIZE
                 data = ""
             prev_size = len(data)
             data += sock.recv(self.CHUNK_SIZE - len(data))
@@ -361,7 +351,7 @@ class Splitter_IMS(threading.Thread):
 
         # {{{ Load the video header.
 
-        for i in xrange(self.HEADER_CHUNKS):
+        for i in xrange(self.HEADER_SIZE):
             self.header += self.receive_next_chunk(source_socket, 0)[0]
 
         # }}}
