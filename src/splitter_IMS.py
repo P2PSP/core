@@ -105,15 +105,6 @@ class Splitter_IMS(threading.Thread):
     #TEAM_PORT = 4552
     #TEAM_PORT = 8888
 
-    # {{{ Threshold to reject a peer from the team.
-    # }}}
-    LOSSES_THRESHOLD = 128 # Ununsed in this class
-
-    # {{{ Number of chunks that must be sent to divide by 2 the number
-    # of lost chunks.
-    # }}}
-    LOSSES_MEMORY = 1024 # Unused in this class
-
     # }}}
 
     def __init__(self):
