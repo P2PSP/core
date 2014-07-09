@@ -79,7 +79,7 @@ or simply:
 
 4. Change the source channel to "new_channel":
 
-   splitter --channel new_channel
+   splitter --channel new_channel &
 
 5. Change the chunk size to 512 bytes:
 
@@ -87,21 +87,25 @@ or simply:
 
 6. Change the source host to "new_host":
 
-   splitter --source_addr new_host
+   splitter --source_addr new_host &
 
 7. Change the source port to 6666:
 
-   splitter --source_port 6666
+   splitter --source_port 6666 &
 
-8. Switch to IP multicast mode using the IP multicast address 224.0.1.1:
+8. Switch to IP multicast mode:
 
-   splitter --mcast_addr 224.0.1.1
+   splitter --mcast &
+
+8. Select a particular IP multicast address 224.0.1.1:
+
+   splitter --mcast --mcast_addr 224.0.1.1 &
 
 9. Create a private team using the password "pass":
 
-   splitter --password pass 
+   splitter --password pass &
 
 10. Encrypt the stream using the keyword "key":
 
-   splitter --keyword key
+   splitter --keyword key &
 
