@@ -954,62 +954,50 @@ class Splitter(Splitter_IMS):
 
 if __name__ == "__main__":
 
-    def main():
-        # {{{
+    # {{{ Args parsing
 
-        # {{{ Args parsing
+    parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP network.')
 
-        parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP network.')
-        
-        #parser.add_argument('--splitter_addr', help='IP address to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR))
-    
-        parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(Splitter.BUFFER_SIZE))
-    
-        parser.add_argument('--channel', help='Name of the channel served by the streaming source. (Default = "{}")'.format(Splitter.CHANNEL))
-    
-        parser.add_argument('--chunk_size', help='Chunk size in bytes. (Default = {})'.format(Splitter.CHUNK_SIZE))
-    
-        parser.add_argument('--header_size', help='Size of the header of the stream in chunks. (Default = {})'.format(Splitter.HEADER_SIZE))
-    
-        #parser.add_argument('--team_addr', help='IP address to talk with the peers. (Default = {})'.format(Splitter_IMS.TEAM_ADDR))
-    
-        #parser.add_argument('--team_port', help='Port to send (UDP) the chunks to the peers. (Default = {})'.format(Splitter_IMS.TEAM_PORT))
-    
+    #parser.add_argument('--splitter_addr', help='IP address to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR))
+
+    parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(Splitter.BUFFER_SIZE))
+
+    parser.add_argument('--channel', help='Name of the channel served by the streaming source. (Default = "{}")'.format(Splitter.CHANNEL))
+
+    parser.add_argument('--chunk_size', help='Chunk size in bytes. (Default = {})'.format(Splitter.CHUNK_SIZE))
+
+    parser.add_argument('--header_size', help='Size of the header of the stream in chunks. (Default = {})'.format(Splitter.HEADER_SIZE))
+
+    #parser.add_argument('--team_addr', help='IP address to talk with the peers. (Default = {})'.format(Splitter_IMS.TEAM_ADDR))
+
+    #parser.add_argument('--team_port', help='Port to send (UDP) the chunks to the peers. (Default = {})'.format(Splitter_IMS.TEAM_PORT))
+
+    parser.add_argument("--mcast", action="store_true", help="Enables IP multicast.")
+
+    args = parser.parse_known_args()[0]
+    if not args.mcast:
+
         parser.add_argument('--losses_memory', help='Number of chunks to divide by two the losses counters. (Default = {})'.format(Splitter.LOSSES_MEMORY))
 
         parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. (Default = {})'.format(Splitter.LOSSES_THRESHOLD))
 
-        parser.add_argument("--mcast", action="store_true", help="Enables IP multicast.")
-        
-        parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks (only with --mcast). (Default = "{}")'.format(Splitter.MCAST_ADDR))
+    parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks (only with --mcast). (Default = "{}")'.format(Splitter.MCAST_ADDR))
 
-        parser.add_argument('--port', help='Port to serve the peers. (Default = "{}")'.format(Splitter.PORT))
+    parser.add_argument('--port', help='Port to serve the peers. (Default = "{}")'.format(Splitter.PORT))
 
-        parser.add_argument('--source_addr', help='IP address of the streaming server. (Default = "{}")'.format(Splitter_IMS.SOURCE_ADDR))
-    
-        parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(Splitter_IMS.SOURCE_PORT))
+    parser.add_argument('--source_addr', help='IP address of the streaming server. (Default = "{}")'.format(Splitter_IMS.SOURCE_ADDR))
 
-        args = parser.parse_known_args()[0]
+    parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(Splitter_IMS.SOURCE_PORT))
 
-        if args.mcast:
-            splitter = Splitter_IMS()
-        else:
-            splitter = Splitter_DBS()
+    args = parser.parse_known_args()[0]
+
+    if args.mcast:
+        splitter = Splitter_IMS()
 
         if args.mcast_addr:
             splitter.MCAST_ADDR = args.mcast_addr
-        
-        if args.buffer_size:
-            splitter.BUFFER_SIZE = int(args.buffer_size)
-
-        if args.channel:
-            splitter.CHANNEL = args.channel
-
-        if args.chunk_size:
-            splitter.CHUNK_SIZE = int(args.chunk_size)
-
-        if args.header_size:
-            splitter.HEADER_SIZE = int(args.header_size)
+    else:
+        splitter = Splitter_DBS()
 
         if args.losses_memory:
             splitter.LOSSES_MEMORY = int(args.losses_memory)
@@ -1017,16 +1005,31 @@ if __name__ == "__main__":
         if args.losses_threshold:
             splitter.LOSSES_THRESHOLD = int(args.losses_threshold)
 
-        if args.port:
-            splitter.PORT = int(args.team_port)
+    if args.buffer_size:
+        splitter.BUFFER_SIZE = int(args.buffer_size)
 
-        if args.source_addr:
-            splitter.SOURCE_ADDR = socket.gethostbyname(args.source_addr)
-            
-        if args.source_port:
-            splitter.SOURCE_PORT = int(args.source_port)
+    if args.channel:
+        splitter.CHANNEL = args.channel
 
-        # }}}
+    if args.chunk_size:
+        splitter.CHUNK_SIZE = int(args.chunk_size)
+
+    if args.header_size:
+        splitter.HEADER_SIZE = int(args.header_size)
+
+    if args.port:
+        splitter.PORT = int(args.team_port)
+
+    if args.source_addr:
+        splitter.SOURCE_ADDR = socket.gethostbyname(args.source_addr)
+
+    if args.source_port:
+        splitter.SOURCE_PORT = int(args.source_port)
+
+    # }}}
+
+    def main():
+        # {{{
 
         #splitter = Splitter()
         #    splitter = Splitter_DBS()
@@ -1035,73 +1038,108 @@ if __name__ == "__main__":
         #    splitter = Splitter_LRS()
         splitter.start()
 
-        # {{{ Prints information until keyboard interruption
+        if args.mcast:
+            # {{{ Prints information until keyboard interruption
 
-        # #Chunk #peers { peer #losses period #chunks }
+            # #Chunk #peers { peer #losses period #chunks }
 
-        #last_chunk_number = 0
-        while splitter.alive:
-            try:
-                sys.stdout.write(Color.white)
-                print('%5d' % splitter.chunk_number, end=' ')
-                sys.stdout.write(Color.cyan)
-                print(len(splitter.peer_list), end=' ')
-                for p in splitter.peer_list:
-                    sys.stdout.write(Color.blue)
-                    print(p, end= ' ')
-                    sys.stdout.write(Color.red)
-                    print('%3d' % splitter.losses[p], '<', splitter.LOSSES_THRESHOLD, end=' ')
-                    try:
-                        sys.stdout.write(Color.blue)
-                        print('%3d' % splitter.period[p], end= ' ')
-                        sys.stdout.write(Color.purple)
-                        print('%4d' % splitter.number_of_sent_chunks_per_peer[p], end = ' ')
-                        splitter.number_of_sent_chunks_per_peer[p] = 0
-                    except AttributeError:
-                        pass
+            #last_chunk_number = 0
+            while splitter.alive:
+                try:
+                    sys.stdout.write(Color.white)
+                    print('%5d' % splitter.chunk_number, end=' ')
                     sys.stdout.write(Color.none)
                     print('|', end=' ')
-                print()
-                '''
-                print "[%3d] " % len(splitter.peer_list),
-                kbps = (splitter.chunk_number - last_chunk_number) * \
-                splitter.CHUNK_SIZE * 8/1000
-                last_chunk_number = splitter.chunk_number
+                    print()
+                    time.sleep(1)
 
-                for x in xrange(0,kbps/10):
-                print "\b#",
-                print kbps, "kbps"
-                '''
-                time.sleep(1)
+                except KeyboardInterrupt:
+                    print('Keyboard interrupt detected ... Exiting!')
 
-            except KeyboardInterrupt:
-                print('Keyboard interrupt detected ... Exiting!')
+                    # Say to the daemon threads that the work has been finished,
+                    splitter.alive = False
 
-                # Say to the daemon threads that the work has been finished,
-                splitter.alive = False
+                    # Wake up the "handle_arrivals" daemon, which is waiting
+                    # in a peer_connection_sock.accept().
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sock.connect((socket.gethostname(), splitter.PORT))
+                    sock.recv(1024*10) # Header
+                    sock.recv(struct.calcsize("H")) # Buffer size
+                    sock.recv(struct.calcsize("H")) # Chunk size
 
-                # Wake up the "moderate_the_team" daemon, which is waiting
-                # in a cluster_sock.recvfrom(...).
-                splitter.say_goodbye((splitter.TEAM_ADDR, splitter.TEAM_PORT), splitter.team_socket)
+                    # Breaks this thread and returns to the parent process
+                    # (usually, the shell).
+                    break
 
-                # Wake up the "handle_arrivals" daemon, which is waiting
-                # in a peer_connection_sock.accept().
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.connect((splitter.TEAM_ADDR, splitter.TEAM_PORT))
-                sock.recv(1024*10) # Header
-                sock.recv(struct.calcsize("H")) # Buffer size
-                sock.recv(struct.calcsize("H")) # Chunk size
-                number_of_peers = socket.ntohs(struct.unpack("H", sock.recv(struct.calcsize("H")))[0])
-                # Receive the list
-                while number_of_peers > 0:
-                    sock.recv(struct.calcsize("4sH"))
-                    number_of_peers -= 1
+            # }}}
+        else:
+            # {{{ Prints information until keyboard interruption
 
-                # Breaks this thread and returns to the parent process
-                # (usually, the shell).
-                break
+            # #Chunk #peers { peer #losses period #chunks }
 
-        # }}}
+            #last_chunk_number = 0
+            while splitter.alive:
+                try:
+                    sys.stdout.write(Color.white)
+                    print('%5d' % splitter.chunk_number, end=' ')
+                    sys.stdout.write(Color.cyan)
+                    print(len(splitter.peer_list), end=' ')
+                    for p in splitter.peer_list:
+                        sys.stdout.write(Color.blue)
+                        print(p, end= ' ')
+                        sys.stdout.write(Color.red)
+                        print('%3d' % splitter.losses[p], '<', splitter.LOSSES_THRESHOLD, end=' ')
+                        try:
+                            sys.stdout.write(Color.blue)
+                            print('%3d' % splitter.period[p], end= ' ')
+                            sys.stdout.write(Color.purple)
+                            print('%4d' % splitter.number_of_sent_chunks_per_peer[p], end = ' ')
+                            splitter.number_of_sent_chunks_per_peer[p] = 0
+                        except AttributeError:
+                            pass
+                        sys.stdout.write(Color.none)
+                        print('|', end=' ')
+                    print()
+                    '''
+                    print "[%3d] " % len(splitter.peer_list),
+                    kbps = (splitter.chunk_number - last_chunk_number) * \
+                    splitter.CHUNK_SIZE * 8/1000
+                    last_chunk_number = splitter.chunk_number
+
+                    for x in xrange(0,kbps/10):
+                    print "\b#",
+                    print kbps, "kbps"
+                    '''
+                    time.sleep(1)
+
+                except KeyboardInterrupt:
+                    print('Keyboard interrupt detected ... Exiting!')
+
+                    # Say to the daemon threads that the work has been finished,
+                    splitter.alive = False
+
+                    # Wake up the "moderate_the_team" daemon, which is waiting
+                    # in a cluster_sock.recvfrom(...).
+                    splitter.say_goodbye((splitter.TEAM_ADDR, splitter.TEAM_PORT), splitter.team_socket)
+
+                    # Wake up the "handle_arrivals" daemon, which is waiting
+                    # in a peer_connection_sock.accept().
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sock.connect((splitter.TEAM_ADDR, splitter.TEAM_PORT))
+                    sock.recv(1024*10) # Header
+                    sock.recv(struct.calcsize("H")) # Buffer size
+                    sock.recv(struct.calcsize("H")) # Chunk size
+                    number_of_peers = socket.ntohs(struct.unpack("H", sock.recv(struct.calcsize("H")))[0])
+                    # Receive the list
+                    while number_of_peers > 0:
+                        sock.recv(struct.calcsize("4sH"))
+                        number_of_peers -= 1
+
+                    # Breaks this thread and returns to the parent process
+                    # (usually, the shell).
+                    break
+
+            # }}}
 
         # }}}
 
