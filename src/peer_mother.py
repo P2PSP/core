@@ -134,5 +134,8 @@ class Peer_mother():
 
         # }}}
 
+    def start(self):
+        run(self)
+
     # }}}
 
