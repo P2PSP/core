@@ -31,17 +31,17 @@
 # {{{ Imports
 
 from __future__ import print_function
-import sys
-import socket
-import struct
-import time
-from color import Color
-import common
+#import sys
+#import socket
+#import struct
+#import time
+#from color import Color
+#import common
 
 # }}}
 
-ADDR = 0
-PORT = 1
+#ADDR = 0
+#PORT = 1
 
 # This is a unuseful peer that only receives from the splitter the
 # first message: the IP multicast channel.
