@@ -1,3 +1,5 @@
+from peer_fns import Peer_FNS
+
 class Peer_Lossy(Peer_FNS):
     # {{{
 

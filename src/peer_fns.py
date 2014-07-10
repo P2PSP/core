@@ -1,4 +1,7 @@
 # Full-cone Nat Set of Rules
+
+from peer_dbs import Peer_DBS
+
 class Peer_FNS(Peer_DBS):
     # {{{
 

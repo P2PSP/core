@@ -1,17 +1,6 @@
 #!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
-# This is the splitter node of the P2PSP (Peer-to-Peer Simple Protocol)
-# <https://launchpad.net/p2psp>.
-#
-# Copyright (C) 2014 Vicente González Ruiz,
-#                    Cristóbal Medina López,
-#                    Juan Alvaro Muñoz Naranjo.
-#
-
-ADDR = 0
-PORT = 1
-
 # {{{ Imports
 
 from __future__ import print_function
@@ -25,10 +14,13 @@ import threading
 from lossy_socket import lossy_socket
 #from multiprocessing import Pipe
 import common
+
+ADDR = 0
+PORT = 1
+
 from peer_mother import Peer_mother
 from peer_ims import Peer_IMS
 from peer_dbs import Peer_DBS
-from monitor_dbs import Monitor_DBS
 from peer_fns import Peer_FNS
 from monitor_fns import Monitor_FNS
 from peer_lossy import Peer_Lossy
@@ -39,13 +31,13 @@ from monitor_lrs import Monitor_LRS
 if __name__ == "__main__":
 
     # {{{ Args handling and object instantiation
-    parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP network.')
+    parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP team.')
 
     parser.add_argument('--splitter_addr', help='IP address of the splitter. ({})'.format(Peer_mother.SPLITTER_ADDR))
 
     parser.add_argument('--splitter_port', help='Listening port of the splitter. ({})'.format(Peer_mother.SPLITTER_PORT))
 
-    parser.add_argument('--team_port', help='Port to communicate with the peers. ({})'.format(Peer_mother.TEAM_PORT))
+    parser.add_argument('--team_port', help='Port to communicate with the peers. ({} = The SO will chose it)'.format(Peer_mother.TEAM_PORT))
 
     args = parser.parse_known_args()[0]
 
@@ -69,6 +61,8 @@ if __name__ == "__main__":
 
     if peer.mcast_channel == '0.0.0.0':
         # {{{ This is a "unicast" peer.
+
+        # Todo esto es mejor que lo indique el splitter
 
         parser.add_argument('--debt_memory', help='Number of chunks to receive to divide by two the debts counter. ({})'.format(Peer_DBS.DEBT_MEMORY))
 

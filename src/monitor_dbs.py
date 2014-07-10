@@ -1,3 +1,5 @@
+from peer_dbs import Peer_DBS
+
 class Monitor_DBS(Peer_DBS):
     # {{{
 

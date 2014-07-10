@@ -1,3 +1,5 @@
+from monitor_fns import Monitor_FNS
+
 # Lost chunks Recovery Set of Rules
 class Monitor_LRS(Monitor_FNS):
     # {{{

@@ -1,0 +1,3 @@
+Copyright (C) 2014 Vicente González Ruiz,
+                   Cristóbal Medina López,
+                   Juan Alvaro Muñoz Naranjo.
