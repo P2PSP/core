@@ -1,51 +1,5 @@
-#!/usr/bin/python -O
-# -*- coding: iso-8859-15 -*-
-
-# Solo el peer monitor se queja al splitter. Si un peer no posee
-# suficiente ancho de banda para recibir o transmitir, el monitor
-# dejara de recibir sus chunks y el splitter lo descubrira a traves de
-# las quejas del monitor al splitter. Un monitor es un peer que se
-# queja y ademas el splitter le hace caso.
-
-# {{{ GNU GENERAL PUBLIC LICENSE
-
-# This is the splitter node of the P2PSP (Peer-to-Peer Simple Protocol)
-# <https://launchpad.net/p2psp>.
-#
-# Copyright (C) 2014 Vicente González Ruiz,
-#                    Cristóbal Medina López,
-#                    Juan Alvaro Muñoz Naranjo.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# }}}
-
-# {{{ Imports
-
 from __future__ import print_function
-import sys
-import socket
-import struct
-import time
-import argparse
-from color import Color
 import threading
-from lossy_socket import lossy_socket
-#from multiprocessing import Pipe
-import common
-
-# }}}
 
 ADDR = 0
 PORT = 1
@@ -83,7 +37,7 @@ class Peer_IMS(threading.Thread):
 #        print("Team address =", self.TEAM_ADDR)
         print("Team port =", self.TEAM_PORT)
 
-        # {{{ The peer dies if there is not a connected player
+        # {{{ The peer dies if the player disconects
         # }}}
         self.player_alive = True
 

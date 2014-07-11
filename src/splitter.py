@@ -1,32 +1,6 @@
 #!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
-# {{{ GNU GENERAL PUBLIC LICENSE
-
-# This is the splitter node of the P2PSP (Peer-to-Peer Simple Protocol)
-# <https://launchpad.net/p2psp>.
-#
-# Copyright (C) 2014 Vicente González Ruiz,
-#                    Cristóbal Medina López,
-#                    Juan Alvaro Muñoz Naranjo.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# }}}
-
-# This code implements the DBS splitter side of the P2PSP.
-
 # {{{ Imports
 
 from __future__ import print_function
@@ -260,6 +234,26 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
+    def send_debt_memory(self, peer_serve_socket):
+        # {{{
+
+        if __debug__:
+            print("Sending a debt_memory of", self.CHUNK_DEBT_MEMORY)
+        message = struct.pack("H", socket.htons(self.CHUNK_MEMORY))
+        peer_serve_socket.sendall(message)
+
+        # }}}
+
+    def send_debt_threshold(self, peer_serve_socket):
+        # {{{
+
+        if __debug__:
+            print("Sending a debt_threshold of", self.CHUNK_DEBT_THRESHOLD)
+        message = struct.pack("H", socket.htons(self.CHUNK_THRESHOLD))
+        peer_serve_socket.sendall(message)
+
+        # }}}
+
     def send_listsize(self, peer_serve_socket):
         # {{{
 
@@ -315,6 +309,8 @@ class Splitter_DBS(threading.Thread):
         self.send_header(peer_serve_socket)
         self.send_buffersize(peer_serve_socket)
         self.send_chunksize(peer_serve_socket)
+        self.send_debt_memory(peer_serve_socket)
+        self.send_debt_threshold(peer_serve_socket)
         self.send_listsize(peer_serve_socket)
         self.send_list(peer_serve_socket)
         peer_serve_socket.close()
@@ -956,17 +952,17 @@ if __name__ == "__main__":
 
     # {{{ Args parsing
 
-    parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP network.')
+    parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP team.')
 
     #parser.add_argument('--splitter_addr', help='IP address to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR))
 
-    parser.add_argument('--buffer_size', help='size of the video buffer in blocks. (Default = {})'.format(Splitter.BUFFER_SIZE))
+    parser.add_argument('--buffer_size', help='size of the video buffer in blocks. Default = {}.'.format(Splitter_IMS.BUFFER_SIZE))
 
-    parser.add_argument('--channel', help='Name of the channel served by the streaming source. (Default = "{}")'.format(Splitter.CHANNEL))
+    parser.add_argument('--channel', help='Name of the channel served by the streaming source. Default = "{}".'.format(Splitter_IMS.CHANNEL))
 
-    parser.add_argument('--chunk_size', help='Chunk size in bytes. (Default = {})'.format(Splitter.CHUNK_SIZE))
+    parser.add_argument('--chunk_size', help='Chunk size in bytes. Default = {}.'.format(Splitter_IMS.CHUNK_SIZE))
 
-    parser.add_argument('--header_size', help='Size of the header of the stream in chunks. (Default = {})'.format(Splitter.HEADER_SIZE))
+    parser.add_argument('--header_size', help='Size of the header of the stream in chunks. Default = {}.'.format(Splitter_IMS.HEADER_SIZE))
 
     #parser.add_argument('--team_addr', help='IP address to talk with the peers. (Default = {})'.format(Splitter_IMS.TEAM_ADDR))
 
@@ -974,20 +970,17 @@ if __name__ == "__main__":
 
     parser.add_argument("--mcast", action="store_true", help="Enables IP multicast.")
 
-    args = parser.parse_known_args()[0]
-    if not args.mcast:
+    parser.add_argument('--losses_memory', help='Number of chunks to divide by two the losses counters. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_MEMORY))
 
-        parser.add_argument('--losses_memory', help='Number of chunks to divide by two the losses counters. (Default = {})'.format(Splitter.LOSSES_MEMORY))
+    parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_THRESHOLD))
 
-        parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. (Default = {})'.format(Splitter.LOSSES_THRESHOLD))
+    parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks (only with --mcast). Makes sense only in multicast mode. Default = "{}".'.format(Splitter_IMS.MCAST_ADDR))
 
-    parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks (only with --mcast). (Default = "{}")'.format(Splitter.MCAST_ADDR))
+    parser.add_argument('--port', help='Port to serve the peers. Default = "{}".'.format(Splitter_IMS.PORT))
 
-    parser.add_argument('--port', help='Port to serve the peers. (Default = "{}")'.format(Splitter.PORT))
+    parser.add_argument('--source_addr', help='IP address of the streaming server. Default = "{}".'.format(Splitter_IMS.SOURCE_ADDR))
 
-    parser.add_argument('--source_addr', help='IP address of the streaming server. (Default = "{}")'.format(Splitter_IMS.SOURCE_ADDR))
-
-    parser.add_argument('--source_port', help='Port where the streaming server is listening. (Default = {})'.format(Splitter_IMS.SOURCE_PORT))
+    parser.add_argument('--source_port', help='Port where the streaming server is listening. Default = {}.'.format(Splitter_IMS.SOURCE_PORT))
 
     args = parser.parse_known_args()[0]
 

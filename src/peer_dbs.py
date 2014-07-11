@@ -64,7 +64,7 @@ class Peer_DBS(threading.Thread):
         #self.pipe_thread_end, self.pipe_main_end = Pipe()
         #self.buffering = True
         self.buffering = threading.Event()
-
+        
         # }}}
 
     def print_modulename(self):
@@ -87,9 +87,11 @@ class Peer_DBS(threading.Thread):
         # {{{
 
         sys.stdout.write(Color.green)
-        print("Requesting the list of peers to", self.splitter_socket.getpeername())
+        if __debug__:
+            print("Requesting the list of peers to", self.splitter_socket.getpeername())
         number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
-        print("The size of the team is", number_of_peers, "(apart from me)")
+        if __debug__:
+            print("The size of the team is", number_of_peers, "(apart from me)")
 
         while number_of_peers > 0:
             message = self.splitter_socket.recv(struct.calcsize("4sH"))
@@ -104,7 +106,8 @@ class Peer_DBS(threading.Thread):
             self.debt[peer] = 0
             number_of_peers -= 1
 
-        print(1, "List of peers received")
+        if __debug__:
+            print(1, "List of peers received")
         sys.stdout.write(Color.none)
 
         # }}}
@@ -154,10 +157,12 @@ class Peer_DBS(threading.Thread):
             pass
         self.player_socket.bind(('', self.PLAYER_PORT))
         self.player_socket.listen(0)
-        print ("Waiting for the player at", self.player_socket.getsockname())
+        if __debug__:
+            print ("Waiting for the player at", self.player_socket.getsockname())
         self.player_socket = self.player_socket.accept()[0]
         #self.player_socket.setblocking(0)
-        print("The player is", self.player_socket.getpeername())
+        if __debug__:
+            print("The player is", self.player_socket.getpeername())
 
         # }}}
 
@@ -182,7 +187,8 @@ class Peer_DBS(threading.Thread):
         except Exception, e:
             print(e)
             sys.exit("Sorry. Can't connect to the splitter at " + str(self.splitter))
-        print("Connected to the splitter at", self.splitter)
+        if __debug__:
+            print("Connected to the splitter at", self.splitter)
 
         # }}}
 
@@ -201,9 +207,11 @@ class Peer_DBS(threading.Thread):
                 print (e)
                 print ("error sending data to the player")
                 print ("len(data) =", len(data))
-            print ("received bytes:", received, "\r", end=" ")
+            if __debug__:
+                print ("received bytes:", received, "\r", end=" ")
 
-        print ("Received", received, "bytes of header")
+        if __debug__:
+            print ("Received", received, "bytes of header")
 
         # }}}
 
@@ -213,7 +221,8 @@ class Peer_DBS(threading.Thread):
         message = self.splitter_socket.recv(struct.calcsize("H"))
         buffer_size = struct.unpack("H", message)[0]
         self.buffer_size = socket.ntohs(buffer_size)
-        print ("buffer_size =", self.buffer_size)
+        if __debug__:
+            print ("buffer_size =", self.buffer_size)
 
         # }}}
 
@@ -223,10 +232,33 @@ class Peer_DBS(threading.Thread):
         message = self.splitter_socket.recv(struct.calcsize("H"))
         chunk_size = struct.unpack("H", message)[0]
         self.chunk_size = socket.ntohs(chunk_size)
-        print ("chunk_size =", self.chunk_size)
+        if __debug__:
+            print ("chunk_size =", self.chunk_size)
 
         # }}}
 
+    def receive_the_debt_memory(self):
+        # {{{
+
+        message = self.splitter_socket.recv(struct.calcsize("H"))
+        debt_memory = struct.unpack("H", message)[0]
+        self.debt_memory = socket.ntohs(debt_memory)
+        if __debug__:
+            print ("debt_memory =", self.debt_memory)
+
+        # }}}
+        
+    def receive_the_debt_threshold(self):
+        # {{{
+
+        message = self.splitter_socket.recv(struct.calcsize("H"))
+        debt_threshold = struct.unpack("H", message)[0]
+        self.debt_threshold = socket.ntohs(debt_threshold)
+        if __debug__:
+            print ("debt_threshold =", self.debt_threshold)
+
+        # }}}
+        
     def setup_team_socket(self):
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
@@ -523,6 +555,8 @@ class Peer_DBS(threading.Thread):
         self.receive_the_header()
         self.receive_the_buffersize()
         self.receive_the_chunksize()
+        self.receive_the_debt_memory()
+        self.receive_the_debt_threshold()
         self.setup_team_socket()
         self.retrieve_the_list_of_peers()
         self.splitter_socket.close()

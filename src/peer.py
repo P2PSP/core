@@ -33,11 +33,11 @@ if __name__ == "__main__":
     # {{{ Args handling and object instantiation
     parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP team.')
 
-    parser.add_argument('--splitter_addr', help='IP address of the splitter. ({})'.format(Peer_mother.SPLITTER_ADDR))
+    parser.add_argument('--splitter_addr', help='IP address of the splitter. Default = {}.'.format(Peer_mother.SPLITTER_ADDR))
 
-    parser.add_argument('--splitter_port', help='Listening port of the splitter. ({})'.format(Peer_mother.SPLITTER_PORT))
+    parser.add_argument('--splitter_port', help='Listening port of the splitter. Default = {}.'.format(Peer_mother.SPLITTER_PORT))
 
-    parser.add_argument('--team_port', help='Port to communicate with the peers. ({} = The SO will chose it)'.format(Peer_mother.TEAM_PORT))
+    parser.add_argument('--team_port', help='Port to communicate with the peers. Default {} (the SO will chose it).'.format(Peer_mother.TEAM_PORT))
 
     args = parser.parse_known_args()[0]
 

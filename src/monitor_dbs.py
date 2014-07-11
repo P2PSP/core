@@ -1,3 +1,5 @@
+# Hay que decidir cómo se crean el peer monitor (tras decibir la orden del splitter)
+
 from peer_dbs import Peer_DBS
 
 class Monitor_DBS(Peer_DBS):
