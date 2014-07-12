@@ -264,6 +264,19 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
+    def send_your_are_a_monitor(self, peer_serve_socket, yes_or_not):
+        # {{{
+
+        if __debug__:
+            print("Sending that your are a monitor peer")
+        if yes_or_not == True:
+            message = struct.pack("c", 255)
+        else:
+            message = struct.pack("c", 0)
+        peer_serve_socket.sendall(message)
+
+        # }}}
+
     def send_list(self, peer_serve_socket):
         # {{{
 
@@ -581,7 +594,11 @@ class Splitter_DBS(threading.Thread):
             self.header += self.receive_next_chunk(source_socket, 0)[0]
 
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
-        self.handle_peer_arrival(self.peer_connection_socket.accept())
+        def _():
+            sock = self.peer_connection_socket.accept()
+            self.send_you_are_a_monitor(sock, True)
+            self.handle_peer_arrival(sock)
+        _()
         threading.Thread(target=self.handle_arrivals).start()
         threading.Thread(target=self.moderate_the_team).start()
         threading.Thread(target=self.reset_counters_thread).start()
