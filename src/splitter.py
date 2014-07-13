@@ -301,12 +301,10 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def handle_peer_arrival(self, (peer_serve_socket, peer)):
+    def handle_peer_arrival(self, connection, is_a_monitor):
         # {{{
 
-        # {{{
-
-        # Handle the arrival of a peer. When a peer want to join a
+        # {{{ Handle the arrival of a peer. When a peer want to join a
         # team, first it must establish a TCP connection with the
         # splitter. In that connection, the splitter sends to the
         # incomming peer the list of peers. Notice that the
@@ -314,19 +312,21 @@ class Splitter_DBS(threading.Thread):
         # some time if the team is big or the peer is slow) is done in
         # a separate thread. This helps to avoid a DoS
         # (Denial-of-Service) attack.
-
         # }}}
 
         sys.stdout.write(Color.green)
-        print(peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer)
-        self.send_header(peer_serve_socket)
-        self.send_buffersize(peer_serve_socket)
-        self.send_chunksize(peer_serve_socket)
-        self.send_debt_memory(peer_serve_socket)
-        self.send_debt_threshold(peer_serve_socket)
-        self.send_listsize(peer_serve_socket)
-        self.send_list(peer_serve_socket)
-        peer_serve_socket.close()
+        sock = connection[0]
+        peer = connection[1]
+        print(sock.getsockname(), '\b: accepted connection from peer', peer)
+        self.send_you_are_a_monitor(connection, is_a_monitor)
+        self.send_the_header(sock)
+        self.send_the_buffersize(sock)
+        self.send_the_chunksize(sock)
+        self.send_the_debt_memory(sock)
+        self.send_the_debt_threshold(sock)
+        self.send_the_listsize(sock)
+        self.send_the_list(socke)
+        sock.close()
         self.append_peer(peer)
         sys.stdout.write(Color.none)
 
@@ -336,8 +336,8 @@ class Splitter_DBS(threading.Thread):
         # {{{
 
         while self.alive:
-            peer_serve_socket, peer = self.peer_connection_socket.accept()
-            threading.Thread(target=self.handle_peer_arrival, args=((peer_serve_socket, peer), )).start()
+            connection = self.peer_connection_socket.accept()
+            threading.Thread(target=self.handle_peer_arrival, args=(connection, False, )).start()
 
         # }}}
 
@@ -595,9 +595,8 @@ class Splitter_DBS(threading.Thread):
 
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
         def _():
-            sock = self.peer_connection_socket.accept()
-            self.send_you_are_a_monitor(sock, True)
-            self.handle_peer_arrival(sock)
+            connection  = self.peer_connection_socket.accept()
+            self.handle_peer_arrival(connection, True)
         _()
         threading.Thread(target=self.handle_arrivals).start()
         threading.Thread(target=self.moderate_the_team).start()
