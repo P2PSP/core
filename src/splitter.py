@@ -12,7 +12,7 @@ import struct
 import argparse
 from color import Color
 import common
-from splitter_IMS import Splitter_IMS
+from splitter_ims import Splitter_IMS
 
 # }}}
 
@@ -62,32 +62,21 @@ class Splitter_DBS(threading.Thread):
     # {{{
 
     # Port where the streaming server is listening.
-
     # }}}
     SOURCE_PORT = 4551
 
-    # {{{
-
-    # IP address to talk with the peers (a host can use several
+    # {{{ IP address to talk with the peers (a host can use several
     # network adapters).
-
     # }}}
 
     TEAM_ADDR = "150.214.150.68"
 
-    # {{{
-
-    # Port to talk with the peers.
-
+    # {{{ Port to talk with the peers.
     # }}}
     TEAM_PORT = 4552
 
-    # {{{
-
-    # Maximum number of lost chunks for an unsupportive peer.
-
+    # {{{ Maximum number of lost chunks for an unsupportive peer.
     # }}}
-
     HEADER_CHUNKS = 10 # In chunks
 
     # {{{ Threshold to reject a peer from the team.
@@ -98,6 +87,8 @@ class Splitter_DBS(threading.Thread):
     # of lost chunks.
     # }}}
     LOSSES_MEMORY = 1024
+
+    MAX_NUMBER_OF_MONITORS = 1
 
     # }}}
 
@@ -183,7 +174,7 @@ class Splitter_DBS(threading.Thread):
         self.GET_message = 'GET ' + self.CHANNEL + ' HTTP/1.1\r\n'
         self.GET_message += '\r\n'
 
-        self.number_of_monitors = 1
+        self.number_of_monitors = 0
 
         self.chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
 
@@ -301,7 +292,21 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def handle_peer_arrival(self, connection, is_a_monitor):
+    def are_you_a_monitor(self):
+        self.number_of_monitors += 1
+        if self.counter_monitors < self.MAX_NUMBER_OF_MONITORS:
+            return True
+        else:
+            self.number_of_monitors = self.MAX_NUMBER_OF_MONITORS
+            return False
+
+    def send_yoy_are_a_monitor(self, sock):
+        pass
+
+    # Pensar en reutilizar Splitter_IMS.handle_peer_arrival()
+    # concatenando las llamadas a las funciones.
+    
+    def handle_peer_arrival(self, connection):
         # {{{
 
         # {{{ Handle the arrival of a peer. When a peer want to join a
@@ -311,21 +316,23 @@ class Splitter_DBS(threading.Thread):
         # transmission of the list of peers (something that could need
         # some time if the team is big or the peer is slow) is done in
         # a separate thread. This helps to avoid a DoS
-        # (Denial-of-Service) attack.
+        # (Denial of Service) attack.
         # }}}
 
         sys.stdout.write(Color.green)
         sock = connection[0]
         peer = connection[1]
         print(sock.getsockname(), '\b: accepted connection from peer', peer)
-        self.send_you_are_a_monitor(connection, is_a_monitor)
+        self.send_mcast_channel(sock)
+        if self.are_you_a_monitor():
+            self.send_you_are_a_monitor(sock)
         self.send_the_header(sock)
         self.send_the_buffersize(sock)
         self.send_the_chunksize(sock)
         self.send_the_debt_memory(sock)
         self.send_the_debt_threshold(sock)
         self.send_the_listsize(sock)
-        self.send_the_list(socke)
+        self.send_the_list(sock)
         sock.close()
         self.append_peer(peer)
         sys.stdout.write(Color.none)

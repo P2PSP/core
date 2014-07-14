@@ -212,19 +212,21 @@ class Splitter_IMS(threading.Thread):
         # }}}
 
         # Ojo, primero transmitimos el canal multicast. Si éste es
-        # distinto de 0.0.0.0, se transmite si es un monitor (el peer
+        # distinto de 224.0.0.1, se transmite si es un monitor (el peer
         # sería del tipo DBS) o no (sería del tipo IMS).
-        
+
     def handle_peer_arrival(self, connection):
         # {{{ Handle the arrival of a peer. When a peer want to join a
         # team, first it must establish a TCP connection with the
         # splitter.
         sys.stdout.write(Color.green)
+        sock = connection[0]
+        peer = connection[1]
         print(peer_serve_socket.getsockname(), '\b: accepted connection from peer', peer)
-        self.send_mcast_channel(peer_serve_socket)
-        self.send_chunksize(peer_serve_socket)
-        self.send_header(peer_serve_socket)
-        self.send_buffersize(peer_serve_socket)
+        self.send_mcast_channel(sock)
+        self.send_chunksize(sock)
+        self.send_header(sock)
+        self.send_buffersize(sock)
         peer_serve_socket.close()
         #self.append_peer(peer)
         sys.stdout.write(Color.none)
