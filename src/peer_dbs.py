@@ -11,8 +11,8 @@ class Peer_DBS(threading.Thread):
     SPLITTER_ADDR = "150.214.150.68"
     SPLITTER_PORT = 4552
     TEAM_PORT = 0
-    DEBT_MEMORY = 1024
-    DEBT_THRESHOLD = 10 # This value depends on debt_memory
+    #DEBT_MEMORY = 1024
+    #DEBT_THRESHOLD = 10 # This value depends on debt_memory
 
     # }}}
 
@@ -379,7 +379,7 @@ class Peer_DBS(threading.Thread):
                     #self.sendto_counter %= MAX_CHUNK_NUMBER
 
                     self.debt[peer] += 1
-                    if self.debt[peer] > self.DEBT_THRESHOLD:
+                    if self.debt[peer] > self.deft_threshold:
                         del self.debt[peer]
                         self.peer_list.remove(peer)
                         print (Color.red, peer, 'removed by unsupportive', Color.none)
@@ -514,7 +514,7 @@ class Peer_DBS(threading.Thread):
 
         while self.player_alive:
             self.keep_the_buffer_full()
-            if (self.played_chunk % self.DEBT_MEMORY) == 0:
+            if (self.played_chunk % self.debt_memory) == 0:
                 for i in self.debt:
                     self.debt[i] /= 2
 

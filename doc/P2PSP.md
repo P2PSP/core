@@ -65,13 +65,13 @@ or simply:
     
 # Splitter manual:
 
-1. Create a channel using the default parameters(unfinished):
+1. Create a channel using the default parameters:
 
-    splitter &
+   splitter &
 
 2. Change the listening port to 5555:
 
-    splitter --port 5555 &
+   splitter --port 5555 &
 
 3. Change the buffer size to 512 chunks:
 

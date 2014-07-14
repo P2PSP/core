@@ -33,11 +33,17 @@ if __name__ == "__main__":
     # {{{ Args handling and object instantiation
     parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP team.')
 
+    parser.add_argument("--lossy", action="store_true", help="Loss chunks consciously.")
+
+    parser.add_argument('--chunk_loss_period', help='1 -> lost all chunks, 2, lost half of the chunks ... Only makes sense with the "--lossy" parameter. Default = {}'.format(Lossy_Peer.CHUNK_LOSS_PERIOD))
+
     parser.add_argument('--splitter_addr', help='IP address of the splitter. Default = {}.'.format(Peer_mother.SPLITTER_ADDR))
 
     parser.add_argument('--splitter_port', help='Listening port of the splitter. Default = {}.'.format(Peer_mother.SPLITTER_PORT))
 
     parser.add_argument('--team_port', help='Port to communicate with the peers. Default {} (the SO will chose it).'.format(Peer_mother.TEAM_PORT))
+
+    parser.add_argument('--player_port', help='Port to communicate with the player. ({})'.format(peer.PLAYER_PORT))
 
     args = parser.parse_known_args()[0]
 
@@ -62,35 +68,34 @@ if __name__ == "__main__":
     if peer.mcast_channel == '0.0.0.0':
         # {{{ This is a "unicast" peer.
 
+        peer = Peer_DBS()
+        peer.start()
+
         # Todo esto es mejor que lo indique el splitter
 
-        parser.add_argument('--debt_memory', help='Number of chunks to receive to divide by two the debts counter. ({})'.format(Peer_DBS.DEBT_MEMORY))
+        #parser.add_argument('--debt_memory', help='Number of chunks to receive to divide by two the debts counter. ({})'.format(Peer_DBS.DEBT_MEMORY))
 
-        parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. ({})'.format(Peer_DBS.DEBT_THRESHOLD))
+        #parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. ({})'.format(Peer_DBS.DEBT_THRESHOLD))
 
-        parser.add_argument('--monitor', help='Run the peer in the monitor mode.', action='store_true')
+        #parser.add_argument('--monitor', help='Run the peer in the monitor mode.', action='store_true')
 
-        parser.add_argument('--chunk_loss_period', help='1 -> lost all chunks, 2, lost half of the chunks ... ({})'.format(Lossy_Peer.CHUNK_LOSS_PERIOD))
 
-        args = parser.parse_known_args()[0]
+        #args = parser.parse_known_args()[0]
 
-        if args.debt_memory:
-            Peer_DBS.DEBT_MEMORY = int(args.debt_memory)
-            print('DEBT_MEMORY = ', Peer_DBS.DEBT_MEMORY)
+        ## if args.debt_memory:
+        ##     Peer_DBS.DEBT_MEMORY = int(args.debt_memory)
+        ##     print('DEBT_MEMORY = ', Peer_DBS.DEBT_MEMORY)
 
-        if args.debt_threshold:
-            Peer_DBS.DEBT_THRESHOLD = int(args.debt_threshold)
-            print ('DEBT_THRESHOLD = ', Peer_DBS.DEBT_THRESHOLD)
+        ## if args.debt_threshold:
+        ##     Peer_DBS.DEBT_THRESHOLD = int(args.debt_threshold)
+        ##     print ('DEBT_THRESHOLD = ', Peer_DBS.DEBT_THRESHOLD)
 
-        if args.monitor:
-            monitor_mode = True
-            print ('Monitor mode activated')
-        else:
-            monitor_mode = False
+        ## if args.monitor:
+        ##     monitor_mode = True
+        ##     print ('Monitor mode activated')
+        ## else:
+        ##     monitor_mode = False
 
-        if args.chunk_loss_period:
-            Lossy_Peer.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
-            print ('chunk_loss_period = ', Lossy_Peer.CHUNK_LOSS_PERIOD)
 
         if monitor_mode:
             peer = Monitor_LRS()
@@ -106,9 +111,17 @@ if __name__ == "__main__":
         peer = Peer_IMS()
         # }}}
 
-    parser.add_argument('--player_port', help='Port to communicate with the player. ({})'.format(peer.PLAYER_PORT))
 
     args = parser.parse_known_args()[0]
+
+    if args.lossy:
+        peer = Lossy_peer()
+
+        if args.chunk_loss_period:
+            peer = Lossy_Peer()
+            print ('chunk_loss_period =', peer.CHUNK_LOSS_PERIOD)
+        else:
+            peer = Peer_FNS()
 
     if args.player_port:
         peer.PLAYER_PORT = int(args.player_port)

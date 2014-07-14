@@ -1,5 +1,8 @@
 # Data Broadcasting Set of rules
 
+from __future__ import print_function
+import threading
+
 # Some useful definitions.
 ADDR = 0
 PORT = 1
@@ -179,7 +182,7 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def send_header(self, peer_serve_socket):
+    def send_the_header(self, peer_serve_socket):
         # {{{
 
         if __debug__:
@@ -188,7 +191,7 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def send_buffersize(self, peer_serve_socket):
+    def send_the_buffersize(self, peer_serve_socket):
         # {{{
 
         if __debug__:
@@ -198,7 +201,7 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def send_chunksize(self, peer_serve_socket):
+    def send_the_chunksize(self, peer_serve_socket):
         # {{{
 
         if __debug__:
@@ -208,7 +211,7 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def send_debt_memory(self, peer_serve_socket):
+    def send_the_debt_memory(self, peer_serve_socket):
         # {{{
 
         if __debug__:
@@ -218,7 +221,7 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def send_debt_threshold(self, peer_serve_socket):
+    def send_the_debt_threshold(self, peer_serve_socket):
         # {{{
 
         if __debug__:
@@ -228,7 +231,7 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def send_listsize(self, peer_serve_socket):
+    def send_the_listsize(self, peer_serve_socket):
         # {{{
 
         if __debug__:
@@ -276,6 +279,8 @@ class Splitter_DBS(threading.Thread):
         # }}}
 
     def are_you_a_monitor(self):
+        # {{{
+
         self.number_of_monitors += 1
         if self.counter_monitors < self.MAX_NUMBER_OF_MONITORS:
             return True
@@ -283,7 +288,9 @@ class Splitter_DBS(threading.Thread):
             self.number_of_monitors = self.MAX_NUMBER_OF_MONITORS
             return False
 
-    def send_yoy_are_a_monitor(self, sock):
+        # }}}
+
+    def send_you_are_a_monitor(self, sock):
         pass
 
     # Pensar en reutilizar Splitter_IMS.handle_peer_arrival()

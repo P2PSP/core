@@ -13,18 +13,9 @@ import argparse
 from color import Color
 import common
 from splitter_ims import Splitter_IMS
+from splitter_dbs import Splitter_DBS
 
 # }}}
-
-# Some useful definitions.
-ADDR = 0
-PORT = 1
-
-
-
-
-class Splitter(Splitter_IMS):
-    pass
 
 if __name__ == "__main__":
 
@@ -32,7 +23,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP team.')
 
-    #parser.add_argument('--splitter_addr', help='IP address to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR))
+    #parser.add_argument('--splitter_addr', help='IP address to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR)) <- no ahora
 
     parser.add_argument('--buffer_size', help='size of the video buffer in blocks. Default = {}.'.format(Splitter_IMS.BUFFER_SIZE))
 
@@ -42,17 +33,13 @@ if __name__ == "__main__":
 
     parser.add_argument('--header_size', help='Size of the header of the stream in chunks. Default = {}.'.format(Splitter_IMS.HEADER_SIZE))
 
-    #parser.add_argument('--team_addr', help='IP address to talk with the peers. (Default = {})'.format(Splitter_IMS.TEAM_ADDR))
-
-    #parser.add_argument('--team_port', help='Port to send (UDP) the chunks to the peers. (Default = {})'.format(Splitter_IMS.TEAM_PORT))
-
-    parser.add_argument("--mcast", action="store_true", help="Enables IP multicast.")
-
     parser.add_argument('--losses_memory', help='Number of chunks to divide by two the losses counters. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_MEMORY))
 
     parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_THRESHOLD))
 
-    parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks (only with --mcast). Makes sense only in multicast mode. Default = "{}".'.format(Splitter_IMS.MCAST_ADDR))
+    parser.add_argument("--mcast", action="store_true", help="Enables IP multicast.")
+
+    parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks. Makes sense only in multicast mode. Default = "{}".'.format(Splitter_IMS.MCAST_ADDR))
 
     parser.add_argument('--port', help='Port to serve the peers. Default = "{}".'.format(Splitter_IMS.PORT))
 
@@ -102,11 +89,6 @@ if __name__ == "__main__":
     def main():
         # {{{
 
-        #splitter = Splitter()
-        #    splitter = Splitter_DBS()
-        #    splitter = Splitter_FNS()
-        #    splitter = Splitter_ACS()
-        #    splitter = Splitter_LRS()
         splitter.start()
 
         if args.mcast:
