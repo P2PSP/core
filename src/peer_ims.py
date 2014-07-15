@@ -1,20 +1,21 @@
 from __future__ import print_function
 import threading
+from peer_mother import Peer_mother
 
 ADDR = 0
 PORT = 1
 
 # IP Multicasting Set of Rules
-class Peer_IMS(threading.Thread):
+class Peer_IMS(threading.Thread, Peer_mother):
     # {{{
 
     # {{{ Class "constants"
 
     PLAYER_PORT = 9999          # Port used to serve the player.
-    SPLITTER_ADDR = "localhost" # Address of the splitter.
-    SPLITTER_PORT = 4552        # Port of the splitter.
-    HEADER_CHUNKS = 10          # Header size (in chunks).
-    TEAM_PORT = 0               # TCP port used to communicate the splitter.
+    #SPLITTER_ADDR = "localhost" # Address of the splitter.
+    #SPLITTER_PORT = 4552        # Port of the splitter.
+    #HEADER_CHUNKS = 10          # Header size (in chunks).
+    #TEAM_PORT = 0               # TCP port used to communicate the splitter.
 
     # }}}
 
@@ -32,10 +33,10 @@ class Peer_IMS(threading.Thread):
         self.print_modulename()
 
         print("Player port =", self.PLAYER_PORT)
-        print("Splitter address =", self.SPLITTER_ADDR)
-        print("Splitter port =", self.SPLITTER_PORT)
+        #print("Splitter address =", self.SPLITTER_ADDR)
+        #print("Splitter port =", self.SPLITTER_PORT)
 #        print("Team address =", self.TEAM_ADDR)
-        print("Team port =", self.TEAM_PORT)
+        #print("Team port =", self.TEAM_PORT)
 
         # {{{ The peer dies if the player disconects
         # }}}
@@ -74,6 +75,10 @@ class Peer_IMS(threading.Thread):
 
     # Tiene pinta de que los tres siguientes metodos pueden simplificarse
 
+    # Tal vez si trasladamos toda la parte del player al Peer_mother
+    # podemos evitar el tener repetido este código en Peer_IMS y
+    # Peer_DBS.
+    
     def find_next_chunk(self):
         # {{{
 
@@ -124,7 +129,7 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def connect_to_the_splitter(self):
+    def connect_to_the_splitter_borrame(self):
         # {{{ Setup "splitter" and "splitter_socket"
 
         # Nota: Ahora no reconvertimos de TCP a UDP!

@@ -1,56 +1,13 @@
-#!/usr/bin/python -O
-# -*- coding: iso-8859-15 -*-
-
 # This is a peer that does not know if is IMS or DBS until receiving
 # this information from the splitter.
 
-# {{{ GNU GENERAL PUBLIC LICENSE
-
-# This is the splitter node of the P2PSP (Peer-to-Peer Simple Protocol)
-# <https://launchpad.net/p2psp>.
-#
-# Copyright (C) 2014 Vicente González Ruiz,
-#                    Cristóbal Medina López,
-#                    Juan Alvaro Muñoz Naranjo.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# }}}
-
-# {{{ Imports
-
 from __future__ import print_function
-#import sys
-#import socket
-#import struct
-#import time
-#from color import Color
-#import common
 
-# }}}
-
-#ADDR = 0
-#PORT = 1
-
-# This is a unuseful peer that only receives from the splitter the
-# first message: the IP multicast channel.
 class Peer_mother():
     # {{{
 
     # {{{ Class "constants"
 
-    PLAYER_PORT = 9999          # Port used to serve the player. #
     SPLITTER_ADDR = "localhost" # Address of the splitter.
     SPLITTER_PORT = 4552        # Port of the splitter.
     TEAM_PORT = 0               # TCP port used to communicate the splitter.

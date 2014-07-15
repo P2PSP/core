@@ -1,16 +1,17 @@
 from __future__ import print_function
 import threading
+from peer_mother import Peer_mother
 
 # Data Broadcasting Set of Rules
-class Peer_DBS(threading.Thread):
+class Peer_DBS(threading.Thread, Peer_mother):
     # {{{
 
     # {{{ Class "constants"
 
     PLAYER_PORT = 9999
-    SPLITTER_ADDR = "150.214.150.68"
-    SPLITTER_PORT = 4552
-    TEAM_PORT = 0
+    #SPLITTER_ADDR = "150.214.150.68"
+    #SPLITTER_PORT = 4552
+    #TEAM_PORT = 0
     #DEBT_MEMORY = 1024
     #DEBT_THRESHOLD = 10 # This value depends on debt_memory
 
@@ -30,9 +31,9 @@ class Peer_DBS(threading.Thread):
         self.print_modulename()
 
         print("Player port =", self.PLAYER_PORT)
-        print("Splitter IP address =", self.SPLITTER_ADDR)
-        print("Splitter port =", self.SPLITTER_PORT)
-        print("(Team) Port =", self.TEAM_PORT)
+        #print("Splitter IP address =", self.SPLITTER_ADDR)
+        #print("Splitter port =", self.SPLITTER_PORT)
+        #print("(Team) Port =", self.TEAM_PORT)
 
         self.peer_list = []
 #        self.buffer_size = 0
@@ -166,7 +167,7 @@ class Peer_DBS(threading.Thread):
 
         # }}}
 
-    def connect_to_the_splitter(self):
+    def connect_to_the_splitter_borrame(self):
         # {{{ Setup "splitter" and "splitter_socket"
 
         self.splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--lossy", action="store_true", help="Loss chunks consciously.")
 
-    parser.add_argument('--chunk_loss_period', help='1 -> lost all chunks, 2, lost half of the chunks ... Only makes sense with the "--lossy" parameter. Default = {}'.format(Lossy_Peer.CHUNK_LOSS_PERIOD))
+    parser.add_argument('--chunk_loss_period', help='0 -> no chunk loss, 1 -> lost all chunks, 2, lost half of the chunks ... Default = {}'.format(Lossy_Peer.CHUNK_LOSS_PERIOD))
 
     parser.add_argument('--splitter_addr', help='IP address of the splitter. Default = {}.'.format(Peer_mother.SPLITTER_ADDR))
 
@@ -47,17 +47,31 @@ if __name__ == "__main__":
 
     args = parser.parse_known_args()[0]
 
+    if args.chunk_loss_period:
+        if int(args.chunk_loss_period) != 0:
+            peer = Lossy_Peer()
+            print ('chunk_loss_period =', peer.CHUNK_LOSS_PERIOD)
+        else:
+            peer = Peer_DBS()
+    else:
+        peer = Peer_DBS()
+#        peer = Peer_FNS()
+
     if args.splitter_addr:
-        Peer_mother.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
-        print ('SPLITTER_ADDR = ', Peer_mother.SPLITTER_ADDR)
+        peer.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
+        print ('SPLITTER_ADDR = ', peer.SPLITTER_ADDR)
 
     if args.splitter_port:
-        Peer_mother.SPLITTER_PORT = int(args.splitter_port)
-        print ('SPLITTER_PORT = ', Peer_mother.SPLITTER_PORT)
+        peer.SPLITTER_PORT = int(args.splitter_port)
+        print ('SPLITTER_PORT = ', peer.SPLITTER_PORT)
 
     if args.team_port:
-        Peer_mother.TEAM_PORT = int(args.team_port)
-        print ('TEAM_PORT= ', Peer_mother.TEAM_PORT)
+        peer.TEAM_PORT = int(args.team_port)
+        print ('TEAM_PORT= ', peer.TEAM_PORT)
+
+    if args.player_port:
+        peer.PLAYER_PORT = int(args.player_port)
+        print ('PLAYER_PORT = ', peer.PLAYER_PORT)
 
     peer = Peer_mother()
     peer.start()
@@ -117,15 +131,6 @@ if __name__ == "__main__":
     if args.lossy:
         peer = Lossy_peer()
 
-        if args.chunk_loss_period:
-            peer = Lossy_Peer()
-            print ('chunk_loss_period =', peer.CHUNK_LOSS_PERIOD)
-        else:
-            peer = Peer_FNS()
-
-    if args.player_port:
-        peer.PLAYER_PORT = int(args.player_port)
-        print ('PLAYER_PORT = ', peer.PLAYER_PORT)
 
     # }}}
 
