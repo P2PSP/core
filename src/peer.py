@@ -33,9 +33,9 @@ if __name__ == "__main__":
     # {{{ Args handling and object instantiation
     parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP team.')
 
-    parser.add_argument("--lossy", action="store_true", help="Loss chunks consciously.")
-
     parser.add_argument('--chunk_loss_period', help='0 -> no chunk loss, 1 -> lost all chunks, 2, lost half of the chunks ... Default = {}'.format(Lossy_Peer.CHUNK_LOSS_PERIOD))
+
+    parser.add_argument('--player_port', help='Port to communicate with the player. ({})'.format(peer.PLAYER_PORT))
 
     parser.add_argument('--splitter_addr', help='IP address of the splitter. Default = {}.'.format(Peer_mother.SPLITTER_ADDR))
 
@@ -43,94 +43,51 @@ if __name__ == "__main__":
 
     parser.add_argument('--team_port', help='Port to communicate with the peers. Default {} (the SO will chose it).'.format(Peer_mother.TEAM_PORT))
 
-    parser.add_argument('--player_port', help='Port to communicate with the player. ({})'.format(peer.PLAYER_PORT))
-
     args = parser.parse_known_args()[0]
 
-    if args.chunk_loss_period:
-        if int(args.chunk_loss_period) != 0:
-            peer = Lossy_Peer()
-            print ('chunk_loss_period =', peer.CHUNK_LOSS_PERIOD)
-        else:
-            peer = Peer_DBS()
-    else:
-        peer = Peer_DBS()
-#        peer = Peer_FNS()
-
     if args.splitter_addr:
-        peer.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
-        print ('SPLITTER_ADDR = ', peer.SPLITTER_ADDR)
+        Peer_IMS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
+        print ('SPLITTER_ADDR = ', Peer_IMS.SPLITTER_ADDR)
 
     if args.splitter_port:
-        peer.SPLITTER_PORT = int(args.splitter_port)
-        print ('SPLITTER_PORT = ', peer.SPLITTER_PORT)
+        Peer_IMS.SPLITTER_PORT = int(args.splitter_port)
+        print ('SPLITTER_PORT = ', Peer_IMS.SPLITTER_PORT)
 
     if args.team_port:
-        peer.TEAM_PORT = int(args.team_port)
-        print ('TEAM_PORT= ', peer.TEAM_PORT)
+        Peer_IMS.TEAM_PORT = int(args.team_port)
+        print ('TEAM_PORT= ', Peer_IMS.TEAM_PORT)
 
     if args.player_port:
-        peer.PLAYER_PORT = int(args.player_port)
-        print ('PLAYER_PORT = ', peer.PLAYER_PORT)
+        Peer_IMS.PLAYER_PORT = int(args.player_port)
+        print ('PLAYER_PORT = ', Peer_IMS.PLAYER_PORT)
 
-    peer = Peer_mother()
-    peer.start()
+    peer = Peer_IMS()
+    peer.receive_the_mcast_channel()
 
-    # At this moment, peer.mcast_channel has been initialized
-    # (together with peer.splitter and peer.splitter_socket).
-
-    if peer.mcast_channel == '0.0.0.0':
+    if Peer_IMS.MCAST_CHANNEL == '0.0.0.0':
         # {{{ This is a "unicast" peer.
 
-        peer = Peer_DBS()
-        peer.start()
-
-        # Todo esto es mejor que lo indique el splitter
-
-        #parser.add_argument('--debt_memory', help='Number of chunks to receive to divide by two the debts counter. ({})'.format(Peer_DBS.DEBT_MEMORY))
-
-        #parser.add_argument('--debt_threshold', help='Number of times a peer can be unsupportive. ({})'.format(Peer_DBS.DEBT_THRESHOLD))
-
-        #parser.add_argument('--monitor', help='Run the peer in the monitor mode.', action='store_true')
-
-
-        #args = parser.parse_known_args()[0]
-
-        ## if args.debt_memory:
-        ##     Peer_DBS.DEBT_MEMORY = int(args.debt_memory)
-        ##     print('DEBT_MEMORY = ', Peer_DBS.DEBT_MEMORY)
-
-        ## if args.debt_threshold:
-        ##     Peer_DBS.DEBT_THRESHOLD = int(args.debt_threshold)
-        ##     print ('DEBT_THRESHOLD = ', Peer_DBS.DEBT_THRESHOLD)
-
-        ## if args.monitor:
-        ##     monitor_mode = True
-        ##     print ('Monitor mode activated')
-        ## else:
-        ##     monitor_mode = False
-
-
-        if monitor_mode:
-            peer = Monitor_LRS()
+        if Monitor_DBS.are_you_a_monitor():
+            peer = Monitor_DBS()
+#            peer = Monitor_LRS()
         else:
             if args.chunk_loss_period:
-                peer = Lossy_Peer()
-                print ('chunk_loss_period =', peer.CHUNK_LOSS_PERIOD)
+                print ('chunk_loss_period =', Peer_DBS.CHUNK_LOSS_PERIOD)
+                if int(args.chunk_loss_period) != 0:
+                    peer = Lossy_Peer()
+                else:
+                    peer = Peer_DBS()
             else:
-                peer = Peer_FNS()
+                peer = Peer_DBS()
+        #        peer = Peer_FNS()
+
         # }}}
     else:
         # {{{ This is a "multicast" peer.
+
         peer = Peer_IMS()
+
         # }}}
-
-
-    args = parser.parse_known_args()[0]
-
-    if args.lossy:
-        peer = Lossy_peer()
-
 
     # }}}
 
@@ -138,9 +95,6 @@ if __name__ == "__main__":
 
     peer.start()
     peer.buffering.wait()
-    #peer.pipe_main_end.recv()
-    #while peer.buffering:
-    #    time.sleep(1)
 
     print("+-----------------------------------------------------+")
     print("| Received = Received kbps, including retransmissions |")

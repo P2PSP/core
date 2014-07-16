@@ -1,21 +1,21 @@
 from __future__ import print_function
 import threading
-from peer_mother import Peer_mother
+from color import Color
+import common
 
 ADDR = 0
 PORT = 1
 
 # IP Multicasting Set of Rules
-class Peer_IMS(threading.Thread, Peer_mother):
+class Peer_IMS(threading.Thread):
     # {{{
 
     # {{{ Class "constants"
 
     PLAYER_PORT = 9999          # Port used to serve the player.
-    #SPLITTER_ADDR = "localhost" # Address of the splitter.
-    #SPLITTER_PORT = 4552        # Port of the splitter.
-    #HEADER_CHUNKS = 10          # Header size (in chunks).
-    #TEAM_PORT = 0               # TCP port used to communicate the splitter.
+    SPLITTER_ADDR = "localhost" # Address of the splitter.
+    SPLITTER_PORT = 4552        # Port of the splitter.
+    TEAM_PORT = 0               # TCP port used to communicate the splitter.
 
     # }}}
 
@@ -30,41 +30,43 @@ class Peer_IMS(threading.Thread, Peer_mother):
         else:
             print("release mode")
 
-        self.print_modulename()
+        self.print_the_module_name()
 
         print("Player port =", self.PLAYER_PORT)
-        #print("Splitter address =", self.SPLITTER_ADDR)
-        #print("Splitter port =", self.SPLITTER_PORT)
+        print("Splitter address =", self.SPLITTER_ADDR)
+        print("Splitter port =", self.SPLITTER_PORT)
 #        print("Team address =", self.TEAM_ADDR)
-        #print("Team port =", self.TEAM_PORT)
+        print("Team port =", self.TEAM_PORT)
 
-        # {{{ The peer dies if the player disconects
+        # {{{ The peer dies if the player disconects.
         # }}}
         self.player_alive = True
 
-        # {{{ The last chunk sent to the player
+        # {{{ The last chunk sent to the player.
         # }}}
         self.played_chunk = 0
 
-        # {{{ The size of the chunk in bytes
+        # {{{ The size of the chunk in bytes.
         # }}}
         self.chunk_size = 0
 
-        # {{{ Label the chunks in the buffer as "received" or "not received"
+        # {{{ Label the chunks in the buffer as "received" or "not
+        # received".
         # }}}
         self.received = []
 
         # {{{ Counts the number of executions of the recvfrom()
+        # function.
         # }}}
         self.recvfrom_counter = 0
 
-        # {{{ "True" while buffering is being performed
+        # {{{ "True" while buffering is being performed.
         # }}}
         self.buffering = threading.Event()
 
         # }}}
 
-    def print_modulename(self):
+    def print_the_module_name(self):
         # {{{
 
         sys.stdout.write(Color.yellow)
@@ -75,10 +77,6 @@ class Peer_IMS(threading.Thread, Peer_mother):
 
     # Tiene pinta de que los tres siguientes metodos pueden simplificarse
 
-    # Tal vez si trasladamos toda la parte del player al Peer_mother
-    # podemos evitar el tener repetido este código en Peer_IMS y
-    # Peer_DBS.
-    
     def find_next_chunk(self):
         # {{{
 
@@ -129,7 +127,7 @@ class Peer_IMS(threading.Thread, Peer_mother):
 
         # }}}
 
-    def connect_to_the_splitter_borrame(self):
+    def connect_to_the_splitter(self):
         # {{{ Setup "splitter" and "splitter_socket"
 
         # Nota: Ahora no reconvertimos de TCP a UDP!
@@ -177,7 +175,7 @@ class Peer_IMS(threading.Thread, Peer_mother):
 
         # }}}
 
-    def receive_the_buffersize(self):
+    def receive_the_buffer_size(self):
         # {{{
 
         message = self.splitter_socket.recv(struct.calcsize("H"))
@@ -187,7 +185,7 @@ class Peer_IMS(threading.Thread, Peer_mother):
 
         # }}}
 
-    def receive_the_chunksize(self):
+    def receive_the_chunk_size(self):
         # {{{
 
         message = self.splitter_socket.recv(struct.calcsize("H"))
@@ -263,7 +261,7 @@ class Peer_IMS(threading.Thread, Peer_mother):
 
         # }}}
 
-    def create_buffer(self):
+    def create_the_buffer(self):
         # {{{ The buffer of chunks is a structure that is used to delay
         # the playback of the chunks in order to accommodate the
         # network jittter. Two components are needed: (1) the "chunks"
@@ -366,13 +364,13 @@ class Peer_IMS(threading.Thread, Peer_mother):
 
         self.wait_for_the_player()
         self.connect_to_the_splitter()
-        self.receive_the_chunksize()
+        self.receive_the_chunk_size()
         self.receive_and_send_the_header()
-        self.receive_the_buffersize()
+        self.receive_the_buffer_size()
         self.receive_the_mcast_channel()
-        self.setup_team_socket()
+        self.setup_the_team_socket()
         self.splitter_socket.close()
-        self.create_buffer()
+        self.create_the_buffer()
         self.buffer_data()
         self.buffering.set()
         self.buffering = False
@@ -380,73 +378,11 @@ class Peer_IMS(threading.Thread, Peer_mother):
 
         # }}}
 
-    # }}}
+    def start(self):
+        # {{{
 
-def main():
+        run(self)
 
-    # {{{ Args parsing
-
-    parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP network.')
-
-    parser.add_argument('--player_port', help='Port to communicate with the player. ({})'.format(Peer_IMS.PLAYER_PORT))
-
-#    parser.add_argument('--team_addr', help='Address to communicate with the peers. ({})'.format(Peer_IMS.TEAM_PORT))
-
-    parser.add_argument('--team_port', help='Port to communicate with the peers. ({})'.format(Peer_IMS.TEAM_PORT))
-
-    parser.add_argument('--splitter_addr', help='IP address of the splitter. ({})'.format(Peer_IMS.SPLITTER_ADDR))
-
-    parser.add_argument('--splitter_port', help='Listening port of the splitter. ({})'.format(Peer_IMS.SPLITTER_PORT))
-
-    parser.add_argument('--monitor', help='Run the peer in the monitor mode.', action='store_true')
-
-    args = parser.parse_known_args()[0]
-
-    if args.player_port:
-        Peer_IMS.PLAYER_PORT = int(args.player_port)
-        print ('PLAYER_PORT = ', Peer_IMS.PLAYER_PORT)
-    if args.splitter_addr:
-        Peer_IMS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
-        print ('SPLITTER_ADDR = ', Peer_IMS.SPLITTER_ADDR)
-    if args.splitter_port:
-        Peer_IMS.SPLITTER_PORT = int(args.splitter_port)
-        print ('SPLITTER_PORT = ', Peer_IMS.SPLITTER_PORT)
-#    if args.team_addr:
-#        Peer_IMS.TEAM_PORT = args.team_addr
-#        print ('TEAM_ADDR= ', Peer_IMS.TEAM_ADDR)
-    if args.team_port:
-        Peer_IMS.TEAM_PORT = int(args.team_port)
-        print ('TEAM_PORT= ', Peer_IMS.TEAM_PORT)
+        # }}}
 
     # }}}
-
-    peer = Peer_IMS()
-    peer.start()
-    peer.buffering.wait()
-
-    print("+-------------------------------------------+")
-    print("| Received = Received kbps                  |")
-    print("| (Expected values are between parenthesis) |")
-    print("+-------------------------------------------+")
-    print()
-    print("        Received ")
-    print("-----------------")
-
-    last_chunk_number = peer.played_chunk
-    last_recvfrom_counter = peer.recvfrom_counter
-    while peer.player_alive:
-        kbps_expected_recv = ((peer.played_chunk - last_chunk_number) * peer.chunk_size * 8) / 1000
-        last_chunk_number = peer.played_chunk
-        kbps_recvfrom = ((peer.recvfrom_counter - last_recvfrom_counter) * peer.chunk_size * 8) / 1000
-        last_recvfrom_counter = peer.recvfrom_counter
-        if kbps_expected_recv < kbps_recvfrom:
-            sys.stdout.write(Color.red)
-        elif kbps_expected_recv > kbps_recvfrom:
-            sys.stdout.write(Color.green)
-        print(repr(kbps_expected_recv).rjust(8), end=Color.none)
-        print(('(' + repr(kbps_recvfrom) + ')').rjust(8), end=' | ')
-        print()
-        time.sleep(1)
-
-if __name__ == "__main__":
-     main()

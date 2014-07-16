@@ -241,7 +241,7 @@ class Splitter_DBS(threading.Thread):
 
         # }}}
 
-    def send_your_are_a_monitor(self, peer_serve_socket, yes_or_not):
+    def send_you_are_a_monitor(self, peer_serve_socket, yes_or_not):
         # {{{
 
         if __debug__:
