@@ -48,7 +48,7 @@ class Splitter_IMS(threading.Thread):
 
     # {{{ The host where the streaming server is running.
     # }}}
-    SOURCE_ADDR = "localhost"
+    SOURCE_HOST = "localhost"
 
     # {{{ Port where the streaming server is listening.
     # }}}
@@ -79,7 +79,7 @@ class Splitter_IMS(threading.Thread):
         print("Header size (in chunks) =", self.CHANNEL)
         #print("Splitter address =", self.SPLITTER_ADDR) # No ahora
         print("Listening port =", self.PORT)
-        print("Source IP address =", self.SOURCE_ADDR)
+        print("Source IP address =", self.SOURCE_HOST)
         print("Source port =", self.SOURCE_PORT)
         print("Multicast address =", self.MCAST_ADDR)
 
@@ -109,7 +109,7 @@ class Splitter_IMS(threading.Thread):
 
         # {{{ Some other useful definitions.
         # }}}
-        self.source = (self.SOURCE_ADDR, self.SOURCE_PORT)
+        self.source = (self.SOURCE_HOST, self.SOURCE_PORT)
         self.GET_message = 'GET /' + self.CHANNEL + ' HTTP/1.1\r\n'
         self.GET_message += '\r\n'
         self.chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
@@ -178,7 +178,7 @@ class Splitter_IMS(threading.Thread):
         self.send_the_chunk_size(sock)
         self.send_the_header(sock)
         self.send_the_buffer_size(sock)
-        peer_serve_socket.close()
+        sock.close()
         #self.append_peer(peer)
         sys.stdout.write(Color.none)
 
@@ -204,7 +204,8 @@ class Splitter_IMS(threading.Thread):
             pass
 
         try:
-            self.peer_connection_socket.bind((socket.gethostname(), self.PORT))
+            #self.peer_connection_socket.bind((socket.gethostname(), self.PORT))
+            self.peer_connection_socket.bind(('', self.PORT))
         except: # Falta averiguar excepcion
             raise
 
@@ -228,7 +229,8 @@ class Splitter_IMS(threading.Thread):
         except:
             pass
         try:
-            self.team_socket.bind((socket.gethostname(), self.PORT))
+            #self.team_socket.bind((socket.gethostname(), self.PORT))
+            self.team_socket.bind(('', self.PORT))
         except:
             raise
 

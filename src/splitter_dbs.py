@@ -2,6 +2,10 @@
 
 from __future__ import print_function
 import threading
+import sys
+import socket
+from color import Color
+import common
 
 # Some useful definitions.
 ADDR = 0

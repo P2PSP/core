@@ -1,5 +1,8 @@
 from __future__ import print_function
 import threading
+import sys
+import socket
+import struct
 from color import Color
 import common
 
@@ -13,7 +16,7 @@ class Peer_IMS(threading.Thread):
     # {{{ Class "constants"
 
     PLAYER_PORT = 9999          # Port used to serve the player.
-    SPLITTER_ADDR = "localhost" # Address of the splitter.
+    SPLITTER_HOST = "localhost" # Address of the splitter.
     SPLITTER_PORT = 4552        # Port of the splitter.
     TEAM_PORT = 0               # TCP port used to communicate the splitter.
 
@@ -33,9 +36,9 @@ class Peer_IMS(threading.Thread):
         self.print_the_module_name()
 
         print("Player port =", self.PLAYER_PORT)
-        print("Splitter address =", self.SPLITTER_ADDR)
+        print("Splitter address =", self.SPLITTER_HOST)
         print("Splitter port =", self.SPLITTER_PORT)
-#        print("Team address =", self.TEAM_ADDR)
+#        print("Team address =", self.TEAM_HOST)
         print("Team port =", self.TEAM_PORT)
 
         # {{{ The peer dies if the player disconects.
@@ -133,7 +136,7 @@ class Peer_IMS(threading.Thread):
         # Nota: Ahora no reconvertimos de TCP a UDP!
         
         self.splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.splitter = (self.SPLITTER_ADDR, self.SPLITTER_PORT)
+        self.splitter = (self.SPLITTER_HOST, self.SPLITTER_PORT)
         print ("Connecting to the splitter at", self.splitter)
         if self.TEAM_PORT != 0:
             try:
@@ -363,11 +366,11 @@ class Peer_IMS(threading.Thread):
         # {{{
 
         self.wait_for_the_player()
-        self.connect_to_the_splitter()
+        #self.connect_to_the_splitter()
         self.receive_the_chunk_size()
         self.receive_and_send_the_header()
         self.receive_the_buffer_size()
-        self.receive_the_mcast_channel()
+        #self.receive_the_mcast_channel()
         self.setup_the_team_socket()
         self.splitter_socket.close()
         self.create_the_buffer()
@@ -381,7 +384,7 @@ class Peer_IMS(threading.Thread):
     def start(self):
         # {{{
 
-        run(self)
+        self.run()
 
         # }}}
 

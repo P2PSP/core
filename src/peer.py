@@ -25,6 +25,7 @@ from peer_fns import Peer_FNS
 from monitor_fns import Monitor_FNS
 from peer_lossy import Peer_Lossy
 from monitor_lrs import Monitor_LRS
+from lossy_peer import Lossy_Peer
 
 # }}}
 
@@ -35,19 +36,19 @@ if __name__ == "__main__":
 
     parser.add_argument('--chunk_loss_period', help='0 -> no chunk loss, 1 -> lost all chunks, 2, lost half of the chunks ... Default = {}'.format(Lossy_Peer.CHUNK_LOSS_PERIOD))
 
-    parser.add_argument('--player_port', help='Port to communicate with the player. ({})'.format(peer.PLAYER_PORT))
+    parser.add_argument('--player_port', help='Port to communicate with the player. ({})'.format(Peer_IMS.PLAYER_PORT))
 
-    parser.add_argument('--splitter_addr', help='IP address of the splitter. Default = {}.'.format(Peer_mother.SPLITTER_ADDR))
+    parser.add_argument('--splitter_host', help='IP address or host name of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_HOST))
 
-    parser.add_argument('--splitter_port', help='Listening port of the splitter. Default = {}.'.format(Peer_mother.SPLITTER_PORT))
+    parser.add_argument('--splitter_port', help='Listening port of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_PORT))
 
-    parser.add_argument('--team_port', help='Port to communicate with the peers. Default {} (the SO will chose it).'.format(Peer_mother.TEAM_PORT))
+    parser.add_argument('--team_port', help='Port to communicate with the peers. Default {} (the SO will chose it).'.format(Peer_IMS.TEAM_PORT))
 
     args = parser.parse_known_args()[0]
 
-    if args.splitter_addr:
-        Peer_IMS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
-        print ('SPLITTER_ADDR = ', Peer_IMS.SPLITTER_ADDR)
+    if args.splitter_host:
+        Peer_IMS.SPLITTER_HOST = socket.gethostbyname(args.splitter_host)
+        print ('SPLITTER_HOST = ', Peer_IMS.SPLITTER_HOST)
 
     if args.splitter_port:
         Peer_IMS.SPLITTER_PORT = int(args.splitter_port)
@@ -62,9 +63,10 @@ if __name__ == "__main__":
         print ('PLAYER_PORT = ', Peer_IMS.PLAYER_PORT)
 
     peer = Peer_IMS()
+    peer.connect_to_the_splitter()
     peer.receive_the_mcast_channel()
 
-    if Peer_IMS.MCAST_CHANNEL == '0.0.0.0':
+    if peer.mcast_channel == '0.0.0.0':
         # {{{ This is a "unicast" peer.
 
         if Monitor_DBS.are_you_a_monitor():
@@ -72,6 +74,7 @@ if __name__ == "__main__":
 #            peer = Monitor_LRS()
         else:
             if args.chunk_loss_period:
+                Peer_DBS.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
                 print ('chunk_loss_period =', Peer_DBS.CHUNK_LOSS_PERIOD)
                 if int(args.chunk_loss_period) != 0:
                     peer = Lossy_Peer()

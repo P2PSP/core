@@ -1,3 +1,6 @@
+from __future__ import print_function
+from peer_fns import Peer_FNS
+
 class Lossy_Peer(Peer_FNS):
     # {{{
 

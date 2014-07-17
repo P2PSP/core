@@ -33,7 +33,7 @@ or simply:
 
 5. Use a particular splitter host (1.2.3.4):
 
-    ./peer.py --splitter_addr 1.2.3.4 &
+    ./peer.py --splitter_host 1.2.3.4 &
     vlc http://localhost:9999 &
 
 6. Run a monitor peer (the monitor peer is the first peer of the team
@@ -87,7 +87,7 @@ or simply:
 
 6. Change the source host to "new_host":
 
-   splitter --source_addr new_host &
+   splitter --source_host new_host &
 
 7. Change the source port to 6666:
 
