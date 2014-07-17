@@ -1,9 +1,9 @@
 from __future__ import print_function
 import threading
-from peer_mother import Peer_mother
+from peer_ims import Peer_IMS
 
 # Data Broadcasting Set of Rules
-class Peer_DBS(threading.Thread, Peer_mother):
+class Peer_DBS(Peer_IMS):
     # {{{
 
     # {{{ Class "constants"
@@ -110,131 +110,6 @@ class Peer_DBS(threading.Thread, Peer_mother):
         if __debug__:
             print(1, "List of peers received")
         sys.stdout.write(Color.none)
-
-        # }}}
-
-    # Tiene pinta de que los tres siguientes metodos pueden simplificarse
-
-    def find_next_chunk(self):
-        # {{{
-
-        chunk_number = (self.played_chunk + 1) % common.MAX_CHUNK_NUMBER
-        while not self.received[chunk_number % self.buffer_size]:
-            chunk_number = (chunk_number + 1) % common.MAX_CHUNK_NUMBER
-        return chunk_number
-
-        # }}}
-
-    def play_chunk(self, chunk):
-        # {{{
-
-        try:
-            self.player_socket.sendall(self.chunks[chunk % self.buffer_size])
-        except socket.error, e:
-            print(e)
-            print('Player disconected, ...', end=' ')
-            self.player_alive = False
-
-        # }}}
-
-    def play_next_chunk(self):
-        # {{{
-
-        self.played_chunk = self.find_next_chunk()
-        self.play_chunk(self.played_chunk)
-        self.received[self.played_chunk % self.buffer_size] = False
-
-        # }}}
-
-    def wait_for_the_player(self):
-        # {{{ Setup "player_socket" and wait for the player
-
-        self.player_socket =  socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            # In Windows systems this call doesn't work!
-            self.player_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except Exception, e:
-            print (e)
-            pass
-        self.player_socket.bind(('', self.PLAYER_PORT))
-        self.player_socket.listen(0)
-        if __debug__:
-            print ("Waiting for the player at", self.player_socket.getsockname())
-        self.player_socket = self.player_socket.accept()[0]
-        #self.player_socket.setblocking(0)
-        if __debug__:
-            print("The player is", self.player_socket.getpeername())
-
-        # }}}
-
-    def connect_to_the_splitter_borrame(self):
-        # {{{ Setup "splitter" and "splitter_socket"
-
-        self.splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.splitter = (self.SPLITTER_ADDR, self.SPLITTER_PORT)
-        print ("Connecting to the splitter at", self.splitter)
-        if self.TEAM_PORT != 0:
-            try:
-                self.splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            except Exception, e:
-                print (e)
-                pass
-            sys.stdout.write(Color.purple)
-            print ("I'm using port the port", self.TEAM_PORT)
-            sys.stdout.write(Color.none)
-            self.splitter_socket.bind(("", self.TEAM_PORT))
-        try:
-            self.splitter_socket.connect(self.splitter)
-        except Exception, e:
-            print(e)
-            sys.exit("Sorry. Can't connect to the splitter at " + str(self.splitter))
-        if __debug__:
-            print("Connected to the splitter at", self.splitter)
-
-        # }}}
-
-    def receive_the_header(self):
-        # {{{
-
-        header_size = 1024*10
-        received = 0
-        data = ""
-        while received < header_size:
-            data = self.splitter_socket.recv(header_size - received)
-            received += len(data)
-            try:
-                self.player_socket.sendall(data)
-            except Exception, e:
-                print (e)
-                print ("error sending data to the player")
-                print ("len(data) =", len(data))
-            if __debug__:
-                print ("received bytes:", received, "\r", end=" ")
-
-        if __debug__:
-            print ("Received", received, "bytes of header")
-
-        # }}}
-
-    def receive_the_buffersize(self):
-        # {{{
-
-        message = self.splitter_socket.recv(struct.calcsize("H"))
-        buffer_size = struct.unpack("H", message)[0]
-        self.buffer_size = socket.ntohs(buffer_size)
-        if __debug__:
-            print ("buffer_size =", self.buffer_size)
-
-        # }}}
-
-    def receive_the_chunksize(self):
-        # {{{
-
-        message = self.splitter_socket.recv(struct.calcsize("H"))
-        chunk_size = struct.unpack("H", message)[0]
-        self.chunk_size = socket.ntohs(chunk_size)
-        if __debug__:
-            print ("chunk_size =", self.chunk_size)
 
         # }}}
 
@@ -429,87 +304,6 @@ class Peer_DBS(threading.Thread, Peer_mother):
 
         # }}}
 
-    def create_buffer(self):
-        # {{{
-
-        # The buffer of chunks is a structure that is used to delay
-        # the playback of the chunks in order to accommodate the
-        # network jittter. Two components are needed: (1) the "chunks"
-        # buffer that stores the received chunks and (2) the
-        # "received" buffer that stores if a chunk has been received
-        # or not. Notice that each peer can use a different
-        # buffer_size: the smaller the buffer size, the lower start-up
-        # time, the higher chunk-loss ratio. However, for the sake of
-        # simpliticy, all peers will use the same buffer size.
-        self.chunks = [""]*self.buffer_size
-        self.received = [False]*self.buffer_size
-        self.numbers = [0]*self.buffer_size
-
-        # }}}
-
-    def buffer_data(self):
-        # {{{ Buffering
-
-        #  Wall time (execution time plus waiting time).
-        start_latency = time.time()
-
-        # We will send a chunk to the player when a new chunk is
-        # received. Besides, those slots in the buffer that have not been
-        # filled by a new chunk will not be send to the player. Moreover,
-        # chunks can be delayed an unknown time. This means that (due to the
-        # jitter) after chunk X, the chunk X+Y can be received (instead of the
-        # chunk X+1). Alike, the chunk X-Y could follow the chunk X. Because
-        # we implement the buffer as a circular queue, in order to minimize
-        # the probability of a delayed chunk overwrites a new chunk that is
-        # waiting for traveling the player, we wil fill only the half of the
-        # circular queue.
-
-        print(self.team_socket.getsockname(), "\b: buffering ",)
-        sys.stdout.flush()
-
-        # First chunk to be sent to the player.
-        chunk_number = self.receive_and_feed()
-
-        # The receive_and_feed() procedure returns if a packet has been
-        # received or if a time-out exception has been arised. In the first
-        # case, the returned value is -1 if the packet contains a
-        # hello/goodbyte message or a number >= 0 if a chunk has been
-        # received. A -2 is returned if a time-out is has happened.
-        while chunk_number < 0:
-            chunk_number = self.receive_and_feed()
-        self.played_chunk = chunk_number
-        print ("First chunk to play", self.played_chunk)
-
-        # Fill up to the half of the buffer
-        for x in xrange(self.buffer_size/2):
-            print("!", end='')
-            sys.stdout.flush()
-            while self.receive_and_feed() < 0:
-                pass
-
-        print()
-        print('latency =', time.time() - start_latency, 'seconds')
-        sys.stdout.flush()
-
-        # }}}
-
-    def keep_the_buffer_full(self):
-        # {{{
-
-        # Receive chunks while the buffer is not full
-        chunk_number = self.receive_and_feed()
-        while chunk_number < 0:
-            chunk_number = self.receive_and_feed()
-        while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
-            chunk_number = self.receive_and_feed()
-            while chunk_number < 0:
-                chunk_number = self.receive_and_feed()
-
-        # Play the next chunk
-        self.play_next_chunk()
-
-        # }}}
-
     def peers_life(self):
         # {{{
 
@@ -567,6 +361,13 @@ class Peer_DBS(threading.Thread, Peer_mother):
         self.buffering = False
         self.peers_life()
         self.polite_farewell()
+
+        # }}}
+
+    def start(self):
+        # {{{
+
+        self.run()
 
         # }}}
 

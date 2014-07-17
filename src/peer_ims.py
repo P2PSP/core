@@ -19,6 +19,8 @@ class Peer_IMS(threading.Thread):
     SPLITTER_HOST = "localhost" # Address of the splitter.
     SPLITTER_PORT = 4552        # Port of the splitter.
     TEAM_PORT = 0               # TCP port used to communicate the splitter.
+    SPLITTER_SOCKET = 'hola'
+    MCAST_ADDR = ''
 
     # }}}
 
@@ -135,21 +137,21 @@ class Peer_IMS(threading.Thread):
 
         # Nota: Ahora no reconvertimos de TCP a UDP!
         
-        self.splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.SPLITTER_SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.splitter = (self.SPLITTER_HOST, self.SPLITTER_PORT)
         print ("Connecting to the splitter at", self.splitter)
         if self.TEAM_PORT != 0:
             try:
-                self.splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                self.SPLITTER_SOCKET.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             except Exception, e:
                 print (e)
                 pass
             sys.stdout.write(Color.purple)
             print ("I'm using port the port", self.TEAM_PORT)
             sys.stdout.write(Color.none)
-            self.splitter_socket.bind(("", self.TEAM_PORT))
+            self.SPLITTER_SOCKET.bind(("", self.TEAM_PORT))
         try:
-            self.splitter_socket.connect(self.splitter)
+            self.SPLITTER_SOCKET.connect(self.splitter)
         except Exception, e:
             print(e)
             sys.exit("Sorry. Can't connect to the splitter at " + str(self.splitter))
@@ -164,7 +166,7 @@ class Peer_IMS(threading.Thread):
         received = 0
         data = ""
         while received < header_size:
-            data = self.splitter_socket.recv(header_size - received)
+            data = self.SPLITTER_SOCKET.recv(header_size - received)
             received += len(data)
             try:
                 self.player_socket.sendall(data)
@@ -181,7 +183,7 @@ class Peer_IMS(threading.Thread):
     def receive_the_buffer_size(self):
         # {{{
 
-        message = self.splitter_socket.recv(struct.calcsize("H"))
+        message = self.SPLITTER_SOCKET.recv(struct.calcsize("H"))
         buffer_size = struct.unpack("H", message)[0]
         self.buffer_size = socket.ntohs(buffer_size)
         print ("buffer_size =", self.buffer_size)
@@ -191,7 +193,8 @@ class Peer_IMS(threading.Thread):
     def receive_the_chunk_size(self):
         # {{{
 
-        message = self.splitter_socket.recv(struct.calcsize("H"))
+        print(self.SPLITTER_SOCKET)
+        message = self.SPLITTER_SOCKET.recv(struct.calcsize("H"))
         chunk_size = struct.unpack("H", message)[0]
         self.chunk_size = socket.ntohs(chunk_size)
         print ("chunk_size =", self.chunk_size)
@@ -202,13 +205,13 @@ class Peer_IMS(threading.Thread):
     def receive_the_mcast_channel(self):
         # {{{
 
-        message = self.splitter_socket.recv(struct.calcsize("4sH"))
+        message = self.SPLITTER_SOCKET.recv(struct.calcsize("4sH"))
         mcast_addr, mcast_port = struct.unpack("4sH", message)
-        mcast_addr = socket.inet_ntoa(mcast_addr)
-        mcast_port = socket.ntohs(mcast_port)
-        self.mcast_channel = (mcast_addr, mcast_port)
+        self.MCAST_ADDR = socket.inet_ntoa(mcast_addr)
+        self.MCAST_PORT = socket.ntohs(mcast_port)
+        mcast_channel = (self.MCAST_ADDR, self.MCAST_PORT)
         if __debug__:
-            print ("mcast_channel =", self.mcast_channel)
+            print ("mcast_channel =", mcast_channel)
 
         # }}}
 
@@ -223,10 +226,10 @@ class Peer_IMS(threading.Thread):
         except Exception, e:
             print (e)
             pass
-        self.team_socket.bind(('', self.mcast_channel[PORT]))
-#        self.team_socket.bind(('', self.splitter_socket.getsockname()[PORT]))
+        self.team_socket.bind(('', self.MCAST_PORT))
+#        self.team_socket.bind(('', self.SPLITTER_SOCKET.getsockname()[PORT]))
 
-        mreq = struct.pack("4sl", socket.inet_aton(self.mcast_channel[ADDR]), socket.INADDR_ANY)
+        mreq = struct.pack("4sl", socket.inet_aton(self.MCAST_ADDR), socket.INADDR_ANY)
         self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         
         # This is the maximum time the peer will wait for a chunk
@@ -372,7 +375,7 @@ class Peer_IMS(threading.Thread):
         self.receive_the_buffer_size()
         #self.receive_the_mcast_channel()
         self.setup_the_team_socket()
-        self.splitter_socket.close()
+        self.SPLITTER_SOCKET.close()
         self.create_the_buffer()
         self.buffer_data()
         self.buffering.set()
