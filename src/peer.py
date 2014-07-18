@@ -28,7 +28,7 @@ from lossy_peer import Lossy_Peer
 
 # }}}
 
-class Peer(Peer_DBS):
+class Peer():
 
     def __init__(self):
     
@@ -63,11 +63,10 @@ class Peer(Peer_DBS):
             Peer_IMS.PLAYER_PORT = int(args.player_port)
             print ('PLAYER_PORT = ', Peer_IMS.PLAYER_PORT)
 
-        self.connect_to_the_splitter()
-        print ("---->", self.SPLITTER_SOCKET)
-        self.receive_the_mcast_channel()
+        sock = Peer_IMS().connect_to_the_splitter()
+        channel = Peer_IMS().receive_the_channel(sock)
 
-        if self.MCAST_ADDR == '0.0.0.0':
+        if channel == '0.0.0.0':
             # {{{ This is a "unicast" peer.
 
             if Monitor_DBS.are_you_a_monitor():
@@ -89,8 +88,9 @@ class Peer(Peer_DBS):
         else:
             # {{{ This is a "multicast" peer.
 
-            Peer_IMS.start(self)
-            #peer = Peer_IMS()
+            #Peer_IMS.start(self)
+            peer = Peer_IMS()
+            print ("---->", Peer_IMS.SPLITTER_SOCKET)
 
             # }}}
 
@@ -98,8 +98,8 @@ class Peer(Peer_DBS):
 
         # {{{ Run!
 
-        peer.start()
-        peer.buffering.wait()
+        self.start()
+        self.buffering.wait()
 
         print("+-----------------------------------------------------+")
         print("| Received = Received kbps, including retransmissions |")
