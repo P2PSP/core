@@ -63,8 +63,9 @@ class Peer():
             Peer_IMS.PLAYER_PORT = int(args.player_port)
             print ('PLAYER_PORT = ', Peer_IMS.PLAYER_PORT)
 
-        sock = Peer_IMS().connect_to_the_splitter()
-        channel = Peer_IMS().receive_the_channel(sock)
+        peer = Peer_IMS()
+        peer.setup_splitter_socket()
+        channel = peer.receive_the_channel()
 
         if channel == '0.0.0.0':
             # {{{ This is a "unicast" peer.
@@ -87,10 +88,10 @@ class Peer():
             # }}}
         else:
             # {{{ This is a "multicast" peer.
-
-            #Peer_IMS.start(self)
-            peer = Peer_IMS()
-            print ("---->", Peer_IMS.SPLITTER_SOCKET)
+            pass
+            #peer.start()
+            #peer = Peer_IMS(sock, channel)
+            #print ("---->", Peer_IMS.SPLITTER_SOCKET)
 
             # }}}
 

@@ -151,8 +151,10 @@ class Splitter_IMS(threading.Thread):
         if __debug__:
             print("Sending a chunk_size of", self.CHUNK_SIZE, "bytes")
         message = struct.pack("H", socket.htons(self.CHUNK_SIZE))
-        peer_serve_socket.sendall(message)
-
+        try:
+            peer_serve_socket.sendall(message)
+        except:
+            pass
         # }}}
 
     def send_the_mcast_channel(self, peer_serve_socket):

@@ -22,6 +22,15 @@ class Peer_IMS(threading.Thread):
 
     # }}}
 
+    def print_the_module_name(self):
+        # {{{
+
+        sys.stdout.write(Color.yellow)
+        print("Peer IMS")
+        sys.stdout.write(Color.none)
+
+        # }}}
+
     def __init__(self):
         # {{{
 
@@ -36,8 +45,8 @@ class Peer_IMS(threading.Thread):
         self.print_the_module_name()
 
         print("Player port =", self.PLAYER_PORT)
-        print("Splitter address =", self.SPLITTER_HOST)
-        print("Splitter port =", self.SPLITTER_PORT)
+        #print("Splitter =", sock.getpeername())
+        print("Splitter =", self.SPLITTER_HOST)
 #        print("Team address =", self.TEAM_HOST)
         print("Team port =", self.TEAM_PORT)
 
@@ -66,15 +75,6 @@ class Peer_IMS(threading.Thread):
         # {{{ "True" while buffering is being performed.
         # }}}
         self.buffering = threading.Event()
-
-        # }}}
-
-    def print_the_module_name(self):
-        # {{{
-
-        sys.stdout.write(Color.yellow)
-        print("Peer IMS")
-        sys.stdout.write(Color.none)
 
         # }}}
 
@@ -130,38 +130,37 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def connect_to_the_splitter(self):
+    def setup_splitter_socket(self):
         # {{{ Setup "splitter" and "splitter_socket"
 
         # Nota: Ahora no reconvertimos de TCP a UDP!
         
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.splitter = (self.SPLITTER_HOST, self.SPLITTER_PORT)
         print ("Connecting to the splitter at", self.splitter)
         if self.TEAM_PORT != 0:
             try:
-                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                self.splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             except Exception, e:
                 print (e)
                 pass
             sys.stdout.write(Color.purple)
             print ("I'm using port the port", self.TEAM_PORT)
             sys.stdout.write(Color.none)
-            sock.bind(("", self.TEAM_PORT))
+            self.splitter_socket.bind(("", self.TEAM_PORT))
         try:
-            sock.connect(self.splitter)
+            self.splitter_socket.connect(self.splitter)
         except Exception, e:
             print(e)
             sys.exit("Sorry. Can't connect to the splitter at " + str(self.splitter))
         print("Connected to the splitter at", self.splitter)
-        return sock
         
         # }}}
 
-    def receive_the_channel(self, sock):
+    def receive_the_channel(self):
         # {{{
-
-        message = sock.recv(struct.calcsize("4sH"))
+        self.setup_splitter_socket()
+        message = self.splitter_socket.recv(struct.calcsize("4sH"))
         addr, port = struct.unpack("4sH", message)
         addr = socket.inet_ntoa(addr)
         port = socket.ntohs(port)
@@ -179,7 +178,7 @@ class Peer_IMS(threading.Thread):
         received = 0
         data = ""
         while received < header_size:
-            data = self.SPLITTER_SOCKET.recv(header_size - received)
+            data = self.splitter_socket.recv(header_size - received)
             received += len(data)
             try:
                 self.player_socket.sendall(data)
@@ -196,8 +195,7 @@ class Peer_IMS(threading.Thread):
     def receive_the_chunk_size(self):
         # {{{
 
-        print(self.SPLITTER_SOCKET)
-        message = self.SPLITTER_SOCKET.recv(struct.calcsize("H"))
+        message = self.splitter_socket.recv(struct.calcsize("H"))
         chunk_size = struct.unpack("H", message)[0]
         self.chunk_size = socket.ntohs(chunk_size)
         print ("chunk_size =", self.chunk_size)
@@ -208,7 +206,7 @@ class Peer_IMS(threading.Thread):
     def receive_the_buffer_size(self):
         # {{{
 
-        message = self.SPLITTER_SOCKET.recv(struct.calcsize("H"))
+        message = self.splitter_socket.recv(struct.calcsize("H"))
         buffer_size = struct.unpack("H", message)[0]
         self.buffer_size = socket.ntohs(buffer_size)
         print ("buffer_size =", self.buffer_size)
@@ -375,7 +373,7 @@ class Peer_IMS(threading.Thread):
         self.receive_the_buffer_size()
         #self.receive_the_mcast_channel()
         self.setup_the_team_socket()
-        self.SPLITTER_SOCKET.close()
+        self.splitter_socket.close()
         self.create_the_buffer()
         self.buffer_data()
         self.buffering.set()
