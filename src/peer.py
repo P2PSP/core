@@ -66,6 +66,7 @@ class Peer():
         peer = Peer_IMS()
         peer.setup_splitter_socket()
         channel = peer.receive_the_channel()
+        print (channel)
 
         if channel == '0.0.0.0':
             # {{{ This is a "unicast" peer.

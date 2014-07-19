@@ -131,8 +131,10 @@ class Splitter_IMS(threading.Thread):
 
         if __debug__:
             print("Sending a header of", len(self.header), "bytes")
-        peer_serve_socket.sendall(self.header)
-
+        try:
+            peer_serve_socket.sendall(self.header)
+        except:
+            pass
         # }}}
 
     def send_the_buffer_size(self, peer_serve_socket):
@@ -141,8 +143,10 @@ class Splitter_IMS(threading.Thread):
         if __debug__:
             print("Sending a buffer_size of", self.BUFFER_SIZE, "bytes")
         message = struct.pack("H", socket.htons(self.BUFFER_SIZE))
-        peer_serve_socket.sendall(message)
-
+        try:
+            peer_serve_socket.sendall(message)
+        except:
+            pass
         # }}}
 
     def send_the_chunk_size(self, peer_serve_socket):
@@ -163,8 +167,10 @@ class Splitter_IMS(threading.Thread):
         if __debug__:
             print("Communicating the multicast channel", (self.MCAST_ADDR, self.PORT))
         message = struct.pack("4sH", socket.inet_aton(self.MCAST_ADDR), socket.htons(self.PORT))
-        peer_serve_socket.sendall(message)
-
+        try:
+            peer_serve_socket.sendall(message)
+        except:
+            pass
         # }}}
 
     def handle_a_peer_arrival(self, connection):
