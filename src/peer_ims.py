@@ -5,6 +5,7 @@ import socket
 import struct
 from color import Color
 import common
+import time
 
 ADDR = 0
 PORT = 1
@@ -130,7 +131,7 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def setup_splitter_socket(self):
+    def connect_to_the_splitter(self):
         # {{{ Setup "splitter" and "splitter_socket"
 
         # Nota: Ahora no reconvertimos de TCP a UDP!
@@ -159,7 +160,6 @@ class Peer_IMS(threading.Thread):
 
     def receive_the_channel(self):
         # {{{
-        self.setup_splitter_socket()
         message = self.splitter_socket.recv(struct.calcsize("4sH"))
         addr, port = struct.unpack("4sH", message)
         addr = socket.inet_ntoa(addr)
@@ -174,11 +174,11 @@ class Peer_IMS(threading.Thread):
     def receive_and_send_the_header(self):
         # {{{
 
-        header_size = self.HEADER_CHUNKS * self.chunk_size
+        header_size_in_bytes = self.header_size_in_chunks * self.chunk_size
         received = 0
         data = ""
-        while received < header_size:
-            data = self.splitter_socket.recv(header_size - received)
+        while received < header_size_in_bytes:
+            data = self.splitter_socket.recv(header_size_in_bytes - received)
             received += len(data)
             try:
                 self.player_socket.sendall(data)
@@ -186,6 +186,7 @@ class Peer_IMS(threading.Thread):
                 print (e)
                 print ("error sending data to the player")
                 print ("len(data) =", len(data))
+                time.sleep(1)
             print ("received bytes:", received, "\r", end=" ")
 
         print ("Received", received, "bytes of header")
@@ -200,6 +201,16 @@ class Peer_IMS(threading.Thread):
         self.chunk_size = socket.ntohs(chunk_size)
         print ("chunk_size =", self.chunk_size)
         self.chunk_format_string = "H" + str(self.chunk_size) + "s"
+
+        # }}}
+
+    def receive_the_header_size(self):
+        # {{{
+
+        message = self.splitter_socket.recv(struct.calcsize("H"))
+        value = struct.unpack("H", message)[0]
+        self.header_size_in_chunks = socket.ntohs(value)
+        print ("header_size (in chunks) =", self.header_size_in_chunks)
 
         # }}}
 
@@ -224,7 +235,7 @@ class Peer_IMS(threading.Thread):
         except Exception, e:
             print (e)
             pass
-        self.team_socket.bind(('', self.MCAST_PORT))
+        self.team_socket.bind(('', self.TEAM_PORT))
 #        self.team_socket.bind(('', self.SPLITTER_SOCKET.getsockname()[PORT]))
 
         mreq = struct.pack("4sl", socket.inet_aton(self.MCAST_ADDR), socket.INADDR_ANY)
@@ -369,6 +380,7 @@ class Peer_IMS(threading.Thread):
         self.wait_for_the_player()
         #self.connect_to_the_splitter()
         self.receive_the_chunk_size()
+        self.receive_the_header_size()
         self.receive_and_send_the_header()
         self.receive_the_buffer_size()
         #self.receive_the_mcast_channel()

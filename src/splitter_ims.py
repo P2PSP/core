@@ -135,6 +135,7 @@ class Splitter_IMS(threading.Thread):
             peer_serve_socket.sendall(self.header)
         except:
             pass
+        
         # }}}
 
     def send_the_buffer_size(self, peer_serve_socket):
@@ -147,6 +148,7 @@ class Splitter_IMS(threading.Thread):
             peer_serve_socket.sendall(message)
         except:
             pass
+        
         # }}}
 
     def send_the_chunk_size(self, peer_serve_socket):
@@ -159,6 +161,7 @@ class Splitter_IMS(threading.Thread):
             peer_serve_socket.sendall(message)
         except:
             pass
+        
         # }}}
 
     def send_the_mcast_channel(self, peer_serve_socket):
@@ -171,6 +174,20 @@ class Splitter_IMS(threading.Thread):
             peer_serve_socket.sendall(message)
         except:
             pass
+        
+        # }}}
+
+    def send_the_header_size(self, peer_serve_socket):
+        # {{{
+
+        if __debug__:
+            print("Communicating the header size", self.HEADER_SIZE)
+        message = struct.pack("H", socket.htons(self.HEADER_SIZE))
+        try:
+            peer_serve_socket.sendall(message)
+        except:
+            pass
+        
         # }}}
 
     def handle_a_peer_arrival(self, connection):
@@ -183,6 +200,7 @@ class Splitter_IMS(threading.Thread):
         peer = connection[1]
         print(sock.getsockname(), '\b: accepted connection from peer', peer)
         self.send_the_mcast_channel(sock)
+        self.send_the_header_size(sock)
         self.send_the_chunk_size(sock)
         self.send_the_header(sock)
         self.send_the_buffer_size(sock)

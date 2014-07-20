@@ -64,7 +64,7 @@ class Peer():
             print ('PLAYER_PORT = ', Peer_IMS.PLAYER_PORT)
 
         peer = Peer_IMS()
-        peer.setup_splitter_socket()
+        peer.connect_to_the_splitter()
         channel = peer.receive_the_channel()
         print (channel)
 
@@ -100,8 +100,8 @@ class Peer():
 
         # {{{ Run!
 
-        self.start()
-        self.buffering.wait()
+        peer.start()
+        peer.buffering.wait()
 
         print("+-----------------------------------------------------+")
         print("| Received = Received kbps, including retransmissions |")
