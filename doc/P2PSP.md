@@ -25,7 +25,7 @@ or simply:
     vlc http://localhost:9999 &
 
 4. Use a specific team port (8888) for communicating with the rest of
-   the team (you should use this feature in order, for example, to create
+   the team (you should use this feature, for example, after have created 
    a NAT entry manualy):
 
     ./peer.py --team_port 8888 &
@@ -52,17 +52,6 @@ or simply:
     ./peer.py --password pass &
     vlc http://localhost:9999 &
 
-12. Feed the local Icecast server, forever:
-
-    xterm -e 'feed_icecast' &
-
-13. Create a minimal local team (usually for testing purposes):
-
-    # Feed the local Icecast server
-    xterm -e 'splitter' &
-    xterm -e 'peer' &
-    vlc http://localhost:9999 &
-    
 # Splitter manual:
 
 1. Create a channel using the default parameters:
@@ -93,7 +82,7 @@ or simply:
 
    splitter --source_port 6666 &
 
-8. Switch to IP multicast mode:
+8. Use the IP multicast mode:
 
    splitter --mcast &
 
@@ -109,3 +98,16 @@ or simply:
 
    splitter --keyword key &
 
+# Miscelaneous:
+
+1. Feed the local Icecast server, forever:
+
+    xterm -e 'feed_icecast' &
+
+2. Create a minimal local team (usually for testing purposes):
+
+    # Feed the local Icecast server
+    xterm -e 'splitter' &
+    xterm -e 'peer' &
+    vlc http://localhost:9999 &
+    

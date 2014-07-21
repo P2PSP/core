@@ -65,10 +65,10 @@ class Peer():
 
         peer = Peer_IMS()
         peer.connect_to_the_splitter()
-        channel = peer.receive_the_channel()
-        print (channel)
+        mcast_endpoint = peer.receive_the_mcast_endpoint()
+        print (mcast_endpoint)
 
-        if channel == '0.0.0.0':
+        if mcast_endpoint[ADDR] == '0.0.0.0':
             # {{{ This is a "unicast" peer.
 
             if Monitor_DBS.are_you_a_monitor():

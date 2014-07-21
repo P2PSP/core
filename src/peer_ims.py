@@ -158,16 +158,16 @@ class Peer_IMS(threading.Thread):
         
         # }}}
 
-    def receive_the_channel(self):
+    def receive_the_mcast_endpoint(self):
         # {{{
         message = self.splitter_socket.recv(struct.calcsize("4sH"))
         addr, port = struct.unpack("4sH", message)
-        addr = socket.inet_ntoa(addr)
-        port = socket.ntohs(port)
-        channel = (addr, port)
+        self.mcast_addr = socket.inet_ntoa(addr)
+        self.mcast_port = socket.ntohs(port)
+        mcast_endpoint = (self.mcast_addr, self.mcast_port)
         if __debug__:
-            print ("channel =", channel)
-        return channel
+            print ("mcast_endpoint =", mcast_endpoint)
+        return mcast_endpoint
     
         # }}}
 
@@ -224,7 +224,7 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def setup_team_socket(self):
+    def setup_the_team_socket(self):
         # {{{ Create "team_socket" (UDP) for using the multicast channel
 
         #self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -238,7 +238,7 @@ class Peer_IMS(threading.Thread):
         self.team_socket.bind(('', self.TEAM_PORT))
 #        self.team_socket.bind(('', self.SPLITTER_SOCKET.getsockname()[PORT]))
 
-        mreq = struct.pack("4sl", socket.inet_aton(self.MCAST_ADDR), socket.INADDR_ANY)
+        mreq = struct.pack("4sl", socket.inet_aton(self.mcast_addr), socket.INADDR_ANY)
         self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         
         # This is the maximum time the peer will wait for a chunk
@@ -310,11 +310,12 @@ class Peer_IMS(threading.Thread):
         # waiting for traveling the player, we wil fill only the half of the
         # circular queue.
 
-        print(self.team_socket.getsockname(), "\b: buffering ",)
+        print(self.team_socket.getsockname(), "\b: buffering (0.00 %")
         sys.stdout.flush()
 
         # First chunk to be sent to the player.
         chunk_number = self.receive_a_chunk()
+        print(self.team_socket.getsockname(), "\b: buffering (\b", repr(100.0/self.buffer_size).rjust(4))
 
         # The receive_and_feed() procedure returns if a packet has been
         # received or if a time-out exception has been arised. In the first
