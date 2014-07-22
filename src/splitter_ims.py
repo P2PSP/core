@@ -78,7 +78,7 @@ class Splitter_IMS(threading.Thread):
         print("Channel =", self.CHANNEL)
         print("Header size (in chunks) =", self.CHANNEL)
         #print("Splitter address =", self.SPLITTER_ADDR) # No ahora
-        print("Listening port =", self.PORT)
+        print("Listening (and multicast) port =", self.PORT)
         print("Source IP address =", self.SOURCE_HOST)
         print("Source port =", self.SOURCE_PORT)
         print("Multicast address =", self.MCAST_ADDR)

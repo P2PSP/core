@@ -61,7 +61,7 @@ class Peer_IMS(threading.Thread):
 
         # {{{ The size of the chunk in bytes.
         # }}}
-        self.chunk_size = 0
+        #self.chunk_size = 0
 
         # {{{ Label the chunks in the buffer as "received" or "not
         # received".
@@ -171,7 +171,7 @@ class Peer_IMS(threading.Thread):
     
         # }}}
 
-    def receive_and_send_the_header(self):
+    def receive_the_header(self):
         # {{{
 
         header_size_in_bytes = self.header_size_in_chunks * self.chunk_size
@@ -201,7 +201,9 @@ class Peer_IMS(threading.Thread):
         self.chunk_size = socket.ntohs(chunk_size)
         print ("chunk_size =", self.chunk_size)
         self.chunk_format_string = "H" + str(self.chunk_size) + "s"
-
+        if __debug__:
+            print ("chunk_format_string = ", self.chunk_format_string)
+        
         # }}}
 
     def receive_the_header_size(self):
@@ -224,7 +226,7 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def setup_the_team_socket(self):
+    def listen_the_mcast_channel(self):
         # {{{ Create "team_socket" (UDP) for using the multicast channel
 
         #self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -235,7 +237,7 @@ class Peer_IMS(threading.Thread):
         except Exception, e:
             print (e)
             pass
-        self.team_socket.bind(('', self.TEAM_PORT))
+        self.team_socket.bind(('', self.mcast_port))
 #        self.team_socket.bind(('', self.SPLITTER_SOCKET.getsockname()[PORT]))
 
         mreq = struct.pack("4sl", socket.inet_aton(self.mcast_addr), socket.INADDR_ANY)
@@ -380,12 +382,12 @@ class Peer_IMS(threading.Thread):
 
         self.wait_for_the_player()
         #self.connect_to_the_splitter()
-        self.receive_the_chunk_size()
         self.receive_the_header_size()
-        self.receive_and_send_the_header()
+        self.receive_the_chunk_size()
+        self.receive_the_header()
         self.receive_the_buffer_size()
         #self.receive_the_mcast_channel()
-        self.setup_the_team_socket()
+        self.listen_the_mcast_channel()
         self.splitter_socket.close()
         self.create_the_buffer()
         self.buffer_data()
