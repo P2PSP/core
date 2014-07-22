@@ -32,52 +32,6 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def __init__(self):
-        # {{{
-
-        threading.Thread.__init__(self)
-
-        print("Running in", end=' ')
-        if __debug__:
-            print("debug mode")
-        else:
-            print("release mode")
-
-        self.print_the_module_name()
-
-        print("Player port =", self.PLAYER_PORT)
-        #print("Splitter =", sock.getpeername())
-        print("Splitter =", self.SPLITTER_HOST)
-#        print("Team address =", self.TEAM_HOST)
-        print("Team port =", self.TEAM_PORT)
-
-        # {{{ The peer dies if the player disconects.
-        # }}}
-        self.player_alive = True
-
-        # {{{ The last chunk sent to the player.
-        # }}}
-        self.played_chunk = 0
-
-        # {{{ The size of the chunk in bytes.
-        # }}}
-        #self.chunk_size = 0
-
-        # {{{ Label the chunks in the buffer as "received" or "not
-        # received".
-        # }}}
-        self.received = []
-
-        # {{{ Counts the number of executions of the recvfrom()
-        # function.
-        # }}}
-        self.recvfrom_counter = 0
-
-        # {{{ "True" while buffering is being performed.
-        # }}}
-        self.buffering = threading.Event()
-
-        # }}}
 
     # Tiene pinta de que los tres siguientes metodos pueden simplificarse
 
@@ -115,6 +69,7 @@ class Peer_IMS(threading.Thread):
     def wait_for_the_player(self):
         # {{{ Setup "player_socket" and wait for the player
 
+        self.player_connection.clear()
         self.player_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             # In Windows systems this call doesn't work!
@@ -128,7 +83,8 @@ class Peer_IMS(threading.Thread):
         self.player_socket = self.player_socket.accept()[0]
         #self.player_socket.setblocking(0)
         print("The player is", self.player_socket.getpeername())
-
+        self.player_connection.set()
+        
         # }}}
 
     def connect_to_the_splitter(self):
@@ -298,6 +254,8 @@ class Peer_IMS(threading.Thread):
     def buffer_data(self):
         # {{{ Buffering
 
+        #self.buffering.clear()
+        
         #  Wall time (execution time plus waiting time).
         start_latency = time.time()
 
@@ -339,7 +297,8 @@ class Peer_IMS(threading.Thread):
         print()
         print('latency =', time.time() - start_latency, 'seconds')
         sys.stdout.flush()
-
+        #self.buffering.set()
+        time.sleep(10)
         # }}}
 
     def keep_the_buffer_full(self):
@@ -377,11 +336,7 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def run(self):
-        # {{{
-
-        self.wait_for_the_player()
-        #self.connect_to_the_splitter()
+    def configure(self):
         self.receive_the_header_size()
         self.receive_the_chunk_size()
         self.receive_the_header()
@@ -390,17 +345,74 @@ class Peer_IMS(threading.Thread):
         self.listen_the_mcast_channel()
         self.splitter_socket.close()
         self.create_the_buffer()
-        self.buffer_data()
-        self.buffering.set()
-        self.buffering = False
+        
+    def run(self):
+        # {{{
+
+        #self.connect_to_the_splitter()
+        #self.buffering.clear()
+        #self.buffer_data()
+        #self.buffering.set()
+        #self.buffering = False
         self.peers_life()
 
         # }}}
 
-    def start(self):
+    #def start(self):
         # {{{
 
-        self.run()
+        #self.run()
+
+        # }}}
+
+    def __init__(self):
+        # {{{
+
+        threading.Thread.__init__(self)
+
+        print("Running in", end=' ')
+        if __debug__:
+            print("debug mode")
+        else:
+            print("release mode")
+
+        self.print_the_module_name()
+
+        print("Player port =", self.PLAYER_PORT)
+        #print("Splitter =", sock.getpeername())
+        print("Splitter =", self.SPLITTER_HOST)
+#        print("Team address =", self.TEAM_HOST)
+        print("Team port =", self.TEAM_PORT)
+
+        # {{{ The peer dies if the player disconects.
+        # }}}
+        self.player_alive = True
+
+        # {{{ The last chunk sent to the player.
+        # }}}
+        self.played_chunk = 0
+
+        # {{{ The size of the chunk in bytes.
+        # }}}
+        #self.chunk_size = 0
+
+        # {{{ Label the chunks in the buffer as "received" or "not
+        # received".
+        # }}}
+        self.received = []
+
+        # {{{ Counts the number of executions of the recvfrom()
+        # function.
+        # }}}
+        self.recvfrom_counter = 0
+
+        # {{{ "True" while buffering is being performed.
+        # }}}
+        #self.buffering = threading.Event()
+
+        self.player_connection = threading.Event()
+
+        self.wait_for_the_player()
 
         # }}}
 

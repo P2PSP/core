@@ -1,4 +1,4 @@
-#!/usr/bin/python 
+#!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
 # {{{ Imports
@@ -64,6 +64,7 @@ class Peer():
             print ('PLAYER_PORT = ', Peer_IMS.PLAYER_PORT)
 
         peer = Peer_IMS()
+        peer.player_connection.wait()
         peer.connect_to_the_splitter()
         mcast_endpoint = peer.receive_the_mcast_endpoint()
         print (mcast_endpoint)
@@ -100,8 +101,10 @@ class Peer():
 
         # {{{ Run!
 
+        peer.configure()
+        peer.buffer_data()
         peer.start()
-        peer.buffering.wait()
+        #peer.buffering.wait()
 
         print("+-----------------------------------------------------+")
         print("| Received = Received kbps, including retransmissions |")
@@ -113,8 +116,15 @@ class Peer():
         print("-----------------+------------------+-----------------")
 
         last_chunk_number = peer.played_chunk
-        last_sendto_counter = peer.sendto_counter
+        if hasattr(peer, 'sendto_counter'):
+            last_sendto_counter = peer.sendto_counter
+        else:
+            peer.sendto_counter = 0
+            last_sendto_counter = 0
+        if not hasattr(peer, 'peer_list'):
+            peer.peer_list = []
         last_recvfrom_counter = peer.recvfrom_counter
+        print(peer.recvfrom_counter)
         while peer.player_alive:
             time.sleep(1)
             kbps_expected_recv = ((peer.played_chunk - last_chunk_number) * peer.chunk_size * 8) / 1000
@@ -125,6 +135,7 @@ class Peer():
             kbps_expected_sent = int(kbps_expected_recv*team_ratio)
             kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
             last_sendto_counter = peer.sendto_counter
+            print (kbps_recvfrom)
             nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
     #        print(1.0/float(nice))
             #print ("Played chunk = ", peer.played_chunk)
