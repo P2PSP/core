@@ -65,7 +65,7 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
 
-    def receive_the_debt_memory(self):
+    def receive_the_debt_memory(self): # deprecated
         # {{{
 
         message = self.splitter_socket.recv(struct.calcsize("H"))
@@ -76,7 +76,7 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
         
-    def receive_the_debt_threshold(self):
+    def receive_the_debt_threshold(self): # deprecated
         # {{{
 
         message = self.splitter_socket.recv(struct.calcsize("H"))
@@ -87,7 +87,7 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
         
-    def setup_team_socket(self):
+    def setup_team_socket(self): # LLamar listen_to_the_team ???
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
         self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -105,7 +105,7 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
 
-    def receive_and_feed(self):
+    def receive_and_feed(self): # LLamar process_a_chunk ???
         # {{{
 
         try:
@@ -134,6 +134,7 @@ class Peer_DBS(Peer_IMS):
 
                 if sender == self.splitter:
                     # {{{ Send the previous chunk in burst sending
+
                     # mode if the chunk has not been sent to all
                     # the peers of the list of peers.
 

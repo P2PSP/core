@@ -180,7 +180,7 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def listen_the_mcast_channel(self):
+    def listen_the_mcast_channel(self):  # LLamar listen_to_the_team ???
         # {{{ Create "team_socket" (UDP) for using the multicast channel
 
         #self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -206,7 +206,7 @@ class Peer_IMS(threading.Thread):
         
         # }}}
 
-    def receive_a_chunk(self):
+    def receive_a_chunk(self): # LLamar process_a_chunk ???
         # {{{
         try:
             # {{{ Receive a chunk
@@ -341,6 +341,8 @@ class Peer_IMS(threading.Thread):
         # }}}
 
     def configure(self):
+        # {{{
+
         self.receive_the_header_size()
         self.receive_the_chunk_size()
         self.receive_the_header()
@@ -349,6 +351,8 @@ class Peer_IMS(threading.Thread):
         self.listen_the_mcast_channel()
         self.splitter_socket.close()
         self.create_the_buffer()
+
+        # }}}
         
     def run(self):
         # {{{
