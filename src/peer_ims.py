@@ -54,7 +54,7 @@ class Peer_IMS(threading.Thread):
             self.player_socket.sendall(self.chunks[chunk % self.buffer_size])
         except socket.error, e:
             print(e)
-            _print_('Player disconected, ...', end=' ')
+            _print_("Player disconected!")
             self.player_alive = False
 
         # }}}
@@ -305,7 +305,7 @@ class Peer_IMS(threading.Thread):
         _print_("buffering done.")
         sys.stdout.flush()
         #self.buffering.set()
-        time.sleep(10)
+
         # }}}
 
     def keep_the_buffer_full(self):
@@ -328,7 +328,6 @@ class Peer_IMS(threading.Thread):
     def peers_life(self):
         # {{{
 
-        _print_("peers_life is running")
         sys.stdout.flush()
         
         while self.player_alive:
@@ -359,7 +358,6 @@ class Peer_IMS(threading.Thread):
     def run(self):
         # {{{
 
-        _print_("run is running")
         sys.stdout.flush()
         
         #self.connect_to_the_splitter()

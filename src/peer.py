@@ -14,6 +14,7 @@ import threading
 from lossy_socket import lossy_socket
 #from multiprocessing import Pipe
 import common
+from _print_ import _print_
 
 ADDR = 0
 PORT = 1
@@ -109,10 +110,10 @@ class Peer():
         print("| Received = Received kbps, including retransmissions |")
         print("|     Sent = Sent kbps                                |")
         print("|       (Expected values are between parenthesis)     |")
-        print("+-----------------------------------------------------+")
+        print("------------------------------------------------------+")
         print()
-        print("        Received |             Sent | Team description")
-        print("-----------------+------------------+-----------------")
+        print("      Time |        Received |             Sent | Team description")
+        print("-----------+-----------------+------------------+-----------------")
 
         last_chunk_number = peer.played_chunk
         if hasattr(peer, 'sendto_counter'):
@@ -123,7 +124,6 @@ class Peer():
         if not hasattr(peer, 'peer_list'):
             peer.peer_list = []
         last_recvfrom_counter = peer.recvfrom_counter
-        print(peer.recvfrom_counter)
         while peer.player_alive:
             time.sleep(1)
             kbps_expected_recv = ((peer.played_chunk - last_chunk_number) * peer.chunk_size * 8) / 1000
@@ -144,7 +144,7 @@ class Peer():
                 sys.stdout.write(Color.red)
             elif kbps_expected_recv > kbps_recvfrom:
                 sys.stdout.write(Color.green)
-            print(repr(kbps_expected_recv).rjust(8), end=Color.none)
+            _print_("|" + repr(kbps_expected_recv).rjust(8), end=Color.none)
             print(('(' + repr(kbps_recvfrom) + ')').rjust(8), end=' | ')
             #print(("{:.1f}".format(nice)).rjust(6), end=' | ')
             #sys.stdout.write(Color.none)
