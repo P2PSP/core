@@ -67,7 +67,6 @@ class Peer():
         peer.player_connection.wait()
         peer.connect_to_the_splitter()
         mcast_endpoint = peer.receive_the_mcast_endpoint()
-        print (mcast_endpoint)
 
         if mcast_endpoint[ADDR] == '0.0.0.0':
             # {{{ This is a "unicast" peer.
@@ -117,7 +116,7 @@ class Peer():
 
         last_chunk_number = peer.played_chunk
         if hasattr(peer, 'sendto_counter'):
-            last_sendto_counter = peer.sendto_counter
+            last_sendto_counter = -1#peer.sendto_counter
         else:
             peer.sendto_counter = 0
             last_sendto_counter = 0
@@ -135,8 +134,10 @@ class Peer():
             kbps_expected_sent = int(kbps_expected_recv*team_ratio)
             kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
             last_sendto_counter = peer.sendto_counter
-            print (kbps_recvfrom)
-            nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
+            if kbps_recvfrom > 0:
+                nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
+            else:
+                nice = 0.0
     #        print(1.0/float(nice))
             #print ("Played chunk = ", peer.played_chunk)
             if kbps_expected_recv < kbps_recvfrom:
