@@ -117,7 +117,7 @@ class Peer():
 
         last_chunk_number = peer.played_chunk
         if hasattr(peer, 'sendto_counter'):
-            last_sendto_counter = -1#peer.sendto_counter
+            last_sendto_counter = 0#peer.sendto_counter
         else:
             peer.sendto_counter = 0
             last_sendto_counter = 0

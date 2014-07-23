@@ -8,10 +8,6 @@ import common
 import time
 from _print_ import _print_
 
-
-ADDR = 0
-PORT = 1
-
 # IP Multicasting Set of Rules
 class Peer_IMS(threading.Thread):
     # {{{
@@ -33,7 +29,6 @@ class Peer_IMS(threading.Thread):
         sys.stdout.write(Color.none)
 
         # }}}
-
 
     # Tiene pinta de que los tres siguientes metodos pueden simplificarse
 

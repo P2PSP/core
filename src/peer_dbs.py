@@ -1,5 +1,12 @@
 from __future__ import print_function
 import threading
+import sys
+import socket
+import struct
+from color import Color
+import common
+import time
+from _print_ import _print_
 from peer_ims import Peer_IMS
 
 # Data Broadcasting Set of Rules
@@ -8,71 +15,16 @@ class Peer_DBS(Peer_IMS):
 
     # {{{ Class "constants"
 
-    PLAYER_PORT = 9999
-    #SPLITTER_ADDR = "150.214.150.68"
-    #SPLITTER_PORT = 4552
-    #TEAM_PORT = 0
-    #DEBT_MEMORY = 1024
-    #DEBT_THRESHOLD = 10 # This value depends on debt_memory
+    DEBT_MEMORY = 1024
+    DEBT_THRESHOLD = 10 # This value depends on debt_memory
 
     # }}}
-
-    def __init__(self):
-        # {{{
-
-        threading.Thread.__init__(self)
-
-        print("Running in", end=' ')
-        if __debug__:
-            print("debug mode")
-        else:
-            print("release mode")
-
-        self.print_modulename()
-
-        print("Player port =", self.PLAYER_PORT)
-        #print("Splitter IP address =", self.SPLITTER_ADDR)
-        #print("Splitter port =", self.SPLITTER_PORT)
-        #print("(Team) Port =", self.TEAM_PORT)
-
-        self.peer_list = []
-#        self.buffer_size = 0
-        self.player_alive = True
-        self.played_chunk = 0
-        self.chunk_size = 0
-
-        # Number of times that the previous received chunk has been sent
-        # to the team. If this counter is smaller than the number
-        # of peers in the team, the previous chunk must be sent in the
-        # burst mode because a new chunk from the splitter has arrived
-        # and the previous received chunk has not been sent to all the
-        # peers of the team. This can happen when one o more chunks
-        # that were routed towards this peer have been lost.
-        self.receive_and_feed_counter = 0
-
-        # This "private and static" variable holds the previous chunk
-        # received from the splitter. It is used to send the previous
-        # received chunk in the congestion avoiding mode. In that
-        # mode, the peer sends a chunk only when it received a chunk
-        # from another peer or om the splitter.
-        self.receive_and_feed_previous = ""
-        self.received = []
-        self.debt = {}
-
-        self.sendto_counter = 0
-        self.recvfrom_counter = 0
-
-        #self.pipe_thread_end, self.pipe_main_end = Pipe()
-        #self.buffering = True
-        self.buffering = threading.Event()
-        
-        # }}}
 
     def print_modulename(self):
         # {{{
 
         sys.stdout.write(Color.yellow)
-        print("Peer DBS")
+        _print_("Peer DBS")
         sys.stdout.write(Color.none)
 
         # }}}
@@ -88,11 +40,9 @@ class Peer_DBS(Peer_IMS):
         # {{{
 
         sys.stdout.write(Color.green)
-        if __debug__:
-            print("Requesting the list of peers to", self.splitter_socket.getpeername())
-        number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
-        if __debug__:
-            print("The size of the team is", number_of_peers, "(apart from me)")
+        _print_("Requesting the list of peers to", self.splitter_socket.getpeername())
+        tmp = number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
+        _print_("The size of the team is", number_of_peers, "(apart from me)")
 
         while number_of_peers > 0:
             message = self.splitter_socket.recv(struct.calcsize("4sH"))
@@ -102,13 +52,15 @@ class Peer_DBS(Peer_IMS):
             peer = (IP_addr, port)
             #self.say_hello(peer, team_socket)
             if __debug__:
-                print("[%5d]" % number_of_peers, peer)
+                _print_("[%5d]" % number_of_peers, peer)
+            else:
+                _print_("{:.2%}\r".format((tmp-number_of_peers)/tmp), end='')
+
             self.peer_list.append(peer)
             self.debt[peer] = 0
             number_of_peers -= 1
 
-        if __debug__:
-            print(1, "List of peers received")
+        _print_("List of peers received")
         sys.stdout.write(Color.none)
 
         # }}}
@@ -369,6 +321,57 @@ class Peer_DBS(Peer_IMS):
 
         self.run()
 
+        # }}}
+
+    def __init__(self):
+        # {{{
+
+        threading.Thread.__init__(self)
+
+        print("Running in", end=' ')
+        if __debug__:
+            print("debug mode")
+        else:
+            print("release mode")
+
+        self.print_modulename()
+
+        print("Player port =", self.PLAYER_PORT)
+        #print("Splitter IP address =", self.SPLITTER_ADDR)
+        #print("Splitter port =", self.SPLITTER_PORT)
+        #print("(Team) Port =", self.TEAM_PORT)
+
+        self.peer_list = []
+#        self.buffer_size = 0
+        self.player_alive = True
+        self.played_chunk = 0
+        self.chunk_size = 0
+
+        # Number of times that the previous received chunk has been sent
+        # to the team. If this counter is smaller than the number
+        # of peers in the team, the previous chunk must be sent in the
+        # burst mode because a new chunk from the splitter has arrived
+        # and the previous received chunk has not been sent to all the
+        # peers of the team. This can happen when one o more chunks
+        # that were routed towards this peer have been lost.
+        self.receive_and_feed_counter = 0
+
+        # This "private and static" variable holds the previous chunk
+        # received from the splitter. It is used to send the previous
+        # received chunk in the congestion avoiding mode. In that
+        # mode, the peer sends a chunk only when it received a chunk
+        # from another peer or om the splitter.
+        self.receive_and_feed_previous = ""
+        self.received = []
+        self.debt = {}
+
+        self.sendto_counter = 0
+        self.recvfrom_counter = 0
+
+        #self.pipe_thread_end, self.pipe_main_end = Pipe()
+        #self.buffering = True
+        self.buffering = threading.Event()
+        
         # }}}
 
     # }}}
