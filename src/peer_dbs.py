@@ -87,7 +87,7 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
         
-    def setup_team_socket(self): # LLamar listen_to_the_team ???
+    def listen_to_the_team(self):
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
         self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -257,29 +257,22 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
 
-    def peers_life(self):
+    def keep_the_buffer_full(self):
         # {{{
 
-        while self.player_alive:
-            self.keep_the_buffer_full()
-            if (self.played_chunk % self.debt_memory) == 0:
-                for i in self.debt:
-                    self.debt[i] /= 2
+        supper(Peer_DBS, self).keep_the_buffer_full()
+        if (self.played_chunk % self.debt_memory) == 0:
+            for i in self.debt:
+                self.debt[i] /= 2
 
-            if __debug__:
-                for i in xrange(self.buffer_size):
-                    if self.received[i]:
-                        sys.stdout.write(str(i%10))
-                    else:
-                        sys.stdout.write('.')
-                print
-                sys.stdout.write(Color.cyan)
-                print ("Number of peers in the team:", len(self.peer_list)+1)
-                print (self.team_socket.getsockname(),)
-                for p in self.peer_list:
-                    print (p,)
-                print
-                sys.stdout.write(Color.none)
+        if __debug__:
+            sys.stdout.write(Color.cyan)
+            print ("Number of peers in the team:", len(self.peer_list)+1)
+            print (self.team_socket.getsockname(),)
+            for p in self.peer_list:
+                print (p,)
+            print
+            sys.stdout.write(Color.none)
 
         # }}}
 
@@ -295,58 +288,25 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
 
+    def configure(self):
+        supper(Peer_DBS, self).configure()
+        self.retrieve_the_list_of_peers()
+        
     def run(self):
         # {{{
 
-        self.wait_for_the_player()
-        self.connect_to_the_splitter()
-        self.receive_the_header()
-        self.receive_the_buffersize()
-        self.receive_the_chunksize()
-        self.receive_the_debt_memory()
-        self.receive_the_debt_threshold()
-        self.setup_team_socket()
-        self.retrieve_the_list_of_peers()
-        self.splitter_socket.close()
-        self.create_buffer()
-        self.buffer_data()
-        self.buffering.set()
-        self.buffering = False
-        self.peers_life()
+        supper(Peer_DBS, self).peers_life()
         self.polite_farewell()
-
-        # }}}
-
-    def start(self):
-        # {{{
-
-        self.run()
 
         # }}}
 
     def __init__(self):
         # {{{
 
-        threading.Thread.__init__(self)
+        supper(Peer_DBS, self).__init__()
 
-        print("Running in", end=' ')
-        if __debug__:
-            print("debug mode")
-        else:
-            print("release mode")
-
-        self.print_modulename()
-
-        print("Player port =", self.PLAYER_PORT)
-        #print("Splitter IP address =", self.SPLITTER_ADDR)
-        #print("Splitter port =", self.SPLITTER_PORT)
-        #print("(Team) Port =", self.TEAM_PORT)
-
+        # The list of peers structure.        
         self.peer_list = []
-#        self.buffer_size = 0
-        self.player_alive = True
-        self.played_chunk = 0
-        self.chunk_size = 0
 
         # Number of times that the previous received chunk has been sent
         # to the team. If this counter is smaller than the number
@@ -363,15 +323,13 @@ class Peer_DBS(Peer_IMS):
         # mode, the peer sends a chunk only when it received a chunk
         # from another peer or om the splitter.
         self.receive_and_feed_previous = ""
-        self.received = []
         self.debt = {}
 
         self.sendto_counter = 0
-        self.recvfrom_counter = 0
 
         #self.pipe_thread_end, self.pipe_main_end = Pipe()
         #self.buffering = True
-        self.buffering = threading.Event()
+        #self.buffering = threading.Event()
         
         # }}}
 

@@ -111,6 +111,13 @@ class Peer_IMS(threading.Thread):
         
         # }}}
 
+    def disconnect_from_the_splitter(self):
+        # {{{
+
+        self.splitter_socket.close()
+
+        # }}}
+        
     def receive_the_mcast_endpoint(self):
         # {{{
         message = self.splitter_socket.recv(struct.calcsize("4sH"))
@@ -180,7 +187,7 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def listen_the_mcast_channel(self):  # LLamar listen_to_the_team ???
+    def listen_to_the_team(self):
         # {{{ Create "team_socket" (UDP) for using the multicast channel
 
         #self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -206,7 +213,7 @@ class Peer_IMS(threading.Thread):
         
         # }}}
 
-    def receive_a_chunk(self): # LLamar process_a_chunk ???
+    def receive_a_chunk(self): # LLamar receive()
         # {{{
         try:
             # {{{ Receive a chunk
@@ -318,25 +325,23 @@ class Peer_IMS(threading.Thread):
         # Play the next chunk
         self.play_next_chunk()
 
+        if __debug__:
+            for i in xrange(self.buffer_size):
+                if self.received[i]:
+                    sys.stdout.write(str(i%10))
+                else:
+                    sys.stdout.write('.')
+            print
+            print (self.team_socket.getsockname(),)
+            sys.stdout.write(Color.none)
+
         # }}}
 
     def peers_life(self):
         # {{{
 
-        sys.stdout.flush()
-        
         while self.player_alive:
             self.keep_the_buffer_full()
-
-            if __debug__:
-                for i in xrange(self.buffer_size):
-                    if self.received[i]:
-                        sys.stdout.write(str(i%10))
-                    else:
-                        sys.stdout.write('.')
-                print
-                print (self.team_socket.getsockname(),)
-                sys.stdout.write(Color.none)
 
         # }}}
 
@@ -347,9 +352,7 @@ class Peer_IMS(threading.Thread):
         self.receive_the_chunk_size()
         self.receive_the_header()
         self.receive_the_buffer_size()
-        #self.receive_the_mcast_channel()
-        self.listen_the_mcast_channel()
-        self.splitter_socket.close()
+        self.listen_to_the_team()
         self.create_the_buffer()
 
         # }}}
@@ -357,7 +360,7 @@ class Peer_IMS(threading.Thread):
     def run(self):
         # {{{
 
-        sys.stdout.flush()
+        #sys.stdout.flush()
         
         #self.connect_to_the_splitter()
         #self.buffering.clear()

@@ -68,7 +68,8 @@ class Peer():
         peer.player_connection.wait()
         peer.connect_to_the_splitter()
         mcast_endpoint = peer.receive_the_mcast_endpoint()
-
+        
+        # A mcast_endpoint is always received, even for DBS peers.
         if mcast_endpoint[ADDR] == '0.0.0.0':
             # {{{ This is a "unicast" peer.
 
@@ -102,6 +103,7 @@ class Peer():
         # {{{ Run!
 
         peer.configure()
+        peer.disconnect_from_the_splitter()
         peer.buffer_data()
         peer.start()
         #peer.buffering.wait()
@@ -112,8 +114,8 @@ class Peer():
         print("|       (Expected values are between parenthesis)     |")
         print("------------------------------------------------------+")
         print()
-        print("      Time |        Received |             Sent | Team description")
-        print("-----------+-----------------+------------------+-----------------")
+        print("    Time |        Received |             Sent | Team description")
+        print("---------+-----------------+------------------+-----------------")
 
         last_chunk_number = peer.played_chunk
         if hasattr(peer, 'sendto_counter'):
