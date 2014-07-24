@@ -235,7 +235,7 @@ class Peer_IMS(threading.Thread):
 
             self.chunks[chunk_number % self.buffer_size] = chunk
             self.received[chunk_number % self.buffer_size] = True
-            self.numbers[chunk_number % self.buffer_size] = chunk_number # Ojo
+            #self.numbers[chunk_number % self.buffer_size] = chunk_number # Ojo
 
             return chunk_number
 
@@ -247,6 +247,7 @@ class Peer_IMS(threading.Thread):
 
     def create_the_buffer(self):
         # {{{ The buffer of chunks is a structure that is used to delay
+
         # the playback of the chunks in order to accommodate the
         # network jittter. Two components are needed: (1) the "chunks"
         # buffer that stores the received chunks and (2) the
@@ -258,7 +259,7 @@ class Peer_IMS(threading.Thread):
         
         self.chunks = [""]*self.buffer_size
         self.received = [False]*self.buffer_size
-        self.numbers = [0]*self.buffer_size # Ojo
+        #self.numbers = [0]*self.buffer_size # Ojo
 
         # }}}
 

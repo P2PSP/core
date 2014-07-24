@@ -105,13 +105,12 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
 
-    def receive_and_feed(self): # LLamar process_a_chunk ???
+    def receive_a_chunk_and_feed(self):
         # {{{
 
         try:
             # {{{ Receive and send
 
-            chunk_format_string = "H" + str(self.chunk_size) + "s"
             message, sender = self.team_socket.recvfrom(struct.calcsize(chunk_format_string))
             self.recvfrom_counter += 1
             #self.recvfrom_counter %= MAX_CHUNK_NUMBER
@@ -130,7 +129,7 @@ class Peer_DBS(Peer_IMS):
 
                 self.chunks[chunk_number % self.buffer_size] = chunk
                 self.received[chunk_number % self.buffer_size] = True
-                self.numbers[chunk_number % self.buffer_size] = chunk_number
+                #self.numbers[chunk_number % self.buffer_size] = chunk_number
 
                 if sender == self.splitter:
                     # {{{ Send the previous chunk in burst sending
@@ -226,6 +225,7 @@ class Peer_DBS(Peer_IMS):
 
                     # }}}
                 # }}}
+                
                 return chunk_number
 
                 # }}}
@@ -281,7 +281,7 @@ class Peer_DBS(Peer_IMS):
 
         print('Goodbye!')
         for x in xrange(3):
-            self.receive_and_feed()
+            self.receive_a_chunk_and_feed()
             self.say_goodbye(self.splitter)
         for peer in self.peer_list:
             self.say_goodbye(peer)
