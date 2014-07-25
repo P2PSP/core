@@ -18,9 +18,9 @@ class Splitter_IMS(threading.Thread):
 
     # {{{ Class "constants"
 
-    # {{{ ??? The buffer_size (in chunks). The buffer_size
-    # should be proportional to the bit-rate and the latency is
-    # proportional to the buffer_size.
+    # {{{ The buffer_size (in chunks). The buffer_size should be
+    # proportional to the bit-rate and the latency is proportional to
+    # the buffer_size.
     # }}}
     BUFFER_SIZE = 256
 
@@ -195,10 +195,11 @@ class Splitter_IMS(threading.Thread):
         # team, first it must establish a TCP connection with the
         # splitter.
         
-        sys.stdout.write(Color.green)
         sock = connection[0]
         peer = connection[1]
+        sys.stdout.write(Color.green)
         print(sock.getsockname(), '\b: accepted connection from peer', peer)
+        sys.stdout.write(Color.none)
         self.send_the_mcast_channel(sock)
         self.send_the_header_size(sock)
         self.send_the_chunk_size(sock)
@@ -206,7 +207,6 @@ class Splitter_IMS(threading.Thread):
         self.send_the_buffer_size(sock)
         sock.close()
         #self.append_peer(peer)
-        sys.stdout.write(Color.none)
 
         # }}}
 
