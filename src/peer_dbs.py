@@ -111,25 +111,12 @@ class Peer_DBS(Peer_IMS):
         try:
             # {{{ Receive and send
 
-            message, sender = self.team_socket.recvfrom(struct.calcsize(chunk_format_string))
-            self.recvfrom_counter += 1
-            #self.recvfrom_counter %= MAX_CHUNK_NUMBER
-
-            # {{{ debug
-            if __debug__:
-                print (Color.cyan, "Received a message from", sender, \
-                    "of length", len(message), Color.none)
-            # }}}
+            message, sender = self.receive_the_chunk()
 
             if len(message) == struct.calcsize(chunk_format_string):
                 # {{{ A video chunk has been received
 
-                number, chunk = struct.unpack(chunk_format_string, message)
-                chunk_number = socket.ntohs(number)
-
-                self.chunks[chunk_number % self.buffer_size] = chunk
-                self.received[chunk_number % self.buffer_size] = True
-                #self.numbers[chunk_number % self.buffer_size] = chunk_number
+                chunk_number = self.unpack_and_store_chunk(message)
 
                 if sender == self.splitter:
                     # {{{ Send the previous chunk in burst sending
@@ -289,8 +276,12 @@ class Peer_DBS(Peer_IMS):
         # }}}
 
     def configure(self):
+        # {{{
+
         supper(Peer_DBS, self).configure()
         self.retrieve_the_list_of_peers()
+
+        # }}}
         
     def run(self):
         # {{{

@@ -213,30 +213,47 @@ class Peer_IMS(threading.Thread):
         
         # }}}
 
-    def receive_a_chunk(self): # LLamar receive()
+    def unpack_and_store_chunk(self, message):
+        # {{{
+
+        number, chunk = struct.unpack(self.chunk_format_string, message)
+        chunk_number = socket.ntohs(number)
+
+        self.chunks[chunk_number % self.buffer_size] = chunk
+        self.received[chunk_number % self.buffer_size] = True
+        #self.numbers[chunk_number % self.buffer_size] = chunk_number # Ojo
+
+        return chunk_number
+
+        # }}}
+        
+    def receive_the_chunk(self):
+        # {{{
+
+        if __debug__:
+            print ("Waiting for a chunk at {} ...".format(self.team_socket.getsockname()))
+
+        message, sender = self.team_socket.recvfrom(struct.calcsize(self.chunk_format_string))
+        self.recvfrom_counter += 1
+
+        # {{{ debug
+        if __debug__:
+            print (Color.cyan, "Received a message from", sender, \
+                "of length", len(message), Color.none)
+        # }}}
+
+        return message, sender
+
+        # }}}
+        
+    def receive_a_chunk(self):
         # {{{
         try:
             # {{{ Receive a chunk
 
-            if __debug__:
-                print ("Waiting for a chunk at {} ...".format(self.team_socket.getsockname()))
-
-            message, sender = self.team_socket.recvfrom(struct.calcsize(self.chunk_format_string))
-            self.recvfrom_counter += 1
-
-            # {{{ debug
-            if __debug__:
-                print (Color.cyan, "Received a message from", sender, \
-                    "of length", len(message), Color.none)
-            # }}}
-
-            number, chunk = struct.unpack(self.chunk_format_string, message)
-            chunk_number = socket.ntohs(number)
-
-            self.chunks[chunk_number % self.buffer_size] = chunk
-            self.received[chunk_number % self.buffer_size] = True
-            #self.numbers[chunk_number % self.buffer_size] = chunk_number # Ojo
-
+            message, sender = self.receive_the_chunk()
+            chunk_number = self.unpack_and_store_chunk(message)
+            
             return chunk_number
 
             # }}}
