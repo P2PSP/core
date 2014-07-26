@@ -51,6 +51,29 @@ class Splitter():
 
         args = parser.parse_known_args()[0]
 
+        if args.buffer_size:
+            Splitter_IMS.BUFFER_SIZE = int(args.buffer_size)
+
+        if args.channel:
+            print("---------------->", Splitter_IMS.CHANNEL)
+            Splitter_IMS.CHANNEL = args.channel
+            print("---------------->", Splitter_IMS.CHANNEL)
+
+        if args.chunk_size:
+            Splitter_IMS.CHUNK_SIZE = int(args.chunk_size)
+
+        if args.header_size:
+            Splitter_IMS.HEADER_SIZE = int(args.header_size)
+
+        if args.port:
+            Splitter_IMS.PORT = int(args.port)
+
+        if args.source_addr:
+            Splitter_IMS.SOURCE_HOST = socket.gethostbyname(args.source_addr)
+
+        if args.source_port:
+            Splitter_IMS.SOURCE_PORT = int(args.source_port)
+
         if args.mcast:
             splitter = Splitter_IMS()
 
@@ -64,29 +87,6 @@ class Splitter():
 
             if args.losses_threshold:
                 splitter.LOSSES_THRESHOLD = int(args.losses_threshold)
-
-        if args.buffer_size:
-            splitter.BUFFER_SIZE = int(args.buffer_size)
-
-        if args.channel:
-            print("---------------->", splitter.CHANNEL)
-            splitter.CHANNEL = args.channel
-            print("---------------->", splitter.CHANNEL)
-
-        if args.chunk_size:
-            splitter.CHUNK_SIZE = int(args.chunk_size)
-
-        if args.header_size:
-            splitter.HEADER_SIZE = int(args.header_size)
-
-        if args.port:
-            splitter.PORT = int(args.port)
-
-        if args.source_addr:
-            splitter.SOURCE_HOST = socket.gethostbyname(args.source_addr)
-
-        if args.source_port:
-            splitter.SOURCE_PORT = int(args.source_port)
 
         # }}}
 

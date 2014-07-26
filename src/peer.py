@@ -12,7 +12,6 @@ import argparse
 from color import Color
 import threading
 from lossy_socket import lossy_socket
-#from multiprocessing import Pipe
 import common
 from _print_ import _print_
 
