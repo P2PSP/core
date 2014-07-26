@@ -17,76 +17,79 @@ from splitter_dbs import Splitter_DBS
 
 # }}}
 
-if __name__ == "__main__":
+class Splitter():
 
-    # {{{ Args parsing
+    def __init__(self):
 
-    parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP team.')
+        # {{{ Args parsing
 
-    #parser.add_argument('--splitter_addr', help='IP address to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR)) <- no ahora
+        parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP team.')
 
-    parser.add_argument('--buffer_size', help='size of the video buffer in blocks. Default = {}.'.format(Splitter_IMS.BUFFER_SIZE))
+        #parser.add_argument('--splitter_addr', help='IP address to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR)) <- no ahora
 
-    parser.add_argument('--channel', help='Name of the channel served by the streaming source. Default = "{}".'.format(Splitter_IMS.CHANNEL))
+        parser.add_argument('--buffer_size', help='size of the video buffer in blocks. Default = {}.'.format(Splitter_IMS.BUFFER_SIZE))
 
-    parser.add_argument('--chunk_size', help='Chunk size in bytes. Default = {}.'.format(Splitter_IMS.CHUNK_SIZE))
+        parser.add_argument('--channel', help='Name of the channel served by the streaming source. Default = "{}".'.format(Splitter_IMS.CHANNEL))
 
-    parser.add_argument('--header_size', help='Size of the header of the stream in chunks. Default = {}.'.format(Splitter_IMS.HEADER_SIZE))
+        parser.add_argument('--chunk_size', help='Chunk size in bytes. Default = {}.'.format(Splitter_IMS.CHUNK_SIZE))
 
-    parser.add_argument('--losses_memory', help='Number of chunks to divide by two the losses counters. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_MEMORY))
+        parser.add_argument('--header_size', help='Size of the header of the stream in chunks. Default = {}.'.format(Splitter_IMS.HEADER_SIZE))
 
-    parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_THRESHOLD))
+        parser.add_argument('--losses_memory', help='Number of chunks to divide by two the losses counters. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_MEMORY))
 
-    parser.add_argument("--mcast", action="store_true", help="Enables IP multicast.")
+        parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_THRESHOLD))
 
-    parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks. Makes sense only in multicast mode. Default = "{}".'.format(Splitter_IMS.MCAST_ADDR))
+        parser.add_argument("--mcast", action="store_true", help="Enables IP multicast.")
 
-    parser.add_argument('--port', help='Port to serve the peers. Default = "{}".'.format(Splitter_IMS.PORT))
+        parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks. Makes sense only in multicast mode. Default = "{}".'.format(Splitter_IMS.MCAST_ADDR))
 
-    parser.add_argument('--source_addr', help='IP address of the streaming server. Default = "{}".'.format(Splitter_IMS.SOURCE_HOST))
+        parser.add_argument('--port', help='Port to serve the peers. Default = "{}".'.format(Splitter_IMS.PORT))
 
-    parser.add_argument('--source_port', help='Port where the streaming server is listening. Default = {}.'.format(Splitter_IMS.SOURCE_PORT))
+        parser.add_argument('--source_addr', help='IP address of the streaming server. Default = "{}".'.format(Splitter_IMS.SOURCE_HOST))
 
-    args = parser.parse_known_args()[0]
+        parser.add_argument('--source_port', help='Port where the streaming server is listening. Default = {}.'.format(Splitter_IMS.SOURCE_PORT))
 
-    if args.mcast:
-        splitter = Splitter_IMS()
+        args = parser.parse_known_args()[0]
 
-        if args.mcast_addr:
-            splitter.MCAST_ADDR = args.mcast_addr
-    else:
-        splitter = Splitter_DBS()
+        if args.mcast:
+            splitter = Splitter_IMS()
 
-        if args.losses_memory:
-            splitter.LOSSES_MEMORY = int(args.losses_memory)
+            if args.mcast_addr:
+                splitter.MCAST_ADDR = args.mcast_addr
+        else:
+            splitter = Splitter_DBS()
 
-        if args.losses_threshold:
-            splitter.LOSSES_THRESHOLD = int(args.losses_threshold)
+            if args.losses_memory:
+                splitter.LOSSES_MEMORY = int(args.losses_memory)
 
-    if args.buffer_size:
-        splitter.BUFFER_SIZE = int(args.buffer_size)
+            if args.losses_threshold:
+                splitter.LOSSES_THRESHOLD = int(args.losses_threshold)
 
-    if args.channel:
-        splitter.CHANNEL = args.channel
+        if args.buffer_size:
+            splitter.BUFFER_SIZE = int(args.buffer_size)
 
-    if args.chunk_size:
-        splitter.CHUNK_SIZE = int(args.chunk_size)
+        if args.channel:
+            print("---------------->", splitter.CHANNEL)
+            splitter.CHANNEL = args.channel
+            print("---------------->", splitter.CHANNEL)
 
-    if args.header_size:
-        splitter.HEADER_SIZE = int(args.header_size)
+        if args.chunk_size:
+            splitter.CHUNK_SIZE = int(args.chunk_size)
 
-    if args.port:
-        splitter.PORT = int(args.port)
+        if args.header_size:
+            splitter.HEADER_SIZE = int(args.header_size)
 
-    if args.source_addr:
-        splitter.SOURCE_HOST = socket.gethostbyname(args.source_addr)
+        if args.port:
+            splitter.PORT = int(args.port)
 
-    if args.source_port:
-        splitter.SOURCE_PORT = int(args.source_port)
+        if args.source_addr:
+            splitter.SOURCE_HOST = socket.gethostbyname(args.source_addr)
 
-    # }}}
+        if args.source_port:
+            splitter.SOURCE_PORT = int(args.source_port)
 
-    def main():
+        # }}}
+
         # {{{
 
         splitter.start()
@@ -196,4 +199,4 @@ if __name__ == "__main__":
 
         # }}}
 
-    main()
+x = Splitter()

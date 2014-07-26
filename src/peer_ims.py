@@ -48,7 +48,7 @@ class Peer_IMS(threading.Thread):
         try:
             self.player_socket.sendall(self.chunks[chunk % self.buffer_size])
         except socket.error, e:
-            print(e)
+            #print(e)
             _print_("Player disconected!")
             self.player_alive = False
 

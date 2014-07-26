@@ -362,24 +362,9 @@ class Splitter_DBS(Splitter_IMS):
     def run(self):
         # {{{
 
-        try:
-            self.setup_peer_connection_socket()
-        except Exception, e:
-            print(e)
-            print(self.peer_connection_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT))
-            sys.exit('')
-
-        try:
-            self.setup_team_socket()
-        except Exception, e:
-            print(e)
-            print(self.team_socket.getsockname(), "\b: unable to bind", (self.TEAM_ADDR, self.TEAM_PORT))
-            sys.exit('')
-
-        source_socket = self.request_video()
-
-        for i in xrange(self.HEADER_CHUNKS):
-            self.header += self.receive_next_chunk(source_socket, 0)[0]
+        self.configure_sockets()
+        source_socket = self.request_the_video_from_the_source()
+        self.load_the_video_header(source_socket)
 
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
         def _():
@@ -391,7 +376,6 @@ class Splitter_DBS(Splitter_IMS):
         threading.Thread(target=self.reset_counters_thread).start()
 
         header_length = 0
-
         while self.alive:
             # Receive data from the source
             chunk, source_socket, header_length = self.receive_next_chunk(source_socket, header_length)
@@ -401,12 +385,13 @@ class Splitter_DBS(Splitter_IMS):
                 self.header += chunk
                 header_length -= 1
 
+            message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
+
             try:
                 peer = self.peer_list[self.peer_number] # Ojo, esto nunca deberia provocar una excepcion
             except KeyError:
                 pass
 
-            message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
             self.team_socket.sendto(message, peer)
 
             if __debug__:
