@@ -20,8 +20,10 @@ class Splitter_IMS(threading.Thread):
     # {{{ Class "constants"
 
     # {{{ The buffer_size (in chunks). The buffer_size should be
+
     # proportional to the bit-rate and the latency is proportional to
     # the buffer_size.
+
     # }}}
     BUFFER_SIZE = 256
 
@@ -284,7 +286,7 @@ class Splitter_IMS(threading.Thread):
     def receive_next_chunk(self, header_length):
         # {{{
 
-        print(self.source_socket.getpeername())
+        #print(self.source_socket.getpeername())
         data = self.source_socket.recv(self.CHUNK_SIZE)
         prev_size = 0
         while len(data) < self.CHUNK_SIZE:
@@ -298,7 +300,7 @@ class Splitter_IMS(threading.Thread):
                 time.sleep(1)
                 self.source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.source_socket.connect(self.source)
-                print(self.source_socket.getpeername())
+                #print(self.source_socket.getpeername())
                 self.source_socket.sendall(self.GET_message)
                 self.header = ""
                 header_length = self.HEADER_SIZE
@@ -340,28 +342,35 @@ class Splitter_IMS(threading.Thread):
 
         # }}}
 
-    def receive_and_refresh_the_header(self, header_length): # Sin usar
-        
+    def receive_chunk(self, header_length):
+        # {{{
+
         chunk, header_length = self.receive_next_chunk(header_length)
 
         if header_length > 0:
-            print("Header length =", header_length)
+            #print("Header length =", header_length)
             self.header += chunk
             header_length -= 1
 
         return chunk
 
-    def send_chunk(self, chunk): # Sin usar
+        # }}}
+
+    def send_chunk(self, chunk):
+        # {{{
+
         message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
         self.team_socket.sendto(message, self.multicast_channel)
 
         if __debug__:
             print('%5d' % self.chunk_number, Color.red, '->', Color.none, self.multicast_channel)
             sys.stdout.flush()
-        
-    
-    def receive_and_send_a_chunk(self, header_length):
-            
+
+        # }}}
+
+    def receive_and_send_a_chunk(self, header_length): # Sin usar
+        # {{{
+
         # Receive data from the source
         chunk, header_length = self.receive_next_chunk(header_length)
 
@@ -377,6 +386,8 @@ class Splitter_IMS(threading.Thread):
             print('%5d' % self.chunk_number, Color.red, '->', Color.none, self.multicast_channel)
             sys.stdout.flush()
 
+        # }}}
+
     def run(self):
         # {{{
 
@@ -390,8 +401,8 @@ class Splitter_IMS(threading.Thread):
 
         header_length = 0
         while self.alive:
-            self.receive_and_send_a_chunk(header_length)
-            #self.send(self.receive(header_length))
+            #self.receive_and_send_a_chunk(header_length)
+            self.send_chunk(self.receive_chunk(header_length))
             self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
 
         # }}}
