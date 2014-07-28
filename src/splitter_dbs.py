@@ -362,9 +362,7 @@ class Splitter_DBS(Splitter_IMS):
     def run(self):
         # {{{
 
-        self.configure_sockets()
-        source_socket = self.request_the_video_from_the_source()
-        self.load_the_video_header(source_socket)
+        self.receive_the_header()
 
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
         def _():
@@ -375,29 +373,18 @@ class Splitter_DBS(Splitter_IMS):
         threading.Thread(target=self.moderate_the_team).start()
         threading.Thread(target=self.reset_counters_thread).start()
 
-        header_length = 0
+        header_load_counter = 0
         while self.alive:
-            # Receive data from the source
-            chunk, source_socket, header_length = self.receive_next_chunk(source_socket, header_length)
 
-            if header_length > 0:
-                print("Header length =", header_length)
-                self.header += chunk
-                header_length -= 1
-
-            message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
+            chunk = (self.receive_chunk(header_load_counter)
 
             try:
                 peer = self.peer_list[self.peer_number] # Ojo, esto nunca deberia provocar una excepcion
             except KeyError:
                 pass
 
-            self.team_socket.sendto(message, peer)
-
-            if __debug__:
-                print('%5d' % self.chunk_number, Color.red, '->', Color.none, peer)
-                sys.stdout.flush()
-
+            self.send_chunk(chunk, peer)
+            
             self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
             self.chunk_number = (self.chunk_number + 1) % MAX_CHUNK_NUMBER
             self.peer_number = (self.peer_number + 1) % len(self.peer_list)

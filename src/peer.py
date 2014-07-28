@@ -49,19 +49,19 @@ class Peer():
 
         if args.splitter_host:
             Peer_IMS.SPLITTER_HOST = socket.gethostbyname(args.splitter_host)
-            print ('SPLITTER_HOST = ', Peer_IMS.SPLITTER_HOST)
+            print ('SPLITTER_HOST =', Peer_IMS.SPLITTER_HOST)
 
         if args.splitter_port:
             Peer_IMS.SPLITTER_PORT = int(args.splitter_port)
-            print ('SPLITTER_PORT = ', Peer_IMS.SPLITTER_PORT)
+            print ('SPLITTER_PORT =', Peer_IMS.SPLITTER_PORT)
 
         if args.team_port:
             Peer_IMS.TEAM_PORT = int(args.team_port)
-            print ('TEAM_PORT= ', Peer_IMS.TEAM_PORT)
+            print ('TEAM_PORT =', Peer_IMS.TEAM_PORT)
 
         if args.player_port:
             Peer_IMS.PLAYER_PORT = int(args.player_port)
-            print ('PLAYER_PORT = ', Peer_IMS.PLAYER_PORT)
+            print ('PLAYER_PORT =', Peer_IMS.PLAYER_PORT)
 
         peer = Peer_IMS()
         peer.player_connection.wait()
@@ -78,7 +78,7 @@ class Peer():
             else:
                 if args.chunk_loss_period:
                     Peer_DBS.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
-                    print ('chunk_loss_period =', Peer_DBS.CHUNK_LOSS_PERIOD)
+                    print ('CHUNK_LOSS_PERIOD =', Peer_DBS.CHUNK_LOSS_PERIOD)
                     if int(args.chunk_loss_period) != 0:
                         peer = Lossy_Peer()
                     else:

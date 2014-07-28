@@ -118,7 +118,7 @@ class Splitter_IMS(threading.Thread):
         self.GET_message = 'GET /' + self.CHANNEL + ' HTTP/1.1\r\n'
         self.GET_message += '\r\n'
         self.chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
-        self.multicast_channel = (self.MCAST_ADDR, self.PORT)
+        self.mcast_channel = (self.MCAST_ADDR, self.PORT)
         
         # }}}
 
@@ -283,18 +283,19 @@ class Splitter_IMS(threading.Thread):
 
         # }}}
 
-    def receive_next_chunk(self, header_length):
+    def receive_next_chunk(self, header_load_counter):
         # {{{
 
         #print(self.source_socket.getpeername())
-        data = self.source_socket.recv(self.CHUNK_SIZE)
+        chunk = self.source_socket.recv(self.CHUNK_SIZE)
         prev_size = 0
-        while len(data) < self.CHUNK_SIZE:
-            if len(data) == prev_size:
+        while len(chunk) < self.CHUNK_SIZE:
+            print("------------------->", len(chunk))
+            if len(chunk) == prev_size:
                 # This section of code is reached when the streaming
                 # server (Icecast) finishes a stream and starts with
                 # the following one.
-                #print('?', end='')
+                print('?', end='')
                 sys.stdout.flush()
                 self.source_socket.close()
                 time.sleep(1)
@@ -303,11 +304,11 @@ class Splitter_IMS(threading.Thread):
                 #print(self.source_socket.getpeername())
                 self.source_socket.sendall(self.GET_message)
                 self.header = ""
-                header_length = self.HEADER_SIZE
-                #data = ""
-            prev_size = len(data)
-            data += self.source_socket.recv(self.CHUNK_SIZE - len(data))
-        return data, header_length
+                header_load_counter = self.HEADER_SIZE
+                chunk = ""
+            prev_size = len(chunk)
+            chunk += self.source_socket.recv(self.CHUNK_SIZE - len(chunk))
+        return chunk, header_load_counter
 
         # }}}
 
@@ -342,67 +343,70 @@ class Splitter_IMS(threading.Thread):
 
         # }}}
 
-    def receive_chunk(self, header_length):
+    def receive_chunk(self, header_load_counter):
         # {{{
 
-        chunk, header_length = self.receive_next_chunk(header_length)
+        chunk, header_load_counter = self.receive_next_chunk(header_load_counter)
 
-        if header_length > 0:
-            #print("Header length =", header_length)
+        if header_load_counter > 0:
+            print("Loaded", len(self.header), "bytes of header")
             self.header += chunk
-            header_length -= 1
+            header_load_counter -= 1
 
         return chunk
 
         # }}}
 
-    def send_chunk(self, chunk):
+    def send_chunk(self, chunk, mcast_channel):
         # {{{
 
         message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
-        self.team_socket.sendto(message, self.multicast_channel)
+        self.team_socket.sendto(message, self.mcast_channel)
 
         if __debug__:
-            print('%5d' % self.chunk_number, Color.red, '->', Color.none, self.multicast_channel)
+            print('%5d' % self.chunk_number, Color.red, '->', Color.none, self.mcast_channel)
             sys.stdout.flush()
 
         # }}}
 
-    def receive_and_send_a_chunk(self, header_length): # Sin usar
+    def receive_and_send_a_chunk(self, header_load_counter): # Sin usar
         # {{{
 
         # Receive data from the source
-        chunk, header_length = self.receive_next_chunk(header_length)
+        chunk, header_load_counter = self.receive_next_chunk(header_load_counter)
 
-        if header_length > 0:
-            print("Header length =", header_length)
+        if header_load_counter > 0:
+            print("Header load counter =", header_load_counter)
             self.header += chunk
-            header_length -= 1
+            header_load_counter -= 1
 
         message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
-        self.team_socket.sendto(message, self.multicast_channel)
+        self.team_socket.sendto(message, self.mcast_channel)
 
         if __debug__:
-            print('%5d' % self.chunk_number, Color.red, '->', Color.none, self.multicast_channel)
+            print('%5d' % self.chunk_number, Color.red, '->', Color.none, self.mcast_channel)
             sys.stdout.flush()
 
         # }}}
 
-    def run(self):
-        # {{{
-
+    def receive_the_header(self):
         self.configure_sockets()
         self.request_the_video_from_the_source()
         self.load_the_video_header()
 
+    def run(self):
+        # {{{
+
+        self.receive_the_header()
+        
         print(self.peer_connection_socket.getsockname(), "\b: waiting for a peer ...")
         self.handle_a_peer_arrival(self.peer_connection_socket.accept())
         threading.Thread(target=self.handle_arrivals).start()
 
-        header_length = 0
+        header_load_counter = 0
         while self.alive:
-            #self.receive_and_send_a_chunk(header_length)
-            self.send_chunk(self.receive_chunk(header_length))
+            #self.receive_and_send_a_chunk(header_load_counter)
+            self.send_chunk(self.receive_chunk(header_load_counter), self.mcast_channel)
             self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
 
         # }}}
