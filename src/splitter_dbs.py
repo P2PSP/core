@@ -86,12 +86,24 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def send_you_are_a_monitor(self, peer_serve_socket, yes_or_not):
+    def are_you_a_monitor(self):
+        # {{{
+
+        self.number_of_monitors += 1
+        if self.number_of_monitors < self.MAX_NUMBER_OF_MONITORS:
+            return True
+        else:
+            self.number_of_monitors = self.MAX_NUMBER_OF_MONITORS
+            return False
+
+        # }}}
+
+    def send_you_are_a_monitor(self, peer_serve_socket):
         # {{{
         
         if __debug__:
             print("Sending that your are the monitor peer", peer_serve_socket.getpeername())
-        if yes_or_not:
+        if self.you_are_a_monitor():
             message = struct.pack("c", 255)
         else:
             message = struct.pack("c", 0)
@@ -123,18 +135,6 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def are_you_a_monitor(self):
-        # {{{
-
-        self.number_of_monitors += 1
-        if self.number_of_monitors < self.MAX_NUMBER_OF_MONITORS:
-            return True
-        else:
-            self.number_of_monitors = self.MAX_NUMBER_OF_MONITORS
-            return False
-
-        # }}}
-
     # Pensar en reutilizar Splitter_IMS.handle_peer_arrival()
     # concatenando las llamadas a las funciones.
     
@@ -149,7 +149,7 @@ class Splitter_DBS(Splitter_IMS):
         # }}}
 
         sock = connection[0]
-        self.send_you_are_a_monitor(sock, self.are_you_a_monitor())
+        self.send_you_are_a_monitor(sock)
         #self.send_the_debt_memory(sock)
         #self.send_the_debt_threshold(sock)
         self.send_the_list_size(sock)

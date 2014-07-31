@@ -35,9 +35,9 @@ class Splitter():
 
         parser.add_argument('--header_size', help='Size of the header of the stream in chunks. Default = {}.'.format(Splitter_IMS.HEADER_SIZE))
 
-        parser.add_argument('--losses_memory', help='Number of chunks to divide by two the losses counters. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_MEMORY))
+        #parser.add_argument('--losses_memory', help='Number of chunks to divide by two the losses counters. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_MEMORY))
 
-        parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_THRESHOLD))
+        #parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_THRESHOLD))
 
         parser.add_argument("--mcast", action="store_true", help="Enables IP multicast.")
 
@@ -55,9 +55,7 @@ class Splitter():
             Splitter_IMS.BUFFER_SIZE = int(args.buffer_size)
 
         if args.channel:
-            print("---------------->", Splitter_IMS.CHANNEL)
             Splitter_IMS.CHANNEL = args.channel
-            print("---------------->", Splitter_IMS.CHANNEL)
 
         if args.chunk_size:
             Splitter_IMS.CHUNK_SIZE = int(args.chunk_size)
@@ -76,6 +74,7 @@ class Splitter():
 
         if args.mcast:
             splitter = Splitter_IMS()
+            splitter.peer_list = []
 
             if args.mcast_addr:
                 splitter.MCAST_ADDR = args.mcast_addr
@@ -97,9 +96,6 @@ class Splitter():
         # {{{ Prints information until keyboard interruption
 
         # #Chunk #peers { peer #losses period #chunks }
-
-        if not hasattr(peer, 'peer_list'):
-            peer.peer_list = []
 
         #last_chunk_number = 0
         while splitter.alive:
@@ -144,19 +140,20 @@ class Splitter():
 
                 # Wake up the "moderate_the_team" daemon, which is waiting
                 # in a cluster_sock.recvfrom(...).
-                splitter.say_goodbye((splitter.TEAM_HOST, splitter.TEAM_PORT), splitter.team_socket)
+                if not args.mcast:
+                    splitter.say_goodbye((splitter.TEAM_HOST, splitter.TEAM_PORT), splitter.team_socket)
 
                 # Wake up the "handle_arrivals" daemon, which is waiting
                 # in a peer_connection_sock.accept().
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.connect((splitter.TEAM_HOST, splitter.TEAM_PORT))
-                sock.recv(1024*10) # Header
+                sock.connect(("localhost", splitter.PORT))
+                sock.recv(splitter.CHUNK_SIZE*splitter.HEADER_SIZE) # Header
                 sock.recv(struct.calcsize("H")) # Buffer size
                 sock.recv(struct.calcsize("H")) # Chunk size
-                if hasattr(peer, 'peer_list'):
-                    number_of_peers = socket.ntohs(struct.unpack("H", sock.recv(struct.calcsize("H")))[0])
-                else:
+                if args.mcast:
                     number_of_peers = 0
+                else:
+                    number_of_peers = socket.ntohs(struct.unpack("H", sock.recv(struct.calcsize("H")))[0])
 
                 # Receive the list
                 while number_of_peers > 0:

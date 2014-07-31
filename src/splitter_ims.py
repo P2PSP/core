@@ -212,6 +212,7 @@ class Splitter_IMS(threading.Thread):
         self.send_the_buffer_size(sock)
         sock.close()
         #self.append_peer(peer)
+        return peer
 
         # }}}
 
