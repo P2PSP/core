@@ -37,6 +37,8 @@ class Peer():
 
         parser.add_argument('--chunk_loss_period', help='0 -> no chunk loss, 1 -> lost all chunks, 2, lost half of the chunks ... Default = {}'.format(Lossy_Peer.CHUNK_LOSS_PERIOD))
 
+        parser.add_argument('--max_chunk_debt', help=' ({})'.format(Peer_DBS.MAX_CHUNK_DEBT))
+
         parser.add_argument('--player_port', help='Port to communicate with the player. ({})'.format(Peer_IMS.PLAYER_PORT))
 
         parser.add_argument('--splitter_host', help='IP address or host name of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_HOST))

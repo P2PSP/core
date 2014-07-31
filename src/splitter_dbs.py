@@ -4,6 +4,7 @@ from __future__ import print_function
 import threading
 import sys
 import socket
+import struct
 from color import Color
 import common
 from splitter_ims import Splitter_IMS
@@ -17,14 +18,9 @@ class Splitter_DBS(Splitter_IMS):
 
     # {{{ Class "constants"
 
-    # {{{ Threshold to reject a peer from the team.
+    # {{{ Threshold of chunk losses to reject a peer from the team.
     # }}}
-    LOSSES_THRESHOLD = 128
-
-    # {{{ Number of chunks that must be sent to divide by 2 the number
-    # of lost chunks.
-    # }}}
-    LOSSES_MEMORY = 1024
+    MAX_CHUNK_LOSS = 128
 
     MAX_NUMBER_OF_MONITORS = 1
 
@@ -80,26 +76,6 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def send_the_debt_memory(self, peer_serve_socket): # Quitar
-        # {{{
-
-        if __debug__:
-            print("Sending a debt_memory of", self.CHUNK_DEBT_MEMORY)
-        message = struct.pack("H", socket.htons(self.CHUNK_MEMORY))
-        peer_serve_socket.sendall(message)
-
-        # }}}
-
-    def send_the_debt_threshold(self, peer_serve_socket): # Quitar
-        # {{{
-
-        if __debug__:
-            print("Sending a debt_threshold of", self.CHUNK_DEBT_THRESHOLD)
-        message = struct.pack("H", socket.htons(self.CHUNK_THRESHOLD))
-        peer_serve_socket.sendall(message)
-
-        # }}}
-
     def send_the_list_size(self, peer_serve_socket):
         # {{{
 
@@ -115,7 +91,7 @@ class Splitter_DBS(Splitter_IMS):
         
         if __debug__:
             print("Sending that your are the monitor peer", peer_serve_socket.getpeername())
-        if yes_or_not == True:
+        if yes_or_not:
             message = struct.pack("c", 255)
         else:
             message = struct.pack("c", 0)
@@ -123,7 +99,7 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def send_list(self, peer_serve_socket):
+    def send_the_list(self, peer_serve_socket):
         # {{{
 
         if __debug__:
@@ -151,16 +127,13 @@ class Splitter_DBS(Splitter_IMS):
         # {{{
 
         self.number_of_monitors += 1
-        if self.counter_monitors < self.MAX_NUMBER_OF_MONITORS:
+        if self.number_of_monitors < self.MAX_NUMBER_OF_MONITORS:
             return True
         else:
             self.number_of_monitors = self.MAX_NUMBER_OF_MONITORS
             return False
 
         # }}}
-
-    def send_you_are_a_monitor(self, sock): # quitar
-        pass
 
     # Pensar en reutilizar Splitter_IMS.handle_peer_arrival()
     # concatenando las llamadas a las funciones.
@@ -179,7 +152,7 @@ class Splitter_DBS(Splitter_IMS):
         self.send_you_are_a_monitor(sock, self.are_you_a_monitor())
         #self.send_the_debt_memory(sock)
         #self.send_the_debt_threshold(sock)
-        self.send_the_listsize(sock)
+        self.send_the_list_size(sock)
         self.send_the_list(sock)
         #sock.close()
         self.append_peer(peer)
@@ -243,7 +216,7 @@ class Splitter_DBS(Splitter_IMS):
                 sys.stdout.write(Color.blue)
                 print(peer, "has loss", self.losses[peer], "chunks")
                 sys.stdout.write(Color.none)
-            if self.losses[peer] > self.LOSSES_THRESHOLD:
+            if self.losses[peer] > self.MAX_CHUNK_LOSS:
                 sys.stdout.write(Color.red)
                 print(peer, 'removed')
                 self.remove_peer(peer)
@@ -376,7 +349,7 @@ class Splitter_DBS(Splitter_IMS):
         header_load_counter = 0
         while self.alive:
 
-            chunk = (self.receive_chunk(header_load_counter)
+            chunk = self.receive_chunk(header_load_counter)
 
             try:
                 peer = self.peer_list[self.peer_number] # Ojo, esto nunca deberia provocar una excepcion

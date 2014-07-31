@@ -1,3 +1,8 @@
+# This code is distributed under the GNU General Public License (see
+# THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+
+# Copyright (C) 2014, the P2PSP team.
+
 from __future__ import print_function
 import threading
 import sys
@@ -8,7 +13,7 @@ import common
 import time
 from _print_ import _print_
 
-# IP Multicasting Set of Rules
+# Ip Multicasting Set of rules
 class Peer_IMS(threading.Thread):
     # {{{
 
@@ -47,7 +52,7 @@ class Peer_IMS(threading.Thread):
 
         try:
             self.player_socket.sendall(self.chunks[chunk % self.buffer_size])
-        except socket.error, e:
+        except socket.error:
             #print(e)
             _print_("Player disconected!")
             self.player_alive = False

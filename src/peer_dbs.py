@@ -1,3 +1,8 @@
+# This code is distributed under the GNU General Public License (see
+# THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+
+# Copyright (C) 2014, the P2PSP team.
+
 from __future__ import print_function
 import threading
 import sys
@@ -9,14 +14,17 @@ import time
 from _print_ import _print_
 from peer_ims import Peer_IMS
 
-# Data Broadcasting Set of Rules
+# Some useful definitions.
+ADDR = 0
+PORT = 1
+
+# Data Broadcasting Set of rules
 class Peer_DBS(Peer_IMS):
     # {{{
 
     # {{{ Class "constants"
 
-    DEBT_MEMORY = 1024
-    DEBT_THRESHOLD = 10 # This value depends on debt_memory
+    MAX_CHUNK_DEBT = 10 
 
     # }}}
 
@@ -41,7 +49,7 @@ class Peer_DBS(Peer_IMS):
 
         sys.stdout.write(Color.green)
         _print_("Requesting the list of peers to", self.splitter_socket.getpeername())
-        tmp = number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
+        number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
         _print_("The size of the team is", number_of_peers, "(apart from me)")
 
         while number_of_peers > 0:
@@ -62,28 +70,6 @@ class Peer_DBS(Peer_IMS):
 
         _print_("List of peers received")
         sys.stdout.write(Color.none)
-
-        # }}}
-
-    def receive_the_debt_memory(self): # deprecated
-        # {{{
-
-        message = self.splitter_socket.recv(struct.calcsize("H"))
-        debt_memory = struct.unpack("H", message)[0]
-        self.debt_memory = socket.ntohs(debt_memory)
-        if __debug__:
-            print ("debt_memory =", self.debt_memory)
-
-        # }}}
-        
-    def receive_the_debt_threshold(self): # deprecated
-        # {{{
-
-        message = self.splitter_socket.recv(struct.calcsize("H"))
-        debt_threshold = struct.unpack("H", message)[0]
-        self.debt_threshold = socket.ntohs(debt_threshold)
-        if __debug__:
-            print ("debt_threshold =", self.debt_threshold)
 
         # }}}
         
@@ -113,7 +99,7 @@ class Peer_DBS(Peer_IMS):
 
             message, sender = self.receive_the_chunk()
 
-            if len(message) == struct.calcsize(chunk_format_string):
+            if len(message) == struct.calcsize(self.chunk_format_string):
                 # {{{ A video chunk has been received
 
                 chunk_number = self.unpack_and_store_chunk(message)
@@ -149,7 +135,7 @@ class Peer_DBS(Peer_IMS):
                         # }}}
 
                         self.debt[peer] += 1
-                        if self.debt[peer] > self.DEBT_THRESHOLD:
+                        if self.debt[peer] > self.MAX_CHUNK_DEBT:
                             del self.debt[peer]
                             self.peer_list.remove(peer)
                             print (Color.red, peer, 'removed by unsupportive', Color.none)
@@ -194,7 +180,7 @@ class Peer_DBS(Peer_IMS):
                     #self.sendto_counter %= MAX_CHUNK_NUMBER
 
                     self.debt[peer] += 1
-                    if self.debt[peer] > self.deft_threshold:
+                    if self.debt[peer] > self.debt_threshold:
                         del self.debt[peer]
                         self.peer_list.remove(peer)
                         print (Color.red, peer, 'removed by unsupportive', Color.none)
@@ -321,7 +307,8 @@ class Peer_DBS(Peer_IMS):
         #self.pipe_thread_end, self.pipe_main_end = Pipe()
         #self.buffering = True
         #self.buffering = threading.Event()
-        
+
+        self.debt_memory = 1 << self.MAX_CHUNK_DEBT
         # }}}
 
     # }}}
