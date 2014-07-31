@@ -14,6 +14,7 @@ from color import Color
 import common
 from splitter_ims import Splitter_IMS
 from splitter_dbs import Splitter_DBS
+from _print_ import _print_
 
 # }}}
 
@@ -98,10 +99,24 @@ class Splitter():
         # #Chunk #peers { peer #losses period #chunks }
 
         #last_chunk_number = 0
+
+        print("         | Received | Sent      |")
+        print("    Time | (kbps)   | (kbps)    | Peers")
+        print("---------+----------+-----------+------------+")
+
+        last_sendto_counter = splitter.sendto_counter
+        last_recvfrom_counter = splitter.recvfrom_counter
+
         while splitter.alive:
             try:
+                time.sleep(1)
+                kbps_sendto = ((splitter.sendto_counter - last_sendto_counter) * splitter.CHUNK_SIZE * 8) / 1000
+                kbps_recvfrom = ((splitter.recvfrom_counter - last_recvfrom_counter) * splitter.CHUNK_SIZE * 8) / 1000
+                last_sendto_counter = splitter.sendto_counter
+                last_recvfrom_counter = splitter.recvfrom_counter
                 sys.stdout.write(Color.white)
-                print('%5d' % splitter.chunk_number, end=' ')
+                _print_("|" + repr(kbps_recvfrom).rjust(10) + "|" + repr(kbps_sendto).rjust(10), end=" | ")
+                #print('%5d' % splitter.chunk_number, end=' ')
                 sys.stdout.write(Color.cyan)
                 print(len(splitter.peer_list), end=' ')
                 for p in splitter.peer_list:
@@ -130,7 +145,6 @@ class Splitter():
                 print "\b#",
                 print kbps, "kbps"
                 '''
-                time.sleep(1)
 
             except KeyboardInterrupt:
                 print('Keyboard interrupt detected ... Exiting!')

@@ -119,6 +119,9 @@ class Splitter_IMS(threading.Thread):
         self.GET_message += '\r\n'
         self.chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
         self.mcast_channel = (self.MCAST_ADDR, self.PORT)
+
+        self.recvfrom_counter = 0
+        self.sendto_counter = 0
         
         # }}}
 
@@ -291,7 +294,6 @@ class Splitter_IMS(threading.Thread):
         chunk = self.source_socket.recv(self.CHUNK_SIZE)
         prev_size = 0
         while len(chunk) < self.CHUNK_SIZE:
-            print("------------------->", len(chunk))
             if len(chunk) == prev_size:
                 # This section of code is reached when the streaming
                 # server (Icecast) finishes a stream and starts with
@@ -354,6 +356,8 @@ class Splitter_IMS(threading.Thread):
             self.header += chunk
             header_load_counter -= 1
 
+        self.recvfrom_counter += 1
+            
         return chunk
 
         # }}}
@@ -368,6 +372,8 @@ class Splitter_IMS(threading.Thread):
             print('%5d' % self.chunk_number, Color.red, '->', Color.none, self.mcast_channel)
             sys.stdout.flush()
 
+        self.sendto_counter += 1
+        
         # }}}
 
     def receive_and_send_a_chunk(self, header_load_counter): # Sin usar
