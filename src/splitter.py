@@ -38,7 +38,7 @@ class Splitter():
 
         #parser.add_argument('--losses_memory', help='Number of chunks to divide by two the losses counters. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_MEMORY))
 
-        #parser.add_argument('--losses_threshold', help='Maximum number of lost chunks for an unsupportive peer. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_THRESHOLD))
+        parser.add_argument('--max_chunk_loss', help='Maximum number of lost chunks for an unsupportive peer. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.MAX_CHUNK_LOSS))
 
         parser.add_argument("--mcast", action="store_true", help="Enables IP multicast.")
 
@@ -82,11 +82,8 @@ class Splitter():
         else:
             splitter = Splitter_DBS()
 
-            if args.losses_memory:
-                splitter.LOSSES_MEMORY = int(args.losses_memory)
-
-            if args.losses_threshold:
-                splitter.LOSSES_THRESHOLD = int(args.losses_threshold)
+            if args.max_chunk_loss:
+                splitter.MAX_CHUNK_LOSS = int(args.max_chunk_loss)
 
         # }}}
 
@@ -123,7 +120,7 @@ class Splitter():
                     sys.stdout.write(Color.blue)
                     print(p, end= ' ')
                     sys.stdout.write(Color.red)
-                    print('%3d' % splitter.losses[p], '<', splitter.LOSSES_THRESHOLD, end=' ')
+                    print('%3d' % splitter.losses[p], '<', splitter.MAX_CHUNK_LOSS, end=' ')
                     try:
                         sys.stdout.write(Color.blue)
                         print('%3d' % splitter.period[p], end= ' ')
@@ -155,7 +152,7 @@ class Splitter():
                 # Wake up the "moderate_the_team" daemon, which is waiting
                 # in a cluster_sock.recvfrom(...).
                 if not args.mcast:
-                    splitter.say_goodbye((splitter.TEAM_HOST, splitter.TEAM_PORT), splitter.team_socket)
+                    splitter.say_goodbye(("localhost", splitter.PORT), splitter.team_socket)
 
                 # Wake up the "handle_arrivals" daemon, which is waiting
                 # in a peer_connection_sock.accept().

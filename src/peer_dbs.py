@@ -113,7 +113,7 @@ class Peer_DBS(Peer_IMS):
                     # {{{ debug
 
                     if __debug__:
-                        print (self.team_socket.getsockname(), \
+                        _print_(self.team_socket.getsockname(), \
                             Color.red, "<-", Color.none, chunk_number, "-", sender)
 
                     # }}}
@@ -281,6 +281,7 @@ class Peer_DBS(Peer_IMS):
         # {{{
 
         supper(Peer_DBS, self).__init__()
+        self.print_modulename()
 
         # The list of peers structure.        
         self.peer_list = []

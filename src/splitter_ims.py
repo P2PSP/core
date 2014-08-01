@@ -362,14 +362,14 @@ class Splitter_IMS(threading.Thread):
 
         # }}}
 
-    def send_chunk(self, chunk, mcast_channel):
+    def send_chunk(self, chunk, endpoint):
         # {{{
 
         message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
-        self.team_socket.sendto(message, self.mcast_channel)
+        self.team_socket.sendto(message, endpoint)
 
         if __debug__:
-            print('%5d' % self.chunk_number, Color.red, '->', Color.none, self.mcast_channel)
+            print('%5d' % self.chunk_number, Color.red, '->', Color.none, endpoint)
             sys.stdout.flush()
 
         self.sendto_counter += 1

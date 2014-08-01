@@ -5,6 +5,7 @@ import threading
 import sys
 import socket
 import struct
+import time
 from color import Color
 import common
 from splitter_ims import Splitter_IMS
@@ -29,8 +30,9 @@ class Splitter_DBS(Splitter_IMS):
     def __init__(self):
         # {{{
 
-        supper(Splitter_DBS, self).__init__()
+        Splitter_IMS.__init__(self)
 
+        self.print_modulename()
         self.number_of_monitors = 0
         self.peer_number = 0
 
@@ -103,10 +105,10 @@ class Splitter_DBS(Splitter_IMS):
         
         if __debug__:
             print("Sending that your are the monitor peer", peer_serve_socket.getpeername())
-        if self.you_are_a_monitor():
-            message = struct.pack("c", 255)
+        if self.are_you_a_monitor():
+            message = struct.pack("c", '1')
         else:
-            message = struct.pack("c", 0)
+            message = struct.pack("c", '0')
         peer_serve_socket.sendall(message)
 
         # }}}
@@ -155,9 +157,8 @@ class Splitter_DBS(Splitter_IMS):
         self.send_the_list_size(sock)
         self.send_the_list(sock)
         #sock.close()
+        peer = Splitter_IMS.handle_a_peer_arrival(self, connection)
         self.append_peer(peer)
-
-        supper(Splitter_DBS, self).handle_a_peer_arrival(connection)
                 
         # }}}
 
@@ -328,7 +329,7 @@ class Splitter_DBS(Splitter_IMS):
 
         while True:
             self.reset_counters()
-            time.sleep(COUNTERS_TIMING)
+            time.sleep(common.COUNTERS_TIMING)
 
         # }}}
 
@@ -340,7 +341,7 @@ class Splitter_DBS(Splitter_IMS):
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
         def _():
             connection  = self.peer_connection_socket.accept()
-            self.handle_peer_arrival(connection, True)
+            self.handle_a_peer_arrival(connection)
         _()
         threading.Thread(target=self.handle_arrivals).start()
         threading.Thread(target=self.moderate_the_team).start()
@@ -359,7 +360,7 @@ class Splitter_DBS(Splitter_IMS):
             self.send_chunk(chunk, peer)
             
             self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
-            self.chunk_number = (self.chunk_number + 1) % MAX_CHUNK_NUMBER
+            self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
             self.peer_number = (self.peer_number + 1) % len(self.peer_list)
 
         # }}}
