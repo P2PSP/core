@@ -198,6 +198,14 @@ class Splitter_IMS(threading.Thread):
         
         # }}}
 
+    def send_configuration(self, sock):
+        self.send_the_mcast_channel(sock)
+        self.send_the_header_size(sock)
+        self.send_the_chunk_size(sock)
+        self.send_the_header(sock)
+        self.send_the_buffer_size(sock)
+
+
     def handle_a_peer_arrival(self, connection):
         # {{{ Handle the arrival of a peer. When a peer want to join a
         # team, first it must establish a TCP connection with the
@@ -208,11 +216,7 @@ class Splitter_IMS(threading.Thread):
         sys.stdout.write(Color.green)
         print(sock.getsockname(), '\b: accepted connection from peer', peer)
         sys.stdout.write(Color.none)
-        self.send_the_mcast_channel(sock)
-        self.send_the_header_size(sock)
-        self.send_the_chunk_size(sock)
-        self.send_the_header(sock)
-        self.send_the_buffer_size(sock)
+        self.send_configuration(sock)
         sock.close()
         #self.append_peer(peer)
         return peer

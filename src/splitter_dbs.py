@@ -1,4 +1,7 @@
-# Data Broadcasting Set of rules
+# This code is distributed under the GNU General Public License (see
+# THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+
+# Copyright (C) 2014, the P2PSP team.
 
 from __future__ import print_function
 import threading
@@ -14,6 +17,7 @@ from splitter_ims import Splitter_IMS
 ADDR = 0
 PORT = 1
 
+# Data Broadcasting Set of rules
 class Splitter_DBS(Splitter_IMS):
     # {{{
 
@@ -139,7 +143,10 @@ class Splitter_DBS(Splitter_IMS):
 
     # Pensar en reutilizar Splitter_IMS.handle_peer_arrival()
     # concatenando las llamadas a las funciones.
-    
+
+    def send_configuration(self, sock):
+        Splitter_IMS.send_configuration(self, sock)
+        
     def handle_a_peer_arrival(self, connection):
         # {{{
 

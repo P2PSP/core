@@ -1,6 +1,11 @@
 #!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
+# This code is distributed under the GNU General Public License (see
+# THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+
+# Copyright (C) 2014, the P2PSP team.
+
 # {{{ Imports
 
 from __future__ import print_function
@@ -15,9 +20,6 @@ from lossy_socket import lossy_socket
 import common
 from _print_ import _print_
 
-ADDR = 0
-PORT = 1
-
 from peer_ims import Peer_IMS
 from peer_dbs import Peer_DBS
 from peer_fns import Peer_FNS
@@ -27,6 +29,10 @@ from monitor_lrs import Monitor_LRS
 from lossy_peer import Lossy_Peer
 
 # }}}
+
+# Some useful definitions.
+ADDR = 0
+PORT = 1
 
 class Peer():
 
@@ -69,6 +75,7 @@ class Peer():
         peer.player_connection.wait()
         peer.connect_to_the_splitter()
         mcast_endpoint = peer.receive_the_mcast_endpoint()
+        _print_("Multicast end-point =", mcast_endpoint)
         
         # A mcast_endpoint is always received, even for DBS peers.
         if mcast_endpoint[ADDR] == '0.0.0.0':
