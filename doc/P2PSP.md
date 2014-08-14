@@ -102,12 +102,12 @@ or simply:
 
 1. Feed the local Icecast server, forever:
 
-    xterm -e 'feed_icecast' &
+    xterm -e './feed_icecast.sh' &
 
 2. Create a minimal local team (usually for testing purposes):
 
     # Feed the local Icecast server
-    xterm -e 'splitter' &
-    xterm -e 'peer' &
+    xterm -e './splitter.py' &
+    xterm -e './peer.py' &
     vlc http://localhost:9999 &
     

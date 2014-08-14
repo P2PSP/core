@@ -20,10 +20,8 @@ class Splitter_IMS(threading.Thread):
     # {{{ Class "constants"
 
     # {{{ The buffer_size (in chunks). The buffer_size should be
-
-    # proportional to the bit-rate and the latency is proportional to
-    # the buffer_size.
-
+    # proportional to the bit-rate (remember that the latency is also
+    # proportional to the buffer_size).
     # }}}
     BUFFER_SIZE = 256
 

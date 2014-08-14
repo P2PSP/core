@@ -29,6 +29,8 @@ class Splitter_DBS(Splitter_IMS):
 
     MAX_NUMBER_OF_MONITORS = 1
 
+    MCAST_ADDR = "0.0.0.0"
+
     # }}}
 
     def __init__(self):
@@ -144,8 +146,8 @@ class Splitter_DBS(Splitter_IMS):
     # Pensar en reutilizar Splitter_IMS.handle_peer_arrival()
     # concatenando las llamadas a las funciones.
 
-    def send_configuration(self, sock):
-        Splitter_IMS.send_configuration(self, sock)
+    #def send_configuration(self, sock): # Quitar!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #    Splitter_IMS.send_configuration(self, sock)
         
     def handle_a_peer_arrival(self, connection):
         # {{{

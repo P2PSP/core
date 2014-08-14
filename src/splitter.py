@@ -1,4 +1,4 @@
-#!/usr/bin/python -O
+#!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 
 # {{{ Imports
@@ -40,7 +40,7 @@ class Splitter():
 
         parser.add_argument('--max_chunk_loss', help='Maximum number of lost chunks for an unsupportive peer. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.MAX_CHUNK_LOSS))
 
-        parser.add_argument("--mcast", action="store_true", help="Enables IP multicast.")
+        parser.add_argument("--mcast", action="store_true", help="Uses the IP multicast infrastructure, if avaiable.")
 
         parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks. Makes sense only in multicast mode. Default = "{}".'.format(Splitter_IMS.MCAST_ADDR))
 
@@ -74,11 +74,14 @@ class Splitter():
             Splitter_IMS.SOURCE_PORT = int(args.source_port)
 
         if args.mcast:
+            print("IP multicast mode selected")
+
+            if args.mcast_addr:
+                Splitter_IMS.MCAST_ADDR = args.mcast_addr
+
             splitter = Splitter_IMS()
             splitter.peer_list = []
 
-            if args.mcast_addr:
-                splitter.MCAST_ADDR = args.mcast_addr
         else:
             splitter = Splitter_DBS()
 

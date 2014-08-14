@@ -1,17 +1,16 @@
 Welcome to the Peer-to-Peer Straightforward Protocol (P2PSP) Project!
 
 The P2PSP is a protocol for the streaming of real-time video/audio
-sequences on peer-to-Peer (P2P) networks. In this repository you can
+sequences on Peer-to-Peer (P2P) networks. In this repository you can
 find an implementation of the P2PSP.
 
 This is a description of the files/directories:
 
 * readme.txt: this file.
 
-* src: the implementation and some scripts.
+* src: the implementation.
 
-* doc: information about the repository management and use
-  of this implementation.
+* doc: information about the use of the implementation.
 
 More information about the protocol at:
 

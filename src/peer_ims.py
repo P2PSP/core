@@ -368,7 +368,7 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def configure(self):
+    def receive_configuration(self):
         # {{{
 
         self.receive_the_header_size()
