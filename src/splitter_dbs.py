@@ -146,8 +146,13 @@ class Splitter_DBS(Splitter_IMS):
     # Pensar en reutilizar Splitter_IMS.handle_peer_arrival()
     # concatenando las llamadas a las funciones.
 
-    #def send_configuration(self, sock): # Quitar!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #    Splitter_IMS.send_configuration(self, sock)
+    def send_configuration(self, sock):
+        Splitter_IMS.send_configuration(self, sock)
+        self.send_you_are_a_monitor(sock)
+        #self.send_the_debt_memory(sock)
+        #self.send_the_debt_threshold(sock)
+        self.send_the_list_size(sock)
+        self.send_the_list(sock)
         
     def handle_a_peer_arrival(self, connection):
         # {{{
@@ -159,14 +164,8 @@ class Splitter_DBS(Splitter_IMS):
         # helps to avoid DoS (Denial of Service) attacks.
         # }}}
 
-        sock = connection[0]
-        self.send_you_are_a_monitor(sock)
-        #self.send_the_debt_memory(sock)
-        #self.send_the_debt_threshold(sock)
-        self.send_the_list_size(sock)
-        self.send_the_list(sock)
-        #sock.close()
-        peer = Splitter_IMS.handle_a_peer_arrival(self, connection)
+        Splitter_IMS.handle_a_peer_arrival(self, connection)
+        peer = connection[1]
         self.append_peer(peer)
                 
         # }}}
