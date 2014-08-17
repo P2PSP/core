@@ -71,7 +71,7 @@ class Peer_IMS(threading.Thread):
     def wait_for_the_player(self):
         # {{{ Setup "player_socket" and wait for the player
 
-        self.player_connection.clear()
+        #self.player_connection.clear()
         self.player_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             # In Windows systems this call doesn't work!
@@ -85,7 +85,7 @@ class Peer_IMS(threading.Thread):
         self.player_socket = self.player_socket.accept()[0]
         #self.player_socket.setblocking(0)
         _print_("The player is", self.player_socket.getpeername())
-        self.player_connection.set()
+        #self.player_connection.set()
         
         # }}}
 
@@ -267,23 +267,7 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def create_the_buffer(self):
-        # {{{ The buffer of chunks is a structure that is used to delay
-
-        # the playback of the chunks in order to accommodate the
-        # network jittter. Two components are needed: (1) the "chunks"
-        # buffer that stores the received chunks and (2) the
-        # "received" buffer that stores if a chunk has been received
-        # or not. Notice that each peer can use a different
-        # buffer_size: the smaller the buffer size, the lower start-up
-        # time, the higher chunk-loss ratio. However, for the sake of
-        # simpliticy, all peers will use the same buffer size.
-        
-        self.chunks = [""]*self.buffer_size
-        self.received = [False]*self.buffer_size
-        #self.numbers = [0]*self.buffer_size # Ojo
-
-        # }}}
+    #def create_the_buffer(self):
 
     def buffer_data(self):
         # {{{ Buffering
@@ -376,7 +360,41 @@ class Peer_IMS(threading.Thread):
         self.receive_the_header()
         self.receive_the_buffer_size()
         self.listen_to_the_team()
-        self.create_the_buffer()
+
+        # {{{ The peer dies if the player disconects.
+        # }}}
+        self.player_alive = True
+
+        # {{{ The last chunk sent to the player.
+        # }}}
+        self.played_chunk = 0
+
+        # {{{ Counts the number of executions of the recvfrom()
+        # function.
+        # }}}
+        self.recvfrom_counter = 0
+
+        # {{{ Label the chunks in the buffer as "received" or "not
+        # received".
+        # }}}
+        self.received = []
+
+        #self.create_the_buffer()
+        # {{{ The buffer of chunks is a structure that is used to delay
+        # the playback of the chunks in order to accommodate the
+        # network jittter. Two components are needed: (1) the "chunks"
+        # buffer that stores the received chunks and (2) the
+        # "received" buffer that stores if a chunk has been received
+        # or not. Notice that each peer can use a different
+        # buffer_size: the smaller the buffer size, the lower start-up
+        # time, the higher chunk-loss ratio. However, for the sake of
+        # simpliticy, all peers will use the same buffer size.
+        
+        self.chunks = [""]*self.buffer_size
+        self.received = [False]*self.buffer_size
+        #self.numbers = [0]*self.buffer_size # Ojo
+
+        # }}}
 
         # }}}
         
@@ -420,35 +438,17 @@ class Peer_IMS(threading.Thread):
 #        print("Team address =", self.TEAM_HOST)
         _print_("Team port =", self.TEAM_PORT)
 
-        # {{{ The peer dies if the player disconects.
-        # }}}
-        self.player_alive = True
-
-        # {{{ The last chunk sent to the player.
-        # }}}
-        self.played_chunk = 0
-
         # {{{ The size of the chunk in bytes.
         # }}}
         #self.chunk_size = 0
-
-        # {{{ Label the chunks in the buffer as "received" or "not
-        # received".
-        # }}}
-        self.received = []
-
-        # {{{ Counts the number of executions of the recvfrom()
-        # function.
-        # }}}
-        self.recvfrom_counter = 0
 
         # {{{ "True" while buffering is being performed.
         # }}}
         #self.buffering = threading.Event()
 
-        self.player_connection = threading.Event()
+        #self.player_connection = threading.Event()
 
-        self.wait_for_the_player()
+        #self.wait_for_the_player()
 
         # }}}
 

@@ -3,7 +3,6 @@
 
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
-
 # Copyright (C) 2014, the P2PSP team.
 
 # {{{ Imports
@@ -23,6 +22,7 @@ from _print_ import _print_
 from peer_ims import Peer_IMS
 from peer_dbs import Peer_DBS
 from peer_fns import Peer_FNS
+from monitor_dbs import Monitor_DBS
 from monitor_fns import Monitor_FNS
 from peer_lossy import Peer_Lossy
 from monitor_lrs import Monitor_LRS
@@ -72,7 +72,8 @@ class Peer():
             print ('PLAYER_PORT =', Peer_IMS.PLAYER_PORT)
 
         peer = Peer_IMS()
-        peer.player_connection.wait()
+        #peer.player_connection.wait()
+        peer.wait_for_the_player()
         #Peer_IMS().player_connection.wait()
         peer.connect_to_the_splitter()
         #Peer_IMS().connect_to_the_splitter()
@@ -83,20 +84,22 @@ class Peer():
         # A mcast_endpoint is always received, even for DBS peers.
         if mcast_endpoint[ADDR] == "0.0.0.0":
             # {{{ This is an "unicast" peer.
+            peer = Peer_DBS(peer)
 
-            if peer.are_you_a_monitor():
-                peer = Monitor_DBS()
+            if peer.am_i_a_monitor():
+                peer = Monitor_DBS(peer)
     #            peer = Monitor_LRS()
             else:
-                if args.chunk_loss_period:
-                    Peer_DBS.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
-                    print ('CHUNK_LOSS_PERIOD =', Peer_DBS.CHUNK_LOSS_PERIOD)
-                    if int(args.chunk_loss_period) != 0:
-                        peer = Lossy_Peer()
-                    else:
-                        peer = Peer_DBS()
-                else:
-                    peer = Peer_DBS()
+                pass
+                #if args.chunk_loss_period:
+                    #Peer_DBS.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
+                    #print ('CHUNK_LOSS_PERIOD =', Peer_DBS.CHUNK_LOSS_PERIOD)
+                    #if int(args.chunk_loss_period) != 0:
+                        #peer = Lossy_Peer()
+                    #else:
+                        #peer = Peer_DBS()
+                #else:
+                    #peer = Peer_DBS()
             #        peer = Peer_FNS()
 
             # }}}
@@ -112,7 +115,6 @@ class Peer():
         # }}}
 
         # {{{ Run!
-
         peer.receive_configuration()
         peer.disconnect_from_the_splitter()
         peer.buffer_data()

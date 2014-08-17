@@ -27,7 +27,7 @@ class Splitter_DBS(Splitter_IMS):
     # }}}
     MAX_CHUNK_LOSS = 128
 
-    MAX_NUMBER_OF_MONITORS = 1
+    MAX_NUMBER_OF_MONITORS = 0#1
 
     MCAST_ADDR = "0.0.0.0"
 
@@ -123,6 +123,11 @@ class Splitter_DBS(Splitter_IMS):
         # {{{
 
         if __debug__:
+            print("Sending a list of peers of size", len(self.peer_list))
+        message = struct.pack("H", socket.htons(len(self.peer_list)))
+        peer_serve_socket.sendall(message)
+
+        if __debug__:
             counter = 0
         for p in self.peer_list:
             message = struct.pack("4sH", socket.inet_aton(p[ADDR]), socket.htons(p[PORT]))
@@ -151,7 +156,7 @@ class Splitter_DBS(Splitter_IMS):
         self.send_you_are_a_monitor(sock)
         #self.send_the_debt_memory(sock)
         #self.send_the_debt_threshold(sock)
-        self.send_the_list_size(sock)
+        #self.send_the_list_size(sock)
         self.send_the_list(sock)
         
     def handle_a_peer_arrival(self, connection):

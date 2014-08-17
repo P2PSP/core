@@ -1,16 +1,30 @@
+# This code is distributed under the GNU General Public License (see
+# THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+# Copyright (C) 2014, the P2PSP team.
+
+import sys
+import socket
+import struct
 from peer_dbs import Peer_DBS
+from _print_ import _print_
+from color import Color
 
 class Monitor_DBS(Peer_DBS):
     # {{{
 
-    def __init__(self):
+    def print_the_module_name(self):
         # {{{
 
-        Peer_DBS.__init__(self)
-
         sys.stdout.write(Color.yellow)
-        print("Monitor DBS")
+        _print_("Monitor DBS")
         sys.stdout.write(Color.none)
+
+        # }}}
+    
+    def __init__(self, peer):
+        # {{{
+
+        Peer_DBS.__init__(self, peer)
 
         # }}}
 
