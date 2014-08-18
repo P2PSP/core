@@ -338,7 +338,7 @@ class Peer_IMS(threading.Thread):
                     sys.stdout.write(str(i%10))
                 else:
                     sys.stdout.write('.')
-            print
+            print ()
             print (self.team_socket.getsockname(),)
             sys.stdout.write(Color.none)
 

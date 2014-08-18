@@ -24,7 +24,7 @@ class Peer_DBS(Peer_IMS):
 
     # {{{ Class "constants"
 
-    MAX_CHUNK_DEBT = 10 
+    MAX_CHUNK_DEBT = 10
 
     # }}}
 
@@ -230,7 +230,7 @@ class Peer_DBS(Peer_IMS):
                     #self.sendto_counter %= MAX_CHUNK_NUMBER
 
                     self.debt[peer] += 1
-                    if self.debt[peer] > self.debt_threshold:
+                    if self.debt[peer] > self.MAX_CHUNK_DEBT:
                         del self.debt[peer]
                         self.peer_list.remove(peer)
                         print (Color.red, peer, 'removed by unsupportive', Color.none)
@@ -239,7 +239,7 @@ class Peer_DBS(Peer_IMS):
 
                     if __debug__:
                         print (self.team_socket.getsockname(), "-", \
-                            socket.ntohs(struct.unpack(chunk_format_string, self.receive_and_feed_previous)[0]),\
+                            socket.ntohs(struct.unpack(self.chunk_format_string, self.receive_and_feed_previous)[0]),\
                             Color.green, "->", Color.none, peer)
 
                     # }}}
@@ -283,7 +283,8 @@ class Peer_DBS(Peer_IMS):
     def keep_the_buffer_full(self):
         # {{{
 
-        supper(Peer_DBS, self).keep_the_buffer_full()
+        Peer_IMS.keep_the_buffer_full(self)
+        #supper(Peer_DBS, self).keep_the_buffer_full()
         if (self.played_chunk % self.debt_memory) == 0:
             for i in self.debt:
                 self.debt[i] /= 2
@@ -294,7 +295,7 @@ class Peer_DBS(Peer_IMS):
             print (self.team_socket.getsockname(),)
             for p in self.peer_list:
                 print (p,)
-            print
+            print ()
             sys.stdout.write(Color.none)
 
         # }}}
@@ -356,7 +357,8 @@ class Peer_DBS(Peer_IMS):
     def run(self):
         # {{{
 
-        supper(Peer_DBS, self).peers_life()
+        Peer_IMS.peers_life(self)
+        #supper(Peer_DBS, self).peers_life()
         self.polite_farewell()
 
         # }}}
