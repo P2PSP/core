@@ -1,5 +1,6 @@
-# IP Multicast Set of Rules.
-# http://p2psp.org/en/p2psp-protocol?cap=indexsu7.xht
+# This code is distributed under the GNU General Public License (see
+# THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+# Copyright (C) 2014, the P2PSP team.
 
 # {{{ Imports
 
@@ -14,6 +15,8 @@ import time
 
 # }}}
 
+# IP Multicast Set of Rules.
+# http://p2psp.org/en/p2psp-protocol?cap=indexsu7.xht
 class Splitter_IMS(threading.Thread):
     # {{{
 
@@ -197,11 +200,15 @@ class Splitter_IMS(threading.Thread):
         # }}}
 
     def send_configuration(self, sock):
+        # {{{
+
         self.send_the_mcast_channel(sock)
         self.send_the_header_size(sock)
         self.send_the_chunk_size(sock)
         self.send_the_header(sock)
         self.send_the_buffer_size(sock)
+
+        # }}}
 
     def handle_a_peer_arrival(self, connection):
         # {{{ Handle the arrival of a peer. When a peer want to join a
@@ -298,7 +305,7 @@ class Splitter_IMS(threading.Thread):
                 # This section of code is reached when the streaming
                 # server (Icecast) finishes a stream and starts with
                 # the following one.
-                print('?', end='')
+                print("No data in the server!")
                 sys.stdout.flush()
                 self.source_socket.close()
                 time.sleep(1)
@@ -397,9 +404,13 @@ class Splitter_IMS(threading.Thread):
         # }}}
 
     def receive_the_header(self):
+        # {{{
+
         self.configure_sockets()
         self.request_the_video_from_the_source()
         self.load_the_video_header()
+
+        # }}}
 
     def run(self):
         # {{{

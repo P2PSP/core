@@ -94,6 +94,7 @@ class Peer_DBS(Peer_IMS):
     def receive_the_list(self):
         # {{{
 
+        self.debt = {}
         self.peer_list = [] # The list of peers structure.
 
         sys.stdout.write(Color.green)
@@ -318,6 +319,13 @@ class Peer_DBS(Peer_IMS):
         #Peer_IMS.receive_configuration(self)
         #supper(Peer_DBS, self).configure()
                 
+        # This "private and static" variable holds the previous chunk
+        # received from the splitter. It is used to send the previous
+        # received chunk in the congestion avoiding mode. In that
+        # mode, the peer sends a chunk only when it received a chunk
+        # from another peer or om the splitter.
+        #self.receive_and_feed_previous = ""
+
         self.receive_the_list()
 
         # Number of times that the previous received chunk has been sent
@@ -336,13 +344,6 @@ class Peer_DBS(Peer_IMS):
         # from another peer or om the splitter.
         self.receive_and_feed_previous = ""
 
-        # This "private and static" variable holds the previous chunk
-        # received from the splitter. It is used to send the previous
-        # received chunk in the congestion avoiding mode. In that
-        # mode, the peer sends a chunk only when it received a chunk
-        # from another peer or om the splitter.
-        #self.receive_and_feed_previous = ""
-        self.debt = {}
 
         self.sendto_counter = 0
 
@@ -364,6 +365,11 @@ class Peer_DBS(Peer_IMS):
         # }}}
 
     def am_i_a_monitor(self):
+        if len(self.peer_list) == 0:
+            # Only the first peer of the team is the monitor peer
+            return True
+        else:
+            return False
         message = self.splitter_socket.recv(struct.calcsize("c"))
         if struct.unpack("c", message)[0] == '1':
             return True

@@ -27,7 +27,8 @@ class Splitter_DBS(Splitter_IMS):
     # }}}
     MAX_CHUNK_LOSS = 128
 
-    MAX_NUMBER_OF_MONITORS = 0#1
+    #MAX_NUMBER_OF_MONITORS = 0#1 # Pensar en determinar si un peer es
+    #monitor o no en funcion del numero de peers en la lista de peers.
 
     MCAST_ADDR = "0.0.0.0"
 
@@ -39,7 +40,7 @@ class Splitter_DBS(Splitter_IMS):
         Splitter_IMS.__init__(self)
 
         self.print_modulename()
-        self.number_of_monitors = 0
+        #self.number_of_monitors = 0
         self.peer_number = 0
 
         # {{{ The list of peers in the team.
@@ -94,7 +95,7 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def are_you_a_monitor(self):
+    def are_you_a_monitor(self): # Sin usar
         # {{{
 
         self.number_of_monitors += 1
@@ -106,7 +107,7 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def send_you_are_a_monitor(self, peer_serve_socket):
+    def send_you_are_a_monitor(self, peer_serve_socket): # sin usar
         # {{{
         
         if __debug__:
@@ -153,7 +154,7 @@ class Splitter_DBS(Splitter_IMS):
 
     def send_configuration(self, sock):
         Splitter_IMS.send_configuration(self, sock)
-        self.send_you_are_a_monitor(sock)
+        #self.send_you_are_a_monitor(sock)
         #self.send_the_debt_memory(sock)
         #self.send_the_debt_threshold(sock)
         #self.send_the_list_size(sock)

@@ -76,13 +76,14 @@ class Peer():
         peer.wait_for_the_player()
         #Peer_IMS().player_connection.wait()
         peer.connect_to_the_splitter()
+        peer.receive_configuration()
         #Peer_IMS().connect_to_the_splitter()
-        mcast_endpoint = peer.receive_the_mcast_endpoint()
+        #mcast_endpoint = peer.receive_the_mcast_endpoint()
         #mcast_endpoint = Peer_IMS().receive_the_mcast_endpoint()
-        _print_("Multicast end-point =", mcast_endpoint)
+        #_print_("Multicast end-point =", mcast_endpoint)
         
         # A mcast_endpoint is always received, even for DBS peers.
-        if mcast_endpoint[ADDR] == "0.0.0.0":
+        if peer.mcast_addr == "0.0.0.0":
             # {{{ This is an "unicast" peer.
             peer = Peer_DBS(peer)
 
@@ -115,8 +116,8 @@ class Peer():
         # }}}
 
         # {{{ Run!
-        peer.receive_configuration()
         peer.disconnect_from_the_splitter()
+        peer.listen_to_the_team()
         peer.buffer_data()
         peer.start()
         #peer.buffering.wait()

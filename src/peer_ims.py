@@ -1,6 +1,5 @@
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
-
 # Copyright (C) 2014, the P2PSP team.
 
 from __future__ import print_function
@@ -132,7 +131,7 @@ class Peer_IMS(threading.Thread):
         mcast_endpoint = (self.mcast_addr, self.mcast_port)
         if __debug__:
             print("mcast_endpoint =", mcast_endpoint)
-        return mcast_endpoint
+        #return mcast_endpoint
     
         # }}}
 
@@ -273,7 +272,42 @@ class Peer_IMS(threading.Thread):
         # {{{ Buffering
 
         #self.buffering.clear()
+
+                # {{{ The peer dies if the player disconnects.
+        # }}}
+        self.player_alive = True
+
+        # {{{ The last chunk sent to the player.
+        # }}}
+        self.played_chunk = 0
+
+        # {{{ Counts the number of executions of the recvfrom()
+        # function.
+        # }}}
+        self.recvfrom_counter = 0
+
+        # {{{ Label the chunks in the buffer as "received" or "not
+        # received".
+        # }}}
+        self.received = []
+
+        #self.create_the_buffer()
+        # {{{ The buffer of chunks is a structure that is used to delay
+        # the playback of the chunks in order to accommodate the
+        # network jittter. Two components are needed: (1) the "chunks"
+        # buffer that stores the received chunks and (2) the
+        # "received" buffer that stores if a chunk has been received
+        # or not. Notice that each peer can use a different
+        # buffer_size: the smaller the buffer size, the lower start-up
+        # time, the higher chunk-loss ratio. However, for the sake of
+        # simpliticy, all peers will use the same buffer size.
         
+        self.chunks = [""]*self.buffer_size
+        self.received = [False]*self.buffer_size
+        #self.numbers = [0]*self.buffer_size # Ojo
+
+        # }}}
+
         #  Wall time (execution time plus waiting time).
         start_latency = time.time()
 
@@ -346,7 +380,7 @@ class Peer_IMS(threading.Thread):
 
     def peers_life(self):
         # {{{
-
+        
         while self.player_alive:
             self.keep_the_buffer_full()
 
@@ -355,46 +389,13 @@ class Peer_IMS(threading.Thread):
     def receive_configuration(self):
         # {{{
 
+        self.receive_the_mcast_endpoint()
         self.receive_the_header_size()
         self.receive_the_chunk_size()
         self.receive_the_header()
         self.receive_the_buffer_size()
-        self.listen_to_the_team()
+        #self.listen_to_the_team()
 
-        # {{{ The peer dies if the player disconects.
-        # }}}
-        self.player_alive = True
-
-        # {{{ The last chunk sent to the player.
-        # }}}
-        self.played_chunk = 0
-
-        # {{{ Counts the number of executions of the recvfrom()
-        # function.
-        # }}}
-        self.recvfrom_counter = 0
-
-        # {{{ Label the chunks in the buffer as "received" or "not
-        # received".
-        # }}}
-        self.received = []
-
-        #self.create_the_buffer()
-        # {{{ The buffer of chunks is a structure that is used to delay
-        # the playback of the chunks in order to accommodate the
-        # network jittter. Two components are needed: (1) the "chunks"
-        # buffer that stores the received chunks and (2) the
-        # "received" buffer that stores if a chunk has been received
-        # or not. Notice that each peer can use a different
-        # buffer_size: the smaller the buffer size, the lower start-up
-        # time, the higher chunk-loss ratio. However, for the sake of
-        # simpliticy, all peers will use the same buffer size.
-        
-        self.chunks = [""]*self.buffer_size
-        self.received = [False]*self.buffer_size
-        #self.numbers = [0]*self.buffer_size # Ojo
-
-        # }}}
 
         # }}}
         
