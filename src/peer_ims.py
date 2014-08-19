@@ -273,7 +273,9 @@ class Peer_IMS(threading.Thread):
 
         #self.buffering.clear()
 
-                # {{{ The peer dies if the player disconnects.
+        print("--------------------------------------------------")
+        
+        # {{{ The peer dies if the player disconnects.
         # }}}
         self.player_alive = True
 
@@ -396,7 +398,6 @@ class Peer_IMS(threading.Thread):
         self.receive_the_buffer_size()
         #self.listen_to_the_team()
 
-
         # }}}
         
     def run(self):
@@ -424,12 +425,6 @@ class Peer_IMS(threading.Thread):
         # {{{
 
         threading.Thread.__init__(self)
-
-        _print_("Running in", end=' ')
-        if __debug__:
-            print("debug mode")
-        else:
-            print("release mode")
 
         self.print_the_module_name()
 

@@ -38,6 +38,12 @@ class Peer():
 
     def __init__(self):
     
+        _print_("Running in", end=' ')
+        if __debug__:
+            print("debug mode")
+        else:
+            print("release mode")
+
         # {{{ Args handling and object instantiation
         parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP team.')
 
@@ -86,6 +92,10 @@ class Peer():
         if peer.mcast_addr == "0.0.0.0":
             # {{{ This is an "unicast" peer.
             peer = Peer_DBS(peer)
+            peer.receive_the_list_of_peers()
+            peer.listen_to_the_team()
+            peer.disconnect_from_the_splitter()
+            peer.buffer_data()
 
             if peer.am_i_a_monitor():
                 peer = Monitor_DBS(peer)
@@ -116,8 +126,8 @@ class Peer():
         # }}}
 
         # {{{ Run!
-        peer.disconnect_from_the_splitter()
         peer.listen_to_the_team()
+        peer.disconnect_from_the_splitter()
         peer.buffer_data()
         peer.start()
         #peer.buffering.wait()

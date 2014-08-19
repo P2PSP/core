@@ -2,12 +2,16 @@
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 
+# {{{ Imports
+
 import sys
 import socket
 import struct
 from peer_dbs import Peer_DBS
 from _print_ import _print_
 from color import Color
+
+# }}}
 
 class Monitor_DBS(Peer_DBS):
     # {{{
@@ -24,7 +28,10 @@ class Monitor_DBS(Peer_DBS):
     def __init__(self, peer):
         # {{{
 
-        Peer_DBS.__init__(self, peer)
+        #Peer_DBS.__init__(self, peer)
+        self.team_socket = peer.team_socket
+        self.played_chunk = peer.played_chunk
+        self.buffer_size = peer.buffer_size
 
         # }}}
 

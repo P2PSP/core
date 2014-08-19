@@ -1,6 +1,5 @@
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
-
 # Copyright (C) 2014, the P2PSP team.
 
 from __future__ import print_function
@@ -32,18 +31,14 @@ class Peer_DBS(Peer_IMS):
         # {{{
 
         #Peer_IMS.__init__(self)
-        threading.Thread.__init__(self)
-
-        _print_("Running in", end=' ')
-        if __debug__:
-            print("debug mode")
-        else:
-            print("release mode")
-
-        self.print_the_module_name()
+        #threading.Thread.__init__(self)
 
         self.splitter_socket = peer.splitter_socket
         self.player_socket = peer.player_socket
+        self.buffer_size = peer.buffer_size
+        self.chunk_format_string = peer.chunk_format_string
+        self.splitter = peer.splitter
+        #self.team_socket = peer.team_socket
         #self.print_modulename()
 
         # The list of peers structure.        
@@ -91,7 +86,7 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
 
-    def receive_the_list(self):
+    def receive_the_list_of_peers(self):
         # {{{
 
         self.debt = {}
@@ -313,10 +308,9 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
 
-    def receive_configuration(self):
+    def buffer_data(self):
         # {{{
 
-        #Peer_IMS.receive_configuration(self)
         #supper(Peer_DBS, self).configure()
                 
         # This "private and static" variable holds the previous chunk
@@ -326,7 +320,7 @@ class Peer_DBS(Peer_IMS):
         # from another peer or om the splitter.
         #self.receive_and_feed_previous = ""
 
-        self.receive_the_list()
+        #self.receive_the_list_of_peers()
 
         # Number of times that the previous received chunk has been sent
         # to the team. If this counter is smaller than the number
@@ -344,7 +338,6 @@ class Peer_DBS(Peer_IMS):
         # from another peer or om the splitter.
         self.receive_and_feed_previous = ""
 
-
         self.sendto_counter = 0
 
         #self.pipe_thread_end, self.pipe_main_end = Pipe()
@@ -352,6 +345,8 @@ class Peer_DBS(Peer_IMS):
         #self.buffering = threading.Event()
 
         self.debt_memory = 1 << self.MAX_CHUNK_DEBT
+
+        Peer_IMS.buffer_data(self)
 
         # }}}
         
@@ -370,10 +365,10 @@ class Peer_DBS(Peer_IMS):
             return True
         else:
             return False
-        message = self.splitter_socket.recv(struct.calcsize("c"))
-        if struct.unpack("c", message)[0] == '1':
-            return True
-        else:
-            return False
+        #message = self.splitter_socket.recv(struct.calcsize("c"))
+        #if struct.unpack("c", message)[0] == '1':
+        #    return True
+        #else:
+        #    return False
 
     # }}}
