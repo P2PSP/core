@@ -91,15 +91,16 @@ class Peer():
         # A mcast_endpoint is always received, even for DBS peers.
         if peer.mcast_addr == "0.0.0.0":
             # {{{ This is an "unicast" peer.
-            peer = Peer_DBS(peer)
+            #peer = Peer_DBS(peer)
+            peer = Peer_FNS(peer)
             peer.receive_the_list_of_peers()
             #peer.listen_to_the_team()
             #peer.disconnect_from_the_splitter()
             #peer.buffer_data()
 
             if peer.am_i_a_monitor():
-                peer = Monitor_DBS(peer)
-    #            peer = Monitor_LRS()
+                #peer = Monitor_DBS(peer)
+                peer = Monitor_FNS(peer)
             else:
                 pass
                 #if args.chunk_loss_period:

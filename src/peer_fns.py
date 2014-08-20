@@ -1,17 +1,38 @@
-# Full-cone Nat Set of Rules
+# This code is distributed under the GNU General Public License (see
+# THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+# Copyright (C) 2014, the P2PSP team.
 
+import threading
+from peer_ims import Peer_IMS
 from peer_dbs import Peer_DBS
+from _print_ import _print_
+from color import Color
 
+# Full-cone Nat Set of Rules
 class Peer_FNS(Peer_DBS):
     # {{{
 
-    def __init__(self):
+    def __init__(self, peer):
         # {{{
 
-        Peer_DBS.__init__(self)
+        #Peer_DBS.__init__(self)
+
+        threading.Thread.__init__(self)
+
+        self.splitter_socket = peer.splitter_socket
+        self.player_socket = peer.player_socket
+        self.buffer_size = peer.buffer_size
+        self.chunk_format_string = peer.chunk_format_string
+        self.splitter = peer.splitter
+        self.chunk_size = peer.chunk_size
+        
+        # }}}
+
+    def print_the_module_name(self):
+        # {{{
 
         sys.stdout.write(Color.yellow)
-        print ("Peer FNS")
+        _print_("Peer FNS")
         sys.stdout.write(Color.none)
 
         # }}}
@@ -30,28 +51,38 @@ class Peer_FNS(Peer_DBS):
 
         # }}}
 
-    def run(self):
+    def disconnect_from_the_splitter(self):
         # {{{
 
-        self.wait_for_the_player()
-        self.connect_to_the_splitter()
-        self.receive_the_header()
-        self.receive_the_buffersize()
-        self.receive_the_chunksize()
-        self.setup_team_socket()
-        self.retrieve_the_list_of_peers()
-        self.splitter_socket.close()
-        # BEGIN NEW
+        Peer_IMS.disconnect_from_the_splitter(self)
         self.say_hello(self.splitter)
         self.say_hello(self.splitter)
         self.say_hello(self.splitter)
-        # END NEW
-        self.create_buffer()
-        self.buffer_data()
-        self.buffering.set()
-        self.peers_life()
-        self.polite_farewell()
 
         # }}}
+        
+    ## def run(self):
+    ##     # {{{
+
+    ##     self.wait_for_the_player()
+    ##     self.connect_to_the_splitter()
+    ##     self.receive_the_header()
+    ##     self.receive_the_buffersize()
+    ##     self.receive_the_chunksize()
+    ##     self.setup_team_socket()
+    ##     self.retrieve_the_list_of_peers()
+    ##     self.splitter_socket.close()
+    ##     # BEGIN NEW
+    ##     self.say_hello(self.splitter)
+    ##     self.say_hello(self.splitter)
+    ##     self.say_hello(self.splitter)
+    ##     # END NEW
+    ##     self.create_buffer()
+    ##     self.buffer_data()
+    ##     self.buffering.set()
+    ##     self.peers_life()
+    ##     self.polite_farewell()
+
+    ##     # }}}
 
     # }}}

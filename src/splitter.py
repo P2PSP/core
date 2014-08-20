@@ -14,6 +14,7 @@ from color import Color
 import common
 from splitter_ims import Splitter_IMS
 from splitter_dbs import Splitter_DBS
+from splitter_fns import Splitter_FNS
 from _print_ import _print_
 
 # }}}
@@ -89,7 +90,8 @@ class Splitter():
             splitter.peer_list = []
 
         else:
-            splitter = Splitter_DBS()
+            #splitter = Splitter_DBS()
+            splitter = Splitter_FNS()
 
             if args.max_chunk_loss:
                 splitter.MAX_CHUNK_LOSS = int(args.max_chunk_loss)

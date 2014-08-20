@@ -31,18 +31,18 @@ class Peer_DBS(Peer_IMS):
 
     # }}}
 
-    def __init__(self, peer):
+    def __init__(self):
         # {{{
 
         #Peer_IMS.__init__(self)
         threading.Thread.__init__(self)
 
-        self.splitter_socket = peer.splitter_socket
-        self.player_socket = peer.player_socket
-        self.buffer_size = peer.buffer_size
-        self.chunk_format_string = peer.chunk_format_string
-        self.splitter = peer.splitter
-        self.chunk_size = peer.chunk_size
+        ## self.splitter_socket = peer.splitter_socket
+        ## self.player_socket = peer.player_socket
+        ## self.buffer_size = peer.buffer_size
+        ## self.chunk_format_string = peer.chunk_format_string
+        ## self.splitter = peer.splitter
+        ## self.chunk_size = peer.chunk_size
 
         #self.team_socket = peer.team_socket
         #self.print_modulename()
