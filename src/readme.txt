@@ -1,4 +1,4 @@
-This is a description of the files/directories:
+Directory contents:
 
 * readme.txt: this file.
 
