@@ -7,14 +7,34 @@
 import sys
 import socket
 import struct
+import threading
 from peer_dbs import Peer_DBS
 from _print_ import _print_
 from color import Color
+import common
 
 # }}}
 
 class Monitor_DBS(Peer_DBS):
     # {{{
+
+    def __init__(self, peer):
+        # {{{
+
+        threading.Thread.__init__(self)
+        #Peer_DBS.__init__(self, peer)
+        #self.team_socket = peer.team_socket
+        #self.played_chunk = peer.played_chunk
+        self.peer_list = peer.peer_list
+        self.splitter_socket = peer.splitter_socket
+        self.buffer_size = peer.buffer_size
+        self.chunk_format_string = peer.chunk_format_string
+        self.splitter = peer.splitter
+        self.debt = peer.debt
+        self.chunk_size = peer.chunk_size
+        self.player_socket = peer.player_socket
+
+        # }}}
 
     def print_the_module_name(self):
         # {{{
@@ -25,16 +45,6 @@ class Monitor_DBS(Peer_DBS):
 
         # }}}
     
-    def __init__(self, peer):
-        # {{{
-
-        #Peer_DBS.__init__(self, peer)
-        self.team_socket = peer.team_socket
-        self.played_chunk = peer.played_chunk
-        self.buffer_size = peer.buffer_size
-
-        # }}}
-
     def complain(self, chunk_number):
         # {{{
 

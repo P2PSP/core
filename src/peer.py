@@ -93,9 +93,9 @@ class Peer():
             # {{{ This is an "unicast" peer.
             peer = Peer_DBS(peer)
             peer.receive_the_list_of_peers()
-            peer.listen_to_the_team()
-            peer.disconnect_from_the_splitter()
-            peer.buffer_data()
+            #peer.listen_to_the_team()
+            #peer.disconnect_from_the_splitter()
+            #peer.buffer_data()
 
             if peer.am_i_a_monitor():
                 peer = Monitor_DBS(peer)

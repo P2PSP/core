@@ -2,6 +2,8 @@
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 
+# {{{
+
 from __future__ import print_function
 import threading
 import sys
@@ -12,6 +14,8 @@ import common
 import time
 from _print_ import _print_
 from peer_ims import Peer_IMS
+
+# }}}
 
 # Some useful definitions.
 ADDR = 0
@@ -31,13 +35,15 @@ class Peer_DBS(Peer_IMS):
         # {{{
 
         #Peer_IMS.__init__(self)
-        #threading.Thread.__init__(self)
+        threading.Thread.__init__(self)
 
         self.splitter_socket = peer.splitter_socket
         self.player_socket = peer.player_socket
         self.buffer_size = peer.buffer_size
         self.chunk_format_string = peer.chunk_format_string
         self.splitter = peer.splitter
+        self.chunk_size = peer.chunk_size
+
         #self.team_socket = peer.team_socket
         #self.print_modulename()
 
