@@ -2,7 +2,7 @@
 
 icecast_name="localhost"
 icecast_port=8000
-video=Big_Buck_Bunny_small.ogv
+video=~/Videos/Big_Buck_Bunny_small.ogv
 #video=big_buck_bunny_720p_stereo.ogg
 #video=/home/jalvaro/workspace/sim/gnagl.ogg
 #video=/home/jalvaro/workspaces-eclipse/P2PSP/Big_Buck_Bunny_small.ogv

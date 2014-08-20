@@ -19,7 +19,8 @@ class Peer_IMS(threading.Thread):
     # {{{ Class "constants"
 
     PLAYER_PORT = 9999          # Port used to serve the player.
-    SPLITTER_HOST = "localhost" # Address of the splitter.
+    #SPLITTER_HOST = "localhost" # Address of the splitter.
+    SPLITTER_HOST = "127.0.0.1" # Address of the splitter.
     SPLITTER_PORT = 4552        # Port of the splitter.
     TEAM_PORT = 0               # TCP port used to communicate the splitter.
 
