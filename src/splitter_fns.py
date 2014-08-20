@@ -53,7 +53,7 @@ class Splitter_FNS(Splitter_DBS):
                 # {{{ The peer wants to leave the team.
 
                 try:
-                    if struct.unpack("s", message)[0] == 'G': # <G>oodbye
+                    if struct.unpack("s", message)[0] == 'G': # 'G'oodbye
                         self.process_goodbye(sender)
                 except Exception, e:
                     print(e)

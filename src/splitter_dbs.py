@@ -10,6 +10,7 @@ import struct
 import time
 from color import Color
 import common
+from _print_ import _print_
 from splitter_ims import Splitter_IMS
 
 # Some useful definitions.
@@ -367,14 +368,15 @@ class Splitter_DBS(Splitter_IMS):
 
             try:
                 peer = self.peer_list[self.peer_number] # Ojo, esto nunca deberia provocar una excepcion
-            except KeyError:
-                pass
+                
+                self.send_chunk(chunk, peer)
 
-            self.send_chunk(chunk, peer)
-            
-            self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
-            self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
-            self.peer_number = (self.peer_number + 1) % len(self.peer_list)
+                self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
+                self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
+                self.peer_number = (self.peer_number + 1) % len(self.peer_list)
+            except IndexError:
+                _print_("The monitor peer has died!")
+
 
         # }}}
 

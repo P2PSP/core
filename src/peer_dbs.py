@@ -27,7 +27,7 @@ class Peer_DBS(Peer_IMS):
 
     # {{{ Class "constants"
 
-    MAX_CHUNK_DEBT = 10
+    MAX_CHUNK_DEBT = 32
 
     # }}}
 

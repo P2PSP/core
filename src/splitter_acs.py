@@ -1,3 +1,20 @@
+# This code is distributed under the GNU General Public License (see
+# THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+# Copyright (C) 2014, the P2PSP team.
+
+# {{{ Imports
+from __future__ import print_function
+import threading
+import sys
+import socket
+import struct
+import time
+from color import Color
+import common
+from _print_ import _print_
+from splitter_ims import Splitter_IMS
+# }}}
+
 # Adaptive Chunk-rate Set of rules
 class Splitter_ACS(Splitter_FNS):
     # {{{
