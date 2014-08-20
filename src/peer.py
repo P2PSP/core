@@ -160,7 +160,7 @@ class Peer():
             kbps_expected_sent = int(kbps_expected_recv*team_ratio)
             kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
             last_sendto_counter = peer.sendto_counter
-            if kbps_recvfrom > 0:
+            if kbps_recvfrom > 0 and kbps_expected_recv > 0:
                 nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
             else:
                 nice = 0.0

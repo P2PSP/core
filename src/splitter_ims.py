@@ -70,11 +70,11 @@ class Splitter_IMS(threading.Thread):
 
         threading.Thread.__init__(self)
 
-        print("Running in", end=' ')
-        if __debug__:
-            print("debug mode")
-        else:
-            print("release mode")
+        #print("Running in", end=' ')
+        #if __debug__:
+            #print("debug mode")
+        #else:
+            #print("release mode")
 
         self.print_the_module_name()
         print("Buffer size (in chunks) =", self.BUFFER_SIZE)

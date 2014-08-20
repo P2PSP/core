@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
 # {{{ Imports
@@ -21,6 +21,12 @@ from _print_ import _print_
 class Splitter():
 
     def __init__(self):
+
+        _print_("Running in", end=' ')
+        if __debug__:
+            print("debug mode")
+        else:
+            print("release mode")
 
         # {{{ Args parsing
 

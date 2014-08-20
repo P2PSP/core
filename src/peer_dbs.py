@@ -213,7 +213,7 @@ class Peer_DBS(Peer_IMS):
                         # The peer is new
                         self.peer_list.append(sender)
                         self.debt[sender] = 0
-                        print (Color.green, sender, 'added by data chunk', \
+                        print (Color.green, sender, 'added by chunk', \
                             chunk_number, Color.none)
                     else:
                         self.debt[sender] -= 1
