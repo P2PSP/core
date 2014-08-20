@@ -1,3 +1,7 @@
+# This code is distributed under the GNU General Public License (see
+# THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+# Copyright (C) 2014, the P2PSP team.
+
 from __future__ import print_function
 from peer_fns import Peer_FNS
 

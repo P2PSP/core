@@ -1,3 +1,5 @@
+# Borrar
+
 # This is a peer that does not know if is IMS or DBS until receiving
 # this information from the splitter.
 
