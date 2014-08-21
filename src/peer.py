@@ -100,7 +100,8 @@ class Peer():
 
             if peer.am_i_a_monitor():
                 #peer = Monitor_DBS(peer)
-                peer = Monitor_FNS(peer)
+                #peer = Monitor_FNS(peer)
+                peer = Monitor_LRS(peer)
             else:
                 pass
                 #if args.chunk_loss_period:

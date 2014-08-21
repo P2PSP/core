@@ -369,14 +369,14 @@ class Splitter_IMS(threading.Thread):
 
         # }}}
 
-    def send_chunk(self, chunk, endpoint):
+    def send_chunk(self, message, peer):
         # {{{
 
-        message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
-        self.team_socket.sendto(message, endpoint)
+        #message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
+        self.team_socket.sendto(message, peer)
 
         if __debug__:
-            print('%5d' % self.chunk_number, Color.red, '->', Color.none, endpoint)
+            print('%5d' % self.chunk_number, Color.red, '->', Color.none, peer)
             sys.stdout.flush()
 
         self.sendto_counter += 1
@@ -424,7 +424,10 @@ class Splitter_IMS(threading.Thread):
         header_load_counter = 0
         while self.alive:
             #self.receive_and_send_a_chunk(header_load_counter)
-            self.send_chunk(self.receive_chunk(header_load_counter), self.mcast_channel)
+            chunk = self.receive_chunk(header_load_counter)
+            message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
+            #self.send_chunk(self.receive_chunk(header_load_counter), self.mcast_channel)
+            self.send_chunk(message, self.mcast_channel)
             self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
 
         # }}}

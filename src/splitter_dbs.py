@@ -370,11 +370,10 @@ class Splitter_DBS(Splitter_IMS):
         while self.alive:
 
             chunk = self.receive_chunk(header_load_counter)
-
             try:
                 peer = self.peer_list[self.peer_number]
-                
-                self.send_chunk(chunk, peer)
+                message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
+                self.send_chunk(message, peer)
 
                 self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
                 self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER

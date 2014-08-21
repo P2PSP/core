@@ -16,6 +16,7 @@ from splitter_ims import Splitter_IMS
 from splitter_dbs import Splitter_DBS
 from splitter_fns import Splitter_FNS
 from splitter_acs import Splitter_ACS
+from splitter_lrs import Splitter_LRS
 from _print_ import _print_
 
 # }}}
@@ -93,7 +94,8 @@ class Splitter():
         else:
             #splitter = Splitter_DBS()
             #splitter = Splitter_FNS()
-            splitter = Splitter_ACS()
+            #splitter = Splitter_ACS()
+            splitter = Splitter_LRS()
 
             if args.max_chunk_loss:
                 splitter.MAX_CHUNK_LOSS = int(args.max_chunk_loss)
@@ -111,8 +113,8 @@ class Splitter():
         #last_chunk_number = 0
 
         print("         | Received | Sent      |")
-        print("    Time | (kbps)   | (kbps)    | Peers (#, peer, losses, period, kbps), ")
-        print("---------+----------+-----------+----------------------------------...")
+        print("    Time | (kbps)   | (kbps)    | Peers (#, peer, losses, period, kbps) ")
+        print("---------+----------+-----------+-----------------------------------...")
 
         last_sendto_counter = splitter.sendto_counter
         last_recvfrom_counter = splitter.recvfrom_counter

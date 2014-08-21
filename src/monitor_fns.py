@@ -8,6 +8,7 @@ from monitor_dbs import Monitor_DBS
 from peer_fns import Peer_FNS
 from _print_ import _print_
 
+# Full-cone Nat Set of rules
 class Monitor_FNS(Monitor_DBS, Peer_FNS):
     # {{{
 
