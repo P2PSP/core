@@ -46,6 +46,10 @@ or simply:
     ./peer.py --password pass &
     vlc http://localhost:9999 &
 
+8. Loss a chunk of each 100:
+
+    ./peer.py --chunk_loss_period 100
+
 # Splitter manual:
 
 1. Create a channel using the default parameters (run "splitter --help"):
