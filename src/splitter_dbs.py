@@ -349,7 +349,7 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def compute_next_peer_number(self):
+    def compute_next_peer_number(self, peer):
         self.peer_number = (self.peer_number + 1) % len(self.peer_list)
 
     def run(self):
@@ -372,14 +372,14 @@ class Splitter_DBS(Splitter_IMS):
             chunk = self.receive_chunk(header_load_counter)
 
             try:
-                peer = self.peer_list[self.peer_number] # Ojo, esto nunca deberia provocar una excepcion
+                peer = self.peer_list[self.peer_number]
                 
                 self.send_chunk(chunk, peer)
 
                 self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
                 self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
                 #self.peer_number = (self.peer_number + 1) % len(self.peer_list)
-                self.compute_next_peer_number()
+                self.compute_next_peer_number(peer)
             except IndexError:
                 _print_("The monitor peer has died!")
 

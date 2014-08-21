@@ -13,6 +13,8 @@ from color import Color
 import common
 from _print_ import _print_
 from splitter_ims import Splitter_IMS
+from splitter_dbs import Splitter_DBS
+from splitter_fns import Splitter_FNS
 # }}}
 
 # Adaptive Chunk-rate Set of rules
@@ -95,10 +97,10 @@ class Splitter_ACS(Splitter_FNS):
 
         # }}}
 
-    def send_chunk(self, chunk, endpoint):
+    def send_chunk(self, chunk, peer):
         # {{{
 
-        Splitter_IMS.send_chunk(chunk, endpoint)
+        Splitter_IMS.send_chunk(self, chunk, peer)
         try:
             self.number_of_sent_chunks_per_peer[peer] += 1
         except KeyError:
@@ -106,7 +108,7 @@ class Splitter_ACS(Splitter_FNS):
 
         # }}}
             
-    def compute_next_peer_number(self):
+    def compute_next_peer_number(self, peer):
         # {{{
 
         try:

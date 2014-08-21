@@ -11,6 +11,10 @@ from color import Color
 class Splitter_FNS(Splitter_DBS):
     # {{{
 
+
+    def __init__(self):
+        Splitter_DBS.__init__(self)
+    
     def print_modulename(self):
         # {{{
 

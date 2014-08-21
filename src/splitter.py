@@ -15,6 +15,7 @@ import common
 from splitter_ims import Splitter_IMS
 from splitter_dbs import Splitter_DBS
 from splitter_fns import Splitter_FNS
+from splitter_acs import Splitter_ACS
 from _print_ import _print_
 
 # }}}
@@ -91,7 +92,8 @@ class Splitter():
 
         else:
             #splitter = Splitter_DBS()
-            splitter = Splitter_FNS()
+            #splitter = Splitter_FNS()
+            splitter = Splitter_ACS()
 
             if args.max_chunk_loss:
                 splitter.MAX_CHUNK_LOSS = int(args.max_chunk_loss)
@@ -109,8 +111,8 @@ class Splitter():
         #last_chunk_number = 0
 
         print("         | Received | Sent      |")
-        print("    Time | (kbps)   | (kbps)    | Peers")
-        print("---------+----------+-----------+------------+")
+        print("    Time | (kbps)   | (kbps)    | Peers (#, peer, losses, period, kbps), ")
+        print("---------+----------+-----------+----------------------------------...")
 
         last_sendto_counter = splitter.sendto_counter
         last_recvfrom_counter = splitter.recvfrom_counter
@@ -136,7 +138,7 @@ class Splitter():
                         sys.stdout.write(Color.blue)
                         print('%3d' % splitter.period[p], end= ' ')
                         sys.stdout.write(Color.purple)
-                        print('%4d' % splitter.number_of_sent_chunks_per_peer[p], end = ' ')
+                        print(repr((splitter.number_of_sent_chunks_per_peer[p] * splitter.CHUNK_SIZE * 8) / 1000).rjust(4), end = ' ')
                         splitter.number_of_sent_chunks_per_peer[p] = 0
                     except AttributeError:
                         pass

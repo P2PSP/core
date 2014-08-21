@@ -167,11 +167,12 @@ class Peer():
                 nice = 0.0
     #        print(1.0/float(nice))
             #print ("Played chunk = ", peer.played_chunk)
+            _print_('|', end=Color.none)
             if kbps_expected_recv < kbps_recvfrom:
                 sys.stdout.write(Color.red)
             elif kbps_expected_recv > kbps_recvfrom:
                 sys.stdout.write(Color.green)
-            _print_("|" + repr(kbps_expected_recv).rjust(8), end=Color.none)
+            print(repr(kbps_expected_recv).rjust(8), end=Color.none)
             print(('(' + repr(kbps_recvfrom) + ')').rjust(8), end=' | ')
             #print(("{:.1f}".format(nice)).rjust(6), end=' | ')
             #sys.stdout.write(Color.none)
