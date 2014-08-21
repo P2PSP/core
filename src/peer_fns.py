@@ -8,7 +8,7 @@ from peer_dbs import Peer_DBS
 from _print_ import _print_
 from color import Color
 
-# Full-cone Nat Set of Rules
+# Full-cone Nat Set of rules
 class Peer_FNS(Peer_DBS):
     # {{{
 

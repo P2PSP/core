@@ -2,6 +2,7 @@
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 
+# {{{ Imports
 from __future__ import print_function
 import threading
 import sys
@@ -12,6 +13,7 @@ from color import Color
 import common
 from _print_ import _print_
 from splitter_ims import Splitter_IMS
+# }}}
 
 # Some useful definitions.
 ADDR = 0
@@ -347,6 +349,9 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
+    def compute_next_peer_number(self):
+        self.peer_number = (self.peer_number + 1) % len(self.peer_list)
+
     def run(self):
         # {{{
 
@@ -373,7 +378,8 @@ class Splitter_DBS(Splitter_IMS):
 
                 self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
                 self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
-                self.peer_number = (self.peer_number + 1) % len(self.peer_list)
+                #self.peer_number = (self.peer_number + 1) % len(self.peer_list)
+                self.compute_next_peer_number()
             except IndexError:
                 _print_("The monitor peer has died!")
 

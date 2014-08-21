@@ -19,14 +19,14 @@ or simply:
     ./peer.py --player_port 9998 &
     vlc http://localhost:9998 &
 
-3. Watch a particular channel (4554):
+3. Watch a particular channel (in the port 4554):
 
     ./peer.py --splitter_port 4554 &
     vlc http://localhost:9999 &
 
 4. Use a specific team port (8888) for communicating with the rest of
-   the team (you should use this feature, for example, after have created 
-   a NAT entry manualy):
+   the team (you should use this feature, for example, after having
+   created a NAT entry manualy):
 
     ./peer.py --team_port 8888 &
     vlc http://localhost:9999 &
@@ -36,71 +36,66 @@ or simply:
     ./peer.py --splitter_host 1.2.3.4 &
     vlc http://localhost:9999 &
 
-6. Run a monitor peer (the monitor peer is the first peer of the team
-   that contacts the splitter):
-
-    ./peer.py --monitor &
-    vlc http://localhost:9999 &
-
-9. Decript a stream using the keyword "key":
+6. Decript a stream using the keyword "key":
 
     ./peer.py --keyword key &
     vlc http://localhost:9999 &
 
-11. Join a private team using the password "pass":
+7. Join a private team using the password "pass":
 
     ./peer.py --password pass &
     vlc http://localhost:9999 &
 
 # Splitter manual:
 
-1. Create a channel using the default parameters:
+1. Create a channel using the default parameters (run "splitter --help"):
 
-   splitter &
+    splitter &
 
 2. Change the listening port to 5555:
 
-   splitter --port 5555 &
+    splitter --port 5555 &
 
 3. Change the buffer size to 512 chunks:
 
-   splitter --buffer_size 512 &
+    splitter --buffer_size 512 &
 
-4. Change the source channel to "new_channel":
+4. Change the source channel (media stream) to "new_channel":
 
-   splitter --channel new_channel &
+    splitter --channel new_channel &
 
 5. Change the chunk size to 512 bytes:
 
-   splitter --chunk_size 512 &
+    splitter --chunk_size 512 &
 
-6. Change the source host to "new_host":
+6. Change the source host (which runs Icecast for example) to
+   "new_host":
 
-   splitter --source_host new_host &
+    splitter --source_host new_host &
 
-7. Change the source port to 6666:
+7. Change the source port (where Icecast is listening) to 6666:
 
-   splitter --source_port 6666 &
+    splitter --source_port 6666 &
 
-8. Use the IP multicast mode:
+8. Create a private team using the password "pass":
 
-   splitter --mcast &
+    splitter --password pass &
 
-8. Select a particular IP multicast address 224.0.1.1:
+9. Encrypt the stream using the keyword "key":
 
-   splitter --mcast --mcast_addr 224.0.1.1 &
+    splitter --keyword key &
 
-9. Create a private team using the password "pass":
+10. Use the IP multicast mode (if available):
 
-   splitter --password pass &
+    splitter --mcast &
 
-10. Encrypt the stream using the keyword "key":
+11. Select a particular IP multicast address 224.0.1.1:
 
-   splitter --keyword key &
+    splitter --mcast --mcast_addr 224.0.1.1 &
 
 # Miscelaneous:
 
-1. Feed the local Icecast server, forever:
+1. Feed a local Icecast server, forever:
 
     xterm -e './feed_icecast.sh' &
 
