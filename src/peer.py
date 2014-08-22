@@ -91,6 +91,9 @@ class Peer():
         # A mcast_endpoint is always received, even for DBS peers.
         if peer.mcast_addr == "0.0.0.0":
             # {{{ This is an "unicast" peer.
+
+            # Partir siempre de Peer_DBS y luego convertir a lo que corresponda
+            
             #peer = Peer_DBS(peer)
             peer = Peer_FNS(peer)
             peer.receive_the_list_of_peers()

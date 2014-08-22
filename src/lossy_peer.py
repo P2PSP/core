@@ -10,13 +10,18 @@ class Lossy_Peer(Peer_FNS):
 
     CHUNK_LOSS_PERIOD = 10
 
-    def __init__(self):
+    def __init__(self, peer):
         # {{{
 
-        Peer_FNS.__init__(self)
+        Peer_FNS.__init__(self, peer)
+
+        # }}}
+
+    def print_the_module_name(self):
+        # {{{
 
         sys.stdout.write(Color.yellow)
-        print ("Lossy Peer")
+        _print_("Lossy Peer")
         sys.stdout.write(Color.none)
 
         # }}}

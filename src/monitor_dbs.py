@@ -21,18 +21,22 @@ class Monitor_DBS(Peer_DBS):
     def __init__(self, peer):
         # {{{
 
-        threading.Thread.__init__(self)
-        #Peer_DBS.__init__(self, peer)
+        sys.stdout.write(Color.yellow)
+        _print_("Monitor DBS")
+        sys.stdout.write(Color.none)
+
+        ##threading.Thread.__init__(self)
+        Peer_DBS.__init__(self, peer)
         #self.team_socket = peer.team_socket
         #self.played_chunk = peer.played_chunk
-        self.peer_list = peer.peer_list
-        self.splitter_socket = peer.splitter_socket
-        self.buffer_size = peer.buffer_size
-        self.chunk_format_string = peer.chunk_format_string
-        self.splitter = peer.splitter
-        self.debt = peer.debt
-        self.chunk_size = peer.chunk_size
-        self.player_socket = peer.player_socket
+        ## self.peer_list = peer.peer_list
+        ## self.splitter_socket = peer.splitter_socket
+        ## self.buffer_size = peer.buffer_size
+        ## self.chunk_format_string = peer.chunk_format_string
+        ## self.splitter = peer.splitter
+        ## self.debt = peer.debt
+        ## self.chunk_size = peer.chunk_size
+        ## self.player_socket = peer.player_socket
 
         # }}}
 

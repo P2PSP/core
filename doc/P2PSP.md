@@ -46,7 +46,7 @@ or simply:
     ./peer.py --password pass &
     vlc http://localhost:9999 &
 
-8. Loss a chunk of each 100:
+8. Deliberately loss a chunk of each 100 (usually for testing purposes):
 
     ./peer.py --chunk_loss_period 100
 

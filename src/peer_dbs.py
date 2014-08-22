@@ -34,6 +34,10 @@ class Peer_DBS(Peer_IMS):
     def __init__(self, peer):
         # {{{
 
+        sys.stdout.write(Color.yellow)
+        _print_("Peer DBS")
+        sys.stdout.write(Color.none)
+
         #Peer_IMS.__init__(self)
         threading.Thread.__init__(self)
 

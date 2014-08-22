@@ -2,6 +2,7 @@
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 
+# {{{ Imports
 from __future__ import print_function
 import threading
 import sys
@@ -11,6 +12,7 @@ from color import Color
 import common
 import time
 from _print_ import _print_
+# }}}
 
 # Ip Multicasting Set of rules
 class Peer_IMS(threading.Thread):
@@ -25,6 +27,37 @@ class Peer_IMS(threading.Thread):
     TEAM_PORT = 0               # TCP port used to communicate the splitter.
 
     # }}}
+
+    def __init__(self):
+        # {{{
+
+        sys.stdout.write(Color.yellow)
+        _print_("Peer IMS")
+        sys.stdout.write(Color.none)
+
+        threading.Thread.__init__(self)
+
+        #self.print_the_module_name()
+
+        _print_("Player port =", self.PLAYER_PORT)
+        #print("Splitter =", sock.getpeername())
+        _print_("Splitter =", self.SPLITTER_HOST)
+#        print("Team address =", self.TEAM_HOST)
+        _print_("Team port =", self.TEAM_PORT)
+
+        # {{{ The size of the chunk in bytes.
+        # }}}
+        #self.chunk_size = 0
+
+        # {{{ "True" while buffering is being performed.
+        # }}}
+        #self.buffering = threading.Event()
+
+        #self.player_connection = threading.Event()
+
+        #self.wait_for_the_player()
+
+        # }}}
 
     def print_the_module_name(self):
         # {{{
@@ -419,33 +452,6 @@ class Peer_IMS(threading.Thread):
         # {{{
 
         #self.run()
-
-        # }}}
-
-    def __init__(self):
-        # {{{
-
-        threading.Thread.__init__(self)
-
-        self.print_the_module_name()
-
-        _print_("Player port =", self.PLAYER_PORT)
-        #print("Splitter =", sock.getpeername())
-        _print_("Splitter =", self.SPLITTER_HOST)
-#        print("Team address =", self.TEAM_HOST)
-        _print_("Team port =", self.TEAM_PORT)
-
-        # {{{ The size of the chunk in bytes.
-        # }}}
-        #self.chunk_size = 0
-
-        # {{{ "True" while buffering is being performed.
-        # }}}
-        #self.buffering = threading.Event()
-
-        #self.player_connection = threading.Event()
-
-        #self.wait_for_the_player()
 
         # }}}
 
