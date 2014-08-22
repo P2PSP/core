@@ -52,10 +52,9 @@ class Splitter_LRS(Splitter_ACS):
         #self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
         #number, chunk = struct.unpack(self.chunk_format_string, message)
         #chunk_number = socket.ntohs(number)
-        if __debug__:
-            sys.stdout.write(Color.cyan)
-            print ("Re-sending", lost_chunk_number, "to", peer)
-            sys.stdout.write(Color.none)
+        sys.stdout.write(Color.cyan)
+        print ("Re-sending", lost_chunk_number, "to", peer)
+        sys.stdout.write(Color.none)
 
         # }}}
 

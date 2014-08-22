@@ -8,6 +8,7 @@ import sys
 import socket
 import struct
 import threading
+from peer_ims import Peer_IMS
 from peer_dbs import Peer_DBS
 from _print_ import _print_
 from color import Color
@@ -25,19 +26,21 @@ class Monitor_DBS(Peer_DBS):
         _print_("Monitor DBS")
         sys.stdout.write(Color.none)
 
-        ##threading.Thread.__init__(self)
-        Peer_DBS.__init__(self, peer)
+        threading.Thread.__init__(self)
+        #Peer_DBS.__init__(self, peer)
+        
         #self.team_socket = peer.team_socket
         #self.played_chunk = peer.played_chunk
-        ## self.peer_list = peer.peer_list
-        ## self.splitter_socket = peer.splitter_socket
-        ## self.buffer_size = peer.buffer_size
-        ## self.chunk_format_string = peer.chunk_format_string
-        ## self.splitter = peer.splitter
-        ## self.debt = peer.debt
-        ## self.chunk_size = peer.chunk_size
-        ## self.player_socket = peer.player_socket
+        self.peer_list = peer.peer_list
+        self.splitter_socket = peer.splitter_socket
+        self.buffer_size = peer.buffer_size
+        self.chunk_format_string = peer.chunk_format_string
+        self.splitter = peer.splitter
+        self.debt = peer.debt
+        self.chunk_size = peer.chunk_size
+        self.player_socket = peer.player_socket
 
+        
         # }}}
 
     def print_the_module_name(self):
@@ -56,10 +59,9 @@ class Monitor_DBS(Peer_DBS):
         message = struct.pack("!H", chunk_number)
         self.team_socket.sendto(message, self.splitter)
 
-        if __debug__:
-            sys.stdout.write(Color.blue)
-            print ("lost chunk:", self.numbers[chunk_number % self.buffer_size], chunk_number, self.received[chunk_number % self.buffer_size])
-            sys.stdout.write(Color.none)
+        sys.stdout.write(Color.cyan)
+        print ("lost chunk:", chunk_number)
+        sys.stdout.write(Color.none)
 
         # }}}
 
@@ -74,4 +76,13 @@ class Monitor_DBS(Peer_DBS):
 
         # }}}
 
+    #def unpack_and_store_chunk(self, message):
+        # {{{
+
+        #chunk_number = Peer_IMS.unpack_and_store_chunk(self, message)
+        #self.numbers[chunk_number % self.buffer_size] = chunk_number
+        #return chunk_number
+    
+        # }}}
+        
     # }}}

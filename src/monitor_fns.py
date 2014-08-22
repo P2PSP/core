@@ -3,15 +3,17 @@
 # Copyright (C) 2014, the P2PSP team.
 
 # {{{ Imports
+import sys
 import threading
 from peer_dbs import Peer_DBS
 from monitor_dbs import Monitor_DBS
 from peer_fns import Peer_FNS
 from _print_ import _print_
+from color import Color
 # }}}
 
 # Full-cone Nat Set of rules
-class Monitor_FNS(Monitor_DBS, Peer_FNS):
+class Monitor_FNS(Peer_FNS, Monitor_DBS):
     # {{{
 
     def __init__(self, peer):
@@ -21,20 +23,21 @@ class Monitor_FNS(Monitor_DBS, Peer_FNS):
         _print_("Monitor FNS")
         sys.stdout.write(Color.none)
 
-        Monitor_DBS.__init__(self, peer)
-        Peer_FNS.__init__(self, peer)
+        #Peer_FNS.__init__(self, peer)
+        #Monitor_DBS.__init__(self, peer)
 
-        ## threading.Thread.__init__(self)
+        threading.Thread.__init__(self)
 
-        ## self.splitter_socket = peer.splitter_socket
-        ## self.player_socket = peer.player_socket
-        ## self.buffer_size = peer.buffer_size
-        ## self.chunk_format_string = peer.chunk_format_string
-        ## self.splitter = peer.splitter
-        ## self.chunk_size = peer.chunk_size
+        self.splitter_socket = peer.splitter_socket
+        self.player_socket = peer.player_socket
+        self.buffer_size = peer.buffer_size
+        self.chunk_format_string = peer.chunk_format_string
+        self.splitter = peer.splitter
+        self.chunk_size = peer.chunk_size
         
-        ## self.peer_list = peer.peer_list
-        ## self.debt = peer.debt
+        self.peer_list = peer.peer_list
+        self.debt = peer.debt
+        #self.numbers = peer.numbers
 
         # }}}
 

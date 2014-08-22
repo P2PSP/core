@@ -111,6 +111,7 @@ class Peer():
                     print('CHUNK_LOSS_PERIOD =', Peer_Lossy.CHUNK_LOSS_PERIOD)
                     if int(args.chunk_loss_period) != 0:
                         peer = Lossy_Peer(peer)
+                    
 
             # }}}
 

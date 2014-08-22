@@ -2,12 +2,14 @@
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 
+# {{{ Imports
 import threading
 import sys
 from peer_ims import Peer_IMS
 from peer_dbs import Peer_DBS
 from _print_ import _print_
 from color import Color
+# }}}
 
 # Full-cone Nat Set of rules
 class Peer_FNS(Peer_DBS):
@@ -20,17 +22,20 @@ class Peer_FNS(Peer_DBS):
         _print_("Peer FNS")
         sys.stdout.write(Color.none)
 
-        Peer_DBS.__init__(self, peer)
+        #Peer_DBS.__init__(self, peer)
+        #self = peer
 
-        #threading.Thread.__init__(self)
+        threading.Thread.__init__(self)
 
-        ## self.splitter_socket = peer.splitter_socket
-        ## self.player_socket = peer.player_socket
-        ## self.buffer_size = peer.buffer_size
-        ## self.chunk_format_string = peer.chunk_format_string
-        ## self.splitter = peer.splitter
-        ## self.chunk_size = peer.chunk_size
-        
+        self.splitter_socket = peer.splitter_socket
+        self.player_socket = peer.player_socket
+        self.buffer_size = peer.buffer_size
+        self.chunk_format_string = peer.chunk_format_string
+        self.splitter = peer.splitter
+        self.chunk_size = peer.chunk_size
+        self.peer_list = peer.peer_list
+        self.debt = peer.debt
+
         # }}}
 
     def print_the_module_name(self):

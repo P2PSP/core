@@ -2,9 +2,13 @@
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 
+# {{{ Imports
+import sys
 import threading
 from _print_ import _print_
 from monitor_fns import Monitor_FNS
+from color import Color
+# }}}
 
 # Lost chunks Recovery Set of rules
 class Monitor_LRS(Monitor_FNS):
@@ -13,7 +17,28 @@ class Monitor_LRS(Monitor_FNS):
     def __init__(self, peer):
         # {{{
 
-        Monitor_FNS.__init__(self, peer)
+        sys.stdout.write(Color.yellow)
+        _print_("Monitor LRS")
+        sys.stdout.write(Color.none)
+
+        #Monitor_FNS.__init__(self, peer)
+
+        #print(dir(self))
+
+        #print(dir(peer))
+        #self = peer
+        threading.Thread.__init__(self)
+        
+        self.splitter_socket = peer.splitter_socket
+        self.splitter = peer.splitter
+        self.buffer_size = peer.buffer_size
+        self.chunk_format_string = peer.chunk_format_string
+        self.peer_list = peer.peer_list
+        self.player_socket = peer.player_socket
+        self.chunk_size = peer.chunk_size
+        self.debt = peer.debt
+
+        #self.numbers = [0]*self.buffer_size
 
         # }}}
 

@@ -48,6 +48,8 @@ class Peer_DBS(Peer_IMS):
         self.splitter = peer.splitter
         self.chunk_size = peer.chunk_size
 
+        _print_("max_chunk_debt =", self.MAX_CHUNK_DEBT)
+        
         #self.team_socket = peer.team_socket
         #self.print_modulename()
 
@@ -100,6 +102,7 @@ class Peer_DBS(Peer_IMS):
         # {{{
 
         self.debt = {}
+        print("0000000000000000000000000")
         self.peer_list = [] # The list of peers structure.
 
         sys.stdout.write(Color.green)
