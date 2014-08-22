@@ -94,8 +94,7 @@ class Peer():
 
             # Partir siempre de Peer_DBS y luego convertir a lo que corresponda
             
-            #peer = Peer_DBS(peer)
-            peer = Peer_FNS(peer)
+            peer = Peer_DBS(peer)
             peer.receive_the_list_of_peers()
             #peer.listen_to_the_team()
             #peer.disconnect_from_the_splitter()
@@ -106,6 +105,7 @@ class Peer():
                 #peer = Monitor_FNS(peer)
                 peer = Monitor_LRS(peer)
             else:
+                peer = Peer_FNS(peer)
                 if args.chunk_loss_period:
                     Peer_Lossy.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
                     print('CHUNK_LOSS_PERIOD =', Peer_Lossy.CHUNK_LOSS_PERIOD)
