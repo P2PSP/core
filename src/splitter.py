@@ -49,7 +49,7 @@ class Splitter():
 
         parser.add_argument('--max_chunk_loss', help='Maximum number of lost chunks for an unsupportive peer. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.MAX_CHUNK_LOSS))
 
-        parser.add_argument("--mcast", action="store_true", help="Uses the IP multicast infrastructure, if avaiable.")
+        parser.add_argument("--mcast", action="store_true", help="Uses the IP multicast infrastructure, if available.")
 
         parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks. Makes sense only in multicast mode. Default = "{}".'.format(Splitter_IMS.MCAST_ADDR))
 
