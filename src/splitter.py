@@ -1,6 +1,11 @@
 #!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
+# This code is distributed under the GNU General Public License (see
+# THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+# Copyright (C) 2014, the P2PSP team.
+# http://www.p2psp.org
+
 # {{{ Imports
 
 from __future__ import print_function
@@ -44,8 +49,6 @@ class Splitter():
         parser.add_argument('--chunk_size', help='Chunk size in bytes. Default = {}.'.format(Splitter_IMS.CHUNK_SIZE))
 
         parser.add_argument('--header_size', help='Size of the header of the stream in chunks. Default = {}.'.format(Splitter_IMS.HEADER_SIZE))
-
-        #parser.add_argument('--losses_memory', help='Number of chunks to divide by two the losses counters. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.LOSSES_MEMORY))
 
         parser.add_argument('--max_chunk_loss', help='Maximum number of lost chunks for an unsupportive peer. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.MAX_CHUNK_LOSS))
 
@@ -107,10 +110,6 @@ class Splitter():
         splitter.start()
 
         # {{{ Prints information until keyboard interruption
-
-        # #Chunk #peers { peer #losses period #chunks }
-
-        #last_chunk_number = 0
 
         print("         | Received | Sent      |")
         print("    Time | (kbps)   | (kbps)    | Peers (#, peer, losses, period, kbps) ")

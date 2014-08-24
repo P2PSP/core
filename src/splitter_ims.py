@@ -1,6 +1,7 @@
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
+# http://www.p2psp.org
 
 # {{{ Imports
 
@@ -15,8 +16,7 @@ import time
 
 # }}}
 
-# IP Multicast Set of Rules.
-# http://p2psp.org/en/p2psp-protocol?cap=indexsu7.xht
+# IP Multicast Set of rules.
 class Splitter_IMS(threading.Thread):
     # {{{
 
@@ -70,12 +70,6 @@ class Splitter_IMS(threading.Thread):
 
         threading.Thread.__init__(self)
 
-        #print("Running in", end=' ')
-        #if __debug__:
-            #print("debug mode")
-        #else:
-            #print("release mode")
-
         self.print_the_module_name()
         print("Buffer size (in chunks) =", self.BUFFER_SIZE)
         print("Chunk size (in bytes) =", self.CHUNK_SIZE)
@@ -107,6 +101,8 @@ class Splitter_IMS(threading.Thread):
         # }}}
         self.team_socket = ""
 
+        # {{{ Used to talk to the source
+        # }}}
         self.source_socket = ""
         
         # {{{ The video header.
@@ -123,7 +119,7 @@ class Splitter_IMS(threading.Thread):
 
         self.recvfrom_counter = 0
         self.sendto_counter = 0
-        
+
         # }}}
 
     def print_the_module_name(self):
