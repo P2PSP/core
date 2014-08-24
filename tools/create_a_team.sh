@@ -37,23 +37,23 @@ export CHUNK_LOSS_PERIOD=100
 usage() {
     echo $0
     echo " Creates a local team."
-    echo "  [-h header size ($HEADER_SIZE)]           /* In chunks */"
-    echo "  [-b buffer size ($BUFFER_SIZE)]           /* In chunks */"
-    echo "  [-c channel ($CHANNEL)]                   /* */"
-    echo "  [-k chunks size ($CHUNK_SIZE)]            /* */"
-    echo "  [-d maximum chunk debt ($MAX_CHUNK_DEBT)] /* */"
-    echo "  [-l maximum chunk loss ($MAX_CHUNK_LOSS)] /* */"
-    echo "  [-i iterations ($ITERATIONS)]             /* Of this script */"
-    echo "  [-s source IP address, ($SOURCE_ADDR)]    /* */"
-    echo "  [-o source port ($SOURCE_PORT)]           /* */"
-    echo "  [-a splitter addr ($SPLITTER_ADDR)]       /* */"
-    echo "  [-p splitter port ($SPLITTER_PORT)]       /* */"
-    echo "  [-m ($MCAST)]                             /* Use IP multicast */"
-    echo "  [-m mcast addr ($MCAST_ADDR)]             /* */"
-    echo "  [-t team port ($TEAM_PORT)]               /* */"
-    echo "  [-f maximun life ($LIFE)]                 /* Of a peer */"
-    echo "  [-y birthday period ($BIRTHDAY_PERIOD)]   /* Of a peer */"
-    echo "  [-w chunk loss period ($LOSS_PERIOD)]     /* */"
+    echo "  [-h header size in chunks ($HEADER_SIZE)]"
+    echo "  [-b buffer size in chunks ($BUFFER_SIZE)]"
+    echo "  [-c channel ($CHANNEL)]"
+    echo "  [-k chunks size ($CHUNK_SIZE)]"
+    echo "  [-d maximum chunk debt ($MAX_CHUNK_DEBT)]"
+    echo "  [-l maximum chunk loss ($MAX_CHUNK_LOSS)]"
+    echo "  [-i iterations of this script ($ITERATIONS)]"
+    echo "  [-s source IP address, ($SOURCE_ADDR)]"
+    echo "  [-o source port ($SOURCE_PORT)]"
+    echo "  [-a splitter addr ($SPLITTER_ADDR)]"
+    echo "  [-p splitter port ($SPLITTER_PORT)]"
+    echo "  [-m /* Use IP multicast */ ($MCAST)]"
+    echo "  [-m mcast addr ($MCAST_ADDR)]"
+    echo "  [-t team port ($TEAM_PORT)]"
+    echo "  [-f maximum life of a peer ($MAX_LIFE)]"
+    echo "  [-y birthday period of a peer ($BIRTHDAY_PERIOD)]"
+    echo "  [-w chunk loss period ($LOSS_PERIOD)]"
     echo "  [-? help]"
 }
 
@@ -193,7 +193,7 @@ do
 
     #xterm -sl 10000 -e '../peer.py --team_port $TEAM_PORT --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
 
-    TIME=`shuf -i 1-$LIFE -n 1`
+    TIME=`shuf -i 1-$MAX_LIFE -n 1`
     timelimit -t $TIME vlc http://localhost:$PLAYER_PORT &
     x=$(( $x + 1 ))
 done
