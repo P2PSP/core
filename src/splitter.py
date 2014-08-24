@@ -55,7 +55,7 @@ class Splitter():
 
         parser.add_argument('--port', help='Port to serve the peers. Default = "{}".'.format(Splitter_IMS.PORT))
 
-        parser.add_argument('--source_addr', help='IP address of the streaming server. Default = "{}".'.format(Splitter_IMS.SOURCE_HOST))
+        parser.add_argument('--source_addr', help='IP address of the streaming server. Default = "{}".'.format(Splitter_IMS.SOURCE_ADDR))
 
         parser.add_argument('--source_port', help='Port where the streaming server is listening. Default = {}.'.format(Splitter_IMS.SOURCE_PORT))
 
@@ -77,7 +77,7 @@ class Splitter():
             Splitter_IMS.PORT = int(args.port)
 
         if args.source_addr:
-            Splitter_IMS.SOURCE_HOST = socket.gethostbyname(args.source_addr)
+            Splitter_IMS.SOURCE_ADDR = socket.gethostbyname(args.source_addr)
 
         if args.source_port:
             Splitter_IMS.SOURCE_PORT = int(args.source_port)
@@ -167,12 +167,12 @@ class Splitter():
                 # Wake up the "moderate_the_team" daemon, which is waiting
                 # in a cluster_sock.recvfrom(...).
                 if not args.mcast:
-                    splitter.say_goodbye(("localhost", splitter.PORT), splitter.team_socket)
+                    splitter.say_goodbye(("127.0.0.1", splitter.PORT), splitter.team_socket)
 
                 # Wake up the "handle_arrivals" daemon, which is waiting
                 # in a peer_connection_sock.accept().
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.connect(("localhost", splitter.PORT))
+                sock.connect(("127.0.0.1", splitter.PORT))
                 sock.recv(splitter.CHUNK_SIZE*splitter.HEADER_SIZE) # Header
                 sock.recv(struct.calcsize("H")) # Buffer size
                 sock.recv(struct.calcsize("H")) # Chunk size

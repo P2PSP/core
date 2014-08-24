@@ -44,7 +44,7 @@ class Splitter_IMS(threading.Thread):
 
     # {{{ The unicast IP address of the splitter server.
     # }}}
-    #SPLITTER_ADDR = "localhost" # No por ahora
+    #SPLITTER_ADDR = "127.0.0.1" # No por ahora
     
     # {{{ Port used to serve the peers (listening port).
     # }}}
@@ -52,7 +52,7 @@ class Splitter_IMS(threading.Thread):
 
     # {{{ The host where the streaming server is running.
     # }}}
-    SOURCE_HOST = "localhost"
+    SOURCE_ADDR = "127.0.0.1"
 
     # {{{ Port where the streaming server is listening.
     # }}}
@@ -83,7 +83,7 @@ class Splitter_IMS(threading.Thread):
         print("Header size (in chunks) =", self.HEADER_SIZE)
         #print("Splitter address =", self.SPLITTER_ADDR) # No ahora
         print("Listening (and multicast) port =", self.PORT)
-        print("Source IP address =", self.SOURCE_HOST)
+        print("Source IP address =", self.SOURCE_ADDR)
         print("Source port =", self.SOURCE_PORT)
         print("Multicast address =", self.MCAST_ADDR)
 
@@ -115,7 +115,7 @@ class Splitter_IMS(threading.Thread):
 
         # {{{ Some other useful definitions.
         # }}}
-        self.source = (self.SOURCE_HOST, self.SOURCE_PORT)
+        self.source = (self.SOURCE_ADDR, self.SOURCE_PORT)
         self.GET_message = 'GET /' + self.CHANNEL + ' HTTP/1.1\r\n'
         self.GET_message += '\r\n'
         self.chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s

@@ -9,7 +9,7 @@ SoR=IMS
 #export CHANNEL="big_buck_bunny_480p_stereo.ogg"
 
 export BUFFER_SIZE=64
-export CHANNEL="~/Videos/Big_Buck_Bunny_small.ogv"
+export CHANNEL="Big_Buck_Bunny_small.ogv"
 
 #export BUFFER_SIZE=32
 #export CHANNEL="The_Last_of_the_Mohicans-Promentory.ogg"
@@ -23,12 +23,14 @@ export CHUNK_SIZE=1024
 export MAX_CHUNK_DEBT=32
 export MAX_CHUNK_LOSS=128
 export ITERATIONS=100
-export SOURCE_HOST="127.0.0.1"
+export SOURCE_ADDR="127.0.0.1"
 export SOURCE_PORT=8000
-export SPLITTER_HOST="127.0.0.1"
+export SPLITTER_ADDR="127.0.0.1"
 export SPLITTER_PORT=4552
-export MCAST=""
+export MCAST="--mcast"
 export MCAST_ADDR="224.0.0.1"
+#export MCAST=""
+#export MCAST_ADDR="224.0.0.1"
 export TEAM_PORT=5007
 export MAX_LIFE=180
 export BIRTHDAY_PERIOD=10
@@ -87,7 +89,7 @@ while getopts "h:b:c:k:d:l:i:s:o:a:p:r:m:t:f:y:w:?" opt; do
 	    ;;
 	i)
 	    ITERATIONS="${OPTARG}"
-	    echo "ITERATIONS="$DEBT_THRESHOLD=
+	    echo "ITERATIONS="$ITERATIONS
 	    ;;
 	s)
 	    SOURCE_ADDR="${OPTARG}"
@@ -95,7 +97,7 @@ while getopts "h:b:c:k:d:l:i:s:o:a:p:r:m:t:f:y:w:?" opt; do
 	    ;;
 	o)
 	    SOURCE_PORT="${OPTARG}"
-	    echo "LOSSES_THRESHOLD="$SOURCE_ADDR
+	    echo "LOSSES_THRESHOLD="$SOURCE_PORT
 	    ;;
 	a)
 	    SPLITTER_ADDR="${OPTARG}"
@@ -106,7 +108,7 @@ while getopts "h:b:c:k:d:l:i:s:o:a:p:r:m:t:f:y:w:?" opt; do
 	    echo "SPLITTER_PORT="$SPLITTER_PORT
 	    ;;
 	m)
-	    MCAST="mcast"
+	    MCAST="--mcast"
 	    echo "Using IP multicast"
 	    ;;
 	r)
@@ -146,32 +148,42 @@ while getopts "h:b:c:k:d:l:i:s:o:a:p:r:m:t:f:y:w:?" opt; do
     esac
 done
 
-set -x
+#set -x
 
-xterm -sl 10000 -e './splitter_IMS.py \
+SPLITTER="../src/splitter.py \
 --buffer_size=$BUFFER_SIZE \
 --channel $CHANNEL \
 --chunk_size=$CHUNK_SIZE \
 --header_size=$HEADER_SIZE \
 --max_chunk_loss=$MAX_CHUNK_LOSS \
---$MCAST \
+$MCAST \
 --mcast_addr $MCAST_ADDR \
 --port $SPLITTER_PORT \
 --source_addr $SOURCE_ADDR \
---source_port $SOURCE_PORT' &
-#xterm -sl 10000 -e '../splitter.py  --team_addr localhost --buffer_size=$BUFFER_SIZE --channel $CHANNEL --chunk_size=$CHUNK_SIZE --losses_threshold=$LOSSES_THRESHOLD --losses_memory=$LOSSES_MEMORY --team_port $SPLITTER_PORT --source_addr $SOURCE_ADDR --source_port $SOURCE_PORT > splitter' &
+--source_port $SOURCE_PORT"
+
+echo $SPLITTER
+
+xterm -sl 10000 -e '$SPLITTER' &
+#xterm -sl 10000 -e '$SPLITTER > splitter' &
 
 sleep 1
 
-xterm -sl 10000 -e '../peer.py \
+PEER="../src/peer.py \
 --max_chunk_debt=MAX_CHUNK_$DEBT
 --player_port 9998 \
---splitter_host $SPLITTER_host \
+--splitter_addr $SPLITTER_addr \
 --splitter_port $SPLITTER_PORT \
---team_port $TEAM_PORT' &
-#xterm -sl 10000 -e '../peer.py --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port 9998 --splitter_addr localhost --splitter_port $SPLITTER_PORT --monitor > monitor' &
+--team_port $TEAM_PORT"
+
+echo $PEER
+
+xterm -sl 10000 -e '$PEER' &
+#xterm -sl 10000 -e '$PEER > monitor' &
 
 vlc http://localhost:9998 &
+
+exit
 
 x=1
 while [ $x -le $ITERATIONS ]
@@ -183,15 +195,15 @@ do
     #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j MARK --set-xmark 101
     #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j RETURN
 
-    xterm -sl 10000 -e '../peer.py \
+    xterm -sl 10000 -e '../src/peer.py \
 --chunk_loss_period=$CHUNK_LOSS_PERIOD \
 --max_chunk_debt=MAX_CHUNK_$DEBT
 --player_port $PLAYER_PORT \
---splitter_host $SPLITTER_HOST \
+--splitter_addr $SPLITTER_ADDR \
 --splitter_port $SPLITTER_PORT \
 --team_port $TEAM_PORT' &
 
-    #xterm -sl 10000 -e '../peer.py --team_port $TEAM_PORT --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_addr localhost --splitter_port $SPLITTER_PORT' &
+    #xterm -sl 10000 -e '../peer.py --team_port $TEAM_PORT --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_host localhost --splitter_port $SPLITTER_PORT' &
 
     TIME=`shuf -i 1-$MAX_LIFE -n 1`
     timelimit -t $TIME vlc http://localhost:$PLAYER_PORT &

@@ -6,11 +6,13 @@ find an implementation of the P2PSP.
 
 This is a description of the files/directories:
 
+* doc: information about the use of the implementation.
+
 * readme.txt: this file.
 
 * src: the implementation.
 
-* doc: information about the use of the implementation.
+* tools: some useful scripts.
 
 More information about the protocol at:
 
