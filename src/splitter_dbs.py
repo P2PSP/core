@@ -146,7 +146,6 @@ class Splitter_DBS(Splitter_IMS):
 
         if peer not in self.peer_list:
             self.peer_list.append(peer)
-        #self.deletions[peer] = 0
         self.losses[peer] = 0
 
         # }}}
@@ -213,11 +212,6 @@ class Splitter_DBS(Splitter_IMS):
             del self.losses[peer]
         except KeyError:
             pass
-
-          #try:
-          #     del self.deletions[peer]
-          #except KeyError:
-          #     pass
 
         # }}}
 

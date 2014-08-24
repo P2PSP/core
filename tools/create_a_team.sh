@@ -22,19 +22,20 @@ export MAX_CHUNK_LOSS=8
 export CHUNK_SIZE=1024
 export MAX_CHUNK_DEBT=32
 export MAX_CHUNK_LOSS=128
-export ITERATIONS=100
+export ITERATIONS=25
 export SOURCE_ADDR="127.0.0.1"
 export SOURCE_PORT=8000
 export SPLITTER_ADDR="127.0.0.1"
 export SPLITTER_PORT=4552
-export MCAST="--mcast"
-export MCAST_ADDR="224.0.0.1"
-#export MCAST=""
+#export MCAST="--mcast"
 #export MCAST_ADDR="224.0.0.1"
+export MCAST=""
+export MCAST_ADDR="0.0.0.0"
 export TEAM_PORT=5007
 export MAX_LIFE=180
 export BIRTHDAY_PERIOD=10
-export CHUNK_LOSS_PERIOD=100
+#export CHUNK_LOSS_PERIOD=100
+export CHUNK_LOSS_PERIOD=0
 
 usage() {
     echo $0
@@ -148,42 +149,41 @@ while getopts "h:b:c:k:d:l:i:s:o:a:p:r:m:t:f:y:w:?" opt; do
     esac
 done
 
-#set -x
+set -x
 
 SPLITTER="../src/splitter.py \
 --buffer_size=$BUFFER_SIZE \
---channel $CHANNEL \
+--channel=$CHANNEL \
 --chunk_size=$CHUNK_SIZE \
 --header_size=$HEADER_SIZE \
 --max_chunk_loss=$MAX_CHUNK_LOSS \
 $MCAST \
---mcast_addr $MCAST_ADDR \
---port $SPLITTER_PORT \
---source_addr $SOURCE_ADDR \
---source_port $SOURCE_PORT"
+--mcast_addr=$MCAST_ADDR \
+--port=$SPLITTER_PORT \
+--source_addr=$SOURCE_ADDR \
+--source_port=$SOURCE_PORT"
 
 echo $SPLITTER
 
-xterm -sl 10000 -e '$SPLITTER' &
+xterm -sl 10000 -e $SPLITTER &
 #xterm -sl 10000 -e '$SPLITTER > splitter' &
 
 sleep 1
 
 PEER="../src/peer.py \
---max_chunk_debt=MAX_CHUNK_$DEBT
---player_port 9998 \
---splitter_addr $SPLITTER_addr \
---splitter_port $SPLITTER_PORT \
---team_port $TEAM_PORT"
+--max_chunk_debt=$MAX_CHUNK_DEBT \
+--player_port=9998 \
+--splitter_addr=$SPLITTER_ADDR \
+--splitter_port=$SPLITTER_PORT"
+# \
+#--team_port=$TEAM_PORT"
 
 echo $PEER
 
-xterm -sl 10000 -e '$PEER' &
+xterm -sl 10000 -e $PEER &
 #xterm -sl 10000 -e '$PEER > monitor' &
 
 vlc http://localhost:9998 &
-
-exit
 
 x=1
 while [ $x -le $ITERATIONS ]
@@ -195,15 +195,16 @@ do
     #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j MARK --set-xmark 101
     #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j RETURN
 
-    xterm -sl 10000 -e '../src/peer.py \
+    PEER="../src/peer.py \
 --chunk_loss_period=$CHUNK_LOSS_PERIOD \
---max_chunk_debt=MAX_CHUNK_$DEBT
+--max_chunk_debt=$MAX_CHUNK_DEBT \
 --player_port $PLAYER_PORT \
 --splitter_addr $SPLITTER_ADDR \
---splitter_port $SPLITTER_PORT \
---team_port $TEAM_PORT' &
+--splitter_port $SPLITTER_PORT"
+# \
+#--team_port $TEAM_PORT"
 
-    #xterm -sl 10000 -e '../peer.py --team_port $TEAM_PORT --debt_threshold=$DEBT_THRESHOLD --debt_memory=$DEBT_MEMORY --player_port $PLAYER_PORT --splitter_host localhost --splitter_port $SPLITTER_PORT' &
+    xterm -sl 10000 -e $PEER &
 
     TIME=`shuf -i 1-$MAX_LIFE -n 1`
     timelimit -t $TIME vlc http://localhost:$PLAYER_PORT &
