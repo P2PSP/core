@@ -1,8 +1,10 @@
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
+# http://www.p2psp.org
 
 # {{{ Imports
+
 from __future__ import print_function
 import threading
 import sys
@@ -15,9 +17,10 @@ from _print_ import _print_
 from splitter_ims import Splitter_IMS
 from splitter_dbs import Splitter_DBS
 from splitter_fns import Splitter_FNS
+
 # }}}
 
-# Adaptive Chunk-rate Set of rules
+# ACS: Adaptive Chunk-rate Set of rules
 class Splitter_ACS(Splitter_FNS):
     # {{{
 

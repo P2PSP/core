@@ -1,8 +1,10 @@
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
+# http://www.p2psp.org
 
 # {{{ Imports
+
 from __future__ import print_function
 import threading
 import sys
@@ -13,13 +15,14 @@ from color import Color
 import common
 from _print_ import _print_
 from splitter_ims import Splitter_IMS
+
 # }}}
 
 # Some useful definitions.
 ADDR = 0
 PORT = 1
 
-# Data Broadcasting Set of rules
+# DBS: Data Broadcasting Set of rules
 class Splitter_DBS(Splitter_IMS):
     # {{{
 
@@ -60,14 +63,6 @@ class Splitter_DBS(Splitter_IMS):
         #    self.destination_of_chunk.append(('0.0.0.0',0))
 
         self.losses = {}
-
-        # {{{ A splitter runs 3 threads. The first one controls the
-        # peer arrivals. The second one listens to the team, for
-        # example, to re-sends lost blocks. The third one shows some
-        # information about the transmission. This variable is used to
-        # stop the child threads. They will be alive only while the
-        # main thread is alive.
-        # }}}
 
         # }}}
 
@@ -351,11 +346,18 @@ class Splitter_DBS(Splitter_IMS):
 
         self.receive_the_header()
 
+        # {{{ A DBS splitter runs 4 threads. The main one and the
+        # "handle_arrivals" thread are equivalent to the daemons used
+        # by the IMS splitter. "moderate_the_team" and
+        # "reset_counters_thread" are new.
+        # }}}
+
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
         def _():
             connection  = self.peer_connection_socket.accept()
             self.handle_a_peer_arrival(connection)
         _()
+
         threading.Thread(target=self.handle_arrivals).start()
         threading.Thread(target=self.moderate_the_team).start()
         threading.Thread(target=self.reset_counters_thread).start()
@@ -371,7 +373,6 @@ class Splitter_DBS(Splitter_IMS):
 
                 self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
                 self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
-                #self.peer_number = (self.peer_number + 1) % len(self.peer_list)
                 self.compute_next_peer_number(peer)
             except IndexError:
                 _print_("The monitor peer has died!")

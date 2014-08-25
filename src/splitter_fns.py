@@ -1,13 +1,16 @@
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
-# Copyright (C) 2014, the P2PSP team.
+# Copyright (C) 2014, the P2PSP team
+# http://www.p2psp.org
 
+# {{{ Imports
 import sys
 import struct
 from splitter_dbs import Splitter_DBS
 from color import Color
+# }}}
 
-# Full-cone Nat Set of rules
+# FNS: Full-cone Nat Set of rules
 class Splitter_FNS(Splitter_DBS):
     # {{{
 

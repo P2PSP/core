@@ -36,7 +36,7 @@ class Splitter():
         else:
             print("release mode")
 
-        # {{{ Args parsing
+        # {{{ Args parsing and instantiation
 
         parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP team.')
 

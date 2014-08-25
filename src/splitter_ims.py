@@ -16,7 +16,7 @@ import time
 
 # }}}
 
-# IP Multicast Set of rules.
+# IMS: IP Multicast Set of rules.
 class Splitter_IMS(threading.Thread):
     # {{{
 
@@ -81,11 +81,9 @@ class Splitter_IMS(threading.Thread):
         print("Source port =", self.SOURCE_PORT)
         print("Multicast address =", self.MCAST_ADDR)
 
-        # {{{ A IMS splitter runs 2 threads. The first one controls
-        # the peer arrivals. The second one shows some information
-        # about the transmission. This variable is used to stop the
-        # child threads. They will be alive only while the main thread
-        # is alive.
+        # {{{ An IMS splitter runs 2 threads. The main one serves the
+        # chunks to the team. The other controls peer arrivals. This
+        # variable is true while the player is receiving data.
         # }}}
         self.alive = True
 
@@ -217,8 +215,6 @@ class Splitter_IMS(threading.Thread):
         sys.stdout.write(Color.none)
         self.send_configuration(sock)
         sock.close()
-        #self.append_peer(peer)
-        #return peer
 
         # }}}
 
@@ -257,7 +253,6 @@ class Splitter_IMS(threading.Thread):
         # {{{ Used to talk with the peers of the team. In this case,
         # it corresponds to a multicast channel.
         
-        #self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         
         self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
@@ -286,14 +281,12 @@ class Splitter_IMS(threading.Thread):
         self.source_socket.sendall(self.GET_message)
         if __debug__:
             print(self.source_socket.getsockname(), 'GET_message =', self.GET_message)
-        #return source_socket
 
         # }}}
 
     def receive_next_chunk(self, header_load_counter):
         # {{{
 
-        #print(self.source_socket.getpeername())
         chunk = self.source_socket.recv(self.CHUNK_SIZE)
         prev_size = 0
         while len(chunk) < self.CHUNK_SIZE:
@@ -307,7 +300,6 @@ class Splitter_IMS(threading.Thread):
                 time.sleep(1)
                 self.source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.source_socket.connect(self.source)
-                #print(self.source_socket.getpeername())
                 self.source_socket.sendall(self.GET_message)
                 self.header = ""
                 header_load_counter = self.HEADER_SIZE
@@ -368,7 +360,6 @@ class Splitter_IMS(threading.Thread):
     def send_chunk(self, message, peer):
         # {{{
 
-        #message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
         self.team_socket.sendto(message, peer)
 
         if __debug__:
@@ -377,26 +368,6 @@ class Splitter_IMS(threading.Thread):
 
         self.sendto_counter += 1
         
-        # }}}
-
-    def receive_and_send_a_chunk(self, header_load_counter): # Sin usar
-        # {{{
-
-        # Receive data from the source
-        chunk, header_load_counter = self.receive_next_chunk(header_load_counter)
-
-        if header_load_counter > 0:
-            print("Header load counter =", header_load_counter)
-            self.header += chunk
-            header_load_counter -= 1
-
-        message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
-        self.team_socket.sendto(message, self.mcast_channel)
-
-        if __debug__:
-            print('%5d' % self.chunk_number, Color.red, '->', Color.none, self.mcast_channel)
-            sys.stdout.flush()
-
         # }}}
 
     def receive_the_header(self):
