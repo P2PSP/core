@@ -146,16 +146,6 @@ class Splitter():
                     sys.stdout.write(Color.none)
                     print('|', end=' ')
                 print()
-                '''
-                print "[%3d] " % len(splitter.peer_list),
-                kbps = (splitter.chunk_number - last_chunk_number) * \
-                splitter.CHUNK_SIZE * 8/1000
-                last_chunk_number = splitter.chunk_number
-
-                for x in xrange(0,kbps/10):
-                print "\b#",
-                print kbps, "kbps"
-                '''
 
             except KeyboardInterrupt:
                 print('Keyboard interrupt detected ... Exiting!')
@@ -171,15 +161,16 @@ class Splitter():
                 # Wake up the "handle_arrivals" daemon, which is waiting
                 # in a peer_connection_sock.accept().
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.connect(("127.0.0.1", splitter.PORT))
+                sock.connect(("127.0.0.1", splitter.PORT)) # Multicast channel
+                sock.recv(struct.calcsize("H")) # Header size
+                sock.recv(struct.calcsize("H")) # Chunk size
                 sock.recv(splitter.CHUNK_SIZE*splitter.HEADER_SIZE) # Header
                 sock.recv(struct.calcsize("H")) # Buffer size
-                sock.recv(struct.calcsize("H")) # Chunk size
                 if args.mcast:
                     number_of_peers = 0
                 else:
                     number_of_peers = socket.ntohs(struct.unpack("H", sock.recv(struct.calcsize("H")))[0])
-
+                    print("Number of peers =", number_of_peers)
                 # Receive the list
                 while number_of_peers > 0:
                     sock.recv(struct.calcsize("4sH"))

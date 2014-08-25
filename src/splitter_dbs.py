@@ -31,10 +31,6 @@ class Splitter_DBS(Splitter_IMS):
     # {{{ Threshold of chunk losses to reject a peer from the team.
     # }}}
     MAX_CHUNK_LOSS = 128
-
-    #MAX_NUMBER_OF_MONITORS = 0#1 # Pensar en determinar si un peer es
-    #monitor o no en funcion del numero de peers en la lista de peers.
-
     MCAST_ADDR = "0.0.0.0"
 
     # }}}
@@ -150,10 +146,6 @@ class Splitter_DBS(Splitter_IMS):
 
     def send_configuration(self, sock):
         Splitter_IMS.send_configuration(self, sock)
-        #self.send_you_are_a_monitor(sock)
-        #self.send_the_debt_memory(sock)
-        #self.send_the_debt_threshold(sock)
-        #self.send_the_list_size(sock)
         self.send_the_list(sock)
         
     def handle_a_peer_arrival(self, connection):
