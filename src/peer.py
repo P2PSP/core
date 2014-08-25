@@ -4,6 +4,7 @@
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
+# http://www.p2psp.org
 
 # {{{ Imports
 
@@ -78,33 +79,23 @@ class Peer():
             print ('PLAYER_PORT =', Peer_IMS.PLAYER_PORT)
 
         peer = Peer_IMS()
-        #peer.player_connection.wait()
         peer.wait_for_the_player()
-        #Peer_IMS().player_connection.wait()
         peer.connect_to_the_splitter()
         peer.receive_configuration()
-        #Peer_IMS().connect_to_the_splitter()
-        #mcast_endpoint = peer.receive_the_mcast_endpoint()
-        #mcast_endpoint = Peer_IMS().receive_the_mcast_endpoint()
-        #_print_("Multicast end-point =", mcast_endpoint)
         
-        # A mcast_endpoint is always received, even for DBS peers.
+        # A multicast address is always received, even for DBS peers.
         if peer.mcast_addr == "0.0.0.0":
             # {{{ This is an "unicast" peer.
 
-            # Partir siempre de Peer_DBS y luego convertir a lo que corresponda
-            
             peer = Peer_DBS(peer)
             peer.receive_the_list_of_peers()
-            #peer.listen_to_the_team()
-            #peer.disconnect_from_the_splitter()
-            #peer.buffer_data()
 
             if peer.am_i_a_monitor():
                 #peer = Monitor_DBS(peer)
                 #peer = Monitor_FNS(peer)
                 peer = Monitor_LRS(peer)
             else:
+                # peer = Peer_DBS(peer)
                 peer = Peer_FNS(peer)
                 if args.chunk_loss_period:
                     Peer_Lossy.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
@@ -122,7 +113,6 @@ class Peer():
         peer.disconnect_from_the_splitter()
         peer.buffer_data()
         peer.start()
-        #peer.buffering.wait()
 
         print("+-----------------------------------------------------+")
         print("| Received = Received kbps, including retransmissions |")
@@ -135,7 +125,7 @@ class Peer():
 
         last_chunk_number = peer.played_chunk
         if hasattr(peer, 'sendto_counter'):
-            last_sendto_counter = 0#peer.sendto_counter
+            last_sendto_counter = 0
         else:
             peer.sendto_counter = 0
             last_sendto_counter = 0
@@ -156,8 +146,6 @@ class Peer():
                 nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
             else:
                 nice = 0.0
-    #        print(1.0/float(nice))
-            #print ("Played chunk = ", peer.played_chunk)
             _print_('|', end=Color.none)
             if kbps_expected_recv < kbps_recvfrom:
                 sys.stdout.write(Color.red)

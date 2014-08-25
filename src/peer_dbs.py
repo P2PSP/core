@@ -1,6 +1,7 @@
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
+# http://www.p2psp.org
 
 # {{{
 
@@ -21,7 +22,7 @@ from peer_ims import Peer_IMS
 ADDR = 0
 PORT = 1
 
-# Data Broadcasting Set of rules
+# DBS: Data Broadcasting Set of rules
 class Peer_DBS(Peer_IMS):
     # {{{
 
@@ -38,7 +39,6 @@ class Peer_DBS(Peer_IMS):
         _print_("Peer DBS")
         sys.stdout.write(Color.none)
 
-        #Peer_IMS.__init__(self)
         threading.Thread.__init__(self)
 
         self.splitter_socket = peer.splitter_socket
@@ -50,45 +50,6 @@ class Peer_DBS(Peer_IMS):
 
         _print_("max_chunk_debt =", self.MAX_CHUNK_DEBT)
         
-        #self.team_socket = peer.team_socket
-        #self.print_modulename()
-
-        # The list of peers structure.        
-        #self.peer_list = []
-
-        # Number of times that the previous received chunk has been sent
-        # to the team. If this counter is smaller than the number
-        # of peers in the team, the previous chunk must be sent in the
-        # burst mode because a new chunk from the splitter has arrived
-        # and the previous received chunk has not been sent to all the
-        # peers of the team. This can happen when one o more chunks
-        # that were routed towards this peer have been lost.
-        #self.receive_and_feed_counter = 0
-
-        # This "private and static" variable holds the previous chunk
-        # received from the splitter. It is used to send the previous
-        # received chunk in the congestion avoiding mode. In that
-        # mode, the peer sends a chunk only when it received a chunk
-        # from another peer or om the splitter.
-        #self.receive_and_feed_previous = ""
-        #self.debt = {}
-
-        #self.sendto_counter = 0
-
-        #self.pipe_thread_end, self.pipe_main_end = Pipe()
-        #self.buffering = True
-        #self.buffering = threading.Event()
-
-        #self.debt_memory = 1 << self.MAX_CHUNK_DEBT
-        # }}}
-
-    def print_the_module_name(self):
-        # {{{
-
-        sys.stdout.write(Color.yellow)
-        _print_("Peer DBS")
-        sys.stdout.write(Color.none)
-
         # }}}
 
     def say_goodbye(self, node):
@@ -101,8 +62,7 @@ class Peer_DBS(Peer_IMS):
     def receive_the_list_of_peers(self):
         # {{{
 
-        self.debt = {}
-        print("0000000000000000000000000")
+        self.debt = {}      # Chunks debts per peer.
         self.peer_list = [] # The list of peers structure.
 
         sys.stdout.write(Color.green)
@@ -165,7 +125,6 @@ class Peer_DBS(Peer_IMS):
 
                 if sender == self.splitter:
                     # {{{ Send the previous chunk in burst sending
-
                     # mode if the chunk has not been sent to all
                     # the peers of the list of peers.
 
@@ -181,7 +140,6 @@ class Peer_DBS(Peer_IMS):
                         peer = self.peer_list[self.receive_and_feed_counter]
                         self.team_socket.sendto(self.receive_and_feed_previous, peer)
                         self.sendto_counter += 1
-                        #self.sendto_counter %= MAX_CHUNK_NUMBER
 
                         # {{{ debug
 
@@ -236,7 +194,6 @@ class Peer_DBS(Peer_IMS):
                     peer = self.peer_list[self.receive_and_feed_counter]
                     self.team_socket.sendto(self.receive_and_feed_previous, peer)
                     self.sendto_counter += 1
-                    #self.sendto_counter %= MAX_CHUNK_NUMBER
 
                     self.debt[peer] += 1
                     if self.debt[peer] > self.MAX_CHUNK_DEBT:
@@ -263,16 +220,6 @@ class Peer_DBS(Peer_IMS):
                 # }}}
             else:
                 # {{{ A control chunk has been received
-                '''
-                try:
-                    sys.stdout.write(Color.red)
-                    print 'Received "goodbye" from', sender
-                    sys.stdout.write(Color.none)
-                    self.peer_list.remove(sender)
-                    del self.debt[sender]
-                except:
-                    pass
-                '''
                 if sender in self.peer_list:
                     sys.stdout.write(Color.red)
                     print (self.team_socket.getsockname(), '\b: received "goodbye" from', sender)
@@ -293,7 +240,6 @@ class Peer_DBS(Peer_IMS):
         # {{{
 
         Peer_IMS.keep_the_buffer_full(self)
-        #supper(Peer_DBS, self).keep_the_buffer_full()
         if (self.played_chunk % self.debt_memory) == 0:
             for i in self.debt:
                 self.debt[i] /= 2
@@ -324,17 +270,6 @@ class Peer_DBS(Peer_IMS):
     def buffer_data(self):
         # {{{
 
-        #supper(Peer_DBS, self).configure()
-                
-        # This "private and static" variable holds the previous chunk
-        # received from the splitter. It is used to send the previous
-        # received chunk in the congestion avoiding mode. In that
-        # mode, the peer sends a chunk only when it received a chunk
-        # from another peer or om the splitter.
-        #self.receive_and_feed_previous = ""
-
-        #self.receive_the_list_of_peers()
-
         # Number of times that the previous received chunk has been sent
         # to the team. If this counter is smaller than the number
         # of peers in the team, the previous chunk must be sent in the
@@ -353,10 +288,6 @@ class Peer_DBS(Peer_IMS):
 
         self.sendto_counter = 0
 
-        #self.pipe_thread_end, self.pipe_main_end = Pipe()
-        #self.buffering = True
-        #self.buffering = threading.Event()
-
         self.debt_memory = 1 << self.MAX_CHUNK_DEBT
 
         Peer_IMS.buffer_data(self)
@@ -367,7 +298,6 @@ class Peer_DBS(Peer_IMS):
         # {{{
 
         Peer_IMS.peers_life(self)
-        #supper(Peer_DBS, self).peers_life()
         self.polite_farewell()
 
         # }}}

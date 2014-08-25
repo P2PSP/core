@@ -1,16 +1,19 @@
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
+# http://www.p2psp.org
 
 # {{{ Imports
+
 import sys
 import threading
 from _print_ import _print_
 from monitor_fns import Monitor_FNS
 from color import Color
+
 # }}}
 
-# Lost chunks Recovery Set of rules
+# LRS: Lost chunks Recovery Set of rules
 class Monitor_LRS(Monitor_FNS):
     # {{{
 
@@ -21,12 +24,6 @@ class Monitor_LRS(Monitor_FNS):
         _print_("Monitor LRS")
         sys.stdout.write(Color.none)
 
-        #Monitor_FNS.__init__(self, peer)
-
-        #print(dir(self))
-
-        #print(dir(peer))
-        #self = peer
         threading.Thread.__init__(self)
         
         self.splitter_socket = peer.splitter_socket
@@ -37,17 +34,6 @@ class Monitor_LRS(Monitor_FNS):
         self.player_socket = peer.player_socket
         self.chunk_size = peer.chunk_size
         self.debt = peer.debt
-
-        #self.numbers = [0]*self.buffer_size
-
-        # }}}
-
-    def print_the_module_name(self):
-        # {{{
-
-        sys.stdout.write(Color.yellow)
-        _print_("Monitor LRS")
-        sys.stdout.write(Color.none)
 
         # }}}
 

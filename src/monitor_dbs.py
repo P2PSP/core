@@ -1,6 +1,7 @@
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
+# http://www.p2psp.org
 
 # {{{ Imports
 
@@ -16,6 +17,7 @@ import common
 
 # }}}
 
+# DBS: Data Broadcasting Set of rules
 class Monitor_DBS(Peer_DBS):
     # {{{
 
@@ -27,10 +29,7 @@ class Monitor_DBS(Peer_DBS):
         sys.stdout.write(Color.none)
 
         threading.Thread.__init__(self)
-        #Peer_DBS.__init__(self, peer)
-        
-        #self.team_socket = peer.team_socket
-        #self.played_chunk = peer.played_chunk
+
         self.peer_list = peer.peer_list
         self.splitter_socket = peer.splitter_socket
         self.buffer_size = peer.buffer_size
@@ -55,7 +54,6 @@ class Monitor_DBS(Peer_DBS):
     def complain(self, chunk_number):
         # {{{
 
-        #message = struct.pack("!H", (chunk_number % self.buffer_size))
         message = struct.pack("!H", chunk_number)
         self.team_socket.sendto(message, self.splitter)
 
@@ -76,13 +74,4 @@ class Monitor_DBS(Peer_DBS):
 
         # }}}
 
-    #def unpack_and_store_chunk(self, message):
-        # {{{
-
-        #chunk_number = Peer_IMS.unpack_and_store_chunk(self, message)
-        #self.numbers[chunk_number % self.buffer_size] = chunk_number
-        #return chunk_number
-    
-        # }}}
-        
     # }}}

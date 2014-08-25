@@ -1,8 +1,10 @@
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
+# http://www.p2psp.org
 
 # {{{ Imports
+
 from __future__ import print_function
 import threading
 import sys
@@ -12,16 +14,16 @@ from color import Color
 import common
 import time
 from _print_ import _print_
+
 # }}}
 
-# Ip Multicasting Set of rules
+# IMS: Ip Multicasting Set of rules
 class Peer_IMS(threading.Thread):
     # {{{
 
     # {{{ Class "constants"
 
     PLAYER_PORT = 9999          # Port used to serve the player.
-    #SPLITTER_HOST = "localhost" # Address of the splitter.
     SPLITTER_HOST = "127.0.0.1" # Address of the splitter.
     SPLITTER_PORT = 4552        # Port of the splitter.
     TEAM_PORT = 0               # TCP port used to communicate the splitter.
@@ -37,38 +39,14 @@ class Peer_IMS(threading.Thread):
 
         threading.Thread.__init__(self)
 
-        #self.print_the_module_name()
-
         _print_("Player port =", self.PLAYER_PORT)
-        #print("Splitter =", sock.getpeername())
         _print_("Splitter =", self.SPLITTER_HOST)
-#        print("Team address =", self.TEAM_HOST)
         _print_("Team port =", self.TEAM_PORT)
 
-        # {{{ The size of the chunk in bytes.
-        # }}}
-        #self.chunk_size = 0
-
-        # {{{ "True" while buffering is being performed.
-        # }}}
-        #self.buffering = threading.Event()
-
-        #self.player_connection = threading.Event()
-
-        #self.wait_for_the_player()
-
         # }}}
 
-    def print_the_module_name(self):
-        # {{{
-
-        sys.stdout.write(Color.yellow)
-        _print_("Peer IMS")
-        sys.stdout.write(Color.none)
-
-        # }}}
-
-    # Tiene pinta de que los tres siguientes metodos pueden simplificarse
+    # Tiene pinta de que los tres siguientes metodos pueden
+    # simplificarse...
 
     def find_next_chunk(self):
         # {{{
@@ -104,7 +82,6 @@ class Peer_IMS(threading.Thread):
     def wait_for_the_player(self):
         # {{{ Setup "player_socket" and wait for the player
 
-        #self.player_connection.clear()
         self.player_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             # In Windows systems this call doesn't work!
@@ -118,7 +95,6 @@ class Peer_IMS(threading.Thread):
         self.player_socket = self.player_socket.accept()[0]
         #self.player_socket.setblocking(0)
         _print_("The player is", self.player_socket.getpeername())
-        #self.player_connection.set()
         
         # }}}
 
@@ -165,7 +141,6 @@ class Peer_IMS(threading.Thread):
         mcast_endpoint = (self.mcast_addr, self.mcast_port)
         if __debug__:
             print("mcast_endpoint =", mcast_endpoint)
-        #return mcast_endpoint
     
         # }}}
 
@@ -195,6 +170,7 @@ class Peer_IMS(threading.Thread):
     def receive_the_chunk_size(self):
         # {{{
 
+        # The size of the chunk in bytes.
         message = self.splitter_socket.recv(struct.calcsize("H"))
         chunk_size = struct.unpack("H", message)[0]
         self.chunk_size = socket.ntohs(chunk_size)
@@ -228,7 +204,6 @@ class Peer_IMS(threading.Thread):
     def listen_to_the_team(self):
         # {{{ Create "team_socket" (UDP) for using the multicast channel
 
-        #self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         try:
             # In Windows systems this call doesn't work!
@@ -259,7 +234,6 @@ class Peer_IMS(threading.Thread):
 
         self.chunks[chunk_number % self.buffer_size] = chunk
         self.received[chunk_number % self.buffer_size] = True
-        #self.numbers[chunk_number % self.buffer_size] = chunk_number # Ojo
 
         return chunk_number
 
@@ -300,15 +274,9 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    #def create_the_buffer(self):
-
     def buffer_data(self):
         # {{{ Buffering
 
-        #self.buffering.clear()
-
-        print("--------------------------------------------------")
-        
         # {{{ The peer dies if the player disconnects.
         # }}}
         self.player_alive = True
@@ -327,7 +295,6 @@ class Peer_IMS(threading.Thread):
         # }}}
         self.received = []
 
-        #self.create_the_buffer()
         # {{{ The buffer of chunks is a structure that is used to delay
         # the playback of the chunks in order to accommodate the
         # network jittter. Two components are needed: (1) the "chunks"
@@ -340,7 +307,6 @@ class Peer_IMS(threading.Thread):
         
         self.chunks = [""]*self.buffer_size
         self.received = [False]*self.buffer_size
-        #self.numbers = [0]*self.buffer_size # Ojo
 
         # }}}
 
@@ -383,7 +349,6 @@ class Peer_IMS(threading.Thread):
         _print_('latency =', time.time() - start_latency, 'seconds')
         _print_("buffering done.")
         sys.stdout.flush()
-        #self.buffering.set()
 
         # }}}
 
@@ -430,28 +395,13 @@ class Peer_IMS(threading.Thread):
         self.receive_the_chunk_size()
         self.receive_the_header()
         self.receive_the_buffer_size()
-        #self.listen_to_the_team()
 
         # }}}
         
     def run(self):
         # {{{
 
-        #sys.stdout.flush()
-        
-        #self.connect_to_the_splitter()
-        #self.buffering.clear()
-        #self.buffer_data()
-        #self.buffering.set()
-        #self.buffering = False
         self.peers_life()
-
-        # }}}
-
-    #def start(self):
-        # {{{
-
-        #self.run()
 
         # }}}
 
