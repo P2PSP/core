@@ -1,21 +1,21 @@
 (Mini) Bazaar manual
 ====================
 
-I want to:
+# Basic instructions:
 
-* Show my status (<launchpad_username> and <email>) in Lauchpad:
+1. Show my status (<launchpad_username> and <email>) in Lauchpad:
 
 bzr config
 
-* Se the Lauchpad user ID:
+2. Set the Lauchpad user ID:
 
 bzr launchpad-login <launchpad_username>
 
-* Copy of the "trunk" branch into a "trunk"-named directory:
+3. Copy of the "trunk" branch into a "trunk"-named directory:
 
 bzr branch lp:p2psp trunk
 
-2. See all the branches of the P2PSP project:
+4. See all the branches of the P2PSP project:
 
 cat << EOF | python - p2psp
 import os, sys
@@ -35,42 +35,70 @@ except KeyError:
     print "Project unknown... \nUsage: " + sys.argv[0] + " lp_project_name"
 EOF
 
-3. Copy the branch <branch> into a <branch>-named directory:
+5. Copy the branch <branch> into a <branch>-named directory:
 
 bzr branch <branch>
 
-4. Commit changes:
+6. Commit changes:
 
 bzr commit -m "a description of your changes"
 bzr push
 
-5. Update my branch:
+7. Update my branch:
 
 bzr pull
 
-6. Create a new personal branch in Lauchpad:
+8. Create a new personal branch in Lauchpad:
 
 bzr push lp:~<lp-username>/p2psp/<branch-name> 
 
-7. Create a new shared branch in Lauchpad:
+9. Create a new shared branch in Lauchpad:
 
 bzr push lp:~p2psp/p2psp/<branch-name>
 
-* Create a +junk branch <branch-name> inside of the P2PSP project
-  (+junk branches do not show up in any project's branch listing):
+10. Create a +junk branch <branch-name> inside of the P2PSP project
+    (+junk branches do not show up in any project's branch listing):
 
 bzr push lp:~p2psp/+junk/<branch-name>
 
-* Merging your branch (on your branch) with the trunk branch:
+11. Merging your branch (on your branch) with the trunk branch:
 
 bzr merge lp:p2psp
 
-* Summit a "Propose for merging". Go to:
+12. Summit a "Propose for merging". Go to:
 
 https://launchpad.net/p2psp
 
-* Merging the trunk branch (on the trunk branch) with a proposed for
-  merging <branch>:
+pick in "Code", next in the branch that you want to merge into the
+"trunk" branch", and select "Propose for merging". The chose "Target
+Branch: lp:p2psp (branch details)– development focus".
+
+13. Merging the trunk branch (on the trunk branch) with a proposed for
+    merging <branch>:
 
 bzr merge <branch>
+
+14. Generate a SSH public key:
+
+ssh-keygen -t rsa
+
+15. Upload a new ssh key. Copy the content of:
+
+~/.ssh/id_rsa.pub
+
+into:
+
+https://launchpad.net/~your-lauchpad-username/+editsshkeys
+
+16. Get a branch of P2PSP:
+
+bzr branch lp:~your-lauchpad-username/p2psp/branch-name
+
+17. Indentificate:
+
+bzr whoami e-mail-address@host
+
+# Complex operations:
+
+1. I want to contribute: 14 + 15 + 16 + 17 + Modify your branch + 12.
 

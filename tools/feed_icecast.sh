@@ -3,14 +3,16 @@
 icecast_name="localhost"
 icecast_port=8000
 video=~/Videos/Big_Buck_Bunny_small.ogv
+#video=big_buck_bunny_720p_stereo.ogg
 #video=/home/jalvaro/workspace/sim/gnagl.ogg
 #video=/home/jalvaro/workspaces-eclipse/P2PSP/Big_Buck_Bunny_small.ogv
 #video=/home/jalvaro/workspaces-eclipse/P2PSP/sample48.ogg
-#password=hackme
-channel=$video
+password=hackme
+channel=Big_Buck_Bunny_small.ogv
 
 usage() {
     echo $0
+    echo "Feeds the Icecast server."
     echo "  [-c (icecast mount-point, \"$channel\" by default)]"
     echo "  [-w (icecast password, \"$password\" by default)]"
     echo "  [-a (icecast hostname, $icecast_name by default)]"
@@ -37,7 +39,6 @@ while getopts "c:w:a:p:v:?" opt; do
 	    ;;
 	v)
 	    video="${OPTARG}"
-	    channel=$video
 	    ;;
 	?)
 	    usage
@@ -69,6 +70,7 @@ set -x
 while true
 do
     oggfwd $icecast_name $icecast_port $password $channel < $video
+    sleep 1
 done
 
 set +x
