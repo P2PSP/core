@@ -69,6 +69,10 @@ bzr merge lp:p2psp
 
 https://launchpad.net/p2psp
 
+pick in "Code", next in the branch that you want to merge into the
+"trunk" branch", and select "Propose for merging". The chose "Target
+Branch: lp:p2psp (branch details)– development focus".
+
 13. Merging the trunk branch (on the trunk branch) with a proposed for
     merging <branch>:
 
