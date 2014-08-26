@@ -55,7 +55,10 @@ class Peer_FNS(Peer_DBS):
     def disconnect_from_the_splitter(self):
         # {{{
 
+        # Close the TCP socket
         Peer_IMS.disconnect_from_the_splitter(self)
+
+        # Use UDP to create a working NAT entry
         self.say_hello(self.splitter)
         self.say_hello(self.splitter)
         self.say_hello(self.splitter)
