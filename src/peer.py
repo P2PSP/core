@@ -25,7 +25,7 @@ from peer_dbs import Peer_DBS
 from peer_fns import Peer_FNS
 from monitor_dbs import Monitor_DBS
 from monitor_fns import Monitor_FNS
-from peer_lossy import Peer_Lossy
+#from peer_lossy import Peer_Lossy
 from monitor_lrs import Monitor_LRS
 from lossy_peer import Lossy_Peer
 
@@ -99,8 +99,8 @@ class Peer():
                 # peer = Peer_DBS(peer)
                 peer = Peer_FNS(peer)
                 if args.chunk_loss_period:
-                    Peer_Lossy.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
-                    print('CHUNK_LOSS_PERIOD =', Peer_Lossy.CHUNK_LOSS_PERIOD)
+                    Lossy_Peer.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
+                    print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
                     if int(args.chunk_loss_period) != 0:
                         peer = Lossy_Peer(peer)
                     
