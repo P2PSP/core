@@ -324,7 +324,7 @@ class Splitter_DBS(Splitter_IMS):
     def reset_counters_thread(self):
         # {{{
 
-        while True:
+        while self.alive:
             self.reset_counters()
             time.sleep(common.COUNTERS_TIMING)
 

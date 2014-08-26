@@ -161,7 +161,8 @@ class Splitter():
                 # Wake up the "handle_arrivals" daemon, which is waiting
                 # in a peer_connection_sock.accept().
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.connect(("127.0.0.1", splitter.PORT)) # Multicast channel
+                sock.connect(("127.0.0.1", splitter.PORT))
+                sock.recv(struct.calcsize("4sH")) # Multicast channel
                 sock.recv(struct.calcsize("H")) # Header size
                 sock.recv(struct.calcsize("H")) # Chunk size
                 sock.recv(splitter.CHUNK_SIZE*splitter.HEADER_SIZE) # Header

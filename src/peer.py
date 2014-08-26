@@ -82,6 +82,7 @@ class Peer():
         peer.wait_for_the_player()
         peer.connect_to_the_splitter()
         peer.receive_configuration()
+        _print_("IP Multicast address =", peer.mcast_addr)
         
         # A multicast address is always received, even for DBS peers.
         if peer.mcast_addr == "0.0.0.0":
