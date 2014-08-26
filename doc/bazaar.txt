@@ -76,7 +76,19 @@ Branch: lp:p2psp (branch details)– development focus".
 13. Merging the trunk branch (on the trunk branch) with a proposed for
     merging <branch>:
 
-bzr merge <branch>
+https://launchpad.net/p2psp
+
+pick in "Code", next in "lp:p2psp", next in "1 branch proposed for
+merging into this one." You will see some like:
+
+lp:~vicente-gonzalez-ruiz/p2psp/IMS ⇒ lp:p2psp 
+
+pick in it and the next page will says some like:
+
+bzr merge lp:~vicente-gonzalez-ruiz/p2psp/IMS
+
+which is the command that you need to write into the "p2psp" directory
+of the trunk branch.
 
 14. Generate a SSH public key:
 
