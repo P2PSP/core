@@ -239,7 +239,7 @@ class Peer_IMS(threading.Thread):
 
         # }}}
         
-    def receive_the_chunk(self):
+    def receive_the_next_message(self):
         # {{{
 
         if __debug__:
@@ -263,7 +263,7 @@ class Peer_IMS(threading.Thread):
         try:
             # {{{ Receive a chunk
 
-            message, sender = self.receive_the_chunk()
+            message, sender = self.receive_the_next_message()
             chunk_number = self.unpack_and_store_chunk(message)
             
             return chunk_number

@@ -118,4 +118,4 @@ bzr whoami e-mail-address@host
 
 cd branches
 bzr branch lp:p2psp DBS
-(bzr merge lp:p2psp) <- If you want to update your branch
+(bzr merge lp:p2psp) <- If you want to keep updated your branch

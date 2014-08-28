@@ -112,7 +112,7 @@ class Splitter_IMS(threading.Thread):
         self.source = (self.SOURCE_ADDR, self.SOURCE_PORT)
         self.GET_message = 'GET /' + self.CHANNEL + ' HTTP/1.1\r\n'
         self.GET_message += '\r\n'
-        self.chunk_format_string = "H" + str(self.CHUNK_SIZE) + "s" # "H1024s
+        self.header_format = "H"
         self.mcast_channel = (self.MCAST_ADDR, self.PORT)
 
         self.recvfrom_counter = 0
@@ -388,11 +388,13 @@ class Splitter_IMS(threading.Thread):
         self.handle_a_peer_arrival(self.peer_connection_socket.accept())
         threading.Thread(target=self.handle_arrivals).start()
 
+        message_format = self.header_format + str(self.CHUNK_SIZE) + "s"
+        
         header_load_counter = 0
         while self.alive:
             #self.receive_and_send_a_chunk(header_load_counter)
             chunk = self.receive_chunk(header_load_counter)
-            message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
+            message = struct.pack(message_format, socket.htons(self.chunk_number), chunk)
             #self.send_chunk(self.receive_chunk(header_load_counter), self.mcast_channel)
             self.send_chunk(message, self.mcast_channel)
             self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
