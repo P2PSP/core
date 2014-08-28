@@ -106,7 +106,7 @@ https://launchpad.net/~your-lauchpad-username/+editsshkeys
 
 bzr branch lp:~your-lauchpad-username/p2psp/branch-name
 
-17. Indentificate:
+17. Indentification:
 
 bzr whoami e-mail-address@host
 
@@ -114,3 +114,8 @@ bzr whoami e-mail-address@host
 
 1. I want to contribute: 14 + 15 + 16 + 17 + Modify your branch + 12.
 
+2. A real example:
+
+cd branches
+bzr branch lp:p2psp DBS
+(bzr merge lp:p2psp) <- If you want to update your branch

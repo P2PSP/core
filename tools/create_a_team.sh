@@ -22,7 +22,7 @@ export MAX_CHUNK_LOSS=8
 export CHUNK_SIZE=1024
 export MAX_CHUNK_DEBT=32
 export MAX_CHUNK_LOSS=128
-export ITERATIONS=25
+export ITERATIONS=50
 export SOURCE_ADDR="127.0.0.1"
 export SOURCE_PORT=8000
 export SPLITTER_ADDR="127.0.0.1"
@@ -33,7 +33,7 @@ export MCAST=""
 export MCAST_ADDR="0.0.0.0"
 export TEAM_PORT=5007
 export MAX_LIFE=180
-export BIRTHDAY_PERIOD=10
+export BIRTHDAY_PERIOD=2
 #export CHUNK_LOSS_PERIOD=100
 export CHUNK_LOSS_PERIOD=0
 
@@ -185,6 +185,8 @@ xterm -sl 10000 -e $PEER &
 
 vlc http://localhost:9998 &
 
+rm -f peer.txt
+
 x=1
 while [ $x -le $ITERATIONS ]
 do
@@ -204,11 +206,17 @@ do
 # \
 #--team_port $TEAM_PORT"
 
-    xterm -sl 10000 -e $PEER &
+    echo $PEER
 
-    TIME=`shuf -i 1-$MAX_LIFE -n 1`
-    timelimit -t $TIME vlc http://localhost:$PLAYER_PORT &
+    xterm -sl 10000 -e "$PEER >> peer.txt" &
+    
+
+    #TIME=`shuf -i 1-$MAX_LIFE -n 1`
+    #timelimit -t $TIME vlc http://localhost:$PLAYER_PORT &
+    sleep 1; netcat localhost $PLAYER_PORT -v > /dev/null &
     x=$(( $x + 1 ))
 done
+
+sleep 1000
 
 set +x

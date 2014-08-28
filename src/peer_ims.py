@@ -311,7 +311,7 @@ class Peer_IMS(threading.Thread):
         # }}}
 
         #  Wall time (execution time plus waiting time).
-        start_latency = time.time()
+        start_time = time.time()
 
         # We will send a chunk to the player when a new chunk is
         # received. Besides, those slots in the buffer that have not been
@@ -346,7 +346,8 @@ class Peer_IMS(threading.Thread):
                 pass
 
         print()
-        _print_('latency =', time.time() - start_latency, 'seconds')
+        latency = time.time() - start_time
+        _print_('latency =', latency, 'seconds')
         _print_("buffering done.")
         sys.stdout.flush()
 
