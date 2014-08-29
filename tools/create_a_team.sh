@@ -22,15 +22,15 @@ export MAX_CHUNK_LOSS=8
 export CHUNK_SIZE=1024
 export MAX_CHUNK_DEBT=32
 export MAX_CHUNK_LOSS=128
-export ITERATIONS=100
+export ITERATIONS=10
 export SOURCE_ADDR="127.0.0.1"
 export SOURCE_PORT=8000
 export SPLITTER_ADDR="127.0.0.1"
 export SPLITTER_PORT=4552
 #export MCAST="--mcast"
-#export MCAST_ADDR="224.0.0.1"
+export MCAST_ADDR="224.0.0.1"
 export MCAST=""
-export MCAST_ADDR="0.0.0.0"
+#export MCAST_ADDR="0.0.0.0"
 export TEAM_PORT=5007
 export MAX_LIFE=180
 export BIRTHDAY_PERIOD=2
@@ -52,7 +52,7 @@ usage() {
     echo "  [-a splitter addr ($SPLITTER_ADDR)]"
     echo "  [-p splitter port ($SPLITTER_PORT)]"
     echo "  [-m /* Use IP multicast */ ($MCAST)]"
-    echo "  [-m mcast addr ($MCAST_ADDR)]"
+    echo "  [-r mcast addr ($MCAST_ADDR)]"
     echo "  [-t team port ($TEAM_PORT)]"
     echo "  [-f maximum life of a peer ($MAX_LIFE)]"
     echo "  [-y birthday period of a peer ($BIRTHDAY_PERIOD)]"
@@ -62,7 +62,7 @@ usage() {
 
 echo $0: parsing: $@
 
-while getopts "h:b:c:k:d:l:i:s:o:a:p:r:m:t:f:y:w:?" opt; do
+while getopts "h:b:c:k:d:l:i:s:o:a:p:mr:t:f:y:w:?" opt; do
     case ${opt} in
 	h)
 	    HEADER_SIZE="${OPTARG}"
@@ -208,12 +208,13 @@ do
 
     echo $PEER
 
-    xterm -sl 10000 -e "$PEER >> peer.txt" &
-    
+    #xterm -sl 10000 -e "$PEER >> peer.txt" &
+    xterm -sl 10000 -e "$PEER" &
 
-    #TIME=`shuf -i 1-$MAX_LIFE -n 1`
-    #timelimit -t $TIME vlc http://localhost:$PLAYER_PORT &
-    sleep 1; netcat localhost $PLAYER_PORT -v > /dev/null &
+    TIME=`shuf -i 1-$MAX_LIFE -n 1`
+    timelimit -t $TIME vlc http://localhost:$PLAYER_PORT &
+    #sleep 1; netcat localhost $PLAYER_PORT -v > /dev/null &
+
     x=$(( $x + 1 ))
 done
 

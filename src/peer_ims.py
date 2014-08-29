@@ -175,9 +175,9 @@ class Peer_IMS(threading.Thread):
         chunk_size = struct.unpack("H", message)[0]
         self.chunk_size = socket.ntohs(chunk_size)
         _print_("chunk_size (bytes) =", self.chunk_size)
-        self.chunk_format_string = "H" + str(self.chunk_size) + "s"
+        self.message_format = "H" + str(self.chunk_size) + "s"
         if __debug__:
-            print ("chunk_format_string = ", self.chunk_format_string)
+            print ("message_format = ", self.message_format)
         
         # }}}
 
@@ -226,16 +226,13 @@ class Peer_IMS(threading.Thread):
         
         # }}}
 
-    def unpack_and_store_chunk(self, message):
+    def unpack_message(self, message):
         # {{{
 
-        number, chunk = struct.unpack(self.chunk_format_string, message)
-        chunk_number = socket.ntohs(number)
+        chunk_number, chunk = struct.unpack(self.message_format, message)
+        chunk_number = socket.ntohs(chunk_number)
 
-        self.chunks[chunk_number % self.buffer_size] = chunk
-        self.received[chunk_number % self.buffer_size] = True
-
-        return chunk_number
+        return chunk_number, chunk
 
         # }}}
         
@@ -245,7 +242,7 @@ class Peer_IMS(threading.Thread):
         if __debug__:
             print ("Waiting for a chunk at {} ...".format(self.team_socket.getsockname()))
 
-        message, sender = self.team_socket.recvfrom(struct.calcsize(self.chunk_format_string))
+        message, sender = self.team_socket.recvfrom(struct.calcsize(self.message_format))
         self.recvfrom_counter += 1
 
         # {{{ debug
@@ -258,14 +255,17 @@ class Peer_IMS(threading.Thread):
 
         # }}}
         
-    def receive_a_chunk(self):
+    def process_next_message(self):
         # {{{
         try:
             # {{{ Receive a chunk
 
             message, sender = self.receive_the_next_message()
-            chunk_number = self.unpack_and_store_chunk(message)
+            chunk_number, chunk = self.unpack_message(message)
             
+            self.chunks[chunk_number % self.buffer_size] = chunk
+            self.received[chunk_number % self.buffer_size] = True
+
             return chunk_number
 
             # }}}
@@ -327,12 +327,13 @@ class Peer_IMS(threading.Thread):
         _print_(self.team_socket.getsockname(), "\b: buffering = 000.00%")
         sys.stdout.flush()
 
-        # First chunk to be sent to the player.  The receive_a_chunk()
-        # procedure returns the chunk number if a packet has been
-        # received or -2 if a time-out exception has been arised.
-        chunk_number = self.receive_a_chunk()
+        # First chunk to be sent to the player.  The
+        # process_next_message() procedure returns the chunk number if
+        # a packet has been received or -2 if a time-out exception has
+        # been arised.
+        chunk_number = self.process_next_message()
         while chunk_number < 0:
-            chunk_number = self.receive_a_chunk()
+            chunk_number = self.process_next_message()
         self.played_chunk = chunk_number
         _print_("First chunk to play", self.played_chunk)
         _print_(self.team_socket.getsockname(), "\b: buffering (\b", repr(100.0/self.buffer_size).rjust(4))
@@ -342,7 +343,7 @@ class Peer_IMS(threading.Thread):
             _print_("{:.2%}\r".format((1.0*x)/(self.buffer_size/2)), end='')
             #print("!", end='')
             sys.stdout.flush()
-            while self.receive_a_chunk() < 0:
+            while self.process_next_message() < 0:
                 pass
 
         print()
@@ -357,13 +358,13 @@ class Peer_IMS(threading.Thread):
         # {{{
 
         # Receive chunks while the buffer is not full
-        chunk_number = self.receive_a_chunk()
+        chunk_number = self.process_next_message()
         while chunk_number < 0:
-            chunk_number = self.receive_a_chunk()
+            chunk_number = self.process_next_message()
         while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
-            chunk_number = self.receive_a_chunk()
+            chunk_number = self.process_next_message()
             while chunk_number < 0:
-                chunk_number = self.receive_a_chunk()
+                chunk_number = self.process_next_message()
 
         # Play the next chunk
         self.play_next_chunk()

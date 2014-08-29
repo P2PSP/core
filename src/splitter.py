@@ -95,10 +95,10 @@ class Splitter():
             splitter.peer_list = []
 
         else:
-            #splitter = Splitter_DBS()
+            splitter = Splitter_DBS()
             #splitter = Splitter_FNS()
             #splitter = Splitter_ACS()
-            splitter = Splitter_LRS()
+            #splitter = Splitter_LRS()
 
             if args.max_chunk_loss:
                 splitter.MAX_CHUNK_LOSS = int(args.max_chunk_loss)

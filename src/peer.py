@@ -92,12 +92,12 @@ class Peer():
             peer.receive_the_list_of_peers()
 
             if peer.am_i_a_monitor():
-                #peer = Monitor_DBS(peer)
+                peer = Monitor_DBS(peer)
                 #peer = Monitor_FNS(peer)
-                peer = Monitor_LRS(peer)
+                #peer = Monitor_LRS(peer)
             else:
-                # peer = Peer_DBS(peer)
-                peer = Peer_FNS(peer)
+                peer = Peer_DBS(peer)
+                #peer = Peer_FNS(peer)
                 if args.chunk_loss_period:
                     Lossy_Peer.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
                     print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)

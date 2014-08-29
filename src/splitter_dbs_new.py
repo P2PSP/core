@@ -1,25 +1,27 @@
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
-# Cuando un peer X se conecta al splitter, √©ste le env√≠a s√≥lo la
-# configuraci√≥n b√°sica. A continuaci√≥n inserta al peer en la lista
-# junto a cotinuaci√≥n del √∫ltimo peer recorrido con la idea que se
-# tarde el m√°ximo tiempo posible en enviar un chunk exclusivo al peer
+# Cuando un peer X se conecta al splitter, Èste le envÌa sÛlo la
+# configuraciÛn b·sica. A continuaciÛn inserta al peer en la lista
+# junto a continuaciÛn del ˙ltimo peer recorrido con la idea que se
+# tarde el m·ximo tiempo posible en enviar un chunk exclusivo al peer
 # entrante. La idea es que el peer entrante reciba primero un chunk
 # desde cada uno de los peers del team antes de recibir el primer
 # chunk desde el splitter, para que de esta forma su lista de peers
-# est√© llena en ese momento. A continuaci√≥n el splitter a√±ade al
-# siguiente chunk a transmitir el end-point del peer X, [X]
-# (dependiendo de un par√°metro de configuraci√≥n, este proceso podr√≠a
-# realizarse para algunos chunks m√°s lo que ayudar√≠a en entornos
+# estÈ llena en ese momento. A continuaciÛn el splitter aÒade al
+# siguiente chunk a transmitir el end-point del peer X: [X]
+# (dependiendo de un par·metro de configuraciÛn, este proceso podrÌa
+# realizarse para algunos chunks m·s lo que ayudarÌa en entornos
 # ruidosos, donde estos chunks pueden perderse facilmente). Este chunk
-# con [X] ser√° recibido por un peer Y que comprobar√° que se trata de
+# con [X] ser· recibido por un peer Y que comprobar· que se trata de
 # un chunk especial, en el que figura [X], el end-point de un nuevo
-# peer en el team. Y insertar√° [X] en su lista de peers y
-# retransmitir√° el chunk al resto del team. El resto del team har√° lo
-# mismo. Los peer evitar√°n a√±adir a sus lista de peers end-points ya
+# peer en el team. Y insertar· [X] en su lista de peers y
+# retransmitir· el chunk al resto del team. El resto del team har· lo
+# mismo. Los peer evitar·n aÒadir a sus lista de peers end-points ya
 # existentes (como ocurre actualmente).
 
 # {{{ Imports
@@ -59,6 +61,8 @@ class Splitter_DBS(Splitter_IMS):
 
         Splitter_IMS.__init__(self)
 
+        self.INCOMMING_PEER_COUNTER = 3
+
         self.print_modulename()
         #self.number_of_monitors = 0
         self.peer_number = 0
@@ -66,8 +70,6 @@ class Splitter_DBS(Splitter_IMS):
         # {{{ The list of peers in the team.
         # }}}
         self.peer_list = []
-
-        # }}}
         
         # {{{ Destination peers of the chunk, indexed by a chunk
         # number. Used to find the peer to which a chunk has been
@@ -108,62 +110,6 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def are_you_a_monitor(self): # Sin usar
-        # {{{
-
-        self.number_of_monitors += 1
-        if self.number_of_monitors < self.MAX_NUMBER_OF_MONITORS:
-            return True
-        else:
-            self.number_of_monitors = self.MAX_NUMBER_OF_MONITORS
-            return False
-
-        # }}}
-
-    def send_you_are_a_monitor(self, peer_serve_socket): # sin usar
-        # {{{
-        
-        if __debug__:
-            print("Sending that your are the monitor peer", peer_serve_socket.getpeername())
-        if self.are_you_a_monitor():
-            message = struct.pack("c", '1')
-        else:
-            message = struct.pack("c", '0')
-        peer_serve_socket.sendall(message)
-
-        # }}}
-
-    # Borrar
-    def send_the_list(self, peer_serve_socket):
-        # {{{
-
-        if __debug__:
-            print("Sending a list of peers of size", len(self.peer_list))
-        message = struct.pack("H", socket.htons(len(self.peer_list)))
-        peer_serve_socket.sendall(message)
-
-        if __debug__:
-            counter = 0
-        for p in self.peer_list:
-            message = struct.pack("4sH", socket.inet_aton(p[ADDR]), socket.htons(p[PORT]))
-            peer_serve_socket.sendall(message)
-            if __debug__:
-                print("[%5d]" % counter, p)
-                counter += 1
-
-        # }}}
-
-    # Borrar
-    def append_peer(self, peer):
-        # {{{
-
-        if peer not in self.peer_list:
-            self.peer_list.append(peer)
-        self.losses[peer] = 0
-
-        # }}}
-
-
     def insert_peer(self, peer):
         # {{{
 
@@ -195,6 +141,7 @@ class Splitter_DBS(Splitter_IMS):
         #self.append_peer(peer)
         self.insert_peer(peer)
         self.incomming_peer = peer
+        self.incomming_peer_counter = self.INCOMMING_PEER_COUNTER
 
         # }}}
 
@@ -328,7 +275,6 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-
     def setup_team_socket(self):
         # {{{
 
@@ -365,7 +311,11 @@ class Splitter_DBS(Splitter_IMS):
         # }}}
 
     def compute_next_peer_number(self, peer):
+        # {{{
+
         self.peer_number = (self.peer_number + 1) % len(self.peer_list)
+
+        # }}}
 
     def run(self):
         # {{{
@@ -388,8 +338,7 @@ class Splitter_DBS(Splitter_IMS):
         threading.Thread(target=self.moderate_the_team).start()
         threading.Thread(target=self.reset_counters_thread).start()
 
-        self.header_format = self.header_format + "4sH"
-        message_format = self.header_format + str(self.CHUNK_SIZE) + "s"
+        self.incomming_peer_counter = 0
 
         header_load_counter = 0
         while self.alive:
@@ -397,11 +346,29 @@ class Splitter_DBS(Splitter_IMS):
             chunk = self.receive_chunk(header_load_counter)
             try:
                 peer = self.peer_list[self.peer_number]
-                message = struct.pack(message_format, \
-                    socket.htons(self.chunk_number), \
-                    socket.inet_aton(self.incomming_peer[ADDR]), \
-                    socket.htons(self.incomming_peer[PORT]), \
-                    chunk)
+
+                if self.incomming_peer_counter > 0:
+                    message_format = self.chunk_number_format \
+                        + "4sH" \
+                        + str(self.CHUNK_SIZE) + "s" 
+
+                    message = struct.pack(message_format, \
+                        socket.htons(self.chunk_number), \
+                        socket.inet_aton(self.incomming_peer[ADDR]), \
+                        socket.htons(self.incomming_peer[PORT]), \
+                        chunk)
+
+                    self.incomming_peer_counter -= 1
+                    
+                else:
+
+                    message_format = self.chunk_number_format \
+                        + str(self.CHUNK_SIZE) + "s"
+
+                    message = struct.pack(message_format, \
+                        socket.htons(self.chunk_number), \
+                        chunk)
+
                 self.send_chunk(message, peer)
 
                 self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
