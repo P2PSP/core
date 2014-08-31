@@ -334,6 +334,7 @@ class Peer_IMS(threading.Thread):
         chunk_number = self.process_next_message()
         while chunk_number < 0:
             chunk_number = self.process_next_message()
+            print(chunk_number)
         self.played_chunk = chunk_number
         _print_("First chunk to play", self.played_chunk)
         _print_(self.team_socket.getsockname(), "\b: buffering (\b", repr(100.0/self.buffer_size).rjust(4))

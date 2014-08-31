@@ -89,14 +89,14 @@ class Peer():
             # {{{ This is an "unicast" peer.
 
             peer = Peer_DBS(peer)
-            peer.receive_the_list_of_peers()
+            #peer.receive_the_list_of_peers()
+            peer.receive_the_number_of_peers()
 
             if peer.am_i_a_monitor():
                 peer = Monitor_DBS(peer)
                 #peer = Monitor_FNS(peer)
                 #peer = Monitor_LRS(peer)
             else:
-                peer = Peer_DBS(peer)
                 #peer = Peer_FNS(peer)
                 if args.chunk_loss_period:
                     Lossy_Peer.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
@@ -104,7 +104,8 @@ class Peer():
                     if int(args.chunk_loss_period) != 0:
                         peer = Lossy_Peer(peer)
                     
-
+            peer.receive_my_endpoint()
+            
             # }}}
 
         # }}}

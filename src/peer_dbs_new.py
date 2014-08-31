@@ -48,12 +48,13 @@ class Peer_DBS(Peer_IMS):
         self.splitter = peer.splitter
         self.chunk_size = peer.chunk_size
         self.message_format = peer.message_format
-
+        self.message_format_new_peer = self.message_format + "4sH"
+        
         _print_("max_chunk_debt =", self.MAX_CHUNK_DEBT)
 
         # }}}
 
-    def receive_the_chunk_size(self):
+    def receive_the_chunk_size(self): # Borrar
         # {{{
 
         Peer_IMS.receive_the_chunk_size(self)
@@ -77,13 +78,21 @@ class Peer_DBS(Peer_IMS):
         self.peer_list = [] # The list of peers structure.
 
         sys.stdout.write(Color.green)
-        _print_("Requesting the list of peers to", self.splitter_socket.getpeername())
+        _print_("Requesting the number of peers to", self.splitter_socket.getpeername())
         self.number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
         _print_("The size of the team is", self.number_of_peers, "(apart from me)")
 
         sys.stdout.write(Color.none)
 
         # }}}
+
+    def receive_my_endpoint(self):
+        message = self.splitter_socket.recv(struct.calcsize("4sH"))
+        IP_addr, port = struct.unpack("4sH", message) # Ojo, !H ????
+        IP_addr = socket.inet_ntoa(IP_addr)
+        port = socket.ntohs(port)
+        self.me = (IP_addr, port)
+        _print_("me =", self.me)
         
     def listen_to_the_team(self):
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
@@ -106,7 +115,7 @@ class Peer_DBS(Peer_IMS):
     def unpack_message(self, message): # Borrar
         # {{{
 
-        chunk_number, in_out, peer, chunk = struct.unpack(self.chunk_format_string, message)
+        chunk_number, chunk, peer = struct.unpack(self.chunk_format_string, message)
         chunk_number = socket.ntohs(chunk_number)
         IP_addr, port = struct.unpack("4sH", incomming_peer)
         incomming_peer = (socket.inet_ntoa(incomming_peer), socket.ntohs(port))
@@ -114,7 +123,36 @@ class Peer_DBS(Peer_IMS):
         return chunk_number, in_out, peer, chunk
 
         # }}}
-        
+
+    def receive_the_next_message(self):
+        # {{{
+
+        if __debug__:
+            print ("Waiting for a chunk at {} ...".format(self.team_socket.getsockname()))
+
+        message, sender = self.team_socket.recvfrom(struct.calcsize(self.message_format_new_peer))
+        #print(self.team_socket.getsockname(), struct.calcsize(self.message_format_new_peer), len(message))
+        self.recvfrom_counter += 1
+
+        # {{{ debug
+        if __debug__:
+            print (Color.cyan, "Received a message from", sender, \
+                "of length", len(message), Color.none)
+        # }}}
+
+        return message, sender
+
+        # }}}
+        '''
+        if sender == splitter:
+          if len(message) == large:
+            anhadir al incomming peer
+        else:
+          if len(message) == large:
+            anhadir el sender
+
+        '''
+
     def process_next_message(self):
         try:
             message, sender = self.receive_the_next_message()
@@ -123,38 +161,47 @@ class Peer_DBS(Peer_IMS):
             chunk_number = 0
             
             if len(message) == struct.calcsize(self.message_format_new_peer):
-                # {{{ Extract: chunk_number, incomming_peer and chunk
-
-                chunk_number, incomming_peer, chunk = struct.unpack(self.message_format_new_peer, message)
+                # {{{ Message with a new peer. Extract: chunk_number, chunk and the incomming_peer
+                #print(self.message_format_new_peer)
+                chunk_number, chunk, IP_addr, port = struct.unpack(self.message_format_new_peer, message)
                 chunk_number = socket.ntohs(chunk_number)
-                IP_addr, port = struct.unpack("4sH", incomming_peer)
+                #IP_addr, port = struct.unpack("4sH", incomming_peer)
                 incomming_peer = (socket.inet_ntoa(IP_addr), socket.ntohs(port))
 
                 # }}}
-                
-                if incomming_peer not in self.peer_list:
+
+                #print("---------------->", incomming_peer, self.me)
+                if (incomming_peer not in self.peer_list) and (incomming_peer != self.me):
+                #if True:
+                #if incomming_peer[1] != self.me[1]:
                     # {{{ Insert the incomming peer in the list of peers
 
                     self.peer_list.append(incomming_peer) # Ojo, colocar como siguiente, no al final
                     self.debt[incomming_peer] = 0
-                    _print_(Color.green, incomming_peer, 'added by chunk', chunk_number, Color.none)
+                    _print_(Color.green, incomming_peer, '--(long)--> added by chunk', chunk_number, Color.none)
 
                     # }}}
             else:
-                # {{{ Extract chunk_number and chunk
-
-                chunk_number, chunk = struct.unpack(self.message_format_new_peer, message)
+                # {{{ Normal message. Extract chunk_number and chunk
+                try:
+                    chunk_number, chunk = struct.unpack(self.message_format, message)
+                except:
+                    _print_(Color.red + "Unexpected message length =", len(message), Color.none)
+                    
                 chunk_number = socket.ntohs(chunk_number)
 
                 # }}}
                 
+            #print("--> chunk_nunber =", chunk_number, "sender =", sender)
             self.chunks[chunk_number % self.buffer_size] = chunk
             self.received[chunk_number % self.buffer_size] = True
 
             if sender == self.splitter:
                 # {{{ Retransmit the previous splitter's message in burst transmission mode
 
-                while( (self.receive_and_feed_counter < len(self.peer_list)) and (self.receive_and_feed_counter > 0) ):
+                #print("--------- receive_and_feed_counter =", self.receive_and_feed_counter)
+                #while( (self.receive_and_feed_counter < len(self.peer_list)) and (self.receive_and_feed_counter > 0) ):
+                while self.receive_and_feed_counter < len(self.peer_list):
                     peer = self.peer_list[self.receive_and_feed_counter]
                     self.team_socket.sendto(self.receive_and_feed_previous, peer)
                     self.sendto_counter += 1
@@ -174,6 +221,7 @@ class Peer_DBS(Peer_IMS):
             else:
                 # {{{ Retransmit the previous splitter's message in congestion avoid transmission mode
 
+                #print("------------ receive_and_feed_counter =", self.receive_and_feed_counter, "len(self.receive_and_feed_previous) =", len(self.receive_and_feed_previous))
                 if ( self.receive_and_feed_counter < len(self.peer_list) and ( self.receive_and_feed_previous != '') ):
                     peer = self.peer_list[self.receive_and_feed_counter]
                     self.team_socket.sendto(self.receive_and_feed_previous, peer)
@@ -187,12 +235,21 @@ class Peer_DBS(Peer_IMS):
 
                     self.receive_and_feed_counter += 1
 
+                if sender not in self.peer_list:
+                    # The peer is new
+                    self.peer_list.append(sender)
+                    self.debt[sender] = 0
+                    print (Color.green, sender, '--(short)--> added by chunk', \
+                        chunk_number, Color.none)
+                else:
+                    self.debt[sender] -= 1
+                
                 # }}}
 
-            self.debt[sender] -= 1
+            return chunk_number
 
         except socket.timeout:
-            return -1
+            return -2
 
     def keep_the_buffer_full(self):
         # {{{
@@ -220,8 +277,8 @@ class Peer_DBS(Peer_IMS):
         for x in xrange(3):
             self.process_next_message()
             self.say_goodbye(self.splitter)
-        for peer in self.peer_list:
-            self.say_goodbye(peer)
+        #for peer in self.peer_list:
+            #self.say_goodbye(peer)
 
         # }}}
 

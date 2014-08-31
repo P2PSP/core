@@ -33,12 +33,13 @@ class Monitor_DBS(Peer_DBS):
         self.peer_list = peer.peer_list
         self.splitter_socket = peer.splitter_socket
         self.buffer_size = peer.buffer_size
-        self.chunk_format_string = peer.chunk_format_string
+        #self.chunk_format_string = peer.chunk_format_string
         self.splitter = peer.splitter
         self.debt = peer.debt
         self.chunk_size = peer.chunk_size
         self.player_socket = peer.player_socket
-
+        self.message_format = peer.message_format
+        self.message_format_new_peer = peer.message_format_new_peer
         
         # }}}
 

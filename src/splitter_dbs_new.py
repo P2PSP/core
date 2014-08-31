@@ -99,7 +99,7 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    # Borrar
+    # Borrar ???
     def send_the_list_size(self, peer_serve_socket):
         # {{{
 
@@ -113,18 +113,24 @@ class Splitter_DBS(Splitter_IMS):
     def insert_peer(self, peer):
         # {{{
 
-        if peer not in self.peer_list:
-            self.peer_list.insert(self.peer_number, peer)
+        if peer not in self.peer_list: # Probar a quitar -----------------------------------------------------
+            self.peer_list.insert(self.peer_number+1, peer)
         self.losses[peer] = 0
 
         # }}}
+
+    def send_the_peer_endpoint(self, peer_serve_socket):
+        peer_endpoint = peer_serve_socket.getpeername()
+        message = struct.pack("4sH", socket.inet_aton(peer_endpoint[ADDR]), socket.htons(peer_endpoint[PORT]))
+        peer_serve_socket.sendall(message)
 
     # Pensar en reutilizar Splitter_IMS.handle_peer_arrival()
     # concatenando las llamadas a las funciones.
 
     def send_configuration(self, sock):
         Splitter_IMS.send_configuration(self, sock)
-        #self.send_the_list(sock)
+        self.send_the_list_size(sock)
+        self.send_the_peer_endpoint(sock)
         
     def handle_a_peer_arrival(self, connection):
         # {{{
@@ -217,9 +223,7 @@ class Splitter_DBS(Splitter_IMS):
             sys.stdout.write(Color.none)
 
             if destination == self.peer_list[0]:
-                print ("=============================")
                 print ("Lost chunk index =", lost_chunk_number)
-                print ("=============================")
 
         self.increment_unsupportivity_of_peer(destination)
 
@@ -332,13 +336,15 @@ class Splitter_DBS(Splitter_IMS):
         def _():
             connection  = self.peer_connection_socket.accept()
             self.handle_a_peer_arrival(connection)
+            self.incomming_peer_counter = 0 # The monitor peer is not announced
         _()
 
         threading.Thread(target=self.handle_arrivals).start()
         threading.Thread(target=self.moderate_the_team).start()
         threading.Thread(target=self.reset_counters_thread).start()
+        #time.sleep(1)
 
-        self.incomming_peer_counter = 0
+        #self.incomming_peer_counter = self.INCOMMING_PEER_COUNTER
 
         header_load_counter = 0
         while self.alive:
@@ -348,18 +354,21 @@ class Splitter_DBS(Splitter_IMS):
                 peer = self.peer_list[self.peer_number]
 
                 if self.incomming_peer_counter > 0:
+
                     message_format = self.chunk_number_format \
+                        + str(self.CHUNK_SIZE) + "s" \
                         + "4sH" \
-                        + str(self.CHUNK_SIZE) + "s" 
 
                     message = struct.pack(message_format, \
                         socket.htons(self.chunk_number), \
+                        chunk,
                         socket.inet_aton(self.incomming_peer[ADDR]), \
-                        socket.htons(self.incomming_peer[PORT]), \
-                        chunk)
+                        socket.htons(self.incomming_peer[PORT]))
+
 
                     self.incomming_peer_counter -= 1
-                    
+
+                    print("--------------------------------_____")
                 else:
 
                     message_format = self.chunk_number_format \
@@ -368,8 +377,10 @@ class Splitter_DBS(Splitter_IMS):
                     message = struct.pack(message_format, \
                         socket.htons(self.chunk_number), \
                         chunk)
-
+                #print(len(message), peer, self.incomming_peer_counter)
                 self.send_chunk(message, peer)
+
+                #print(self.chunk_number)
 
                 self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
                 self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
