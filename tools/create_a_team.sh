@@ -209,7 +209,7 @@ do
     echo $PEER
 
     xterm -sl 10000 -e "$PEER >> peer.txt" &
-    #xterm -sl 10000 -e "$PEER" &
+    #xterm -sl 10000 -e "$PEER" & #
 
     TIME=`shuf -i 1-$MAX_LIFE -n 1`
     #timelimit -t $TIME vlc http://localhost:$PLAYER_PORT &
