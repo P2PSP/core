@@ -112,9 +112,9 @@ class Splitter_DBS(Splitter_IMS):
 
     def insert_peer(self, peer):
         # {{{
-
         if peer not in self.peer_list: # Probar a quitar -----------------------------------------------------
-            self.peer_list.insert(self.peer_number+1, peer)
+            #self.peer_list.insert(self.peer_number+1, peer)
+            self.peer_list.append(peer)
         self.losses[peer] = 0
 
         # }}}

@@ -160,6 +160,58 @@ class Peer_DBS(Peer_IMS):
             chunk = ""
             chunk_number = 0
             
+            if sender == self.splitter:
+                # {{{ Retransmit the previous splitter's message in burst transmission mode
+
+                #print("--------- receive_and_feed_counter =", self.receive_and_feed_counter)
+                #while( (self.receive_and_feed_counter < len(self.peer_list)) and (self.receive_and_feed_counter > 0) ):
+                while self.receive_and_feed_counter < len(self.peer_list):
+                    peer = self.peer_list[self.receive_and_feed_counter]
+                    #_print_("Sending (burst) to", peer, "the chunk", chunk_number-1) 
+                    self.team_socket.sendto(self.receive_and_feed_previous, peer)
+                    self.sendto_counter += 1
+
+                    self.debt[peer] += 1
+                    if self.debt[peer] > self.MAX_CHUNK_DEBT:
+                        del self.debt[peer]
+                        self.peer_list.remove(peer)
+                        print (Color.red, peer, 'removed by unsupportive', Color.none)
+
+                    self.receive_and_feed_counter += 1
+
+                self.receive_and_feed_counter = 0
+                self.receive_and_feed_previous = message
+
+                # }}}
+            else:
+                # {{{ Retransmit the previous splitter's message in congestion avoid transmission mode
+
+                #print("------------ receive_and_feed_counter =", self.receive_and_feed_counter, "len(self.receive_and_feed_previous) =", len(self.receive_and_feed_previous))
+                if ( self.receive_and_feed_counter < len(self.peer_list) and ( self.receive_and_feed_previous != '') ):
+                    peer = self.peer_list[self.receive_and_feed_counter]
+                    #_print_("Sending (congestion avoid) to", peer, "the chunk", chunk_number-1) 
+                    self.team_socket.sendto(self.receive_and_feed_previous, peer)
+                    self.sendto_counter += 1
+
+                    self.debt[peer] += 1
+                    if self.debt[peer] > self.MAX_CHUNK_DEBT:
+                        del self.debt[peer]
+                        self.peer_list.remove(peer)
+                        print (Color.red, peer, 'removed by unsupportive', Color.none)
+
+                    self.receive_and_feed_counter += 1
+
+                if sender not in self.peer_list:
+                    # The peer is new
+                    self.peer_list.append(sender)
+                    self.debt[sender] = 0
+                    _print_(Color.green, sender, '--(short)--> added by chunk', \
+                        chunk_number, Color.none)
+                else:
+                    self.debt[sender] -= 1
+                
+                # }}}
+                
             if len(message) == struct.calcsize(self.message_format_new_peer):
                 # {{{ Message with a new peer. Extract: chunk_number, chunk and the incomming_peer
                 #print(self.message_format_new_peer)
@@ -196,55 +248,6 @@ class Peer_DBS(Peer_IMS):
             self.chunks[chunk_number % self.buffer_size] = chunk
             self.received[chunk_number % self.buffer_size] = True
 
-            if sender == self.splitter:
-                # {{{ Retransmit the previous splitter's message in burst transmission mode
-
-                #print("--------- receive_and_feed_counter =", self.receive_and_feed_counter)
-                #while( (self.receive_and_feed_counter < len(self.peer_list)) and (self.receive_and_feed_counter > 0) ):
-                while self.receive_and_feed_counter < len(self.peer_list):
-                    peer = self.peer_list[self.receive_and_feed_counter]
-                    self.team_socket.sendto(self.receive_and_feed_previous, peer)
-                    self.sendto_counter += 1
-
-                    self.debt[peer] += 1
-                    if self.debt[peer] > self.MAX_CHUNK_DEBT:
-                        del self.debt[peer]
-                        self.peer_list.remove(peer)
-                        print (Color.red, peer, 'removed by unsupportive', Color.none)
-
-                    self.receive_and_feed_counter += 1
-
-                self.receive_and_feed_counter = 0
-                self.receive_and_feed_previous = message
-
-                # }}}
-            else:
-                # {{{ Retransmit the previous splitter's message in congestion avoid transmission mode
-
-                #print("------------ receive_and_feed_counter =", self.receive_and_feed_counter, "len(self.receive_and_feed_previous) =", len(self.receive_and_feed_previous))
-                if ( self.receive_and_feed_counter < len(self.peer_list) and ( self.receive_and_feed_previous != '') ):
-                    peer = self.peer_list[self.receive_and_feed_counter]
-                    self.team_socket.sendto(self.receive_and_feed_previous, peer)
-                    self.sendto_counter += 1
-
-                    self.debt[peer] += 1
-                    if self.debt[peer] > self.MAX_CHUNK_DEBT:
-                        del self.debt[peer]
-                        self.peer_list.remove(peer)
-                        print (Color.red, peer, 'removed by unsupportive', Color.none)
-
-                    self.receive_and_feed_counter += 1
-
-                if sender not in self.peer_list:
-                    # The peer is new
-                    self.peer_list.append(sender)
-                    self.debt[sender] = 0
-                    print (Color.green, sender, '--(short)--> added by chunk', \
-                        chunk_number, Color.none)
-                else:
-                    self.debt[sender] -= 1
-                
-                # }}}
 
             return chunk_number
 
