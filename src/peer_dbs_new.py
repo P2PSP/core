@@ -187,6 +187,7 @@ class Peer_DBS(Peer_IMS):
                 # {{{ Retransmit the previous splitter's message in congestion avoid transmission mode
 
                 #print("------------ receive_and_feed_counter =", self.receive_and_feed_counter, "len(self.receive_and_feed_previous) =", len(self.receive_and_feed_previous))
+                #if ( self.receive_and_feed_counter < len(self.peer_list) and ( self.receive_and_feed_previous != '') ):
                 if ( self.receive_and_feed_counter < len(self.peer_list) and ( self.receive_and_feed_previous != '') ):
                     peer = self.peer_list[self.receive_and_feed_counter]
                     #_print_("Sending (congestion avoid) to", peer, "the chunk", chunk_number-1) 
