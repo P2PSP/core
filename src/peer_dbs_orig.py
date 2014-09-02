@@ -44,7 +44,7 @@ class Peer_DBS(Peer_IMS):
         self.splitter_socket = peer.splitter_socket
         self.player_socket = peer.player_socket
         self.buffer_size = peer.buffer_size
-        self.chunk_format_string = peer.chunk_format_string
+        self.chunk_format_string = peer.message_format
         self.splitter = peer.splitter
         self.chunk_size = peer.chunk_size
 
@@ -185,7 +185,7 @@ class Peer_DBS(Peer_IMS):
 
                     # }}}
 
-                # {{{ A new chunk has arrived from a peer and the
+                # {{{ A new chunk has arrived and the
                 # previous must be forwarded to next peer of the
                 # list of peers.
                 if ( self.receive_and_feed_counter < len(self.peer_list) and ( self.receive_and_feed_previous != '') ):

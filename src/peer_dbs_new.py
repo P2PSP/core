@@ -177,7 +177,7 @@ class Peer_DBS(Peer_IMS):
                                                         port)
 
                     # }}}
-                else:
+                elif len(self.previous_message) == struct.calcsize(self.extended_message_format):
                     # {{{ Decode the previous splitter's message
 
                     prev_chunk_number, prev_chunk, prev_IP_addr, prev_port = \
@@ -218,8 +218,12 @@ class Peer_DBS(Peer_IMS):
             else:
                 _print_(Color.red + "Unexpected message length =", len(message), Color.none)
 
+            self.chunks[chunk_number % self.buffer_size] = chunk
+            self.received[chunk_number % self.buffer_size] = True
+
             if sender == self.splitter:
-                # {{{ Retransmit the previous splitter's message in burst transmission mode
+                # {{{ Retransmit the previous splitter's message in burst
+                # transmission mode
 
                 # {{{ debug
 
@@ -278,34 +282,35 @@ class Peer_DBS(Peer_IMS):
                     self.debt[sender] -= 1
 
                 # }}}
-                # {{{ Retransmit the previous splitter's message using the congestion avoid transmission mode 
-                if ( self.eat_and_feed_counter < len(self.peer_list) and ( self.previous_message != '') ):
-                    # {{{ Send the previous chunk in congestion avoiding mode.
+                
+            # {{{ Retransmit the previous splitter's message using the congestion avoid transmission mode 
+            if ( self.eat_and_feed_counter < len(self.peer_list) and ( self.previous_message != '') ):
+                # {{{ Send the previous chunk in congestion avoiding mode.
 
-                    peer = self.peer_list[self.eat_and_feed_counter]
-                    self.team_socket.sendto(self.previous_message, peer)
-                    self.sendto_counter += 1
+                peer = self.peer_list[self.eat_and_feed_counter]
+                self.team_socket.sendto(self.previous_message, peer)
+                self.sendto_counter += 1
 
-                    self.debt[peer] += 1
-                    if self.debt[peer] > self.MAX_CHUNK_DEBT:
-                        del self.debt[peer]
-                        self.peer_list.remove(peer)
-                        print (Color.red, peer, 'removed by unsupportive', Color.none)
+                self.debt[peer] += 1
+                if self.debt[peer] > self.MAX_CHUNK_DEBT:
+                    del self.debt[peer]
+                    self.peer_list.remove(peer)
+                    print (Color.red, peer, 'removed by unsupportive', Color.none)
 
-                    # {{{ debug
+                # {{{ debug
 
-                    if __debug__:
-                        print (self.team_socket.getsockname(), "-", \
-                            socket.ntohs(struct.unpack(self.standard_message_format, self.previous_message)[0]),\
-                            Color.green, "->", Color.none, peer)
+                if __debug__:
+                    print (self.team_socket.getsockname(), "-", \
+                        socket.ntohs(struct.unpack(self.standard_message_format, self.previous_message)[0]),\
+                        Color.green, "->", Color.none, peer)
 
-                    # }}}
-
-                    self.eat_and_feed_counter += 1
-
-                    # }}}
-                    
                 # }}}
+
+                self.eat_and_feed_counter += 1
+
+                # }}}
+
+            # }}}
 
             return chunk_number
         

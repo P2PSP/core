@@ -134,7 +134,7 @@ class Splitter_DBS(Splitter_IMS):
     def insert_peer(self, peer):
         # {{{
         if peer not in self.peer_list: # Probar a quitar -----------------------------------------------------
-            self.peer_list.insert(self.peer_number, peer)
+            self.peer_list.insert(self.peer_number-1, peer)
             #self.peer_list.append(peer)
         self.losses[peer] = 0
 
@@ -153,9 +153,10 @@ class Splitter_DBS(Splitter_IMS):
         Splitter_IMS.handle_a_peer_arrival(self, connection)
         peer = connection[1]
         #self.append_peer(peer)
-        self.insert_peer(peer)
         self.incomming_peer = peer
         self.incomming_peer_counter = self.INCOMMING_PEER_COUNTER
+        time.sleep(1.0)
+        self.insert_peer(peer)
 
         # }}}
 
@@ -374,10 +375,10 @@ class Splitter_DBS(Splitter_IMS):
                         socket.inet_aton(self.incomming_peer[ADDR]), \
                         socket.htons(self.incomming_peer[PORT]))
 
-
                     self.incomming_peer_counter -= 1
 
                     print("--------------------------------_____")
+                    
                 else:
 
                     message_format = self.chunk_number_format \
@@ -386,6 +387,7 @@ class Splitter_DBS(Splitter_IMS):
                     message = struct.pack(message_format, \
                         socket.htons(self.chunk_number), \
                         chunk)
+                        
                 #print(len(message), peer, self.incomming_peer_counter)
                 self.send_chunk(message, peer)
 
