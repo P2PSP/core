@@ -141,12 +141,22 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
+    def send_the_peer_endpoint(self, peer_serve_socket):
+        # {{{
+
+        peer_endpoint = peer_serve_socket.getpeername()
+        message = struct.pack("4sH", socket.inet_aton(peer_endpoint[ADDR]), socket.htons(peer_endpoint[PORT]))
+        peer_serve_socket.sendall(message)
+
+        # }}}
+
     # Pensar en reutilizar Splitter_IMS.handle_peer_arrival()
     # concatenando las llamadas a las funciones.
 
     def send_configuration(self, sock):
         Splitter_IMS.send_configuration(self, sock)
         self.send_the_list(sock)
+        self.send_the_peer_endpoint(sock)
         
     def handle_a_peer_arrival(self, connection):
         # {{{
@@ -354,13 +364,16 @@ class Splitter_DBS(Splitter_IMS):
         threading.Thread(target=self.moderate_the_team).start()
         threading.Thread(target=self.reset_counters_thread).start()
 
+        message_format = self.chunk_number_format \
+                        + str(self.CHUNK_SIZE) + "s"
+                        
         header_load_counter = 0
         while self.alive:
 
             chunk = self.receive_chunk(header_load_counter)
             try:
                 peer = self.peer_list[self.peer_number]
-                message = struct.pack(self.chunk_format_string, socket.htons(self.chunk_number), chunk)
+                message = struct.pack(message_format, socket.htons(self.chunk_number), chunk)
                 self.send_chunk(message, peer)
 
                 self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer

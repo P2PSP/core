@@ -455,8 +455,9 @@ class Peer_DBS(Peer_IMS):
 
         print('Goodbye!')
         for x in xrange(3):
-            self.process_next_message()
             self.say_goodbye(self.splitter)
+        for x in xrange(5):
+            self.process_next_message()
         #for peer in self.peer_list:
             #self.say_goodbye(peer)
 

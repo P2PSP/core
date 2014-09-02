@@ -44,9 +44,11 @@ class Peer_DBS(Peer_IMS):
         self.splitter_socket = peer.splitter_socket
         self.player_socket = peer.player_socket
         self.buffer_size = peer.buffer_size
-        self.chunk_format_string = peer.message_format
+        #self.chunk_format_string = peer.message_format
         self.splitter = peer.splitter
         self.chunk_size = peer.chunk_size
+        self.message_format = peer.message_format
+        #self.extended_message_format = peer.message_format + "4sH"
 
         _print_("max_chunk_debt =", self.MAX_CHUNK_DEBT)
         
@@ -59,6 +61,20 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
 
+    def receive_the_number_of_peers(self):
+        # {{{
+
+        self.debt = {}      # Chunks debts per peer.
+        self.peer_list = [] # The list of peers structure.
+
+        sys.stdout.write(Color.green)
+        _print_("Requesting the number of peers to", self.splitter_socket.getpeername())
+        self.number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
+        _print_("The size of the team is", self.number_of_peers, "(apart from me)")
+
+        sys.stdout.write(Color.none)
+
+        # }}}
     def receive_the_list_of_peers(self):
         # {{{
 
@@ -67,11 +83,12 @@ class Peer_DBS(Peer_IMS):
 
         sys.stdout.write(Color.green)
         _print_("Requesting the list of peers to", self.splitter_socket.getpeername())
-        number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
-        _print_("The size of the team is", number_of_peers, "(apart from me)")
+        #number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
+        #_print_("The size of the team is", number_of_peers, "(apart from me)")
 
-        tmp = number_of_peers
-        while number_of_peers > 0:
+        if __debug__:
+            tmp = self.number_of_peers
+        while self.number_of_peers > 0:
             message = self.splitter_socket.recv(struct.calcsize("4sH"))
             IP_addr, port = struct.unpack("4sH", message) # Ojo, !H ????
             IP_addr = socket.inet_ntoa(IP_addr)
@@ -79,16 +96,28 @@ class Peer_DBS(Peer_IMS):
             peer = (IP_addr, port)
             #self.say_hello(peer, team_socket)
             if __debug__:
-                _print_("[%5d]" % number_of_peers, peer)
+                _print_("[%5d]" % self.number_of_peers, peer)
             else:
-                _print_("{:.2%}\r".format((tmp-number_of_peers)/tmp), end='')
+                _print_("{:.2%}\r".format((tmp-self.number_of_peers)/tmp), end='')
 
             self.peer_list.append(peer)
             self.debt[peer] = 0
-            number_of_peers -= 1
+            self.number_of_peers -= 1
 
         _print_("List of peers received")
         sys.stdout.write(Color.none)
+
+        # }}}
+        
+    def receive_my_endpoint(self):
+        # {{{
+
+        message = self.splitter_socket.recv(struct.calcsize("4sH"))
+        IP_addr, port = struct.unpack("4sH", message) # Ojo, !H ????
+        IP_addr = socket.inet_ntoa(IP_addr)
+        port = socket.ntohs(port)
+        self.me = (IP_addr, port)
+        _print_("me =", self.me)
 
         # }}}
         
