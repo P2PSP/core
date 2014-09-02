@@ -44,11 +44,10 @@ class Peer_DBS(Peer_IMS):
         self.splitter_socket = peer.splitter_socket
         self.player_socket = peer.player_socket
         self.buffer_size = peer.buffer_size
-        #self.chunk_number_format = peer.chunk_number_format
         self.splitter = peer.splitter
         self.chunk_size = peer.chunk_size
-        self.message_format = peer.message_format
-        self.message_format_new_peer = self.message_format + "4sH"
+        self.standard_message_format = peer.message_format
+        self.extended_message_format = peer.message_format + "4sH"
         
         _print_("max_chunk_debt =", self.MAX_CHUNK_DEBT)
 
@@ -58,9 +57,9 @@ class Peer_DBS(Peer_IMS):
         # {{{
 
         Peer_IMS.receive_the_chunk_size(self)
-        self.message_format_new_peer = self.message_format + "4sH"
+        self.extended_message_format = self.message_format + "4sH"
         if __debug__:
-            print ("message_format_new_peer = ", self.message_format_new_peer)
+            print ("extended_message_format = ", self.extended_message_format)
 
         # }}}
         
@@ -87,12 +86,16 @@ class Peer_DBS(Peer_IMS):
         # }}}
 
     def receive_my_endpoint(self):
+        # {{{
+
         message = self.splitter_socket.recv(struct.calcsize("4sH"))
         IP_addr, port = struct.unpack("4sH", message) # Ojo, !H ????
         IP_addr = socket.inet_ntoa(IP_addr)
         port = socket.ntohs(port)
         self.me = (IP_addr, port)
         _print_("me =", self.me)
+
+        # }}}
         
     def listen_to_the_team(self):
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
@@ -112,26 +115,14 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
 
-    def unpack_message(self, message): # Borrar
-        # {{{
-
-        chunk_number, chunk, peer = struct.unpack(self.chunk_format_string, message)
-        chunk_number = socket.ntohs(chunk_number)
-        IP_addr, port = struct.unpack("4sH", incomming_peer)
-        incomming_peer = (socket.inet_ntoa(incomming_peer), socket.ntohs(port))
-        
-        return chunk_number, in_out, peer, chunk
-
-        # }}}
-
     def receive_the_next_message(self):
         # {{{
 
         if __debug__:
             print ("Waiting for a chunk at {} ...".format(self.team_socket.getsockname()))
 
-        message, sender = self.team_socket.recvfrom(struct.calcsize(self.message_format_new_peer))
-        #print(self.team_socket.getsockname(), struct.calcsize(self.message_format_new_peer), len(message))
+        message, sender = self.team_socket.recvfrom(struct.calcsize(self.extended_message_format))
+        #print(self.team_socket.getsockname(), struct.calcsize(self.extended_message_format), len(message))
         self.recvfrom_counter += 1
 
         # {{{ debug
@@ -153,93 +144,57 @@ class Peer_DBS(Peer_IMS):
 
         '''
 
-    def process_next_message2(self):
+    def process_next_message(self):
         # {{{ 
 
         try:
-
             message, sender = self.receive_the_next_message()
 
-            if len(message) != struct.calcsize(self.message_format_new_peer):
-                # {{{ A standard message has been received
-
-                try:
-                    chunk_number, chunk = struct.unpack(self.message_format, message)
-                except:
-                    _print_(Color.red + "Unexpected message length =", len(message), Color.none)
-                    
-                chunk_number = socket.ntohs(chunk_number)
-
-                if sender == self.splitter:
-                    # {{{ Retransmit the previous splitter's message in burst transmission mode
-
-                    # {{{ debug
-
-                    if __debug__:
-                        _print_(self.team_socket.getsockname(), \
-                            Color.red, "<-", Color.none, chunk_number, "-", sender)
-
-                    # }}}
-
-                    while( (self.receive_and_feed_counter < len(self.peer_list)) and (self.receive_and_feed_counter > 0) ):
-                        peer = self.peer_list[self.receive_and_feed_counter]
-                        self.team_socket.sendto(self.receive_and_feed_previous, peer)
-                        self.sendto_counter += 1
-
-                        # {{{ debug
-
-                        if __debug__:
-                            print (self.team_socket.getsockname(), "-",\
-                                socket.ntohs(struct.unpack(self.chunk_format_string, \
-                                                               self.receive_and_feed_previous)[0]),\
-                                Color.green, "->", Color.none, peer)
-
-                        # }}}
-
-                        self.debt[peer] += 1
-                        if self.debt[peer] > self.MAX_CHUNK_DEBT:
-                            del self.debt[peer]
-                            self.peer_list.remove(peer)
-                            print (Color.red, peer, 'removed by unsupportive', Color.none)
-
-                        self.receive_and_feed_counter += 1
-
-                    self.receive_and_feed_counter = 0
-                    self.receive_and_feed_previous = message
-
-                   # }}}
-                else:
-                    # {{{ Insert the peer in the list of peers
-
-                    # {{{ debug
-
-                    if __debug__:
-                        print (self.team_socket.getsockname(), \
-                            Color.green, "<-", Color.none, chunk_number, "-", sender)
-
-                    # }}}
-
-                    if sender not in self.peer_list:
-                        # The peer is new
-                        self.peer_list.append(sender)
-                        self.debt[sender] = 0
-                        print (Color.green, sender, 'added by chunk', \
-                            chunk_number, Color.none)
-                    else:
-                        self.debt[sender] -= 1
-
-                    # }}}
-                # }}}
-
-            else:
+            if len(message) == struct.calcsize(self.extended_message_format):
                 # {{{ An extended message has been received
-                chunk_number, chunk, IP_addr, port = struct.unpack(self.message_format_new_peer, message)
+                
+                # {{{ Decode the message
+
+                chunk_number, chunk, IP_addr, port = struct.unpack(self.extended_message_format, message)
                 chunk_number = socket.ntohs(chunk_number)
                 incomming_peer = (socket.inet_ntoa(IP_addr), socket.ntohs(port))
 
+                # }}}
+                
+                if len(self.previous_message) == struct.calcsize(self.standard_message_format):
+                    # {{{ Decode the previous message
+
+                    prev_chunk_number, prev_chunk = struct.unpack(self.standard_message_format, \
+                                                                  self.previous_message)
+
+                    # }}}
+                    # {{{ Attach to the previous splitter's message the new incomming peer
+
+                    self.previous_message = struct.pack(self.extended_message_format, \
+                                                        prev_chunk_number, \
+                                                        prev_chunk, \
+                                                        IP_addr, \
+                                                        port)
+
+                    # }}}
+                else:
+                    # {{{ Decode the previous splitter's message
+
+                    prev_chunk_number, prev_chunk, prev_IP_addr, prev_port = \
+                      struct.unpack(self.extended_message_format, self.previous_message)
+
+                    # }}}
+                    # {{{ Replace the previous incomming peer by the new one
+
+                    self.previous_message = struct.pack(self.extended_message_format, \
+                                                        prev_chunk_number,
+                                                        prev_chunk,
+                                                        IP_addr, \
+                                                        port)
+
+                    # }}}
+                
                 if (incomming_peer not in self.peer_list) and (incomming_peer != self.me):
-                #if True:
-                #if incomming_peer[1] != self.me[1]:
                     # {{{ Insert the incomming peer in the list of peers
 
                     self.peer_list.append(incomming_peer) # Ojo, colocar como siguiente, no al final
@@ -248,45 +203,109 @@ class Peer_DBS(Peer_IMS):
 
                     # }}}
                     
-               if sender in self.peer_list:
-                    sys.stdout.write(Color.red)
-                    print (self.team_socket.getsockname(), '\b: received "goodbye" from', sender)
-                    sys.stdout.write(Color.none)
-                    self.peer_list.remove(sender)
-                    del self.debt[sender]
-                return -1
+                # }}}
+            elif len(message) == struct.calcsize(self.standard_message_format):
+                # {{{ A standard message has been received
+
+                # {{{ Decode the message
+
+                chunk_number, chunk = struct.unpack(self.standard_message_format, message)
+                chunk_number = socket.ntohs(chunk_number)
 
                 # }}}
 
-            # {{{ Congestion avoid transmission mode 
-            if ( self.receive_and_feed_counter < len(self.peer_list) and ( self.receive_and_feed_previous != '') ):
-                # {{{ Send the previous chunk in congestion avoiding mode.
+                # }}}
+            else:
+                _print_(Color.red + "Unexpected message length =", len(message), Color.none)
 
-                peer = self.peer_list[self.receive_and_feed_counter]
-                self.team_socket.sendto(self.receive_and_feed_previous, peer)
-                self.sendto_counter += 1
-
-                self.debt[peer] += 1
-                if self.debt[peer] > self.MAX_CHUNK_DEBT:
-                    del self.debt[peer]
-                    self.peer_list.remove(peer)
-                    print (Color.red, peer, 'removed by unsupportive', Color.none)
+            if sender == self.splitter:
+                # {{{ Retransmit the previous splitter's message in burst transmission mode
 
                 # {{{ debug
 
                 if __debug__:
-                    print (self.team_socket.getsockname(), "-", \
-                        socket.ntohs(struct.unpack(self.chunk_format_string, self.receive_and_feed_previous)[0]),\
-                        Color.green, "->", Color.none, peer)
+                    _print_(self.team_socket.getsockname(), \
+                        Color.red, "<-", Color.none, chunk_number, "-", sender)
 
                 # }}}
 
-                self.receive_and_feed_counter += 1
+                while (self.eat_and_feed_counter < len(self.peer_list)) and (self.eat_and_feed_counter > 0):
+                    # {{{
+                    peer = self.peer_list[self.eat_and_feed_counter]
+                    self.team_socket.sendto(self.previous_message, peer)
+                    self.sendto_counter += 1
+
+                    # {{{ debug
+
+                    if __debug__:
+                        print (self.team_socket.getsockname(), "-",\
+                            socket.ntohs(struct.unpack(self.standard_message_format, \
+                                                           self.previous_message)[0]),\
+                            Color.green, "->", Color.none, peer)
+
+                    # }}}
+
+                    self.debt[peer] += 1
+                    if self.debt[peer] > self.MAX_CHUNK_DEBT:
+                        del self.debt[peer]
+                        self.peer_list.remove(peer)
+                        print (Color.red, peer, 'removed by unsupportive', Color.none)
+
+                    self.eat_and_feed_counter += 1
+                    # }}}
+
+                self.eat_and_feed_counter = 0
+                self.previous_message = message
 
                 # }}}
-            # }}}
+            else:
+                # {{{ If the sender peer is new, insert it in the list of peers
 
-            # }}}
+                # {{{ debug
+
+                if __debug__:
+                    print (self.team_socket.getsockname(), \
+                        Color.green, "<-", Color.none, chunk_number, "-", sender)
+
+                # }}}
+
+                if sender not in self.peer_list:
+                    self.peer_list.append(sender)
+                    self.debt[sender] = 0
+                    print (Color.green, sender, 'added by chunk', \
+                        chunk_number, Color.none)
+                else:
+                    self.debt[sender] -= 1
+
+                # }}}
+                # {{{ Retransmit the previous splitter's message using the congestion avoid transmission mode 
+                if ( self.eat_and_feed_counter < len(self.peer_list) and ( self.previous_message != '') ):
+                    # {{{ Send the previous chunk in congestion avoiding mode.
+
+                    peer = self.peer_list[self.eat_and_feed_counter]
+                    self.team_socket.sendto(self.previous_message, peer)
+                    self.sendto_counter += 1
+
+                    self.debt[peer] += 1
+                    if self.debt[peer] > self.MAX_CHUNK_DEBT:
+                        del self.debt[peer]
+                        self.peer_list.remove(peer)
+                        print (Color.red, peer, 'removed by unsupportive', Color.none)
+
+                    # {{{ debug
+
+                    if __debug__:
+                        print (self.team_socket.getsockname(), "-", \
+                            socket.ntohs(struct.unpack(self.standard_message_format, self.previous_message)[0]),\
+                            Color.green, "->", Color.none, peer)
+
+                    # }}}
+
+                    self.eat_and_feed_counter += 1
+
+                    # }}}
+                    
+                # }}}
 
             return chunk_number
         
@@ -295,18 +314,18 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
         
-    def process_next_message(self):
+    def process_next_message2(self):
         try:
             message, sender = self.receive_the_next_message()
 
             chunk = ""
             chunk_number = 0
 
-            if len(message) == struct.calcsize(self.message_format_new_peer):
+            if len(message) == struct.calcsize(self.extended_message_format):
                 # {{{ Message with a new peer. Extract: chunk_number, chunk and the incomming_peer
                 
-                #print(self.message_format_new_peer)
-                chunk_number, chunk, IP_addr, port = struct.unpack(self.message_format_new_peer, message)
+                #print(self.extended_message_format)
+                chunk_number, chunk, IP_addr, port = struct.unpack(self.extended_message_format, message)
                 chunk_number = socket.ntohs(chunk_number)
                 #IP_addr, port = struct.unpack("4sH", incomming_peer)
                 incomming_peer = (socket.inet_ntoa(IP_addr), socket.ntohs(port))
@@ -328,7 +347,7 @@ class Peer_DBS(Peer_IMS):
             else:
                 # {{{ Normal message. Extract chunk_number and chunk
                 try:
-                    chunk_number, chunk = struct.unpack(self.message_format, message)
+                    chunk_number, chunk = struct.unpack(self.standard_message_format, message)
                 except:
                     _print_(Color.red + "Unexpected message length =", len(message), Color.none)
                     
@@ -343,15 +362,18 @@ class Peer_DBS(Peer_IMS):
             if sender == self.splitter:
                 # {{{ Retransmit the previous splitter's message in burst transmission mode
 
-                _print_(self.team_socket.getsockname(), Color.red, "<-", Color.none, chunk_number, "-", sender)
-                #print("--------- receive_and_feed_counter =", self.receive_and_feed_counter)
-                #while( (self.receive_and_feed_counter < len(self.peer_list)) and (self.receive_and_feed_counter > 0) ):
-                while self.receive_and_feed_counter < len(self.peer_list):
-                    peer = self.peer_list[self.receive_and_feed_counter]
+                #_print_(self.team_socket.getsockname(), Color.red, "<-", Color.none, chunk_number, "-", sender)
+                #print("--------- eat_and_feed_counter =", self.eat_and_feed_counter)
+                #while( (self.eat_and_feed_counter < len(self.peer_list)) and (self.eat_and_feed_counter > 0) ):
+                while self.eat_and_feed_counter < len(self.peer_list):
+                    peer = self.peer_list[self.eat_and_feed_counter]
                     #_print_("Sending (burst) to", peer, "the chunk", chunk_number-1) 
-                    self.team_socket.sendto(self.receive_and_feed_previous, peer)
+                    self.team_socket.sendto(self.previous_message, peer)
 
-                    _print_(self.team_socket.getsockname(), "-", socket.ntohs(struct.unpack(self.chunk_format_string, self.receive_and_feed_previous)[0]), Color.green, "->", Color.none, peer)
+                    ## _print_(self.team_socket.getsockname(), "-", \
+                    ##         socket.ntohs(struct.unpack(self.standard_message_format, \
+                    ##                                    self.previous_message)[0]), \
+                    ##                                    Color.green, "->", Color.none, peer)
                     
                     #self.team_socket.sendto(message, peer)
                     self.sendto_counter += 1
@@ -362,22 +384,22 @@ class Peer_DBS(Peer_IMS):
                         self.peer_list.remove(peer)
                         print (Color.red, peer, 'removed by unsupportive', Color.none)
 
-                    self.receive_and_feed_counter += 1
+                    self.eat_and_feed_counter += 1
 
-                self.receive_and_feed_counter = 0
-                self.receive_and_feed_previous = message
+                self.eat_and_feed_counter = 0
+                self.previous_message = message
 
                 # }}}
             else:
                 # {{{ Retransmit the previous splitter's message in congestion avoid transmission mode
 
-                #print("------------ receive_and_feed_counter =", self.receive_and_feed_counter, "len(self.receive_and_feed_previous) =", len(self.receive_and_feed_previous))
-                #if ( self.receive_and_feed_counter < len(self.peer_list) and ( self.receive_and_feed_previous != '') ):
-                if self.receive_and_feed_counter < len(self.peer_list):
+                #print("------------ eat_and_feed_counter =", self.eat_and_feed_counter, "len(self.previous_message) =", len(self.previous_message))
+                #if ( self.eat_and_feed_counter < len(self.peer_list) and ( self.previous_message != '') ):
+                if self.eat_and_feed_counter < len(self.peer_list):
 
-                    peer = self.peer_list[self.receive_and_feed_counter]
+                    peer = self.peer_list[self.eat_and_feed_counter]
                     #_print_("Sending (congestion avoid) to", peer, "the chunk", chunk_number-1) 
-                    self.team_socket.sendto(self.receive_and_feed_previous, peer)
+                    self.team_socket.sendto(self.previous_message, peer)
                     self.sendto_counter += 1
 
                     self.debt[peer] += 1
@@ -386,7 +408,7 @@ class Peer_DBS(Peer_IMS):
                         self.peer_list.remove(peer)
                         print (Color.red, peer, 'removed by unsupportive', Color.none)
 
-                    self.receive_and_feed_counter += 1
+                    self.eat_and_feed_counter += 1
 
                 if sender not in self.peer_list:
                     # The peer is new
@@ -445,14 +467,14 @@ class Peer_DBS(Peer_IMS):
         # and the previous received chunk has not been sent to all the
         # peers of the team. This can happen when one o more chunks
         # that were routed towards this peer have been lost.
-        self.receive_and_feed_counter = 0
+        self.eat_and_feed_counter = 0
 
         # This "private and static" variable holds the previous chunk
         # received from the splitter. It is used to send the previous
         # received chunk in the congestion avoiding mode. In that
         # mode, the peer sends a chunk only when it received a chunk
         # from another peer or om the splitter.
-        self.receive_and_feed_previous = ""
+        self.previous_message = ""
 
         self.sendto_counter = 0
 

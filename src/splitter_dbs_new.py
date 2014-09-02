@@ -110,28 +110,36 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def insert_peer(self, peer):
-        # {{{
-        if peer not in self.peer_list: # Probar a quitar -----------------------------------------------------
-            #self.peer_list.insert(self.peer_number+1, peer)
-            self.peer_list.append(peer)
-        self.losses[peer] = 0
-
-        # }}}
-
     def send_the_peer_endpoint(self, peer_serve_socket):
+        # {{{
+
         peer_endpoint = peer_serve_socket.getpeername()
         message = struct.pack("4sH", socket.inet_aton(peer_endpoint[ADDR]), socket.htons(peer_endpoint[PORT]))
         peer_serve_socket.sendall(message)
+
+        # }}}
 
     # Pensar en reutilizar Splitter_IMS.handle_peer_arrival()
     # concatenando las llamadas a las funciones.
 
     def send_configuration(self, sock):
+        # {{{
+
         Splitter_IMS.send_configuration(self, sock)
         self.send_the_list_size(sock)
         self.send_the_peer_endpoint(sock)
+
+        # }}}
         
+    def insert_peer(self, peer):
+        # {{{
+        if peer not in self.peer_list: # Probar a quitar -----------------------------------------------------
+            self.peer_list.insert(self.peer_number, peer)
+            #self.peer_list.append(peer)
+        self.losses[peer] = 0
+
+        # }}}
+
     def handle_a_peer_arrival(self, connection):
         # {{{
 
@@ -352,6 +360,7 @@ class Splitter_DBS(Splitter_IMS):
             chunk = self.receive_chunk(header_load_counter)
             try:
                 peer = self.peer_list[self.peer_number]
+                self.compute_next_peer_number(peer)
 
                 if self.incomming_peer_counter > 0:
 
@@ -384,7 +393,6 @@ class Splitter_DBS(Splitter_IMS):
 
                 self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
                 self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
-                self.compute_next_peer_number(peer)
             except IndexError:
                 _print_("The monitor peer has died!")
 
