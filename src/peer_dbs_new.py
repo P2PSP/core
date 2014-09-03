@@ -134,15 +134,6 @@ class Peer_DBS(Peer_IMS):
         return message, sender
 
         # }}}
-        '''
-        if sender == splitter:
-          if len(message) == large:
-            anhadir al incomming peer
-        else:
-          if len(message) == large:
-            anhadir el sender
-
-        '''
 
     def process_next_message(self):
         # {{{ 
@@ -456,7 +447,7 @@ class Peer_DBS(Peer_IMS):
         print('Goodbye!')
         for x in xrange(3):
             self.say_goodbye(self.splitter)
-        for x in xrange(5):
+        while self.eat_and_feed_counter < len(self.peer_list):
             self.process_next_message()
         #for peer in self.peer_list:
             #self.say_goodbye(peer)

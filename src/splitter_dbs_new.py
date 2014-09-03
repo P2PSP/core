@@ -150,12 +150,14 @@ class Splitter_DBS(Splitter_IMS):
         # helps to avoid DoS (Denial of Service) attacks.
         # }}}
 
+        tmp_list_runs = self.list_runs
         Splitter_IMS.handle_a_peer_arrival(self, connection)
         peer = connection[1]
         #self.append_peer(peer)
         self.incomming_peer = peer
         self.incomming_peer_counter = self.INCOMMING_PEER_COUNTER
-        time.sleep(2.0)
+        #while (self.list_runs - tmp_list_runs) < 2:
+        #    time.sleep(1) 
         self.insert_peer(peer)
 
         # }}}
@@ -327,6 +329,8 @@ class Splitter_DBS(Splitter_IMS):
         # {{{
 
         self.peer_number = (self.peer_number + 1) % len(self.peer_list)
+        if self.peer_number == 0:
+            self.list_runs += 1
 
         # }}}
 
@@ -335,6 +339,8 @@ class Splitter_DBS(Splitter_IMS):
 
         self.receive_the_header()
 
+        self.list_runs = 0
+        
         # {{{ A DBS splitter runs 4 threads. The main one and the
         # "handle_arrivals" thread are equivalent to the daemons used
         # by the IMS splitter. "moderate_the_team" and

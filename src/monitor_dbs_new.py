@@ -45,7 +45,7 @@ class Monitor_DBS(Peer_DBS):
     def print_the_module_name(self):
         # {{{
 
-        sys.stdout.write(Color.yellow)
+        sys.stdout.write(Color.red)
         _print_("Monitor DBS")
         sys.stdout.write(Color.none)
 
