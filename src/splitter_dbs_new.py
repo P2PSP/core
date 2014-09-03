@@ -240,6 +240,7 @@ class Splitter_DBS(Splitter_IMS):
             if destination == self.peer_list[0]:
                 print ("Lost chunk index =", lost_chunk_number)
 
+        _print_("Complain about: ", destination)
         if destination != self.peer_list[0]:
             self.increment_unsupportivity_of_peer(destination)
 

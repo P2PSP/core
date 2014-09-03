@@ -8,9 +8,9 @@ SoR=IMS
 #export BUFFER_SIZE=512
 #export CHANNEL="big_buck_bunny_480p_stereo.ogg"
 
-export BUFFER_SIZE=256  # Important for the lost of chunks!!!
+#export BUFFER_SIZE=512  # Important for the lost of chunks!!!
 #export BUFFER_SIZE=128
-#export BUFFER_SIZE=64
+export BUFFER_SIZE=64
 export CHANNEL="Big_Buck_Bunny_small.ogv"
 
 #export BUFFER_SIZE=32
@@ -24,8 +24,8 @@ export MAX_CHUNK_LOSS=8
 export CHUNK_SIZE=1024
 #export MAX_CHUNK_DEBT=32
 #export MAX_CHUNK_DEBT=128
-export MAX_CHUNK_DEBT=8
-export MAX_CHUNK_LOSS=2
+export MAX_CHUNK_DEBT=2
+export MAX_CHUNK_LOSS=0
 export ITERATIONS=100
 export SOURCE_ADDR="127.0.0.1"
 export SOURCE_PORT=8000
@@ -37,7 +37,7 @@ export MCAST=""
 #export MCAST_ADDR="0.0.0.0"
 export TEAM_PORT=5007
 export MAX_LIFE=180
-export BIRTHDAY_PERIOD=2
+export BIRTHDAY_PERIOD=1
 #export CHUNK_LOSS_PERIOD=100
 export CHUNK_LOSS_PERIOD=0
 
