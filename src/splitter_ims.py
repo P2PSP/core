@@ -196,6 +196,7 @@ class Splitter_IMS(threading.Thread):
     def send_configuration(self, sock):
         # {{{
 
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         self.send_the_mcast_channel(sock)
         self.send_the_header_size(sock)
         self.send_the_chunk_size(sock)
