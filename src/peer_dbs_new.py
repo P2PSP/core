@@ -118,17 +118,19 @@ class Peer_DBS(Peer_IMS):
     def receive_the_next_message(self):
         # {{{
 
-        if __debug__:
-            print ("Waiting for a chunk at {} ...".format(self.team_socket.getsockname()))
+        #if __debug__:
+        #    print ("Waiting for a chunk at {} ...".format(self.team_socket.getsockname()))
 
         message, sender = self.team_socket.recvfrom(struct.calcsize(self.extended_message_format))
         #print(self.team_socket.getsockname(), struct.calcsize(self.extended_message_format), len(message))
         self.recvfrom_counter += 1
 
         # {{{ debug
-        if __debug__:
-            print (Color.cyan, "Received a message from", sender, \
-                "of length", len(message), Color.none)
+
+        #if __debug__:
+        #    print (Color.cyan, "Received a message from", sender, \
+        #        "of length", len(message), Color.none)
+
         # }}}
 
         return message, sender
@@ -436,14 +438,14 @@ class Peer_DBS(Peer_IMS):
             for i in self.debt:
                 self.debt[i] /= 2
 
-        if __debug__:
-            sys.stdout.write(Color.cyan)
-            print ("Number of peers in the team:", len(self.peer_list)+1)
-            print (self.team_socket.getsockname(),)
-            for p in self.peer_list:
-                print (p,)
-            print ()
-            sys.stdout.write(Color.none)
+        ## if __debug__:
+        ##     sys.stdout.write(Color.cyan)
+        ##     print ("Number of peers in the team:", len(self.peer_list)+1)
+        ##     print (self.team_socket.getsockname(),)
+        ##     for p in self.peer_list:
+        ##         print (p,)
+        ##     print ()
+        ##     sys.stdout.write(Color.none)
 
         # }}}
 
