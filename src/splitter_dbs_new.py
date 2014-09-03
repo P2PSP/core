@@ -153,13 +153,15 @@ class Splitter_DBS(Splitter_IMS):
         tmp_list_runs = self.list_runs
         Splitter_IMS.handle_a_peer_arrival(self, connection)
         peer = connection[1]
-        #self.append_peer(peer)
         self.incomming_peer = peer
         self.incomming_peer_counter = self.INCOMMING_PEER_COUNTER
-        if len(self.peer_list) > 0:
-            while (self.list_runs - tmp_list_runs) < 2:
-                print (self.list_runs - tmp_list_runs, " ----------------")
-                time.sleep(1) 
+        ## if len(self.peer_list) > 0:
+        ##     while (self.list_runs - tmp_list_runs) < 2:
+        ##         _print_("longitud de la lista =", len(self.peer_list))
+        ##         _print_("self.list_runs =", self.list_runs)
+        ##         _print_("tmp_list_runs =", tmp_list_runs)
+        ##         _print_("self.list_runs - tmp_list_runs =", self.list_runs - tmp_list_runs)
+        ##         time.sleep(1) 
         self.insert_peer(peer)
 
         # }}}
@@ -238,7 +240,8 @@ class Splitter_DBS(Splitter_IMS):
             if destination == self.peer_list[0]:
                 print ("Lost chunk index =", lost_chunk_number)
 
-        self.increment_unsupportivity_of_peer(destination)
+        if destination != self.peer_list[0]:
+            self.increment_unsupportivity_of_peer(destination)
 
         # }}}
 
@@ -333,7 +336,6 @@ class Splitter_DBS(Splitter_IMS):
         self.peer_number = (self.peer_number + 1) % len(self.peer_list)
         if self.peer_number == 0:
             self.list_runs += 1
-        print("?????????????", self.peer_number, self.list_runs)
 
         # }}}
 
@@ -384,9 +386,9 @@ class Splitter_DBS(Splitter_IMS):
                         socket.inet_aton(self.incomming_peer[ADDR]), \
                         socket.htons(self.incomming_peer[PORT]))
 
+                    #self.send_chunk(message, self.incomming_peer)
+                    
                     self.incomming_peer_counter -= 1
-
-                    print("--------------------------------_____")
                     
                 else:
 

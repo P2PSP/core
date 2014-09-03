@@ -291,9 +291,15 @@ class Peer_DBS(Peer_IMS):
                 # {{{ debug
 
                 if __debug__:
-                    print (self.team_socket.getsockname(), "-", \
-                        socket.ntohs(struct.unpack(self.standard_message_format, self.previous_message)[0]),\
-                        Color.green, "->", Color.none, peer)
+                    if len(self.previous_message) == struct.calcsize(self.standard_message_format):
+                        print (self.team_socket.getsockname(), "-", \
+                            socket.ntohs(struct.unpack(self.standard_message_format, self.previous_message)[0]),\
+                            Color.green, "->", Color.none, peer)
+                    else:
+                        print (self.team_socket.getsockname(), "-", \
+                            socket.ntohs(struct.unpack(self.extended_message_format, self.previous_message)[0]),\
+                            Color.green, "->", Color.none, peer)
+              
 
                 # }}}
 
