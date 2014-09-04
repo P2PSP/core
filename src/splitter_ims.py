@@ -281,8 +281,7 @@ class Splitter_IMS(threading.Thread):
         if __debug__:
             print(self.source_socket.getsockname(), 'connected to', self.source)
         self.source_socket.sendall(self.GET_message)
-        if __debug__:
-            print(self.source_socket.getsockname(), 'GET_message =', self.GET_message)
+        _print_(self.source_socket.getsockname(), 'GET_message =', self.GET_message)
 
         # }}}
 
