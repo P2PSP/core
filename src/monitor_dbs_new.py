@@ -39,6 +39,7 @@ class Monitor_DBS(Peer_DBS):
         self.player_socket = peer.player_socket
         self.standard_message_format = peer.standard_message_format
         self.extended_message_format = peer.extended_message_format
+        self.number_of_peers = peer.number_of_peers
         
         # }}}
 

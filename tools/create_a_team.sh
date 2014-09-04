@@ -176,6 +176,21 @@ sleep 1
 
 PEER="../src/peer.py \
 --max_chunk_debt=$MAX_CHUNK_DEBT \
+--player_port=9999 \
+--splitter_addr=$SPLITTER_ADDR \
+--splitter_port=$SPLITTER_PORT"
+# \
+#--team_port=$TEAM_PORT"
+
+echo $PEER
+
+xterm -sl 10000 -e $PEER &
+#xterm -sl 10000 -e '$PEER > monitor' &
+
+vlc http://localhost:9999 &
+
+PEER="../src/peer.py \
+--max_chunk_debt=$MAX_CHUNK_DEBT \
 --player_port=9998 \
 --splitter_addr=$SPLITTER_ADDR \
 --splitter_port=$SPLITTER_PORT"

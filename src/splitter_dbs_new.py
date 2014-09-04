@@ -51,7 +51,7 @@ class Splitter_DBS(Splitter_IMS):
 
     # {{{ Threshold of chunk losses to reject a peer from the team.
     # }}}
-    MAX_CHUNK_LOSS = 128
+    MAX_CHUNK_LOSS = 16
     MCAST_ADDR = "0.0.0.0"
 
     # }}}
@@ -61,7 +61,7 @@ class Splitter_DBS(Splitter_IMS):
 
         Splitter_IMS.__init__(self)
 
-        self.INCOMMING_PEER_COUNTER = 3
+        self.INCOMMING_PEER_COUNTER = 13
 
         self.print_modulename()
         #self.number_of_monitors = 0
@@ -134,8 +134,8 @@ class Splitter_DBS(Splitter_IMS):
     def insert_peer(self, peer):
         # {{{
         if peer not in self.peer_list: # Probar a quitar -----------------------------------------------------
-            #self.peer_list.insert(self.peer_number-1, peer)
-            self.peer_list.append(peer)
+            self.peer_list.insert(self.peer_number, peer)
+            #self.peer_list.append(peer)
         self.losses[peer] = 0
 
         # }}}
@@ -161,8 +161,9 @@ class Splitter_DBS(Splitter_IMS):
         ##         _print_("self.list_runs =", self.list_runs)
         ##         _print_("tmp_list_runs =", tmp_list_runs)
         ##         _print_("self.list_runs - tmp_list_runs =", self.list_runs - tmp_list_runs)
-        ##         time.sleep(1) 
-        self.insert_peer(peer)
+        ##         time.sleep(1)
+        
+        #self.insert_peer(peer)
 
         # }}}
 
@@ -358,6 +359,7 @@ class Splitter_DBS(Splitter_IMS):
             connection  = self.peer_connection_socket.accept()
             self.handle_a_peer_arrival(connection)
             self.incomming_peer_counter = 0 # The monitor peer is not announced
+            self.insert_peer(self.incomming_peer)
         _()
 
         threading.Thread(target=self.handle_arrivals).start()
@@ -388,9 +390,13 @@ class Splitter_DBS(Splitter_IMS):
                         socket.htons(self.incomming_peer[PORT]))
 
                     #self.send_chunk(message, self.incomming_peer)
-                    
+
                     self.incomming_peer_counter -= 1
-                    
+
+                    if self.incomming_peer_counter == 0:
+                        self.insert_peer(self.incomming_peer)
+                        self.compute_next_peer_number(peer)
+                
                 else:
 
                     message_format = self.chunk_number_format \

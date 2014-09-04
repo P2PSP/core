@@ -130,11 +130,17 @@ class Splitter():
                 #print('%5d' % splitter.chunk_number, end=' ')
                 sys.stdout.write(Color.cyan)
                 print(len(splitter.peer_list), end=' ')
+                if not __debug__:
+                    counter = 0
                 for p in splitter.peer_list:
+                    if not __debug__:
+                        if counter > 10:
+                            break
+                        counter += 1
                     sys.stdout.write(Color.blue)
                     print(p, end= ' ')
                     sys.stdout.write(Color.red)
-                    print('%3d' % splitter.losses[p], '<', splitter.MAX_CHUNK_LOSS, end=' ')
+                    print('%3d' % splitter.losses[p], splitter.MAX_CHUNK_LOSS, end=' ')
                     try:
                         sys.stdout.write(Color.blue)
                         print('%3d' % splitter.period[p], end= ' ')

@@ -254,6 +254,9 @@ class Peer_DBS(Peer_IMS):
                 self.eat_and_feed_counter = 0
                 self.previous_message = message
 
+                if len(self.peer_list) < self.number_of_peers:
+                    _print_("len(peer_list) =", len(self.peer_list), "number_of_peers =", self.number_of_peers)
+
                 # }}}
             else:
                 # {{{ If the sender peer is new, insert it in the list of peers
