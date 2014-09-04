@@ -169,8 +169,10 @@ $MCAST \
 
 echo $SPLITTER
 
-xterm -sl 10000 -e $SPLITTER &
-#xterm -sl 10000 -e '$SPLITTER > splitter' &
+#xterm -sl 10000 -e $SPLITTER &
+xterm -sl 10000 -e "$SPLITTER | tee > splitter.txt" &
+
+rm -f peer.txt
 
 sleep 1
 
@@ -184,8 +186,8 @@ PEER="../src/peer.py \
 
 echo $PEER
 
-xterm -sl 10000 -e $PEER &
-#xterm -sl 10000 -e '$PEER > monitor' &
+#xterm -sl 10000 -e $PEER &
+xterm -T "Monitor" -sl 10000 -e "$PEER | tee > monitor.txt" &
 
 vlc http://localhost:9999 &
 
@@ -199,12 +201,10 @@ PEER="../src/peer.py \
 
 echo $PEER
 
-xterm -sl 10000 -e $PEER &
-#xterm -sl 10000 -e '$PEER > monitor' &
+#xterm -sl 10000 -e $PEER &
+xterm -sl 10000 -e "$PEER | tee > peer.txt" &
 
 vlc http://localhost:9998 &
-
-rm -f peer.txt
 
 x=1
 while [ $x -le $ITERATIONS ]
@@ -227,8 +227,8 @@ do
 
     echo $PEER
 
-    #xterm -sl 10000 -e "$PEER >> peer.txt" &
-    xterm -sl 10000 -e "$PEER" & #
+    xterm -sl 10000 -e "$PEER | tee >> peer.txt" &
+    #xterm -sl 10000 -e "$PEER" & #
 
     TIME=`shuf -i 1-$MAX_LIFE -n 1`
     #timelimit -t $TIME vlc http://localhost:$PLAYER_PORT &
