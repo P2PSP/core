@@ -369,14 +369,14 @@ class Splitter_DBS(Splitter_IMS):
 
         #self.incomming_peer_counter = self.INCOMMING_PEER_COUNTER
 
-        header_load_counter = 0
+        #header_load_counter = 0
         while self.alive:
 
-            chunk = self.receive_chunk(header_load_counter)
+            #chunk = self.receive_chunk(header_load_counter)
+            chunk = self.receive_chunk()
             try:
                 peer = self.peer_list[self.peer_number]
-                self.compute_next_peer_number(peer)
-
+                #self.compute_next_peer_number(peer)
                 if self.incomming_peer_counter > 0:
 
                     message_format = self.chunk_number_format \
@@ -407,6 +407,7 @@ class Splitter_DBS(Splitter_IMS):
                         chunk)
                         
                 #print(len(message), peer, self.incomming_peer_counter)
+                self.compute_next_peer_number(peer)
                 self.send_chunk(message, peer)
 
                 #print(self.chunk_number)

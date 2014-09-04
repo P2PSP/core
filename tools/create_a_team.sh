@@ -14,7 +14,7 @@ export BUFFER_SIZE=64
 export CHANNEL="Big_Buck_Bunny_small.ogv"
 
 #export BUFFER_SIZE=32
-#export CHANNEL="The_Last_of_the_Mohicans-Promentory.ogg"
+#export CHANNEL="The_Last_of_the_Mohicans-promentory.ogg"
 
 #export BUFFER_SIZE=128
 #export CHANNEL="sintel_trailer-144p.ogg"
@@ -24,7 +24,7 @@ export MAX_CHUNK_LOSS=8
 export CHUNK_SIZE=1024
 #export MAX_CHUNK_DEBT=32
 #export MAX_CHUNK_DEBT=128
-export MAX_CHUNK_DEBT=2
+export MAX_CHUNK_DEBT=32
 export MAX_CHUNK_LOSS=0
 export ITERATIONS=100
 export SOURCE_ADDR="127.0.0.1"
@@ -227,8 +227,8 @@ do
 
     echo $PEER
 
-    xterm -sl 10000 -e "$PEER >> peer.txt" &
-    #xterm -sl 10000 -e "$PEER" & #
+    #xterm -sl 10000 -e "$PEER >> peer.txt" &
+    xterm -sl 10000 -e "$PEER" & #
 
     TIME=`shuf -i 1-$MAX_LIFE -n 1`
     #timelimit -t $TIME vlc http://localhost:$PLAYER_PORT &

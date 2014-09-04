@@ -13,6 +13,7 @@ import struct
 from color import Color
 import common
 import time
+from _print_ import _print_
 
 # }}}
 
@@ -118,6 +119,8 @@ class Splitter_IMS(threading.Thread):
         self.recvfrom_counter = 0
         self.sendto_counter = 0
 
+        self.header_load_counter = 0
+        
         # }}}
 
     def print_the_module_name(self):
@@ -132,8 +135,7 @@ class Splitter_IMS(threading.Thread):
     def send_the_header(self, peer_serve_socket):
         # {{{
 
-        if __debug__:
-            print("Sending a header of", len(self.header), "bytes")
+        _print_("Sending a header of", len(self.header), "bytes")
         try:
             peer_serve_socket.sendall(self.header)
         except:
@@ -279,34 +281,7 @@ class Splitter_IMS(threading.Thread):
         if __debug__:
             print(self.source_socket.getsockname(), 'connected to', self.source)
         self.source_socket.sendall(self.GET_message)
-        if __debug__:
-            print(self.source_socket.getsockname(), 'GET_message =', self.GET_message)
-
-        # }}}
-
-    def receive_next_chunk(self, header_load_counter):
-        # {{{
-
-        chunk = self.source_socket.recv(self.CHUNK_SIZE)
-        prev_size = 0
-        while len(chunk) < self.CHUNK_SIZE:
-            if len(chunk) == prev_size:
-                # This section of code is reached when the streaming
-                # server (Icecast) finishes a stream and starts with
-                # the following one.
-                print("No data in the server!")
-                sys.stdout.flush()
-                self.source_socket.close()
-                time.sleep(1)
-                self.source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                self.source_socket.connect(self.source)
-                self.source_socket.sendall(self.GET_message)
-                self.header = ""
-                header_load_counter = self.HEADER_SIZE
-                chunk = ""
-            prev_size = len(chunk)
-            chunk += self.source_socket.recv(self.CHUNK_SIZE - len(chunk))
-        return chunk, header_load_counter
+        _print_(self.source_socket.getsockname(), 'GET_message =', self.GET_message)
 
         # }}}
 
@@ -337,19 +312,47 @@ class Splitter_IMS(threading.Thread):
         # {{{ Load the video header.
 
         for i in xrange(self.HEADER_SIZE):
-            self.header += self.receive_next_chunk(0)[0]
+            self.header += self.receive_next_chunk()
 
         # }}}
 
-    def receive_chunk(self, header_load_counter):
+    def receive_next_chunk(self):
         # {{{
 
-        chunk, header_load_counter = self.receive_next_chunk(header_load_counter)
+        chunk = self.source_socket.recv(self.CHUNK_SIZE)
+        prev_size = 0
+        while len(chunk) < self.CHUNK_SIZE:
+            if len(chunk) == prev_size:
+                # This section of code is reached when the streaming
+                # server (Icecast) finishes a stream and starts with
+                # the following one.
+                print("No data in the server!")
+                sys.stdout.flush()
+                self.source_socket.close()
+                time.sleep(1)
+                self.source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.source_socket.connect(self.source)
+                self.source_socket.sendall(self.GET_message)
+                self.header = ""
+                self.header_load_counter = self.HEADER_SIZE
+                #_print_("1: header_load_counter =", self.header_load_counter)
+                chunk = ""
+            prev_size = len(chunk)
+            chunk += self.source_socket.recv(self.CHUNK_SIZE - len(chunk))
+        return chunk
 
-        if header_load_counter > 0:
-            print("Loaded", len(self.header), "bytes of header")
+        # }}}
+        
+    def receive_chunk(self):
+        # {{{
+
+        chunk = self.receive_next_chunk()
+        #_print_ ("2: header_load_counter =", self.header_load_counter)
+        if self.header_load_counter > 0:
             self.header += chunk
-            header_load_counter -= 1
+            self.header_load_counter -= 1
+            print("Loaded", len(self.header), "bytes of header")
+            #_print_("3: header_load_counter =", self.header_load_counter)
 
         self.recvfrom_counter += 1
             
@@ -390,10 +393,10 @@ class Splitter_IMS(threading.Thread):
 
         message_format = self.chunk_number_format + str(self.CHUNK_SIZE) + "s"
         
-        header_load_counter = 0
+        #_print_("4: header_load_counter =", self.header_load_counter)
         while self.alive:
             #self.receive_and_send_a_chunk(header_load_counter)
-            chunk = self.receive_chunk(header_load_counter)
+            chunk = self.receive_chunk()
             message = struct.pack(message_format, socket.htons(self.chunk_number), chunk)
             #self.send_chunk(self.receive_chunk(header_load_counter), self.mcast_channel)
             self.send_chunk(message, self.mcast_channel)
