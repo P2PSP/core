@@ -169,8 +169,8 @@ $MCAST \
 
 echo $SPLITTER
 
-#xterm -sl 10000 -e $SPLITTER &
-xterm -sl 10000 -e "$SPLITTER | tee > splitter.txt" &
+xterm -sl 10000 -e $SPLITTER &
+#xterm -sl 10000 -e "$SPLITTER | tee > splitter.txt" &
 
 rm -f peer.txt
 
