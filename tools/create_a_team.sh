@@ -155,6 +155,8 @@ done
 
 set -x
 
+rm -f *.dat
+
 SPLITTER="../src/splitter.py \
 --buffer_size=$BUFFER_SIZE \
 --channel=$CHANNEL \
@@ -169,10 +171,8 @@ $MCAST \
 
 echo $SPLITTER
 
-xterm -sl 10000 -e $SPLITTER &
-#xterm -sl 10000 -e "$SPLITTER | tee > splitter.txt" &
-
-rm -f peer.txt
+#xterm -sl 10000 -e $SPLITTER &
+xterm -sl 10000 -e "$SPLITTER | tee splitter.dat" &
 
 sleep 1
 
@@ -186,10 +186,12 @@ PEER="../src/peer.py \
 
 echo $PEER
 
-xterm -sl 10000 -e $PEER &
-#xterm -T "Monitor" -sl 10000 -e "$PEER | tee > monitor.txt" &
+#xterm -sl 10000 -e $PEER &
+xterm -T "Monitor" -sl 10000 -e "$PEER | tee monitor.dat" &
 
 vlc http://localhost:9999 &
+
+sleep 1
 
 PEER="../src/peer.py \
 --max_chunk_debt=$MAX_CHUNK_DEBT \
@@ -201,8 +203,8 @@ PEER="../src/peer.py \
 
 echo $PEER
 
-xterm -sl 10000 -e $PEER &
-#xterm -sl 10000 -e "$PEER | tee > peer.txt" &
+#xterm -sl 10000 -e $PEER &
+xterm -sl 10000 -e "$PEER | tee 9998.dat" &
 
 vlc http://localhost:9998 &
 
@@ -227,8 +229,8 @@ do
 
     echo $PEER
 
-    #xterm -sl 10000 -e "$PEER | tee >> peer.txt" &
-    xterm -sl 10000 -e "$PEER" & #
+    xterm -sl 10000 -e "$PEER | tee $PLAYER_PORT.dat" &
+    #xterm -sl 10000 -e "$PEER" & #
 
     TIME=`shuf -i 1-$MAX_LIFE -n 1`
     #timelimit -t $TIME vlc http://localhost:$PLAYER_PORT &

@@ -36,7 +36,7 @@ class Peer_DBS(Peer_IMS):
         # {{{
 
         sys.stdout.write(Color.yellow)
-        _print_("Peer DBS")
+        _print_("Peer DBS (list)")
         sys.stdout.write(Color.none)
 
         threading.Thread.__init__(self)
@@ -332,7 +332,7 @@ class Peer_DBS(Peer_IMS):
         # }}}
 
     def am_i_a_monitor(self):
-        if len(self.peer_list) == 0:
+        if self.number_of_peers == 0:
             # Only the first peer of the team is the monitor peer
             return True
         else:

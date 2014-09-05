@@ -25,7 +25,7 @@ class Monitor_DBS(Peer_DBS):
         # {{{
 
         sys.stdout.write(Color.yellow)
-        _print_("Monitor DBS")
+        _print_("Monitor DBS (no list)")
         sys.stdout.write(Color.none)
 
         threading.Thread.__init__(self)

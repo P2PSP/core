@@ -87,7 +87,7 @@ class Splitter_DBS(Splitter_IMS):
         # {{{
 
         sys.stdout.write(Color.yellow)
-        print("Splitter DBS")
+        print("Splitter DBS (no list)")
         sys.stdout.write(Color.none)
 
         # }}}

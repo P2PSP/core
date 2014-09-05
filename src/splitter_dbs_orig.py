@@ -66,7 +66,7 @@ class Splitter_DBS(Splitter_IMS):
         # {{{
 
         sys.stdout.write(Color.yellow)
-        print("Splitter DBS")
+        print("Splitter DBS (list)")
         sys.stdout.write(Color.none)
 
         # }}}
@@ -370,7 +370,7 @@ class Splitter_DBS(Splitter_IMS):
         header_load_counter = 0
         while self.alive:
 
-            chunk = self.receive_chunk(header_load_counter)
+            chunk = self.receive_chunk()
             try:
                 peer = self.peer_list[self.peer_number]
                 message = struct.pack(message_format, socket.htons(self.chunk_number), chunk)
