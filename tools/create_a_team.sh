@@ -153,7 +153,7 @@ while getopts "h:b:c:k:d:l:i:s:o:a:p:mr:t:f:y:w:?" opt; do
     esac
 done
 
-set -x
+#set -x
 
 rm -f *.dat
 
@@ -189,7 +189,7 @@ echo $PEER
 #xterm -sl 10000 -e $PEER &
 xterm -T "Monitor" -sl 10000 -e "$PEER | tee monitor.dat" &
 
-vlc http://localhost:9999 &
+vlc http://localhost:9999 > /dev/null 2> /dev/null &
 
 sleep 1
 
@@ -206,7 +206,7 @@ echo $PEER
 #xterm -sl 10000 -e $PEER &
 xterm -sl 10000 -e "$PEER | tee peer.dat" &
 
-vlc http://localhost:9998 &
+vlc http://localhost:9998 > /dev/null 2> /dev/null &
 
 x=1
 while [ $x -le $ITERATIONS ]
@@ -241,4 +241,4 @@ done
 
 sleep 1000
 
-set +x
+#set +x
