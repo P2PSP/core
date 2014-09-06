@@ -8,9 +8,9 @@ SoR=IMS
 #export BUFFER_SIZE=512
 #export CHANNEL="big_buck_bunny_480p_stereo.ogg"
 
-#export BUFFER_SIZE=512  # Important for the lost of chunks!!!
+export BUFFER_SIZE=512  # Important for the lost of chunks!!!
 #export BUFFER_SIZE=128
-export BUFFER_SIZE=64
+#export BUFFER_SIZE=64
 export CHANNEL="Big_Buck_Bunny_small.ogv"
 
 #export BUFFER_SIZE=32
