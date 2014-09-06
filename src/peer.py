@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -81,7 +81,12 @@ class Peer():
         peer = Peer_IMS()
         peer.wait_for_the_player()
         peer.connect_to_the_splitter()
-        peer.receive_configuration()
+        peer.receive_the_mcast_endpoint()
+        peer.receive_the_header_size()
+        peer.receive_the_chunk_size()
+        peer.receive_the_header()
+        peer.receive_the_buffer_size()
+        #peer.receive_configuration()
         _print_("IP Multicast address =", peer.mcast_addr)
         
         # A multicast address is always received, even for DBS peers.
@@ -89,8 +94,10 @@ class Peer():
             # {{{ This is an "unicast" peer.
 
             peer = Peer_DBS(peer)
-            #peer.receive_the_list_of_peers()
+            peer.receive_my_endpoint()
             peer.receive_the_number_of_peers()
+            peer.listen_to_the_team()
+            peer.receive_the_list_of_peers()
 
             if peer.am_i_a_monitor():
                 peer = Monitor_DBS(peer)
@@ -104,14 +111,15 @@ class Peer():
                     if int(args.chunk_loss_period) != 0:
                         peer = Lossy_Peer(peer)
                     
-            peer.receive_my_endpoint()
+            #peer.receive_my_endpoint()
             
             # }}}
+        else:
+            peer.listen_to_the_team()
 
         # }}}
 
         # {{{ Run!
-        peer.listen_to_the_team()
         peer.disconnect_from_the_splitter()
         peer.buffer_data()
         peer.start()

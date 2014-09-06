@@ -393,16 +393,16 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def receive_configuration(self):
-        # {{{
+    ## def receive_configuration(self):
+    ##     # {{{
 
-        self.receive_the_mcast_endpoint()
-        self.receive_the_header_size()
-        self.receive_the_chunk_size()
-        self.receive_the_header()
-        self.receive_the_buffer_size()
+    ##     self.receive_the_mcast_endpoint()
+    ##     self.receive_the_header_size()
+    ##     self.receive_the_chunk_size()
+    ##     self.receive_the_header()
+    ##     self.receive_the_buffer_size()
 
-        # }}}
+    ##     # }}}
         
     def run(self):
         # {{{

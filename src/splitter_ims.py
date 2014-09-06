@@ -211,12 +211,13 @@ class Splitter_IMS(threading.Thread):
         # team, first it must establish a TCP connection with the
         # splitter.
         
-        sock = connection[0]
+        serve_socket = connection[0]
         sys.stdout.write(Color.green)
-        print(sock.getsockname(), '\b: accepted connection from peer', connection[1])
+        print(serve_socket.getsockname(), '\b: accepted connection from peer', \
+              connection[1])
         sys.stdout.write(Color.none)
-        self.send_configuration(sock)
-        sock.close()
+        self.send_configuration(serve_socket)
+        serve_socket.close()
 
         # }}}
 

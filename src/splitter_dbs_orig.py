@@ -88,18 +88,6 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def are_you_a_monitor(self): # Sin usar
-        # {{{
-
-        self.number_of_monitors += 1
-        if self.number_of_monitors < self.MAX_NUMBER_OF_MONITORS:
-            return True
-        else:
-            self.number_of_monitors = self.MAX_NUMBER_OF_MONITORS
-            return False
-
-        # }}}
-
     def send_you_are_a_monitor(self, peer_serve_socket): # sin usar
         # {{{
         
@@ -113,14 +101,17 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def send_the_list(self, peer_serve_socket):
+    def send_the_list_of_peers(self, peer_serve_socket):
         # {{{
 
-        if __debug__:
-            print("Sending a list of peers of size", len(self.peer_list))
-        message = struct.pack("H", socket.htons(len(self.peer_list)))
-        peer_serve_socket.sendall(message)
+        #if __debug__:
+        #    print("Sending a list of peers of size", len(self.peer_list))
+        #message = struct.pack("H", socket.htons(len(self.peer_list)))
+        #peer_serve_socket.sendall(message)
+        self.send_the_list_size(peer_serve_socket)
 
+        #peer_serve_socket.sendall(self.message)
+        
         if __debug__:
             counter = 0
         for p in self.peer_list:
@@ -155,9 +146,17 @@ class Splitter_DBS(Splitter_IMS):
 
     def send_configuration(self, sock):
         Splitter_IMS.send_configuration(self, sock)
-        self.send_the_list(sock)
         self.send_the_peer_endpoint(sock)
         
+    def insert_peer(self, peer):
+        # {{{
+        if peer not in self.peer_list: # Probar a quitar -----------------------------------------------------
+            #self.peer_list.insert(self.peer_number, peer)
+            self.peer_list.append(peer)
+        self.losses[peer] = 0
+
+        # }}}
+
     def handle_a_peer_arrival(self, connection):
         # {{{
 
@@ -169,11 +168,38 @@ class Splitter_DBS(Splitter_IMS):
         # }}}
 
         Splitter_IMS.handle_a_peer_arrival(self, connection)
+        serve_socket = connection[0]
+        self.send_the_list_of_peers(serve_socket)
         peer = connection[1]
-        self.append_peer(peer)
+        self.insert_peer(peer)
+        return peer
                 
         # }}}
 
+    def handle_a_peer_arrival(self, connection):
+        # {{{
+
+        # {{{ In the DBS, the splitter sends to the incomming peer the
+        # list of peers. Notice that the transmission of the list of
+        # peers (something that could need some time if the team is
+        # big or if the peer is slow) is done in a separate thread. This
+        # helps to avoid DoS (Denial of Service) attacks.
+        # }}}
+
+        serve_socket = connection[0]
+        incomming_peer = connection[1]
+        sys.stdout.write(Color.green)
+        print(serve_socket.getsockname(), '\b: accepted connection from peer', \
+              incomming_peer)
+        sys.stdout.write(Color.none)
+        self.send_configuration(serve_socket)
+        self.send_the_list_of_peers(serve_socket)
+        self.insert_peer(incomming_peer)
+        serve_socket.close()
+        return incomming_peer
+                
+        # }}}
+        
     def receive_message(self):
         # {{{
 
@@ -246,9 +272,7 @@ class Splitter_DBS(Splitter_IMS):
             sys.stdout.write(Color.none)
 
             if destination == self.peer_list[0]:
-                print ("=============================")
                 print ("Lost chunk index =", lost_chunk_number)
-                print ("=============================")
 
         self.increment_unsupportivity_of_peer(destination)
 
@@ -357,7 +381,12 @@ class Splitter_DBS(Splitter_IMS):
         print(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peer ...")
         def _():
             connection  = self.peer_connection_socket.accept()
-            self.handle_a_peer_arrival(connection)
+            incomming_peer = self.handle_a_peer_arrival(connection)
+            #self.insert_peer(incomming_peer) # Notice that now, the
+                                             # monitor peer is the
+                                             # only one in the list of
+                                             # peers. It is no
+                                             # neccesary a delay.
         _()
 
         threading.Thread(target=self.handle_arrivals).start()
@@ -367,7 +396,7 @@ class Splitter_DBS(Splitter_IMS):
         message_format = self.chunk_number_format \
                         + str(self.CHUNK_SIZE) + "s"
                         
-        header_load_counter = 0
+        #header_load_counter = 0
         while self.alive:
 
             chunk = self.receive_chunk()

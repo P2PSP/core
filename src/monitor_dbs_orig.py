@@ -39,6 +39,7 @@ class Monitor_DBS(Peer_DBS):
         self.chunk_size = peer.chunk_size
         self.player_socket = peer.player_socket
         self.message_format = peer.message_format
+        self.team_socket = peer.team_socket
         #self.extended_message_format = peer.extended_message_format
         
         # }}}

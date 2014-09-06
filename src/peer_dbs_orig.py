@@ -54,10 +54,17 @@ class Peer_DBS(Peer_IMS):
         
         # }}}
 
+    def say_hello(self, node):
+        # {{{
+
+        self.team_socket.sendto('H', node)
+
+        # }}}
+
     def say_goodbye(self, node):
         # {{{
 
-        self.team_socket.sendto('', node)
+        self.team_socket.sendto('G', node)
 
         # }}}
 
@@ -82,19 +89,19 @@ class Peer_DBS(Peer_IMS):
         self.peer_list = [] # The list of peers structure.
 
         sys.stdout.write(Color.green)
-        _print_("Requesting the list of peers to", self.splitter_socket.getpeername())
+        _print_("Requesting", self.number_of_peers, "peers to", self.splitter_socket.getpeername())
         #number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
         #_print_("The size of the team is", number_of_peers, "(apart from me)")
 
-        if __debug__:
-            tmp = self.number_of_peers
+        tmp = self.number_of_peers
         while self.number_of_peers > 0:
             message = self.splitter_socket.recv(struct.calcsize("4sH"))
             IP_addr, port = struct.unpack("4sH", message) # Ojo, !H ????
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
-            #self.say_hello(peer, team_socket)
+            print("[hello] sent to", peer)
+            self.say_hello(peer)
             if __debug__:
                 _print_("[%5d]" % self.number_of_peers, peer)
             else:
@@ -139,18 +146,20 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
 
-    def receive_a_chunk(self):
+    def process_next_message(self):
         # {{{ Now, receive and send.
 
         try:
             # {{{ Receive and send
 
-            message, sender = self.receive_the_chunk()
+            message, sender = self.receive_the_next_message()
 
-            if len(message) == struct.calcsize(self.chunk_format_string):
+            if len(message) == struct.calcsize(self.message_format):
                 # {{{ A video chunk has been received
 
-                chunk_number = self.unpack_and_store_chunk(message)
+                chunk_number, chunk = self.unpack_message(message)
+                self.chunks[chunk_number % self.buffer_size] = chunk
+                self.received[chunk_number % self.buffer_size] = True
 
                 if sender == self.splitter:
                     # {{{ Send the previous chunk in burst sending
@@ -174,7 +183,7 @@ class Peer_DBS(Peer_IMS):
 
                         if __debug__:
                             print (self.team_socket.getsockname(), "-",\
-                                socket.ntohs(struct.unpack(self.chunk_format_string, \
+                                socket.ntohs(struct.unpack(self.message_format, \
                                                                self.receive_and_feed_previous)[0]),\
                                 Color.green, "->", Color.none, peer)
 
@@ -234,7 +243,7 @@ class Peer_DBS(Peer_IMS):
 
                     if __debug__:
                         print (self.team_socket.getsockname(), "-", \
-                            socket.ntohs(struct.unpack(self.chunk_format_string, self.receive_and_feed_previous)[0]),\
+                            socket.ntohs(struct.unpack(self.message_format, self.receive_and_feed_previous)[0]),\
                             Color.green, "->", Color.none, peer)
 
                     # }}}
@@ -249,12 +258,20 @@ class Peer_DBS(Peer_IMS):
                 # }}}
             else:
                 # {{{ A control chunk has been received
-                if sender in self.peer_list:
-                    sys.stdout.write(Color.red)
-                    print (self.team_socket.getsockname(), '\b: received "goodbye" from', sender)
-                    sys.stdout.write(Color.none)
-                    self.peer_list.remove(sender)
-                    del self.debt[sender]
+                print("Control received")
+                if message == 'H':
+                    if sender not in self.peer_list:
+                        # The peer is new
+                        self.peer_list.append(sender)
+                        self.debt[sender] = 0
+                        print (Color.green, sender, 'added by [hello]', Color.none)
+                else:
+                    if sender in self.peer_list:
+                        sys.stdout.write(Color.red)
+                        print (self.team_socket.getsockname(), '\b: received "goodbye" from', sender)
+                        sys.stdout.write(Color.none)
+                        self.peer_list.remove(sender)
+                        del self.debt[sender]
                 return -1
 
                 # }}}
@@ -289,7 +306,7 @@ class Peer_DBS(Peer_IMS):
 
         print('Goodbye!')
         for x in xrange(3):
-            self.receive_a_chunk()
+            self.process_next_message()
             self.say_goodbye(self.splitter)
         for peer in self.peer_list:
             self.say_goodbye(peer)
@@ -332,6 +349,8 @@ class Peer_DBS(Peer_IMS):
         # }}}
 
     def am_i_a_monitor(self):
+        # {{{
+
         if self.number_of_peers == 0:
             # Only the first peer of the team is the monitor peer
             return True
@@ -342,5 +361,7 @@ class Peer_DBS(Peer_IMS):
         #    return True
         #else:
         #    return False
+
+        # }}}
 
     # }}}

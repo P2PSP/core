@@ -204,7 +204,7 @@ PEER="../src/peer.py \
 echo $PEER
 
 #xterm -sl 10000 -e $PEER &
-xterm -sl 10000 -e "$PEER | tee 9998.dat" &
+xterm -sl 10000 -e "$PEER | tee peer.dat" &
 
 vlc http://localhost:9998 &
 
