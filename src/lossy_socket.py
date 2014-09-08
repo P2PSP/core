@@ -20,7 +20,7 @@ class lossy_socket():
         if (self.counter % self.ratio) != 0:
             return self._sock.sendto(*p)
         else:
-            print('Lost chunk!')
+            print('lost chunk!')
             self.counter = 0
 
     def bind(self, *p):

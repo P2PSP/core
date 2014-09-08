@@ -272,7 +272,7 @@ class Splitter_DBS(Splitter_IMS):
             sys.stdout.write(Color.none)
 
             if destination == self.peer_list[0]:
-                print ("Lost chunk index =", lost_chunk_number)
+                print ("lost chunk index =", lost_chunk_number)
 
         self.increment_unsupportivity_of_peer(destination)
 

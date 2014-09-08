@@ -54,7 +54,7 @@ class Peer_IMS(threading.Thread):
         chunk_number = (self.played_chunk + 1) % common.MAX_CHUNK_NUMBER
         while not self.received[chunk_number % self.buffer_size]:
             sys.stdout.write(Color.cyan)
-            _print_("Lost chunk", chunk_number)
+            _print_("lost chunk", chunk_number)
             sys.stdout.write(Color.none)
             chunk_number = (chunk_number + 1) % common.MAX_CHUNK_NUMBER
         return chunk_number
