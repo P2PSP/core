@@ -88,19 +88,6 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def send_you_are_a_monitor(self, peer_serve_socket): # sin usar
-        # {{{
-        
-        if __debug__:
-            print("Sending that your are the monitor peer", peer_serve_socket.getpeername())
-        if self.are_you_a_monitor():
-            message = struct.pack("c", '1')
-        else:
-            message = struct.pack("c", '0')
-        peer_serve_socket.sendall(message)
-
-        # }}}
-
     def send_the_list_of_peers(self, peer_serve_socket):
         # {{{
 

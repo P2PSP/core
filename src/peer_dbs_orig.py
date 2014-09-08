@@ -94,7 +94,7 @@ class Peer_DBS(Peer_IMS):
         #_print_("The size of the team is", number_of_peers, "(apart from me)")
 
         tmp = self.number_of_peers
-        while self.number_of_peers > 0:
+        while tmp > 0:
             message = self.splitter_socket.recv(struct.calcsize("4sH"))
             IP_addr, port = struct.unpack("4sH", message) # Ojo, !H ????
             IP_addr = socket.inet_ntoa(IP_addr)
@@ -103,13 +103,13 @@ class Peer_DBS(Peer_IMS):
             print("[hello] sent to", peer)
             self.say_hello(peer)
             if __debug__:
-                _print_("[%5d]" % self.number_of_peers, peer)
+                _print_("[%5d]" % tmp, peer)
             else:
-                _print_("{:.2%}\r".format((tmp-self.number_of_peers)/tmp), end='')
+                _print_("{:.2%}\r".format((self.number_of_peers-tmp)/self.number_of_peers), end='')
 
             self.peer_list.append(peer)
             self.debt[peer] = 0
-            self.number_of_peers -= 1
+            tmp -= 1
 
         _print_("List of peers received")
         sys.stdout.write(Color.none)
@@ -350,7 +350,7 @@ class Peer_DBS(Peer_IMS):
 
     def am_i_a_monitor(self):
         # {{{
-
+        print ("---------------------> number_of_peers =", self.number_of_peers)
         if self.number_of_peers == 0:
             # Only the first peer of the team is the monitor peer
             return True

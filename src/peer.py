@@ -96,6 +96,8 @@ class Peer():
             peer = Peer_DBS(peer)
             peer.receive_my_endpoint()
             peer.receive_the_number_of_peers()
+            print("===============> number_of_peers =", peer.number_of_peers)
+            print(peer.am_i_a_monitor())
             peer.listen_to_the_team()
             peer.receive_the_list_of_peers()
 
