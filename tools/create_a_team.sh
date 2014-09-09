@@ -129,8 +129,8 @@ while getopts "h:b:c:k:d:l:i:s:o:a:p:mr:t:f:y:w:?" opt; do
 	    echo "MAX_LIFE="$MAX_LIFE
 	    ;;
 	y)
-	    BIRTHDAY="${OPTARG}"
-	    echo "BIRTHDAY="$BIRTHDAY
+	    BIRTHDAY_PERIOD="${OPTARG}"
+	    echo "BIRTHDAY_PERIOD="$BIRTHDAY_PERIOD
 	    ;;
 	w)
 	    CHUNK_LOSS_PERIOD="${OPTARG}"
@@ -153,7 +153,7 @@ while getopts "h:b:c:k:d:l:i:s:o:a:p:mr:t:f:y:w:?" opt; do
     esac
 done
 
-#set -x
+set -x
 
 rm -f *.dat
 
@@ -212,33 +212,12 @@ x=1
 while [ $x -le $ITERATIONS ]
 do
     sleep $BIRTHDAY_PERIOD
-    export PLAYER_PORT=`shuf -i 2000-65000 -n 1`
-    #export TEAM_PORT=`shuf -i 2000-65000 -n 1`
 
-    #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j MARK --set-xmark 101
-    #sudo iptables -A POSTROUTING -t mangle -o lo -p udp -m multiport --sports $TEAM_PORT -j RETURN
-
-    PEER="../src/peer.py \
---chunk_loss_period=$CHUNK_LOSS_PERIOD \
---max_chunk_debt=$MAX_CHUNK_DEBT \
---player_port $PLAYER_PORT \
---splitter_addr $SPLITTER_ADDR \
---splitter_port $SPLITTER_PORT"
-# \
-#--team_port $TEAM_PORT"
-
-    echo $PEER
-
-    xterm -sl 10000 -e "$PEER | tee $PLAYER_PORT.dat" &
-    #xterm -sl 10000 -e "$PEER" & #
-
-    TIME=`shuf -i 1-$MAX_LIFE -n 1`
-    #timelimit -t $TIME vlc http://localhost:$PLAYER_PORT &
-    sleep 1; netcat localhost $PLAYER_PORT -v > /dev/null &
+    ./play.sh -a $SPLITTER_ADDR -p $SPLITTER_PORT &
 
     x=$(( $x + 1 ))
 done
 
 sleep 1000
 
-#set +x
+set +x
