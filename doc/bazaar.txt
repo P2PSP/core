@@ -7,40 +7,21 @@
 
 bzr config
 
-2. Copy of the "trunk" branch into a "trunk"-named directory:
+2. Set the Lauchpad user ID:
+
+bzr launchpad-login launchpad_username
+bzr config
+
+3. Copy of the "trunk" branch into a "trunk"-named directory:
 
 bzr branch lp:p2psp trunk
 
-3. Set the Lauchpad user ID:
-
-bzr launchpad-login launchpad_username
-
-4. Generate a SSH public key:
-
-ssh-keygen -t rsa
-
-5. Upload a new ssh key. Copy the content of:
-
-~/.ssh/id_rsa.pub
-
-into:
-
-https://launchpad.net/~your-lauchpad-username/+editsshkeys
-
-6. Set who are you:
-
-bzr whoami "Your Name Surname <your_email_address_to_access_lauchpad>"
-
-8. Commit (the "trunk" branch ... if you are allowed):
-
-bzr push lp:~p2psp/p2psp/trunk
-
-7. See all the branches of the P2PSP project:
+4. See all the branches of the P2PSP project:
 
 cat << EOF | python - p2psp
 import os, sys
-from launchpadlib.launchpad import Launchpad
 from future import print
+from launchpadlib.launchpad import Launchpad
 
 cachedir = os.path.expanduser("~/.launchpadlib/cache/")
 launchpad = Launchpad.login_anonymously('find_branches',
@@ -102,14 +83,26 @@ https://launchpad.net/p2psp
 pick in "Code", next in "lp:p2psp", next in "1 branch proposed for
 merging into this one." You will see some like:
 
-lp:~your-lauchpad-username/p2psp/IMS ⇒ lp:p2psp 
+lp:~vicente-gonzalez-ruiz/p2psp/IMS ⇒ lp:p2psp 
 
 pick in it and the next page will says some like:
 
-bzr merge lp:~your-lauchpad-username/p2psp/IMS
+bzr merge lp:~vicente-gonzalez-ruiz/p2psp/IMS
 
 which is the command that you need to write into the "p2psp" directory
 of the trunk branch.
+
+14. Generate a SSH public key:
+
+ssh-keygen -t rsa
+
+15. Upload a new ssh key. Copy the content of:
+
+~/.ssh/id_rsa.pub
+
+into:
+
+https://launchpad.net/~your-lauchpad-username/+editsshkeys
 
 16. Get a branch of P2PSP:
 
