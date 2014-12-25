@@ -114,7 +114,7 @@ bzr whoami e-mail-address@host
 
 # Complex operations:
 
-1. I want to contribute: 14 + 15 + 16 + 17 + Modify your branch + 12.
+1. I want to contribute: 2 + 14 + 15 + 16 + 17 + Modify your branch + 12.
 
 2. A real example:
 
