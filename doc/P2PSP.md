@@ -99,11 +99,18 @@ or simply:
 
 # Miscelaneous:
 
-1. Feed a local Icecast server, forever (until kill the process):
+* Download http://commons.wikimedia.org/wiki/File:Big_Buck_Bunny_small.ogv.
+
+* Feed a local Icecast server, forever (until kill the process):
 
     xterm -e './tools/feed_icecast.sh' &
 
-2. Create (manually) a local team (usually for testing purposes):
+* Use VLC as source (support several HTTP clients).
+
+   Media -> Broadcast -> Select the archive -> Broadcast -> Next -> HTTP ->
+   Show in local + Add + Path=/x.ogv -> Not transcode -> Next -> Stream
+
+* Create (manually) a local team (usually for testing purposes):
 
     # Remember first to feed the local Icecast server!!!
     xterm -e './src/splitter.py' &                # Run a splitter
@@ -112,7 +119,7 @@ or simply:
     vlc http://localhost:9999 &                   # Run a player for the monitor
     vlc http://localhost:9998 &                   # Run a player for the peer
 
-3. Create (automatically) a local team:
+* Create (automatically) a local team:
 
     # Remember first to feed the local Icecast server!!!
     ./tools/create_a_team.sh # Create the team
