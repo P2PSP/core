@@ -5,21 +5,25 @@ P2PSP manual
 
 How to:
 
-1. Watch the default channel:
+0. Help:
+
+    ./peer.py --help
+
+1. Watch the default channel (supposing that you are in the "src" directory):
 
     ./peer.py &
-    vlc http://localhost:9999
+    vlc http://localhost:9999 &
 
 or simply:
 
-    ./play.sh &
+    ../tools/play.sh &
 
 2. Change the local port (9998) to communicate with VLC:
 
     ./peer.py --player_port=9998 &
     vlc http://localhost:9998 &
 
-3. Watch a particular channel (in the port 4554):
+3. Watch a particular (port 4554) channel:
 
     ./peer.py --splitter_port=4554 &
     vlc http://localhost:9999 &
@@ -33,7 +37,7 @@ or simply:
 
 5. Use a particular splitter host (1.2.3.4):
 
-    ./peer.py --splitter_host=1.2.3.4 &
+    ./peer.py --splitter_addr=1.2.3.4 &
     vlc http://localhost:9999 &
 
 6. Decript a stream using the keyword "key" (not yet implemented):
@@ -52,58 +56,65 @@ or simply:
 
 # Splitter manual:
 
+0. Help:
+
+    ./splitter.py --help
+
 1. Create a channel using the default parameters (run "splitter --help"):
 
-    splitter &
+    ./splitter.py &
 
 2. Change the listening port to 5555:
 
-    splitter --port=5555 &
+    ./splitter.py --port=5555 &
 
 3. Change the buffer size to 512 chunks:
 
-    splitter --buffer_size=512 &
+    ./splitter.py --buffer_size=512 &
 
 4. Change the source channel (media stream) to "new_channel":
 
-    splitter --channel=new_channel &
+    ./splitter.py --channel=new_channel &
 
 5. Change the chunk size to 512 bytes:
 
-    splitter --chunk_size=512 &
+    ./splitter.py --chunk_size=512 &
 
 6. Change the source host (which runs Icecast for example) to
    "new_host":
 
-    splitter --source_host=new_host &
+    ./splitter.py --source_addr=new_host &
 
 7. Change the source port (where Icecast is listening) to 6666:
 
-    splitter --source_port=6666 &
+    ./splitter.py --source_port=6666 &
 
 8. Create a private team using the password "pass" (not yet implemented):
 
-    splitter --password=pass &
+    ./splitter.py --password=pass &
 
-9. Encrypt the stream using the keyword "key" (not yet implemented):
+<-- 9. Encrypt the stream using the keyword "key" (not yet implemented):
 
-    splitter --keyword=key &
+    ./splitter.py --keyword=key & !-->
 
 10. Use the IP multicast mode (if available):
 
-    splitter --mcast &
+    ./splitter.py --mcast &
 
 11. Select a particular IP multicast address 224.0.1.1:
 
-    splitter --mcast --mcast_addr=224.0.1.1 &
+    ./splitter.py --mcast --mcast_addr=224.0.1.1 &
 
 # Miscelaneous:
 
-* Download http://commons.wikimedia.org/wiki/File:Big_Buck_Bunny_small.ogv.
+* Download a video:
 
-* Feed a local Icecast server, forever (until kill the process):
+    * http://commons.wikimedia.org/wiki/File:Big_Buck_Bunny_small.ogv.
 
-    xterm -e './tools/feed_icecast.sh' &
+* Feed a local Icecast server (the source), forever
+  (until kill the process) using "oggfwd":
+
+    xterm -e '../tools/feed_icecast.sh' &
 
 * Use VLC as source (support several HTTP clients).
 
@@ -122,6 +133,6 @@ or simply:
 * Create (automatically) a local team:
 
     # Remember first to feed the local Icecast server!!!
-    ./tools/create_a_team.sh # Create the team
+    ../tools/create_a_team.sh # Create the team
 
     
