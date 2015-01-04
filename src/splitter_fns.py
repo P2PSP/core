@@ -17,20 +17,14 @@ class Splitter_FNS(Splitter_DBS):
 
     def __init__(self):
         Splitter_DBS.__init__(self)
-    
-    def print_modulename(self):
-        # {{{
-
         sys.stdout.write(Color.yellow)
         print("Using FNS")
         sys.stdout.write(Color.none)
 
-        # }}}
-
     def say_goodbye(self, node, sock):
         # {{{
 
-        sock.sendto('G', node)
+        sock.sendto(b'G', node)
 
         # }}}
 
@@ -40,7 +34,11 @@ class Splitter_FNS(Splitter_DBS):
         while self.alive:
             # {{{
 
-            message, sender = self.receive_message()
+            try:
+                message, sender = self.receive_message()
+            except:
+                message = b'?'
+                sender = ("0.0.0.0", 0)
 
             if len(message) == 2:
 
@@ -62,8 +60,8 @@ class Splitter_FNS(Splitter_DBS):
                 try:
                     if struct.unpack("s", message)[0] == 'G': # 'G'oodbye
                         self.process_goodbye(sender)
-                except Exception, e:
-                    print(e)
+                except Exception as e:
+                    print("LRS: ", e)
                     print(message)
 
                 # }}}

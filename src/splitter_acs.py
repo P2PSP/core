@@ -28,6 +28,10 @@ class Splitter_ACS(Splitter_FNS):
         # {{{
 
         Splitter_FNS.__init__(self)
+        sys.stdout.write(Color.yellow)
+        print("Using ACS")
+        sys.stdout.write(Color.none)
+
 
         self.period = {}                         # Indexed by a peer (IP address, port)
         self.period_counter = {}                 # Indexed by a peer (IP address, port)
@@ -35,21 +39,14 @@ class Splitter_ACS(Splitter_FNS):
 
         # }}}
 
-    def print_modulename(self):
+    def insert_peer(self, peer):
         # {{{
 
-        sys.stdout.write(Color.yellow)
-        print("Using ACS")
-        sys.stdout.write(Color.none)
-
-        # }}}
-
-    def append_peer(self, peer):
-        # {{{
-
-        Splitter_DBS.append_peer(self, peer)
+        Splitter_DBS.insert_peer(self, peer)
         self.period[peer] = self.period_counter[peer] = 1
         self.number_of_sent_chunks_per_peer[peer] = 0
+        #if __debug__:
+        _print_("ACS: inserted", peer)
 
         # }}}
 

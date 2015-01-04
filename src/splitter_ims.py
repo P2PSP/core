@@ -31,7 +31,8 @@ class Splitter_IMS(threading.Thread):
 
     # {{{ Channel served by the streaming source.
     # }}}
-    CHANNEL = "Big_Buck_Bunny_small.ogv"
+    #CHANNEL = "BBB-134.ogv"
+    CHANNEL = ""
 
     # {{{ The chunk_size (in bytes) depends mainly on the network
     # technology and should be selected as big as possible, depending
@@ -62,7 +63,7 @@ class Splitter_IMS(threading.Thread):
     # {{{ The multicast IP address of the team, used to send the chunks.
     # }}}
     MCAST_ADDR = "224.0.0.1" # All Systems on this subnet
-    #MCAST_ADDR = "224.1.1.1"
+    #MCAST_ADDR = "224.0.0.2"
 
     # }}}
 
@@ -70,17 +71,19 @@ class Splitter_IMS(threading.Thread):
         # {{{
 
         threading.Thread.__init__(self)
+        sys.stdout.write(Color.yellow)
+        print("Using IMS")
+        sys.stdout.write(Color.none)
 
-        self.print_the_module_name()
-        print("Buffer size (in chunks) =", self.BUFFER_SIZE)
-        print("Chunk size (in bytes) =", self.CHUNK_SIZE)
-        print("Channel =", self.CHANNEL)
-        print("Header size (in chunks) =", self.HEADER_SIZE)
-        #print("Splitter address =", self.SPLITTER_ADDR) # No ahora
-        print("Listening (and multicast) port =", self.PORT)
-        print("Source IP address =", self.SOURCE_ADDR)
-        print("Source port =", self.SOURCE_PORT)
-        print("Multicast address =", self.MCAST_ADDR)
+        print("IMS: Buffer size (in chunks) =", self.BUFFER_SIZE)
+        print("IMS: Chunk size (in bytes) =", self.CHUNK_SIZE)
+        print('IMS: Channel ="', self.CHANNEL, '"')
+        print("IMS: Header size (in chunks) =", self.HEADER_SIZE)
+        #print("IMS: Splitter address =", self.SPLITTER_ADDR) # No ahora
+        print("IMS: Listening (and multicast) port =", self.PORT)
+        print("IMS: Source IP address =", self.SOURCE_ADDR)
+        print("IMS: Source port =", self.SOURCE_PORT)
+        print("IMS: Multicast address =", self.MCAST_ADDR)
 
         # {{{ An IMS splitter runs 2 threads. The main one serves the
         # chunks to the team. The other controls peer arrivals. This
@@ -106,7 +109,7 @@ class Splitter_IMS(threading.Thread):
         
         # {{{ The video header.
         # }}}
-        self.header = ""
+        #self.header = buffer('')
 
         # {{{ Some other useful definitions.
         # }}}
@@ -123,19 +126,10 @@ class Splitter_IMS(threading.Thread):
         
         # }}}
 
-    def print_the_module_name(self):
-        # {{{
-
-        sys.stdout.write(Color.yellow)
-        print("Splitter IMS")
-        sys.stdout.write(Color.none)
-
-        # }}}
-
     def send_the_header(self, peer_serve_socket):
         # {{{
 
-        _print_("Sending a header of", len(self.header), "bytes")
+        _print_("IMS: Sending a header of", len(self.header), "bytes")
         try:
             peer_serve_socket.sendall(self.header)
         except:
@@ -147,7 +141,7 @@ class Splitter_IMS(threading.Thread):
         # {{{
 
         if __debug__:
-            print("Sending a buffer_size of", self.BUFFER_SIZE, "bytes")
+            print("IMS: Sending a buffer_size of", self.BUFFER_SIZE, "bytes")
         message = struct.pack("H", socket.htons(self.BUFFER_SIZE))
         try:
             peer_serve_socket.sendall(message)
@@ -160,7 +154,7 @@ class Splitter_IMS(threading.Thread):
         # {{{
 
         if __debug__:
-            print("Sending a chunk_size of", self.CHUNK_SIZE, "bytes")
+            print("IMS: Sending a chunk_size of", self.CHUNK_SIZE, "bytes")
         message = struct.pack("H", socket.htons(self.CHUNK_SIZE))
         try:
             peer_serve_socket.sendall(message)
@@ -173,12 +167,9 @@ class Splitter_IMS(threading.Thread):
         # {{{
 
         if __debug__:
-            print("Communicating the multicast channel", (self.MCAST_ADDR, self.PORT))
+            print("IMS: Communicating the multicast channel", (self.MCAST_ADDR, self.PORT))
         message = struct.pack("4sH", socket.inet_aton(self.MCAST_ADDR), socket.htons(self.PORT))
-        try:
-            peer_serve_socket.sendall(message)
-        except:
-            pass
+        peer_serve_socket.sendall(message)
         
         # }}}
 
@@ -186,7 +177,7 @@ class Splitter_IMS(threading.Thread):
         # {{{
 
         if __debug__:
-            print("Communicating the header size", self.HEADER_SIZE)
+            print("IMS: Communicating the header size", self.HEADER_SIZE)
         message = struct.pack("H", socket.htons(self.HEADER_SIZE))
         try:
             peer_serve_socket.sendall(message)
@@ -213,7 +204,7 @@ class Splitter_IMS(threading.Thread):
         
         serve_socket = connection[0]
         sys.stdout.write(Color.green)
-        print(serve_socket.getsockname(), '\b: accepted connection from peer', \
+        print(serve_socket.getsockname(), '\b: IMS: accepted connection from peer', \
               connection[1])
         sys.stdout.write(Color.none)
         self.send_configuration(serve_socket)
@@ -257,18 +248,26 @@ class Splitter_IMS(threading.Thread):
         # it corresponds to a multicast channel.
         
         self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        
-        self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
+        self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 0)
+
         try:
             # This does not work in Windows systems !!
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except:
+        except Exception as e:
+            print ("IMS: ", e)
             pass
+
         try:
+            self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        except Exception as e:
+            print ("IMS: ", e)
+            pass
+
+        #try:
             #self.team_socket.bind((socket.gethostname(), self.PORT))
-            self.team_socket.bind(('', self.PORT))
-        except:
-            raise
+            #self.team_socket.bind(('', self.PORT))
+        #except:
+            #raise
 
         # }}}
 
@@ -277,12 +276,12 @@ class Splitter_IMS(threading.Thread):
 
         self.source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if __debug__:
-            print(self.source_socket.getsockname(), 'connecting to the source', self.source, '...')
+            print(self.source_socket.getsockname(), 'IMS: connecting to the source', self.source, '...')
         self.source_socket.connect(self.source)
         if __debug__:
-            print(self.source_socket.getsockname(), 'connected to', self.source)
-        self.source_socket.sendall(self.GET_message)
-        _print_(self.source_socket.getsockname(), 'GET_message =', self.GET_message)
+            print(self.source_socket.getsockname(), 'IMS: connected to', self.source)
+        self.source_socket.sendall(self.GET_message.encode())
+        _print_(self.source_socket.getsockname(), 'IMS: GET_message =', self.GET_message)
 
         # }}}
 
@@ -291,9 +290,11 @@ class Splitter_IMS(threading.Thread):
 
         try:
             self.setup_peer_connection_socket()
-        except Exception, e:
-            print(e)
-            print(self.peer_connection_socket.getsockname(), "\b: unable to bind the port ", self.PORT)
+        except Exception as e:
+            print("IMS: ", e)
+            print(Color.red)
+            print(self.peer_connection_socket.getsockname(), "\b: IMS: unable to bind the port ", self.PORT)
+            print(Color.none)
             sys.exit('')
 
         # }}}
@@ -302,9 +303,9 @@ class Splitter_IMS(threading.Thread):
 
         try:
             self.setup_team_socket()
-        except Exception, e:
-            print(e)
-            print(self.team_socket.getsockname(), "\b: unable to bind", (socket.gethostname(), self.PORT))
+        except Exception as e:
+            print("IMS: ", e)
+            print(self.team_socket.getsockname(), "\b: IMS: unable to bind", (socket.gethostname(), self.PORT))
             sys.exit('')
 
         # }}}
@@ -312,7 +313,8 @@ class Splitter_IMS(threading.Thread):
     def load_the_video_header(self):
         # {{{ Load the video header.
 
-        for i in xrange(self.HEADER_SIZE):
+        self.header = b''
+        for i in range(self.HEADER_SIZE):
             self.header += self.receive_next_chunk()
 
         # }}}
@@ -327,17 +329,17 @@ class Splitter_IMS(threading.Thread):
                 # This section of code is reached when the streaming
                 # server (Icecast) finishes a stream and starts with
                 # the following one.
-                print("No data in the server!")
+                print("IMS: No data in the server!")
                 sys.stdout.flush()
                 self.source_socket.close()
                 time.sleep(1)
                 self.source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.source_socket.connect(self.source)
-                self.source_socket.sendall(self.GET_message)
-                self.header = ""
+                self.source_socket.sendall(self.GET_message.encode())
+                self.header = b""
                 self.header_load_counter = self.HEADER_SIZE
                 #_print_("1: header_load_counter =", self.header_load_counter)
-                chunk = ""
+                chunk = b""
             prev_size = len(chunk)
             chunk += self.source_socket.recv(self.CHUNK_SIZE - len(chunk))
         return chunk
@@ -352,7 +354,7 @@ class Splitter_IMS(threading.Thread):
         if self.header_load_counter > 0:
             self.header += chunk
             self.header_load_counter -= 1
-            print("Loaded", len(self.header), "bytes of header")
+            print("IMS: Loaded", len(self.header), "bytes of header")
             #_print_("3: header_load_counter =", self.header_load_counter)
 
         self.recvfrom_counter += 1
@@ -361,13 +363,13 @@ class Splitter_IMS(threading.Thread):
 
         # }}}
 
-    def send_chunk(self, message, peer):
+    def send_chunk(self, message, destine):
         # {{{
 
-        self.team_socket.sendto(message, peer)
+        self.team_socket.sendto(message, destine)
 
         if __debug__:
-            print('%5d' % self.chunk_number, Color.red, '->', Color.none, peer)
+            print('IMS: %5d' % self.chunk_number, Color.red, '->', Color.none, destine)
             sys.stdout.flush()
 
         self.sendto_counter += 1
@@ -377,9 +379,15 @@ class Splitter_IMS(threading.Thread):
     def receive_the_header(self):
         # {{{
 
+        if __debug__:
+            print("IMS: Requesting the stream header ...")
+
         self.configure_sockets()
         self.request_the_video_from_the_source()
         self.load_the_video_header()
+
+        if __debug__:
+            print("IMS: Stream header received!")
 
         # }}}
 
@@ -388,7 +396,7 @@ class Splitter_IMS(threading.Thread):
 
         self.receive_the_header()
         
-        print(self.peer_connection_socket.getsockname(), "\b: waiting for a peer ...")
+        print(self.peer_connection_socket.getsockname(), "\b: IMS: waiting for a peer ...")
         self.handle_a_peer_arrival(self.peer_connection_socket.accept())
         threading.Thread(target=self.handle_arrivals).start()
 

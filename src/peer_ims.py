@@ -24,15 +24,17 @@ class Peer_IMS(threading.Thread):
     # {{{ Class "constants"
 
     PLAYER_PORT = 9999          # Port used to serve the player.
-    SPLITTER_HOST = "127.0.0.1" # Address of the splitter.
+    SPLITTER_ADDR = "127.0.0.1" # Address of the splitter.
     SPLITTER_PORT = 4552        # Port of the splitter.
-    TEAM_PORT = 0               # TCP port used to communicate the splitter.
+    PORT = 0                    # TCP->UDP port used to communicate.
+    USE_LOCALHOST = False       # Use localhost instead the IP of the addapter
 
     # }}}
 
     def __init__(self):
         # {{{
 
+        threading.Thread.__init__(self)
         sys.stdout.write(Color.yellow)
         _print_("Peer IMS")
         sys.stdout.write(Color.none)
@@ -40,45 +42,8 @@ class Peer_IMS(threading.Thread):
         threading.Thread.__init__(self)
 
         _print_("Player port =", self.PLAYER_PORT)
-        _print_("Splitter =", self.SPLITTER_HOST)
-        _print_("Team port =", self.TEAM_PORT)
-
-        # }}}
-
-    # Tiene pinta de que los tres siguientes metodos pueden
-    # simplificarse...
-
-    def find_next_chunk(self):
-        # {{{
-        #print (".")
-        chunk_number = (self.played_chunk + 1) % common.MAX_CHUNK_NUMBER
-        while not self.received[chunk_number % self.buffer_size]:
-            sys.stdout.write(Color.cyan)
-            _print_("lost chunk", chunk_number)
-            sys.stdout.write(Color.none)
-            chunk_number = (chunk_number + 1) % common.MAX_CHUNK_NUMBER
-        return chunk_number
-
-        # }}}
-
-    def play_chunk(self, chunk):
-        # {{{
-
-        try:
-            self.player_socket.sendall(self.chunks[chunk % self.buffer_size])
-        except socket.error:
-            #print(e)
-            _print_("Player disconected!")
-            self.player_alive = False
-
-        # }}}
-
-    def play_next_chunk(self):
-        # {{{
-
-        self.played_chunk = self.find_next_chunk()
-        self.play_chunk(self.played_chunk)
-        self.received[self.played_chunk % self.buffer_size] = False
+        _print_("Splitter =", self.SPLITTER_ADDR)
+        _print_("(Peer) port =", self.PORT)
 
         # }}}
 
@@ -89,7 +54,7 @@ class Peer_IMS(threading.Thread):
         try:
             # In Windows systems this call doesn't work!
             self.player_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except Exception, e:
+        except Exception as e:
             _print_ (e)
             pass
         self.player_socket.bind(('', self.PLAYER_PORT))
@@ -107,21 +72,29 @@ class Peer_IMS(threading.Thread):
         # Nota: Ahora no reconvertimos de TCP a UDP!
         
         self.splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.splitter = (self.SPLITTER_HOST, self.SPLITTER_PORT)
-        _print_("Connecting to the splitter at", self.splitter)
-        if self.TEAM_PORT != 0:
+        self.splitter = (self.SPLITTER_ADDR, self.SPLITTER_PORT)
+        print("use_localhost=", self.USE_LOCALHOST)
+        if self.USE_LOCALHOST:
+            my_ip = '0.0.0.0' # Or '127.0.0.1'
+            #my_ip = '127.0.0.1'
+        else:
+            my_ip = socket.gethostbyname(socket.gethostname())
+        _print_("Connecting to the splitter at", self.splitter, "from", my_ip)
+        if self.PORT != 0:
             try:
                 self.splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            except Exception, e:
+            except Exception as e:
                 print (e)
                 pass
             sys.stdout.write(Color.purple)
-            _print_("I'm using port the port", self.TEAM_PORT)
+            _print_("I'm using port the port", self.PORT)
             sys.stdout.write(Color.none)
-            self.splitter_socket.bind(("", self.TEAM_PORT))
+            self.splitter_socket.bind((my_ip, self.PORT))
+        else:
+            self.splitter_socket.bind((my_ip, 0))
         try:
             self.splitter_socket.connect(self.splitter)
-        except Exception, e:
+        except Exception as e:
             print(e)
             sys.exit("Sorry. Can't connect to the splitter at " + str(self.splitter))
         _print_("Connected to the splitter at", self.splitter)
@@ -159,7 +132,7 @@ class Peer_IMS(threading.Thread):
             _print_("Percentage of header received = {:.2%}".format((1.0*received)/header_size_in_bytes))
             try:
                 self.player_socket.sendall(data)
-            except Exception, e:
+            except Exception as e:
                 print (e)
                 print ("error sending data to the player")
                 print ("len(data) =", len(data))
@@ -209,11 +182,17 @@ class Peer_IMS(threading.Thread):
 
         self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         try:
-            # In Windows systems this call doesn't work!
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except Exception, e:
+        except Exception as e:
             print (e)
             pass
+
+        try:
+            self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        except Exception as e:
+            print (e)
+            pass
+
         self.team_socket.bind(('', self.mcast_port))
 #        self.team_socket.bind(('', self.SPLITTER_SOCKET.getsockname()[PORT]))
 
@@ -343,7 +322,7 @@ class Peer_IMS(threading.Thread):
         _print_(self.team_socket.getsockname(), "\b: buffering (\b", repr(100.0/self.buffer_size).rjust(4))
 
         # Now, fill up to the half of the buffer.
-        for x in xrange(self.buffer_size/2):
+        for x in range(int(self.buffer_size/2)):
             _print_("{:.2%}\r".format((1.0*x)/(self.buffer_size/2)), end='')
             #print("!", end='')
             sys.stdout.flush()
@@ -358,38 +337,54 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
-    def keep_the_buffer_full(self):
+    # Tiene pinta de que los tres siguientes metodos pueden
+    # simplificarse...
+
+    def find_next_chunk(self):
         # {{{
-
-        # Receive chunks while the buffer is not full
-        chunk_number = self.process_next_message()
-        while chunk_number < 0:
-            chunk_number = self.process_next_message()
-        while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
-            chunk_number = self.process_next_message()
-            while chunk_number < 0:
-                chunk_number = self.process_next_message()
-
-        # Play the next chunk
-        self.play_next_chunk()
-
-        if __debug__:
-            for i in xrange(self.buffer_size):
-                if self.received[i]:
-                    sys.stdout.write(str(i%10))
-                else:
-                    sys.stdout.write('.')
-            print ()
-            #print (self.team_socket.getsockname(),)
+        #print (".")
+        #counter = 0
+        chunk_number = (self.played_chunk + 1) % common.MAX_CHUNK_NUMBER
+        while not self.received[chunk_number % self.buffer_size]:
+            sys.stdout.write(Color.cyan)
+            _print_("lost chunk", chunk_number)
             sys.stdout.write(Color.none)
+            chunk_number = (chunk_number + 1) % common.MAX_CHUNK_NUMBER
+            #counter += 1
+            #if counter > self.buffer_size:
+            #    break
+        return chunk_number
 
         # }}}
 
-    def peers_life(self):
+    def play_chunk(self, chunk):
+        # {{{
+
+        try:
+            self.player_socket.sendall(self.chunks[chunk % self.buffer_size])
+        except socket.error:
+            #print(e)
+            _print_("Player disconnected!")
+            self.player_alive = False
+
+        # }}}
+
+    def play_next_chunk(self):
+        # {{{
+
+        self.played_chunk = self.find_next_chunk()
+        self.play_chunk(self.played_chunk)
+        self.received[self.played_chunk % self.buffer_size] = False
+        #print("----------------------------")
+
+        # }}}
+
+    def play(self):
         # {{{
         
         while self.player_alive:
-            self.keep_the_buffer_full()
+            #self.keep_the_buffer_full()
+            self.play_next_chunk()
 
         # }}}
 
@@ -404,10 +399,38 @@ class Peer_IMS(threading.Thread):
 
     ##     # }}}
         
+    def keep_the_buffer_full(self):
+        # {{{
+
+        # Receive chunks while the buffer is not full
+        chunk_number = self.process_next_message()
+        while chunk_number < 0:
+            chunk_number = self.process_next_message()
+        while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
+            chunk_number = self.process_next_message()
+            while chunk_number < 0:
+                chunk_number = self.process_next_message()
+
+        if __debug__:
+            for i in range(self.buffer_size):
+                if self.received[i]:
+                    sys.stdout.write(str(i%10))
+                else:
+                    sys.stdout.write('.')
+            print ()
+            #print (self.team_socket.getsockname(),)
+            sys.stdout.write(Color.none)
+
+        # }}}
+
     def run(self):
         # {{{
 
-        self.peers_life()
+        #threading.Thread(target=self.play).start()
+
+        while self.player_alive:
+            self.keep_the_buffer_full()
+            self.play_next_chunk()
 
         # }}}
 

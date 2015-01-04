@@ -28,7 +28,7 @@ class Peer_DBS(Peer_IMS):
 
     # {{{ Class "constants"
 
-    MAX_CHUNK_DEBT = 32
+    MAX_CHUNK_LOSS = 128
 
     # }}}
 
@@ -50,21 +50,21 @@ class Peer_DBS(Peer_IMS):
         self.message_format = peer.message_format
         #self.extended_message_format = peer.message_format + "4sH"
 
-        _print_("max_chunk_debt =", self.MAX_CHUNK_DEBT)
+        _print_("DBS: max_chunk_loss =", self.MAX_CHUNK_LOSS)
         
         # }}}
 
     def say_hello(self, node):
         # {{{
 
-        self.team_socket.sendto('H', node)
+        self.team_socket.sendto(b'H', node)
 
         # }}}
 
     def say_goodbye(self, node):
         # {{{
 
-        self.team_socket.sendto('G', node)
+        self.team_socket.sendto(b'G', node)
 
         # }}}
 
@@ -75,9 +75,9 @@ class Peer_DBS(Peer_IMS):
         self.peer_list = [] # The list of peers structure.
 
         sys.stdout.write(Color.green)
-        _print_("Requesting the number of peers to", self.splitter_socket.getpeername())
+        _print_("DBS: Requesting the number of peers to", self.splitter_socket.getpeername())
         self.number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
-        _print_("The size of the team is", self.number_of_peers, "(apart from me)")
+        _print_("DBS: The size of the team is", self.number_of_peers, "(apart from me)")
 
         sys.stdout.write(Color.none)
 
@@ -89,7 +89,7 @@ class Peer_DBS(Peer_IMS):
         self.peer_list = [] # The list of peers structure.
 
         sys.stdout.write(Color.green)
-        _print_("Requesting", self.number_of_peers, "peers to", self.splitter_socket.getpeername())
+        _print_("DBS: Requesting", self.number_of_peers, "peers to", self.splitter_socket.getpeername())
         #number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
         #_print_("The size of the team is", number_of_peers, "(apart from me)")
 
@@ -100,18 +100,18 @@ class Peer_DBS(Peer_IMS):
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
-            print("[hello] sent to", peer)
+            print("DBS: [hello] sent to", peer)
             self.say_hello(peer)
             if __debug__:
-                _print_("[%5d]" % tmp, peer)
+                _print_("DBS: [%5d]" % tmp, peer)
             else:
-                _print_("{:.2%}\r".format((self.number_of_peers-tmp)/self.number_of_peers), end='')
+                _print_("DBS: {:.2%}\r".format((self.number_of_peers-tmp)/self.number_of_peers), end='')
 
             self.peer_list.append(peer)
             self.debt[peer] = 0
             tmp -= 1
 
-        _print_("List of peers received")
+        _print_("DBS: List of peers received")
         sys.stdout.write(Color.none)
 
         # }}}
@@ -124,7 +124,7 @@ class Peer_DBS(Peer_IMS):
         IP_addr = socket.inet_ntoa(IP_addr)
         port = socket.ntohs(port)
         self.me = (IP_addr, port)
-        _print_("me =", self.me)
+        _print_("DBS: me =", self.me)
 
         # }}}
         
@@ -135,8 +135,8 @@ class Peer_DBS(Peer_IMS):
         try:
             # In Windows systems this call doesn't work!
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except Exception, e:
-            print (e)
+        except Exception as e:
+            print ("DBS:", e)
             pass
         self.team_socket.bind(('', self.splitter_socket.getsockname()[PORT]))
 
@@ -169,7 +169,7 @@ class Peer_DBS(Peer_IMS):
                     # {{{ debug
 
                     if __debug__:
-                        _print_(self.team_socket.getsockname(), \
+                        _print_("DBS:", self.team_socket.getsockname(), \
                             Color.red, "<-", Color.none, chunk_number, "-", sender)
 
                     # }}}
@@ -182,7 +182,7 @@ class Peer_DBS(Peer_IMS):
                         # {{{ debug
 
                         if __debug__:
-                            print (self.team_socket.getsockname(), "-",\
+                            print ("DBS:", self.team_socket.getsockname(), "-",\
                                 socket.ntohs(struct.unpack(self.message_format, \
                                                                self.receive_and_feed_previous)[0]),\
                                 Color.green, "->", Color.none, peer)
@@ -190,10 +190,10 @@ class Peer_DBS(Peer_IMS):
                         # }}}
 
                         self.debt[peer] += 1
-                        if self.debt[peer] > self.MAX_CHUNK_DEBT:
+                        if self.debt[peer] > self.MAX_CHUNK_LOSS:
+                            print (Color.red, "DBS:", peer, 'removed by unsupportive (' + str(self.debt[peer]) + ' lossess)', Color.none)
                             del self.debt[peer]
                             self.peer_list.remove(peer)
-                            print (Color.red, peer, 'removed by unsupportive', Color.none)
 
                         self.receive_and_feed_counter += 1
 
@@ -207,7 +207,7 @@ class Peer_DBS(Peer_IMS):
                     # {{{ debug
 
                     if __debug__:
-                        print (self.team_socket.getsockname(), \
+                        print ("DBS:", self.team_socket.getsockname(), \
                             Color.green, "<-", Color.none, chunk_number, "-", sender)
 
                     # }}}
@@ -216,7 +216,7 @@ class Peer_DBS(Peer_IMS):
                         # The peer is new
                         self.peer_list.append(sender)
                         self.debt[sender] = 0
-                        print (Color.green, sender, 'added by chunk', \
+                        print (Color.green, "DBS:", sender, 'added by chunk', \
                             chunk_number, Color.none)
                     else:
                         self.debt[sender] -= 1
@@ -234,15 +234,15 @@ class Peer_DBS(Peer_IMS):
                     self.sendto_counter += 1
 
                     self.debt[peer] += 1
-                    if self.debt[peer] > self.MAX_CHUNK_DEBT:
+                    if self.debt[peer] > self.MAX_CHUNK_LOSS:
+                        print (Color.red, "DBS:", peer, 'removed by unsupportive (' + str(self.debt[peer]) + ' lossess)', Color.none)
                         del self.debt[peer]
                         self.peer_list.remove(peer)
-                        print (Color.red, peer, 'removed by unsupportive', Color.none)
 
                     # {{{ debug
 
                     if __debug__:
-                        print (self.team_socket.getsockname(), "-", \
+                        print ("DBS:", self.team_socket.getsockname(), "-", \
                             socket.ntohs(struct.unpack(self.message_format, self.receive_and_feed_previous)[0]),\
                             Color.green, "->", Color.none, peer)
 
@@ -258,17 +258,17 @@ class Peer_DBS(Peer_IMS):
                 # }}}
             else:
                 # {{{ A control chunk has been received
-                print("Control received")
+                print("DBS: Control received")
                 if message == 'H':
                     if sender not in self.peer_list:
                         # The peer is new
                         self.peer_list.append(sender)
                         self.debt[sender] = 0
-                        print (Color.green, sender, 'added by [hello]', Color.none)
+                        print (Color.green, "DBS:", sender, 'added by [hello]', Color.none)
                 else:
                     if sender in self.peer_list:
                         sys.stdout.write(Color.red)
-                        print (self.team_socket.getsockname(), '\b: received "goodbye" from', sender)
+                        print ("DBS:", self.team_socket.getsockname(), '\b: received "goodbye" from', sender)
                         sys.stdout.write(Color.none)
                         self.peer_list.remove(sender)
                         del self.debt[sender]
@@ -279,6 +279,8 @@ class Peer_DBS(Peer_IMS):
             # }}}
         except socket.timeout:
             return -2
+        except socket.error:
+            return -3
 
         # }}}
 
@@ -292,10 +294,10 @@ class Peer_DBS(Peer_IMS):
 
         if __debug__:
             sys.stdout.write(Color.cyan)
-            print ("Number of peers in the team:", len(self.peer_list)+1)
-            print (self.team_socket.getsockname(),)
+            print ("DBS: Number of peers in the team:", len(self.peer_list)+1)
+            print ("DBS:", self.team_socket.getsockname(),)
             for p in self.peer_list:
-                print (p,)
+                print ("DBS:", p,)
             print ()
             sys.stdout.write(Color.none)
 
@@ -304,8 +306,8 @@ class Peer_DBS(Peer_IMS):
     def polite_farewell(self):
         # {{{
 
-        print('Goodbye!')
-        for x in xrange(3):
+        print('DBS: Goodbye!')
+        for x in range(3):
             self.process_next_message()
             self.say_goodbye(self.splitter)
         for peer in self.peer_list:
@@ -334,7 +336,7 @@ class Peer_DBS(Peer_IMS):
 
         self.sendto_counter = 0
 
-        self.debt_memory = 1 << self.MAX_CHUNK_DEBT
+        self.debt_memory = 1 << self.MAX_CHUNK_LOSS
 
         Peer_IMS.buffer_data(self)
 
@@ -343,14 +345,14 @@ class Peer_DBS(Peer_IMS):
     def run(self):
         # {{{
 
-        Peer_IMS.peers_life(self)
+        #Peer_IMS.peers_life(self)
+        Peer_IMS.run(self)
         self.polite_farewell()
 
         # }}}
 
     def am_i_a_monitor(self):
         # {{{
-        print ("---------------------> number_of_peers =", self.number_of_peers)
         if self.number_of_peers == 0:
             # Only the first peer of the team is the monitor peer
             return True

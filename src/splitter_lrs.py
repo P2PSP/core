@@ -29,19 +29,13 @@ class Splitter_LRS(Splitter_ACS):
         # {{{
 
         Splitter_ACS.__init__(self)
+        sys.stdout.write(Color.yellow)
+        print("Using LRS")
+        sys.stdout.write(Color.none)
 
         # A circular array of messages (chunk_number, chunk) in
         # network endian
         self.buffer = [""]*self.BUFFER_SIZE
-
-        # }}}
-
-    def print_modulename(self):
-        # {{{
-
-        sys.stdout.write(Color.yellow)
-        print("Using LRS")
-        sys.stdout.write(Color.none)
 
         # }}}
 
@@ -52,9 +46,10 @@ class Splitter_LRS(Splitter_ACS):
         message = self.buffer[lost_chunk_number % self.BUFFER_SIZE]
         peer = self.peer_list[0]
         self.team_socket.sendto(message, peer)
-        sys.stdout.write(Color.cyan)
-        print ("Re-sending", lost_chunk_number, "to", peer)
-        sys.stdout.write(Color.none)
+        if __debug__:
+            sys.stdout.write(Color.cyan)
+            print ("LRS: Re-sending", lost_chunk_number, "to", peer)
+            sys.stdout.write(Color.none)
 
         # }}}
 

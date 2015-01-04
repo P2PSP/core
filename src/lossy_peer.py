@@ -60,7 +60,7 @@ class Lossy_Peer(Peer_FNS):
         try:
             # In Windows systems this call doesn't work!
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except Exception, e:
+        except Exception as e:
             print (e)
             pass
         self.team_socket.bind(('', self.splitter_socket.getsockname()[PORT]))

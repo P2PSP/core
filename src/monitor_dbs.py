@@ -59,9 +59,10 @@ class Monitor_DBS(Peer_DBS):
         message = struct.pack("!H", chunk_number)
         self.team_socket.sendto(message, self.splitter)
 
-        sys.stdout.write(Color.cyan)
-        print ("lost chunk:", chunk_number)
-        sys.stdout.write(Color.none)
+        if __debug__:
+            sys.stdout.write(Color.cyan)
+            print ("lost chunk:", chunk_number)
+            sys.stdout.write(Color.none)
 
         # }}}
 

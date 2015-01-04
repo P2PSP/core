@@ -16,19 +16,28 @@ import threading
 import struct
 import argparse
 from color import Color
-import common
 from splitter_ims import Splitter_IMS
 from splitter_dbs import Splitter_DBS
 from splitter_fns import Splitter_FNS
 from splitter_acs import Splitter_ACS
 from splitter_lrs import Splitter_LRS
+import common
 from _print_ import _print_
+try:
+    import colorama
+except ImportError:
+    pass
 
 # }}}
 
 class Splitter():
 
     def __init__(self):
+
+        try:
+            colorama.init()
+        except Exception:
+            pass
 
         _print_("Running in", end=' ')
         if __debug__:
@@ -62,7 +71,8 @@ class Splitter():
 
         parser.add_argument('--source_port', help='Port where the streaming server is listening. Default = {}.'.format(Splitter_IMS.SOURCE_PORT))
 
-        args = parser.parse_known_args()[0]
+        args = parser.parse_args()
+        #args = parser.parse_known_args()[0]
 
         if args.buffer_size:
             Splitter_IMS.BUFFER_SIZE = int(args.buffer_size)
@@ -95,13 +105,14 @@ class Splitter():
             splitter.peer_list = []
 
         else:
-            splitter = Splitter_DBS()
-            #splitter = Splitter_FNS()
-            #splitter = Splitter_ACS()
-            #splitter = Splitter_LRS()
 
             if args.max_chunk_loss:
-                splitter.MAX_CHUNK_LOSS = int(args.max_chunk_loss)
+                Splitter_DBS.MAX_CHUNK_LOSS = int(args.max_chunk_loss)
+
+            #splitter = Splitter_DBS()
+            #splitter = Splitter_FNS()
+            #splitter = Splitter_ACS()
+            splitter = Splitter_LRS()
 
         # }}}
 
@@ -111,8 +122,8 @@ class Splitter():
 
         # {{{ Prints information until keyboard interruption
 
-        print("         | Received | Sent      |")
-        print("    Time | (kbps)   | (kbps)    | Peers (#, peer, losses, period, kbps) ")
+        print("         | Received | Sent      | Number       losses/ losses")
+        print("    Time | (kbps)   | (kbps)    | peers (peer) sents   threshold period kbps")
         print("---------+----------+-----------+-----------------------------------...")
 
         last_sendto_counter = splitter.sendto_counter
@@ -121,11 +132,13 @@ class Splitter():
         while splitter.alive:
             try:
                 time.sleep(1)
-                kbps_sendto = ((splitter.sendto_counter - last_sendto_counter) * splitter.CHUNK_SIZE * 8) / 1000
-                kbps_recvfrom = ((splitter.recvfrom_counter - last_recvfrom_counter) * splitter.CHUNK_SIZE * 8) / 1000
+                chunks_sendto = splitter.sendto_counter - last_sendto_counter
+                kbps_sendto = (chunks_sendto * splitter.CHUNK_SIZE * 8) / 1000
+                chunks_recvfrom = splitter.recvfrom_counter - last_recvfrom_counter
+                kbps_recvfrom = ( chunks_recvfrom * splitter.CHUNK_SIZE * 8) / 1000
                 last_sendto_counter = splitter.sendto_counter
                 last_recvfrom_counter = splitter.recvfrom_counter
-                sys.stdout.write(Color.white)
+                sys.stdout.write(Color.none)
                 _print_("|" + repr(kbps_recvfrom).rjust(10) + "|" + repr(kbps_sendto).rjust(10), end=" | ")
                 #print('%5d' % splitter.chunk_number, end=' ')
                 sys.stdout.write(Color.cyan)
@@ -140,17 +153,19 @@ class Splitter():
                     sys.stdout.write(Color.blue)
                     print(p, end= ' ')
                     sys.stdout.write(Color.red)
-                    print('%3d' % splitter.losses[p], splitter.MAX_CHUNK_LOSS, end=' ')
+                    print(str('%3d' % splitter.losses[p]) + '/' + str('%3d' % chunks_sendto), splitter.MAX_CHUNK_LOSS, end=' ')
                     try:
-                        sys.stdout.write(Color.blue)
+                        sys.stdout.write(Color.yellow)
                         print('%3d' % splitter.period[p], end= ' ')
                         sys.stdout.write(Color.purple)
                         print(repr((splitter.number_of_sent_chunks_per_peer[p] * splitter.CHUNK_SIZE * 8) / 1000).rjust(4), end = ' ')
                         splitter.number_of_sent_chunks_per_peer[p] = 0
-                    except AttributeError:
+                    except KeyError as e:
+                        print("!", e, "--")
+                        print(splitter.period[p])
                         pass
                     sys.stdout.write(Color.none)
-                    print('|', end=' ')
+                    print('', end=' ')
                 print()
 
             except KeyboardInterrupt:

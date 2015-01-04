@@ -30,25 +30,26 @@ class Peer_FNS(Peer_DBS):
         self.splitter_socket = peer.splitter_socket
         self.player_socket = peer.player_socket
         self.buffer_size = peer.buffer_size
-        self.chunk_format_string = peer.chunk_format_string
         self.splitter = peer.splitter
         self.chunk_size = peer.chunk_size
         self.peer_list = peer.peer_list
         self.debt = peer.debt
+        self.message_format = peer.message_format
+        self.team_socket = peer.team_socket
 
         # }}}
 
     def say_hello(self, node):
         # {{{
 
-        self.team_socket.sendto('H', node)
+        self.team_socket.sendto(b'H', node)
 
         # }}}
 
     def say_goodbye(self, node):
         # {{{
 
-        self.team_socket.sendto('G', node)
+        self.team_socket.sendto(b'G', node)
 
         # }}}
 

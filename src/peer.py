@@ -19,6 +19,10 @@ import threading
 from lossy_socket import lossy_socket
 import common
 from _print_ import _print_
+try:
+    import colorama
+except ImportError:
+    pass
 
 from peer_ims import Peer_IMS
 from peer_dbs import Peer_DBS
@@ -38,6 +42,11 @@ PORT = 1
 class Peer():
 
     def __init__(self):
+
+        try:
+            colorama.init()
+        except Exception:
+            pass
     
         _print_("Running in", end=' ')
         if __debug__:
@@ -50,33 +59,44 @@ class Peer():
 
         parser.add_argument('--chunk_loss_period', help='0 -> no chunk loss, 1 -> lost all chunks, 2, lost half of the chunks ... Default = {}'.format(Lossy_Peer.CHUNK_LOSS_PERIOD))
 
-        parser.add_argument('--max_chunk_debt', help=' Defaut = {}'.format(Peer_DBS.MAX_CHUNK_DEBT))
+        parser.add_argument('--max_chunk_loss', help=' Defaut = {}'.format(Peer_DBS.MAX_CHUNK_LOSS))
 
         parser.add_argument('--player_port', help='Port to communicate with the player. Default = {}'.format(Peer_IMS.PLAYER_PORT))
 
-        parser.add_argument('--splitter_host', help='IP address or host name of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_HOST))
+        parser.add_argument('--splitter_host', help='IP address or hostname of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_ADDR))
 
         parser.add_argument('--splitter_port', help='Listening port of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_PORT))
 
-        parser.add_argument('--team_port', help='Port to communicate with the peers. Default {} (the SO will chose it).'.format(Peer_IMS.TEAM_PORT))
+        parser.add_argument('--port', help='Port to communicate with the peers. Default {} (the SO will chose it).'.format(Peer_IMS.PORT))
 
-        args = parser.parse_known_args()[0]
+        parser.add_argument('--use_localhost', action="store_true", help='Forces the peer to use localhost instead of the IP of the adapter to connecto the splitter.')
+
+        #args = parser.parse_known_args()[0]
+        args = parser.parse_args()
 
         if args.splitter_host:
-            Peer_IMS.SPLITTER_HOST = socket.gethostbyname(args.splitter_host)
-            print ('SPLITTER_HOST =', Peer_IMS.SPLITTER_HOST)
+            Peer_IMS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_host)
+            print ('SPLITTER_ADDR =', Peer_IMS.SPLITTER_ADDR)
 
         if args.splitter_port:
             Peer_IMS.SPLITTER_PORT = int(args.splitter_port)
             print ('SPLITTER_PORT =', Peer_IMS.SPLITTER_PORT)
 
-        if args.team_port:
-            Peer_IMS.TEAM_PORT = int(args.team_port)
-            print ('TEAM_PORT =', Peer_IMS.TEAM_PORT)
+        if args.port:
+            Peer_IMS.PORT = int(args.port)
+            print ('(Peer) PORT =', Peer_IMS.PORT)
 
         if args.player_port:
             Peer_IMS.PLAYER_PORT = int(args.player_port)
             print ('PLAYER_PORT =', Peer_IMS.PLAYER_PORT)
+
+        if args.max_chunk_loss:
+            Peer_DBS.MAX_CHUNK_LOSS = int(args.max_chunk_loss)
+            print ('MAX_CHUNK_LOSS =', Peer_DBS.MAX_CHUNK_LOSS)
+
+        if args.use_localhost:
+            Peer_IMS.USE_LOCALHOST = True
+            print('Using localhost!')
 
         peer = Peer_IMS()
         peer.wait_for_the_player()
@@ -102,11 +122,11 @@ class Peer():
             peer.receive_the_list_of_peers()
 
             if peer.am_i_a_monitor():
-                peer = Monitor_DBS(peer)
+                #peer = Monitor_DBS(peer)
                 #peer = Monitor_FNS(peer)
-                #peer = Monitor_LRS(peer)
+                peer = Monitor_LRS(peer)
             else:
-                #peer = Peer_FNS(peer)
+                peer = Peer_FNS(peer)
                 if args.chunk_loss_period:
                     Lossy_Peer.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
                     print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
@@ -132,8 +152,8 @@ class Peer():
         print("|       (Expected values are between parenthesis)     |")
         print("------------------------------------------------------+")
         print()
-        print("    Time |        Received |             Sent | Team description")
-        print("---------+-----------------+------------------+-----------------")
+        print("    Time |     Received (Expected) |          Sent (Expected) | Team description")
+        print("---------+-------------------------+--------------------------+-----------------...")
 
         last_chunk_number = peer.played_chunk
         if hasattr(peer, 'sendto_counter'):
@@ -163,16 +183,16 @@ class Peer():
                 sys.stdout.write(Color.red)
             elif kbps_expected_recv > kbps_recvfrom:
                 sys.stdout.write(Color.green)
-            print(repr(kbps_expected_recv).rjust(8), end=Color.none)
-            print(('(' + repr(kbps_recvfrom) + ')').rjust(8), end=' | ')
+            print(repr(kbps_expected_recv).rjust(12), end=Color.none)
+            print(('(' + repr(kbps_recvfrom) + ')').rjust(12), end=' | ')
             #print(("{:.1f}".format(nice)).rjust(6), end=' | ')
             #sys.stdout.write(Color.none)
             if kbps_expected_sent > kbps_sendto:
                 sys.stdout.write(Color.red)
             elif kbps_expected_sent < kbps_sendto:
                 sys.stdout.write(Color.green)
-            print(repr(kbps_sendto).rjust(8), end=Color.none)
-            print(('(' + repr(kbps_expected_sent) + ')').rjust(8), end=' | ')
+            print(repr(kbps_sendto).rjust(12), end=Color.none)
+            print(('(' + repr(kbps_expected_sent) + ')').rjust(12), end=' | ')
             #sys.stdout.write(Color.none)
             #print(repr(nice).ljust(1)[:6], end=' ')
             print(len(peer.peer_list), end=' ')
