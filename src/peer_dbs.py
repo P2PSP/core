@@ -279,8 +279,8 @@ class Peer_DBS(Peer_IMS):
             # }}}
         except socket.timeout:
             return -2
-        except socket.error:
-            return -3
+        #except socket.error:
+        #    return -3
 
         # }}}
 
