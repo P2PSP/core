@@ -78,8 +78,12 @@ class Peer_IMS(threading.Thread):
             my_ip = '0.0.0.0' # Or '127.0.0.1'
             #my_ip = '127.0.0.1'
         else:
-            my_ip = socket.gethostbyname(socket.gethostname())
-        _print_("Connecting to the splitter at", self.splitter, "from", my_ip)
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("gmail.com",80))
+            #my_ip = socket.gethostbyname(socket.gethostname())
+            my_ip = s.getsockname()[0]
+            s.close()
+        socket.gethostbyname(socket.gethostname())_print_("Connecting to the splitter at", self.splitter, "from", my_ip)
         if self.PORT != 0:
             try:
                 self.splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
