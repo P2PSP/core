@@ -154,25 +154,6 @@ class Splitter_DBS(Splitter_IMS):
         # helps to avoid DoS (Denial of Service) attacks.
         # }}}
 
-        Splitter_IMS.handle_a_peer_arrival(self, connection)
-        serve_socket = connection[0]
-        self.send_the_list_of_peers(serve_socket)
-        peer = connection[1]
-        self.insert_peer(peer)
-        return peer
-                
-        # }}}
-
-    def handle_a_peer_arrival(self, connection):
-        # {{{
-
-        # {{{ In the DBS, the splitter sends to the incomming peer the
-        # list of peers. Notice that the transmission of the list of
-        # peers (something that could need some time if the team is
-        # big or if the peer is slow) is done in a separate thread. This
-        # helps to avoid DoS (Denial of Service) attacks.
-        # }}}
-
         serve_socket = connection[0]
         incomming_peer = connection[1]
         sys.stdout.write(Color.green)
