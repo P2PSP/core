@@ -98,7 +98,8 @@ class Splitter_DBS(Splitter_IMS):
         if __debug__:
             counter = 0
         for p in self.peer_list:
-            message = struct.pack("4sH", socket.inet_aton(p[ADDR]), socket.htons(p[PORT]))
+            message = struct.pack("4sH", socket.inet_aton(p[ADDR]), \
+                                  socket.htons(p[PORT]))
             peer_serve_socket.sendall(message)
             if __debug__:
                 print("DBS: [%5d]" % counter, p)
@@ -121,7 +122,8 @@ class Splitter_DBS(Splitter_IMS):
         # {{{
 
         peer_endpoint = peer_serve_socket.getpeername()
-        message = struct.pack("4sH", socket.inet_aton(peer_endpoint[ADDR]), socket.htons(peer_endpoint[PORT]))
+        message = struct.pack("4sH", socket.inet_aton(peer_endpoint[ADDR]), \
+                              socket.htons(peer_endpoint[PORT]))
         peer_serve_socket.sendall(message)
 
         # }}}
