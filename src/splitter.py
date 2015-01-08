@@ -67,7 +67,7 @@ class Splitter():
 
         parser.add_argument('--port', help='Port to serve the peers. Default = "{}".'.format(Splitter_IMS.PORT))
 
-        parser.add_argument('--source_addr', help='IP address of the streaming server. Default = "{}".'.format(Splitter_IMS.SOURCE_ADDR))
+        parser.add_argument('--source_host', help='IP address or hostname of the streaming server. Default = "{}".'.format(Splitter_IMS.SOURCE_ADDR))
 
         parser.add_argument('--source_port', help='Port where the streaming server is listening. Default = {}.'.format(Splitter_IMS.SOURCE_PORT))
 
@@ -89,8 +89,8 @@ class Splitter():
         if args.port:
             Splitter_IMS.PORT = int(args.port)
 
-        if args.source_addr:
-            Splitter_IMS.SOURCE_ADDR = socket.gethostbyname(args.source_addr)
+        if args.source_host:
+            Splitter_IMS.SOURCE_ADDR = socket.gethostbyname(args.source_host)
 
         if args.source_port:
             Splitter_IMS.SOURCE_PORT = int(args.source_port)
