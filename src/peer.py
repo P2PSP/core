@@ -59,7 +59,7 @@ class Peer():
 
         parser.add_argument('--chunk_loss_period', help='0 -> no chunk loss, 1 -> lost all chunks, 2, lost half of the chunks ... Default = {}'.format(Lossy_Peer.CHUNK_LOSS_PERIOD))
 
-        parser.add_argument('--max_chunk_loss', help=' Defaut = {}'.format(Peer_DBS.MAX_CHUNK_LOSS))
+        parser.add_argument('--max_chunk_loss', help='The maximun number of times that other peer can not send a chunk to this peer. Defaut = {}'.format(Peer_DBS.MAX_CHUNK_LOSS))
 
         parser.add_argument('--player_port', help='Port to communicate with the player. Default = {}'.format(Peer_IMS.PLAYER_PORT))
 
