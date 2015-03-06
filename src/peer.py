@@ -69,7 +69,7 @@ class Peer():
 
         parser.add_argument('--port', help='Port to communicate with the peers. Default {} (the SO will chose it).'.format(Peer_IMS.PORT))
 
-        parser.add_argument('--use_localhost', action="store_true", help='Forces the peer to use localhost instead of the IP of the adapter to connecto the splitter.')
+        parser.add_argument('--use_localhost', action="store_true", help='Forces the peer to use localhost instead of the IP of the adapter to connect to the splitter.')
 
         #args = parser.parse_known_args()[0]
         args = parser.parse_args()
