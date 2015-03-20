@@ -206,6 +206,5 @@ class Peer():
             print()
 
             # }}}
-
-x = Peer()
-
+if __name__ == "__main__":
+    x = Peer()
