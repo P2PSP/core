@@ -3,9 +3,9 @@ Running a team between different VirtualBox guests
 
 1. Create a "NAT Network":
 
-```
-VBoxManage natnetwork add -t localnet -n "192.168.15.0/24" -e -h on
-```
+    ```
+    VBoxManage natnetwork add -t localnet -n "192.168.15.0/24" -e -h on
+    ```
 
 2. In the "Splitter" machine:
 
