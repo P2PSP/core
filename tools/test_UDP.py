@@ -64,7 +64,9 @@ class Packets_per_second(Thread):
             time.sleep(1)
             iters += 1
 
-Packets_per_second().start()
+pack = Packets_per_second()
+pack.daemon = True
+pack.start()
 
 address = (destination.addr, destination.port)
 the_socket = socket(AF_INET, SOCK_DGRAM)
@@ -72,4 +74,7 @@ payload = '0'.zfill(payload_size)
 
 while True:
     sent_packets = sent_packets + 1
-    the_socket.sendto(payload, address)
+    try:
+	the_socket.sendto(payload, address)
+    except:
+	sys.exit(0)
