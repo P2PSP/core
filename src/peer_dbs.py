@@ -323,7 +323,7 @@ class Peer_DBS(Peer_IMS):
         # of peers in the team, the previous chunk must be sent in the
         # burst mode because a new chunk from the splitter has arrived
         # and the previous received chunk has not been sent to all the
-        # peers of the team. This can happen when one o more chunks
+        # peers of the team. This can happen when one or more chunks
         # that were routed towards this peer have been lost.
         self.receive_and_feed_counter = 0
 
@@ -331,7 +331,7 @@ class Peer_DBS(Peer_IMS):
         # received from the splitter. It is used to send the previous
         # received chunk in the congestion avoiding mode. In that
         # mode, the peer sends a chunk only when it received a chunk
-        # from another peer or om the splitter.
+        # from another peer or from the splitter.
         self.receive_and_feed_previous = ""
 
         self.sendto_counter = 0
