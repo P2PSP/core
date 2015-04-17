@@ -6,7 +6,7 @@
 # {{{ Imports
 
 from __future__ import print_function
-import sys
+import sys,os
 import socket
 import threading
 import struct
@@ -277,7 +277,15 @@ class Splitter_IMS(threading.Thread):
         self.source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if __debug__:
             print(self.source_socket.getsockname(), 'IMS: connecting to the source', self.source, '...')
-        self.source_socket.connect(self.source)
+        try:
+            self.source_socket.connect(self.source)
+        except socket.error as e:
+            print("IMS: ", e)
+            print(Color.red)
+            print(self.source_socket.getsockname(), "\b: IMS: unable to connect to the source ", self.source)
+            print(Color.none)
+            self.source_socket.close()
+            os._exit(1)
         if __debug__:
             print(self.source_socket.getsockname(), 'IMS: connected to', self.source)
         self.source_socket.sendall(self.GET_message.encode())
