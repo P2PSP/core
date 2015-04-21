@@ -107,14 +107,14 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def append_peer_borrame(self, peer):
-        # {{{
+    # def append_peer_borrame(self, peer):
+    #     # {{{
 
-        if peer not in self.peer_list:
-            self.peer_list.append(peer)
-        self.losses[peer] = 0
+    #     if peer not in self.peer_list:
+    #         self.peer_list.append(peer)
+    #     self.losses[peer] = 0
 
-        print("DBS: ---------------------------------")
+    #     print("DBS: ---------------------------------")
 
         # }}}
 
