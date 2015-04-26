@@ -6,6 +6,8 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
+# PYTHON_ARGCOMPLETE_OK
+
 # {{{ Imports
 
 from __future__ import print_function
@@ -21,6 +23,10 @@ import common
 from _print_ import _print_
 try:
     import colorama
+except ImportError:
+    pass
+try:
+    import argcomplete
 except ImportError:
     pass
 
@@ -70,6 +76,11 @@ class Peer():
         parser.add_argument('--port', help='Port to communicate with the peers. Default {} (the OS will chose it).'.format(Peer_IMS.PORT))
 
         parser.add_argument('--use_localhost', action="store_true", help='Forces the peer to use localhost instead of the IP of the adapter to connect to the splitter.')
+
+        try:
+            argcomplete.autocomplete(parser)
+        except Exception:
+            pass
 
         #args = parser.parse_known_args()[0]
         args = parser.parse_args()
