@@ -6,6 +6,8 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
+# PYTHON_ARGCOMPLETE_OK
+
 # {{{ Imports
 
 from __future__ import print_function
@@ -27,7 +29,10 @@ try:
     import colorama
 except ImportError:
     pass
-
+try:
+    import argcomplete
+except ImportError:
+    pass
 # }}}
 
 class Splitter():
@@ -71,6 +76,10 @@ class Splitter():
 
         parser.add_argument('--source_port', help='Port where the streaming server is listening. Default = {}.'.format(Splitter_IMS.SOURCE_PORT))
 
+        try:
+            argcomplete.autocomplete(parser)
+        except Exceptiontion:
+            pass
         args = parser.parse_args()
         #args = parser.parse_known_args()[0]
 
