@@ -130,3 +130,8 @@ or simply:
 
         python -d example.py
 
+* Autocomplete support:
+
+        sudo pip install argcomplete
+        sudo activate-global-python-argcomplete
+        
