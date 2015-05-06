@@ -69,7 +69,7 @@ class Peer():
 
         parser.add_argument('--player_port', help='Port to communicate with the player. Default = {}'.format(Peer_IMS.PLAYER_PORT))
 
-        parser.add_argument('--splitter_host', help='IP address or hostname of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_ADDR))
+        parser.add_argument('--splitter_addr', help='IP address or hostname of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_ADDR))
 
         parser.add_argument('--splitter_port', help='Listening port of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_PORT))
 
@@ -85,8 +85,8 @@ class Peer():
         #args = parser.parse_known_args()[0]
         args = parser.parse_args()
 
-        if args.splitter_host:
-            Peer_IMS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_host)
+        if args.splitter_addr:
+            Peer_IMS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
             print ('SPLITTER_ADDR =', Peer_IMS.SPLITTER_ADDR)
 
         if args.splitter_port:
