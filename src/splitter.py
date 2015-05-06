@@ -78,7 +78,7 @@ class Splitter():
 
         try:
             argcomplete.autocomplete(parser)
-        except Exceptiontion:
+        except Exception:
             pass
         args = parser.parse_args()
         #args = parser.parse_known_args()[0]
@@ -131,9 +131,9 @@ class Splitter():
 
         # {{{ Prints information until keyboard interruption
 
-        print("         | Received | Sent      | Number       losses/ losses")
-        print("    Time | (kbps)   | (kbps)    | peers (peer) sents   threshold period kbps")
-        print("---------+----------+-----------+-----------------------------------...")
+        print("         | Received  | Sent      | Number       losses/ losses")
+        print("    Time | (kbps)    | (kbps)    | peers (peer) sents   threshold period kbps")
+        print("---------+-----------+-----------+-----------------------------------...")
 
         last_sendto_counter = splitter.sendto_counter
         last_recvfrom_counter = splitter.recvfrom_counter
@@ -148,7 +148,7 @@ class Splitter():
                 last_sendto_counter = splitter.sendto_counter
                 last_recvfrom_counter = splitter.recvfrom_counter
                 sys.stdout.write(Color.none)
-                _print_("|" + repr(kbps_recvfrom).rjust(10) + "|" + repr(kbps_sendto).rjust(10), end=" | ")
+                _print_("|" + repr(kbps_recvfrom).rjust(10) + " |" + repr(kbps_sendto).rjust(10), end=" | ")
                 #print('%5d' % splitter.chunk_number, end=' ')
                 sys.stdout.write(Color.cyan)
                 print(len(splitter.peer_list), end=' ')
@@ -167,7 +167,7 @@ class Splitter():
                         sys.stdout.write(Color.yellow)
                         print('%3d' % splitter.period[p], end= ' ')
                         sys.stdout.write(Color.purple)
-                        print(repr((splitter.number_of_sent_chunks_per_peer[p] * splitter.CHUNK_SIZE * 8) / 1000).rjust(4), end = ' ')
+                        print(repr((splitter.number_of_sent_chunks_per_peer[p] * splitter.CHUNK_SIZE * 8) / 1000).rjust(10), end = ' ')
                         splitter.number_of_sent_chunks_per_peer[p] = 0
                     except KeyError as e:
                         print("!", e, "--")

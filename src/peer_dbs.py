@@ -159,7 +159,8 @@ class Peer_DBS(Peer_IMS):
 
                 chunk_number, chunk = self.unpack_message(message)
                 self.chunks[chunk_number % self.buffer_size] = chunk
-                self.received[chunk_number % self.buffer_size] = True
+                self.received_flag[chunk_number % self.buffer_size] = True
+                self.received_counter += 1
 
                 if sender == self.splitter:
                     # {{{ Send the previous chunk in burst sending

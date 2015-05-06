@@ -250,7 +250,8 @@ class Peer_IMS(threading.Thread):
             chunk_number, chunk = self.unpack_message(message)
             
             self.chunks[chunk_number % self.buffer_size] = chunk
-            self.received[chunk_number % self.buffer_size] = True
+            self.received_flag[chunk_number % self.buffer_size] = True
+            self.received_counter += 1
 
             return chunk_number
 
@@ -279,7 +280,7 @@ class Peer_IMS(threading.Thread):
         # {{{ Label the chunks in the buffer as "received" or "not
         # received".
         # }}}
-        self.received = []
+        self.received_flag = []
 
         # {{{ The buffer of chunks is a structure that is used to delay
         # the playback of the chunks in order to accommodate the
@@ -292,7 +293,8 @@ class Peer_IMS(threading.Thread):
         # simpliticy, all peers will use the same buffer size.
         
         self.chunks = [""]*self.buffer_size
-        self.received = [False]*self.buffer_size
+        self.received_flag = [False]*self.buffer_size
+        self.received_counter = 0
 
         # }}}
 
@@ -349,7 +351,7 @@ class Peer_IMS(threading.Thread):
         #print (".")
         #counter = 0
         chunk_number = (self.played_chunk + 1) % common.MAX_CHUNK_NUMBER
-        while not self.received[chunk_number % self.buffer_size]:
+        while not self.received_flag[chunk_number % self.buffer_size]:
             sys.stdout.write(Color.cyan)
             _print_("lost chunk", chunk_number)
             sys.stdout.write(Color.none)
@@ -378,7 +380,8 @@ class Peer_IMS(threading.Thread):
 
         self.played_chunk = self.find_next_chunk()
         self.play_chunk(self.played_chunk)
-        self.received[self.played_chunk % self.buffer_size] = False
+        self.received_flag[self.played_chunk % self.buffer_size] = False
+        self.received_counter -= 1
         #print("----------------------------")
 
         # }}}
@@ -407,17 +410,22 @@ class Peer_IMS(threading.Thread):
         # {{{
 
         # Receive chunks while the buffer is not full
+        #while True:
+        #    chunk_number = self.process_next_message()
+        #    if chunk_number >= 0:
+        #        break
         chunk_number = self.process_next_message()
         while chunk_number < 0:
             chunk_number = self.process_next_message()
-        while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
+        #while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
+        while self.received_counter < self.buffer_size/2:
             chunk_number = self.process_next_message()
             while chunk_number < 0:
                 chunk_number = self.process_next_message()
 
         if __debug__:
             for i in range(self.buffer_size):
-                if self.received[i]:
+                if self.received_flag[i]:
                     sys.stdout.write(str(i%10))
                 else:
                     sys.stdout.write('.')
