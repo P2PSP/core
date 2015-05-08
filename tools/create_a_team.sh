@@ -24,11 +24,11 @@ export MAX_CHUNK_LOSS=8
 export CHUNK_SIZE=1024
 #export MAX_CHUNK_DEBT=32
 #export MAX_CHUNK_DEBT=128
-export MAX_CHUNK_DEBT=32
-export MAX_CHUNK_LOSS=0
+#export MAX_CHUNK_DEBT=32
+#export MAX_CHUNK_LOSS=0
 export ITERATIONS=100
 export SOURCE_ADDR="127.0.0.1"
-export SOURCE_PORT=8000
+export SOURCE_PORT=8080
 export SPLITTER_ADDR="127.0.0.1"
 export SPLITTER_PORT=4552
 #export MCAST="--mcast"
@@ -48,7 +48,7 @@ usage() {
     echo "  [-b buffer size in chunks ($BUFFER_SIZE)]"
     echo "  [-c channel ($CHANNEL)]"
     echo "  [-k chunks size ($CHUNK_SIZE)]"
-    echo "  [-d maximum chunk debt ($MAX_CHUNK_DEBT)]"
+#    echo "  [-d maximum chunk debt ($MAX_CHUNK_DEBT)]"
     echo "  [-l maximum chunk loss ($MAX_CHUNK_LOSS)]"
     echo "  [-i iterations of this script ($ITERATIONS)]"
     echo "  [-s source IP address, ($SOURCE_ADDR)]"
@@ -84,10 +84,10 @@ while getopts "h:b:c:k:d:l:i:s:o:a:p:mr:t:f:y:w:?" opt; do
 	    CHUNK_SIZE="${OPTARG}"
 	    echo "CHUNK_SIZE="$CHUNK_SIZE
 	    ;;
-	d)
-	    MAX_CHUNK_DEBT="${OPTARG}"
-	    echo "MAX_CHUNK_DEBT="$MAX_CHUNK_DEBT
-	    ;;
+#	d)
+#	    MAX_CHUNK_DEBT="${OPTARG}"
+#	    echo "MAX_CHUNK_DEBT="$MAX_CHUNK_DEBT
+#	    ;;
 	l)
 	    MAX_CHUNK_LOSS="${OPTARG}"
 	    echo "MAX_CHUNK_LOSS="$MAX_CHUNK_LOSS
@@ -177,11 +177,12 @@ xterm -sl 10000 -e "$SPLITTER | tee splitter.dat" &
 sleep 1
 
 PEER="../src/peer.py \
---max_chunk_debt=$MAX_CHUNK_DEBT \
+--use_localhost \
 --player_port=9999 \
 --splitter_addr=$SPLITTER_ADDR \
 --splitter_port=$SPLITTER_PORT"
 # \
+#--max_chunk_debt=$MAX_CHUNK_DEBT \
 #--team_port=$TEAM_PORT"
 
 echo $PEER
@@ -194,11 +195,12 @@ vlc http://localhost:9999 > /dev/null 2> /dev/null &
 sleep 1
 
 PEER="../src/peer.py \
---max_chunk_debt=$MAX_CHUNK_DEBT \
+--use_localhost \
 --player_port=9998 \
 --splitter_addr=$SPLITTER_ADDR \
 --splitter_port=$SPLITTER_PORT"
 # \
+#--max_chunk_debt=$MAX_CHUNK_DEBT \
 #--team_port=$TEAM_PORT"
 
 echo $PEER
