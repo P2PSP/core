@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export CHANNEL=""
+export CHANNEL="Big_Buck_Bunny_small.ogv"
 export SOURCE_PORT=8080
 export VIDEO="$HOME/Videos/Big_Buck_Bunny_small.ogv"
 
@@ -8,7 +8,7 @@ usage() {
     echo $0
     echo " Run a source."
     echo "  [-c channel ($CHANNEL)]"
-    echo "  [-o source port ($SOURCE_PORT)]"
+    echo "  [-o (listening) port ($PORT)]"
     echo "  [-v video ($VIDEO)]"
     echo "  [-? help]"
 }
@@ -22,8 +22,8 @@ while getopts "c:o:v:?" opt; do
 	    echo "CHANNEL="$CHANNEL
 	    ;;
 	o)
-	    SOURCE_PORT="${OPTARG}"
-	    echo "LOSSES_THRESHOLD="$SOURCE_PORT
+	    PORT="${OPTARG}"
+	    echo "PORT="$PORT
 	    ;;
 	v)
 	    VIDEO="${OPTARG}"
@@ -48,4 +48,4 @@ done
 
 set -x
 
-vlc $VIDEO --sout "#duplicate{dst=standard{mux=ogg,dst=:$SOURCE_PORT/$CHANNEL,access=http}}" &
+vlc $VIDEO --sout "#duplicate{dst=standard{mux=ogg,dst=:$PORT/$CHANNEL,access=http}}" &
