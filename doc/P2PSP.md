@@ -135,7 +135,7 @@ or simply:
     splitter --mcast --mcast_addr=224.0.1.1 &
     ```
 
-# Miscelaneous:
+# Miscellaneous:
 
 * Download http://commons.wikimedia.org/wiki/File:Big_Buck_Bunny_small.ogv.
 
@@ -152,18 +152,26 @@ or simply:
 
 * Create (manually) a local team (usually for testing purposes):
 
-    ```
-    # Remember first to feed the local Icecast server!!!
-    xterm -e './src/splitter.py' &                # Run a splitter
-    xterm -e './src/peer.py' &                    # Run a (monitor) peer
-    xterm -e './src/peer.py --player_port=9998' & # Run a peer
-    vlc http://localhost:9999 &                   # Run a player for the monitor
-    vlc http://localhost:9998 &                   # Run a player for the peer
-    ```
+ #Remember first to feed the local Icecast server!!!
+                                                             
+        xterm -e './src/splitter.py' &                # Run a splitter
+        xterm -e './src/peer.py' &                    # Run a (monitor) peer
+        xterm -e './src/peer.py --player_port=9998' & # Run a peer
+        vlc http://localhost:9999 &                   # Run a player for the monitor
+        vlc http://localhost:9998 &                   # Run a player for the peer
 
 * Create (automatically) a local team:
 
-    ```
-    # Remember first to feed the local Icecast server!!!
-    ./tools/create_a_team.sh # Create the team
-    ```
+    #Remember first to feed the local Icecast server!!!
+    
+        ./tools/create_a_team.sh # Create the team
+
+* To run in debug mode:
+
+        python -d example.py
+
+* Autocomplete support:
+
+        sudo pip install argcomplete
+        sudo activate-global-python-argcomplete
+        

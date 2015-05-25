@@ -52,6 +52,7 @@ done
 export PLAYER_PORT=`shuf -i 2000-65000 -n 1`
 
 PEER="../src/peer.py \
+--use_localhost \
 --chunk_loss_period=$CHUNK_LOSS_PERIOD \
 --max_chunk_debt=$MAX_CHUNK_DEBT \
 --player_port $PLAYER_PORT \

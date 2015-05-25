@@ -28,7 +28,7 @@ class Peer_DBS(Peer_IMS):
 
     # {{{ Class "constants"
 
-    MAX_CHUNK_LOSS = 128
+    MAX_CHUNK_DEBT = 128
 
     # }}}
 
@@ -50,7 +50,7 @@ class Peer_DBS(Peer_IMS):
         self.message_format = peer.message_format
         #self.extended_message_format = peer.message_format + "4sH"
 
-        _print_("DBS: max_chunk_loss =", self.MAX_CHUNK_LOSS)
+        _print_("DBS: max_chunk_debt =", self.MAX_CHUNK_DEBT)
         
         # }}}
 
@@ -159,7 +159,8 @@ class Peer_DBS(Peer_IMS):
 
                 chunk_number, chunk = self.unpack_message(message)
                 self.chunks[chunk_number % self.buffer_size] = chunk
-                self.received[chunk_number % self.buffer_size] = True
+                self.received_flag[chunk_number % self.buffer_size] = True
+                self.received_counter += 1
 
                 if sender == self.splitter:
                     # {{{ Send the previous chunk in burst sending
@@ -190,7 +191,7 @@ class Peer_DBS(Peer_IMS):
                         # }}}
 
                         self.debt[peer] += 1
-                        if self.debt[peer] > self.MAX_CHUNK_LOSS:
+                        if self.debt[peer] > self.MAX_CHUNK_DEBT:
                             print (Color.red, "DBS:", peer, 'removed by unsupportive (' + str(self.debt[peer]) + ' lossess)', Color.none)
                             del self.debt[peer]
                             self.peer_list.remove(peer)
@@ -234,7 +235,7 @@ class Peer_DBS(Peer_IMS):
                     self.sendto_counter += 1
 
                     self.debt[peer] += 1
-                    if self.debt[peer] > self.MAX_CHUNK_LOSS:
+                    if self.debt[peer] > self.MAX_CHUNK_DEBT:
                         print (Color.red, "DBS:", peer, 'removed by unsupportive (' + str(self.debt[peer]) + ' lossess)', Color.none)
                         del self.debt[peer]
                         self.peer_list.remove(peer)
@@ -323,7 +324,7 @@ class Peer_DBS(Peer_IMS):
         # of peers in the team, the previous chunk must be sent in the
         # burst mode because a new chunk from the splitter has arrived
         # and the previous received chunk has not been sent to all the
-        # peers of the team. This can happen when one o more chunks
+        # peers of the team. This can happen when one or more chunks
         # that were routed towards this peer have been lost.
         self.receive_and_feed_counter = 0
 
@@ -331,12 +332,12 @@ class Peer_DBS(Peer_IMS):
         # received from the splitter. It is used to send the previous
         # received chunk in the congestion avoiding mode. In that
         # mode, the peer sends a chunk only when it received a chunk
-        # from another peer or om the splitter.
+        # from another peer or from the splitter.
         self.receive_and_feed_previous = ""
 
         self.sendto_counter = 0
 
-        self.debt_memory = 1 << self.MAX_CHUNK_LOSS
+        self.debt_memory = 1 << self.MAX_CHUNK_DEBT
 
         Peer_IMS.buffer_data(self)
 

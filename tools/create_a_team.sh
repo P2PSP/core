@@ -19,16 +19,18 @@ export CHANNEL="Big_Buck_Bunny_small.ogv"
 #export BUFFER_SIZE=128
 #export CHANNEL="sintel_trailer-144p.ogg"
 
-export HEADER_SIZE=10
 export MAX_CHUNK_LOSS=8
+
+export HEADER_SIZE=10
+export MAX_CHUNK_DEBT=8
 export CHUNK_SIZE=1024
 #export MAX_CHUNK_DEBT=32
 #export MAX_CHUNK_DEBT=128
-export MAX_CHUNK_DEBT=32
-export MAX_CHUNK_LOSS=0
+#export MAX_CHUNK_DEBT=32
+#export MAX_CHUNK_DEBT=0
 export ITERATIONS=100
 export SOURCE_ADDR="127.0.0.1"
-export SOURCE_PORT=8000
+export SOURCE_PORT=8080
 export SPLITTER_ADDR="127.0.0.1"
 export SPLITTER_PORT=4552
 #export MCAST="--mcast"
@@ -98,11 +100,11 @@ while getopts "h:b:c:k:d:l:i:s:o:a:p:mr:t:f:y:w:?" opt; do
 	    ;;
 	s)
 	    SOURCE_ADDR="${OPTARG}"
-	    echo "LOSSES_THRESHOLD="$SOURCE_ADDR
+	    echo "SOURCE_ADDR="$SOURCE_ADDR
 	    ;;
 	o)
 	    SOURCE_PORT="${OPTARG}"
-	    echo "LOSSES_THRESHOLD="$SOURCE_PORT
+	    echo "SOURCE_PORT="$SOURCE_PORT
 	    ;;
 	a)
 	    SPLITTER_ADDR="${OPTARG}"
@@ -177,11 +179,12 @@ xterm -sl 10000 -e "$SPLITTER | tee splitter.dat" &
 sleep 1
 
 PEER="../src/peer.py \
---max_chunk_debt=$MAX_CHUNK_DEBT \
+--use_localhost \
 --player_port=9999 \
 --splitter_addr=$SPLITTER_ADDR \
 --splitter_port=$SPLITTER_PORT"
 # \
+#--max_chunk_debt=$MAX_CHUNK_DEBT \
 #--team_port=$TEAM_PORT"
 
 echo $PEER
@@ -194,11 +197,12 @@ vlc http://localhost:9999 > /dev/null 2> /dev/null &
 sleep 1
 
 PEER="../src/peer.py \
---max_chunk_debt=$MAX_CHUNK_DEBT \
+--use_localhost \
 --player_port=9998 \
 --splitter_addr=$SPLITTER_ADDR \
 --splitter_port=$SPLITTER_PORT"
 # \
+#--max_chunk_debt=$MAX_CHUNK_DEBT \
 #--team_port=$TEAM_PORT"
 
 echo $PEER
@@ -213,7 +217,7 @@ while [ $x -le $ITERATIONS ]
 do
     sleep $BIRTHDAY_PERIOD
 
-    ./play.sh -a $SPLITTER_ADDR -p $SPLITTER_PORT &
+    ./play.sh -a $SPLITTER_ADDR -p $SPLITTER_PORT -d $MAX_CHUNK_DEBT &
 
     x=$(( $x + 1 ))
 done
