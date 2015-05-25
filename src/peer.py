@@ -35,9 +35,9 @@ from peer_dbs import Peer_DBS
 from peer_fns import Peer_FNS
 from monitor_dbs import Monitor_DBS
 from monitor_fns import Monitor_FNS
-#from peer_lossy import Peer_Lossy
 from monitor_lrs import Monitor_LRS
 from lossy_peer import Lossy_Peer
+from malicious_peer import MaliciousPeer
 
 # }}}
 
@@ -76,6 +76,8 @@ class Peer():
         parser.add_argument('--port', help='Port to communicate with the peers. Default {} (the OS will chose it).'.format(Peer_IMS.PORT))
 
         parser.add_argument('--use_localhost', action="store_true", help='Forces the peer to use localhost instead of the IP of the adapter to connect to the splitter.')
+
+        parser.add_argument('--malicious', action="store_true", help='Forces the peer to send poisoned chunks to other peers.')
 
         try:
             argcomplete.autocomplete(parser)
@@ -117,7 +119,6 @@ class Peer():
         peer.receive_the_chunk_size()
         peer.receive_the_header()
         peer.receive_the_buffer_size()
-        #peer.receive_configuration()
         _print_("IP Multicast address =", peer.mcast_addr)
         
         # A multicast address is always received, even for DBS peers.
@@ -125,6 +126,8 @@ class Peer():
             # {{{ This is an "unicast" peer.
 
             peer = Peer_DBS(peer)
+            if args.malicious:
+                peer = MaliciousPeer(peer)
             peer.receive_my_endpoint()
             peer.receive_the_number_of_peers()
             print("===============> number_of_peers =", peer.number_of_peers)
@@ -133,8 +136,6 @@ class Peer():
             peer.receive_the_list_of_peers()
 
             if peer.am_i_a_monitor():
-                #peer = Monitor_DBS(peer)
-                #peer = Monitor_FNS(peer)
                 peer = Monitor_LRS(peer)
             else:
                 peer = Peer_FNS(peer)
@@ -143,8 +144,6 @@ class Peer():
                     print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
                     if int(args.chunk_loss_period) != 0:
                         peer = Lossy_Peer(peer)
-                    
-            #peer.receive_my_endpoint()
             
             # }}}
         else:
