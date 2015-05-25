@@ -38,5 +38,4 @@ class MaliciousSocket():
 
     def get_poisoned_chunk(self, message):
         chunk_number, chunk = struct.unpack(self.message_format, message)
-        chunk_number = socket.ntohs(chunk_number)
-        return struct.pack(self.message_format, socket.htons(chunk_number), '0')
+        return struct.pack(self.message_format, chunk_number, '0')
