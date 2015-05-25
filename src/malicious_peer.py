@@ -53,7 +53,7 @@ class MaliciousPeer(Peer_DBS):
     def listen_to_the_team(self):
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
-        self.team_socket = MaliciousSocket(struct.calcsize(self.message_format), socket.AF_INET, socket.SOCK_DGRAM)
+        self.team_socket = MaliciousSocket(self.message_format, socket.AF_INET, socket.SOCK_DGRAM)
         try:
             # In Windows systems this call doesn't work!
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

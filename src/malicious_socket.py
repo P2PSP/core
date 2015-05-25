@@ -6,17 +6,18 @@
 # Copyright (C) 2015, the P2PSP team.
 # http://www.p2psp.org
 
-from socket import socket
+import socket
+import struct
 
 class MaliciousSocket():
 
-    def __init__(self, chunk_message_length, *p):
-        self._sock = socket(*p)
-        self.chunk_message_length = chunk_message_length
+    def __init__(self, message_format, *p):
+        self._sock = socket.socket(*p)
+        self.message_format = message_format
 
     def sendto(self, string, address):
-        if len(string) == self.chunk_message_length:
-            return self._sock.sendto(self.get_poisoned_chunk(), address)
+        if len(string) == struct.calcsize(self.message_format):
+            return self._sock.sendto(self.get_poisoned_chunk(string), address)
         else:
             return self._sock.sendto(string, address)
 
@@ -35,5 +36,7 @@ class MaliciousSocket():
     def setsockopt(self, *p):
         return self._sock.setsockopt(*p)
 
-    def get_poisoned_chunk(self):
-        return bytes('0' * self.chunk_message_length, 'utf-8')
+    def get_poisoned_chunk(self, message):
+        chunk_number, chunk = struct.unpack(self.message_format, message)
+        chunk_number = socket.ntohs(chunk_number)
+        return struct.pack(self.message_format, socket.htons(chunk_number), '0')
