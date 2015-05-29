@@ -49,9 +49,9 @@ class TrustedPeer(Peer_DBS):
 
     def process_next_message(self):
         chunk_number = Peer_DBS.process_next_message(self)
-        if chunk_number > 0 and self.counter % 255 == 0:
+        if chunk_number > 0 and self.counter == 0:
             chunk = self.chunks[chunk_number % self.buffer_size]
             msg = struct.pack('Hi', chunk_number, binascii.crc32(chunk))
             self.team_socket.sendto(msg, self.splitter)
-        self.counter += 1
+        self.counter = (self.counter + 1) % 255
         return chunk_number

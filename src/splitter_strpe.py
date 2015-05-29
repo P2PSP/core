@@ -68,13 +68,14 @@ class StrpeSplitter(Splitter_LRS):
         chunk = struct.unpack(self.get_message_format(), chunk_message)[1]
         if binascii.crc32(chunk) != hash:
             peer = self.destination_of_chunk[chunk_number % self.BUFFER_SIZE]
-            self.blame_malicious_peer(peer)
+            self.punish_malicious_peer(peer)
 
     def get_message_format(self):
         return self.chunk_number_format + str(self.CHUNK_SIZE) + "s"
 
-    def blame_malicious_peer(self, peer):
+    def punish_malicious_peer(self, peer):
         print('!!! malicous peer ' + str(peer))
+        self.remove_peer(peer)
 
     def add_trusted_peer(self, peer):
         self.trusted_peers.append(peer)
