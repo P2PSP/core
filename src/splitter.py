@@ -23,6 +23,7 @@ from splitter_dbs import Splitter_DBS
 from splitter_fns import Splitter_FNS
 from splitter_acs import Splitter_ACS
 from splitter_lrs import Splitter_LRS
+from splitter_strpe import  StrpeSplitter
 import common
 from _print_ import _print_
 try:
@@ -76,6 +77,8 @@ class Splitter():
 
         parser.add_argument('--source_port', help='Port where the streaming server is listening. Default = {}.'.format(Splitter_IMS.SOURCE_PORT))
 
+        parser.add_argument('--strpe', action="store_true", help='Enables STrPe')
+
         try:
             argcomplete.autocomplete(parser)
         except Exception:
@@ -114,14 +117,16 @@ class Splitter():
             splitter.peer_list = []
 
         else:
-
             if args.max_chunk_loss:
                 Splitter_DBS.MAX_CHUNK_LOSS = int(args.max_chunk_loss)
 
             #splitter = Splitter_DBS()
             #splitter = Splitter_FNS()
             #splitter = Splitter_ACS()
-            splitter = Splitter_LRS()
+            if (args.strpe):
+                splitter = StrpeSplitter()
+            else:
+                splitter = Splitter_LRS()
 
         # }}}
 

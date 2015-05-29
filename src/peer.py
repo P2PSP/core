@@ -38,6 +38,7 @@ from monitor_fns import Monitor_FNS
 from monitor_lrs import Monitor_LRS
 from lossy_peer import Lossy_Peer
 from malicious_peer import MaliciousPeer
+from trusted_peer import TrustedPeer
 
 # }}}
 
@@ -53,7 +54,7 @@ class Peer():
             colorama.init()
         except Exception:
             pass
-    
+
         _print_("Running in", end=' ')
         if __debug__:
             print("debug mode")
@@ -78,6 +79,8 @@ class Peer():
         parser.add_argument('--use_localhost', action="store_true", help='Forces the peer to use localhost instead of the IP of the adapter to connect to the splitter.')
 
         parser.add_argument('--malicious', action="store_true", help='Forces the peer to send poisoned chunks to other peers.')
+
+        parser.add_argument('--trusted', action="store_true", help='Forces the peer to send hashes of chunks to splitter')
 
         try:
             argcomplete.autocomplete(parser)
@@ -120,7 +123,7 @@ class Peer():
         peer.receive_the_header()
         peer.receive_the_buffer_size()
         _print_("IP Multicast address =", peer.mcast_addr)
-        
+
         # A multicast address is always received, even for DBS peers.
         if peer.mcast_addr == "0.0.0.0":
             # {{{ This is an "unicast" peer.
@@ -144,12 +147,15 @@ class Peer():
                     print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
                     if int(args.chunk_loss_period) != 0:
                         peer = Lossy_Peer(peer)
-            
+
             # }}}
         else:
             peer.listen_to_the_team()
 
         # }}}
+
+        if args.trusted:
+            peer = TrustedPeer(peer)
 
         # {{{ Run!
         peer.disconnect_from_the_splitter()
