@@ -24,8 +24,6 @@ class MaliciousPeer(Peer_DBS):
     def __init__(self, peer):
         # {{{
 
-        #Peer_FNS.__init__(self, peer)
-
         sys.stdout.write(Color.yellow)
         _print_("Malicious Peer")
         sys.stdout.write(Color.none)
