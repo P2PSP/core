@@ -1,6 +1,6 @@
-import threading , gui.file_util , peer ,gui.vlc ,sys #, time , gui.vlc
+import threading , gui.file_util , core.peer as peer ,gui.vlc ,sys #, time , gui.vlc
 from  gui.player import Player_Instance
-from peer_ims import Peer_IMS
+from core.peer_ims import  Peer_IMS 
 try:
     from gi.repository import GObject
     from gi.repository import Gtk
@@ -24,7 +24,7 @@ class Main_Application():
     
     PLAYER_MRL = 'http://localhost:9999'
     Peer_IMS.USE_LOCALHOST = True 
-    PLAYER_MEDIA_SOURCE = "./gui/p2psp.jpg"
+    PLAYER_MEDIA_SOURCE = "../data/images/p2psp.jpg"
     
     
     def __init__(self):
@@ -33,7 +33,7 @@ class Main_Application():
         self.player_fullscreen  = False
         self.channels_revealed = True
         self.status_box_hidden = False
-        self.interface = gui.file_util.get_user_interface('gui', 'gui/P2PSP_GUI.glade')
+        self.interface = gui.file_util.get_user_interface('glade', '../data/glade/P2PSP_GUI.glade')
         self.load_widgets()
         self.interface.connect_signals(self.setup_signals())
         self.window.connect("destroy",Gtk.main_quit)
@@ -52,6 +52,8 @@ class Main_Application():
         self.status_box = self.interface.get_object('PlayerAndStatusBox')
         self.play_image = self.interface.get_object('PlayImage')
         self.pause_image = self.interface.get_object('PauseImage')
+        self.monitor_image = self.interface.get_object('MonitorThumbnail')
+        self.monitor_image.set_from_file(gui.file_util.find_file('images','../data/images/monitor_thumbnail.png'))
         
     def start_peer(self):
         thread1 = Peer_Thread(1, "Peer Thread")
