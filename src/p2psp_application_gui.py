@@ -39,6 +39,7 @@ class Main_Application():
         self.window.connect("destroy",Gtk.main_quit)
         self.channel_box.set_size_request(350,600)
         self.configure_player_surface()
+        
 
     def load_widgets(self):
         self.window = self.interface.get_object('MainWindow')
@@ -99,10 +100,9 @@ class Main_Application():
         #self.player_instance.em.event_detach(gui.vlc.EventType.MediaPlayerEndReached)
         self.player.stop()
         
-    '''def end_callback(self,event):
-        print('End of media stream (event %s)' % event.type)
+    def end_callback(self):
         if self.peer_active == False:
-            self.toggle_player_type(self.win_id)'''
+            self.toggle_player_type(self.win_id)
         
     def toggle_player_playback(self, widget, data=None):
         if self.peer_active == False and self.player_paused == False:
@@ -149,6 +149,9 @@ class Main_Application():
             self.player_fullscreen = False
             self.status_box_hidden = False
             
+    def redraw_surface(self,widget,data=None):
+        self.end_callback()
+            
     def hide_status_box(self):
         self.status_box.hide()
         
@@ -169,6 +172,7 @@ class Main_Application():
         #self.player_instance.em.event_attach(gui.vlc.EventType.MediaPlayerEndReached,self.end_callback)
         self.win_id = widget.get_window().get_xid()
         self.toggle_player_type(self.win_id)
+        self.player_surface.connect("configure_event", self.redraw_surface)
         
 if __name__ == "__main__":
     #Gdk.threads_init()
