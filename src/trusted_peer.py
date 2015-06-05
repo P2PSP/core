@@ -15,6 +15,7 @@ import socket
 from color import Color
 from _print_ import _print_
 import threading
+import hashlib
 
 class TrustedPeer(Peer_DBS):
 
@@ -35,7 +36,7 @@ class TrustedPeer(Peer_DBS):
         self.message_format = peer.message_format
         self.team_socket = peer.team_socket
 
-        self.counter = 0
+        self.counter = 1
 
         # }}}
     def print_the_module_name(self):
@@ -51,7 +52,8 @@ class TrustedPeer(Peer_DBS):
         chunk_number = Peer_DBS.process_next_message(self)
         if chunk_number > 0 and self.counter == 0:
             chunk = self.chunks[chunk_number % self.buffer_size]
-            msg = struct.pack('Hi', chunk_number, binascii.crc32(chunk))
+            chunk_hash = hashlib.sha256(chunk).hexdigest()
+            msg = struct.pack('H64s', chunk_number, chunk_hash)
             self.team_socket.sendto(msg, self.splitter)
         self.counter = (self.counter + 1) % 255
         return chunk_number

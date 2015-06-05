@@ -8,7 +8,7 @@
 
 import struct
 import sys
-import binascii
+import hashlib
 from color import Color
 from _print_ import _print_
 
@@ -45,7 +45,7 @@ class StrpeSplitter(Splitter_LRS):
                 self.process_lost_chunk(lost_chunk_number, sender)
 
                 # }}}
-            elif len(message) == 8:
+            elif len(message) == 66:
                 # trusted peer sends hash of received chunk
                 # number of chunk, hash (crc32) of chunk
                 #if sender in self.trusted_peers:
@@ -63,10 +63,10 @@ class StrpeSplitter(Splitter_LRS):
             # }}}
 
     def process_chunk_hash_message(self, message):
-        chunk_number, hash = struct.unpack('Hi', message)
+        chunk_number, hash = struct.unpack('H64s', message)
         chunk_message = self.buffer[chunk_number % self.BUFFER_SIZE]
         chunk = struct.unpack(self.get_message_format(), chunk_message)[1]
-        if binascii.crc32(chunk) != hash:
+        if hashlib.sha256(chunk).hexdigest() != hash:
             peer = self.destination_of_chunk[chunk_number % self.BUFFER_SIZE]
             self.punish_malicious_peer(peer)
 
@@ -84,7 +84,7 @@ class StrpeSplitter(Splitter_LRS):
         # {{{
 
         try:
-            return self.team_socket.recvfrom(struct.calcsize("Hi"))
+            return self.team_socket.recvfrom(struct.calcsize("H64s"))
         except:
             if __debug__:
                 print("DBS: Unexpected error:", sys.exc_info()[0])
