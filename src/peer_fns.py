@@ -7,7 +7,6 @@
 
 import threading
 import sys
-from peer_ims import Peer_IMS
 from peer_dbs import Peer_DBS
 from _print_ import _print_
 from color import Color
@@ -57,7 +56,7 @@ class Peer_FNS(Peer_DBS):
         # {{{
 
         # Close the TCP socket
-        Peer_IMS.disconnect_from_the_splitter(self)
+        Peer_DBS.disconnect_from_the_splitter(self)
 
         # Use UDP to create a working NAT entry
         self.say_hello(self.splitter)
