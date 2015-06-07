@@ -11,4 +11,3 @@ App.show()
 Gtk.main()
 App.quit()
 print "Exiting Gtk-Main Thread"
-sys.exit(0)
