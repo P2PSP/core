@@ -3,7 +3,7 @@ Created on May 31, 2015
 
 @author: maniotrix
 '''
-import vlc
+from lib import vlc
 class Player_Instance():
     '''
     classdocs
@@ -15,7 +15,7 @@ class Player_Instance():
         Constructor
         '''
         # Creates Vlc Instance
-        self.vlcInstance = vlc.Instance()
+        self.vlcInstance = vlc.Instance("--no-xlib")
         self.player = self.vlcInstance.media_player_new()
         self.em = self.player.event_manager()
         
