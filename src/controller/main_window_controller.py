@@ -6,6 +6,7 @@ try:
     from gi.repository import Gtk
     from gi.repository import GdkX11
     import common.file_util as file_util
+    from model.wrapper.p2psp_peer import Peer_Thread
 except Exception as msg:
     print(msg)
 
@@ -16,6 +17,7 @@ class Main_Controller():
     
     
     def __init__(self,window,model):
+        self.peer_active = False
         self.player_paused = False
         self.player_fullscreen  = False
         self.channels_revealed = True
@@ -26,10 +28,11 @@ class Main_Controller():
         self.app_window.player_surface.connect("realize",self._realized)
         self.adapter = Buffering_Adapter()
         self.adapter.set_widget(self.app_window.buffer_status_bar)
-        self.thread1 = self.app_model.get_peer_thread()
 
     def start_peer(self):
-        self.thread1.start()
+        thread1 = Peer_Thread(1, "Peer Thread")
+        thread1.start()
+        self.peer_active = True
         print 'thread started'
         
     def show(self):
@@ -46,7 +49,7 @@ class Main_Controller():
         return signals
     
     def toggle_player_type(self,win_id):
-        if self.thread1.peer_active :
+        if self.peer_active :
             self.player = self.player_instance.stream_player(self.win_id,self.PLAYER_MRL)
         else:
             self.player = self.player_instance.media_player(self.win_id,self.PLAYER_MEDIA_SOURCE)
@@ -54,7 +57,7 @@ class Main_Controller():
              
     def stop_player(self, widget, data=None):
         self.player.stop()
-        self.thread1.peer_active = False
+        self.peer_active = False
         self.toggle_player_type(self.win_id)
         self.app_window.playback_toggle_button.set_image(self.app_window.play_image)
         #self.player_instance.em.event_attach(gui.vlc.EventType.MediaPlayerEndReached,self.end_callback)
@@ -64,21 +67,21 @@ class Main_Controller():
         self.player.stop()
         
     def end_callback(self):
-        if self.thread1.peer_active == False:
+        if self.peer_active == False:
             self.toggle_player_type(self.win_id)
         
     def toggle_player_playback(self, widget, data=None):
-        if self.thread1.peer_active == False and self.player_paused == False:
+        if self.peer_active == False and self.player_paused == False:
             #self.player_instance.em.event_detach(gui.vlc.EventType.MediaPlayerEndReached)
             self.start_peer()
             self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
             self.toggle_player_type(self.win_id)
             
-        elif self.thread1.peer_active == True and self.player_paused == True:
+        elif self.peer_active == True and self.player_paused == True:
             self.player.play()
             self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
             self.player_paused = False
-        elif self.thread1.peer_active == True and self.player_paused == False:
+        elif self.peer_active == True and self.player_paused == False:
             self.player.pause()
             self.app_window.playback_toggle_button.set_image(self.app_window.play_image)
             self.player_paused = True
