@@ -8,7 +8,6 @@ try:
     from  model.media.player import Player_Instance
     import common.file_util as file_util
     from model.wrapper.p2psp_peer import Peer_Thread
-    from view.main_window import Main_Window
 except Exception as msg:
     print(msg)
 
@@ -18,13 +17,13 @@ class Main_Controller():
     PLAYER_MEDIA_SOURCE = "../data/images/p2psp.jpg"
     
     
-    def __init__(self):
+    def __init__(self,window):
         self.peer_active  = False
         self.player_paused = False
         self.player_fullscreen  = False
         self.channels_revealed = True
         self.status_box_hidden = False
-        self.app_window = Main_Window()
+        self.app_window = window
         self.app_window.interface.connect_signals(self.setup_signals())
         self.app_window.player_surface.connect("realize",self._realized)
         self.adapter = Buffering_Adapter()
