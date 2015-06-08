@@ -77,7 +77,7 @@ class Splitter():
 
         parser.add_argument('--source_port', help='Port where the streaming server is listening. Default = {}.'.format(Splitter_IMS.SOURCE_PORT))
 
-        parser.add_argument('--strpe', action="store_true", help='Enables STrPe')
+        parser.add_argument('--strpe', nargs='+', type=str, help='Enables STrPe')
 
         try:
             argcomplete.autocomplete(parser)
@@ -123,8 +123,10 @@ class Splitter():
             #splitter = Splitter_DBS()
             #splitter = Splitter_FNS()
             #splitter = Splitter_ACS()
-            if (args.strpe):
+            if (args.strpe != None):
                 splitter = StrpeSplitter()
+                for peer in args.strpe:
+                    splitter.add_trusted_peer(peer)
             else:
                 splitter = Splitter_LRS()
 
