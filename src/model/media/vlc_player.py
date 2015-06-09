@@ -4,7 +4,7 @@ Created on May 31, 2015
 @author: maniotrix
 '''
 from lib import vlc
-class Player_Instance():
+class VLC_Player():
     '''
     classdocs
     '''
@@ -43,5 +43,3 @@ class Player_Instance():
         self._set_win_id(win_id)
         self._set_mrl(mrl)
         return self.player
-        
-        
