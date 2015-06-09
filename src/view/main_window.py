@@ -11,7 +11,7 @@ class Main_Window():
     
     
     def __init__(self):
-        self.interface = file_util.get_user_interface('glade', '../data/glade/P2PSP_GUI.glade')
+        self.interface = file_util.get_user_interface('glade', '../data/glade/mainwindow.glade')
         self.load_widgets()
         self.window.connect("destroy",Gtk.main_quit)
         self.channel_box.set_size_request(350,600)
