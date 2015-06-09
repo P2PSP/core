@@ -1,8 +1,8 @@
 import threading
 
 try:
-    import model.core.peer as peer
-    from model.core.peer_ims import  Peer_IMS
+    import core.peer as peer
+    from core.peer_ims import  Peer_IMS
 except Exception as msg:
     print(msg)
 

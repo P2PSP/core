@@ -6,7 +6,7 @@ try:
     from gi.repository import Gtk
     from gi.repository import GdkX11
     import common.file_util as file_util
-    from model.wrapper.p2psp_peer import Peer_Thread
+    from model.peer_thread import Peer_Thread
 except Exception as msg:
     print(msg)
 
@@ -50,9 +50,9 @@ class Main_Controller():
     
     def toggle_player_type(self,win_id):
         if self.peer_active :
-            self.player = self.player_instance.stream_player(self.win_id,self.PLAYER_MRL)
+            self.player = self.vlc_player_instance.stream_player(self.win_id,self.PLAYER_MRL)
         else:
-            self.player = self.player_instance.media_player(self.win_id,self.PLAYER_MEDIA_SOURCE)
+            self.player = self.vlc_player_instance.media_player(self.win_id,self.PLAYER_MEDIA_SOURCE)
         self.player.play()
              
     def stop_player(self, widget, data=None):
@@ -123,7 +123,7 @@ class Main_Controller():
                 self.status_box_hidden = False
                                 
     def _realized(self,widget,data=None):
-        self.player_instance = self.app_model.get_player_instance()
+        self.vlc_player_instance = self.app_model.get_vlc_player_instance()
         #self.player_instance.em.event_attach(gui.vlc.EventType.MediaPlayerEndReached,self.end_callback)
         self.win_id = widget.get_window().get_xid()
         self.toggle_player_type(self.win_id)

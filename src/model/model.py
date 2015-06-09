@@ -1,14 +1,12 @@
 try:
-    from media.player import Player_Instance
+    from vlc_player import VLC_Player
 except Exception as msg:
     print(msg)
     
-class Model():
+class Model():  
     
-    
-    def __init__(self):
+    def __init__(self):        
+        self.vlc_player_instance = VLC_Player()
         
-        self.player_instance = Player_Instance()
-        
-    def get_player_instance(self):
-        return self.player_instance
+    def get_vlc_player_instance(self):
+        return self.vlc_player_instance
