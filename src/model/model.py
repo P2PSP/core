@@ -1,5 +1,5 @@
 try:
-    from media.vlc_player import VLC_Player
+    from vlc_player import VLC_Player
 except Exception as msg:
     print(msg)
     

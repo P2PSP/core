@@ -6,7 +6,7 @@ try:
     from gi.repository import Gtk
     from gi.repository import GdkX11
     import common.file_util as file_util
-    from model.wrapper.p2psp_peer import Peer_Thread
+    from model.peer_thread import Peer_Thread
 except Exception as msg:
     print(msg)
 
