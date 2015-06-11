@@ -35,6 +35,7 @@ class Main_Controller():
                                      ,self.app_window.users_label)
         
     def start_peer(self):
+        self.app_window.buffer_status_bar.show()
         thread1 = Peer_Thread(1, "Peer Thread")
         thread1.start()
         self.peer_active = True
