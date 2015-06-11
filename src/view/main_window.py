@@ -2,6 +2,7 @@ import sys
 try:
     from gi.repository import GObject
     from gi.repository import Gtk
+    from gi.repository import Gdk
     import common.file_util as file_util
 except Exception as msg:
     print(msg)
@@ -9,12 +10,13 @@ except Exception as msg:
     
 class Main_Window():
     
+    SCREEN = Gdk.Screen.get_default()
     
     def __init__(self):
         self.interface = file_util.get_user_interface('glade', '../data/glade/mainwindow.glade')
         self.load_widgets()
         self.window.connect("destroy",Gtk.main_quit)
-        self.channel_box.set_size_request(350,600)
+        self.channel_box.set_size_request(self.SCREEN.get_width()/8,self.SCREEN.get_height()/4)
         self.configure_player_surface()
         
     def load_widgets(self):
@@ -37,7 +39,7 @@ class Main_Window():
         self.users_label = self.interface.get_object('Users_Label')
         
     def configure_player_surface(self):
-        self.player_surface.set_size_request(600,600)
+        self.player_surface.set_size_request(self.SCREEN.get_width()/4,self.SCREEN.get_height()/4)
         self.player_surface.show()
         
     def show(self):
