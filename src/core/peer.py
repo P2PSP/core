@@ -223,7 +223,8 @@ class Peer():
                 else:
                     break
             print()
-
+        if common.CONSOLE_MODE == False :
+            speed_adapter.update_widget(str(0)+' kbps',str(0)+' kbps',str(0))
             # }}}
 if __name__ == "__main__":
     x = Peer()
