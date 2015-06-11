@@ -32,6 +32,9 @@ class Main_Window():
         self.monitor_image = self.interface.get_object('MonitorThumbnail')
         self.monitor_image.set_from_file(file_util.find_file('images','../data/images/monitor_thumbnail.png'))
         self.buffer_status_bar = self.interface.get_object('ProgressBar')
+        self.up_speed_label = self.interface.get_object('UpSpeedlabel')
+        self.down_speed_label = self.interface.get_object('DownSpeedlabel')
+        self.users_label = self.interface.get_object('Users_Label')
         
     def configure_player_surface(self):
         self.player_surface.set_size_request(600,600)

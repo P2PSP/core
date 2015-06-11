@@ -6,7 +6,7 @@ try:
     from model.model import Model
 except Exception as msg:
     print(msg)
-    
+
 GObject.threads_init()
 App_Model = Model()
 App_Window = Main_Window()

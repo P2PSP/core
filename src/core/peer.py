@@ -38,6 +38,10 @@ from monitor_fns import Monitor_FNS
 #from peer_lossy import Peer_Lossy
 from monitor_lrs import Monitor_LRS
 from lossy_peer import Lossy_Peer
+try:
+    from adapter import speed_adapter
+except Exception as msg:
+    print(msg)
 
 # }}}
 
@@ -185,6 +189,10 @@ class Peer():
             kbps_expected_sent = int(kbps_expected_recv*team_ratio)
             kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
             last_sendto_counter = peer.sendto_counter
+            if common.CONSOLE_MODE == False :
+                speed_adapter.update_widget(str(kbps_recvfrom) + ' kbps' 
+                                           ,str(kbps_sendto) + ' kbps'
+                                           ,str(len(peer.peer_list)+1))
             if kbps_recvfrom > 0 and kbps_expected_recv > 0:
                 nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
             else:
@@ -215,7 +223,8 @@ class Peer():
                 else:
                     break
             print()
-
+        if common.CONSOLE_MODE == False :
+            speed_adapter.update_widget(str(0)+' kbps',str(0)+' kbps',str(0))
             # }}}
 if __name__ == "__main__":
     x = Peer()
