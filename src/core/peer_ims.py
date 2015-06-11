@@ -336,7 +336,8 @@ class Peer_IMS(threading.Thread):
         for x in range(int(self.buffer_size/2)):
             _print_("{:.2%}\r".format((1.0*x)/(self.buffer_size/2)), end='')
             BUFFER_STATUS = (100*x)/(self.buffer_size/2) +1
-            buffering_adapter.update_widget(BUFFER_STATUS)
+            if common.CONSOLE_MODE == False :
+                buffering_adapter.update_widget(BUFFER_STATUS)
             #print("!", end='')
             sys.stdout.flush()
             while self.process_next_message() < 0:

@@ -2,6 +2,7 @@ import threading
 import sys
 try:
     from adapter.buffering_adapter import Buffering_Adapter
+    from adapter.speed_adapter import Speed_Adapter
     from gi.repository import GObject
     from gi.repository import Gtk
     from gi.repository import GdkX11
@@ -11,11 +12,11 @@ except Exception as msg:
     print(msg)
 
 class Main_Controller():
-    
+
     PLAYER_MRL = 'http://localhost:9999'
     PLAYER_MEDIA_SOURCE = "../data/images/p2psp.jpg"
-    
-    
+
+
     def __init__(self,window,model):
         self.peer_active = False
         self.player_paused = False
@@ -26,18 +27,22 @@ class Main_Controller():
         self.app_model = model
         self.app_window.interface.connect_signals(self.setup_signals())
         self.app_window.player_surface.connect("realize",self._realized)
-        self.adapter = Buffering_Adapter()
-        self.adapter.set_widget(self.app_window.buffer_status_bar)
-
+        self.buffer_adapter = Buffering_Adapter()
+        self.buffer_adapter.set_widget(self.app_window.buffer_status_bar)
+        self.speed_adapter = Speed_Adapter()
+        self.speed_adapter.set_widget(self.app_window.down_speed_label
+                                     ,self.app_window.up_speed_label
+                                     ,self.app_window.users_label)
+        
     def start_peer(self):
         thread1 = Peer_Thread(1, "Peer Thread")
         thread1.start()
         self.peer_active = True
         print 'thread started'
-        
+
     def show(self):
         self.app_window.show()
-        
+
     def setup_signals(self):
         signals = {
         'on_StopButton_clicked'                 : self.stop_player
@@ -47,47 +52,48 @@ class Main_Controller():
         ,'on_Surface_button_press_event'        : self.toggle_status_box
                    }
         return signals
-    
+
     def toggle_player_type(self,win_id):
         if self.peer_active :
             self.player = self.vlc_player_instance.stream_player(self.win_id,self.PLAYER_MRL)
         else:
             self.player = self.vlc_player_instance.media_player(self.win_id,self.PLAYER_MEDIA_SOURCE)
         self.player.play()
-             
+
     def stop_player(self, widget, data=None):
         self.player.stop()
         self.peer_active = False
         self.toggle_player_type(self.win_id)
         self.app_window.playback_toggle_button.set_image(self.app_window.play_image)
         #self.player_instance.em.event_attach(gui.vlc.EventType.MediaPlayerEndReached,self.end_callback)
-        
+
     def quit(self):
         #self.player_instance.em.event_detach(gui.vlc.EventType.MediaPlayerEndReached)
         self.player.stop()
-        
+
     def end_callback(self):
         if self.peer_active == False:
             self.toggle_player_type(self.win_id)
-        
+
     def toggle_player_playback(self, widget, data=None):
         if self.peer_active == False and self.player_paused == False:
             #self.player_instance.em.event_detach(gui.vlc.EventType.MediaPlayerEndReached)
             self.start_peer()
             self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
             self.toggle_player_type(self.win_id)
-            
+
         elif self.peer_active == True and self.player_paused == True:
             self.player.play()
             self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
             self.player_paused = False
+
         elif self.peer_active == True and self.player_paused == False:
             self.player.pause()
             self.app_window.playback_toggle_button.set_image(self.app_window.play_image)
             self.player_paused = True
         else:
             pass
-        
+
     def toggle_channel_box(self, widget, data=None):
         if self.channels_revealed == True:
             self.app_window.channel_box.hide()
@@ -97,7 +103,7 @@ class Main_Controller():
             self.app_window.channel_box.show()
             self.app_window.channel_revealer.set_label('>>')
             self.channels_revealed = True
-        
+
     def toggle_player_fullscreen(self, widget, data=None):
         if self.player_fullscreen == False:
             self.app_window.hide_all_but_surface()
@@ -109,10 +115,10 @@ class Main_Controller():
             self.app_window.window.unfullscreen()
             self.player_fullscreen = False
             self.status_box_hidden = False
-            
+
     def redraw_surface(self,widget,data=None):
         self.end_callback()
-            
+
     def toggle_status_box(self,widget,data=None):
         if self.player_fullscreen == True:
             if self.status_box_hidden == False :
@@ -121,11 +127,10 @@ class Main_Controller():
             else:
                 self.app_window.show_status_box()
                 self.status_box_hidden = False
-                                
+
     def _realized(self,widget,data=None):
         self.vlc_player_instance = self.app_model.get_vlc_player_instance()
         #self.player_instance.em.event_attach(gui.vlc.EventType.MediaPlayerEndReached,self.end_callback)
         self.win_id = widget.get_window().get_xid()
         self.toggle_player_type(self.win_id)
         self.app_window.player_surface.connect("configure_event", self.redraw_surface)
-        

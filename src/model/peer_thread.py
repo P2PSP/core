@@ -2,11 +2,13 @@ import threading
 
 try:
     import core.peer as peer
+    import core.common as common
     from core.peer_ims import  Peer_IMS
 except Exception as msg:
     print(msg)
 
 Peer_IMS.USE_LOCALHOST = True
+common.CONSOLE_MODE = False
 
 class Peer_Thread (threading.Thread):
     def __init__(self, threadID, name):
