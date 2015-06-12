@@ -13,7 +13,7 @@ class Main_Window():
     SCREEN = Gdk.Screen.get_default()
     
     def __init__(self):
-        self.interface = file_util.get_user_interface('glade', '../data/glade/mainwindow.glade')
+        self.interface = file_util.get_user_interface(__file__, '../../data/glade/mainwindow.glade')
         self.load_widgets()
         self.window.connect("destroy",Gtk.main_quit)
         self.channel_box.set_size_request(self.SCREEN.get_width()/8,self.SCREEN.get_height()/4)
@@ -32,7 +32,7 @@ class Main_Window():
         self.play_image = self.interface.get_object('PlayImage')
         self.pause_image = self.interface.get_object('PauseImage')
         self.monitor_image = self.interface.get_object('MonitorThumbnail')
-        self.monitor_image.set_from_file(file_util.find_file('images','../data/images/monitor_thumbnail.png'))
+        self.monitor_image.set_from_file(file_util.find_file(__file__,'../../data/images/monitor_thumbnail.png'))
         self.buffer_status_bar = self.interface.get_object('ProgressBar')
         self.up_speed_label = self.interface.get_object('UpSpeedlabel')
         self.down_speed_label = self.interface.get_object('DownSpeedlabel')

@@ -6,12 +6,14 @@ try:
     from model.model import Model
 except Exception as msg:
     print(msg)
-
-GObject.threads_init()
-App_Model = Model()
-App_Window = Main_Window()
-App = Main_Controller(App_Window,App_Model)
-App.show()
-Gtk.main()
-App.quit()
-print "Exiting Gtk-Main Thread"
+try:
+    GObject.threads_init()
+    App_Model = Model()
+    App_Window = Main_Window()
+    App = Main_Controller(App_Window,App_Model)
+    App.show()
+    Gtk.main()
+    App.quit()
+    print "Exiting Gtk-Main Thread"
+except Exception as msg:
+    print(msg)
