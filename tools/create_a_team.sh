@@ -19,13 +19,15 @@ export CHANNEL="Big_Buck_Bunny_small.ogv"
 #export BUFFER_SIZE=128
 #export CHANNEL="sintel_trailer-144p.ogg"
 
-export HEADER_SIZE=10
 export MAX_CHUNK_LOSS=8
+
+export HEADER_SIZE=10
+export MAX_CHUNK_DEBT=8
 export CHUNK_SIZE=1024
 #export MAX_CHUNK_DEBT=32
 #export MAX_CHUNK_DEBT=128
 #export MAX_CHUNK_DEBT=32
-#export MAX_CHUNK_LOSS=0
+#export MAX_CHUNK_DEBT=0
 export ITERATIONS=100
 export SOURCE_ADDR="127.0.0.1"
 export SOURCE_PORT=8080
@@ -48,7 +50,7 @@ usage() {
     echo "  [-b buffer size in chunks ($BUFFER_SIZE)]"
     echo "  [-c channel ($CHANNEL)]"
     echo "  [-k chunks size ($CHUNK_SIZE)]"
-#    echo "  [-d maximum chunk debt ($MAX_CHUNK_DEBT)]"
+    echo "  [-d maximum chunk debt ($MAX_CHUNK_DEBT)]"
     echo "  [-l maximum chunk loss ($MAX_CHUNK_LOSS)]"
     echo "  [-i iterations of this script ($ITERATIONS)]"
     echo "  [-s source IP address, ($SOURCE_ADDR)]"
@@ -84,10 +86,10 @@ while getopts "h:b:c:k:d:l:i:s:o:a:p:mr:t:f:y:w:?" opt; do
 	    CHUNK_SIZE="${OPTARG}"
 	    echo "CHUNK_SIZE="$CHUNK_SIZE
 	    ;;
-#	d)
-#	    MAX_CHUNK_DEBT="${OPTARG}"
-#	    echo "MAX_CHUNK_DEBT="$MAX_CHUNK_DEBT
-#	    ;;
+	d)
+	    MAX_CHUNK_DEBT="${OPTARG}"
+	    echo "MAX_CHUNK_DEBT="$MAX_CHUNK_DEBT
+	    ;;
 	l)
 	    MAX_CHUNK_LOSS="${OPTARG}"
 	    echo "MAX_CHUNK_LOSS="$MAX_CHUNK_LOSS
@@ -98,11 +100,11 @@ while getopts "h:b:c:k:d:l:i:s:o:a:p:mr:t:f:y:w:?" opt; do
 	    ;;
 	s)
 	    SOURCE_ADDR="${OPTARG}"
-	    echo "LOSSES_THRESHOLD="$SOURCE_ADDR
+	    echo "SOURCE_ADDR="$SOURCE_ADDR
 	    ;;
 	o)
 	    SOURCE_PORT="${OPTARG}"
-	    echo "LOSSES_THRESHOLD="$SOURCE_PORT
+	    echo "SOURCE_PORT="$SOURCE_PORT
 	    ;;
 	a)
 	    SPLITTER_ADDR="${OPTARG}"
@@ -215,7 +217,7 @@ while [ $x -le $ITERATIONS ]
 do
     sleep $BIRTHDAY_PERIOD
 
-    ./play.sh -a $SPLITTER_ADDR -p $SPLITTER_PORT &
+    ./play.sh -a $SPLITTER_ADDR -p $SPLITTER_PORT -d $MAX_CHUNK_DEBT &
 
     x=$(( $x + 1 ))
 done

@@ -3,6 +3,10 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
+# The P2PSP.org project has been supported by the Junta de Andalucía
+# through the Proyecto Motriz "Codificación de Vídeo Escalable y su
+# Streaming sobre Internet" (P10-TIC-6548).
+
 # {{{
 
 from __future__ import print_function
@@ -28,7 +32,7 @@ class Peer_DBS(Peer_IMS):
 
     # {{{ Class "constants"
 
-    MAX_CHUNK_LOSS = 128
+    MAX_CHUNK_DEBT = 128
 
     # }}}
 
@@ -50,7 +54,7 @@ class Peer_DBS(Peer_IMS):
         self.message_format = peer.message_format
         #self.extended_message_format = peer.message_format + "4sH"
 
-        _print_("DBS: max_chunk_loss =", self.MAX_CHUNK_LOSS)
+        _print_("DBS: max_chunk_debt =", self.MAX_CHUNK_DEBT)
         
         # }}}
 
@@ -191,7 +195,7 @@ class Peer_DBS(Peer_IMS):
                         # }}}
 
                         self.debt[peer] += 1
-                        if self.debt[peer] > self.MAX_CHUNK_LOSS:
+                        if self.debt[peer] > self.MAX_CHUNK_DEBT:
                             print (Color.red, "DBS:", peer, 'removed by unsupportive (' + str(self.debt[peer]) + ' lossess)', Color.none)
                             del self.debt[peer]
                             self.peer_list.remove(peer)
@@ -235,7 +239,7 @@ class Peer_DBS(Peer_IMS):
                     self.sendto_counter += 1
 
                     self.debt[peer] += 1
-                    if self.debt[peer] > self.MAX_CHUNK_LOSS:
+                    if self.debt[peer] > self.MAX_CHUNK_DEBT:
                         print (Color.red, "DBS:", peer, 'removed by unsupportive (' + str(self.debt[peer]) + ' lossess)', Color.none)
                         del self.debt[peer]
                         self.peer_list.remove(peer)
@@ -337,7 +341,7 @@ class Peer_DBS(Peer_IMS):
 
         self.sendto_counter = 0
 
-        self.debt_memory = 1 << self.MAX_CHUNK_LOSS
+        self.debt_memory = 1 << self.MAX_CHUNK_DEBT
 
         Peer_IMS.buffer_data(self)
 

@@ -3,6 +3,10 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
+# The P2PSP.org project has been supported by the Junta de Andalucía
+# through the Proyecto Motriz "Codificación de Vídeo Escalable y su
+# Streaming sobre Internet" (P10-TIC-6548).
+
 # {{{ Imports
 import threading
 import sys
