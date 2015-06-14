@@ -47,7 +47,7 @@ class StrpeSplitter(Splitter_LRS):
                 # }}}
             elif len(message) == 34:
                 # trusted peer sends hash of received chunk
-                # number of chunk, hash (crc32) of chunk
+                # number of chunk, hash (sha256) of chunk
                 endpoint = sender[0] + ':' + str(sender[1])
                 if endpoint in self.trusted_peers:
                     self.process_chunk_hash_message(message)
