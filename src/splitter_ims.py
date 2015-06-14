@@ -1,3 +1,5 @@
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
@@ -51,7 +53,7 @@ class Splitter_IMS(threading.Thread):
     # {{{ The unicast IP address of the splitter server.
     # }}}
     #SPLITTER_ADDR = "127.0.0.1" # No por ahora
-    
+
     # {{{ Port used to serve the peers (listening port).
     # }}}
     PORT = 4552
@@ -110,7 +112,7 @@ class Splitter_IMS(threading.Thread):
         # {{{ Used to talk to the source
         # }}}
         self.source_socket = ""
-        
+
         # {{{ The video header.
         # }}}
         #self.header = buffer('')
@@ -127,7 +129,7 @@ class Splitter_IMS(threading.Thread):
         self.sendto_counter = 0
 
         self.header_load_counter = 0
-        
+
         # }}}
 
     def send_the_header(self, peer_serve_socket):
@@ -138,7 +140,7 @@ class Splitter_IMS(threading.Thread):
             peer_serve_socket.sendall(self.header)
         except:
             pass
-        
+
         # }}}
 
     def send_the_buffer_size(self, peer_serve_socket):
@@ -151,7 +153,7 @@ class Splitter_IMS(threading.Thread):
             peer_serve_socket.sendall(message)
         except:
             pass
-        
+
         # }}}
 
     def send_the_chunk_size(self, peer_serve_socket):
@@ -164,7 +166,7 @@ class Splitter_IMS(threading.Thread):
             peer_serve_socket.sendall(message)
         except:
             pass
-        
+
         # }}}
 
     def send_the_mcast_channel(self, peer_serve_socket):
@@ -174,7 +176,7 @@ class Splitter_IMS(threading.Thread):
             print("IMS: Communicating the multicast channel", (self.MCAST_ADDR, self.PORT))
         message = struct.pack("4sH", socket.inet_aton(self.MCAST_ADDR), socket.htons(self.PORT))
         peer_serve_socket.sendall(message)
-        
+
         # }}}
 
     def send_the_header_size(self, peer_serve_socket):
@@ -187,7 +189,7 @@ class Splitter_IMS(threading.Thread):
             peer_serve_socket.sendall(message)
         except:
             pass
-        
+
         # }}}
 
     def send_configuration(self, sock):
@@ -205,7 +207,7 @@ class Splitter_IMS(threading.Thread):
         # {{{ Handle the arrival of a peer. When a peer want to join a
         # team, first it must establish a TCP connection with the
         # splitter.
-        
+
         serve_socket = connection[0]
         sys.stdout.write(Color.green)
         print(serve_socket.getsockname(), '\b: IMS: accepted connection from peer', \
@@ -217,7 +219,7 @@ class Splitter_IMS(threading.Thread):
         # }}}
 
     def handle_arrivals(self):
-        # {{{ 
+        # {{{
 
         while self.alive:
             peer_serve_socket, peer = self.peer_connection_socket.accept()
@@ -243,14 +245,14 @@ class Splitter_IMS(threading.Thread):
 
         # {{{ Set the connection queue to the max!
         # }}}
-        self.peer_connection_socket.listen(socket.SOMAXCONN) 
+        self.peer_connection_socket.listen(socket.SOMAXCONN)
 
         # }}}
 
     def setup_team_socket(self):
         # {{{ Used to talk with the peers of the team. In this case,
         # it corresponds to a multicast channel.
-        
+
         self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 0)
 
@@ -284,9 +286,9 @@ class Splitter_IMS(threading.Thread):
                 print(self.source_socket.getsockname(), 'IMS: connecting to the source', self.source, '...')
             except Exception as e:
                 pass
-            # The behavior and return value for calling socket.socket.getsockname() on 
+            # The behavior and return value for calling socket.socket.getsockname() on
             # an unconnected unbound socket is unspecified.
-            # On UNIX, it returns an address ('0.0.0.0', 0), while on Windows it raises an obscure exception 
+            # On UNIX, it returns an address ('0.0.0.0', 0), while on Windows it raises an obscure exception
             # "error: (10022, 'Invalid argument')"
 
             # I think we can avoid printing before connecting to the source to prevent errors in windows
@@ -367,7 +369,7 @@ class Splitter_IMS(threading.Thread):
         return chunk
 
         # }}}
-        
+
     def receive_chunk(self):
         # {{{
 
@@ -380,7 +382,7 @@ class Splitter_IMS(threading.Thread):
             #_print_("3: header_load_counter =", self.header_load_counter)
 
         self.recvfrom_counter += 1
-            
+
         return chunk
 
         # }}}
@@ -395,7 +397,7 @@ class Splitter_IMS(threading.Thread):
             sys.stdout.flush()
 
         self.sendto_counter += 1
-        
+
         # }}}
 
     def receive_the_header(self):
@@ -417,13 +419,13 @@ class Splitter_IMS(threading.Thread):
         # {{{
 
         self.receive_the_header()
-        
+
         print(self.peer_connection_socket.getsockname(), "\b: IMS: waiting for a peer ...")
         self.handle_a_peer_arrival(self.peer_connection_socket.accept())
         threading.Thread(target=self.handle_arrivals).start()
 
         message_format = self.chunk_number_format + str(self.CHUNK_SIZE) + "s"
-        
+
         #_print_("4: header_load_counter =", self.header_load_counter)
         while self.alive:
             #self.receive_and_send_a_chunk(header_load_counter)
@@ -436,4 +438,3 @@ class Splitter_IMS(threading.Thread):
         # }}}
 
     # }}}
-

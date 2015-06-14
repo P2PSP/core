@@ -1,3 +1,5 @@
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
@@ -55,7 +57,7 @@ class Peer_DBS(Peer_IMS):
         #self.extended_message_format = peer.message_format + "4sH"
 
         _print_("DBS: max_chunk_debt =", self.MAX_CHUNK_DEBT)
-        
+
         # }}}
 
     def say_hello(self, node):
@@ -119,7 +121,7 @@ class Peer_DBS(Peer_IMS):
         sys.stdout.write(Color.none)
 
         # }}}
-        
+
     def receive_my_endpoint(self):
         # {{{
 
@@ -131,7 +133,7 @@ class Peer_DBS(Peer_IMS):
         _print_("DBS: me =", self.me)
 
         # }}}
-        
+
     def listen_to_the_team(self):
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
@@ -257,7 +259,7 @@ class Peer_DBS(Peer_IMS):
 
                     # }}}
                 # }}}
-                
+
                 return chunk_number
 
                 # }}}
@@ -346,7 +348,7 @@ class Peer_DBS(Peer_IMS):
         Peer_IMS.buffer_data(self)
 
         # }}}
-        
+
     def run(self):
         # {{{
 

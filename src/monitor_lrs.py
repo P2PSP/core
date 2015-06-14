@@ -1,3 +1,5 @@
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
@@ -29,7 +31,7 @@ class Monitor_LRS(Monitor_FNS):
         sys.stdout.write(Color.none)
 
         threading.Thread.__init__(self)
-        
+
         self.splitter_socket = peer.splitter_socket
         self.splitter = peer.splitter
         self.buffer_size = peer.buffer_size
