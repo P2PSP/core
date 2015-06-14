@@ -1,7 +1,13 @@
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
+
+# The P2PSP.org project has been supported by the Junta de Andalucía
+# through the Proyecto Motriz "Codificación de Vídeo Escalable y su
+# Streaming sobre Internet" (P10-TIC-6548).
 
 # {{{ Imports
 
@@ -41,7 +47,7 @@ class Monitor_DBS(Peer_DBS):
         self.message_format = peer.message_format
         self.team_socket = peer.team_socket
         #self.extended_message_format = peer.extended_message_format
-        
+
         # }}}
 
     def print_the_module_name(self):
@@ -52,7 +58,7 @@ class Monitor_DBS(Peer_DBS):
         sys.stdout.write(Color.none)
 
         # }}}
-    
+
     def complain(self, chunk_number):
         # {{{
 

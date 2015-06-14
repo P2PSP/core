@@ -6,6 +6,10 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
+# The P2PSP.org project has been supported by the Junta de Andalucía
+# through the Proyecto Motriz "Codificación de Vídeo Escalable y su
+# Streaming sobre Internet" (P10-TIC-6548).
+
 # PYTHON_ARGCOMPLETE_OK
 
 # {{{ Imports
@@ -23,6 +27,7 @@ from splitter_dbs import Splitter_DBS
 from splitter_fns import Splitter_FNS
 from splitter_acs import Splitter_ACS
 from splitter_lrs import Splitter_LRS
+from splitter_strpe import  StrpeSplitter
 import common
 from _print_ import _print_
 try:
@@ -76,6 +81,8 @@ class Splitter():
 
         parser.add_argument('--source_port', help='Port where the streaming server is listening. Default = {}.'.format(Splitter_IMS.SOURCE_PORT))
 
+        parser.add_argument('--strpe', nargs='+', type=str, help='Enables STrPe')
+
         try:
             argcomplete.autocomplete(parser)
         except Exception:
@@ -114,14 +121,18 @@ class Splitter():
             splitter.peer_list = []
 
         else:
-
             if args.max_chunk_loss:
                 Splitter_DBS.MAX_CHUNK_LOSS = int(args.max_chunk_loss)
 
             #splitter = Splitter_DBS()
             #splitter = Splitter_FNS()
             #splitter = Splitter_ACS()
-            splitter = Splitter_LRS()
+            if (args.strpe != None):
+                splitter = StrpeSplitter()
+                for peer in args.strpe:
+                    splitter.add_trusted_peer(peer)
+            else:
+                splitter = Splitter_LRS()
 
         # }}}
 

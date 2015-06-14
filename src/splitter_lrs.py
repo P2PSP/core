@@ -1,7 +1,13 @@
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
+
+# The P2PSP.org project has been supported by the Junta de Andalucía
+# through the Proyecto Motriz "Codificación de Vídeo Escalable y su
+# Streaming sobre Internet" (P10-TIC-6548).
 
 # {{{ Imports
 
@@ -58,7 +64,7 @@ class Splitter_LRS(Splitter_ACS):
 
         Splitter_ACS.send_chunk(self, message, peer)
         self.buffer[self.chunk_number % self.BUFFER_SIZE] = message
-        
+
         # }}}
 
 

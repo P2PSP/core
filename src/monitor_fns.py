@@ -1,7 +1,13 @@
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
+
+# The P2PSP.org project has been supported by the Junta de Andalucía
+# through the Proyecto Motriz "Codificación de Vídeo Escalable y su
+# Streaming sobre Internet" (P10-TIC-6548).
 
 # {{{ Imports
 
@@ -34,7 +40,7 @@ class Monitor_FNS(Peer_FNS, Monitor_DBS):
         self.chunk_format_string = peer.chunk_format_string
         self.splitter = peer.splitter
         self.chunk_size = peer.chunk_size
-        
+
         self.peer_list = peer.peer_list
         self.debt = peer.debt
 
