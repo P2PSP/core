@@ -41,7 +41,7 @@ from lossy_peer import Lossy_Peer
 try:
     from adapter import speed_adapter
 except ImportError as msg:
-    print(msg)
+    pass
 
 # }}}
 
@@ -195,7 +195,7 @@ class Peer():
                                             ,str(kbps_sendto) + ' kbps'
                                             ,str(len(peer.peer_list)+1))
             except Exception as msg:
-                print(msg)
+                pass
             if kbps_recvfrom > 0 and kbps_expected_recv > 0:
                 nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
             else:
@@ -230,7 +230,7 @@ class Peer():
             if common.CONSOLE_MODE == False :
                 speed_adapter.update_widget(str(0)+' kbps',str(0)+' kbps',str(0))
         except  Exception as msg:
-            print(msg)
+            pass
             # }}}
 if __name__ == "__main__":
     x = Peer()

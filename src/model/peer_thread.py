@@ -1,11 +1,13 @@
 import threading
+import traceback
 
 try:
     import core.peer as peer
     import core.common as common
     from core.peer_ims import  Peer_IMS
+    from common.decorators import exc_handler
 except ImportError as msg:
-    print(msg)
+    traceback.print_exc()
 
 Peer_IMS.USE_LOCALHOST = True
 common.CONSOLE_MODE = False
@@ -16,11 +18,10 @@ class Peer_Thread (threading.Thread):
         self.peer_active = False
         self.threadID = threadID
         self.name = name
+
+    @exc_handler
     def run(self):
-        try:
-            print "Starting " + self.name
-            self.peer_active = True
-            self.x=peer.Peer()
-            print "Exiting " + self.name
-        except Exception as msg:
-            print(msg)
+        print "Starting " + self.name
+        self.peer_active = True
+        self.x=peer.Peer()
+        print "Exiting " + self.name

@@ -1,7 +1,8 @@
+import traceback
 try:
     from vlc_player import VLC_Player
 except ImportError as msg:
-    print(msg)
+    traceback.print_exc()
     
 class Model():  
     
