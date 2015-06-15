@@ -1,6 +1,6 @@
 try:
     from vlc_player import VLC_Player
-except Exception as msg:
+except ImportError as msg:
     print(msg)
     
 class Model():  

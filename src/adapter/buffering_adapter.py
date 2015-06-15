@@ -1,8 +1,10 @@
 def update_widget(BUFFER_STATUS):
-    Buffering_Adapter.WIDGET.set_fraction(float(BUFFER_STATUS)/100)
-    if BUFFER_STATUS == 100:
-        Buffering_Adapter.WIDGET.hide()
-    
+    try:
+        Buffering_Adapter.WIDGET.set_fraction(float(BUFFER_STATUS)/100)
+        if BUFFER_STATUS == 100:
+            Buffering_Adapter.WIDGET.hide()
+    except Exception as msg:
+        print(msg)
     
 class Buffering_Adapter():
     

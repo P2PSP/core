@@ -16,7 +16,7 @@ import time
 from _print_ import _print_
 try:
     from adapter import buffering_adapter
-except Exception as msg:
+except ImportError as msg:
     print(msg)
 
 

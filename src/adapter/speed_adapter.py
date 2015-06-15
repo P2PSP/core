@@ -1,8 +1,10 @@
 def update_widget(down_speed,up_speed,users):
-    Speed_Adapter.DOWN_WIDGET.set_text(down_speed)
-    Speed_Adapter.UP_WIDGET.set_text(up_speed)
-    Speed_Adapter.USERS_WIDGET.set_text('Users Online: '+users)
-    
+    try:
+        Speed_Adapter.DOWN_WIDGET.set_text(down_speed)
+        Speed_Adapter.UP_WIDGET.set_text(up_speed)
+        Speed_Adapter.USERS_WIDGET.set_text('Users Online: '+users)
+    except Exception as msg:
+        print(msg)
     
 class Speed_Adapter():
     

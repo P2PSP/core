@@ -40,7 +40,7 @@ from monitor_lrs import Monitor_LRS
 from lossy_peer import Lossy_Peer
 try:
     from adapter import speed_adapter
-except Exception as msg:
+except ImportError as msg:
     print(msg)
 
 # }}}
@@ -57,7 +57,7 @@ class Peer():
             colorama.init()
         except Exception:
             pass
-    
+
         _print_("Running in", end=' ')
         if __debug__:
             print("debug mode")
@@ -123,7 +123,7 @@ class Peer():
         peer.receive_the_buffer_size()
         #peer.receive_configuration()
         _print_("IP Multicast address =", peer.mcast_addr)
-        
+
         # A multicast address is always received, even for DBS peers.
         if peer.mcast_addr == "0.0.0.0":
             # {{{ This is an "unicast" peer.
@@ -147,9 +147,9 @@ class Peer():
                     print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
                     if int(args.chunk_loss_period) != 0:
                         peer = Lossy_Peer(peer)
-                    
+
             #peer.receive_my_endpoint()
-            
+
             # }}}
         else:
             peer.listen_to_the_team()
@@ -189,10 +189,13 @@ class Peer():
             kbps_expected_sent = int(kbps_expected_recv*team_ratio)
             kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
             last_sendto_counter = peer.sendto_counter
-            if common.CONSOLE_MODE == False :
-                speed_adapter.update_widget(str(kbps_recvfrom) + ' kbps' 
-                                           ,str(kbps_sendto) + ' kbps'
-                                           ,str(len(peer.peer_list)+1))
+            try:
+                if common.CONSOLE_MODE == False :
+                    speed_adapter.update_widget(str(kbps_recvfrom) + ' kbps'
+                                            ,str(kbps_sendto) + ' kbps'
+                                            ,str(len(peer.peer_list)+1))
+            except Exception as msg:
+                print(msg)
             if kbps_recvfrom > 0 and kbps_expected_recv > 0:
                 nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
             else:
@@ -223,8 +226,11 @@ class Peer():
                 else:
                     break
             print()
-        if common.CONSOLE_MODE == False :
-            speed_adapter.update_widget(str(0)+' kbps',str(0)+' kbps',str(0))
+        try:
+            if common.CONSOLE_MODE == False :
+                speed_adapter.update_widget(str(0)+' kbps',str(0)+' kbps',str(0))
+        except  Exception as msg:
+            print(msg)
             # }}}
 if __name__ == "__main__":
     x = Peer()

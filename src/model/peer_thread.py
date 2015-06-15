@@ -4,7 +4,7 @@ try:
     import core.peer as peer
     import core.common as common
     from core.peer_ims import  Peer_IMS
-except Exception as msg:
+except ImportError as msg:
     print(msg)
 
 Peer_IMS.USE_LOCALHOST = True
@@ -17,7 +17,10 @@ class Peer_Thread (threading.Thread):
         self.threadID = threadID
         self.name = name
     def run(self):
-        print "Starting " + self.name
-        self.peer_active = True
-        self.x=peer.Peer()
-        print "Exiting " + self.name
+        try:
+            print "Starting " + self.name
+            self.peer_active = True
+            self.x=peer.Peer()
+            print "Exiting " + self.name
+        except Exception as msg:
+            print(msg)

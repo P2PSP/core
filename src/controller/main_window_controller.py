@@ -6,13 +6,17 @@ try:
     from gi.repository import GdkX11
     import common.file_util as file_util
     from model.peer_thread import Peer_Thread
-except Exception as msg:
+except ImportError as msg:
     print(msg)
 
 class Main_Controller():
 
     PLAYER_MRL = 'http://localhost:9999'
-    PLAYER_MEDIA_SOURCE = file_util.find_file(__file__, "../../data/images/p2psp.jpg")
+    try:
+        PLAYER_MEDIA_SOURCE = file_util.find_file(__file__,
+                                                  "../../data/images/p2psp.jpg")
+    except Exception as msg:
+        print(msg)
 
     def __init__(self,window,model):
         self.peer_active = False
@@ -37,12 +41,13 @@ class Main_Controller():
     def start_peer(self):
         self.peer_active = True
         try:
+            self.app_window.buffer_status_bar.set_fraction(0)
             self.app_window.buffer_status_bar.show()
+            thread1 = Peer_Thread(1, "Peer Thread")
+            thread1.start()
+            print 'thread started'
         except Exception as msg:
             print(msg)
-        thread1 = Peer_Thread(1, "Peer Thread")
-        thread1.start()
-        print 'thread started'
 
     def show(self):
         try:
@@ -64,80 +69,111 @@ class Main_Controller():
             print(msg)
 
     def toggle_player_type(self,win_id):
-        if self.peer_active :
-            self.player = self.vlc_player_instance.stream_player(self.win_id,self.PLAYER_MRL)
-        else:
-            self.player = self.vlc_player_instance.media_player(self.win_id,self.PLAYER_MEDIA_SOURCE)
-        self.player.play()
+        try:
+            if self.peer_active :
+                self.player = self.vlc_player_instance.stream_player(self.win_id,
+                                                                self.PLAYER_MRL)
+            else:
+                self.player = self.vlc_player_instance.media_player(self.win_id,
+                                                       self.PLAYER_MEDIA_SOURCE)
+            self.player.play()
+        except Exception as msg:
+            print(msg)
 
     def stop_player(self, widget, data=None):
-        self.player.stop()
-        self.peer_active = False
-        self.player_paused = False
-        self.toggle_player_type(self.win_id)
-        self.app_window.playback_toggle_button.set_image(self.app_window.play_image)
+        try:
+            self.player.stop()
+            self.peer_active = False
+            self.player_paused = False
+            self.toggle_player_type(self.win_id)
+            self.app_window.playback_toggle_button.set_image(self.app_window.play_image)
+            self.app_window.buffer_status_bar.hide()
+        except Exception as msg:
+            print(msg)
 
     def quit(self):
-        self.player.stop()
+        try:
+            self.player.stop()
+        except Exception as msg:
+            print(msg)
 
     def end_callback(self):
         if self.peer_active == False:
             self.toggle_player_type(self.win_id)
 
     def toggle_player_playback(self, widget, data=None):
-        if self.peer_active == False and self.player_paused == False:
-            self.start_peer()
-            self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
-            self.toggle_player_type(self.win_id)
+        try:
+            if self.peer_active == False and self.player_paused == False:
+                self.start_peer()
+                self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
+                self.toggle_player_type(self.win_id)
 
-        elif self.peer_active == True and self.player_paused == True:
-            self.player.play()
-            self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
-            self.player_paused = False
+            elif self.peer_active == True and self.player_paused == True:
+                self.player.play()
+                self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
+                self.player_paused = False
 
-        elif self.peer_active == True and self.player_paused == False:
-            self.player.pause()
-            self.app_window.playback_toggle_button.set_image(self.app_window.play_image)
-            self.player_paused = True
-        else:
-            pass
+            elif self.peer_active == True and self.player_paused == False:
+                self.player.pause()
+                self.app_window.playback_toggle_button.set_image(self.app_window.play_image)
+                self.player_paused = True
+            else:
+                pass
+        except Exception as msg:
+            print(msg)
 
     def toggle_channel_box(self, widget, data=None):
-        if self.channels_revealed == True:
-            self.app_window.channel_box.hide()
-            self.app_window.channel_revealer.set_label('<<')
-            self.channels_revealed = False
-        elif self.channels_revealed == False:
-            self.app_window.channel_box.show()
-            self.app_window.channel_revealer.set_label('>>')
-            self.channels_revealed = True
+        try:
+            if self.channels_revealed == True:
+                self.app_window.channel_box.hide()
+                self.app_window.channel_revealer.set_label('<<')
+                self.channels_revealed = False
+            elif self.channels_revealed == False:
+                self.app_window.channel_box.show()
+                self.app_window.channel_revealer.set_label('>>')
+                self.channels_revealed = True
+        except Exception as msg:
+            print(msg)
 
     def toggle_player_fullscreen(self, widget, data=None):
-        if self.player_fullscreen == False:
-            self.app_window.hide_all_but_surface()
-            self.app_window.window.fullscreen()
-            self.player_fullscreen = True
-            self.status_box_hidden = True
-        else:
-            self.show()
-            self.app_window.window.unfullscreen()
-            self.player_fullscreen = False
-            self.status_box_hidden = False
-
-    def redraw_surface(self,widget,data=None):
-        self.end_callback()
-
-    def toggle_status_box(self,widget,data=None):
-        if self.player_fullscreen == True:
-            if self.status_box_hidden == False :
-                self.app_window.hide_status_box()
+        try:
+            if self.player_fullscreen == False:
+                self.app_window.hide_all_but_surface()
+                self.app_window.window.fullscreen()
+                self.player_fullscreen = True
                 self.status_box_hidden = True
             else:
-                self.app_window.show_status_box()
+                self.show()
+                self.app_window.window.unfullscreen()
+                self.player_fullscreen = False
                 self.status_box_hidden = False
+        except Exception as msg:
+            print(msg)
+
+    def redraw_surface(self,widget,data=None):
+        try:
+            self.end_callback()
+        except Exception as msg:
+            print(msg)
+
+    def toggle_status_box(self,widget,data=None):
+        try:
+            if self.player_fullscreen == True:
+                if self.status_box_hidden == False :
+                    self.app_window.hide_status_box()
+                    self.status_box_hidden = True
+                else:
+                    self.app_window.show_status_box()
+                    self.status_box_hidden = False
+        except Exception as msg:
+            print(msg)
 
     def _realized(self,widget,data=None):
-        self.vlc_player_instance = self.app_model.get_vlc_player_instance()
-        self.win_id = widget.get_window().get_xid()
-        self.toggle_player_type(self.win_id)
-        self.app_window.player_surface.connect("configure_event", self.redraw_surface)
+        try:
+            self.vlc_player_instance = self.app_model.get_vlc_player_instance()
+            self.win_id = widget.get_window().get_xid()
+            self.toggle_player_type(self.win_id)
+            self.app_window.player_surface.connect("configure_event",
+                                                   self.redraw_surface)
+        except Exception as msg:
+            print(msg)
