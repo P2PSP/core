@@ -16,8 +16,8 @@ import time
 from _print_ import _print_
 try:
     from adapter import buffering_adapter
-except Exception as msg:
-    print(msg)
+except ImportError as msg:
+    pass
 
 
 # }}}
@@ -338,6 +338,8 @@ class Peer_IMS(threading.Thread):
             BUFFER_STATUS = (100*x)/(self.buffer_size/2) +1
             if common.CONSOLE_MODE == False :
                 buffering_adapter.update_widget(BUFFER_STATUS)
+            else:
+                pass
             #print("!", end='')
             sys.stdout.flush()
             while self.process_next_message() < 0:

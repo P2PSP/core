@@ -3,7 +3,12 @@ Created on May 31, 2015
 
 @author: maniotrix
 '''
-from lib import vlc
+import traceback
+try:
+    from lib import vlc
+except ImportError as msg:
+    traceback.print_exc()
+    
 class VLC_Player():
     '''
     classdocs
