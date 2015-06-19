@@ -24,6 +24,7 @@ import argparse
 from color import Color
 from splitter_ims import Splitter_IMS
 from splitter_dbs import Splitter_DBS
+from splitter_nts import Splitter_NTS
 from splitter_fns import Splitter_FNS
 from splitter_acs import Splitter_ACS
 from splitter_lrs import Splitter_LRS
@@ -123,9 +124,10 @@ class Splitter():
                 Splitter_DBS.MAX_CHUNK_LOSS = int(args.max_chunk_loss)
 
             #splitter = Splitter_DBS()
+            splitter = Splitter_NTS()
             #splitter = Splitter_FNS()
             #splitter = Splitter_ACS()
-            splitter = Splitter_LRS()
+            #splitter = Splitter_LRS()
 
         # }}}
 
@@ -167,16 +169,17 @@ class Splitter():
                     print(p, end= ' ')
                     sys.stdout.write(Color.red)
                     print(str('%3d' % splitter.losses[p]) + '/' + str('%3d' % chunks_sendto), splitter.MAX_CHUNK_LOSS, end=' ')
-                    try:
-                        sys.stdout.write(Color.yellow)
-                        print('%3d' % splitter.period[p], end= ' ')
-                        sys.stdout.write(Color.purple)
-                        print(repr((splitter.number_of_sent_chunks_per_peer[p] * splitter.CHUNK_SIZE * 8) / 1000).rjust(10), end = ' ')
-                        splitter.number_of_sent_chunks_per_peer[p] = 0
-                    except KeyError as e:
-                        print("!", e, "--")
-                        print(splitter.period[p])
-                        pass
+                    if splitter is Splitter_ACS:
+                        try:
+                            sys.stdout.write(Color.yellow)
+                            print('%3d' % splitter.period[p], end= ' ')
+                            sys.stdout.write(Color.purple)
+                            print(repr((splitter.number_of_sent_chunks_per_peer[p] * splitter.CHUNK_SIZE * 8) / 1000).rjust(10), end = ' ')
+                            splitter.number_of_sent_chunks_per_peer[p] = 0
+                        except KeyError as e:
+                            print("!", e, "--")
+                            print(splitter.period[p])
+                            pass
                     sys.stdout.write(Color.none)
                     print('', end=' ')
                 print()

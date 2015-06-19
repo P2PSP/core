@@ -36,6 +36,7 @@ except ImportError:
 
 from peer_ims import Peer_IMS
 from peer_dbs import Peer_DBS
+from peer_nts import Peer_NTS
 from peer_fns import Peer_FNS
 from monitor_dbs import Monitor_DBS
 from monitor_fns import Monitor_FNS
@@ -128,7 +129,7 @@ class Peer():
         if peer.mcast_addr == "0.0.0.0":
             # {{{ This is an "unicast" peer.
 
-            peer = Peer_DBS(peer)
+            peer = Peer_NTS(peer)
             peer.receive_my_endpoint()
             peer.receive_the_number_of_peers()
             print("===============> number_of_peers =", peer.number_of_peers)
@@ -137,9 +138,9 @@ class Peer():
             peer.receive_the_list_of_peers()
 
             if peer.am_i_a_monitor():
-                #peer = Monitor_DBS(peer)
+                peer = Monitor_DBS(peer)
                 #peer = Monitor_FNS(peer)
-                peer = Monitor_LRS(peer)
+                #peer = Monitor_LRS(peer)
             else:
                 peer = Peer_FNS(peer)
                 if args.chunk_loss_period:
