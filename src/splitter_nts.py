@@ -9,6 +9,7 @@
 
 # {{{ Imports
 import sys
+import struct
 from splitter_dbs import Splitter_DBS
 from color import Color
 # }}}
@@ -23,5 +24,54 @@ class Splitter_NTS(Splitter_DBS):
         sys.stdout.write(Color.yellow)
         print("Using NTS")
         sys.stdout.write(Color.none)
+
+    def say_goodbye(self, node, sock):
+        # {{{
+
+        sock.sendto(b'G', node)
+
+        # }}}
+
+    def moderate_the_team(self):
+        # {{{
+
+        while self.alive:
+            # {{{
+
+            try:
+                message, sender = self.receive_message()
+            except:
+                message = b'?'
+                sender = ("0.0.0.0", 0)
+
+            if len(message) == 2:
+
+                # {{{ The peer complains about a lost chunk.
+
+                # In this situation, the splitter counts the number of
+                # complains. If this number exceeds a threshold, the
+                # unsupportive peer is expelled from the
+                # team.
+
+                lost_chunk_number = self.get_lost_chunk_number(message)
+                self.process_lost_chunk(lost_chunk_number, sender)
+
+                # }}}
+
+            else:
+                # {{{ The peer wants to leave the team.
+
+                try:
+                    if struct.unpack("s", message)[0] == 'G': # 'G'oodbye
+                        self.process_goodbye(sender)
+                except Exception as e:
+                    print("LRS: ", e)
+                    print(message)
+
+                # }}}
+
+            # }}}
+
+        # }}}
 
     # }}}

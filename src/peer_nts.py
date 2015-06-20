@@ -25,7 +25,7 @@ class Peer_NTS(Peer_DBS):
         # {{{
 
         sys.stdout.write(Color.yellow)
-        _print_("Peer NTS (list)")
+        _print_("Peer NTS")
         sys.stdout.write(Color.none)
 
         threading.Thread.__init__(self)
@@ -38,5 +38,34 @@ class Peer_NTS(Peer_DBS):
         self.message_format = peer.message_format
 
         # }}}
+
+    def say_hello(self, node):
+        # {{{
+
+        self.team_socket.sendto(b'H', node)
+
+        # }}}
+
+    def say_goodbye(self, node):
+        # {{{
+
+        self.team_socket.sendto(b'G', node)
+
+        # }}}
+
+    def disconnect_from_the_splitter(self):
+        # {{{
+
+        # Close the TCP socket
+        Peer_DBS.disconnect_from_the_splitter(self)
+
+        # Use UDP to create a working NAT entry
+        self.say_hello(self.splitter)
+        self.say_hello(self.splitter)
+        self.say_hello(self.splitter)
+
+        # }}}
+
+    # }}}
 
     # }}}
