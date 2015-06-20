@@ -10,6 +10,7 @@
 # {{{ Imports
 import sys
 import struct
+import socket
 from splitter_dbs import Splitter_DBS
 from color import Color
 # }}}
@@ -29,6 +30,31 @@ class Splitter_NTS(Splitter_DBS):
         # {{{
 
         sock.sendto(b'G', node)
+
+        # }}}
+
+    def handle_a_peer_arrival(self, connection):
+        # {{{
+
+        # {{{ In the DBS, the splitter sends to the incomming peer the
+        # list of peers. Notice that the transmission of the list of
+        # peers (something that could need some time if the team is
+        # big or if the peer is slow) is done in a separate thread. This
+        # helps to avoid DoS (Denial of Service) attacks.
+        # }}}
+
+        new_peer = connection[1]
+        if __debug__:
+            print("NTS: sending [send hello to %s]" % (new_peer,))
+            counter = 0
+        message = struct.pack("4sH", socket.inet_aton(new_peer[0]), \
+                              socket.htons(new_peer[1]))
+        for peer in self.peer_list:
+            self.team_socket.sendto(message, peer)
+            if __debug__:
+                print("NTS: [%5d]" % counter, peer)
+                counter += 1
+        return Splitter_DBS.handle_a_peer_arrival(self, connection)
 
         # }}}
 

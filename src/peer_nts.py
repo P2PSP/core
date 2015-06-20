@@ -11,6 +11,8 @@
 
 import threading
 import sys
+import struct
+import socket
 from color import Color
 from _print_ import _print_
 from peer_dbs import Peer_DBS
@@ -35,7 +37,10 @@ class Peer_NTS(Peer_DBS):
         self.buffer_size = peer.buffer_size
         self.splitter = peer.splitter
         self.chunk_size = peer.chunk_size
+        self.peer_list = peer.peer_list
+        self.debt = peer.debt
         self.message_format = peer.message_format
+        self.team_socket = peer.team_socket
 
         # }}}
 
@@ -60,8 +65,6 @@ class Peer_NTS(Peer_DBS):
         Peer_DBS.disconnect_from_the_splitter(self)
 
         # Use UDP to create a working NAT entry
-        self.say_hello(self.splitter)
-        self.say_hello(self.splitter)
         self.say_hello(self.splitter)
 
         # }}}
@@ -186,6 +189,18 @@ class Peer_NTS(Peer_DBS):
                         self.peer_list.append(sender)
                         self.debt[sender] = 0
                         print (Color.green, "NTS:", sender, 'added by [hello]', Color.none)
+                elif len(message) == struct.calcsize("4sH"):
+                    # [say hello to (X)] received from splitter
+                    IP_addr, port = struct.unpack("4sH", message) # Ojo, !H ????
+                    IP_addr = socket.inet_ntoa(IP_addr)
+                    port = socket.ntohs(port)
+                    peer = (IP_addr, port)
+                    print("NTS: received [send hello to %s]" % (peer,))
+                    print("NTS: sending [hello] to %s" % (peer,))
+                    self.say_hello(peer)
+
+                    self.peer_list.append(peer)
+                    self.debt[peer] = 0
                 else:
                     if sender in self.peer_list:
                         sys.stdout.write(Color.red)
