@@ -39,6 +39,7 @@ from peer_dbs import Peer_DBS
 from peer_nts import Peer_NTS
 from peer_fns import Peer_FNS
 from monitor_dbs import Monitor_DBS
+from monitor_nts import Monitor_NTS
 from monitor_fns import Monitor_FNS
 #from peer_lossy import Peer_Lossy
 from monitor_lrs import Monitor_LRS
@@ -129,7 +130,7 @@ class Peer():
         if peer.mcast_addr == "0.0.0.0":
             # {{{ This is an "unicast" peer.
 
-            peer = Peer_NTS(peer)
+            peer = Peer_DBS(peer)
             peer.receive_my_endpoint()
             peer.receive_the_number_of_peers()
             print("===============> number_of_peers =", peer.number_of_peers)
@@ -138,11 +139,12 @@ class Peer():
             peer.receive_the_list_of_peers()
 
             if peer.am_i_a_monitor():
-                peer = Monitor_DBS(peer)
+                #peer = Monitor_DBS(peer)
+                peer = Monitor_NTS(peer)
                 #peer = Monitor_FNS(peer)
                 #peer = Monitor_LRS(peer)
             else:
-                peer = Peer_FNS(peer)
+                peer = Peer_NTS(peer)
                 if args.chunk_loss_period:
                     Lossy_Peer.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
                     print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
