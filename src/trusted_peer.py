@@ -71,7 +71,6 @@ class TrustedPeer(Peer_DBS):
         chunk_hash = hashlib.sha256(chunk).digest()
         msg = struct.pack('H32s', chunk_number, chunk_hash)
         self.team_socket.sendto(msg, self.splitter)
-        print 'sampled sended {0}'.format(chunk_number)
 
     def calculate_next_sampled(self):
         max_random = len(self.peer_list) / TrustedPeer.SAMPLING_EFFORT
