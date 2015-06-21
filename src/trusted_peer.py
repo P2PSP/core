@@ -9,15 +9,18 @@
 from peer_dbs import Peer_DBS
 
 import struct
-import binascii
 import sys
 import socket
 from color import Color
 from _print_ import _print_
 import threading
 import hashlib
+import random
 
 class TrustedPeer(Peer_DBS):
+
+    PASS_NUMBER = 40
+    SAMPLING_EFFORT = 1
 
     def __init__(self, peer):
         sys.stdout.write(Color.yellow)
@@ -35,7 +38,7 @@ class TrustedPeer(Peer_DBS):
         self.debt = peer.debt
         self.message_format = peer.message_format
         self.team_socket = peer.team_socket
-
+        self.next_sampled_index = 0
         self.counter = 1
 
         # }}}
@@ -50,10 +53,26 @@ class TrustedPeer(Peer_DBS):
 
     def process_next_message(self):
         chunk_number = Peer_DBS.process_next_message(self)
-        if chunk_number > 0 and self.counter == 0:
-            chunk = self.chunks[chunk_number % self.buffer_size]
-            chunk_hash = hashlib.sha256(chunk).digest()
-            msg = struct.pack('H32s', chunk_number, chunk_hash)
-            self.team_socket.sendto(msg, self.splitter)
-        self.counter = (self.counter + 1) % 255
+        if chunk_number > 0 and self.current_sender != self.splitter:
+            if self.counter == 0:
+                self.send_chunk_hash(chunk_number)
+                self.counter = self.calculate_next_sampled()
+            else:
+                self.counter -= 1
         return chunk_number
+
+    def receive_the_next_message(self):
+        message, sender = Peer_DBS.receive_the_next_message(self)
+        self.current_sender = sender
+        return message, sender
+
+    def send_chunk_hash(self, chunk_number):
+        chunk = self.chunks[chunk_number % self.buffer_size]
+        chunk_hash = hashlib.sha256(chunk).digest()
+        msg = struct.pack('H32s', chunk_number, chunk_hash)
+        self.team_socket.sendto(msg, self.splitter)
+        print 'sampled sended {0}'.format(chunk_number)
+
+    def calculate_next_sampled(self):
+        max_random = len(self.peer_list) / TrustedPeer.SAMPLING_EFFORT
+        return random.randint(1, max(1, max_random)) + TrustedPeer.PASS_NUMBER
