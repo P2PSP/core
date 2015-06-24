@@ -22,7 +22,7 @@ class VLC_Player():
         # Creates Vlc Instance
         self.vlcInstance = vlc.Instance("--no-xlib")
         self.player = self.vlcInstance.media_player_new()
-        self.em = self.player.event_manager()
+        self.player.video_set_mouse_input(False)
         
     def _get_media(self,Source):
         MEDIA_SOURCE = Source

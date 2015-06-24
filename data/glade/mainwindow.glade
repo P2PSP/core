@@ -34,12 +34,11 @@
       <object class="GtkPaned" id="MainPane">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
-        <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
         <child>
           <object class="GtkBox" id="MainBox">
+            <property name="name">s</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkMenuBar" id="Menu">

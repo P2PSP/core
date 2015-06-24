@@ -18,7 +18,7 @@ def main_app():
     App.show()
     Gtk.main()
     App.quit()
-    print "Exiting Gtk-Main Thread"
-    
+    print("Exiting Gtk-Main Thread")
+
 if __name__ == "__main__":
      main_app()

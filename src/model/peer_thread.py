@@ -21,7 +21,7 @@ class Peer_Thread (threading.Thread):
 
     @exc_handler
     def run(self):
-        print "Starting " + self.name
+        print("Starting " + self.name)
         self.peer_active = True
         self.x=peer.Peer()
-        print "Exiting " + self.name
+        print("Exiting " + self.name)
