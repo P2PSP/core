@@ -28,18 +28,6 @@ class Peer_FNS(Peer_DBS):
         _print_("Peer FNS")
         sys.stdout.write(Color.none)
 
-        threading.Thread.__init__(self)
-
-        self.splitter_socket = peer.splitter_socket
-        self.player_socket = peer.player_socket
-        self.buffer_size = peer.buffer_size
-        self.splitter = peer.splitter
-        self.chunk_size = peer.chunk_size
-        self.peer_list = peer.peer_list
-        self.debt = peer.debt
-        self.message_format = peer.message_format
-        self.team_socket = peer.team_socket
-
         # }}}
 
     def say_hello(self, node):
