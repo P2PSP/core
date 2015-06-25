@@ -35,7 +35,20 @@ function stop_processes() {
 trap stop_processes EXIT
 
 # Exit on error
-set -e 
+set -e
+
+# Get P2PSP configuration from code
+splitter_class="$(ssh $user@$splitter cat $dir/splitter.py \
+    | sed -n "s/.* splitter = \(Splitter_...\)(.*/\1/p" | tail -n1)"
+monitor_class="$(ssh $user@$pc1 cat $dir/peer.py \
+    | sed -n "s/.* peer = \(Monitor_...\)(.*/\1/p" | tail -n1)"
+peer_class="$(ssh $user@$pc2 cat $dir/peer.py \
+    | sed -n "s/.* peer = \(Peer_...\)(.*/\1/p" | tail -n1)"
+branch="$(ssh $user@$pc1 cd $dir \; git rev-parse --abbrev-ref HEAD)"
+commit="$(ssh $user@$pc1 cd $dir \; git rev-parse --short HEAD)"
+configuration="$splitter_class, $monitor_class, $peer_class (branch $branch, commit $commit)"
+echo "Configuration: $configuration"
+echo
 
 # Create table
 result="Mon\Peer"
@@ -46,7 +59,6 @@ result="$result
 ======================================"
 
 # Run test
-#for nat1_config in $nat_configs; do
 for nat1_config in $nat_configs; do
     result="$result
 $nat1_config "
@@ -123,6 +135,8 @@ done
 trap - EXIT
 
 # Print result table
+echo
+echo "$configuration:"
 echo
 echo "$result"
 echo
