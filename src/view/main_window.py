@@ -1,7 +1,6 @@
 import sys
 import traceback
 try:
-    from gi.repository import GObject
     from gi.repository import Gtk
     from gi.repository import Gdk
     import common.file_util as file_util

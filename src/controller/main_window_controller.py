@@ -3,8 +3,7 @@ try:
     from common.decorators import exc_handler
     from adapter.buffering_adapter import Buffering_Adapter
     from adapter.speed_adapter import Speed_Adapter
-    from gi.repository import GObject
-    from gi.repository import Gtk
+    from gi.repository import Gdk
     from gi.repository import GdkX11
     import common.file_util as file_util
     from model.peer_thread import Peer_Thread
@@ -47,7 +46,7 @@ class Main_Controller():
         self.app_window.buffer_status_bar.show()
         thread1 = Peer_Thread(1, "Peer Thread")
         thread1.start()
-        print 'thread started'
+        print('thread started')
 
 
     @exc_handler
@@ -154,8 +153,11 @@ class Main_Controller():
 
     @exc_handler
     def _realized(self,widget,data=None):
+        cursor = Gdk.Cursor.new(Gdk.CursorType.ARROW)
         self.vlc_player_instance = self.app_model.get_vlc_player_instance()
         self.win_id = widget.get_window().get_xid()
         self.toggle_player_type(self.win_id)
+        widget.get_window().set_cursor(cursor)
+        print('surface_cursor = '  + str(widget.get_window().get_cursor().__class__ ))
         self.app_window.player_surface.connect("configure_event",
                                                 self.redraw_surface)

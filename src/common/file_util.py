@@ -24,4 +24,17 @@ def get_user_interface(dire, fName):
 def find_file(dire, fName):
         path = os.path.join(os.path.dirname(dire), fName)
         return path
+        
+@exc_handler
+def file_size(path):
+    f = open(path,"r")
+    f.seek(0, os.SEEK_END)
+    size = f.tell()
+    return size
+    
+@exc_handler
+def file_del(path):
+    f = open(path,"w")
+    del(f)
+        
 
