@@ -1,0 +1,16 @@
+{
+    "monitor": {
+        "splitter_addr": "localhost", 
+        "splitter_port": "4552", 
+        "thumbnail_url": "http:/xyz.com", 
+        "name": "monitor", 
+        "description": "monitor"
+    }, 
+    "monitor1": {
+        "splitter_addr": "localhost", 
+        "splitter_port": "4552", 
+        "thumbnail_url": "http:/xyz.com", 
+        "name": "monitor", 
+        "description": "monitor"
+    }
+}
