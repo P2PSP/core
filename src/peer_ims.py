@@ -35,6 +35,20 @@ class Peer_IMS(threading.Thread):
 
     # }}}
 
+    def __new__(typ, *args, **kwargs):
+        # {{{
+
+        if len(args) == 1 and isinstance(args[0], Peer_IMS):
+            # Parameter is a peer instance; extending its class instead of nesting:
+            instance = args[0]
+            instance.__class__ = typ
+            return instance
+        else:
+            # Use default object creation
+            return object.__new__(typ, *args, **kwargs)
+
+        # }}}
+
     def __init__(self):
         # {{{
 
