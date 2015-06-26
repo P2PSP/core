@@ -46,7 +46,7 @@ class Main_Controller():
         self.show_monitor_channel()
         
     @exc_handler
-    def show_monitor_channel(self):
+    def show_monitor_channel(self):#only for testing purpose
         monitor_data = channel_store.get_monitor_data()
         channel = Channel(monitor_data["monitor"])
         store = Channel_Store()
@@ -79,6 +79,7 @@ class Main_Controller():
         ,'on_ToggleChannels_button_press_event' : self.toggle_channel_box
         ,'on_FullscreenButton_clicked'          : self.toggle_player_fullscreen
         ,'on_Surface_button_press_event'        : self.toggle_status_box
+        ,'on_ChannelIconView_button_press_event': self.play_monitor_channel
                 }
         return signals
 
@@ -167,7 +168,19 @@ class Main_Controller():
             else:
                 self.app_window.show_status_box()
                 self.status_box_hidden = False
-
+    
+    @exc_handler
+    def play_monitor_channel(self,widget,data=None):#implented only for testing purposes
+        if data.type == Gdk.EventType._2BUTTON_PRESS:
+            self.player.stop()
+            self.peer_active = False
+            self.player_paused = False
+            self.app_window.buffer_status_bar.hide()
+            self.start_peer()
+            self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
+            self.toggle_player_type(self.win_id)
+        
+        
     @exc_handler
     def _realized(self,widget,data=None):
         cursor = Gdk.Cursor.new(Gdk.CursorType.ARROW)

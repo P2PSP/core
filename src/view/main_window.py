@@ -76,6 +76,3 @@ class Main_Window():
 
     def show_status_box(self):
         self.status_box.show()
-        self.channel_iconview.set_pixbuf_column(0)
-        self.channel_iconview.set_text_column(1)
-
