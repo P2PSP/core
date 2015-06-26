@@ -1,5 +1,5 @@
 import json
-from common.decorators import exc_handler
+from decorators import exc_handler
 
 class JSON_Importer():
     

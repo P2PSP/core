@@ -40,6 +40,7 @@
   </object>
   <object class="GtkApplicationWindow" id="MainWindow">
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">P2PSP</property>
     <child>
       <object class="GtkPaned" id="MainPane">
         <property name="visible">True</property>

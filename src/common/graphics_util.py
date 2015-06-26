@@ -1,7 +1,7 @@
 
 from gi.repository import Gdk
 from gi.repository.GdkPixbuf import Pixbuf
-from common.decorators import exc_handler
+from decorators import exc_handler
 
 default_image_width = 100
 @exc_handler
