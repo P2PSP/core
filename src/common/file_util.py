@@ -8,7 +8,7 @@ import os
 import traceback
 try:
     from gi.repository import Gtk
-    from common.decorators import exc_handler
+    from decorators import exc_handler
 except ImportError as msg:
     traceback.print_exc()
 

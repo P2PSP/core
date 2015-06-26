@@ -3,6 +3,7 @@ import traceback
 try:
     from gi.repository import Gtk
     from gi.repository import Gdk
+    from gi.repository.GdkPixbuf import Pixbuf
     import common.file_util as file_util
     from common.decorators import exc_handler
 except ImportError as msg:
@@ -23,6 +24,9 @@ class Main_Window():
         self.window.connect("destroy",Gtk.main_quit)
         self.channel_box.set_size_request(self.SCREEN.get_width()/8,
                                             self.SCREEN.get_height()/4)
+        self.icon_list_store = Gtk.ListStore(Pixbuf, str)
+        self.set_iconview_model(self.icon_list_store)
+        self.configure_iconview()
         self.configure_player_surface()
 
 
@@ -39,13 +43,11 @@ class Main_Window():
         self.status_box = self.interface.get_object('PlayerAndStatusBox')
         self.play_image = self.interface.get_object('PlayImage')
         self.pause_image = self.interface.get_object('PauseImage')
-        self.monitor_image = self.interface.get_object('MonitorThumbnail')
-        self.monitor_image.set_from_file(file_util.find_file(__file__,
-                                    '../../data/images/monitor_thumbnail.png'))
         self.buffer_status_bar = self.interface.get_object('ProgressBar')
         self.up_speed_label = self.interface.get_object('UpSpeedlabel')
         self.down_speed_label = self.interface.get_object('DownSpeedlabel')
         self.users_label = self.interface.get_object('Users_Label')
+        self.channel_iconview = self.interface.get_object('ChannelIconView')
 
     def configure_player_surface(self):
         self.player_surface.set_size_request(self.SCREEN.get_width()/4,
@@ -62,7 +64,15 @@ class Main_Window():
 
     def hide_status_box(self):
         self.status_box.hide()
+        
+    def set_iconview_model(self,model):
+        self.channel_iconview.set_model(model)
+        
+    def configure_iconview(self):
+        self.channel_iconview.set_pixbuf_column(0)
+        self.channel_iconview.set_text_column(1)
+        self.channel_iconview.set_columns(0)
+        self.channel_iconview.set_item_width(80)
 
     def show_status_box(self):
         self.status_box.show()
-

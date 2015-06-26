@@ -1,11 +1,16 @@
 #script tested with python2.7
-from model.category import Category
-from model.channel import Channel
-from common.json_importer import JSON_Importer
-from common.json_exporter import JSON_Exporter
-from model.channel_encoder import Channel_Encoder
-from core._print_ import _print_
-import common.file_util as file_util
+
+import sys,os
+module_path = os.path.join(os.path.dirname(__file__),"..")
+sys.path.append(module_path)
+
+from src.model.category import Category
+from src.model.channel import Channel
+from src.common.json_importer import JSON_Importer
+from src.common.json_exporter import JSON_Exporter
+from src.model.channel_encoder import Channel_Encoder
+from src.core._print_ import _print_
+import src.common.file_util as file_util
 
 import unittest
 import json
