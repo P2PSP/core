@@ -40,8 +40,8 @@ class Import_Export_Test(unittest.TestCase):
         if Import_Export_Test.imported_data is None:
             pass
         else:
-            file_util.file_del(path)
-            #pass
+            #file_util.file_del(path)
+            pass
             
     def test_01_delete_channels_data(self):
     

@@ -7,6 +7,10 @@ try:
     from gi.repository import GdkX11
     import common.file_util as file_util
     from model.peer_thread import Peer_Thread
+    from model.channel import Channel
+    from model import channel_store
+    from model.channel_store import Channel_Store
+    import common.graphics_util as graphics_util
 except ImportError as msg:
     traceback.print_exc()
 
@@ -38,7 +42,20 @@ class Main_Controller():
                                         ,self.app_window.users_label)
         except Exception as msg:
             traceback.print_exc()
-
+            
+        self.show_monitor_channel()
+        
+    @exc_handler
+    def show_monitor_channel(self):
+        monitor_data = channel_store.get_monitor_data()
+        channel = Channel(monitor_data["monitor"])
+        store = Channel_Store()
+        store.get_default().add(channel.name,channel)
+        (name,image_url) = (channel.get_name(),channel.get_thumbnail_url())
+        scaled_image = graphics_util.get_scaled_image(image_url)
+        for i in range(0,20):
+            self.app_window.icon_list_store.append([scaled_image,name])
+        
     @exc_handler
     def start_peer(self):
         self.peer_active = True
