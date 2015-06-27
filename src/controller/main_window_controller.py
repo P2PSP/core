@@ -51,10 +51,12 @@ class Main_Controller():
         channel = Channel(monitor_data["monitor"])
         store = Channel_Store()
         store.get_default().add(channel.name,channel)
-        (name,image_url) = (channel.get_name(),channel.get_thumbnail_url())
-        scaled_image = graphics_util.get_scaled_image(image_url)
+        (name,image_url,desc) = (channel.get_name()
+                                ,channel.get_thumbnail_url()
+                                ,channel.get_description())
+        scaled_image = graphics_util.get_scaled_image(image_url,180)
         for i in range(0,20):
-            self.app_window.icon_list_store.append([scaled_image,name])
+            self.app_window.icon_list_store.append([scaled_image,name,desc])
         
     @exc_handler
     def start_peer(self):
