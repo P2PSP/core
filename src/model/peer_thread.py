@@ -9,6 +9,10 @@ try:
 except ImportError as msg:
     traceback.print_exc()
 
+def configure_peer(data=None):
+    Peer_IMS.SPLITTER_ADDR = data[0]
+    Peer_IMS.SPLITTER_PORT = data[1]
+
 Peer_IMS.USE_LOCALHOST = True
 common.CONSOLE_MODE = False
 

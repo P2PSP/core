@@ -99,6 +99,7 @@
                             <property name="can_focus">False</property>
                             <property name="image">image2</property>
                             <property name="use_stock">False</property>
+                            <signal name="activate" handler="on_Import_activate" swapped="no"/>
                           </object>
                         </child>
                         <child>

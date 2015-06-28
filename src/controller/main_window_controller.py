@@ -4,13 +4,18 @@ try:
     from adapter.buffering_adapter import Buffering_Adapter
     from adapter.speed_adapter import Speed_Adapter
     from gi.repository import Gdk
+    from gi.repository import Gtk
     from gi.repository import GdkX11
     import common.file_util as file_util
     from model.peer_thread import Peer_Thread
+    from model import peer_thread
     from model.channel import Channel
     from model import channel_store
     from model.channel_store import Channel_Store
+    from channel_import_controller import Import_Controller
     import common.graphics_util as graphics_util
+    from common.json_exporter import JSON_Exporter
+    from model.channel_encoder import Channel_Encoder
 except ImportError as msg:
     traceback.print_exc()
 
@@ -43,7 +48,17 @@ class Main_Controller():
         except Exception as msg:
             traceback.print_exc()
             
-        self.show_monitor_channel()
+        #self.show_monitor_channel()
+        self.export_sample_monitor()
+        
+    @exc_handler    
+    def export_sample_monitor(self):
+        exported_data = channel_store.get_monitor_data()
+        monitor_channel = Channel(exported_data["monitor"])
+        path = file_util.find_file(__file__,
+                                    "../../data/channels/to_import_sample_data.json")
+        exporter  = JSON_Exporter()
+        exporter.to_JSON(path,{"monitor":monitor_channel},Channel_Encoder)
         
     @exc_handler
     def show_monitor_channel(self):#only for testing purpose
@@ -81,11 +96,16 @@ class Main_Controller():
         ,'on_ToggleChannels_button_press_event' : self.toggle_channel_box
         ,'on_FullscreenButton_clicked'          : self.toggle_player_fullscreen
         ,'on_Surface_button_press_event'        : self.toggle_status_box
-        ,'on_ChannelIconView_button_press_event': self.play_monitor_channel
+        ,'on_ChannelIconView_button_press_event': self.play_selected_channel
+        ,'on_Import_activate'                   : self.import_channels
                 }
         return signals
 
 
+    @exc_handler
+    def import_channels(self,widget,data=None):
+            controller = Import_Controller(self.app_window)
+                
     @exc_handler
     def toggle_player_type(self,win_id):
         if self.peer_active :
@@ -109,6 +129,9 @@ class Main_Controller():
     @exc_handler
     def quit(self):
         self.player.stop()
+        path = file_util.find_file(__file__,
+                                    "../../data/channels/to_import_sample_data.json")
+        file_util.file_del(path)
 
 
     def end_callback(self):
@@ -172,8 +195,16 @@ class Main_Controller():
                 self.status_box_hidden = False
     
     @exc_handler
-    def play_monitor_channel(self,widget,data=None):#implented only for testing purposes
+    def play_selected_channel(self,widget,data=None):#implented only for testing purposes
         if data.type == Gdk.EventType._2BUTTON_PRESS:
+            if  len(widget.get_selected_items()) == 0:
+                return
+            item  = widget.get_selected_items()[0]
+            channel_key = self.app_window.icon_list_store[item][1]
+            channel = Channel_Store.ALL.get_channel(channel_key)
+            data = (channel.get_splitter_addr()
+                   ,int(channel.get_splitter_port()))
+            peer_thread.configure_peer(data)
             self.player.stop()
             self.peer_active = False
             self.player_paused = False
