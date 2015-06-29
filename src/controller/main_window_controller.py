@@ -13,6 +13,7 @@ try:
     from model import channel_store
     from model.channel_store import Channel_Store
     from channel_import_controller import Import_Controller
+    from channel_export_controller import Export_Controller
     import common.graphics_util as graphics_util
     from common.json_exporter import JSON_Exporter
     from model.channel_encoder import Channel_Encoder
@@ -98,6 +99,7 @@ class Main_Controller():
         ,'on_Surface_button_press_event'        : self.toggle_status_box
         ,'on_ChannelIconView_button_press_event': self.play_selected_channel
         ,'on_Import_activate'                   : self.import_channels
+        ,'on_Export_activate'                   : self.export_channels
                 }
         return signals
 
@@ -106,6 +108,10 @@ class Main_Controller():
     def import_channels(self,widget,data=None):
             controller = Import_Controller(self.app_window)
                 
+    @exc_handler
+    def export_channels(self,widget,data=None):
+        controller = Export_Controller(self.app_window)
+        
     @exc_handler
     def toggle_player_type(self,win_id):
         if self.peer_active :
