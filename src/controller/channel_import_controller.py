@@ -31,9 +31,12 @@ class Import_Controller():
     def on_file_selected(self,widget,data=None):
         self.box.list_store.clear()
         _file = widget.get_filename()
+        if _file == '':
+            return
         importer = JSON_Importer()
         self.imported_data = importer.from_JSON(_file)
         if self.imported_data is not None:
+            self.box.import_button.set_sensitive(True)
             for channel in self.imported_data:
                 channel_data = collections.OrderedDict(
                                    sorted(self.imported_data[channel].items()))

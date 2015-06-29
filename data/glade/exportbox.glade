@@ -11,7 +11,7 @@
   </object>
   <object class="GtkDialog" id="ExportBox">
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Import Channels</property>
+    <property name="title" translatable="yes">Export Channels</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
@@ -30,6 +30,7 @@
               <object class="GtkButton" id="ExportButton">
                 <property name="label" translatable="yes">Export</property>
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="on_ExportButton_clicked" swapped="no"/>
@@ -112,7 +113,7 @@
               <object class="GtkLabel" id="ChooseFileLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Choose File : </property>
+                <property name="label" translatable="yes"> File : </property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -123,6 +124,7 @@
             <child>
               <object class="GtkEntry" id="FileNameEntry">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
               </object>
               <packing>

@@ -10,7 +10,6 @@ import collections
 class Export_Controller():
     
     def __init__(self,main_window):
-        self.app_window = main_window
         self.parent_window = main_window.window
         self.box = Export_Box()
         self.box.interface.connect_signals(self.setup_signals())
@@ -50,10 +49,12 @@ class Export_Controller():
         
     @exc_handler
     def save_to_file(self,widget,data=None):
-        dialog = Gtk.FileChooserDialog("Save your text file", self.box.export_box,
-                                      Gtk.FileChooserAction.SAVE,
-                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                                        Gtk.STOCK_SAVE, Gtk.ResponseType.ACCEPT))
+        dialog = Gtk.FileChooserDialog("Save data to JSON file"
+                                      , self.box.export_box,Gtk.FileChooserAction.SAVE
+                                      ,(Gtk.STOCK_CANCEL
+                                      , Gtk.ResponseType.CANCEL
+                                      , Gtk.STOCK_SAVE
+                                      , Gtk.ResponseType.ACCEPT))
         dialog.set_default_size(800, 400)
 
         self.add_filters(dialog)
@@ -64,6 +65,7 @@ class Export_Controller():
         if response == Gtk.ResponseType.ACCEPT:
             filename= Gtk.FileChooser.get_filename(dialog)
             self.box.text_entry.set_text(filename)
+            self.box.export_button.set_sensitive(True)
         dialog.destroy()
         
     @exc_handler
@@ -74,7 +76,7 @@ class Export_Controller():
             exporter.to_JSON(path
                             ,Channel_Store.ALL.get_channels()
                             ,Channel_Encoder)
-        self.box.export_box.destroy()
+            self.box.export_box.destroy()
     
     @exc_handler
     def cancel(self,widget,data=None):
