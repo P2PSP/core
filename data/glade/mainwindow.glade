@@ -5,6 +5,7 @@
   <object class="GtkImage" id="FullscreenImage">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="tooltip_text" translatable="yes">Fullscreen</property>
     <property name="stock">gtk-fullscreen</property>
     <property name="icon_size">3</property>
   </object>
@@ -17,6 +18,7 @@
   <object class="GtkImage" id="PlayImage">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="tooltip_text" translatable="yes">Play/Pause</property>
     <property name="margin_right">2</property>
     <property name="margin_bottom">2</property>
     <property name="stock">gtk-media-play</property>
@@ -25,6 +27,7 @@
   <object class="GtkImage" id="StopImage">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="tooltip_text" translatable="yes">Stop</property>
     <property name="stock">gtk-media-stop</property>
     <property name="icon_size">3</property>
   </object>
@@ -96,6 +99,7 @@
                             <property name="can_focus">False</property>
                             <property name="image">image2</property>
                             <property name="use_stock">False</property>
+                            <signal name="activate" handler="on_Import_activate" swapped="no"/>
                           </object>
                         </child>
                         <child>
@@ -105,6 +109,7 @@
                             <property name="can_focus">False</property>
                             <property name="image">image1</property>
                             <property name="use_stock">False</property>
+                            <signal name="activate" handler="on_Export_activate" swapped="no"/>
                           </object>
                         </child>
                       </object>
@@ -147,6 +152,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="no_show_all">True</property>
+                    <property name="tooltip_text" translatable="yes">Hide/Show Channels</property>
                     <property name="right_justified">True</property>
                     <property name="label">&gt;&gt;</property>
                     <signal name="button-press-event" handler="on_ToggleChannels_button_press_event" swapped="no"/>
@@ -249,6 +255,7 @@
                   <object class="GtkLabel" id="DownSpeedlabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">DownloadSpeed</property>
                     <property name="label" translatable="yes">0 kbps</property>
                     <property name="justify">fill</property>
                   </object>
@@ -276,6 +283,7 @@
                   <object class="GtkLabel" id="UpSpeedlabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">UploadSpeed</property>
                     <property name="label" translatable="yes">0 kbps</property>
                     <property name="justify">fill</property>
                   </object>
@@ -340,62 +348,47 @@
           </packing>
         </child>
         <child>
-          <object class="GtkScrolledWindow" id="ChannelScrolledWindow">
+          <object class="GtkBox" id="ChannelGroupBox">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="shadow_type">in</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
             <child>
-              <object class="GtkViewport" id="ChannelViewport">
+              <object class="GtkLabel" id="ChannelGroupLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Channels</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="padding">4</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow" id="ChannelScrolledWindow">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="shadow_type">in</property>
                 <child>
-                  <object class="GtkBox" id="ChannelBox">
+                  <object class="GtkIconView" id="ChannelIconView">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="orientation">vertical</property>
-                    <child>
-                      <object class="GtkFrame" id="ChannelFrame">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label_xalign">0</property>
-                        <property name="shadow_type">none</property>
-                        <child>
-                          <object class="GtkAlignment" id="ChannelFrameAlignment">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="left_padding">12</property>
-                            <child>
-                              <object class="GtkIconView" id="ChannelIconView">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
-                                <property name="margin">6</property>
-                                <signal name="button-press-event" handler="on_ChannelIconView_button_press_event" swapped="no"/>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                        <child type="label">
-                          <object class="GtkLabel" id="ChannelFrameLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Channels</property>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
+                    <property name="can_focus">True</property>
+                    <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
+                    <property name="margin">6</property>
+                    <signal name="button-press-event" handler="on_ChannelIconView_button_press_event" swapped="no"/>
                   </object>
                 </child>
               </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
             </child>
           </object>
           <packing>
-            <property name="resize">True</property>
+            <property name="resize">False</property>
             <property name="shrink">False</property>
           </packing>
         </child>

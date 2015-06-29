@@ -3,9 +3,9 @@ from gi.repository import Gdk
 from gi.repository.GdkPixbuf import Pixbuf
 from decorators import exc_handler
 
-default_image_width = 100
 @exc_handler
-def get_scaled_image(path):
+def get_scaled_image(path,image_width):
+    default_image_width = image_width
     pixbuf = Pixbuf.new_from_file(path)
     pix_w = pixbuf.get_width()
     pix_h = pixbuf.get_height()

@@ -10,7 +10,7 @@ def get_monitor_data():
    data = {"monitor":
            {"name" : "monitor"
            ,"thumbnail_url" : path
-           ,"description" : "monitor"
+           ,"description" : "P2PSP monitor"
            ,"splitter_addr" : "127.0.0.1"
            ,"splitter_port" : "4552"
            }

@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.18.3 -->
 <interface>
-  <requires lib="gtk+" version="3.12"/>
+  <requires lib="gtk+" version="3.0"/>
+  <object class="GtkFileFilter" id="filefilter1">
+    <mime-types>
+      <mime-type>application/json</mime-type>
+    </mime-types>
+    <patterns>
+      <pattern>*.json</pattern>
+    </patterns>
+  </object>
   <object class="GtkDialog" id="ImportBox">
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Import Channels</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="ImportVBox">
@@ -16,11 +28,13 @@
             <property name="homogeneous">True</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="Import">
+              <object class="GtkButton" id="ImportButton">
                 <property name="label" translatable="yes">Import</property>
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="on_ImportButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -29,11 +43,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="CancelImport">
+              <object class="GtkButton" id="CancelButton">
                 <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="on_CancelButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -59,9 +74,12 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkFileChooserButton" id="filechooserbutton2">
+                  <object class="GtkFileChooserButton" id="ImportFileChooserButton">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Choose file to import</property>
+                    <property name="filter">filefilter1</property>
+                    <signal name="selection-changed" handler="on_ImportFileChooserButton_selection_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -97,11 +115,18 @@
                 <property name="can_focus">False</property>
                 <property name="left_padding">12</property>
                 <child>
-                  <object class="GtkTreeView" id="ImportChannelList">
+                  <object class="GtkScrolledWindow" id="scrolledwindow1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection" id="treeview-selection1"/>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkTreeView" id="ImportChannelList">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection1"/>
+                        </child>
+                      </object>
                     </child>
                   </object>
                 </child>
