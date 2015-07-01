@@ -84,7 +84,7 @@ $nat1_config "
         splitter_id=$!
 
         # Run peers
-        peer_cmd="python2 $dir/peer.py --splitter_addr '$splitter' \
+        peer_cmd="python2 -u $dir/peer.py --splitter_addr '$splitter' \
             --splitter_port '$splitter_port' --port '$peer_port'"
         # The exit value is determined by "grep" and will be "0" if
         # peer1 received messages from peer2 and vice versa
