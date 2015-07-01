@@ -9,6 +9,7 @@ channel=BBB-134.ogv
 source_port=4551
 peer_port=8100
 splitter_port=9100
+tmpdir="/tmp/p2psp_output"
 
 # Virtual Machine addresses
 pc1="192.168.56.4"
@@ -26,6 +27,7 @@ function stop_processes() {
     for host in $pc1 $pc2 $splitter; do
         ssh "$user@$host" killall python2 2>/dev/null
     done
+    kill $player0_id 2>/dev/null
     kill $player1_id 2>/dev/null
     kill $player2_id 2>/dev/null
     kill $source_id 2>/dev/null
@@ -36,6 +38,10 @@ trap stop_processes EXIT
 
 # Exit on error
 set -e
+
+# Clean output directory
+rm -rf "$tmpdir"
+mkdir -p "$tmpdir"
 
 # Get P2PSP configuration from code
 splitter_class="$(ssh $user@$splitter cat $dir/splitter.py \
@@ -83,19 +89,26 @@ $nat1_config "
             --source_port "$source_port" --channel "$channel" --port "$splitter_port" >/dev/null &
         splitter_id=$!
 
-        # Run peers
+        # Build output filenames
+        monitor_output="$tmpdir/monitor.$nat1_config.$nat2_config.txt"
+        peer1_output="$tmpdir/peer1.$nat1_config.$nat2_config.txt"
+        peer2_output="$tmpdir/peer2.$nat1_config.$nat2_config.txt"
+
+        # Run monitor on same host as splitter
         peer_cmd="python2 -u $dir/peer.py --splitter_addr '$splitter' \
             --splitter_port '$splitter_port' --port '$peer_port'"
-        # The exit value is determined by "grep" and will be "0" if
-        # peer1 received messages from peer2 and vice versa
-        ssh "$user@$pc1" "$peer_cmd | sort -u | grep \"Received a message from ('$nat2_pub\"" >/dev/null &
-        peer1_id=$!
-        ssh "$user@$pc2" "$peer_cmd | sort -u | grep \"Received a message from ('$nat1_pub\"" >/dev/null &
-        peer2_id=$!
+        ssh "$user@$splitter" "$peer_cmd" >"$monitor_output" &
+
+        # Run peers
+        ssh "$user@$pc1" "$peer_cmd" >"$peer1_output" &
+        ssh "$user@$pc2" "$peer_cmd" >"$peer2_output" &
 
         # Run players
         echo "Running players."
         sleep 3
+        cvlc "http://$splitter:9999" --vout none 2>/dev/null >/dev/null &
+        player0_id=$!
+        sleep 1
         cvlc "http://$pc1:9999" --vout none 2>/dev/null >/dev/null &
         player1_id=$!
         sleep 1
@@ -107,16 +120,34 @@ $nat1_config "
         # Stop the test
         stop_processes
 
-        # Get outputs
+        monitor_grep="Received a message from ('$splitter"
+        peer1_grep="Received a message from ('$nat1_pub"
+        peer2_grep="Received a message from ('$nat2_pub"
+        # Get outputs; the exit value is determined by "grep" and will be "0"
+        # if a peer received messages from both other peers
+        # Todo: also check if peers received messages from the splitter
         set +e
-        wait $peer1_id
-        peer1_success=$?
-        wait $peer2_id
-        peer2_success=$?
+        success=""
+        echo "monitor:"
+        grep "$monitor_output" -e "$peer1_grep"
+        success="$success$?"
+        grep "$monitor_output" -e "$peer2_grep"
+        success="$success$?"
+        echo "peer1:"
+        grep "$peer1_output" -e "$monitor_grep"
+        success="$success$?"
+        grep "$peer1_output" -e "$peer2_grep"
+        success="$success$?"
+        echo "peer2:"
+        grep "$peer2_output" -e "$monitor_grep"
+        success="$success$?"
+        grep "$peer2_output" -e "$peer1_grep"
+        success="$success$?"
         set -e
+        echo "$success"
 
         # Append to result table
-        if [ "$peer1_success" == "0" ] && [ "$peer2_success" == "0" ]; then
+        if [ "$success" == "000000" ]; then
             success=yes
         else
             success=no
