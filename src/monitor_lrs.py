@@ -28,19 +28,6 @@ class Monitor_LRS(Monitor_FNS):
         _print_("Monitor LRS")
         sys.stdout.write(Color.none)
 
-        threading.Thread.__init__(self)
-        
-        self.splitter_socket = peer.splitter_socket
-        self.splitter = peer.splitter
-        self.buffer_size = peer.buffer_size
-        #self.chunk_format_string = peer.chunk_format_string
-        self.peer_list = peer.peer_list
-        self.player_socket = peer.player_socket
-        self.chunk_size = peer.chunk_size
-        self.debt = peer.debt
-        self.team_socket = peer.team_socket
-        self.message_format = peer.message_format
-
         # }}}
 
     def receive_the_buffer_size(self):
