@@ -32,20 +32,6 @@ class Monitor_NTS(Peer_NTS):
         _print_("Monitor NTS (list)")
         sys.stdout.write(Color.none)
 
-        threading.Thread.__init__(self)
-
-        self.peer_list = peer.peer_list
-        self.splitter_socket = peer.splitter_socket
-        self.buffer_size = peer.buffer_size
-        #self.chunk_format_string = peer.chunk_format_string
-        self.splitter = peer.splitter
-        self.debt = peer.debt
-        self.chunk_size = peer.chunk_size
-        self.player_socket = peer.player_socket
-        self.message_format = peer.message_format
-        self.team_socket = peer.team_socket
-        #self.extended_message_format = peer.extended_message_format
-        
         # }}}
 
     def print_the_module_name(self):
