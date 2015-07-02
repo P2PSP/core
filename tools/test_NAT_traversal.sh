@@ -113,15 +113,15 @@ $nat1_config "
         ssh "$user@$pc2" "$peer_cmd" >"$peer2_output" &
 
         # Run players
-        echo "Running players."
+        echo "Running players without any output."
         sleep 3
-        cvlc "http://$splitter:9999" --vout none 2>/dev/null >/dev/null &
+        cvlc "http://$splitter:9999" --vout none --aout none 2>/dev/null >/dev/null &
         player0_id=$!
         sleep 1
-        cvlc "http://$pc1:9999" --vout none 2>/dev/null >/dev/null &
+        cvlc "http://$pc1:9999" --vout none --aout none 2>/dev/null >/dev/null &
         player1_id=$!
         sleep 1
-        cvlc "http://$pc2:9999" --vout none 2>/dev/null >/dev/null &
+        cvlc "http://$pc2:9999" --vout none --aout none 2>/dev/null >/dev/null &
         player2_id=$!
 
         # Wait until stream is buffered
