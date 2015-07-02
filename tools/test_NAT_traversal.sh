@@ -57,7 +57,7 @@ echo "Configuration: $configuration"
 echo
 
 # Create table
-result="Mon\Peer"
+result="Peer1\2	"
 for nat in $nat_configs; do
     result="$result| $nat	"
 done
@@ -128,26 +128,23 @@ $nat1_config "
         # Todo: also check if peers received messages from the splitter
         set +e
         success=""
-        echo "monitor:"
-        grep "$monitor_output" -e "$peer1_grep"
+        grep "$monitor_output" -e "$peer1_grep" >/dev/null
         success="$success$?"
-        grep "$monitor_output" -e "$peer2_grep"
+        grep "$monitor_output" -e "$peer2_grep" >/dev/null
         success="$success$?"
-        echo "peer1:"
-        grep "$peer1_output" -e "$monitor_grep"
+        grep "$peer1_output" -e "$monitor_grep" >/dev/null
+        success="$success|$?"
+        grep "$peer1_output" -e "$peer2_grep" >/dev/null
         success="$success$?"
-        grep "$peer1_output" -e "$peer2_grep"
-        success="$success$?"
-        echo "peer2:"
-        grep "$peer2_output" -e "$monitor_grep"
-        success="$success$?"
-        grep "$peer2_output" -e "$peer1_grep"
+        grep "$peer2_output" -e "$monitor_grep" >/dev/null
+        success="$success|$?"
+        grep "$peer2_output" -e "$peer1_grep" >/dev/null
         success="$success$?"
         set -e
-        echo "$success"
+        echo "Result (mon|peer1|peer2, 00=success): $success"
 
         # Append to result table
-        if [ "$success" == "000000" ]; then
+        if [ "$success" == "00|00|00" ]; then
             success=yes
         else
             success=no
