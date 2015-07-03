@@ -5,19 +5,19 @@ This document shows detailed information about the test network setup used to
 test NAT traversal between two P2PSP peers, each behind a NAT. General
 information about the test can be found [here](NAT_test.md).
 
-# Network setup
+## Network setup
 The setup with network interfaces and IP addresses as used in the tests is shown
 in the following diagram:
 
 ![network setup details](images/network_setup_details.png)
 
-# NAT types
+## NAT types
 The different NAT types (Full Cone NAT, Restricted Cone NAT, Port-Restricted
 Cone NAT, Symmetric NAT) are configured by the following iptables rules:
 
-## NAT 1
+### NAT 1
 
-### Full Cone NAT
+#### Full Cone NAT
 
     ```
     *filter
@@ -35,7 +35,7 @@ Cone NAT, Symmetric NAT) are configured by the following iptables rules:
     COMMIT
     ```
 
-### Restricted Cone NAT
+#### Restricted Cone NAT
 
     ```
     *filter
@@ -60,7 +60,7 @@ Cone NAT, Symmetric NAT) are configured by the following iptables rules:
     COMMIT
     ```
 
-### Port-Restricted Cone NAT
+#### Port-Restricted Cone NAT
 
     ```
     *filter
@@ -79,7 +79,7 @@ Cone NAT, Symmetric NAT) are configured by the following iptables rules:
     COMMIT
     ```
 
-### Symmetric NAT
+#### Symmetric NAT
 
     ```
     *filter
@@ -99,9 +99,9 @@ Cone NAT, Symmetric NAT) are configured by the following iptables rules:
     COMMIT
     ```
 
-## NAT 2
+### NAT 2
 
-### Full Cone NAT
+#### Full Cone NAT
 
     ```
     *filter
@@ -119,7 +119,7 @@ Cone NAT, Symmetric NAT) are configured by the following iptables rules:
     COMMIT
     ```
 
-### Restricted Cone NAT
+#### Restricted Cone NAT
 
     ```
     *filter
@@ -144,7 +144,7 @@ Cone NAT, Symmetric NAT) are configured by the following iptables rules:
     COMMIT
     ```
 
-### Port-Restricted Cone NAT
+#### Port-Restricted Cone NAT
 
     ```
     *filter
@@ -164,7 +164,7 @@ Cone NAT, Symmetric NAT) are configured by the following iptables rules:
     COMMIT
     ```
 
-### Symmetric NAT
+#### Symmetric NAT
 
     ```
     *filter
