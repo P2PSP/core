@@ -129,6 +129,7 @@ $nat1_config "
         # Stop the test
         stop_processes
 
+        splitter_grep="Received a message from ('$splitter', $splitter_port)"
         monitor_grep="Received a message from ('$splitter"
         peer1_grep="Received a message from ('$nat1_pub"
         peer2_grep="Received a message from ('$nat2_pub"
@@ -137,23 +138,29 @@ $nat1_config "
         # Todo: also check if peers received messages from the splitter
         set +e
         success=""
+        grep "$monitor_output" -e "$splitter_grep" >/dev/null
+        success="$success$?"
         grep "$monitor_output" -e "$peer1_grep" >/dev/null
         success="$success$?"
         grep "$monitor_output" -e "$peer2_grep" >/dev/null
         success="$success$?"
-        grep "$peer1_output" -e "$monitor_grep" >/dev/null
+        grep "$peer1_output" -e "$splitter_grep" >/dev/null
         success="$success|$?"
+        grep "$peer1_output" -e "$monitor_grep" >/dev/null
+        success="$success$?"
         grep "$peer1_output" -e "$peer2_grep" >/dev/null
         success="$success$?"
-        grep "$peer2_output" -e "$monitor_grep" >/dev/null
+        grep "$peer2_output" -e "$splitter_grep" >/dev/null
         success="$success|$?"
+        grep "$peer2_output" -e "$monitor_grep" >/dev/null
+        success="$success$?"
         grep "$peer2_output" -e "$peer1_grep" >/dev/null
         success="$success$?"
         set -e
-        echo "Result (mon|peer1|peer2, 00=success): $success"
+        echo "Result (mon|peer1|peer2, 000=success): $success"
 
         # Append to result table
-        if [ "$success" == "00|00|00" ]; then
+        if [ "$success" == "000|000|000" ]; then
             success=yes
         else
             success=no
