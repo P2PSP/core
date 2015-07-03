@@ -6,11 +6,15 @@ Basic information about NAT traversal techniques in P2PSP can be found in the
 [official documentation](http://p2psp.org/en/p2psp-protocol?cap=indexsu9.xht)
 and in [this slideshow](http://slides.p2psp.org/BCN-2015).
 
-# Test details
+# Test setup
 To test the connection between two peers behind NATs, the whole setup can be
 simulated in virtual machines. You need one machine for each peer, the splitter,
 and the NATs (routers). The monitor (i.e. the first peer) is running on the same
 host as the splitter.
+
+The setup is shown in the following diagram:
+
+![network setup](images/network_setup.png)
 
 The different NAT types (Full Cone NAT, Restricted Cone NAT, Port-Restricted
 Cone NAT, Symmetric NAT) can be emulated by linux hosts, that are configured
