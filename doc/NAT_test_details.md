@@ -127,7 +127,48 @@ The different NAT types are configured by the following iptables rules:
     COMMIT
     ```
 
-#### Symmetric NAT
+#### Symmetric NAT: Port preservation
+
+    ```
+    *filter
+    :INPUT ACCEPT [0:0]
+    :FORWARD ACCEPT [0:0]
+    :OUTPUT ACCEPT [0:0]
+    -A FORWARD -i enp0s8 -o enp0s3 -m state --state RELATED,ESTABLISHED -j ACCEPT
+    -A FORWARD -i enp0s8 -o enp0s3 -m state --state NEW -j DROP
+    -A FORWARD -i enp0s3 -o enp0s8 -j ACCEPT
+    COMMIT
+    *nat
+    :PREROUTING ACCEPT [0:0]
+    :INPUT ACCEPT [0:0]
+    :OUTPUT ACCEPT [0:0]
+    :POSTROUTING ACCEPT [0:0]
+    -A POSTROUTING -o enp0s8 -j MASQUERADE
+    COMMIT
+    ```
+
+#### Symmetric NAT: Sequential port
+
+    ```
+    *filter
+    :INPUT ACCEPT [0:0]
+    :FORWARD ACCEPT [0:0]
+    :OUTPUT ACCEPT [0:0]
+    -A FORWARD -i enp0s8 -o enp0s3 -m state --state RELATED,ESTABLISHED -j ACCEPT
+    -A FORWARD -i enp0s8 -o enp0s3 -m state --state NEW -j DROP
+    -A FORWARD -i enp0s3 -o enp0s8 -j ACCEPT
+    COMMIT
+    *nat
+    :PREROUTING ACCEPT [0:0]
+    :INPUT ACCEPT [0:0]
+    :OUTPUT ACCEPT [0:0]
+    :POSTROUTING ACCEPT [0:0]
+    -A POSTROUTING -p udp -o enp0s8 -j MASQUERADE --to-ports 2000-6000
+    -A POSTROUTING -p tcp -o enp0s8 -j MASQUERADE --to-ports 2000-6000
+    COMMIT
+    ```
+
+#### Symmetric NAT: Random port
 
     ```
     *filter
@@ -212,7 +253,48 @@ The different NAT types are configured by the following iptables rules:
     COMMIT
     ```
 
-#### Symmetric NAT
+#### Symmetric NAT: Port preservation
+
+    ```
+    *filter
+    :INPUT ACCEPT [0:0]
+    :FORWARD ACCEPT [0:0]
+    :OUTPUT ACCEPT [0:0]
+    -A FORWARD -i enp0s3 -o enp0s8 -m state --state RELATED,ESTABLISHED -j ACCEPT
+    -A FORWARD -i enp0s3 -o enp0s8 -m state --state NEW -j DROP
+    -A FORWARD -i enp0s8 -o enp0s3 -j ACCEPT
+    COMMIT
+    *nat
+    :PREROUTING ACCEPT [0:0]
+    :INPUT ACCEPT [0:0]
+    :OUTPUT ACCEPT [0:0]
+    :POSTROUTING ACCEPT [0:0]
+    -A POSTROUTING -o enp0s3 -j MASQUERADE
+    COMMIT
+    ```
+
+#### Symmetric NAT: Sequential port
+
+    ```
+    *filter
+    :INPUT ACCEPT [0:0]
+    :FORWARD ACCEPT [0:0]
+    :OUTPUT ACCEPT [0:0]
+    -A FORWARD -i enp0s3 -o enp0s8 -m state --state RELATED,ESTABLISHED -j ACCEPT
+    -A FORWARD -i enp0s3 -o enp0s8 -m state --state NEW -j DROP
+    -A FORWARD -i enp0s8 -o enp0s3 -j ACCEPT
+    COMMIT
+    *nat
+    :PREROUTING ACCEPT [0:0]
+    :INPUT ACCEPT [0:0]
+    :OUTPUT ACCEPT [0:0]
+    :POSTROUTING ACCEPT [0:0]
+    -A POSTROUTING -p udp -o enp0s3 -j MASQUERADE --to-ports 2000-6000
+    -A POSTROUTING -p tcp -o enp0s3 -j MASQUERADE --to-ports 2000-6000
+    COMMIT
+    ```
+
+#### Symmetric NAT: Random port
 
     ```
     *filter
