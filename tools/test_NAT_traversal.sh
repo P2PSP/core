@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-nat_configs="fcn rcn prcn sym"
+nat_configs="fcn rcn prcn symsp sympp symrp"
 user="ladmin"
 dir="p2psp/src"
 source_filename="Big_Buck_Bunny_small.ogv"
@@ -73,7 +73,7 @@ for nat in $nat_configs; do
     result="$result| $nat	"
 done
 result="$result
-======================================"
+========================================================"
 
 # Run test
 for nat1_config in $nat_configs; do
