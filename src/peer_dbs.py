@@ -45,17 +45,6 @@ class Peer_DBS(Peer_IMS):
         _print_("Peer DBS (list)")
         sys.stdout.write(Color.none)
 
-        threading.Thread.__init__(self)
-
-        self.splitter_socket = peer.splitter_socket
-        self.player_socket = peer.player_socket
-        self.buffer_size = peer.buffer_size
-        #self.chunk_format_string = peer.message_format
-        self.splitter = peer.splitter
-        self.chunk_size = peer.chunk_size
-        self.message_format = peer.message_format
-        #self.extended_message_format = peer.message_format + "4sH"
-
         _print_("DBS: max_chunk_debt =", self.MAX_CHUNK_DEBT)
 
         # }}}

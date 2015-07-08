@@ -37,6 +37,20 @@ class Peer_IMS(threading.Thread):
 
     # }}}
 
+    def __new__(typ, *args, **kwargs):
+        # {{{
+
+        if len(args) == 1 and isinstance(args[0], Peer_IMS):
+            # Parameter is a peer instance; extending its class instead of nesting:
+            instance = args[0]
+            instance.__class__ = typ
+            return instance
+        else:
+            # Use default object creation
+            return object.__new__(typ, *args, **kwargs)
+
+        # }}}
+
     def __init__(self):
         # {{{
 
@@ -85,7 +99,7 @@ class Peer_IMS(threading.Thread):
             #my_ip = '127.0.0.1'
         else:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(("gmail.com",80))
+            s.connect(self.splitter)
             #my_ip = socket.gethostbyname(socket.gethostname())
             my_ip = s.getsockname()[0]
             s.close()
