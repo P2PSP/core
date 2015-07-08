@@ -183,3 +183,108 @@ Cone NAT, Symmetric NAT) are configured by the following iptables rules:
     -A POSTROUTING -o enp0s3 -j MASQUERADE --random
     COMMIT
     ```
+
+## Network interfaces
+The network interfaces are set up using the netctl configuration files listed
+below:
+
+### PC 1
+
+#### enp0s3
+
+    ```
+    Interface=enp0s3
+    Connection=ethernet
+    IP=static
+    Address=('192.168.56.4/24')
+    Gateway='192.168.56.5'
+    DNS=('192.168.56.5')
+    ```
+
+### NAT 1
+
+#### enp0s3
+
+    ```
+    Interface=enp0s3
+    Connection=ethernet
+    IP=static
+    Address=('192.168.56.5/24')
+    ```
+
+#### enp0s8
+
+    ```
+    Interface=enp0s8
+    Connection=ethernet
+    IP=static
+    Address=('192.168.57.4/24')
+    ```
+
+#### enp0s9
+
+    ```
+    Interface=enp0s9
+    Connection=ethernet
+    IP=dhcp
+    ```
+
+### Splitter
+
+#### enp0s3
+
+    ```
+    Interface=enp0s3
+    Connection=ethernet
+    IP=static
+    Address=('192.168.57.6/24')
+    ```
+
+#### enp0s8
+
+    ```
+    Interface=enp0s8
+    Connection=ethernet
+    IP=dhcp
+    ```
+
+### NAT 2
+
+#### enp0s3
+
+    ```
+    Interface=enp0s3
+    Connection=ethernet
+    IP=static
+    Address=('192.168.57.5/24')
+    ```
+
+#### enp0s8
+
+    ```
+    Interface=enp0s8
+    Connection=ethernet
+    IP=static
+    Address=('192.168.58.4/24')
+    ```
+
+#### enp0s9
+
+    ```
+    Interface=enp0s9
+    Connection=ethernet
+    IP=dhcp
+    ```
+
+### PC 2
+
+#### enp0s3
+
+    ```
+    Interface=enp0s3
+    Connection=ethernet
+    IP=static
+    Address=('192.168.58.5/24')
+    Gateway='192.168.58.4'
+    DNS=('192.168.58.4')
+    ```
