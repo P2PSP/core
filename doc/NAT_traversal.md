@@ -23,7 +23,8 @@ The iptables rules used in the NATs can be found
 [here](https://wiki.asterisk.org/wiki/display/TOP/NAT+Traversal+Testing).
 
 ## Test setup details
-Details on the simulated test network can be found [here](NAT_test_details.md).
+Details on the simulated test network and more information about NAT types can
+be found [here](NAT_test_details.md).
 
 ## Running the test
 To run the test on your setup, you have to setup ssh so no password input is

@@ -12,8 +12,56 @@ in the following diagram:
 ![network setup details](images/network_setup_details.png)
 
 ## NAT types
-The different NAT types (Full Cone NAT, Restricted Cone NAT, Port-Restricted
-Cone NAT, Symmetric NAT) are configured by the following iptables rules:
+To test the behaviour of peers behind different kinds of NAT devices (i.e.
+routers), different NAT types are simulated. A short description from
+[this page](https://wiki.asterisk.org/wiki/display/TOP/NAT+Traversal+Testing):
+
+* **Full-cone NAT (FCN):**
+"A full-cone NAT is one where all requests from the same internal IP address
+and port are mapped to the same external IP address and port. Any external
+host can send a packet to the internal host simply by sending a packet to the
+mapped external address."
+
+* **Restricted cone NAT (RCN):**
+"A restricted-cone NAT is one where all requests from the same internal IP
+address and port are mapped to the same external IP address and port. Unlike a
+full-cone NAT though, an external host can send a packet to the internal host
+only if the internal host had previously sent a packet to that external host."
+
+* **Port-restricted cone NAT (PRCN):**
+"A port-restricted cone NAT is like a restricted-cone NAT, but the restriction
+also includes port numbers. An external host can send a packet to the internal
+host only if the internal host had previously sent a packet to that external
+host on the same port number."
+
+* **Symmetric NAT (SYM):**
+"A symmetric nat is a NAT where all requests from the same internal IP address
+and port to a specific destination IP address and port are mapped to the same
+external source IP address and port. If the same internal host sends a packet
+with the same source address and port to a different destination, a different
+mapping is used (these mappings are referred to as NAT translations). Only the
+external host that receives a packet can send a packet back to the internal
+host."
+
+To test the P2PSP peer functionality, the symmetric NATs are divided again into
+these subtypes, depending on the allocation of the source port of the NAT:
+
+* **Port preservation (SYMPP):**
+The public source port of the NAT is the same as the source port of the local
+host. If this NAT behaviour is detected, prediction of the public port is
+trivial.
+
+* **Sequential port allocation (SYMSP):**
+To allocate a new public source port, the next free port number is selected, so
+the port number is incremented each time. This behaviour is covered by the P2PSP
+NTS of rules in algorithms 5 and 6.
+
+* **Random port allocation (SYMRP):**
+For each new pair `(dest. address, dest. port)` a completely random public
+source port is selected. A connection between two peers each behind this NAT
+type cannot be established, as each other's public source port is unpredictable.
+
+The different NAT types are configured by the following iptables rules:
 
 ### NAT 1
 
@@ -68,7 +116,7 @@ Cone NAT, Symmetric NAT) are configured by the following iptables rules:
     :FORWARD ACCEPT [0:0]
     :OUTPUT ACCEPT [0:0]
     -A INPUT -i enp0s8 -m state --state ESTABLISHED,RELATED -j ACCEPT
-    -A INPUT -i enp0s3 -j ACCEPT 
+    -A INPUT -i enp0s3 -j ACCEPT
     COMMIT
     *nat
     :PREROUTING ACCEPT [0:0]
