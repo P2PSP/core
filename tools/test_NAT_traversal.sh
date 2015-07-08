@@ -4,13 +4,11 @@
 nat_configs="fcn rcn prcn sym"
 user="ladmin"
 dir="p2psp/src"
-source_addr=150.214.150.68
+source_filename="Big_Buck_Bunny_small.ogv"
 # As local source address you have to specify the local IP address of the host
 # that is reachable by the virtual machines
 local_source_addr=192.168.57.1
-channel=BBB-134.ogv
-source_port=4551
-local_source_port=8000
+local_source_port=8080
 peer_port=8100
 splitter_port=8200
 tmpdir="/tmp/p2psp_output"
@@ -27,18 +25,22 @@ nat2_pub="192.168.57.5"
 
 function stop_processes() {
     set +e
-    echo "Stopping splitter, peers, players and source forwarding."
+    echo "Stopping splitter, peers and players."
     for host in $pc1 $pc2 $splitter; do
         ssh "$user@$host" killall python2 2>/dev/null
     done
     kill $player0_id 2>/dev/null
     kill $player1_id 2>/dev/null
     kill $player2_id 2>/dev/null
-    killall socat
     set -e
 }
+function cleanup() {
+    stop_processes
+    echo "Stopping source."
+    kill $source_id 2>/dev/null
+}
 # Register cleanup trap function
-trap stop_processes EXIT
+trap cleanup EXIT
 
 # Exit on error
 set -e
@@ -59,6 +61,11 @@ commit="$(ssh $user@$pc1 cd $dir \; git rev-parse --short HEAD)"
 configuration="$splitter_class, $monitor_class, $peer_class (branch $branch, commit $commit)"
 echo "Configuration: $configuration"
 echo
+
+# Start the source
+echo "Starting source."
+cvlc "$source_filename" --sout "#duplicate{dst=standard{mux=ogg,dst=,access=http}}" |& grep error &
+source_id=$!
 
 # Create table
 result="Peer1\2	"
@@ -87,16 +94,10 @@ $nat1_config "
             iptables -t nat -X \; \
             iptables-restore /etc/iptables/iptables.rules.${nat2_config}
 
-        # Forward the source
-        echo "Starting source forwarding."
-        socat "TCP-LISTEN:$local_source_port,fork" "TCP:$source_addr:$source_port" \
-            |& grep -v "Broken pipe" &
-        source_id=$!
-
         echo "Running splitter and peers."
         # Run splitter
         ssh "$user@$splitter" python2 "$dir/splitter.py" --source_addr "$local_source_addr" \
-            --source_port "$local_source_port" --channel "$channel" --port "$splitter_port" >/dev/null &
+            --source_port "$local_source_port" --port "$splitter_port" >/dev/null &
 
         # Build output filenames
         monitor_output="$tmpdir/monitor.$nat1_config.$nat2_config.txt"
@@ -169,7 +170,6 @@ $nat1_config "
         result="$result	| $success"
 
         # Increment ports
-        local_source_port=$((local_source_port+1))
         splitter_port=$((splitter_port+1))
         peer_port=$((peer_port+1))
 
