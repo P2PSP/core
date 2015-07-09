@@ -32,6 +32,9 @@ needed (e.g. with public key authentification), setup the iptables rules in
 `/etc/iptables/iptables.rules.{fcn,rcn,prcn,sym}` and adapt the configuration in
 `tools/test_NAT_traversal.sh` to your needs and run the script.
 
+Note that a video to stream is necessary; the filename can be specified in the
+variable `source_filename` in the header of the script.
+
 The testing script automatically starts splitter, monitor, two peers and players
 and quits them after a while, and checks the output if each of the 3 peers
 have received packets from the other two. This is done for all combinations of
