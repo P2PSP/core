@@ -96,13 +96,14 @@ $nat1_config "
 
         echo "Running splitter and peers."
         # Run splitter
+        splitter_output="$tmpdir/$nat1_config.$nat2_config.splitter.txt"
         ssh "$user@$splitter" python2 "$dir/splitter.py" --source_addr "$local_source_addr" \
-            --source_port "$local_source_port" --port "$splitter_port" >/dev/null &
+            --source_port "$local_source_port" --port "$splitter_port" >"$splitter_output" &
 
         # Build output filenames
-        monitor_output="$tmpdir/monitor.$nat1_config.$nat2_config.txt"
-        peer1_output="$tmpdir/peer1.$nat1_config.$nat2_config.txt"
-        peer2_output="$tmpdir/peer2.$nat1_config.$nat2_config.txt"
+        monitor_output="$tmpdir/$nat1_config.$nat2_config.monitor.txt"
+        peer1_output="$tmpdir/$nat1_config.$nat2_config.peer1.txt"
+        peer2_output="$tmpdir/$nat1_config.$nat2_config.peer2.txt"
 
         # Run monitor on same host as splitter
         peer_cmd="python2 -u $dir/peer.py --splitter_addr '$splitter' \
