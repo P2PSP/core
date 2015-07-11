@@ -95,7 +95,10 @@ for nat in $nat_configs; do
     result="$result| $nat	"
 done
 result="$result
-========================================================"
+========"
+for nat in $nat_configs; do
+    result="$result========"
+done
 
 # Run test
 for nat1_config in $nat_configs; do
