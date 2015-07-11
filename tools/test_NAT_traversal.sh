@@ -58,6 +58,37 @@ configuration="$splitter_class, $monitor_class, $peer_class (branch $branch, com
 echo "Configuration: $configuration"
 echo
 
+# Reset NAT configuration
+echo -n "Resetting NAT configuration..."
+ssh "root@$nat1" iptables-restore /etc/iptables/empty.rules \; \
+    iptables -F \; \
+    iptables -X \; \
+    iptables -t nat -F \; \
+    iptables -t nat -X \; \
+    netctl stop enp0s8 \; \
+    conntrack -F 2\>/dev/null \; \
+    netctl start enp0s8
+echo -n "."
+ssh "root@$nat2" iptables-restore /etc/iptables/empty.rules \; \
+    iptables -F \; \
+    iptables -X \; \
+    iptables -t nat -F \; \
+    iptables -t nat -X \; \
+    netctl stop enp0s3 \; \
+    conntrack -F 2\>/dev/null \; \
+    netctl start enp0s3
+echo -n "."
+ssh "root@$nat1_pub" \
+    netctl stop enp0s3 \; \
+    conntrack -F 2\>/dev/null \; \
+    netctl start enp0s3
+echo -n "."
+ssh "root@$nat2_pub" \
+    netctl stop enp0s8 \; \
+    conntrack -F 2\>/dev/null \; \
+    netctl start enp0s8
+echo "."
+
 # Create table
 result="Peer1\2	"
 for nat in $nat_configs; do
@@ -72,17 +103,13 @@ for nat1_config in $nat_configs; do
 $nat1_config "
     ssh "root@$nat1" iptables-restore /etc/iptables/empty.rules \; \
         iptables -F \; \
-        iptables -X \; \
         iptables -t nat -F \; \
-        iptables -t nat -X \; \
         iptables-restore /etc/iptables/iptables.rules.${nat1_config}
     for nat2_config in $nat_configs; do
         echo "Configuring NATs: $nat1_config <-> $nat2_config."
         ssh "root@$nat2" iptables-restore /etc/iptables/empty.rules \; \
             iptables -F \; \
-            iptables -X \; \
             iptables -t nat -F \; \
-            iptables -t nat -X \; \
             iptables-restore /etc/iptables/iptables.rules.${nat2_config}
 
         # Run stream source
