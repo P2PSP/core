@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-nat_configs="fcn rcn prcn symsp sympp symrp"
+nat_configs="fcn rcn prcn sympp symsp symrp"
 user="ladmin"
 dir="p2psp/src"
 source_filename="Big_Buck_Bunny_small.ogv"
