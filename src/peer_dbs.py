@@ -242,12 +242,7 @@ class Peer_DBS(Peer_IMS):
                 self.receive_and_feed_counter += 1
 
                 # }}}
-<<<<<<< HEAD
-
-                return chunk_number
-=======
             # }}}
->>>>>>> 18e754b092726cfec039f1b1f28a8dc760482625
 
             return chunk_number
 
