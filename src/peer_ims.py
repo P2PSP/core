@@ -266,7 +266,7 @@ class Peer_IMS(threading.Thread):
 
             message, sender = self.receive_the_next_message()
             # The process_message method can be overridden by inheriting peers
-            return self.process_message(self, message, sender)
+            return self.process_message(message, sender)
 
             # }}}
         except socket.timeout:
