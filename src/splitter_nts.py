@@ -36,11 +36,7 @@ class Splitter_NTS(Splitter_DBS):
     def handle_a_peer_arrival(self, connection):
         # {{{
 
-        # {{{ In the DBS, the splitter sends to the incomming peer the
-        # list of peers. Notice that the transmission of the list of
-        # peers (something that could need some time if the team is
-        # big or if the peer is slow) is done in a separate thread. This
-        # helps to avoid DoS (Denial of Service) attacks.
+        # {{{ This method implements the NAT traversal algorithms of NTS of rules.
         # }}}
 
         new_peer = connection[1]
