@@ -8,6 +8,9 @@
 # Streaming sobre Internet" (P10-TIC-6548).
 
 # {{{ Imports
+import common
+import random
+import string
 import sys
 import struct
 import socket
@@ -18,7 +21,6 @@ from color import Color
 # NTS: NAT Traversal Set of rules
 class Splitter_NTS(Splitter_DBS):
     # {{{
-
 
     def __init__(self):
         Splitter_DBS.__init__(self)
@@ -33,13 +35,33 @@ class Splitter_NTS(Splitter_DBS):
 
         # }}}
 
+    def generate_id(self):
+        # {{{ Generate a random ID for a newly arriving peer
+
+        return ''.join(random.choice(string.ascii_uppercase + string.digits)
+            for _ in range(common.PEER_ID_LENGTH))
+
+        # }}}
+
     def handle_a_peer_arrival(self, connection):
         # {{{
 
         # {{{ This method implements the NAT traversal algorithms of NTS of rules.
         # }}}
 
+        serve_socket = connection[0]
         new_peer = connection[1]
+        sys.stdout.write(Color.green)
+        print(serve_socket.getsockname(), 'NTS: accepted connection from peer', \
+              new_peer)
+        sys.stdout.write(Color.none)
+        self.send_configuration(serve_socket)
+        self.send_the_list_of_peers(serve_socket)
+        # Send the generated ID to peer
+        peer_id = self.generate_id()
+        print("NTS: sending ID %s to peer %s" % (peer_id, new_peer))
+        serve_socket.send(peer_id)
+
         if __debug__:
             print("NTS: sending [send hello to %s]" % (new_peer,))
             counter = 0
@@ -50,7 +72,10 @@ class Splitter_NTS(Splitter_DBS):
             if __debug__:
                 print("NTS: [%5d]" % counter, peer)
                 counter += 1
-        return Splitter_DBS.handle_a_peer_arrival(self, connection)
+
+        self.insert_peer(new_peer)
+        serve_socket.close()
+        return new_peer
 
         # }}}
 

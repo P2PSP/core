@@ -9,6 +9,7 @@
 
 # {{{
 
+import common
 import threading
 import sys
 import struct
@@ -46,8 +47,20 @@ class Peer_NTS(Peer_DBS):
 
         # }}}
 
+    def receive_id(self):
+        # {{{
+
+        _print_("NTS: Requesting peer ID from splitter")
+        self.peer_id = self.splitter_socket.recv(common.PEER_ID_LENGTH)
+        _print_("NTS: ID received: %s" % self.peer_id)
+
+        # }}}
+
     def disconnect_from_the_splitter(self):
         # {{{
+
+        # Receive the generated ID for this peer from splitter
+        self.receive_id()
 
         # Close the TCP socket
         Peer_DBS.disconnect_from_the_splitter(self)
