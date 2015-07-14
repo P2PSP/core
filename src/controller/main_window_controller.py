@@ -100,6 +100,7 @@ class Main_Controller():
         ,'on_ChannelIconView_button_press_event': self.play_selected_channel
         ,'on_Import_activate'                   : self.import_channels
         ,'on_Export_activate'                   : self.export_channels
+        ,'on_VolumeButton_value_changed'        : self.control_player_volume
                 }
         return signals
 
@@ -219,6 +220,9 @@ class Main_Controller():
             self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
             self.toggle_player_type(self.win_id)
         
+    @exc_handler
+    def control_player_volume(self,widget,data=None):
+        self.player.audio_set_volume(int(data*100))
         
     @exc_handler
     def _realized(self,widget,data=None):
