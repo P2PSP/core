@@ -86,10 +86,11 @@ class Splitter_NTS(Splitter_DBS):
             # {{{
 
             try:
-                message, sender = self.receive_message()
+                # The longest possible message has length common.PEER_ID_LENGTH
+                message, sender = self.team_socket.recvfrom(common.PEER_ID_LENGTH)
             except:
-                message = b'?'
-                sender = ("0.0.0.0", 0)
+                print("NTS: Unexpected error:", sys.exc_info()[0])
+                continue
 
             if len(message) == 2:
 
@@ -105,17 +106,12 @@ class Splitter_NTS(Splitter_DBS):
 
                 # }}}
 
-            else:
+            elif message == 'G': # 'G'oodbye
                 # {{{ The peer wants to leave the team.
-
-                try:
-                    if struct.unpack("s", message)[0] == 'G': # 'G'oodbye
-                        self.process_goodbye(sender)
-                except Exception as e:
-                    print("LRS: ", e)
-                    print(message)
-
+                self.process_goodbye(sender)
                 # }}}
+            elif len(message) == common.PEER_ID_LENGTH:
+                print('NTS: received ID %s from %s' % (message, sender))
 
             # }}}
 

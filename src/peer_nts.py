@@ -36,7 +36,8 @@ class Peer_NTS(Peer_DBS):
     def say_hello(self, node):
         # {{{
 
-        self.team_socket.sendto(b'H', node)
+        print("NTS: Sending hello (ID %s) to %s" % (self.peer_id, node))
+        self.team_socket.sendto(self.peer_id, node)
 
         # }}}
 
