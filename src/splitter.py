@@ -6,8 +6,8 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
-# The P2PSP.org project has been supported by the Junta de Andalucía
-# through the Proyecto Motriz "Codificación de Vídeo Escalable y su
+# The P2PSP.org project has been supported by the Junta de Andalucï¿½a
+# through the Proyecto Motriz "Codificaciï¿½n de Vï¿½deo Escalable y su
 # Streaming sobre Internet" (P10-TIC-6548).
 
 # PYTHON_ARGCOMPLETE_OK
@@ -27,7 +27,8 @@ from splitter_dbs import Splitter_DBS
 from splitter_fns import Splitter_FNS
 from splitter_acs import Splitter_ACS
 from splitter_lrs import Splitter_LRS
-from splitter_strpe import  StrpeSplitter
+from splitter_strpe import StrpeSplitter
+from splitter_strpeds import StrpeDsSplitter
 import common
 from _print_ import _print_
 try:
@@ -83,6 +84,8 @@ class Splitter():
 
         parser.add_argument('--strpe', nargs='+', type=str, help='Enables STrPe')
 
+        parser.add_argument('--strpeds', action="store_true", help='Enables STrPe-DS')
+
         try:
             argcomplete.autocomplete(parser)
         except Exception:
@@ -131,6 +134,8 @@ class Splitter():
                 splitter = StrpeSplitter()
                 for peer in args.strpe:
                     splitter.add_trusted_peer(peer)
+            elif (args.strpeds):
+                splitter = StrpeDsSplitter()
             else:
                 splitter = Splitter_LRS()
 
