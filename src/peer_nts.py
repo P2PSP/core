@@ -66,8 +66,13 @@ class Peer_NTS(Peer_DBS):
         # Close the TCP socket
         Peer_DBS.disconnect_from_the_splitter(self)
 
-        # Use UDP to create a working NAT entry
+        # Send UDP packets to splitter and monitor peer
+        # to create working NAT entries and to determine the
+        # source port allocation type of the NAT of this peer
         self.say_hello(self.splitter)
+        if len(self.peer_list) > 0:
+            # Send hello to monitor peer
+            self.say_hello(self.peer_list[0])
 
         # }}}
 
@@ -80,12 +85,13 @@ class Peer_NTS(Peer_DBS):
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
-            print("NTS: received [send hello to %s]" % (peer,))
-            print("NTS: sending [hello] to %s" % (peer,))
+            print("NTS: Received [send hello to %s]" % (peer,))
             self.say_hello(peer)
 
             self.peer_list.append(peer)
             self.debt[peer] = 0
+        elif len(message) == common.PEER_ID_LENGTH:
+            print("NTS: Received hello (ID %s) from %s" % (message, sender))
         else:
             return Peer_DBS.process_message(self, message, sender)
 
