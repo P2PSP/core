@@ -13,8 +13,6 @@ def sign(message, key):
     h = SHA256.new(message).digest()
     k = random.StrongRandom().randint(1,key.q-1)
     sig = key.sign(h,k)
-    print len(sig[0])
-    exit()
     return sig
 
 def check(message, key, sig):
