@@ -164,8 +164,9 @@ class Peer():
         if args.trusted:
             peer = TrustedPeer(peer)
 
-        if args.trusted:
+        if args.strpeds:
             peer = Peer_StrpeDs(peer)
+            peer.receive_dsa_key()
 
         # {{{ Run!
         peer.disconnect_from_the_splitter()

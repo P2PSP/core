@@ -6,14 +6,22 @@
 # Copyright (C) 2015, the P2PSP team.
 # http://www.p2psp.org
 
-from peer_dbs import Peer_DBS
-from _print_ import _print_
-from color import Color
+from __future__ import print_function
+import threading
+import sys
+import socket
 import struct
+from color import Color
+import common
+import time
+from _print_ import _print_
+from peer_ims import Peer_IMS
+from peer_dbs import Peer_DBS
+from Crypto.PublicKey import DSA
 
 class Peer_StrpeDs(Peer_DBS):
 
-    def __init__(self):
+    def __init__(self, peer):
         sys.stdout.write(Color.yellow)
         _print_("STrPe-DS Peer")
         sys.stdout.write(Color.none)
@@ -44,3 +52,17 @@ class Peer_StrpeDs(Peer_DBS):
         return chunk_number, chunk
 
         # }}}
+
+    def receive_dsa_key(self):
+        message = self.splitter_socket.recv(struct.calcsize("256s256s256s40s"))
+        y, g, p, q = struct.unpack("256s256s256s40s", message)
+        y = long(y, 16)
+        g = long(g, 16)
+        p = long(p, 16)
+        q = long(q, 16)
+        self.dsa_key = DSA.construct((y, g, p, q))
+        _print_("DSA key received")
+        _print_("y = " + str(self.dsa_key.y))
+        _print_("g = " + str(self.dsa_key.g))
+        _print_("p = " + str(self.dsa_key.p))
+        _print_("q = " + str(self.dsa_key.q))
