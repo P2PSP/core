@@ -23,10 +23,18 @@ class Splitter_NTS(Splitter_DBS):
     # {{{
 
     def __init__(self):
+        # {{{
+
         Splitter_DBS.__init__(self)
         sys.stdout.write(Color.yellow)
         print("Using NTS")
         sys.stdout.write(Color.none)
+
+        # {{{ The IDs of the peers in the team.
+        # }}}
+        self.ids = {}
+
+        # }}}
 
     def say_goodbye(self, node, sock):
         # {{{
@@ -73,9 +81,23 @@ class Splitter_NTS(Splitter_DBS):
                 print("NTS: [%5d]" % counter, peer)
                 counter += 1
 
+        # Insert the peer into the lists
         self.insert_peer(new_peer)
+        self.ids[new_peer] = peer_id
         serve_socket.close()
         return new_peer
+
+        # }}}
+
+    def remove_peer(self, peer):
+        # {{{
+
+        Splitter_DBS.remove_peer(self, peer)
+
+        try:
+            del self.ids[peer]
+        except KeyError:
+            pass
 
         # }}}
 
