@@ -128,6 +128,13 @@ class Peer_NTS(Peer_DBS):
 
             self.peer_list.append(peer)
             self.debt[peer] = 0
+        elif message == self.peer_id or (sender == self.splitter and \
+                len(message) == common.PEER_ID_LENGTH + struct.calcsize("H")):
+            print("NTS: Received acknowledge from %s" % (sender,))
+            with self.hello_messages_lock:
+                hello_data = (message, sender)
+                if hello_data in self.hello_messages:
+                    self.hello_messages.remove(hello_data)
         elif len(message) == common.PEER_ID_LENGTH:
             print("NTS: Received hello (ID %s) from %s" % (message, sender))
         elif message == 'H':

@@ -192,7 +192,7 @@ class Splitter_NTS(Splitter_DBS):
                 peer_id = message[:common.PEER_ID_LENGTH]
                 print('NTS: Received hello (ID %s) from %s' % (peer_id, sender))
                 # Send acknowledge
-                self.team_socket.sendto(peer_id, sender)
+                self.team_socket.sendto(message, sender)
                 if peer_id not in self.arriving_peers:
                     print('NTS: Peer ID %s is unknown' % peer_id)
                     continue
