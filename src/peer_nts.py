@@ -37,9 +37,15 @@ class Peer_NTS(Peer_DBS):
     def say_hello(self, peer):
         # {{{
 
-        with self.arriving_peers_lock:
-            if not self.peer_id in self.arriving_peers:
-                self.arriving_peers.append(peer)
+        with self.hello_messages_lock:
+            message = self.peer_id
+            if peer == self.splitter:
+                # Send the local source port to splitter
+                source_port_local = self.team_socket.getsockname()[1]
+                message += struct.pack("H", socket.htons(source_port_local))
+            hello_data = (message, peer)
+            if hello_data not in self.hello_messages:
+                self.hello_messages.append(hello_data)
 
         # }}}
 
@@ -65,24 +71,11 @@ class Peer_NTS(Peer_DBS):
         while self.player_alive:
             # Continuously send hello UDP packets to arriving peers
             # until a connection is established
-            for peer in self.arriving_peers:
-                print("NTS: Sending hello (ID %s) to %s" % (self.peer_id, peer))
-                self.team_socket.sendto(self.peer_id, peer)
+            for (message, peer) in self.hello_messages:
+                print("NTS: Sending hello (%s) to %s"
+                    % (message[:common.PEER_ID_LENGTH], peer))
+                self.team_socket.sendto(message, peer)
             time.sleep(common.HELLO_PACKET_TIMING)
-
-        # }}}
-
-    def receive_monitor_endpoint(self):
-        # {{{
-
-        _print_("NTS: Requesting monitor endpoint from splitter")
-        message = self.splitter_socket.recv(struct.calcsize("4sH"))
-        IP_addr, port = struct.unpack("4sH", message)
-        IP_addr = socket.inet_ntoa(IP_addr)
-        port = socket.ntohs(port)
-        monitor_peer = (IP_addr, port)
-        print("NTS: Received monitor endpoint %s" % (monitor_peer,))
-        return monitor_peer
 
         # }}}
 
@@ -90,8 +83,8 @@ class Peer_NTS(Peer_DBS):
         # {{{
 
         self.player_alive = True # Peer_IMS sets this variable in buffer_data()
-        self.arriving_peers = []
-        self.arriving_peers_lock = threading.Lock()
+        self.hello_messages = [] # Each entry is a (peer_endpoint, message) tuple
+        self.hello_messages_lock = threading.Lock()
         # Start the hello packet sending thread
         threading.Thread(target=self.send_hello_thread).start()
 
@@ -110,8 +103,8 @@ class Peer_NTS(Peer_DBS):
         # Send UDP packets to splitter and monitor peer
         # to create working NAT entries and to determine the
         # source port allocation type of the NAT of this peer
-        self.say_hello(self.splitter)
         self.say_hello(self.peer_list[0])
+        self.say_hello(self.splitter)
 
         # Receive peer list
         #self.receive_the_list_of_peers_2()
@@ -137,6 +130,10 @@ class Peer_NTS(Peer_DBS):
             self.debt[peer] = 0
         elif len(message) == common.PEER_ID_LENGTH:
             print("NTS: Received hello (ID %s) from %s" % (message, sender))
+        elif message == 'H':
+            # Ignore hello messages that are sent by Peer_DBS instances
+            # in receive_the_list_of_peers() before a Peer_NTS instance is created
+            pass
         else:
             return Peer_DBS.process_message(self, message, sender)
 

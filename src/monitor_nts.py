@@ -11,6 +11,7 @@
 
 import sys
 import struct
+import socket
 from peer_dbs import Peer_DBS
 from peer_nts import Peer_NTS
 from _print_ import _print_
@@ -77,5 +78,25 @@ class Monitor_NTS(Peer_NTS):
 
         # Close the TCP socket
         Peer_DBS.disconnect_from_the_splitter(self)
+
+        # }}}
+
+    def process_message(self, message, sender):
+        # {{{ Handle NTS messages; pass other messages to base class
+
+        if sender != self.splitter and len(message) == common.PEER_ID_LENGTH:
+            print("NTS: Received hello (ID %s) from %s" % (message, sender))
+            # Send acknowledge
+            self.team_socket.sendto(message, sender)
+
+            print("NTS: Forwarding ID %s and source port %s to splitter"
+                % (message, sender[1]))
+            message += struct.pack("H", socket.htons(sender[1]))
+            with self.hello_messages_lock:
+                message_data = (message, self.splitter)
+                if message_data not in self.hello_messages:
+                    self.hello_messages.append(message_data)
+        else:
+            return Peer_NTS.process_message(self, message, sender)
 
         # }}}
