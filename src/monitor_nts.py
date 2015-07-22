@@ -10,10 +10,8 @@
 # {{{ Imports
 
 import sys
-import socket
 import struct
-import threading
-from peer_ims import Peer_IMS
+from peer_dbs import Peer_DBS
 from peer_nts import Peer_NTS
 from _print_ import _print_
 from color import Color
@@ -42,7 +40,7 @@ class Monitor_NTS(Peer_NTS):
         sys.stdout.write(Color.none)
 
         # }}}
-    
+
     def complain(self, chunk_number):
         # {{{
 
@@ -68,3 +66,16 @@ class Monitor_NTS(Peer_NTS):
         # }}}
 
     # }}}
+
+    def disconnect_from_the_splitter(self):
+        # {{{
+
+        self.start_send_hello_thread()
+
+        # Receive the generated ID for this peer from splitter
+        self.receive_id()
+
+        # Close the TCP socket
+        Peer_DBS.disconnect_from_the_splitter(self)
+
+        # }}}

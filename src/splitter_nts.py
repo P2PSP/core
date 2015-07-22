@@ -14,7 +14,7 @@ import string
 import sys
 import struct
 import socket
-from splitter_dbs import Splitter_DBS
+from splitter_dbs import Splitter_DBS, ADDR, PORT
 from color import Color
 # }}}
 
@@ -34,6 +34,10 @@ class Splitter_NTS(Splitter_DBS):
         # }}}
         self.ids = {}
 
+        # {{{ The arriving peers. Key: ID. Value: serve_socket.
+        # }}}
+        self.arriving_peers = {}
+
         # }}}
 
     def say_goodbye(self, node, sock):
@@ -48,6 +52,29 @@ class Splitter_NTS(Splitter_DBS):
 
         return ''.join(random.choice(string.ascii_uppercase + string.digits)
             for _ in range(common.PEER_ID_LENGTH))
+
+        # }}}
+
+    def send_the_list_of_peers(self, peer_serve_socket):
+        # {{{
+
+        # For NTS, only send the monitor peer, as the other peers' endpoints
+        # are sent together with their IDs when a Peer_NTS instance has been
+        # created from the Peer_DBS instance
+
+        if len(self.peer_list) == 0:
+            print("NTS: Sending an empty list of peers")
+            message = struct.pack("H", socket.htons(0))
+            peer_serve_socket.sendall(message)
+        else:
+            print("NTS: Sending the monitor as the list of peers")
+            # Send a peer list size of 1
+            message = struct.pack("H", socket.htons(1))
+            peer_serve_socket.sendall(message)
+            # Send the monitor endpoint
+            message = struct.pack("4sH", socket.inet_aton(self.peer_list[0][ADDR]), \
+                                  socket.htons(self.peer_list[0][PORT]))
+            peer_serve_socket.sendall(message)
 
         # }}}
 
@@ -68,7 +95,22 @@ class Splitter_NTS(Splitter_DBS):
         # Send the generated ID to peer
         peer_id = self.generate_id()
         print("NTS: sending ID %s to peer %s" % (peer_id, new_peer))
-        serve_socket.send(peer_id)
+        serve_socket.sendall(peer_id)
+        if len(self.peer_list) == 0:
+            # Directly incorporate the monitor peer into the team
+            self.incorporate_peer(serve_socket, new_peer)
+            return new_peer
+        else:
+            self.arriving_peers[peer_id] = serve_socket
+            # Splitter will continue with incorporate_peer() as soon as the arriving
+            # peer has sent UDP packets to splitter and monitor
+
+        # }}}
+
+    def incorporate_peer(self, serve_socket, new_peer):
+        # {{{
+
+        #self.send_the_list_of_peers_2(serve_socket)
 
         if __debug__:
             print("NTS: sending [send hello to %s]" % (new_peer,))
@@ -81,11 +123,9 @@ class Splitter_NTS(Splitter_DBS):
                 print("NTS: [%5d]" % counter, peer)
                 counter += 1
 
-        # Insert the peer into the lists
+        # Insert the peer into the list
         self.insert_peer(new_peer)
-        self.ids[new_peer] = peer_id
         serve_socket.close()
-        return new_peer
 
         # }}}
 
@@ -133,8 +173,12 @@ class Splitter_NTS(Splitter_DBS):
                 self.process_goodbye(sender)
                 # }}}
             elif len(message) == common.PEER_ID_LENGTH:
-                print('NTS: received ID %s from %s' % (message, sender))
-
+                peer_id = message
+                print('NTS: received hello (ID %s) from %s' % (peer_id, sender))
+                # Send acknowledge
+                self.team_socket.sendto(peer_id, sender)
+                # Incorporate the peer
+                self.incorporate_peer(self.arriving_peers[peer_id], sender)
             # }}}
 
         # }}}

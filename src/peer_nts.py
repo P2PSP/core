@@ -11,6 +11,7 @@
 
 import common
 import threading
+import time
 import sys
 import struct
 import socket
@@ -33,11 +34,12 @@ class Peer_NTS(Peer_DBS):
 
         # }}}
 
-    def say_hello(self, node):
+    def say_hello(self, peer):
         # {{{
 
-        print("NTS: Sending hello (ID %s) to %s" % (self.peer_id, node))
-        self.team_socket.sendto(self.peer_id, node)
+        with self.arriving_peers_lock:
+            if not self.peer_id in self.arriving_peers:
+                self.arriving_peers.append(peer)
 
         # }}}
 
@@ -57,22 +59,65 @@ class Peer_NTS(Peer_DBS):
 
         # }}}
 
+    def send_hello_thread(self):
+        # {{{
+
+        while self.player_alive:
+            # Continuously send hello UDP packets to arriving peers
+            # until a connection is established
+            for peer in self.arriving_peers:
+                print("NTS: Sending hello (ID %s) to %s" % (self.peer_id, peer))
+                self.team_socket.sendto(self.peer_id, peer)
+            time.sleep(common.HELLO_PACKET_TIMING)
+
+        # }}}
+
+    def receive_monitor_endpoint(self):
+        # {{{
+
+        _print_("NTS: Requesting monitor endpoint from splitter")
+        message = self.splitter_socket.recv(struct.calcsize("4sH"))
+        IP_addr, port = struct.unpack("4sH", message)
+        IP_addr = socket.inet_ntoa(IP_addr)
+        port = socket.ntohs(port)
+        monitor_peer = (IP_addr, port)
+        print("NTS: Received monitor endpoint %s" % (monitor_peer,))
+        return monitor_peer
+
+        # }}}
+
+    def start_send_hello_thread(self):
+        # {{{
+
+        self.player_alive = True # Peer_IMS sets this variable in buffer_data()
+        self.arriving_peers = []
+        self.arriving_peers_lock = threading.Lock()
+        # Start the hello packet sending thread
+        threading.Thread(target=self.send_hello_thread).start()
+
+        # }}}
+
     def disconnect_from_the_splitter(self):
         # {{{
+
+        self.start_send_hello_thread()
 
         # Receive the generated ID for this peer from splitter
         self.receive_id()
 
-        # Close the TCP socket
-        Peer_DBS.disconnect_from_the_splitter(self)
+        # Note: This peer is *not* the monitor peer.
 
         # Send UDP packets to splitter and monitor peer
         # to create working NAT entries and to determine the
         # source port allocation type of the NAT of this peer
         self.say_hello(self.splitter)
-        if len(self.peer_list) > 0:
-            # Send hello to monitor peer
-            self.say_hello(self.peer_list[0])
+        self.say_hello(self.peer_list[0])
+
+        # Receive peer list
+        #self.receive_the_list_of_peers_2()
+
+        # Close the TCP socket
+        Peer_DBS.disconnect_from_the_splitter(self)
 
         # }}}
 
