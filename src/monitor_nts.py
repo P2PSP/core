@@ -96,6 +96,8 @@ class Monitor_NTS(Peer_NTS):
                 message_data = (message, self.splitter)
                 if message_data not in self.hello_messages:
                     self.hello_messages.append(message_data)
+                    # Directly start packet sending
+                    self.hello_messages_event.set()
         else:
             return Peer_NTS.process_message(self, message, sender)
 

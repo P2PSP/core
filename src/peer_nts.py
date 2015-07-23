@@ -46,6 +46,8 @@ class Peer_NTS(Peer_DBS):
             hello_data = (message, peer)
             if hello_data not in self.hello_messages:
                 self.hello_messages.append(hello_data)
+                # Directly start packet sending
+                self.hello_messages_event.set()
 
         # }}}
 
@@ -75,7 +77,8 @@ class Peer_NTS(Peer_DBS):
                 print("NTS: Sending hello (%s) to %s"
                     % (message[:common.PEER_ID_LENGTH], peer))
                 self.team_socket.sendto(message, peer)
-            time.sleep(common.HELLO_PACKET_TIMING)
+            self.hello_messages_event.clear()
+            self.hello_messages_event.wait(common.HELLO_PACKET_TIMING)
 
         # }}}
 
@@ -85,6 +88,7 @@ class Peer_NTS(Peer_DBS):
         self.player_alive = True # Peer_IMS sets this variable in buffer_data()
         self.hello_messages = [] # Each entry is a (peer_endpoint, message) tuple
         self.hello_messages_lock = threading.Lock()
+        self.hello_messages_event = threading.Event()
         # Start the hello packet sending thread
         threading.Thread(target=self.send_hello_thread).start()
 
