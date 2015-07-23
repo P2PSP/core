@@ -160,7 +160,7 @@ $nat1_config "
         stop_processes
 
         splitter_grep="Received a message from ('$splitter', $splitter_port)"
-        monitor_grep="Received a message from ('$splitter"
+        monitor_grep="Received a message from ('$splitter', $peer_port)"
         peer1_grep="Received a message from ('$nat1_pub"
         peer2_grep="Received a message from ('$nat2_pub"
         # Get outputs; the exit value is determined by "grep" and will be "0"
