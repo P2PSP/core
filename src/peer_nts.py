@@ -94,6 +94,41 @@ class Peer_NTS(Peer_DBS):
 
         # }}}
 
+    def receive_the_list_of_peers_2(self):
+        # {{{
+
+        self.debt = {}      # Chunks debts per peer.
+        self.peer_list = [] # The list of peers structure.
+
+        sys.stdout.write(Color.green)
+        _print_("NTS: Requesting the number of peers from splitter")
+        sys.stdout.write(Color.none)
+        # Add 1 as the monitor peer was already received
+        self.number_of_peers = socket.ntohs(struct.unpack("H",
+            self.splitter_socket.recv(struct.calcsize("H")))[0]) + 1
+        _print_("NTS: The size of the team is %d (apart from me)" % self.number_of_peers)
+
+        # Skip the monitor peer
+        for _ in range(self.number_of_peers - 1):
+            message = self.splitter_socket.recv(common.PEER_ID_LENGTH +
+                                                struct.calcsize("4sH"))
+            peer_id = message[:common.PEER_ID_LENGTH]
+            IP_addr, port = struct.unpack("4sH", message[common.PEER_ID_LENGTH:]) # Ojo, !H ????
+            IP_addr = socket.inet_ntoa(IP_addr)
+            port = socket.ntohs(port)
+            peer = (IP_addr, port)
+            print("NTS: [hello] sent to %s" % (peer,))
+            self.say_hello(peer)
+
+            self.peer_list.append(peer)
+            self.debt[peer] = 0
+
+        sys.stdout.write(Color.green)
+        _print_("NTS: List of peers received")
+        sys.stdout.write(Color.none)
+
+        # }}}
+
     def disconnect_from_the_splitter(self):
         # {{{
 
@@ -110,8 +145,8 @@ class Peer_NTS(Peer_DBS):
         self.say_hello(self.peer_list[0])
         self.say_hello(self.splitter)
 
-        # Receive peer list
-        #self.receive_the_list_of_peers_2()
+        # Receive the list of peers, except the monitor peer, with their peer IDs
+        self.receive_the_list_of_peers_2()
 
         # Close the TCP socket
         Peer_DBS.disconnect_from_the_splitter(self)
@@ -121,17 +156,16 @@ class Peer_NTS(Peer_DBS):
     def process_message(self, message, sender):
         # {{{ Handle NTS messages; pass other messages to base class
 
-        if len(message) == struct.calcsize("4sH"):
+        if sender == self.splitter and \
+                len(message) == common.PEER_ID_LENGTH + struct.calcsize("4sH"):
             # [say hello to (X)] received from splitter
-            IP_addr, port = struct.unpack("4sH", message)
+            peer_id = message[:common.PEER_ID_LENGTH]
+            IP_addr, port = struct.unpack("4sH", message[common.PEER_ID_LENGTH:]) # Ojo, !H ????
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
-            print("NTS: Received [send hello to %s]" % (peer,))
+            print("NTS: Received [send hello to %s %s]" % (peer_id, peer))
             self.say_hello(peer)
-
-            self.peer_list.append(peer)
-            self.debt[peer] = 0
         elif message == self.peer_id or (sender == self.splitter and \
                 len(message) == common.PEER_ID_LENGTH + struct.calcsize("H")):
             print("NTS: Received acknowledge from %s" % (sender,))
@@ -141,6 +175,11 @@ class Peer_NTS(Peer_DBS):
                     self.hello_messages.remove(hello_data)
         elif len(message) == common.PEER_ID_LENGTH:
             print("NTS: Received hello (ID %s) from %s" % (message, sender))
+            if sender not in self.peer_list:
+                self.peer_list.append(sender)
+                self.debt[sender] = 0
+                # Send acknowledge
+                self.team_socket.sendto(message, sender)
         elif message == 'H':
             # Ignore hello messages that are sent by Peer_DBS instances
             # in receive_the_list_of_peers() before a Peer_NTS instance is created

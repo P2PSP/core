@@ -63,9 +63,9 @@ class Splitter_NTS(Splitter_DBS):
     def send_the_list_of_peers(self, peer_serve_socket):
         # {{{
 
-        # For NTS, only send the monitor peer, as the other peers' endpoints
+        # For NTS, send only the monitor peer, as the other peers' endpoints
         # are sent together with their IDs when a Peer_NTS instance has been
-        # created from the Peer_DBS instance
+        # created from the Peer_DBS instance, in send_the_list_of_peers_2()
 
         if len(self.peer_list) == 0:
             print("NTS: Sending an empty list of peers")
@@ -83,6 +83,23 @@ class Splitter_NTS(Splitter_DBS):
 
         # }}}
 
+    def send_the_list_of_peers_2(self, peer_serve_socket):
+        # {{{
+
+        # Send all peers except the monitor peer with their peer ID
+        if __debug__:
+            print("DBS: Sending the list of peers except the monitor (%d peers)",
+                  len(self.peer_list)-1)
+        message = struct.pack("H", socket.htons(len(self.peer_list)-1))
+        peer_serve_socket.sendall(message)
+
+        for p in self.peer_list[1:]:
+            message = self.ids[p] + struct.pack("4sH", socket.inet_aton(p[ADDR]), \
+                                                socket.htons(p[PORT]))
+            peer_serve_socket.sendall(message)
+
+        # }}}
+
     def handle_a_peer_arrival(self, connection):
         # {{{
 
@@ -92,8 +109,7 @@ class Splitter_NTS(Splitter_DBS):
         serve_socket = connection[0]
         new_peer = connection[1]
         sys.stdout.write(Color.green)
-        print(serve_socket.getsockname(), 'NTS: Accepted connection from peer', \
-              new_peer)
+        print('NTS: Accepted connection from peer %s' % (new_peer,))
         sys.stdout.write(Color.none)
         self.send_configuration(serve_socket)
         self.send_the_list_of_peers(serve_socket)
@@ -122,22 +138,24 @@ class Splitter_NTS(Splitter_DBS):
         print("NTS: Incorporating the peer %s. Source ports: %s, %s, %s"
             % (peer_id, source_port_local, source_port_to_splitter, source_port_to_monitor))
 
-        #self.send_the_list_of_peers_2(serve_socket)
+        if len(self.peer_list) != 0:
+            self.send_the_list_of_peers_2(serve_socket)
 
         # This has to be adapted with port prediction
         new_peer = (peer_address, source_port_to_splitter)
         if __debug__:
             print("NTS: Sending [send hello to %s]" % (new_peer,))
-            counter = 0
-        message = struct.pack("4sH", socket.inet_aton(new_peer[0]), \
-                              socket.htons(new_peer[1]))
-        for peer in self.peer_list:
+        message = peer_id + struct.pack("4sH", socket.inet_aton(new_peer[0]), \
+                                        socket.htons(new_peer[1]))
+        # Send the packet to all peers except the monitor peer
+        for peer in self.peer_list[1:]:
+            # Hopefully this packet arrives
             self.team_socket.sendto(message, peer)
-            if __debug__:
-                print("NTS: [%5d]" % counter, peer)
-                counter += 1
+            self.team_socket.sendto(message, peer)
+            self.team_socket.sendto(message, peer)
 
         # Insert the peer into the list
+        self.ids[new_peer] = peer_id
         self.insert_peer(new_peer)
         serve_socket.close()
 
