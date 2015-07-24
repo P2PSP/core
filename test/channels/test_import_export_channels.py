@@ -1,7 +1,7 @@
 #script tested with python2.7
 
 import sys,os
-module_path = os.path.join(os.path.dirname(__file__),"..")
+module_path = os.path.join(os.path.dirname(__file__),"../..")
 sys.path.append(module_path)
 
 from src.model.category import Category
@@ -27,7 +27,7 @@ def get_data():
    return data
    
 path = file_util.find_file(__file__,
-                                    "../data/channels/sample_data.json")
+                                    "../../data/channels/sample_data.json")
 
 #unittests are sorted according to their name and then run.
 #edit tearDown method to retain exported channels file  and vice-versa.
