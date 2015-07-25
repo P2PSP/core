@@ -1,0 +1,111 @@
+\section*{Peer manual\+:}
+
+How to\+:
+
+
+\begin{DoxyEnumerate}
+\item Watch the default channel\+:
+
+./peer.py \& vlc \href{http://localhost:9999}{\tt http\+://localhost\+:9999}
+\end{DoxyEnumerate}
+
+or simply\+: \begin{DoxyVerb}./play.sh &
+\end{DoxyVerb}
+
+
+
+\begin{DoxyEnumerate}
+\item Change the local port (9998) to communicate with V\+L\+C\+:
+
+./peer.py --player\+\_\+port=9998 \& vlc \href{http://localhost:9998}{\tt http\+://localhost\+:9998} \&
+\item Watch a particular channel (in the port 4554)\+:
+
+./peer.py --splitter\+\_\+port=4554 \& vlc \href{http://localhost:9999}{\tt http\+://localhost\+:9999} \&
+\item Use a specific team port (8888) for communicating with the rest of the team (you should use this feature, for example, after having created a N\+A\+T entry manualy)\+:
+
+./peer.py --team\+\_\+port=8888 \& vlc \href{http://localhost:9999}{\tt http\+://localhost\+:9999} \&
+\item Use a particular splitter host (1.\+2.\+3.\+4)\+:
+
+./peer.py --splitter\+\_\+host=1.\+2.\+3.\+4 \& vlc \href{http://localhost:9999}{\tt http\+://localhost\+:9999} \&
+\item Decript a stream using the keyword \char`\"{}key\char`\"{} (not yet implemented)\+:
+
+./peer.py --keyword=key \& vlc \href{http://localhost:9999}{\tt http\+://localhost\+:9999} \&
+\item Join a private team using the password \char`\"{}pass\char`\"{} (not yet implemented)\+:
+
+./peer.py --password=pass \& vlc \href{http://localhost:9999}{\tt http\+://localhost\+:9999} \&
+\item Deliberately loss a chunk of each 100 (usually for testing purposes)\+:
+
+./peer.py --chunk\+\_\+loss\+\_\+period=100
+\end{DoxyEnumerate}
+
+\section*{Splitter manual\+:}
+
+
+\begin{DoxyEnumerate}
+\item Create a channel using the default parameters (run \char`\"{}splitter -\/-\/help\char`\"{})\+:
+
+splitter \&
+\item Change the listening port to 5555\+:
+
+splitter --port=5555 \&
+\item Change the buffer size to 512 chunks\+:
+
+splitter --buffer\+\_\+size=512 \&
+\item Change the source channel (media stream) to \char`\"{}new\+\_\+channel\char`\"{}\+:
+
+splitter --channel=new\+\_\+channel \&
+\item Change the chunk size to 512 bytes\+:
+
+splitter --chunk\+\_\+size=512 \&
+\item Change the source host (which runs Icecast for example) to \char`\"{}new\+\_\+host\char`\"{}\+:
+
+splitter --source\+\_\+host=new\+\_\+host \&
+\item Change the source port (where Icecast is listening) to 6666\+:
+
+splitter --source\+\_\+port=6666 \&
+\item Create a private team using the password \char`\"{}pass\char`\"{} (not yet implemented)\+:
+
+splitter --password=pass \&
+\item Encrypt the stream using the keyword \char`\"{}key\char`\"{} (not yet implemented)\+:
+
+splitter --keyword=key \&
+\item Use the I\+P multicast mode (if available)\+:
+
+splitter --mcast \&
+\item Select a particular I\+P multicast address 224.\+0.\+1.\+1\+:
+
+splitter --mcast --mcast\+\_\+addr=224.\+0.\+1.\+1 \&
+\end{DoxyEnumerate}
+
+\section*{Miscellaneous\+:}
+
+
+\begin{DoxyItemize}
+\item Download \href{http://commons.wikimedia.org/wiki/File:Big_Buck_Bunny_small.ogv}{\tt http\+://commons.\+wikimedia.\+org/wiki/\+File\+:\+Big\+\_\+\+Buck\+\_\+\+Bunny\+\_\+small.\+ogv}.
+\item Feed a local Icecast server, forever (until kill the process)\+:
+
+xterm -\/e \textquotesingle{}./tools/feed\+\_\+icecast.sh\textquotesingle{} \&
+\item Use V\+L\+C as source (support several H\+T\+T\+P clients).
+
+Media -\/$>$ Broadcast -\/$>$ Select the archive -\/$>$ Broadcast -\/$>$ Next -\/$>$ H\+T\+T\+P -\/$>$ Show in local + Add + Path=/x.ogv -\/$>$ Not transcode -\/$>$ Next -\/$>$ Stream
+\item Create (manually) a local team (usually for testing purposes)\+:
+
+\#\+Remember first to feed the local Icecast server!!! \begin{DoxyVerb}   xterm -e './src/splitter.py' &                # Run a splitter
+   xterm -e './src/peer.py' &                    # Run a (monitor) peer
+   xterm -e './src/peer.py --player_port=9998' & # Run a peer
+   vlc http://localhost:9999 &                   # Run a player for the monitor
+   vlc http://localhost:9998 &                   # Run a player for the peer
+\end{DoxyVerb}
+
+\item Create (automatically) a local team\+:
+
+\#\+Remember first to feed the local Icecast server!!! \begin{DoxyVerb}./tools/create_a_team.sh # Create the team
+\end{DoxyVerb}
+
+\item To run in debug mode\+: \begin{DoxyVerb}  python -d example.py
+\end{DoxyVerb}
+
+\item Autocomplete support\+: \begin{DoxyVerb}  sudo pip install argcomplete
+  sudo activate-global-python-argcomplete\end{DoxyVerb}
+ 
+\end{DoxyItemize}

@@ -1,0 +1,34 @@
+
+\begin{DoxyEnumerate}
+\item Create a \char`\"{}\+N\+A\+T Network\char`\"{}\+:
+\end{DoxyEnumerate}
+
+V\+Box\+Manage natnetwork add -\/t localnet -\/n \char`\"{}192.\+168.\+15.\+0/24\char`\"{} -\/e -\/h on
+
+
+\begin{DoxyEnumerate}
+\item In the \char`\"{}\+Splitter\char`\"{} machine\+:
+\begin{DoxyEnumerate}
+\item Run the source (see \hyperlink{VLC_8md}{V\+L\+C.\+md}).
+\item Run the splitter\+:
+
+./splitter.py --source\+\_\+port 8080
+\item Run the monitor\+:
+
+./peer.py --splitter\+\_\+host 192.\+168.\+15.\+4
+\item Run the monitor\textquotesingle{}s player\+:
+
+vlc \href{http://localhost:9999}{\tt http\+://localhost\+:9999} \&
+\end{DoxyEnumerate}
+\end{DoxyEnumerate}
+\begin{DoxyEnumerate}
+\item In the \char`\"{}\+Peer\char`\"{} machine\+:
+\begin{DoxyEnumerate}
+\item Run the peer\+:
+
+./peer.py --splitter\+\_\+host 192.\+168.\+15.\+4
+\item Run the peer\textquotesingle{}s player\+:
+
+vlc \href{http://localhost:9999}{\tt http\+://localhost\+:9999} \& 
+\end{DoxyEnumerate}
+\end{DoxyEnumerate}
