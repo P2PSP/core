@@ -137,7 +137,9 @@ class StrpeDsSplitter(Splitter_LRS):
         return '%x' % value
 
     def add_trusted_peer(self, peer):
-        self.trusted_peers.append(peer)
+        l = peer.split(':')
+        peer_obj = (l[0], int(l[1]))
+        self.trusted_peers.append(peer_obj)
 
     def receive_message(self):
         try:
@@ -176,10 +178,13 @@ class StrpeDsSplitter(Splitter_LRS):
 
     def process_bad_peers_message(self, message, sender):
         bad_number = struct.unpack("3sH", message)[1]
-        _print_('bads = ' + str(bad_number))
         for _ in range(bad_number):
             message, sender = self.receive_bad_peer_message()
-            _print_(struct.unpack("ii", message))
+            x = struct.unpack("ii", message)
+            bad_peer = (socket.inet_ntoa(struct.pack('!L', x[0])), x[1])
+            if sender in self.trusted_peers:
+                _print_("bad peer: " + str(bad_peer))
+                self.remove_peer(bad_peer)
 
     def receive_bad_peer_message(self):
         return self.team_socket.recvfrom(struct.calcsize("ii"))

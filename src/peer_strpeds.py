@@ -56,7 +56,8 @@ class Peer_StrpeDs(Peer_DBS):
         msg = struct.pack("3sH", "bad", len(self.bad_peers))
         self.team_socket.sendto(msg, self.splitter)
         for peer in self.bad_peers:
-            msg = socket.inet_aton(peer[0]) + struct.pack('i', peer[1])
+            ip = struct.unpack("!L", socket.inet_aton(peer[0]))[0]
+            msg = struct.pack('ii', ip, peer[1])
             self.team_socket.sendto(msg, self.splitter)
 
     def check_message(self, message, sender):
