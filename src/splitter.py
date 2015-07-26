@@ -84,7 +84,7 @@ class Splitter():
 
         parser.add_argument('--strpe', nargs='+', type=str, help='Enables STrPe')
 
-        parser.add_argument('--strpeds', action="store_true", help='Enables STrPe-DS')
+        parser.add_argument('--strpeds', nargs='+', type=str, help='Enables STrPe-DS')
 
         try:
             argcomplete.autocomplete(parser)
@@ -136,6 +136,8 @@ class Splitter():
                     splitter.add_trusted_peer(peer)
             elif (args.strpeds):
                 splitter = StrpeDsSplitter()
+                for peer in args.strpeds:
+                    splitter.add_trusted_peer(peer)
             else:
                 splitter = Splitter_LRS()
 

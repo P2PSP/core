@@ -40,14 +40,24 @@ class Peer_StrpeDs(Peer_DBS):
         self.team_socket = peer.team_socket
         self.message_format += '40s40s'
         self.bad_peers = []
+        #self.bad_peers.append(('127.0.0.1', 1234))
 
     def process_message(self, message, sender):
-        # here hash checking will be implemented
         if self.is_current_message_from_splitter() or self.check_message(message, sender):
-            return Peer_DBS.process_message(self, message, sender)
+            if self.is_control_message(message) and message == 'B':
+                self.handle_bad_peers_request()
+            else:
+                return Peer_DBS.process_message(self, message, sender)
         else:
             self.process_bad_message(message, sender)
             return -1
+
+    def handle_bad_peers_request(self):
+        msg = struct.pack("3sH", "bad", len(self.bad_peers))
+        self.team_socket.sendto(msg, self.splitter)
+        for peer in self.bad_peers:
+            msg = socket.inet_aton(peer[0]) + struct.pack('i', peer[1])
+            self.team_socket.sendto(msg, self.splitter)
 
     def check_message(self, message, sender):
         if sender in self.bad_peers:

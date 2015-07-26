@@ -20,10 +20,12 @@ from Crypto.PublicKey import DSA
 from Crypto.Hash import SHA256
 from splitter_dbs import Splitter_DBS
 from splitter_lrs import Splitter_LRS
+import time
 
 class StrpeDsSplitter(Splitter_LRS):
 
     DIGEST_SIZE = 40
+    GATHER_BAD_PEERS_SLEEP = 10
 
     def __init__(self):
         sys.stdout.write(Color.yellow)
@@ -31,6 +33,8 @@ class StrpeDsSplitter(Splitter_LRS):
         sys.stdout.write(Color.none)
         Splitter_LRS.__init__(self)
         self.trusted_peers = []
+        self.gathering_counter = 0
+        self.gethered_bad_peers = []
 
     def add_trusted_peer(self, peer):
         self.trusted_peers.append(peer)
@@ -58,6 +62,23 @@ class StrpeDsSplitter(Splitter_LRS):
         message = struct.pack('256s256s256s40s', y, g, p, q)
         sock.sendall(message)
 
+    def gather_bad_peers(self):
+        while self.alive:
+            _print_("gathering bad peers")
+            if len(self.peer_list) <= 0:
+                return
+            peer = self.get_peer_for_gathering()
+            self.request_bad_peers(peer) # then, we will handle it in 'moderate the team'
+            time.sleep(self.GATHER_BAD_PEERS_SLEEP)
+
+    def get_peer_for_gathering(self):
+        peer = self.peer_list[self.gathering_counter]
+        self.gathering_counter = (self.gathering_counter + 1) % len(self.peer_list)
+        return peer
+
+    def request_bad_peers(self, dest):
+        self.team_socket.sendto(b'B', dest)
+
     def run(self):
         # {{{
 
@@ -71,6 +92,7 @@ class StrpeDsSplitter(Splitter_LRS):
         threading.Thread(target=self.handle_arrivals).start()
         threading.Thread(target=self.moderate_the_team).start()
         threading.Thread(target=self.reset_counters_thread).start()
+        threading.Thread(target=self.gather_bad_peers).start()
 
         message_format = self.chunk_number_format \
                         + str(self.CHUNK_SIZE) + "s" \
@@ -113,3 +135,51 @@ class StrpeDsSplitter(Splitter_LRS):
 
     def long_to_hex(self, value):
         return '%x' % value
+
+    def add_trusted_peer(self, peer):
+        self.trusted_peers.append(peer)
+
+    def receive_message(self):
+        try:
+            return self.team_socket.recvfrom(struct.calcsize("3sH"))
+        except:
+            if __debug__:
+                print("DBS: Unexpected error:", sys.exc_info()[0])
+            pass
+
+    def moderate_the_team(self):
+        while self.alive:
+            try:
+                message, sender = self.receive_message()
+            except:
+                message = b'?'
+                sender = ("0.0.0.0", 0)
+
+            if len(message) == 2:
+                lost_chunk_number = self.get_lost_chunk_number(message)
+                self.process_lost_chunk(lost_chunk_number, sender)
+            elif len(message) == 6:
+                _print_(len(message))
+                self.process_bad_peers_message(message, sender)
+            else:
+                _print_(len(message))
+                # {{{ The peer wants to leave the team.
+
+                try:
+                    if struct.unpack("s", message)[0] == 'G': # 'G'oodbye
+                        self.process_goodbye(sender)
+                except Exception as e:
+                    print("LRS: ", e)
+                    print(message)
+                # }}}
+            # }}}
+
+    def process_bad_peers_message(self, message, sender):
+        bad_number = struct.unpack("3sH", message)[1]
+        _print_('bads = ' + str(bad_number))
+        for _ in range(bad_number):
+            message, sender = self.receive_bad_peer_message()
+            _print_(struct.unpack("ii", message))
+
+    def receive_bad_peer_message(self):
+        return self.team_socket.recvfrom(struct.calcsize("ii"))
