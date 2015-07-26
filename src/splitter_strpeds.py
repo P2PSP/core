@@ -160,10 +160,8 @@ class StrpeDsSplitter(Splitter_LRS):
                 lost_chunk_number = self.get_lost_chunk_number(message)
                 self.process_lost_chunk(lost_chunk_number, sender)
             elif len(message) == 6:
-                _print_(len(message))
                 self.process_bad_peers_message(message, sender)
             else:
-                _print_(len(message))
                 # {{{ The peer wants to leave the team.
 
                 try:
