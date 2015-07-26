@@ -47,9 +47,11 @@ class Peer_StrpeDs(Peer_DBS):
             return Peer_DBS.process_message(self, message, sender)
         else:
             self.process_bad_message(message, sender)
-            return Peer_DBS.process_message(self, message, sender)
+            return -1
 
     def check_message(self, message, sender):
+        if sender in self.bad_peers:
+            return False
         if not self.is_control_message(message):
             chunk_number, chunk, k1, k2 = struct.unpack(self.message_format, message)
             chunk_number = socket.ntohs(chunk_number)
@@ -63,6 +65,8 @@ class Peer_StrpeDs(Peer_DBS):
 
     def process_bad_message(self, message, sender):
         _print_("bad peer: " + str(sender))
+        self.bad_peers.append(sender)
+        self.peer_list.remove(sender)
 
     def unpack_message(self, message):
         # {{{
