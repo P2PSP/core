@@ -65,10 +65,9 @@ class StrpeDsSplitter(Splitter_LRS):
     def gather_bad_peers(self):
         while self.alive:
             _print_("gathering bad peers")
-            if len(self.peer_list) <= 0:
-                return
-            peer = self.get_peer_for_gathering()
-            self.request_bad_peers(peer) # then, we will handle it in 'moderate the team'
+            if len(self.peer_list) > 0:
+                peer = self.get_peer_for_gathering()
+                self.request_bad_peers(peer) # then, we will handle it in 'moderate the team'
             time.sleep(self.GATHER_BAD_PEERS_SLEEP)
 
     def get_peer_for_gathering(self):
