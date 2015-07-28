@@ -7,7 +7,7 @@
       <mime-type>application/json</mime-type>
     </mime-types>
     <patterns>
-      <pattern>*.json</pattern>
+      <pattern>*.p2psp</pattern>
     </patterns>
   </object>
   <object class="GtkDialog" id="ImportBox">

@@ -27,7 +27,7 @@ def get_data():
    return data
    
 path = file_util.find_file(__file__,
-                                    "../../data/channels/sample_data.json")
+                                    "../../data/channels/sample_data.p2psp")
 
 #unittests are sorted according to their name and then run.
 #edit tearDown method to retain exported channels file  and vice-versa.

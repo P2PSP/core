@@ -57,7 +57,7 @@ class Main_Controller():
         exported_data = channel_store.get_monitor_data()
         monitor_channel = Channel(exported_data["monitor"])
         path = file_util.find_file(__file__,
-                                    "../../data/channels/to_import_sample_data.json")
+                                    "../../data/channels/to_import_sample_data.p2psp")
         exporter  = JSON_Exporter()
         exporter.to_JSON(path,{"monitor":monitor_channel},Channel_Encoder)
         
@@ -137,7 +137,7 @@ class Main_Controller():
     def quit(self):
         self.player.stop()
         path = file_util.find_file(__file__,
-                                    "../../data/channels/to_import_sample_data.json")
+                                    "../../data/channels/to_import_sample_data.p2psp")
         file_util.file_del(path)
 
 
