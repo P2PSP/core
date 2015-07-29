@@ -96,11 +96,11 @@ class Main_Controller():
         ,'on_TogglePlaybackButton_clicked'      : self.toggle_player_playback
         ,'on_ToggleChannels_button_press_event' : self.toggle_channel_box
         ,'on_FullscreenButton_clicked'          : self.toggle_player_fullscreen
-        ,'on_Surface_button_press_event'        : self.toggle_status_box
         ,'on_ChannelIconView_button_press_event': self.play_selected_channel
         ,'on_Import_activate'                   : self.import_channels
         ,'on_Export_activate'                   : self.export_channels
         ,'on_VolumeButton_value_changed'        : self.control_player_volume
+        ,'on_Surface_key_press_event'           : self.toggle_status_box
                 }
         return signals
 
@@ -182,6 +182,7 @@ class Main_Controller():
             self.app_window.window.fullscreen()
             self.player_fullscreen = True
             self.status_box_hidden = True
+            self.app_window.player_surface.grab_focus()
         else:
             self.show()
             self.app_window.window.unfullscreen()
@@ -193,7 +194,8 @@ class Main_Controller():
 
     @exc_handler
     def toggle_status_box(self,widget,data=None):
-        if self.player_fullscreen == True:
+        #check whether data.keyeval is GDK_ESCAPE
+        if self.player_fullscreen == True and data.keyval == 65307:
             if self.status_box_hidden == False :
                 self.app_window.hide_status_box()
                 self.status_box_hidden = True
