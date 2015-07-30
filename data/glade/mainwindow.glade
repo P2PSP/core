@@ -42,7 +42,8 @@
     <property name="stock">gtk-missing-image</property>
   </object>
   <object class="GtkApplicationWindow" id="MainWindow">
-    <property name="can_focus">False</property>
+    <property name="can_focus">True</property>
+    <property name="events">GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
     <property name="title" translatable="yes">P2PSP</property>
     <child>
       <object class="GtkPaned" id="MainPane">
@@ -52,7 +53,7 @@
           <object class="GtkBox" id="MainBox">
             <property name="name">s</property>
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkMenuBar" id="Menu">
@@ -181,8 +182,9 @@
                 <property name="visible">True</property>
                 <property name="app_paintable">True</property>
                 <property name="can_focus">True</property>
-                <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
-                <signal name="button-press-event" handler="on_Surface_button_press_event" swapped="no"/>
+                <property name="can_default">True</property>
+                <property name="events">GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
+                <signal name="key-press-event" handler="on_Surface_key_press_event" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>

@@ -43,8 +43,8 @@ class Export_Controller():
     def add_filters(self, dialog):
         #Add json file filter
         filter_text = Gtk.FileFilter()
-        filter_text.set_name("Json Files")
-        filter_text.add_mime_type("application/json")
+        filter_text.set_name("P2PSP Files")
+        filter_text.add_mime_type("application/p2psp")
         dialog.add_filter(filter_text)
         
     @exc_handler
@@ -58,7 +58,7 @@ class Export_Controller():
         dialog.set_default_size(800, 400)
 
         self.add_filters(dialog)
-
+        Gtk.FileChooser.set_current_name(dialog,"Untitled.p2psp")
         Gtk.FileChooser.set_do_overwrite_confirmation(dialog, True) 
         response = dialog.run()
             
