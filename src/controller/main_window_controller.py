@@ -35,6 +35,9 @@ class Main_Controller():
         self.player_fullscreen  = False
         self.channels_revealed = True
         self.status_box_hidden = False
+        self.vlc_player_instance = None
+        self.win_id = None
+        self.player = None
         self.app_window = window
         self.app_model = model
         self.app_window.interface.connect_signals(self.setup_signals())
@@ -48,11 +51,11 @@ class Main_Controller():
                                         ,self.app_window.users_label)
         except Exception as msg:
             traceback.print_exc()
-            
+
         #self.show_monitor_channel()
         self.export_sample_monitor()
-        
-    @exc_handler    
+
+    @exc_handler
     def export_sample_monitor(self):
         exported_data = channel_store.get_monitor_data()
         monitor_channel = Channel(exported_data["monitor"])
@@ -60,7 +63,7 @@ class Main_Controller():
                                     "../../data/channels/to_import_sample_data.p2psp")
         exporter  = JSON_Exporter()
         exporter.to_JSON(path,{"monitor":monitor_channel},Channel_Encoder)
-        
+
     @exc_handler
     def show_monitor_channel(self):#only for testing purpose
         monitor_data = channel_store.get_monitor_data()
@@ -73,7 +76,7 @@ class Main_Controller():
         scaled_image = graphics_util.get_scaled_image(image_url,180)
         for i in range(0,20):
             self.app_window.icon_list_store.append([scaled_image,name,desc])
-        
+
     @exc_handler
     def start_peer(self):
         self.peer_active = True
@@ -108,11 +111,11 @@ class Main_Controller():
     @exc_handler
     def import_channels(self,widget,data=None):
             controller = Import_Controller(self.app_window)
-                
+
     @exc_handler
     def export_channels(self,widget,data=None):
         controller = Export_Controller(self.app_window)
-        
+
     @exc_handler
     def toggle_player_type(self,win_id):
         if self.peer_active :
@@ -147,10 +150,11 @@ class Main_Controller():
 
     @exc_handler
     def toggle_player_playback(self, widget, data=None):
-        if self.peer_active == False and self.player_paused == False:
-            self.start_peer()
+        if  len(self.app_window.channel_iconview.get_selected_items()) == 0:
+                return
+        elif self.peer_active == False and self.player_paused == False:
+            self.play_selection(self.app_window.channel_iconview)
             self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
-            self.toggle_player_type(self.win_id)
 
         elif self.peer_active == True and self.player_paused == True:
             self.player.play()
@@ -202,30 +206,35 @@ class Main_Controller():
             else:
                 self.app_window.show_status_box()
                 self.status_box_hidden = False
-    
+
     @exc_handler
     def play_selected_channel(self,widget,data=None):#implented only for testing purposes
         if data.type == Gdk.EventType._2BUTTON_PRESS:
-            if  len(widget.get_selected_items()) == 0:
+            self.play_selection(widget)
+
+    @exc_handler
+    def play_selection(self,iconview):
+        if  len(iconview.get_selected_items()) == 0:
                 return
-            item  = widget.get_selected_items()[0]
-            channel_key = self.app_window.icon_list_store[item][1]
-            channel = Channel_Store.ALL.get_channel(channel_key)
-            data = (channel.get_splitter_addr()
-                   ,int(channel.get_splitter_port()))
-            peer_thread.configure_peer(data)
-            self.player.stop()
-            self.peer_active = False
-            self.player_paused = False
-            self.app_window.buffer_status_bar.hide()
-            self.start_peer()
-            self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
-            self.toggle_player_type(self.win_id)
-        
+        item  = iconview.get_selected_items()[0]
+        channel_key = self.app_window.icon_list_store[item][1]
+        channel = Channel_Store.ALL.get_channel(channel_key)
+        data = (channel.get_splitter_addr()
+                ,int(channel.get_splitter_port()))
+        peer_thread.configure_peer(data)
+        self.player.stop()
+        self.peer_active = False
+        self.player_paused = False
+        self.app_window.buffer_status_bar.hide()
+        self.start_peer()
+        self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
+        self.toggle_player_type(self.win_id)
+
+
     @exc_handler
     def control_player_volume(self,widget,data=None):
         self.player.audio_set_volume(int(data*100))
-        
+
     @exc_handler
     def _realized(self,widget,data=None):
         cursor = Gdk.Cursor.new(Gdk.CursorType.ARROW)
