@@ -95,11 +95,7 @@ class Peer_StrpeDs(Peer_DBS):
         q = self.convert_to_long(q)
         self.dsa_key = DSA.construct((y, g, p, q))
         _print_("DSA key received")
-        _print_("y = " + str(self.dsa_key.y))
-        _print_("g = " + str(self.dsa_key.g))
-        _print_("p = " + str(self.dsa_key.p))
-        _print_("q = " + str(self.dsa_key.q))
-
+        
     def convert_to_long(self, s):
         return long(s.rstrip('\x00'), 16)
 

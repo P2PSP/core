@@ -6,7 +6,6 @@
 # Copyright (C) 2015, the P2PSP team.
 # http://www.p2psp.org
 
-
 import binascii
 import struct
 import sys
@@ -55,6 +54,7 @@ class StrpeDsSplitter(Splitter_LRS):
 
     def send_dsa_key(self, sock):
         # send Public key (y), Sub-group generator (g), Modulus, finite field order (p), Sub-group order (q)
+        # in one message
         y = self.long_to_hex(self.dsa_key.y)
         g = self.long_to_hex(self.dsa_key.g)
         p = self.long_to_hex(self.dsa_key.p)
@@ -64,7 +64,6 @@ class StrpeDsSplitter(Splitter_LRS):
 
     def gather_bad_peers(self):
         while self.alive:
-            _print_("gathering bad peers")
             if len(self.peer_list) > 0:
                 peer = self.get_peer_for_gathering()
                 self.request_bad_peers(peer) # then, we will handle it in 'moderate the team'
@@ -79,10 +78,7 @@ class StrpeDsSplitter(Splitter_LRS):
         self.team_socket.sendto(b'B', dest)
 
     def run(self):
-        # {{{
-
         self.receive_the_header()
-
         self.init_key()
 
         print(self.peer_connection_socket.getsockname(), "\b: STrPe-DS: waiting for the monitor peer ...")
@@ -113,17 +109,8 @@ class StrpeDsSplitter(Splitter_LRS):
                 if __debug__:
                     _print_("DBS: The monitor peer has died!")
 
-        # }}}
-
-    # }}}
-
     def init_key(self):
         self.dsa_key = DSA.generate(1024)
-        _print_("DSA key generated")
-        _print_("y = " + str(self.dsa_key.y))
-        _print_("g = " + str(self.dsa_key.g))
-        _print_("p = " + str(self.dsa_key.p))
-        _print_("q = " + str(self.dsa_key.q))
 
     def get_message(self, chunk_number, chunk, dst):
         m = str(chunk_number) + str(chunk) + str(dst)
@@ -168,7 +155,7 @@ class StrpeDsSplitter(Splitter_LRS):
                     if struct.unpack("s", message)[0] == 'G': # 'G'oodbye
                         self.process_goodbye(sender)
                 except Exception as e:
-                    print("LRS: ", e)
+                    print("STrPe-DS: ", e)
                     print(message)
                 # }}}
             # }}}
@@ -180,8 +167,16 @@ class StrpeDsSplitter(Splitter_LRS):
             x = struct.unpack("ii", message)
             bad_peer = (socket.inet_ntoa(struct.pack('!L', x[0])), x[1])
             if sender in self.trusted_peers:
-                _print_("bad peer: " + str(bad_peer))
-                self.remove_peer(bad_peer)
+                self.handle_bad_peer_from_trusted(bad_peer)
+            else:
+                self.handle_bad_peer_from_regular(bad_peer)
+
+    def handle_bad_peer_from_trusted(self, bad_peer):
+        _print_("bad peer: " + str(bad_peer))
+        self.remove_peer(bad_peer)
+
+    def handle_bad_peer_from_regular(self, bad_peer):
+        return
 
     def receive_bad_peer_message(self):
         return self.team_socket.recvfrom(struct.calcsize("ii"))
