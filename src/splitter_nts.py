@@ -218,7 +218,7 @@ class Splitter_NTS(Splitter_DBS):
                 peer_data = self.arriving_peers[peer_id]
                 reported_source_port = socket.ntohs(struct.unpack("H",
                     message[common.PEER_ID_LENGTH:])[0])
-                if sender[ADDR] == self.peer_list[0][ADDR]:
+                if len(self.peer_list)>0 and sender[ADDR] == self.peer_list[0][ADDR]:
                     # Packet is from monitor
                     source_port_to_monitor = reported_source_port
                     peer_data = (peer_data[0], peer_data[1], peer_data[2],
