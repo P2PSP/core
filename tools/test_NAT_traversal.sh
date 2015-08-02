@@ -76,12 +76,14 @@ $nat1_config "
     ssh "root@$nat1" iptables-restore /etc/iptables/empty.rules \; \
         iptables -F \; \
         iptables -t nat -F \; \
+        conntrack -F 2>/dev/null \; \
         iptables-restore /etc/iptables/iptables.rules.${nat1_config}
     for nat2_config in $nat_configs; do
         echo "Configuring NATs: $nat1_config <-> $nat2_config."
         ssh "root@$nat2" iptables-restore /etc/iptables/empty.rules \; \
             iptables -F \; \
             iptables -t nat -F \; \
+            conntrack -F 2>/dev/null \; \
             iptables-restore /etc/iptables/iptables.rules.${nat2_config}
 
         # Run stream source
@@ -123,43 +125,40 @@ $nat1_config "
         cvlc "http://$pc2:9999" --vout none --aout none 2>/dev/null >/dev/null &
         player2_id=$!
 
-        # Wait until stream is buffered
-        sleep 12
+        # Wait until connections are established
+        sleep 8
         # Stop the test
         stop_processes
 
-        splitter_grep="Received a message from ('$splitter', $splitter_port)"
-        monitor_grep="Received a message from ('$splitter', $peer_port)"
-        peer1_grep="Received a message from ('$nat1_pub"
-        peer2_grep="Received a message from ('$nat2_pub"
         # Get outputs; the exit value is determined by "grep" and will be "0"
         # if a peer received messages from both other peers
-        # Todo: also check if peers received messages from the splitter
         set +e
         success=""
-        grep "$monitor_output" -e "$splitter_grep" >/dev/null
+        peer1_conn="$(ssh root@$nat1 conntrack -L -p udp 2>/dev/null | grep -v UNREPLIED)"
+        peer2_conn="$(ssh root@$nat2 conntrack -L -p udp 2>/dev/null | grep -v UNREPLIED)"
+        # Connection peer1 <-> splitter
+        <<<"$peer1_conn" grep -e "src=$splitter dst=$nat1_pub sport=$splitter_port" >/dev/null
         success="$success$?"
-        grep "$monitor_output" -e "$peer1_grep" >/dev/null
+        # Connection peer1 <-> monitor
+        <<<"$peer1_conn" grep -e "src=$splitter dst=$nat1_pub sport=$peer_port" >/dev/null
         success="$success$?"
-        grep "$monitor_output" -e "$peer2_grep" >/dev/null
+        # Connection peer1 <-> peer2
+        <<<"$peer1_conn" grep -e "dst=$nat2_pub sport=$peer_port .*ASSURED" >/dev/null
         success="$success$?"
-        grep "$peer1_output" -e "$splitter_grep" >/dev/null
+        # Connection peer2 <-> splitter
+        <<<"$peer2_conn" grep -e "src=$splitter dst=$nat2_pub sport=$splitter_port" >/dev/null
         success="$success|$?"
-        grep "$peer1_output" -e "$monitor_grep" >/dev/null
+        # Connection peer2 <-> monitor
+        <<<"$peer2_conn" grep -e "src=$splitter dst=$nat2_pub sport=$peer_port" >/dev/null
         success="$success$?"
-        grep "$peer1_output" -e "$peer2_grep" >/dev/null
-        success="$success$?"
-        grep "$peer2_output" -e "$splitter_grep" >/dev/null
-        success="$success|$?"
-        grep "$peer2_output" -e "$monitor_grep" >/dev/null
-        success="$success$?"
-        grep "$peer2_output" -e "$peer1_grep" >/dev/null
+        # Connection peer2 <-> peer1
+        <<<"$peer2_conn" grep -e "dst=$nat1_pub sport=$peer_port" >/dev/null
         success="$success$?"
         set -e
-        echo "Result (mon|peer1|peer2, 000=success): $success"
+        echo "Result (peer1|peer2, 000=success): $success"
 
         # Append to result table
-        if [ "$success" == "000|000|000" ]; then
+        if [ "$success" == "000|000" ]; then
             success=yes
         else
             success=no
