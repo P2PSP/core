@@ -155,7 +155,7 @@ $nat1_config "
             <<<"$peer1_conn" grep -e "src=$splitter dst=$nat1_pub sport=$peer_port" >/dev/null
             success="$success$?"
             # Connection peer1 <-> peer2
-            <<<"$peer1_conn" grep -e "dst=$nat2_pub sport=$peer_port .*ASSURED" >/dev/null
+            <<<"$peer1_conn" grep -e "dst=$nat2_pub sport=$peer_port" >/dev/null
             success="$success$?"
             # Connection peer2 <-> splitter
             <<<"$peer2_conn" grep -e "src=$splitter dst=$nat2_pub sport=$splitter_port" >/dev/null
@@ -180,7 +180,7 @@ $nat1_config "
         done
 
         # Append to result table
-        result="$result	| $((successes*100/$testruns))"
+        result="$result	| $((successes*100/$testruns)) "
 
         stop_source
         # Increment port of the source
