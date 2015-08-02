@@ -141,14 +141,26 @@ class Splitter_NTS(Splitter_DBS):
         if len(self.peer_list) != 0:
             self.send_the_list_of_peers_2(serve_socket)
 
-        # This has to be adapted with port prediction
         new_peer = (peer_address, source_port_to_splitter)
+
+        # Port prediction:
+        port_diff = source_port_to_monitor - source_port_to_splitter
+        if port_diff == 0:
+            print("NTS: Peer %s has the same source ports for all peers", (new_peer,))
+        elif port_diff >= 0 and port_diff < 10:
+            print("NTS: Peer %s has sequential port allocation with step %d", (new_peer, port_diff))
+        else:
+            print("NTS: Peer %s has random port allocation", (new_peer,))
+            port_diff = 0
+
+        next_source_port = source_port_to_monitor
         if __debug__:
             print("NTS: Sending [send hello to %s]" % (new_peer,))
-        message = peer_id + struct.pack("4sH", socket.inet_aton(new_peer[0]), \
-                                        socket.htons(new_peer[1]))
         # Send the packet to all peers except the monitor peer
         for peer in self.peer_list[1:]:
+            next_source_port += port_diff
+            message = peer_id + struct.pack("4sH", socket.inet_aton(peer_address), \
+                                            socket.htons(next_source_port))
             # Hopefully this packet arrives
             self.team_socket.sendto(message, peer)
             self.team_socket.sendto(message, peer)
