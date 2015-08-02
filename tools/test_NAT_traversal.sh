@@ -27,7 +27,7 @@ nat2_pub="192.168.57.5"
 function stop_processes() {
     set +e
     for host in $pc1 $pc2 $splitter; do
-        ssh "$user@$host" killall python2 2>/dev/null
+        ssh "$user@$host" killall python2 2>/dev/null &
     done
     kill $player0_id 2>/dev/null
     kill $player1_id 2>/dev/null
