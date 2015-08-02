@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-nat_configs="fcn rcn prcn sympp symsp symrp"
+nat_configs="rcn prcn sympp symrp" # fcn and symsp not tested
 user="ladmin"
 dir="p2psp/src"
 source_filename="Big_Buck_Bunny_small.ogv"
@@ -57,37 +57,6 @@ commit="$(ssh $user@$pc1 cd $dir \; git rev-parse --short HEAD)"
 configuration="$splitter_class, $monitor_class, $peer_class (branch $branch, commit $commit)"
 echo "Configuration: $configuration"
 echo
-
-# Reset NAT configuration
-echo -n "Resetting NAT configuration..."
-ssh "root@$nat1" iptables-restore /etc/iptables/empty.rules \; \
-    iptables -F \; \
-    iptables -X \; \
-    iptables -t nat -F \; \
-    iptables -t nat -X \; \
-    netctl stop enp0s8 \; \
-    conntrack -F 2\>/dev/null \; \
-    netctl start enp0s8
-echo -n "."
-ssh "root@$nat2" iptables-restore /etc/iptables/empty.rules \; \
-    iptables -F \; \
-    iptables -X \; \
-    iptables -t nat -F \; \
-    iptables -t nat -X \; \
-    netctl stop enp0s3 \; \
-    conntrack -F 2\>/dev/null \; \
-    netctl start enp0s3
-echo -n "."
-ssh "root@$nat1_pub" \
-    netctl stop enp0s3 \; \
-    conntrack -F 2\>/dev/null \; \
-    netctl start enp0s3
-echo -n "."
-ssh "root@$nat2_pub" \
-    netctl stop enp0s8 \; \
-    conntrack -F 2\>/dev/null \; \
-    netctl start enp0s8
-echo "."
 
 # Create table
 result="Peer1\2	"
