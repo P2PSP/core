@@ -6,8 +6,8 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
-# The P2PSP.org project has been supported by the Junta de Andalucía
-# through the Proyecto Motriz "Codificación de Vídeo Escalable y su
+# The P2PSP.org project has been supported by the Junta de Andalucï¿½a
+# through the Proyecto Motriz "Codificaciï¿½n de Vï¿½deo Escalable y su
 # Streaming sobre Internet" (P10-TIC-6548).
 
 # PYTHON_ARGCOMPLETE_OK
@@ -43,6 +43,7 @@ from monitor_lrs import Monitor_LRS
 from lossy_peer import Lossy_Peer
 from malicious_peer import MaliciousPeer
 from trusted_peer import TrustedPeer
+from peer_strpeds import Peer_StrpeDs
 
 # }}}
 
@@ -85,6 +86,10 @@ class Peer():
         parser.add_argument('--malicious', action="store_true", help='Forces the peer to send poisoned chunks to other peers.')
 
         parser.add_argument('--trusted', action="store_true", help='Forces the peer to send hashes of chunks to splitter')
+
+        parser.add_argument('--strpeds', action="store_true", help='Enables STrPe-DS')
+
+        parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
 
         try:
             argcomplete.autocomplete(parser)
@@ -160,6 +165,14 @@ class Peer():
 
         if args.trusted:
             peer = TrustedPeer(peer)
+
+        if args.strpeds:
+            peer = Peer_StrpeDs(peer)
+            peer.receive_dsa_key()
+
+        if args.strpe_log != None:
+            peer.LOGGING = True
+            peer.LOG_FILE = open(args.strpe_log, 'w', 0)
 
         # {{{ Run!
         peer.disconnect_from_the_splitter()

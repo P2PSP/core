@@ -16,11 +16,12 @@ from _print_ import _print_
 import threading
 import hashlib
 import random
+import time
 
 class TrustedPeer(Peer_DBS):
 
-    PASS_NUMBER = 40
-    SAMPLING_EFFORT = 1
+    PASS_NUMBER = 10
+    SAMPLING_EFFORT = 2
 
     def __init__(self, peer):
         sys.stdout.write(Color.yellow)
@@ -59,7 +60,19 @@ class TrustedPeer(Peer_DBS):
                 self.counter = self.calculate_next_sampled()
             else:
                 self.counter -= 1
+
         return chunk_number
+
+    def calc_buffer_correctnes(self):
+        zerochunk = struct.pack("1024s", "0")
+        goodchunks = badchunks = 0
+        for i in range(self.buffer_size):
+            if self.received_flag[i]:
+                if self.chunks[i] == zerochunk:
+                    badchunks += 1
+                else:
+                    goodchunks += 1
+        return goodchunks / float(goodchunks + badchunks)
 
     def receive_the_next_message(self):
         message, sender = Peer_DBS.receive_the_next_message(self)

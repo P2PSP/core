@@ -32,18 +32,6 @@ class Monitor_FNS(Peer_FNS, Monitor_DBS):
         _print_("Monitor FNS")
         sys.stdout.write(Color.none)
 
-        threading.Thread.__init__(self)
-
-        self.splitter_socket = peer.splitter_socket
-        self.player_socket = peer.player_socket
-        self.buffer_size = peer.buffer_size
-        self.chunk_format_string = peer.chunk_format_string
-        self.splitter = peer.splitter
-        self.chunk_size = peer.chunk_size
-
-        self.peer_list = peer.peer_list
-        self.debt = peer.debt
-
         # }}}
 
     def say_hello(self, node):

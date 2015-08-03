@@ -9,12 +9,20 @@
 import struct
 import sys
 import hashlib
+import time
 from color import Color
 from _print_ import _print_
+import threading
+import socket
+import common
 
 from splitter_lrs import Splitter_LRS
 
 class StrpeSplitter(Splitter_LRS):
+
+    LOGGING = False
+    LOG_FILE = ""
+    CURRENT_ROUND = 0
 
     def __init__(self):
         sys.stdout.write(Color.yellow)
@@ -75,6 +83,8 @@ class StrpeSplitter(Splitter_LRS):
         return self.chunk_number_format + str(self.CHUNK_SIZE) + "s"
 
     def punish_malicious_peer(self, peer):
+        if self.LOGGING:
+            self.log_message('!!! malicous peer ' + str(peer))
         print('!!! malicous peer ' + str(peer))
         self.remove_peer(peer)
 
@@ -92,3 +102,63 @@ class StrpeSplitter(Splitter_LRS):
             pass
 
         # }}}
+
+    def run(self):
+        # {{{
+
+        self.receive_the_header()
+
+        # {{{ A DBS splitter runs 4 threads. The main one and the
+        # "handle_arrivals" thread are equivalent to the daemons used
+        # by the IMS splitter. "moderate_the_team" and
+        # "reset_counters_thread" are new.
+        # }}}
+
+        print(self.peer_connection_socket.getsockname(), "\b: DBS: waiting for the monitor peer ...")
+        def _():
+            connection  = self.peer_connection_socket.accept()
+            incomming_peer = self.handle_a_peer_arrival(connection)
+            #self.insert_peer(incomming_peer) # Notice that now, the
+                                             # monitor peer is the
+                                             # only one in the list of
+                                             # peers. It is no
+                                             # neccesary a delay.
+        _()
+
+        threading.Thread(target=self.handle_arrivals).start()
+        threading.Thread(target=self.moderate_the_team).start()
+        threading.Thread(target=self.reset_counters_thread).start()
+
+        message_format = self.chunk_number_format \
+                        + str(self.CHUNK_SIZE) + "s"
+
+        #header_load_counter = 0
+        while self.alive:
+
+            chunk = self.receive_chunk()
+            try:
+                peer = self.peer_list[self.peer_number]
+                message = struct.pack(message_format, socket.htons(self.chunk_number), chunk)
+                self.send_chunk(message, peer)
+
+                self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
+                self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
+                self.compute_next_peer_number(peer)
+                if self.LOGGING:
+                    if self.peer_number == 0:
+                        self.CURRENT_ROUND += 1
+                        message = "{0} {1} {2}".format(self.CURRENT_ROUND, len(self.peer_list), " ".join(map(lambda x: "{0}:{1}".format(x[0], x[1]), self.peer_list)))
+                        self.log_message(message)
+
+            except IndexError:
+                if __debug__:
+                    _print_("DBS: The monitor peer has died!")
+
+
+        # }}}
+
+    def log_message(self, message):
+        print >>self.LOG_FILE, self.build_log_message(message)
+
+    def build_log_message(self, message):
+        return "{0}\t{1}".format(repr(time.time()), message)
