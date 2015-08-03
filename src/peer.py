@@ -89,6 +89,8 @@ class Peer():
 
         parser.add_argument('--strpeds', action="store_true", help='Enables STrPe-DS')
 
+        parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
+
         try:
             argcomplete.autocomplete(parser)
         except Exception:
@@ -167,6 +169,10 @@ class Peer():
         if args.strpeds:
             peer = Peer_StrpeDs(peer)
             peer.receive_dsa_key()
+
+        if args.strpe_log != None:
+            peer.LOGGING = True
+            peer.LOG_FILE = open(args.strpe_log, 'w', 0)
 
         # {{{ Run!
         peer.disconnect_from_the_splitter()

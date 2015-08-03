@@ -86,6 +86,8 @@ class Splitter():
 
         parser.add_argument('--strpeds', nargs='+', type=str, help='Enables STrPe-DS')
 
+        parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
+
         try:
             argcomplete.autocomplete(parser)
         except Exception:
@@ -130,14 +132,10 @@ class Splitter():
             #splitter = Splitter_DBS()
             #splitter = Splitter_FNS()
             #splitter = Splitter_ACS()
-            if (args.strpe != None):
-                splitter = StrpeSplitter()
-                for peer in args.strpe:
-                    splitter.add_trusted_peer(peer)
+            if (args.strpe):
+                splitter = self.init_strpe_splitter('strpe', args.strpe, args.strpe_log)
             elif (args.strpeds):
-                splitter = StrpeDsSplitter()
-                for peer in args.strpeds:
-                    splitter.add_trusted_peer(peer)
+                splitter = self.init_strpe_splitter('strpeds', args.strpeds)
             else:
                 splitter = Splitter_LRS()
 
@@ -232,5 +230,18 @@ class Splitter():
             # }}}
 
         # }}}
+
+    def init_strpe_splitter(self, type, trusted_peers, log_file = None):
+        if type == 'strpe':
+            re = StrpeSplitter()
+        if type == 'strpeds':
+            re = StrpeDsSplitter()
+        for peer in trusted_peers:
+            re.add_trusted_peer(peer)
+        if log_file != None:
+            re.LOGGING = True
+            re.LOG_FILE = open(log_file, 'w', 0)
+        return re
+
 
 x = Splitter()

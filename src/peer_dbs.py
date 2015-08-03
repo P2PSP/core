@@ -36,6 +36,9 @@ class Peer_DBS(Peer_IMS):
 
     MAX_CHUNK_DEBT = 128
 
+    LOGGING = False
+    LOG_FILE = ""
+
     # }}}
 
     def __init__(self, peer):
@@ -162,6 +165,9 @@ class Peer_DBS(Peer_IMS):
                 if __debug__:
                     _print_("DBS:", self.team_socket.getsockname(), \
                         Color.red, "<-", Color.none, chunk_number, "-", sender)
+
+                if self.LOGGING:
+                    self.log_message("buffer correctnes {0}".format(self.calc_buffer_correctnes()))
 
                 # }}}
 
@@ -352,3 +358,21 @@ class Peer_DBS(Peer_IMS):
         # }}}
 
     # }}}
+
+    def calc_buffer_correctnes(self):
+        zerochunk = struct.pack("1024s", "0")
+        goodchunks = badchunks = 0
+        for i in range(self.buffer_size):
+            if self.received_flag[i]:
+                if self.chunks[i] == zerochunk:
+                    badchunks += 1
+                else:
+                    goodchunks += 1
+        return goodchunks / float(goodchunks + badchunks)
+
+    def log_message(self, message):
+        self.LOG_FILE.write(self.build_log_message(message) + "\n")
+        #print >>self.LOG_FILE, self.build_log_message(message)
+
+    def build_log_message(self, message):
+        return "{0}\t{1}".format(repr(time.time()), message)
