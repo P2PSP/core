@@ -100,6 +100,19 @@ class Monitor_NTS(Peer_NTS):
                     self.hello_messages_times[message_data] = time.time()
                     # Directly start packet sending
                     self.hello_messages_event.set()
+        elif sender == self.splitter and \
+                len(message) == common.PEER_ID_LENGTH + struct.calcsize("4sH"):
+            # [say hello to (X)] received from splitter
+            peer_id = message[:common.PEER_ID_LENGTH]
+            IP_addr, port = struct.unpack("4sH", message[common.PEER_ID_LENGTH:]) # Ojo, !H ????
+            IP_addr = socket.inet_ntoa(IP_addr)
+            port = socket.ntohs(port)
+            peer = (IP_addr, port)
+            print("NTS: Received [send hello to %s %s]" % (peer_id, peer))
+            # Sending hello not needed as monitor and peer already communicated
+            if peer not in self.peer_list:
+                self.peer_list.append(peer)
+                self.debt[peer] = 0
         else:
             return Peer_NTS.process_message(self, message, sender)
 

@@ -115,8 +115,8 @@ class Peer_NTS(Peer_DBS):
     def receive_the_list_of_peers_2(self):
         # {{{
 
-        self.debt = {}      # Chunks debts per peer.
-        self.peer_list = [] # The list of peers structure.
+        # The monitor peer endpoint has already been received
+        assert len(self.peer_list) == 1
 
         sys.stdout.write(Color.green)
         _print_("NTS: Requesting the number of peers from splitter")

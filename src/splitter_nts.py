@@ -178,15 +178,15 @@ class Splitter_NTS(Splitter_DBS):
         next_source_port = source_port_to_monitor
         if __debug__:
             print("NTS: Sending [send hello to %s]" % (new_peer,))
-        # Send the packet to all peers except the monitor peer
-        for peer in self.peer_list[1:]:
-            next_source_port += port_diff
+        # Send the packet to all peers
+        for peer in self.peer_list:
             message = peer_id + struct.pack("4sH", socket.inet_aton(peer_address), \
                                             socket.htons(next_source_port))
             # Hopefully this packet arrives
             self.team_socket.sendto(message, peer)
             self.team_socket.sendto(message, peer)
             self.team_socket.sendto(message, peer)
+            next_source_port += port_diff
 
         # Insert the peer into the list
         self.ids[new_peer] = peer_id
