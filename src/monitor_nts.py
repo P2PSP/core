@@ -12,6 +12,7 @@
 import sys
 import struct
 import socket
+import time
 from peer_dbs import Peer_DBS
 from peer_nts import Peer_NTS
 from _print_ import _print_
@@ -96,6 +97,7 @@ class Monitor_NTS(Peer_NTS):
                 message_data = (message, self.splitter)
                 if message_data not in self.hello_messages:
                     self.hello_messages.append(message_data)
+                    self.hello_messages_times[message_data] = time.time()
                     # Directly start packet sending
                     self.hello_messages_event.set()
         else:

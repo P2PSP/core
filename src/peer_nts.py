@@ -46,6 +46,7 @@ class Peer_NTS(Peer_DBS):
             hello_data = (message, peer)
             if hello_data not in self.hello_messages:
                 self.hello_messages.append(hello_data)
+                self.hello_messages_times[hello_data] = time.time()
                 # Directly start packet sending
                 self.hello_messages_event.set()
 
@@ -73,10 +74,26 @@ class Peer_NTS(Peer_DBS):
         while self.player_alive:
             # Continuously send hello UDP packets to arriving peers
             # until a connection is established
-            for (message, peer) in self.hello_messages:
+            now = time.time()
+            messages_to_remove = []
+            for message_data in self.hello_messages:
+                # Check for timeout
+                if now - self.hello_messages_times[message_data] > common.MAX_PEER_ARRIVING_TIME:
+                    messages_to_remove.append(message_data)
+                    continue
+                message, peer = message_data
                 print("NTS: Sending hello (%s) to %s"
                     % (message[:common.PEER_ID_LENGTH], peer))
                 self.team_socket.sendto(message, peer)
+            # Remove messages that timed out
+            with self.hello_messages_lock:
+                for message_data in messages_to_remove:
+                    if message_data in self.hello_messages:
+                        print("NTS: Removed message (%s) to %s due to timeout\n"
+                            % message_data)
+                        self.hello_messages.remove(message_data)
+                        del self.hello_messages_times[message_data]
+
             self.hello_messages_event.clear()
             self.hello_messages_event.wait(common.HELLO_PACKET_TIMING)
 
@@ -89,6 +106,7 @@ class Peer_NTS(Peer_DBS):
         self.hello_messages = [] # Each entry is a (peer_endpoint, message) tuple
         self.hello_messages_lock = threading.Lock()
         self.hello_messages_event = threading.Event()
+        self.hello_messages_times = {} # Start times of the messages
         # Start the hello packet sending thread
         threading.Thread(target=self.send_hello_thread).start()
 
@@ -173,13 +191,14 @@ class Peer_NTS(Peer_DBS):
                 hello_data = (message, sender)
                 if hello_data in self.hello_messages:
                     self.hello_messages.remove(hello_data)
+                    del self.hello_messages_times[hello_data]
         elif len(message) == common.PEER_ID_LENGTH:
             print("NTS: Received hello (ID %s) from %s" % (message, sender))
             if sender not in self.peer_list:
                 self.peer_list.append(sender)
                 self.debt[sender] = 0
-                # Send acknowledge
-                self.team_socket.sendto(message, sender)
+            # Send acknowledge
+            self.team_socket.sendto(message, sender)
         elif message == 'H':
             # Ignore hello messages that are sent by Peer_DBS instances
             # in receive_the_list_of_peers() before a Peer_NTS instance is created
