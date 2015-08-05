@@ -14,6 +14,7 @@ import string
 import sys
 import struct
 import socket
+import time
 from splitter_dbs import Splitter_DBS, ADDR, PORT
 from color import Color
 # }}}
@@ -36,7 +37,7 @@ class Splitter_NTS(Splitter_DBS):
 
         # {{{ The arriving peers. Key: ID.
         # Value: (serve_socket, peer_address, source_port_local,
-        # source_port_to_splitter, source_port_to_monitor)
+        # source_port_to_splitter, source_port_to_monitor, arrive_time)
         # where source_port_local is the local source port towards the NAT,
         # source_port_to_splitter is the public source port towards the splitter,
         # and source_port_to_monitor is the public source port towards the monitor.
@@ -100,6 +101,25 @@ class Splitter_NTS(Splitter_DBS):
 
         # }}}
 
+    def check_arriving_peer_time(self):
+        # {{{ Remove peers that are waiting to be incorporated for too long
+
+        now = time.time()
+        peers_to_remove = []
+        # Build list of arriving peers to remove
+        for peer_id in self.arriving_peers:
+            if now - self.arriving_peers[peer_id][5] > common.MAX_PEER_ARRIVING_TIME:
+                peers_to_remove.append(peer_id)
+        # Actually remove the peers
+        for peer_id in peers_to_remove:
+            print('NTS: Removed arriving peer %s due to timeout\n' % peer_id)
+            # Close socket
+            self.arriving_peers[peer_id][0].close()
+            # Remove peer
+            del self.arriving_peers[peer_id]
+
+        # }}}
+
     def handle_a_peer_arrival(self, connection):
         # {{{
 
@@ -125,7 +145,9 @@ class Splitter_NTS(Splitter_DBS):
                                   new_peer[1], new_peer[1], new_peer[1])
             return new_peer
         else:
-            self.arriving_peers[peer_id] = (serve_socket, new_peer[0], 0, 0, 0)
+            # Remove peers that are waiting to be incorporated for too long
+            self.check_arriving_peer_time()
+            self.arriving_peers[peer_id] = (serve_socket, new_peer[0], 0, 0, 0, time.time())
             # Splitter will continue with incorporate_peer() as soon as the arriving
             # peer has sent UDP packets to splitter and monitor
 
@@ -234,7 +256,7 @@ class Splitter_NTS(Splitter_DBS):
                     # Packet is from monitor
                     source_port_to_monitor = reported_source_port
                     peer_data = (peer_data[0], peer_data[1], peer_data[2],
-                        peer_data[3], source_port_to_monitor)
+                        peer_data[3], source_port_to_monitor, peer_data[5])
                 else:
                     # Packet is from the arriving peer itself
                     if peer_data[1] != sender[0]:
@@ -242,7 +264,8 @@ class Splitter_NTS(Splitter_DBS):
                             % (peer_id, peer_data[1], sender[0]))
                     source_port_local = reported_source_port
                     source_port_to_splitter = sender[1]
-                    peer_data = (peer_data[0], peer_data[1], source_port_local, source_port_to_splitter, peer_data[4])
+                    peer_data = (peer_data[0], peer_data[1], source_port_local,
+                        source_port_to_splitter, peer_data[4], peer_data[5])
 
                 # Update peer information
                 self.arriving_peers[peer_id] = peer_data
@@ -250,7 +273,7 @@ class Splitter_NTS(Splitter_DBS):
                 if peer_data[2] != 0 and peer_data[3] != 0 and peer_data[4] != 0:
                     # All source ports are known, incorporate the peer
                     del self.arriving_peers[peer_id]
-                    self.incorporate_peer(peer_id, *peer_data)
+                    self.incorporate_peer(peer_id, *peer_data[:-1])
             # }}}
 
         # }}}
