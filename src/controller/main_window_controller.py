@@ -152,7 +152,9 @@ class Main_Controller():
     @exc_handler
     def toggle_player_playback(self, widget, data=None):
         if  len(self.app_window.channel_iconview.get_selected_items()) == 0 and self.peer_active == False:
-                return
+            self.start_peer()
+            self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
+            self.toggle_player_type(self.win_id)
         elif self.peer_active == False and self.player_paused == False:
             self.play_selection(self.app_window.channel_iconview)
             self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
