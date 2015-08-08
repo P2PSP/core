@@ -6,6 +6,7 @@ try:
     from gi.repository import Gdk
     from gi.repository import Gtk
     from gi.repository import GdkX11
+    from gi.repository import GObject
     import common.file_util as file_util
     from model.peer_thread import Peer_Thread
     from model import peer_thread
@@ -129,10 +130,10 @@ class Main_Controller():
 
     @exc_handler
     def stop_player(self, widget, data=None):
-        self.player.stop()
+        GObject.idle_add(self.player.stop)
         self.peer_active = False
         self.player_paused = False
-        self.toggle_player_type(self.win_id)
+        GObject.idle_add(self.toggle_player_type,self.win_id)
         self.app_window.playback_toggle_button.set_image(self.app_window.play_image)
         self.app_window.buffer_status_bar.hide()
 
@@ -150,8 +151,10 @@ class Main_Controller():
 
     @exc_handler
     def toggle_player_playback(self, widget, data=None):
-        if  len(self.app_window.channel_iconview.get_selected_items()) == 0:
-                return
+        if  len(self.app_window.channel_iconview.get_selected_items()) == 0 and self.peer_active == False:
+            self.start_peer()
+            self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
+            self.toggle_player_type(self.win_id)
         elif self.peer_active == False and self.player_paused == False:
             self.play_selection(self.app_window.channel_iconview)
             self.app_window.playback_toggle_button.set_image(self.app_window.pause_image)
@@ -210,12 +213,13 @@ class Main_Controller():
     @exc_handler
     def play_selected_channel(self,widget,data=None):#implented only for testing purposes
         if data.type == Gdk.EventType._2BUTTON_PRESS:
-            self.play_selection(widget)
+            if  len(widget.get_selected_items()) == 0:
+                return
+            else:
+                self.play_selection(widget)
 
     @exc_handler
     def play_selection(self,iconview):
-        if  len(iconview.get_selected_items()) == 0:
-                return
         item  = iconview.get_selected_items()[0]
         channel_key = self.app_window.icon_list_store[item][1]
         channel = Channel_Store.ALL.get_channel(channel_key)

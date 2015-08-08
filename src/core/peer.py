@@ -21,6 +21,7 @@ import threading
 from lossy_socket import lossy_socket
 import common
 from _print_ import _print_
+from gi.repository import GObject
 try:
     import colorama
 except ImportError:
@@ -191,7 +192,7 @@ class Peer():
             last_sendto_counter = peer.sendto_counter
             try:
                 if common.CONSOLE_MODE == False :
-                    speed_adapter.update_widget(str(kbps_recvfrom) + ' kbps'
+                    GObject.idle_add(speed_adapter.update_widget,str(kbps_recvfrom) + ' kbps'
                                             ,str(kbps_sendto) + ' kbps'
                                             ,str(len(peer.peer_list)+1))
             except Exception as msg:
@@ -228,7 +229,7 @@ class Peer():
             print()
         try:
             if common.CONSOLE_MODE == False :
-                speed_adapter.update_widget(str(0)+' kbps',str(0)+' kbps',str(0))
+                GObject.idle_add(speed_adapter.update_widget,str(0)+' kbps',str(0)+' kbps',str(0))
         except  Exception as msg:
             pass
             # }}}
