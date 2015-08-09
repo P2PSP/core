@@ -37,10 +37,8 @@ class StrpeDsSplitter(Splitter_LRS):
         Splitter_LRS.__init__(self)
         self.trusted_peers = []
         self.gathering_counter = 0
+        self.trusted_gathering_counter = 0
         self.gethered_bad_peers = []
-
-    def add_trusted_peer(self, peer):
-        self.trusted_peers.append(peer)
 
     def handle_a_peer_arrival(self, connection):
         serve_socket = connection[0]
@@ -71,12 +69,23 @@ class StrpeDsSplitter(Splitter_LRS):
             if len(self.peer_list) > 0:
                 peer = self.get_peer_for_gathering()
                 self.request_bad_peers(peer) # then, we will handle it in 'moderate the team'
+                time.sleep(2)
+                tp = self.get_trusted_peer_for_gathering()
+                if tp != None:
+                    self.request_bad_peers(tp) # then, we will handle it in 'moderate the team'
+
             time.sleep(self.GATHER_BAD_PEERS_SLEEP)
 
     def get_peer_for_gathering(self):
         self.gathering_counter = (self.gathering_counter + 1) % len(self.peer_list)
         peer = self.peer_list[self.gathering_counter]
         return peer
+
+    def get_trusted_peer_for_gathering(self):
+        self.trusted_gathering_counter = (self.trusted_gathering_counter + 1) % len(self.trusted_peers)
+        if self.trusted_peers[self.trusted_gathering_counter] in self.peer_list:
+            return self.trusted_peers[self.trusted_gathering_counter]
+        return None
 
     def request_bad_peers(self, dest):
         self.team_socket.sendto(b'B', dest)
