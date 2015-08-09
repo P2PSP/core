@@ -48,8 +48,6 @@ class Peer_NTS(Peer_DBS):
                 self.hello_messages.append(hello_data)
                 self.hello_messages_times[hello_data] = time.time()
                 self.hello_messages_ports[hello_data] = [peer[1]]+additional_ports
-                # Directly start packet sending
-                self.hello_messages_event.set()
 
         # }}}
 
@@ -135,17 +133,26 @@ class Peer_NTS(Peer_DBS):
         # Skip the monitor peer
         for _ in range(self.number_of_peers - 1):
             message = self.splitter_socket.recv(common.PEER_ID_LENGTH +
-                                                struct.calcsize("4sH"))
+                                                struct.calcsize("4sHH"))
             peer_id = message[:common.PEER_ID_LENGTH]
-            IP_addr, port = struct.unpack("4sH", message[common.PEER_ID_LENGTH:]) # Ojo, !H ????
+            IP_addr, port, port_step = \
+                struct.unpack("4sHH", message[common.PEER_ID_LENGTH:]) # Ojo, !H ????
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
+            # Try different probable ports for the existing peer
+            probable_source_ports = []
+            if port_step > 0:
+                number_of_ports = min((65536-port)//port_step, common.MAX_PREDICTED_PORTS)
+                probable_source_ports = list(range(port+port_step,
+                    port+(number_of_ports+1)*port_step, port_step))
+            self.say_hello(peer, probable_source_ports)
             print("NTS: [hello] sent to %s" % (peer,))
-            self.say_hello(peer)
 
             self.peer_list.append(peer)
             self.debt[peer] = 0
+        # Directly start packet sending
+        self.hello_messages_event.set()
 
         sys.stdout.write(Color.green)
         _print_("NTS: List of peers received")
@@ -168,6 +175,8 @@ class Peer_NTS(Peer_DBS):
         # source port allocation type of the NAT of this peer
         self.say_hello(self.peer_list[0])
         self.say_hello(self.splitter)
+        # Directly start packet sending
+        self.hello_messages_event.set()
 
         # Receive the list of peers, except the monitor peer, with their peer IDs
         self.receive_the_list_of_peers_2()
@@ -214,6 +223,8 @@ class Peer_NTS(Peer_DBS):
             additional_ports = self.get_probable_source_ports(source_port_to_splitter,
                 port_diff, peer_number)
             self.say_hello(peer, additional_ports)
+            # Directly start packet sending
+            self.hello_messages_event.set()
         elif message == self.peer_id or (sender == self.splitter and \
                 len(message) == common.PEER_ID_LENGTH + struct.calcsize("H")):
             with self.hello_messages_lock:

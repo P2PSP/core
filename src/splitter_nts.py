@@ -34,6 +34,10 @@ class Splitter_NTS(Splitter_DBS):
         # {{{ The IDs of the peers in the team.
         # }}}
         self.ids = {}
+        # {{{ The source port steps (smallest difference of the source ports
+        # when connecting to different endpoints) of the peers in the team.
+        # }}}
+        self.port_steps = {}
 
         # {{{ The arriving peers. Key: ID.
         # Value: (serve_socket, peer_address, source_port_local,
@@ -95,8 +99,10 @@ class Splitter_NTS(Splitter_DBS):
         peer_serve_socket.sendall(message)
 
         for p in self.peer_list[1:]:
-            message = self.ids[p] + struct.pack("4sH", socket.inet_aton(p[ADDR]), \
-                                                socket.htons(p[PORT]))
+            # Also send the port step of the existing peer, in case
+            # it is behind a sequentially allocating NAT
+            message = self.ids[p] + struct.pack("4sHH", socket.inet_aton(p[ADDR]), \
+                socket.htons(p[PORT]), self.port_steps[p])
             peer_serve_socket.sendall(message)
 
         # }}}
@@ -188,6 +194,7 @@ class Splitter_NTS(Splitter_DBS):
 
         # Insert the peer into the list
         self.ids[new_peer] = peer_id
+        self.port_steps[new_peer] = port_diff
         self.insert_peer(new_peer)
         serve_socket.close()
 
@@ -200,6 +207,7 @@ class Splitter_NTS(Splitter_DBS):
 
         try:
             del self.ids[peer]
+            del self.port_steps[peer]
         except KeyError:
             pass
 
