@@ -98,6 +98,7 @@ class Monitor_NTS(Peer_NTS):
                 if message_data not in self.hello_messages:
                     self.hello_messages.append(message_data)
                     self.hello_messages_times[message_data] = time.time()
+                    self.hello_messages_ports[message_data] = [self.splitter[1]]
                     # Directly start packet sending
                     self.hello_messages_event.set()
         elif sender == self.splitter and \

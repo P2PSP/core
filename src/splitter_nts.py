@@ -164,29 +164,27 @@ class Splitter_NTS(Splitter_DBS):
             self.send_the_list_of_peers_2(serve_socket)
 
         new_peer = (peer_address, source_port_to_splitter)
+        port_diff = abs(source_port_to_monitor - source_port_to_splitter)
 
-        # Port prediction:
-        port_diff = source_port_to_monitor - source_port_to_splitter
-        if port_diff == 0:
-            print("NTS: Peer %s has the same source ports for all peers", (new_peer,))
-        elif port_diff >= 0 and port_diff < 10:
-            print("NTS: Peer %s has sequential port allocation with step %d", (new_peer, port_diff))
-        else:
-            print("NTS: Peer %s has random port allocation", (new_peer,))
-            port_diff = 0
-
-        next_source_port = source_port_to_monitor
         if __debug__:
             print("NTS: Sending [send hello to %s]" % (new_peer,))
-        # Send the packet to all peers
-        for peer in self.peer_list:
-            message = peer_id + struct.pack("4sH", socket.inet_aton(peer_address), \
-                                            socket.htons(next_source_port))
-            # Hopefully this packet arrives
+        # Send packets to all peers;
+        for peer_number, peer in enumerate(self.peer_list):
+            if peer_number == 0:
+                # Send only the endpoint of the peer to the monitor,
+                # as the arriving peer and the monitor already communicated
+                message = peer_id + struct.pack("4sH", socket.inet_aton(peer_address), \
+                    socket.htons(source_port_to_monitor))
+            else:
+                # Send all information necessary for port prediction to the existing peers
+                message = peer_id + struct.pack("4sHHH", socket.inet_aton(peer_address), \
+                    socket.htons(source_port_to_splitter), socket.htons(port_diff), \
+                    socket.htons(peer_number))
+
+            # Hopefully one of these packets arrives
             self.team_socket.sendto(message, peer)
             self.team_socket.sendto(message, peer)
             self.team_socket.sendto(message, peer)
-            next_source_port += port_diff
 
         # Insert the peer into the list
         self.ids[new_peer] = peer_id
@@ -246,7 +244,7 @@ class Splitter_NTS(Splitter_DBS):
                 # Send acknowledge
                 self.team_socket.sendto(message, sender)
                 if peer_id not in self.arriving_peers:
-                    print('NTS: Peer ID %s is unknown' % peer_id)
+                    print('NTS: Peer ID %s is not an arriving peer' % peer_id)
                     continue
 
                 peer_data = self.arriving_peers[peer_id]
