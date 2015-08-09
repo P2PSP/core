@@ -24,7 +24,11 @@ import time
 class StrpeDsSplitter(Splitter_LRS):
 
     DIGEST_SIZE = 40
-    GATHER_BAD_PEERS_SLEEP = 10
+    GATHER_BAD_PEERS_SLEEP = 5
+
+    LOGGING = False
+    LOG_FILE = ""
+    CURRENT_ROUND = 0
 
     def __init__(self):
         sys.stdout.write(Color.yellow)
@@ -70,8 +74,8 @@ class StrpeDsSplitter(Splitter_LRS):
             time.sleep(self.GATHER_BAD_PEERS_SLEEP)
 
     def get_peer_for_gathering(self):
-        peer = self.peer_list[self.gathering_counter]
         self.gathering_counter = (self.gathering_counter + 1) % len(self.peer_list)
+        peer = self.peer_list[self.gathering_counter]
         return peer
 
     def request_bad_peers(self, dest):
@@ -105,6 +109,13 @@ class StrpeDsSplitter(Splitter_LRS):
                 self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
                 self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
                 self.compute_next_peer_number(peer)
+
+                if self.LOGGING:
+                    if self.peer_number == 0:
+                        self.CURRENT_ROUND += 1
+                        message = "{0} {1} {2}".format(self.CURRENT_ROUND, len(self.peer_list), " ".join(map(lambda x: "{0}:{1}".format(x[0], x[1]), self.peer_list)))
+                        self.log_message(message)
+
             except IndexError:
                 if __debug__:
                     _print_("DBS: The monitor peer has died!")
@@ -180,3 +191,9 @@ class StrpeDsSplitter(Splitter_LRS):
 
     def receive_bad_peer_message(self):
         return self.team_socket.recvfrom(struct.calcsize("ii"))
+
+    def log_message(self, message):
+        print >>self.LOG_FILE, self.build_log_message(message)
+
+    def build_log_message(self, message):
+        return "{0}\t{1}".format(repr(time.time()), message)

@@ -11,9 +11,10 @@ import struct
 
 class MaliciousSocket():
 
-    def __init__(self, message_format, *p):
+    def __init__(self, message_format, strpeds = False, *p):
         self._sock = socket.socket(*p)
         self.message_format = message_format
+        self.strpeds = strpeds
 
     def sendto(self, string, address):
         if len(string) == struct.calcsize(self.message_format):
@@ -37,5 +38,9 @@ class MaliciousSocket():
         return self._sock.setsockopt(*p)
 
     def get_poisoned_chunk(self, message):
-        chunk_number, chunk = struct.unpack(self.message_format, message)
-        return struct.pack(self.message_format, chunk_number, '0')
+        if self.strpeds:
+            chunk_number, chunk, k1, k2 = struct.unpack(self.message_format, message)
+            return struct.pack(self.message_format, chunk_number, '0', k1, k2)
+        else:
+            chunk_number, chunk = struct.unpack(self.message_format, message)
+            return struct.pack(self.message_format, chunk_number, '0')

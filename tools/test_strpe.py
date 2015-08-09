@@ -5,9 +5,12 @@ import os, sys, getopt
 import time
 import random
 import shlex, subprocess
+import re
 
 processes = []
 DEVNULL = open(os.devnull, 'wb')
+
+nPeers = nTrusted = nMalicious = 0
 
 def checkdir():
     if not os.path.exists("./strpe-testing"):
@@ -28,17 +31,23 @@ def runStream():
     run("/Applications/VLC.app/Contents/MacOS/VLC ../src/Big_Buck_Bunny_small.ogv --sout \"#duplicate{dst=standard{mux=ogg,dst=,access=http}}\"")
     time.sleep(1)
 
-def runSplitter(trustedPeers):
+def runSplitter(trustedPeers, ds = False):
+    if len(trustedPeers) == 0:
+        trustedPeers.append("127.0.0.1:1234")
     tps = ""
     for p in trustedPeers:
         tps += "\"{0}\" ".format(p)
-    run("../src/splitter.py --source_port 8080 --strpe {0} --strpe_log strpe-testing/splitter.log".format(tps))
+    prefix = ""
+    if ds: prefix = "ds"
+    run("../src/splitter.py --source_port 8080 --strpe{0} {1} --strpe_log strpe-testing/splitter.log".format(prefix, tps))
     time.sleep(1)
 
-def runPeer(port, playerPort, trusted = False, malicious = False):
+def runPeer(port, playerPort, trusted = False, malicious = False, ds = False):
     #run peer
-    runStr = "../src/peer.py --use_localhost --port {0} --player_port {1}".format(port, playerPort)
-    if trusted:
+    strpeds = ""
+    if ds: strpeds = "--strpeds"
+    runStr = "../src/peer.py --use_localhost --port {0} --player_port {1} {2}".format(port, playerPort, strpeds)
+    if trusted and not ds:
         runStr += " --trusted"
     if malicious:
         runStr += " --malicious"
@@ -49,13 +58,24 @@ def runPeer(port, playerPort, trusted = False, malicious = False):
     #run netcat
     run("nc 127.0.0.1 {0}".format(playerPort))
 
+def check(x):
+    with open("./strpe-testing/splitter.log") as fh:
+        for line in fh:
+            pass
+        result = re.match("(\d*.\d*)\t(\d*)\s(\d*).*", line)
+        if result != None and int(result.group(3)) == x:
+            return True
+    return False
+
 def main(args):
     try:
-        opts, args = getopt.getopt(args, "n:t:m:w:")
+        opts, args = getopt.getopt(args, "n:t:m:s")
     except getopt.GetoptError:
         usage()
         sys.exit(2)
-    nPeers = nTrusted = nMalicious = waitTimeInSeconds = 0
+
+    ds = False
+
     for opt, arg in opts:
         if opt == "-n":
             nPeers = int(arg)
@@ -63,8 +83,11 @@ def main(args):
             nTrusted = int(arg)
         elif opt == "-m":
             nMalicious = int(arg)
-        elif opt == "-w":
-            waitTimeInSeconds = int(arg)
+        elif opt == "-s":
+            ds = True
+
+
+    nPeers = nPeers - nTrusted - nMalicious # for more friendly user input
 
     checkdir()
 
@@ -77,25 +100,29 @@ def main(args):
     print "running stream"
     runStream()
     print "running splitter"
-    runSplitter(map(lambda x: "127.0.0.1:{0}".format(x), trustedPorts))
+    runSplitter(map(lambda x: "127.0.0.1:{0}".format(x), trustedPorts), ds)
     print "running peers"
     for _ in range(nPeers + nTrusted):
         if port in trustedPorts:
             print "trusted peer with port {0}".format(port)
-            runPeer(port, playerPort, True)
+            runPeer(port, playerPort, True, False, ds)
         else:
             print "regular peer with port {0}".format(port)
-            runPeer(port, playerPort)
+            runPeer(port, playerPort, False, False, ds)
 
         port, playerPort = port + 1, playerPort + 1
 
     for _ in range(nMalicious):
         print "malicious peer with port {0}".format(port)
-        runPeer(port, playerPort, False, True)
+        runPeer(port, playerPort, False, True, ds)
         port, playerPort = port + 1, playerPort + 1
 
-    print "wait for {0} seconds".format(waitTimeInSeconds)
-    time.sleep(waitTimeInSeconds)
+    time.sleep(2)
+    while not check(nPeers + nTrusted):
+        time.sleep(2)
+
+    print "finish!"
+
     killall()
     return 0
 
