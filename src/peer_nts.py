@@ -47,7 +47,7 @@ class Peer_NTS(Peer_DBS):
             if hello_data not in self.hello_messages:
                 self.hello_messages.append(hello_data)
                 self.hello_messages_times[hello_data] = time.time()
-                self.hello_messages_ports[hello_data] = [peer[1]]+additional_ports
+                self.hello_messages_ports[hello_data] = additional_ports+[peer[1]]
 
         # }}}
 
