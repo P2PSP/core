@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-nat_configs="rcn prcn sympp symrp" # fcn and symsp not tested
+nat_configs="rcn prcn sympp symsp symrp" # fcn not tested (results same as rcn)
 user="ladmin"
 dir="p2psp/src"
 source_filename="Big_Buck_Bunny_small.ogv"
@@ -115,7 +115,7 @@ $nat1_config "
 
             # Run monitor on same host as splitter
             peer_cmd="python2 -u $dir/peer.py --splitter_addr '$splitter' \
-                --splitter_port '$splitter_port' --port '$peer_port' | sed 's_[^m]*m__g'"
+                --splitter_port '$splitter_port' --port '$peer_port' --port_step 2 | sed 's_[^m]*m__g'"
             ssh "$user@$splitter" "$peer_cmd" >"$monitor_output" &
 
             # Run peers
