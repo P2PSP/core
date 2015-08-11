@@ -29,18 +29,19 @@ class Import_Controller():
     Imports channels from JSON file with "p2psp" as file extension.
 
     """
+
     def __init__(self,main_window):
 
         """
         Get the reference of the main window.
 
-        Instansiate Import Dialog Box.
+        Instantiate Import Dialog Box.
         Connect the signals associated with the Box.
         Set Box transient for main window.
 
-       Set the dimensions which are half of parent window.
+        Set the dimensions which are half of parent window.
 
-       @param : main_window
+        @param : main_window
 
         """
         self.app_window = main_window
