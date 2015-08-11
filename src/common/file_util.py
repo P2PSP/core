@@ -30,10 +30,8 @@ def get_user_interface(dire, fName):
         Get a "Gtk Builder" after  parsing a file containing a GtkBuilder UI
         definition and merges it with the current contents of builder.
         
-        @param : dire
-                directory path
-        @param : fName
-                file name
+        @param : dire (directory path)
+        @param : fName (file name)
         @return : builder
         """
         
@@ -48,10 +46,8 @@ def find_file(dire, fName):
         """
         Returns a file path after joining one or more path components.
         
-        @param : dire
-                directory path
-        @param : fName
-                file name
+        @param : dire (directory path)
+        @param : fName (file name)ff
         @return : path
         """
         

@@ -31,8 +31,7 @@ class JSON_Importer():
         Returns data inside a given json file.
         
         @param  : path
-        @return : data
-                JSON data
+        @return : data (JSON data)
         """
         json_file = open(path,"r")
         data = json.load(json_file)

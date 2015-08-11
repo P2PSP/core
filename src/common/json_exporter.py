@@ -31,8 +31,7 @@ class JSON_Exporter():
         
         @param : path
         @param : channels
-        @param : encoder
-                Channel Encoder
+        @param : encoder (Channel Encoder)
         """
         
         json_file = open(path,"w")

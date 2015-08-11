@@ -32,8 +32,7 @@ def get_scaled_image(path,image_width):
                 destination image_height
                 the interpolation of the transformation(GDK Interp_Type)
     
-    @param : path
-            Image location
+    @param : path (Image location)
     @param : image_width
     
     @return : scaled_pix
