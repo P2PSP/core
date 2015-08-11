@@ -138,7 +138,7 @@ class Peer():
             # {{{ This is an "unicast" peer.
 
             peer = Peer_DBS(peer)
-            if args.malicious:
+            if args.malicious and not args.strpeds: # workaround for malicous strpeds peer
                 peer = MaliciousPeer(peer)
             peer.receive_my_endpoint()
             peer.receive_the_number_of_peers()
@@ -167,7 +167,7 @@ class Peer():
             peer = TrustedPeer(peer)
 
         if args.strpeds:
-            peer = Peer_StrpeDs(peer)
+            peer = Peer_StrpeDs(peer, args.malicious)
             peer.receive_dsa_key()
 
         if args.strpe_log != None:

@@ -24,7 +24,11 @@ import time
 class StrpeDsSplitter(Splitter_LRS):
 
     DIGEST_SIZE = 40
-    GATHER_BAD_PEERS_SLEEP = 10
+    GATHER_BAD_PEERS_SLEEP = 5
+
+    LOGGING = False
+    LOG_FILE = ""
+    CURRENT_ROUND = 0
 
     def __init__(self):
         sys.stdout.write(Color.yellow)
@@ -33,10 +37,8 @@ class StrpeDsSplitter(Splitter_LRS):
         Splitter_LRS.__init__(self)
         self.trusted_peers = []
         self.gathering_counter = 0
+        self.trusted_gathering_counter = 0
         self.gethered_bad_peers = []
-
-    def add_trusted_peer(self, peer):
-        self.trusted_peers.append(peer)
 
     def handle_a_peer_arrival(self, connection):
         serve_socket = connection[0]
@@ -67,12 +69,23 @@ class StrpeDsSplitter(Splitter_LRS):
             if len(self.peer_list) > 0:
                 peer = self.get_peer_for_gathering()
                 self.request_bad_peers(peer) # then, we will handle it in 'moderate the team'
+                time.sleep(2)
+                tp = self.get_trusted_peer_for_gathering()
+                if tp != None:
+                    self.request_bad_peers(tp) # then, we will handle it in 'moderate the team'
+
             time.sleep(self.GATHER_BAD_PEERS_SLEEP)
 
     def get_peer_for_gathering(self):
-        peer = self.peer_list[self.gathering_counter]
         self.gathering_counter = (self.gathering_counter + 1) % len(self.peer_list)
+        peer = self.peer_list[self.gathering_counter]
         return peer
+
+    def get_trusted_peer_for_gathering(self):
+        self.trusted_gathering_counter = (self.trusted_gathering_counter + 1) % len(self.trusted_peers)
+        if self.trusted_peers[self.trusted_gathering_counter] in self.peer_list:
+            return self.trusted_peers[self.trusted_gathering_counter]
+        return None
 
     def request_bad_peers(self, dest):
         self.team_socket.sendto(b'B', dest)
@@ -105,6 +118,13 @@ class StrpeDsSplitter(Splitter_LRS):
                 self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
                 self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
                 self.compute_next_peer_number(peer)
+
+                if self.LOGGING:
+                    if self.peer_number == 0:
+                        self.CURRENT_ROUND += 1
+                        message = "{0} {1} {2}".format(self.CURRENT_ROUND, len(self.peer_list), " ".join(map(lambda x: "{0}:{1}".format(x[0], x[1]), self.peer_list)))
+                        self.log_message(message)
+
             except IndexError:
                 if __debug__:
                     _print_("DBS: The monitor peer has died!")
@@ -180,3 +200,9 @@ class StrpeDsSplitter(Splitter_LRS):
 
     def receive_bad_peer_message(self):
         return self.team_socket.recvfrom(struct.calcsize("ii"))
+
+    def log_message(self, message):
+        print >>self.LOG_FILE, self.build_log_message(message)
+
+    def build_log_message(self, message):
+        return "{0}\t{1}".format(repr(time.time()), message)

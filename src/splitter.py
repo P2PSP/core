@@ -135,7 +135,7 @@ class Splitter():
             if (args.strpe):
                 splitter = self.init_strpe_splitter('strpe', args.strpe, args.strpe_log)
             elif (args.strpeds):
-                splitter = self.init_strpe_splitter('strpeds', args.strpeds)
+                splitter = self.init_strpe_splitter('strpeds', args.strpeds, args.strpe_log)
             else:
                 splitter = Splitter_LRS()
 

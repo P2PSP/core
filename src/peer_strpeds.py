@@ -20,9 +20,13 @@ from peer_dbs import Peer_DBS
 from Crypto.PublicKey import DSA
 from Crypto.Hash import SHA256
 
+# Some useful definitions.
+ADDR = 0
+PORT = 1
+
 class Peer_StrpeDs(Peer_DBS):
 
-    def __init__(self, peer):
+    def __init__(self, peer, isMalicious = False):
         sys.stdout.write(Color.yellow)
         _print_("STrPe-DS Peer")
         sys.stdout.write(Color.none)
@@ -40,13 +44,20 @@ class Peer_StrpeDs(Peer_DBS):
         self.team_socket = peer.team_socket
         self.message_format += '40s40s'
         self.bad_peers = []
+
+        self.isMalicious = isMalicious
         #self.bad_peers.append(('127.0.0.1', 1234))
 
     def process_message(self, message, sender):
+        if sender in self.bad_peers:
+            return -1
+
         if self.is_current_message_from_splitter() or self.check_message(message, sender):
             if self.is_control_message(message) and message == 'B':
-                self.handle_bad_peers_request()
+                return self.handle_bad_peers_request()
             else:
+                if self.isMalicious:
+                    message = self.get_poisoned_message(message)
                 return Peer_DBS.process_message(self, message, sender)
         else:
             self.process_bad_message(message, sender)
@@ -59,6 +70,7 @@ class Peer_StrpeDs(Peer_DBS):
             ip = struct.unpack("!L", socket.inet_aton(peer[0]))[0]
             msg = struct.pack('ii', ip, peer[1])
             self.team_socket.sendto(msg, self.splitter)
+        return -1
 
     def check_message(self, message, sender):
         if sender in self.bad_peers:
@@ -95,7 +107,7 @@ class Peer_StrpeDs(Peer_DBS):
         q = self.convert_to_long(q)
         self.dsa_key = DSA.construct((y, g, p, q))
         _print_("DSA key received")
-        
+
     def convert_to_long(self, s):
         return long(s.rstrip('\x00'), 16)
 
@@ -106,3 +118,7 @@ class Peer_StrpeDs(Peer_DBS):
 
     def is_current_message_from_splitter(self):
         return self.current_sender == self.splitter
+
+    def get_poisoned_message(self, message):
+        n, m, k1, k2 = struct.unpack(self.message_format, message)
+        return struct.pack(self.message_format, n, "0", k1, k2)
