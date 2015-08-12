@@ -71,7 +71,7 @@ class StrpeDsSplitter(Splitter_LRS):
                 self.request_bad_peers(peer) # then, we will handle it in 'moderate the team'
                 time.sleep(2)
                 tp = self.get_trusted_peer_for_gathering()
-                if tp != None:
+                if tp != None and tp != peer:
                     self.request_bad_peers(tp) # then, we will handle it in 'moderate the team'
 
             time.sleep(self.GATHER_BAD_PEERS_SLEEP)

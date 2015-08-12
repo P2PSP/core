@@ -168,6 +168,7 @@ class Peer_DBS(Peer_IMS):
 
                 if self.LOGGING:
                     self.log_message("buffer correctnes {0}".format(self.calc_buffer_correctnes()))
+                    self.log_message("buffer filling {0}".format(self.calc_buffer_filling()))
 
                 # }}}
 
@@ -369,6 +370,13 @@ class Peer_DBS(Peer_IMS):
                 else:
                     goodchunks += 1
         return goodchunks / float(goodchunks + badchunks)
+
+    def calc_buffer_filling(self):
+        chunks = 0
+        for i in range(self.buffer_size):
+            if self.received_flag[i]:
+                chunks += 1
+        return chunks / float(self.buffer_size)
 
     def log_message(self, message):
         self.LOG_FILE.write(self.build_log_message(message) + "\n")
