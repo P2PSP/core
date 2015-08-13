@@ -26,8 +26,8 @@ nat2_pub="192.168.57.5"
 
 function stop_processes() {
     set +e
-    for host in $pc1 $pc2 $splitter; do
-        ssh "$user@$host" killall python2 2>/dev/null &
+    for host in $splitter $pc1 $pc2; do
+        ssh "$user@$host" "pkill -f 'python2 -u $dir'" 2>/dev/null
     done
     kill $player0_id 2>/dev/null
     kill $player1_id 2>/dev/null
@@ -66,6 +66,10 @@ configuration="$splitter_class, $monitor_class, $peer_class (branch $branch, com
 echo "Configuration: $configuration"
 echo
 
+# Clear NAT entries
+ssh "root@$nat1" conntrack -F 2>/dev/null
+ssh "root@$nat2" conntrack -F 2>/dev/null
+
 # Create table
 result="Peer1\2	"
 for nat in $nat_configs; do
@@ -81,22 +85,16 @@ done
 for nat1_config in $nat_configs; do
     result="$result
 $nat1_config "
-    ssh "root@$nat1" iptables-restore /etc/iptables/empty.rules \; \
-        iptables -F \; \
-        iptables -t nat -F \; \
-        iptables-restore /etc/iptables/iptables.rules.${nat1_config}
+    ssh "root@$nat1" iptables-restore /etc/iptables/iptables.rules.${nat1_config}1
     for nat2_config in $nat_configs; do
         echo "Configuring NATs: $nat1_config <-> $nat2_config."
-        ssh "root@$nat2" iptables-restore /etc/iptables/empty.rules \; \
-            iptables -F \; \
-            iptables -t nat -F \; \
-            iptables-restore /etc/iptables/iptables.rules.${nat2_config}
+        ssh "root@$nat2" iptables-restore /etc/iptables/iptables.rules.${nat2_config}2
 
         # Run stream source
         cvlc --sout "#duplicate{dst=standard{mux=ogg,dst=:$local_source_port,access=http}}" \
             "$source_filename" 2>/dev/null &
         source_id=$!
-        sleep 1
+        sleep 0.5
 
         successes=0
         date
@@ -105,7 +103,7 @@ $nat1_config "
 
             # Run splitter
             splitter_output="$tmpdir/$nat1_config.$nat2_config.splitter.txt"
-            ssh "$user@$splitter" python2 "$dir/splitter.py" --source_addr "$local_source_addr" \
+            ssh "$user@$splitter" python2 -u "$dir/splitter.py" --source_addr "$local_source_addr" \
                 --source_port "$local_source_port" --port "$splitter_port" >"$splitter_output" &
 
             # Build output filenames
@@ -123,17 +121,17 @@ $nat1_config "
             ssh "$user@$pc2" "$peer_cmd" >"$peer2_output" &
 
             # Clear NAT entries
-            ssh "root@$nat1" "conntrack -F 2>/dev/null" &
-            ssh "root@$nat2" "conntrack -F 2>/dev/null" &
-            sleep 3
+            ssh "root@$nat1" "conntrack -F" 2>/dev/null
+            ssh "root@$nat2" "conntrack -F" 2>/dev/null
+            sleep 1
 
             # Run players
             cvlc "http://$splitter:9999" --vout none --aout none 2>/dev/null >/dev/null &
             player0_id=$!
-            sleep 1
+            sleep 0.5
             cvlc "http://$pc1:9999" --vout none --aout none 2>/dev/null >/dev/null &
             player1_id=$!
-            sleep 1
+            sleep 0.5
             cvlc "http://$pc2:9999" --vout none --aout none 2>/dev/null >/dev/null &
             player2_id=$!
 
