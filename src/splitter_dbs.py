@@ -36,6 +36,7 @@ class Splitter_DBS(Splitter_IMS):
     # }}}
     MAX_CHUNK_LOSS = 32
     MCAST_ADDR = "0.0.0.0"
+    MONITOR_NUMBER = 1
 
     # }}}
 
@@ -81,6 +82,10 @@ class Splitter_DBS(Splitter_IMS):
     def send_the_list_size(self, peer_serve_socket):
         # {{{
 
+        if __debug__:
+            print("DBS: Sending the number of monitors", self.MONITOR_NUMBER)
+        message = struct.pack("H", socket.htons(self.MONITOR_NUMBER))
+        peer_serve_socket.sendall(message)
         if __debug__:
             print("DBS: Sending a list of peers of size", len(self.peer_list))
         message = struct.pack("H", socket.htons(len(self.peer_list)))
