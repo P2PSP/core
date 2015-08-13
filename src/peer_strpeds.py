@@ -120,5 +120,7 @@ class Peer_StrpeDs(Peer_DBS):
         return self.current_sender == self.splitter
 
     def get_poisoned_message(self, message):
-        n, m, k1, k2 = struct.unpack(self.message_format, message)
-        return struct.pack(self.message_format, n, "0", k1, k2)
+        if len(message) == struct.calcsize(self.message_format):
+            n, m, k1, k2 = struct.unpack(self.message_format, message)
+            return struct.pack(self.message_format, n, "0", k1, k2)
+        return message

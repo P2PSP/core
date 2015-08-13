@@ -19,8 +19,8 @@ def checkdir():
 def usage():
     print "args error"
 
-def run(runStr):
-    proc = subprocess.Popen(shlex.split(runStr), stdout=DEVNULL, stderr=DEVNULL)
+def run(runStr, out = DEVNULL):
+    proc = subprocess.Popen(shlex.split(runStr), stdout=out, stderr=out)
     processes.append(proc)
 
 def killall():
@@ -53,8 +53,8 @@ def runPeer(port, playerPort, trusted = False, malicious = False, ds = False):
         runStr += " --malicious"
     if not malicious:
          runStr += " --strpe_log ./strpe-testing/peer{0}.log".format(port)
-    run(runStr)
-    time.sleep(1)
+    run(runStr, open("strpe-testing/peer{0}.out".format(port), "w"))
+    time.sleep(2)
     #run netcat
     run("nc 127.0.0.1 {0}".format(playerPort))
 

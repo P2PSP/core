@@ -192,6 +192,8 @@ class StrpeDsSplitter(Splitter_LRS):
                 self.handle_bad_peer_from_regular(bad_peer)
 
     def handle_bad_peer_from_trusted(self, bad_peer):
+        if self.LOGGING:
+            self.log_message("bad peer {0}".format(bad_peer))
         _print_("bad peer: " + str(bad_peer))
         self.remove_peer(bad_peer)
 
