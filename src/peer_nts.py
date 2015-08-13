@@ -47,6 +47,20 @@ class Peer_NTS(Peer_DBS):
 
         # }}}
 
+    def send_message(self, message_data):
+        # {{{ Parameter: message_data = (message, destination)
+        # Send a general message continuously until acknowledge is received
+
+        with self.hello_messages_lock:
+            if message_data not in self.hello_messages:
+                self.hello_messages.append(message_data)
+                self.hello_messages_times[message_data] = time.time()
+                self.hello_messages_ports[message_data] = [message_data[1][1]]
+                # Directly start packet sending
+                self.hello_messages_event.set()
+
+        # }}}
+
     def say_goodbye(self, node):
         # {{{
 
@@ -238,6 +252,10 @@ class Peer_NTS(Peer_DBS):
             if sender not in self.peer_list:
                 self.peer_list.append(sender)
                 self.debt[sender] = 0
+                # Send source port information to splitter
+                message += struct.pack("H", socket.htons(sender[1]))
+                message_data = (message, self.splitter)
+                self.send_message(message_data)
             # Send acknowledge
             self.team_socket.sendto(message, sender)
         elif message == 'H':

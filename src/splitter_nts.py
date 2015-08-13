@@ -9,6 +9,7 @@
 
 # {{{ Imports
 import common
+from fractions import gcd
 import random
 import string
 import sys
@@ -294,6 +295,34 @@ class Splitter_NTS(Splitter_DBS):
                     # All source ports are known, incorporate the peer
                     del self.arriving_peers[peer_id]
                     self.incorporate_peer(peer_id, *peer_data[:-1])
+
+            elif len(message) == common.PEER_ID_LENGTH + struct.calcsize("H"):
+                # Received source port of a peer from another peer
+                peer_id = message[:common.PEER_ID_LENGTH]
+                print('NTS: Received source port of peer %s from %s' % (peer_id, sender))
+                # Send acknowledge
+                self.team_socket.sendto(message, sender)
+
+                peer = None
+                for peer_data in self.ids.iteritems():
+                    if peer_id == peer_data[1]:
+                        peer = peer_data[0]
+                        break
+                if peer == None:
+                    print('NTS: Peer ID %s unknown' % peer_id)
+                    continue
+
+                source_port = socket.ntohs(struct.unpack("H",
+                    message[common.PEER_ID_LENGTH:])[0])
+
+                # Update peer information
+                port_diff = abs(peer[1] - source_port)
+                previous_port_step = self.port_steps[peer]
+                self.port_steps[peer] = gcd(previous_port_step, port_diff)
+                if self.port_steps[peer] != previous_port_step:
+                    print('NTS: Updated port step of peer %s from %d to %d' %
+                        (peer, previous_port_step, self.port_steps[peer]))
+
             # }}}
 
         # }}}

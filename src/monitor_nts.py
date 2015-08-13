@@ -93,14 +93,8 @@ class Monitor_NTS(Peer_NTS):
             print("NTS: Forwarding ID %s and source port %s to splitter"
                 % (message, sender[1]))
             message += struct.pack("H", socket.htons(sender[1]))
-            with self.hello_messages_lock:
-                message_data = (message, self.splitter)
-                if message_data not in self.hello_messages:
-                    self.hello_messages.append(message_data)
-                    self.hello_messages_times[message_data] = time.time()
-                    self.hello_messages_ports[message_data] = [self.splitter[1]]
-                    # Directly start packet sending
-                    self.hello_messages_event.set()
+            message_data = (message, self.splitter)
+            self.send_message(message_data)
         elif sender == self.splitter and \
                 len(message) == common.PEER_ID_LENGTH + struct.calcsize("4sH"):
             # [say hello to (X)] received from splitter
