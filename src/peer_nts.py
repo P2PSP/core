@@ -159,8 +159,6 @@ class Peer_NTS(Peer_DBS):
             self.say_hello(peer, probable_source_ports)
             print("NTS: [hello] sent to %s" % (peer,))
 
-            self.peer_list.append(peer)
-            self.debt[peer] = 0
         # Directly start packet sending
         self.hello_messages_event.set()
 
