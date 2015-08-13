@@ -39,10 +39,6 @@ class Peer_NTS(Peer_DBS):
 
         with self.hello_messages_lock:
             message = self.peer_id
-            if peer == self.splitter:
-                # Send the local source port to splitter
-                source_port_local = self.team_socket.getsockname()[1]
-                message += struct.pack("H", socket.htons(source_port_local))
             hello_data = (message, peer)
             if hello_data not in self.hello_messages:
                 self.hello_messages.append(hello_data)
