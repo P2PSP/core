@@ -63,7 +63,7 @@ def check(x):
         for line in fh:
             pass
         result = re.match("(\d*.\d*)\t(\d*)\s(\d*).*", line)
-        if result != None and int(result.group(3)) == x:
+        if result != None and int(result.group(3)) <= x:
             return True
     return False
 
