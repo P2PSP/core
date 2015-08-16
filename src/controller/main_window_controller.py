@@ -43,7 +43,7 @@ class Main_Controller():
     """
     Controller which controls the signals from the main window. It is
     responsible for communication between models and  widgets in main window.
-    It uses Adapters to update data from the core package to the 
+    It uses Adapters to update data from the core package to the
     """
 
     ## MRL of default local P2PSP Peer Stream.
@@ -76,7 +76,7 @@ class Main_Controller():
         ## Whether player is fullscreen.
         self.player_fullscreen  = False
 
-        #### Whether channel_Iconview  is revealed.
+        ## Whether channel_Iconview  is revealed.
         self.channels_revealed = True
 
         ## Whether player status box is hidden.
@@ -205,9 +205,9 @@ class Main_Controller():
         ,'on_Export_activate'                   : self.export_channels
         ,'on_VolumeButton_value_changed'        : self.control_player_volume
         ,'on_Surface_key_press_event'           : self.toggle_status_box
+        ,'on_ViewPlayerStatusBox_toggled'       : self.toggle_status_box
                 }
         return signals
-
 
     @exc_handler
     def import_channels(self,widget,data=None):
@@ -330,12 +330,10 @@ class Main_Controller():
         """
 
         if self.channels_revealed == True:
-            self.app_window.channel_box.hide()
-            self.app_window.channel_revealer.set_label('<<')
+            self.app_window.hide_channels_box()
             self.channels_revealed = False
         elif self.channels_revealed == False:
-            self.app_window.channel_box.show()
-            self.app_window.channel_revealer.set_label('>>')
+            self.app_window.show_channels_box()
             self.channels_revealed = True
 
     @exc_handler
@@ -374,12 +372,18 @@ class Main_Controller():
         """
 
         if self.player_fullscreen == True and data.keyval == 65307:
-            if self.status_box_hidden == False :
-                self.app_window.hide_status_box()
-                self.status_box_hidden = True
-            else:
-                self.app_window.show_status_box()
-                self.status_box_hidden = False
+            self.toggle_player_status_bar()
+        elif self.player_fullscreen == False:
+            self.toggle_player_status_bar()
+
+    @exc_handler
+    def toggle_player_status_bar(self):
+        if self.status_box_hidden == False :
+            self.app_window.hide_status_box()
+            self.status_box_hidden = True
+        else:
+            self.app_window.show_status_box()
+            self.status_box_hidden = False
 
     @exc_handler
     def play_selected_channel(self,widget,data=None):

@@ -1,6 +1,6 @@
 """
 @package adapter
-buffering_adapter module 
+buffering_adapter module
 """
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
@@ -40,7 +40,7 @@ class Buffering_Adapter():
 
     """
     This Design Pattern is used to update the graphical user
-    interface with the buffer status of a Peer in P2PSP Project.Objects of this 
+    interface with the buffer status of a Peer in P2PSP Project.Objects of this
     class should be instantiated inside a  controller.
     """
 

@@ -1,6 +1,6 @@
 """
 @package src
-p2psp_application_gui module 
+p2psp_application_gui module
 """
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
@@ -31,17 +31,17 @@ def main_app():
 
     """
     Before using Python threads, or libraries using threads, must apply
-    GObject.threads_init().This is needed because GTK+ isn't thread safe.Only 
+    GObject.threads_init().This is needed because GTK+ isn't thread safe.Only
     one thread,the main thread, is allowed to call GTK+ code at all times.
     This function isn't provided by gobject but initializes thread support
     in PyGObject (it was called gobject.threads_init() in pygtk).
     Contrary to the naming actually it is gi.threads_init().
-    
-    GObject.idle_add() takes the function and arguments that will get passed to 
+
+    GObject.idle_add() takes the function and arguments that will get passed to
     the function and asks the main loop to schedule its execution in the main
     thread.
-    
-    Instantiate models and views and pass it to the main_controller.
+
+    Instantiate models and views , then pass it to the main_controller.
     """
 
     GObject.threads_init()
