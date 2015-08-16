@@ -77,6 +77,9 @@ class Monitor_NTS(Peer_NTS):
         # Receive the generated ID for this peer from splitter
         self.receive_id()
 
+        # There are currently no other peers in the team
+        self.initial_peer_list = []
+
         # Close the TCP socket
         Peer_DBS.disconnect_from_the_splitter(self)
 
@@ -85,13 +88,15 @@ class Monitor_NTS(Peer_NTS):
     def process_message(self, message, sender):
         # {{{ Handle NTS messages; pass other messages to base class
 
-        if sender != self.splitter and len(message) == common.PEER_ID_LENGTH:
-            print("NTS: Received hello (ID %s) from %s" % (message, sender))
+        if sender != self.splitter and (len(message) == common.PEER_ID_LENGTH or
+            len(message) == common.PEER_ID_LENGTH+1):
+            print("NTS: Received hello (ID %s) from %s" \
+                % (message[:common.PEER_ID_LENGTH], sender))
             # Send acknowledge
             self.team_socket.sendto(message, sender)
 
             print("NTS: Forwarding ID %s and source port %s to splitter"
-                % (message, sender[1]))
+                % (message[:common.PEER_ID_LENGTH], sender[1]))
             message += struct.pack("H", socket.htons(sender[1]))
             message_data = (message, self.splitter)
             self.send_message(message_data)

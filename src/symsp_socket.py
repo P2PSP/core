@@ -48,3 +48,6 @@ class symsp_socket():
 
     def setsockopt(self, *p):
         return self._sock.setsockopt(*p)
+
+    def close(self, *p):
+        return self._sock.close(*p)
