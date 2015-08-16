@@ -41,6 +41,10 @@ class Splitter_NTS(Splitter_DBS):
         # }}}
         self.port_steps = {}
 
+        # {{{ The last known allocated source port for each peer in the team.
+        # }}}
+        self.last_source_port = {}
+
         # {{{ The arriving peers. Key: ID.
         # Value: (serve_socket, peer_address,
         # source_port_to_splitter, source_ports_to_monitors, arrive_time)
@@ -117,7 +121,7 @@ class Splitter_NTS(Splitter_DBS):
             # Also send the port step of the existing peer, in case
             # it is behind a sequentially allocating NAT
             message = self.ids[p] + struct.pack("4sHH", socket.inet_aton(p[ADDR]), \
-                socket.htons(p[PORT]), self.port_steps[p])
+                socket.htons(self.last_source_port[p]), self.port_steps[p])
             peer_serve_socket.sendall(message)
 
         # }}}
@@ -137,6 +141,8 @@ class Splitter_NTS(Splitter_DBS):
             # Close socket
             self.arriving_peers[peer_id][0].close()
             # Remove peer
+            peer = self.arriving_peers[peer_id][1:3]
+            del self.last_source_port[peer]
             del self.arriving_peers[peer_id]
 
         # }}}
@@ -160,6 +166,7 @@ class Splitter_NTS(Splitter_DBS):
             peer = self.incorporating_peers[peer_id][0]
             del self.ids[peer]
             del self.port_steps[peer]
+            del self.last_source_port[peer]
             del self.incorporating_peers[peer_id]
 
         # }}}
@@ -198,6 +205,7 @@ class Splitter_NTS(Splitter_DBS):
             # should be publicly accessible
             self.ids[new_peer] = peer_id
             self.port_steps[new_peer] = 0
+            self.last_source_port[new_peer] = new_peer[1]
             self.send_new_peer(peer_id, new_peer, [new_peer[1]]*self.MONITOR_NUMBER)
             self.insert_peer(new_peer)
             serve_socket.close()
@@ -298,6 +306,8 @@ class Splitter_NTS(Splitter_DBS):
     def update_port_step(self, peer, source_port):
         # {{{
 
+        # Set last known source port
+        self.last_source_port[peer] = source_port
         # Skip check if measured port step is 0
         if self.port_steps[peer] == 0:
             return
@@ -321,6 +331,7 @@ class Splitter_NTS(Splitter_DBS):
         try:
             del self.ids[peer]
             del self.port_steps[peer]
+            del self.last_source_port[peer]
         except KeyError:
             pass
 
