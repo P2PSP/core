@@ -108,7 +108,7 @@ class Monitor_NTS(Peer_NTS):
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
-            print("NTS: Received [send hello to %s %s]" % (peer_id, peer))
+            print("NTS: Received peer ID %s %s" % (peer_id, peer))
             # Sending hello not needed as monitor and peer already communicated
             if peer not in self.peer_list:
                 self.peer_list.append(peer)

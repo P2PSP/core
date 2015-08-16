@@ -138,19 +138,19 @@ class Peer_NTS(Peer_DBS):
     def receive_the_list_of_peers_2(self):
         # {{{
 
-        # The monitor peer endpoint has already been received
-        assert len(self.peer_list) == 1
+        # The monitor peer endpoints have already been received
+        assert len(self.peer_list) == self.number_of_monitors
 
         sys.stdout.write(Color.green)
         _print_("NTS: Requesting the number of peers from splitter")
         sys.stdout.write(Color.none)
         # Add 1 as the monitor peer was already received
         self.number_of_peers = socket.ntohs(struct.unpack("H",
-            self.splitter_socket.recv(struct.calcsize("H")))[0]) + 1
+            self.splitter_socket.recv(struct.calcsize("H")))[0]) + self.number_of_monitors
         _print_("NTS: The size of the team is %d (apart from me)" % self.number_of_peers)
 
         # Skip the monitor peer
-        for _ in range(self.number_of_peers - 1):
+        for _ in range(self.number_of_peers - self.number_of_monitors):
             message = self.splitter_socket.recv(common.PEER_ID_LENGTH +
                                                 struct.calcsize("4sHH"))
             peer_id = message[:common.PEER_ID_LENGTH]
@@ -205,10 +205,11 @@ class Peer_NTS(Peer_DBS):
 
         # Note: This peer is *not* the monitor peer.
 
-        # Send UDP packets to splitter and monitor peer
+        # Send UDP packets to splitter and monitor peers
         # to create working NAT entries and to determine the
         # source port allocation type of the NAT of this peer
-        self.say_hello(self.peer_list[0])
+        for peer in self.peer_list[:self.number_of_monitors]:
+            self.say_hello(peer)
         self.say_hello(self.splitter)
         # Directly start packet sending
         self.hello_messages_event.set()
@@ -237,7 +238,7 @@ class Peer_NTS(Peer_DBS):
                     del self.hello_messages[:]
                 # Resetting peer lists
                 del self.initial_peer_list[:]
-                del self.peer_list[1:] # Leave monitor in list
+                del self.peer_list[self.number_of_monitors:] # Leave monitors in list
                 # Recreate the socket
                 # This similar to Peer_DBS.listen_to_the_team, but binds to a new random port
                 self.team_socket.close()
@@ -252,8 +253,9 @@ class Peer_NTS(Peer_DBS):
                 # Say hello to splitter again, to retry incorporation
                 # 'N' for 'not incorporated'
                 self.send_message((self.peer_id + 'N', self.splitter))
-                # Say hello to monitor again, to keep the NAT entry alive
-                self.send_message((self.peer_id + 'N', self.peer_list[0]))
+                # Say hello to monitors again, to keep the NAT entry alive
+                for peer in self.peer_list[:self.number_of_monitors]:
+                    self.send_message((self.peer_id + 'N', peer))
                 # Receive all peer endpoints and send hello messages
                 self.receive_the_list_of_peers_2()
 
