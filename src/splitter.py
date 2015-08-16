@@ -88,6 +88,8 @@ class Splitter():
 
         parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
 
+        parser.add_argument('--strpeds_majority_decision', help='Set majority decision ratio.')
+
         try:
             argcomplete.autocomplete(parser)
         except Exception:
@@ -136,6 +138,8 @@ class Splitter():
                 splitter = self.init_strpe_splitter('strpe', args.strpe, args.strpe_log)
             elif (args.strpeds):
                 splitter = self.init_strpe_splitter('strpeds', args.strpeds, args.strpe_log)
+                if args.strpeds_majority_decision:
+                    splitter.setMajorityRatio(float(args.strpeds_majority_decision))
             else:
                 splitter = Splitter_LRS()
 
