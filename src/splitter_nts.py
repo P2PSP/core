@@ -107,8 +107,6 @@ class Splitter_NTS(Splitter_DBS):
 
         # Send all peers except the monitor peers with their peer ID
         number_of_other_peers = len(self.peer_list)-self.MONITOR_NUMBER
-        if peer in self.peer_list:
-            number_of_other_peers -= 1
         if __debug__:
             print("NTS: Sending the list of peers except the monitor (%d peers)" \
                 % number_of_other_peers)
@@ -116,8 +114,6 @@ class Splitter_NTS(Splitter_DBS):
         peer_serve_socket.sendall(message)
 
         for p in self.peer_list[self.MONITOR_NUMBER:]:
-            if p == peer: # Do not send its endpoint to the peer itself
-                continue
             # Also send the port step of the existing peer, in case
             # it is behind a sequentially allocating NAT
             message = self.ids[p] + struct.pack("4sHH", socket.inet_aton(p[ADDR]), \
@@ -161,6 +157,9 @@ class Splitter_NTS(Splitter_DBS):
             # Close TCP socket
             self.incorporating_peers[peer_id][4].close()
             # Remove peer
+            peer = self.incorporating_peers[peer_id][0]
+            del self.ids[peer]
+            del self.port_steps[peer]
             del self.incorporating_peers[peer_id]
 
         # }}}
@@ -199,8 +198,8 @@ class Splitter_NTS(Splitter_DBS):
             # should be publicly accessible
             self.ids[new_peer] = peer_id
             self.port_steps[new_peer] = 0
-            self.insert_peer(new_peer)
             self.send_new_peer(peer_id, new_peer, [new_peer[1]]*self.MONITOR_NUMBER)
+            self.insert_peer(new_peer)
             serve_socket.close()
             return new_peer
         else:
@@ -235,7 +234,6 @@ class Splitter_NTS(Splitter_DBS):
 
         # Insert the peer into the list
         self.ids[new_peer] = peer_id
-        self.insert_peer(new_peer)
         # The peer is in the team, but is not connected to all peers yet,
         # so add to the list
         self.incorporating_peers[peer_id] = (new_peer, time.time(), 0, \
@@ -252,8 +250,6 @@ class Splitter_NTS(Splitter_DBS):
             print("NTS: Sending [send hello to %s]" % (new_peer,))
         # Send packets to all peers;
         for peer_number, peer in enumerate(self.peer_list):
-            if peer == new_peer: # Do not send its endpoint to the peer itself
-                continue
             if peer_number < self.MONITOR_NUMBER:
                 # Send only the endpoint of the peer to the monitor,
                 # as the arriving peer and the monitor already communicated
@@ -272,19 +268,6 @@ class Splitter_NTS(Splitter_DBS):
 
         # }}}
 
-    def update_peer(self, peer, new_peer):
-        # {{{
-
-        # Put the updated peer to the end of the list, as it is newly connecting
-        self.peer_list.remove(peer)
-        self.peer_list.append(new_peer)
-
-        self.ids[new_peer] = self.ids.pop(peer)
-        self.port_steps[new_peer] = self.port_steps.pop(peer)
-        self.losses[new_peer] = self.losses.pop(peer)
-
-        # }}}
-
     def retry_to_incorporate_peer(self, peer_id):
         # {{{
 
@@ -296,7 +279,8 @@ class Splitter_NTS(Splitter_DBS):
             self.update_port_step(peer, source_port_to_monitor)
         # Update peer lists
         new_peer = (peer[0], source_port_to_splitter)
-        self.update_peer(peer, new_peer)
+        self.ids[new_peer] = self.ids.pop(peer)
+        self.port_steps[new_peer] = self.port_steps.pop(peer)
         self.incorporating_peers[peer_id] = (new_peer, start_time, 0, \
             [0]*self.MONITOR_NUMBER, serve_socket)
 
@@ -462,6 +446,7 @@ class Splitter_NTS(Splitter_DBS):
                     print('NTS: Peer %s was successfully incorporated' % peer_id)
                     # Close TCP socket
                     self.incorporating_peers[peer_id][4].close()
+                    self.insert_peer(self.incorporating_peers[peer_id][0])
                     del self.incorporating_peers[peer_id]
                 else:
                     if sender[1] == self.incorporating_peers[peer_id][0][1]:
