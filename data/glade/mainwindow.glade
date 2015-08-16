@@ -35,6 +35,11 @@
     <property name="stock">gtk-media-stop</property>
     <property name="icon_size">3</property>
   </object>
+  <object class="GtkImage" id="UnFullscreenImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-leave-fullscreen</property>
+  </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>

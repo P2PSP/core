@@ -346,12 +346,14 @@ class Main_Controller():
         if self.player_fullscreen == False:
             self.app_window.hide_all_but_surface()
             self.app_window.window.fullscreen()
+            self.app_window.player_fullscreen_button.set_image(self.app_window.unfullscreen_image)
             self.player_fullscreen = True
             self.status_box_hidden = True
             self.app_window.player_surface.grab_focus()
         else:
             self.show()
             self.app_window.window.unfullscreen()
+            self.app_window.player_fullscreen_button.set_image(self.app_window.fullscreen_image)
             self.player_fullscreen = False
             self.status_box_hidden = False
 

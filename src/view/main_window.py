@@ -126,6 +126,12 @@ class Main_Window():
 
         ## SubMenu to toggle visibility of channels.
         self.toggle_channel_box = self.interface.get_object('ViewChannelBox')
+        
+        ## fullscreen icon image
+        self.fullscreen_image =  self.interface.get_object('FullscreenImage')
+
+        ## leave fullscreen icon image
+        self.unfullscreen_image = self.interface.get_object('UnFullscreenImage')
 
     def configure_player_surface(self):
 
