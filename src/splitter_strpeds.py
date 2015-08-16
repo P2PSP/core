@@ -30,6 +30,8 @@ class StrpeDsSplitter(Splitter_LRS):
     LOG_FILE = ""
     CURRENT_ROUND = 0
 
+    majorityRatio = 0.5
+
     def __init__(self):
         sys.stdout.write(Color.yellow)
         print("Using STrPe-DS")
@@ -39,6 +41,10 @@ class StrpeDsSplitter(Splitter_LRS):
         self.gathering_counter = 0
         self.trusted_gathering_counter = 0
         self.gethered_bad_peers = []
+        self.complains = {}
+
+    def setMajorityRatio(self, value):
+        self.majorityRatio = value
 
     def handle_a_peer_arrival(self, connection):
         serve_socket = connection[0]
@@ -187,18 +193,33 @@ class StrpeDsSplitter(Splitter_LRS):
             x = struct.unpack("ii", message)
             bad_peer = (socket.inet_ntoa(struct.pack('!L', x[0])), x[1])
             if sender in self.trusted_peers:
-                self.handle_bad_peer_from_trusted(bad_peer)
+                self.handle_bad_peer_from_trusted(bad_peer, sender)
             else:
-                self.handle_bad_peer_from_regular(bad_peer)
+                self.handle_bad_peer_from_regular(bad_peer, sender)
 
-    def handle_bad_peer_from_trusted(self, bad_peer):
+    def handle_bad_peer_from_trusted(self, bad_peer, sender):
+        self.add_complain(bad_peer, sender)
+        self.punish_peer(bad_peer, "by trusted")
+        return
+
+    def handle_bad_peer_from_regular(self, bad_peer, sender):
+        self.add_complain(bad_peer, sender)
+        x = len(self.complains[bad_peer]) / float(max(1, len(self.peer_list) - 1))
+        if x >= self.majorityRatio:
+            self.punish_peer(bad_peer, "by majority decision")
+
+    def add_complain(self, bad_peer, sender):
+        if bad_peer in self.complains:
+            if sender not in self.complains:
+                self.complains[bad_peer].append(sender)
+        else:
+            self.complains[bad_peer] = [sender]
+
+    def punish_peer(self, bad_peer, message = ""):
         if self.LOGGING:
             self.log_message("bad peer {0}".format(bad_peer))
-        _print_("bad peer: " + str(bad_peer))
+        _print_("bad peer: " + str(bad_peer) + "(" + message + ")")
         self.remove_peer(bad_peer)
-
-    def handle_bad_peer_from_regular(self, bad_peer):
-        return
 
     def receive_bad_peer_message(self):
         return self.team_socket.recvfrom(struct.calcsize("ii"))
