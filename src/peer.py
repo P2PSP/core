@@ -96,6 +96,8 @@ class Peer():
 
         parser.add_argument('--trusted', action="store_true", help='Forces the peer to send hashes of chunks to splitter')
 
+        parser.add_argument('--checkall', action="store_true", help='Forces the peer to send hashes of every chunks to splitter (works only with trusted option)')
+
         parser.add_argument('--strpeds', action="store_true", help='Enables STrPe-DS')
 
         parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
@@ -181,6 +183,8 @@ class Peer():
 
         if args.trusted:
             peer = TrustedPeer(peer)
+            if args.checkall:
+                peer.setCheckAll(True)
 
         if args.strpeds:
             peer = Peer_StrpeDs(peer)
