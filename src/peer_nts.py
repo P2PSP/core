@@ -185,6 +185,19 @@ class Peer_NTS(Peer_DBS):
     def disconnect_from_the_splitter(self):
         # {{{
 
+        try:
+            self.try_to_disconnect_from_the_splitter()
+        except Exception as e:
+            sys.stderr.write(
+                "NTS: '%s': Probably the splitter removed this peer due to timeout\n" % e)
+            self.player_alive = False
+            sys.exit(1)
+
+        # }}}
+
+    def try_to_disconnect_from_the_splitter(self):
+        # {{{
+
         self.start_send_hello_thread()
 
         # Receive the generated ID for this peer from splitter
@@ -212,8 +225,7 @@ class Peer_NTS(Peer_DBS):
         # A timeout less than common.MAX_PEER_ARRIVING_TIME has to be set for self.team_socket
         # The monitor is not in initial_peer_list
         while len(self.initial_peer_list) > 0:
-            # Leave 2 seconds to send packet to splitter before being removed from the team
-            if time.time() - incorporation_time > common.MAX_PEER_ARRIVING_TIME - 2:
+            if time.time() - incorporation_time > common.MAX_PEER_ARRIVING_TIME:
                 # Retry incorporation into the team
                 print("NTS: Timed out with %d peers left to connect. Retrying incorporation." \
                     % len(self.initial_peer_list))

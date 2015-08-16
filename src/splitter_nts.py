@@ -152,7 +152,8 @@ class Splitter_NTS(Splitter_DBS):
         peers_to_remove = []
         # Build list of incorporating peers to remove
         for peer_id in self.incorporating_peers:
-            if now - self.incorporating_peers[peer_id][1] > common.MAX_PEER_ARRIVING_TIME:
+            if now - self.incorporating_peers[peer_id][1] \
+                > common.MAX_TOTAL_INCORPORATION_TIME:
                 peers_to_remove.append(peer_id)
         # Actually remove the peers
         for peer_id in peers_to_remove:
@@ -284,14 +285,14 @@ class Splitter_NTS(Splitter_DBS):
         # {{{
 
         # Update source port information
-        peer, _, source_port_to_splitter, source_port_to_monitor, serve_socket = \
-            self.incorporating_peers[peer_id]
+        peer, start_time, source_port_to_splitter, source_port_to_monitor, \
+            serve_socket = self.incorporating_peers[peer_id]
         self.update_port_step(peer, source_port_to_splitter)
         self.update_port_step(peer, source_port_to_monitor)
-        # Update peer lists and refresh timeout
+        # Update peer lists
         new_peer = (peer[0], source_port_to_splitter)
         self.update_peer(peer, new_peer)
-        self.incorporating_peers[peer_id] = (new_peer, time.time(), 0, 0, serve_socket)
+        self.incorporating_peers[peer_id] = (new_peer, start_time, 0, 0, serve_socket)
 
         # Send the updated endpoint to the existing peers
         self.send_new_peer(peer_id, new_peer, self.port_steps[new_peer],
