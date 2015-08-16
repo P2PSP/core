@@ -68,7 +68,9 @@ class Peer_DBS(Peer_IMS):
         self.peer_list = [] # The list of peers structure.
 
         sys.stdout.write(Color.green)
-        _print_("DBS: Requesting the number of peers to", self.splitter_socket.getpeername())
+        _print_("DBS: Requesting the number of monitors and peers to", self.splitter_socket.getpeername())
+        self.number_of_monitors = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
+        _print_("DBS: The number of monitors is", self.number_of_monitors)
         self.number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
         _print_("DBS: The size of the team is", self.number_of_peers, "(apart from me)")
 
@@ -336,8 +338,8 @@ class Peer_DBS(Peer_IMS):
 
     def am_i_a_monitor(self):
         # {{{
-        if self.number_of_peers == 0:
-            # Only the first peer of the team is the monitor peer
+        if self.number_of_peers < self.number_of_monitors:
+            # Only the first peers of the team are monitor peers
             return True
         else:
             return False
