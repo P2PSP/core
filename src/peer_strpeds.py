@@ -26,7 +26,7 @@ PORT = 1
 
 class Peer_StrpeDs(Peer_DBS):
 
-    def __init__(self, peer, isMalicious = False):
+    def __init__(self, peer):
         sys.stdout.write(Color.yellow)
         _print_("STrPe-DS Peer")
         sys.stdout.write(Color.none)
@@ -45,9 +45,6 @@ class Peer_StrpeDs(Peer_DBS):
         self.message_format += '40s40s'
         self.bad_peers = []
 
-        self.isMalicious = isMalicious
-        #self.bad_peers.append(('127.0.0.1', 1234))
-
     def process_message(self, message, sender):
         if sender in self.bad_peers:
             return -1
@@ -56,8 +53,6 @@ class Peer_StrpeDs(Peer_DBS):
             if self.is_control_message(message) and message == 'B':
                 return self.handle_bad_peers_request()
             else:
-                if self.isMalicious:
-                    message = self.get_poisoned_message(message)
                 return Peer_DBS.process_message(self, message, sender)
         else:
             self.process_bad_message(message, sender)
@@ -118,9 +113,3 @@ class Peer_StrpeDs(Peer_DBS):
 
     def is_current_message_from_splitter(self):
         return self.current_sender == self.splitter
-
-    def get_poisoned_message(self, message):
-        if len(message) == struct.calcsize(self.message_format):
-            n, m, k1, k2 = struct.unpack(self.message_format, message)
-            return struct.pack(self.message_format, n, "0", k1, k2)
-        return message

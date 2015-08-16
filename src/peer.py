@@ -44,6 +44,7 @@ from lossy_peer import Lossy_Peer
 from malicious_peer import MaliciousPeer
 from trusted_peer import TrustedPeer
 from peer_strpeds import Peer_StrpeDs
+from peer_strpeds_malicious import Peer_StrpeDsMalicious
 
 # }}}
 
@@ -90,6 +91,8 @@ class Peer():
         parser.add_argument('--on_off_ratio', help='Enables on-off attack and sets ratio for on off (from 1 to 100)')
 
         parser.add_argument('--selective', nargs='+', type=str, help='Enables selective attack for given set of peers.')
+
+        parser.add_argument('--bad_mouth', nargs='+', type=str, help='Enables Bad Mouth attack for given set of peers.')
 
         parser.add_argument('--trusted', action="store_true", help='Forces the peer to send hashes of chunks to splitter')
 
@@ -180,8 +183,18 @@ class Peer():
             peer = TrustedPeer(peer)
 
         if args.strpeds:
-            peer = Peer_StrpeDs(peer, args.malicious)
+            peer = Peer_StrpeDs(peer)
             peer.receive_dsa_key()
+            if args.malicious:
+                peer = Peer_StrpeDsMalicious(peer)
+                if args.persistent:
+                    peer.setPersistentAttack(True)
+                if args.on_off_ratio:
+                    peer.setOnOffAttack(True, int(args.on_off_ratio))
+                if args.selective:
+                    peer.setSelectiveAttack(True, args.selective)
+                if args.bad_mouth:
+                    peer.setBadMouthAttack(True, args.bad_mouth)
 
         if args.strpe_log != None:
             peer.LOGGING = True
