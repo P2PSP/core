@@ -39,7 +39,7 @@ def runSplitter(trustedPeers, ds = False):
         tps += "\"{0}\" ".format(p)
     prefix = ""
     if ds: prefix = "ds"
-    run("../src/splitter.py --source_port 8080 --strpe{0} {1} --strpe_log strpe-testing/splitter.log".format(prefix, tps))
+    run("../src/splitter.py --buffer_size 1024 --source_port 8080 --strpe{0} {1} --strpe_log strpe-testing/splitter.log".format(prefix, tps))
     time.sleep(1)
 
 def runPeer(port, playerPort, trusted = False, malicious = False, ds = False):
@@ -50,7 +50,7 @@ def runPeer(port, playerPort, trusted = False, malicious = False, ds = False):
     if trusted and not ds:
         runStr += " --trusted --checkall"
     if malicious:
-        runStr += " --malicious --persistent"
+        runStr += " --malicious --on_off_ratio 100"
     if not malicious:
          runStr += " --strpe_log ./strpe-testing/peer{0}.log".format(port)
     run(runStr, open("strpe-testing/peer{0}.out".format(port), "w"))

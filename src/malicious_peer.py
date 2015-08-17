@@ -20,7 +20,7 @@ class MaliciousPeer(Peer_DBS):
 
     persistentAttack = False
     onOffAttack = False
-    onOffRatio = 1.0
+    onOffRatio = 100
     selectiveAttack = False
     selectedPeersForAttack = []
 
@@ -184,8 +184,8 @@ class MaliciousPeer(Peer_DBS):
             return
 
         if self.onOffAttack:
-            x = random.randint(1, 100)
-            if (x <= self.onOffRatio):
+            r = random.randint(1, 100)
+            if r <= self.onOffRatio:
                 self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
             else:
                 self.team_socket.sendto(self.receive_and_feed_previous, peer)
@@ -213,8 +213,8 @@ class MaliciousPeer(Peer_DBS):
         self.persistentAttack = value
 
     def setOnOffAttack(self, value, ratio):
-        self.onOffAttack = value
-        self.OnOffRatio = ratio
+        self.onOffAttack = True
+        self.onOffRatio = ratio
 
     def setSelectiveAttack(self, value, selected):
         self.selectiveAttack = True
