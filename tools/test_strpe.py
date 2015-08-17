@@ -48,13 +48,13 @@ def runPeer(port, playerPort, trusted = False, malicious = False, ds = False):
     if ds: strpeds = "--strpeds"
     runStr = "../src/peer.py --use_localhost --port {0} --player_port {1} {2}".format(port, playerPort, strpeds)
     if trusted and not ds:
-        runStr += " --trusted"
+        runStr += " --trusted --checkall"
     if malicious:
         runStr += " --malicious --persistent"
     if not malicious:
          runStr += " --strpe_log ./strpe-testing/peer{0}.log".format(port)
     run(runStr, open("strpe-testing/peer{0}.out".format(port), "w"))
-    time.sleep(2)
+    time.sleep(1)
     #run netcat
     run("nc 127.0.0.1 {0}".format(playerPort))
 

@@ -75,6 +75,7 @@ class StrpeSplitter(Splitter_LRS):
         chunk_number, hash = struct.unpack('H32s', message)
         chunk_message = self.buffer[chunk_number % self.BUFFER_SIZE]
         stored_chunk_number, chunk = struct.unpack(self.get_message_format(), chunk_message)
+        stored_chunk_number = socket.ntohs(stored_chunk_number)
         if stored_chunk_number == chunk_number and hashlib.sha256(chunk).digest() != hash:
             peer = self.destination_of_chunk[chunk_number % self.BUFFER_SIZE]
             self.punish_malicious_peer(peer)
