@@ -10,6 +10,7 @@
 # {{{
 
 import common
+import math
 import threading
 import time
 import sys
@@ -273,20 +274,65 @@ class Peer_NTS(Peer_DBS):
 
         # }}}
 
+    def get_factors(self, n):
+        # {{{ This function is from http://stackoverflow.com/a/6800214
+
+        return sorted(set(reduce(list.__add__,
+            ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0))))
+
+        # }}}
+
+    def count_combinations(self, factors):
+        # {{{
+
+        # Get the number of possible products of a factor and another integer
+        # that are less or equal to the original number n.
+        # Example: the number is 10, the factors are 1, 2, 5, 10.
+        # Products <=10: 1*1, ..., 1*10, 2*1, ..., 2*5, 5*1, 5*2, 10*1.
+        # So for each factor there are "n/factor" products:
+        return reduce(lambda a, b: a + b, factors)
+
+        # }}}
+
+    def get_probable_port_diffs(self, port_diff, peer_number):
+        # {{{
+
+        # The actual port prediction happens here:
+        # port_diff is the measured source port difference, so the NAT could have
+        # any factor of port_diff as its actual port_step. This function assumes
+        # different port_step values and calculates a few resulting source port
+        # differences, assuming some ports are skipped (already taken).
+
+        factors = self.get_factors(port_diff)
+        num_combinations = self.count_combinations(factors)
+        count_factor = common.MAX_PREDICTED_PORTS/float(num_combinations)
+
+        port_diffs = sorted(set(reduce(list.__add__, (list(
+            # For each previous peer and each skip, the source port is incremented
+            port_step * (peer_number + skips)
+            # For each assumed port_step, "port_diff/port_step" different port skips
+            # are tried, multiplied with count_factor to get the desired list length
+            for skips in range(0, int(math.ceil(port_diff/port_step*count_factor))+1))
+            # Each factor of port_diff is a possible port_step
+            for port_step in factors))))
+        return port_diffs
+
+        # }}}
+
     def get_probable_source_ports(self, source_port_to_splitter, port_diff, peer_number):
         # {{{
 
         # Predict porobable source ports that the arriving peer will use
         # to communicate with this peer
 
-        probable_source_port = source_port_to_splitter + peer_number*port_diff
-        if port_diff <= 0 or probable_source_port >= 65536:
-            # Constant source port (Cone NAT) or source port prediction impossible
+        if port_diff <= 0:
+            # Constant source port (Cone NAT)
             return []
 
-        # Simple port prediction: Assume port step of 1 and try port range
-        return list(range(probable_source_port,
-            probable_source_port + common.MAX_PREDICTED_PORTS + 1))
+        # Port prediction:
+        return list(source_port_to_splitter + probable_port_diff
+            for probable_port_diff in self.get_probable_port_diffs(port_diff, peer_number)
+            if source_port_to_splitter + probable_port_diff < 65536)
 
         # }}}
 
