@@ -12,7 +12,9 @@ local_source_port=7000
 peer_port=8000
 splitter_port=9000
 tmpdir="/tmp/p2psp_output"
-testruns=20
+sequential_runs=5
+parallel_runs=10
+testruns=$((sequential_runs*parallel_runs))
 
 # Virtual Machine addresses
 pc1="192.168.56.4"
@@ -29,22 +31,11 @@ function stop_processes() {
     for host in $splitter $pc1 $pc2; do
         ssh "$user@$host" "pkill -f 'python2 -u $dir'" 2>/dev/null
     done
-    kill $player0_id 2>/dev/null
-    kill $player1_id 2>/dev/null
-    kill $player2_id 2>/dev/null
+    killall vlc 2>/dev/null
     set -e
-}
-function stop_source() {
-    set +e
-    kill $source_id 2>/dev/null
-    set -e
-}
-function stop_processes_all() {
-    stop_processes
-    stop_source
 }
 # Register cleanup trap function
-trap stop_processes_all EXIT
+trap stop_processes EXIT
 
 # Exit on error
 set -e
@@ -90,99 +81,108 @@ $nat1_config "
         echo "Configuring NATs: $nat1_config <-> $nat2_config."
         ssh "root@$nat2" iptables-restore /etc/iptables/iptables.rules.${nat2_config}2
 
-        # Run stream source
-        cvlc --sout "#duplicate{dst=standard{mux=ogg,dst=:$local_source_port,access=http}}" \
-            "$source_filename" 2>/dev/null &
-        source_id=$!
-        sleep 0.5
-
         successes=0
-        date
 
-        for testrun in $(seq $testruns); do
+        run_single_test(){
+            # parameters: splitter_port, peer_port, player_port
 
             # Run splitter
-            splitter_output="$tmpdir/$nat1_config.$nat2_config.splitter.txt"
+            splitter_output="$tmpdir/$nat1_config.$nat2_config.$1.splitter.txt"
             ssh "$user@$splitter" python2 -u "$dir/splitter.py" --source_addr "$local_source_addr" \
                 --source_port "$local_source_port" --port "$splitter_port" >"$splitter_output" &
 
             # Build output filenames
-            monitor_output="$tmpdir/$nat1_config.$nat2_config.monitor.txt"
-            peer1_output="$tmpdir/$nat1_config.$nat2_config.peer1.txt"
-            peer2_output="$tmpdir/$nat1_config.$nat2_config.peer2.txt"
+            monitor_output="$tmpdir/$nat1_config.$nat2_config.$1.monitor.txt"
+            peer1_output="$tmpdir/$nat1_config.$nat2_config.$1.peer1.txt"
+            peer2_output="$tmpdir/$nat1_config.$nat2_config.$1.peer2.txt"
 
             # Run monitor on same host as splitter
-            peer_cmd="python2 -u $dir/peer.py --splitter_addr '$splitter' \
-                --splitter_port '$splitter_port' --port '$peer_port' --port_step 2 | sed 's_[^m]*m__g'"
+            peer_cmd="python2 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
+                --splitter_port '$1' --port '$2' --port_step 1 | sed 's_[^m]*m__g'"
             ssh "$user@$splitter" "$peer_cmd" >"$monitor_output" &
 
             # Run peers
             ssh "$user@$pc1" "$peer_cmd" >"$peer1_output" &
             ssh "$user@$pc2" "$peer_cmd" >"$peer2_output" &
-
-            # Clear NAT entries
-            ssh "root@$nat1" "conntrack -F" 2>/dev/null
-            ssh "root@$nat2" "conntrack -F" 2>/dev/null
             sleep 1
 
             # Run players
-            cvlc "http://$splitter:9999" --vout none --aout none 2>/dev/null >/dev/null &
-            player0_id=$!
-            sleep 0.5
-            cvlc "http://$pc1:9999" --vout none --aout none 2>/dev/null >/dev/null &
-            player1_id=$!
-            sleep 0.5
-            cvlc "http://$pc2:9999" --vout none --aout none 2>/dev/null >/dev/null &
-            player2_id=$!
-
-            # Wait until connections are established
-            sleep 5
-            # Stop the test
-            stop_processes
+            cvlc "http://$splitter:$3" --vout none --aout none 2>/dev/null >/dev/null &
+            sleep 1
+            cvlc "http://$pc1:$3" --vout none --aout none 2>/dev/null >/dev/null &
+            sleep 1
+            cvlc "http://$pc2:$3" --vout none --aout none 2>/dev/null >/dev/null &
 
             # Get outputs; the exit value is determined by "grep" and will be "0"
             # if a peer received messages from both other peers
             set +e
-            success=""
+            wait $!
+        }
+
+        for sequential_run in $(seq $sequential_runs); do
+            date
+            # Run stream source
+            cvlc --sout "#duplicate{dst=standard{mux=ogg,dst=:$local_source_port,access=http}}" \
+                "$source_filename" 2>/dev/null &
+            sleep 1
+            player_port=10000
+            for parallel_run in $(seq $parallel_runs); do
+                run_single_test $splitter_port $peer_port $player_port &
+                sleep 0.5
+                # Increment ports by 100 to avoid conflict between parallel runs
+                splitter_port=$((splitter_port+100))
+                peer_port=$((peer_port+100))
+                player_port=$((player_port+1))
+            done
+            # Wait until connections are established
+            sleep 22
+            # Stop the test
+            stop_processes
+            # Gather results
+            set +e
             peer1_conn="$(ssh root@$nat1 conntrack -L -p udp 2>/dev/null | grep -v UNREPLIED)"
             peer2_conn="$(ssh root@$nat2 conntrack -L -p udp 2>/dev/null | grep -v UNREPLIED)"
-            # Connection peer1 <-> splitter
-            <<<"$peer1_conn" grep -e "src=$splitter dst=$nat1_pub sport=$splitter_port" >/dev/null
-            success="$success$?"
-            # Connection peer1 <-> monitor
-            <<<"$peer1_conn" grep -e "src=$splitter dst=$nat1_pub sport=$peer_port" >/dev/null
-            success="$success$?"
-            # Connection peer1 <-> peer2
-            <<<"$peer1_conn" grep -e "dst=$nat2_pub sport=$peer_port" >/dev/null
-            success="$success$?"
-            # Connection peer2 <-> splitter
-            <<<"$peer2_conn" grep -e "src=$splitter dst=$nat2_pub sport=$splitter_port" >/dev/null
-            success="$success|$?"
-            # Connection peer2 <-> monitor
-            <<<"$peer2_conn" grep -e "src=$splitter dst=$nat2_pub sport=$peer_port" >/dev/null
-            success="$success$?"
-            # Connection peer2 <-> peer1
-            <<<"$peer2_conn" grep -e "dst=$nat1_pub sport=$peer_port" >/dev/null
-            success="$success$?"
+            # Reset ports
+            splitter_port=$((splitter_port-100*parallel_runs))
+            peer_port=$((peer_port-100*parallel_runs))
+            for parallel_run in $(seq $parallel_runs); do
+                success=""
+                # Connection peer1 <-> splitter
+                <<<"$peer1_conn" grep -e "src=$splitter dst=$nat1_pub sport=$splitter_port" >/dev/null
+                success="$success$?"
+                # Connection peer1 <-> monitor
+                <<<"$peer1_conn" grep -e "src=$splitter dst=$nat1_pub sport=$peer_port" >/dev/null
+                success="$success$?"
+                # Connection peer1 <-> peer2
+                <<<"$peer1_conn" grep -e "dst=$nat2_pub sport=$peer_port" >/dev/null
+                success="$success$?"
+                # Connection peer2 <-> splitter
+                <<<"$peer2_conn" grep -e "src=$splitter dst=$nat2_pub sport=$splitter_port" >/dev/null
+                success="$success|$?"
+                # Connection peer2 <-> monitor
+                <<<"$peer2_conn" grep -e "src=$splitter dst=$nat2_pub sport=$peer_port" >/dev/null
+                success="$success$?"
+                # Connection peer2 <-> peer1
+                <<<"$peer2_conn" grep -e "dst=$nat1_pub sport=$peer_port" >/dev/null
+                success="$success$?"
+                echo $success
+                if [ "$success" == "000|000" ]; then
+                    successes=$((successes+1))
+                fi
+                # Increment ports
+                splitter_port=$((splitter_port+100))
+                peer_port=$((peer_port+100))
+            done
             set -e
-
-            if [ "$success" == "000|000" ]; then
-                successes=$((successes+1))
-            fi
-            echo -ne "\rSuccessful runs: $successes | $testrun"
-
-            # Increment ports
-            splitter_port=$((splitter_port+1))
-            peer_port=$((peer_port+1))
-
+            echo "Successful runs: $successes | $((sequential_run*parallel_runs))"
+            # Reset ports for next test run
+            splitter_port=$((splitter_port+1-100*parallel_runs))
+            peer_port=$((peer_port+1-100*parallel_runs))
+            local_source_port=$((local_source_port+1))
         done
 
         # Append to result table
-        result="$result	| $((successes*100/$testruns)) "
-
-        stop_source
-        # Increment port of the source
-        local_source_port=$((local_source_port+1))
+        result="$result	| $((successes*100/(sequential_runs*parallel_runs))) "
 
         # Print result table
         echo; echo
