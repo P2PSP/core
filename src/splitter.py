@@ -102,6 +102,9 @@ class Splitter():
         if args.header_size:
             Splitter_IMS.HEADER_SIZE = int(args.header_size)
 
+        if args.monitor_number:
+            Splitter_DBS.MONITOR_NUMBER = int(args.monitor_number)
+
         if args.port:
             Splitter_IMS.PORT = int(args.port)
 

@@ -236,7 +236,7 @@ class Splitter_DBS(Splitter_IMS):
                 print("DBS: ", peer, "has loss", self.losses[peer], "chunks")
                 sys.stdout.write(Color.none)
             if self.losses[peer] > self.MAX_CHUNK_LOSS:
-                if peer != self.peer_list[0]:
+                if peer not in self.peer_list[:self.MONITOR_NUMBER]:
                     sys.stdout.write(Color.red)
                     print("DBS: ", peer, 'removed')
                     self.remove_peer(peer)
@@ -257,7 +257,7 @@ class Splitter_DBS(Splitter_IMS):
             print("DBS: ", sender, "complains about lost chunk", lost_chunk_number, "sent to", destination)
             sys.stdout.write(Color.none)
 
-            if destination == self.peer_list[0]:
+            if destination in self.peer_list[:self.MONITOR_NUMBER]:
                 print ("DBS: lost chunk index =", lost_chunk_number)
 
         self.increment_unsupportivity_of_peer(destination)
@@ -272,7 +272,7 @@ class Splitter_DBS(Splitter_IMS):
         sys.stdout.write(Color.none)
         sys.stdout.flush()
 
-        #if peer != self.peer_list[0]:
+        #if peer not in self.peer_list[:self.MONITOR_NUMBER]:
         self.remove_peer(peer)
 
         # }}}
