@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NAMESPACES="pc1 nat1 splitter nat2 pc2"
+NAMESPACES="pc1 nat1 splitter server nat2 pc2"
 BRIDGES="brnet1 brinet brnet2"
 
 # Cleanup

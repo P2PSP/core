@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NAMESPACES="pc1 nat1 splitter nat2 pc2"
+NAMESPACES="pc1 nat1 splitter server nat2 pc2"
 BRIDGES="brnet1 brinet brnet2"
 
 # Namespace addresses
@@ -9,6 +9,7 @@ pc2="192.168.58.5"
 nat1="192.168.56.5"
 nat2="192.168.58.4"
 splitter="192.168.57.6"
+server="192.168.57.7"
 # NAT addresses towards the "internet"
 nat1_pub="192.168.57.4"
 nat2_pub="192.168.57.5"
@@ -54,6 +55,7 @@ create_interface_to_bridge pc1 ifpc1 $pc1 brnet1
 create_interface_to_bridge nat1 ifnat11 $nat1 brnet1
 create_interface_to_bridge nat1 ifnat12 $nat1_pub brinet
 create_interface_to_bridge splitter ifsplitter $splitter brinet
+create_interface_to_bridge server ifserver $server brinet
 create_interface_to_bridge nat2 ifnat21 $nat2_pub brinet
 create_interface_to_bridge nat2 ifnat22 $nat2 brnet2
 create_interface_to_bridge pc2 ifpc2 $pc2 brnet2
@@ -63,8 +65,11 @@ ifconfig brnet1 192.168.56.1 up
 ifconfig brinet 192.168.57.1 up
 ifconfig brnet2 192.168.58.1 up
 # Configure routing
-ip netns exec pc1 ip route add 192.168.57.0/24 dev ifpc1 via 192.168.56.5
-ip netns exec pc2 ip route add 192.168.57.0/24 dev ifpc2 via 192.168.58.4
+ip netns exec pc1 ip route add default via 192.168.56.5
+ip netns exec pc2 ip route add default via 192.168.58.4
+for NAMESPACE in nat1 splitter server nat2; do
+    ip netns exec $NAMESPACE ip route add default via 192.168.57.1
+done
 
 # Run sshd
 for NAMESPACE in $NAMESPACES; do
