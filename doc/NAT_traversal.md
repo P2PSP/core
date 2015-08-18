@@ -5,7 +5,8 @@ NAT traversal methods
 Information about NAT traversal in the P2PSP protocol can be found in the
 [P2PSP protocol documentation][1] and in [this slideshow][2].
 This document documents the NAT traversal methods developed in the GSoC 2015
-project "NAT traversal using UDP hole punching".
+project "NAT traversal using UDP hole punching" as a python implementation in
+the NAT Traversal Set of rules (NTS) classes.
 
 
 ## NAT types
@@ -92,6 +93,57 @@ step of already incorporated peers.
 If the determined port step is 0, the NAT is one of the FCN, RCN, PRCN, SYMPP
 types and NAT traversal is trivial. Otherwise the P2PSP software will try to
 predict the source ports chosen next by the NAT. See details below.
+
+
+## UDP hole punching
+NAT devices (all but the FCN type) only forward packets from a peer to the local
+network if previously a packet to the peer address and port has been sent and
+therefore a NAT entry exists (for RCN, a packet must have been sent to the peer
+address and *any* port). Therefore hello packets are sent continuously between two
+peers until both peers have received a packet from each other.
+
+
+## Source port prediction
+In case peer A and B want to connect to each other and peer A is behind a NAT
+with a different source port for each destination, normal UDP hole punching does
+not work:
+
+* Peer A sends a packet to peer B, with a randomly generated source port; a NAT
+  entry at peer A is created.
+* The packet does not reach peer B, because there is no corresponding NAT entry
+  at the NAT of peer B.
+* Peer B sends a packet to peer A, with the same source port as for every
+  destination; a NAT entry at peer B is created.
+* The packet does not reach peer A, because the destination port at peer A that
+  peer B sent to does not match the source port of the packet to peer B.
+
+If peer A can predict the source port that will be allocated for the packet from
+peer B, then peer A can send packets to this port and they will be forwarded by
+the NAT as a matching NAT entry exists.
+
+### Simple port prediction
+When a new peer behind a sequentially allocating NAT wants to be incorporated
+into the team, it sends hello packets to the splitter and to the monitors, and
+then to all peers, one after another. For each new destination, the allocated
+source port is increased by the port step of the NAT. So for a given `port_step`
+and a `peer_number`, the predicted source port is:
+
+    ```
+    predicted_source_port = source_port_to_splitter + peer_number * port_step
+    ```
+
+### Advanced port prediction
+When during the sending of the hello packets to the peers another packet is sent
+by any host behind the same NAT, a source port will be allocated for that packet
+as well. So one port number is skipped and the following outgoint packets will
+have a source port `predicted_source_port + port_step`. To increase the
+probability that the correct source port is matched, the peers try various
+numbers of skips out of `{0,1,...}`, and for each the predicted source port is:
+
+    ```
+    predicted_source_port =
+        source_port_to_splitter + (peer_number + skips) * port_step
+    ```
 
 
 ## Message sending
