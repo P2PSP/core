@@ -1,11 +1,6 @@
 NAT traversal testing
 =====================
 
-## NAT traversal in P2PSP
-Basic information about NAT traversal techniques in P2PSP can be found in the
-[official documentation](http://p2psp.org/en/p2psp-protocol?cap=indexsu9.xht)
-and in [this slideshow](http://slides.p2psp.org/BCN-2015).
-
 ## Test setup
 To test the connection between two peers behind NATs, the whole setup can be
 simulated in virtual machines. You need one machine for each peer, the splitter,
@@ -23,8 +18,8 @@ The iptables rules used in the NATs can be found
 [here](https://wiki.asterisk.org/wiki/display/TOP/NAT+Traversal+Testing).
 
 ## Test setup details
-Details on the simulated test network and more information about NAT types can
-be found [here](NAT_test_details.md).
+Details on the simulated test network can be found [here](NAT_test_details.md),
+and more information about NAT types and NAT traversal [here](NAT_traversal.md).
 
 ## Running the test
 To run the test on your setup, you have to setup ssh so no password input is
