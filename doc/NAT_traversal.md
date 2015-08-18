@@ -1,5 +1,5 @@
-NAT traversal methods
-=====================
+NAT traversal techniques
+========================
 
 ## NAT traversal in P2PSP protocol
 Information about NAT traversal in the P2PSP protocol can be found in the
@@ -146,7 +146,7 @@ numbers of skips out of `{0,1,...}`, and for each the predicted source port is:
     ```
 
 
-## Message sending
+## Reliable message sending over UDP
 The P2PSP software uses TCP during initialization and incorporation of a new
 peer in a team. Afterwards UDP is used due to its low latency needed for live
 video broadcasting. As UDP is per design an unreliable protocol and packets may
@@ -154,10 +154,87 @@ drop or arrive several times in any order, important data (needed for
 establishing connections between peers) is sent continuously in regular
 intervals. The receiver then sends exactly the same message as an acknowledge
 back to the sender, once for each received message.
-In the following diagrams, this is symbolized by a second arrow in the opposing
-direction below:
 
-![acknowledge message](images/acknowledge_message.png)
+The splitter has the most important role in P2PSP streaming. To reduce load on
+the splitter, it does not automatically resend messages continuously in a thread
+but only replies to peers if a message is received. To ensure that a message
+reaches the peer, it is sent several (currently 3) times at once.
+
+In the following diagrams, this is symbolized by a second arrow in the opposing
+direction below or two arrows in the same direction, respectively:
+
+![acknowledge message and message by splitter](images/acknowledge_message.png)
+
+The NAT traversal classes are developed in such a way that repeatedly arriving
+messages do not affect the communication between peers.
+
+
+## NAT traversal method
+The sequence of messages when a new peer is arriving and another peer has
+already been incorporated into the team is shown in the diagram below:
+
+![NAT traversal](images/NAT_traversal.png)
+
+* Peer 1 already has been incorporated into the team and communicates with the
+  splitter and monitor over UDP.
+* A new peer 2 connects to the splitter over TCP and receives the configuration
+  as well as the public endpoints of the peers in the team, including the
+  determined port step of the NAT of each peer.
+* Peer 2 continuously sends hello messages to the splitter and the monitor, each
+  until an acknowledge is received.
+* The monitor forwards the hello message to the splitter, appending the source
+  port of peer 2 towards the monitor.
+* The splitter determines the port step of peer 2 using the hello messages, and
+  sends address, port and determined port step to peer 1.
+* Peer 1 and 2 start sending hello messages to each other, each for a number of
+  predicted possible ports, until an acknowledge is received.
+* When receiving a hello message, the peers send the used source port of the
+  other peer to the splitter to determine the port step more accurately and to
+  save the currently allocated source port.
+* After having received a hello message from peer 1, peer 2 sends a message of
+  success to the splitter.
+* The splitter and peer 2 close their TCP socket.
+
+The same principle applies if there is more than monitor or more than one
+already incorporated peer.
+
+
+## Retrying incorporation
+When a peer fails to receive hello messages from one or more incorporated peers,
+it retries to join the team with a new UDP socket:
+
+![retrying incorporation](images/retrying_incorporation.png)
+
+* Peer 1 already has been incorporated into the team and communicates with the
+  splitter and monitor over UDP.
+* Peer 2 closes its UDP socket and creates a new one, to have different source
+  ports.
+* Peer 2 sends a retry message to the splitter and the monitor, each until an
+  acknowledge is received.
+* The splitter sends the public endpoints of the peers in the team, including
+  the determined port step of the NAT of each peer. This is necessary as the
+  peer list or port information could have changed since peer 2 tried to get
+  incorporated.
+* The monitor forwards the retry message to the splitter, appending the source
+  port of peer 2 towards the monitor.
+* The splitter determines the port step of peer 2 using the retry messages, and
+  sends address, port and determined port step to peer 1.
+* Peer 1 and 2 start sending hello messages to each other, each for a number of
+  predicted possible ports, until an acknowledge is received.
+* When receiving a hello message, the peers send the used source port of the
+  other peer to the splitter to determine the port step more accurately and to
+  save the currently allocated source port.
+* After having received a hello message from peer 1, peer 2 sends a message of
+  success to the splitter.
+* The splitter and peer 2 close their TCP socket.
+
+As above, the same principle applies if there is more than monitor or more than
+one already incorporated peer.
+
+After the splitter has received a message of success, a peer cannot retry
+incorporation anymore. This is to ensure that an attacker cannot disturb the
+communication of a peer once it is incorporated into the team.
+
 
 
 [1]: http://p2psp.org/en/p2psp-protocol?cap=indexsu9.html
