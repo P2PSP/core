@@ -162,8 +162,7 @@ class Peer_NTS(Peer_DBS):
             port_step = socket.ntohs(port_step)
             peer = (IP_addr, port)
 
-            peer_data = (peer_id, peer, port_step)
-            self.initial_peer_list.append(peer_data)
+            self.initial_peer_list.append(peer_id)
 
             # Try different probable ports for the existing peer
             probable_source_ports = []
@@ -215,8 +214,8 @@ class Peer_NTS(Peer_DBS):
         # Directly start packet sending
         self.hello_messages_event.set()
 
-        # A list of tuples (peer_id, peer, port_step) that contains the peers
-        # that were in the team when starting incorporation and are not connected yet
+        # A list of peer_ids that contains the peers that were in the team when
+        # starting incorporation and that are not connected yet
         self.initial_peer_list = []
         # Receive the list of peers, except the monitor peer, with their peer IDs
         # and send hello messages
@@ -312,7 +311,7 @@ class Peer_NTS(Peer_DBS):
             port_step * (peer_number + skips)
             # For each assumed port_step, "port_diff/port_step" different port skips
             # are tried, multiplied with count_factor to get the desired list length
-            for skips in range(0, int(math.ceil(port_diff/port_step*count_factor))+1))
+            for skips in range(int(math.ceil(port_diff/port_step*count_factor))+1))
             # Each factor of port_diff is a possible port_step
             for port_step in factors))))
         return port_diffs
@@ -387,10 +386,8 @@ class Peer_NTS(Peer_DBS):
                 message_data = (message, self.splitter)
                 self.send_message(message_data)
 
-                for peer_data in self.initial_peer_list:
-                    if peer_id == peer_data[0]:
-                        self.initial_peer_list.remove(peer_data)
-                        break
+                if peer_id in self.initial_peer_list:
+                    self.initial_peer_list.remove(peer_id)
         elif message == 'H':
             # Ignore hello messages that are sent by Peer_DBS instances
             # in receive_the_list_of_peers() before a Peer_NTS instance is created
