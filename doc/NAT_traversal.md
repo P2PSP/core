@@ -187,7 +187,7 @@ Using the six different NAT types, the table looks like this:
     ```
 
 This shows that most combinations are possible, especially as according to
-[this paper][1] only few NAT devices are symmetric ones. However this also means
+[this paper][5] only few NAT devices are symmetric ones. However this also means
 that if there is already a peer behind a port-restricted NAT in the team, a peer
 with a randomly port allocating NAT cannot join the team at all (or vice versa).
 
