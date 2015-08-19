@@ -144,6 +144,70 @@ numbers of skips out of `{0,1,...}`, and for each the predicted source port is:
         source_port_to_splitter + (peer_number + skips) * port_step
     ```
 
+#### Even more advanced port prediction
+There are a few more things to consider when predicting source ports. In the
+following paragraph it is assumed that the splitter has determined a port
+distance of 10 and the third peer tries to predict the source port of the newly
+arriving peer and tries 20 different ports to have good chances:
+
+1. The port step cannot be determined reliably (as stated above). If the
+   splitter measures a port distance of 10, it could actually be one of
+   {1,2,5,10}. So there is a measured port distance and an actual port step.
+2. For each probable port step, different numbers of "skips" should be tried,
+   because some source ports are skipped if the port is already taken by another
+   UDP "connection". So as the third peer is 3 port steps after the monitor, the
+   ports {3,4,...}, {6,8,...}, {15,20,...}, {30,40,...} should be tried (in
+   addition to `source_port_to_splitter`).
+3. The number of port "skips" depends on the assumed port step: If a port step
+   of 10 is measured but a port step of 1 is assumed, then there must have been
+   9 port skips between the UDP packets to the splitter and to the monitor. So
+   it is very likely that there will be also many port skips between the packets
+   to the peers, so different numbers of skips should be tried: {3,4,5,6,7,8}.
+   On the other hand, if both the measured and the assumed port step are 10,
+   then there have been no port skips and it is less likely that some will occur
+   between the packets to the peers, so few port skips are tried: {30,40}.
+
+Two examples where a trivial implementation (assuming either a port step of 1 or
+assuming the measured port distance as the port step) would fail:
+
+* When a port step of 1 is assumed for all NATs, and the actual port step is 10,
+  then the predicted ports will be {3,4,...,23}, while the actual taken port is
+  one of {30,40,...}, depending on the number of skips.
+* If the assumed port step is 10 and the actual is 1, then the predicted ports
+  will be {30,40,...,230}, while the actual taken port is one of {3,4,...}.
+
+To solve this, an algorithm was developed that assumes different port steps and
+for each assumes different numbers of skips, and calculates probable
+`port_diffs` (in addition to `source_port_to_splitter`) given any determined
+port distance `port_diff` and `peer_number` (the position in the team of the
+peer that does the port prediction).
+
+    ```
+    # Get probable port steps
+    factors = self.get_factors(port_diff)
+    # Estimate how many port guesses will be made
+    num_combinations = self.count_combinations(factors)
+    # Influence the prediction to achieve the desired number of results
+    count_factor = common.MAX_PREDICTED_PORTS/float(num_combinations)
+
+    port_diffs = sorted(set(reduce(list.__add__, (list(
+        # For each previous peer and each skip, the source port is incremented
+        port_step * (peer_number + skips)
+        # For each assumed port_step, "port_diff/port_step" different port skips
+        # are tried, multiplied with count_factor to get the desired list length
+        for skips in range(int(math.ceil(port_diff/port_step*count_factor))+1))
+        # Each factor of port_diff is a possible port_step
+        for port_step in factors))))
+    ```
+
+The desired number of results can be approximately achieved. For the example
+above, the algorithm yields:
+
+    ```
+    port_diffs = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 25,
+        30, 40, 50]
+    ```
+
 
 ### Limits for UDP hole punching and port prediction
 In some scenarios UDP hole punching with port prediction cannot work by design.
