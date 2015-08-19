@@ -45,3 +45,44 @@ This is done for each new destination, so for destination C the `symsp_socket`
 class would force the NAT to allocate source port P+2. To simulate higher port
 steps, more temporary sockets are created and connected to the new destination,
 before being closed right after.
+
+### SYMPP oddities
+The SYMPP NAT (as specified by the iptables rules) sends an ICMP Destination
+Unreachable packet if there is no NAT entry assigned to this port. Apparently
+the PRCN and SYMPP NATs immediately close the NAT entry if such an ICMP packet
+is received, and somehow remember the (address, port) tuple as "not responding",
+so that further connection attempts will fail. This has the following two
+consequences:
+
+* In the SYMPP<->SYMPP scenario (two peers behind a SYMPP NAT try to connect to
+  each other), the connection only works if the two peers send the first packet
+  to each other "simultaneously".
+* In the SYMPP<->PRCN scenario, the connection works if the two peers send the
+  first packet to each other "simultaneously", or if the peer behind the SYMPP
+  NAT sends its first packet before the other peer.
+
+Supposed that peer 1 sends its first packet to peer 2, "simultaneously" here
+means that the NAT entry at peer 2 has to be created before the packet from peer
+1 arrives, or the packet from peer 2 has to arrive at peer 1 before the ICMP
+packet, in order to mark the NAT entry at peer 1 as assured.
+
+The time difference between the first packets from each peer is determined by
+the packet jitter (delay variation) of the splitter plus the difference in delay
+between the two peers. This time difference has to be less than the sum of both
+peers' delay, in order to successfully connect. Apparently this applies in
+nearly all cases, just not in the network simulation where the jitter (~5ms) is
+higher than the delay (~3ms).
+
+Via the [tc command and the netem module][1], additional delay and jitter can be
+configured for the network interfaces. With a delay at the peers of 4ms and
+above, the connection can be reliably established.
+
+### Realistic network scenarios
+To test realistic network scenarios, a delay and jitter (as noted above) and an
+average rate of packet loss is configured for each network interface. As the
+test script runs each configuration several times, it can be estimated how
+reliably a connection can be established between different NAT types under
+different network conditions.
+
+
+[1]: http://www.linuxfoundation.org/collaborate/workgroups/networking/netem
