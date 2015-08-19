@@ -59,7 +59,7 @@ source port is selected. A connection between two peers each behind this NAT
 type cannot be established, as each other's public source port is unpredictable.
 
 
-## NAT type determination
+### NAT type determination
 To be able to traverse a NAT device, the type of the NAT has to be determined
 correctly. For this, the NAT types are grouped into port preserving NAT devices
 (FCN, RCN, PRCN, SYMPP), and types with destination dependent port allocation
@@ -95,7 +95,8 @@ types and NAT traversal is trivial. Otherwise the P2PSP software will try to
 predict the source ports chosen next by the NAT. See details below.
 
 
-## UDP hole punching
+## UDP hole punching and port prediction
+### UDP hole punching
 NAT devices (all but the FCN type) only forward packets from a peer to the local
 network if previously a packet to the peer address and port has been sent and
 therefore a NAT entry exists (for RCN, a packet must have been sent to the peer
@@ -103,7 +104,7 @@ address and *any* port). Therefore hello packets are sent continuously between t
 peers until both peers have received a packet from each other.
 
 
-## Source port prediction
+### Source port prediction
 In case peer A and B want to connect to each other and peer A is behind a NAT
 with a different source port for each destination, normal UDP hole punching does
 not work:
@@ -121,7 +122,7 @@ If peer A can predict the source port that will be allocated for the packet from
 peer B, then peer A can send packets to this port and they will be forwarded by
 the NAT as a matching NAT entry exists.
 
-### Simple port prediction
+#### Simple port prediction
 When a new peer behind a sequentially allocating NAT wants to be incorporated
 into the team, it sends hello packets to the splitter and to the monitors, and
 then to all peers, one after another. For each new destination, the allocated
@@ -132,7 +133,7 @@ and a `peer_number`, the predicted source port is:
     predicted_source_port = source_port_to_splitter + peer_number * port_step
     ```
 
-### Advanced port prediction
+#### Advanced port prediction
 When during the sending of the hello packets to the peers another packet is sent
 by any host behind the same NAT, a source port will be allocated for that packet
 as well. So one port number is skipped and the following outgoint packets will
@@ -146,7 +147,55 @@ numbers of skips out of `{0,1,...}`, and for each the predicted source port is:
     ```
 
 
-## Reliable message sending over UDP
+### Limits for UDP hole punching and port prediction
+In some scenarios UDP hole punching with port prediction cannot work by design.
+When one peer is behind a port-restricted NAT (PRCN, or a symmetric NAT), it
+only receives messages if they come from an address/port tuple that the peer
+previously sent a message to. If the other peer is behind a NAT with an
+randomly (not sequentially) allocated source port, then the first peer cannot
+predict the source port of a message from the second peer and send a message to
+this endpoint. So a peer with port-restricted NAT and a peer with a randomly
+source port allocating NAT cannot send messages to each other.
+
+To determine the possible combinations, the NAT types can be divided into three
+classes:
+
+1. Not port-restricted, with a predictable port number (FCN, RCN)
+2. Port-restricted, with a predictable port number (PRCN, SYMPP, SYMSP)
+3. Port-restricted, with an unpredictable port number (SYMRP)
+
+This assumes that all symmetric NAT implementations are port-restricted. For
+these three classes, the following combinations theoretically can work:
+
+    ```
+    Peer1\2 | 1.  | 2.  | 3.
+    =========================
+    1.      | yes | yes | yes
+    2.      | yes | yes | no
+    3.      | yes | no  | no
+    ```
+
+Using the six different NAT types, the table looks like this:
+
+    ```
+    Peer1\2 | fcn   | rcn   | prcn  | sympp | symsp | symrp
+    =========================================================
+    fcn     | yes   | yes   | yes   | yes   | yes   | yes
+    rcn     | yes   | yes   | yes   | yes   | yes   | yes
+    prcn    | yes   | yes   | yes   | yes   | yes   | no
+    sympp   | yes   | yes   | yes   | yes   | yes   | no
+    symsp   | yes   | yes   | yes   | yes   | yes   | no
+    symrp   | yes   | yes   | no    | no    | no    | no
+    ```
+
+This shows that most combinations are possible, especially as according to
+[this paper][1] only few NAT devices are symmetric ones. However this also means
+that if there is already a peer behind a port-restricted NAT in the team, a peer
+with a randomly port allocating NAT cannot join the team at all (or vice versa).
+
+
+## Implementation of the NAT Traversal Set of rules
+### Reliable message sending over UDP
 The P2PSP software uses TCP during initialization and incorporation of a new
 peer in a team. Afterwards UDP is used due to its low latency needed for live
 video broadcasting. As UDP is per design an unreliable protocol and packets may
@@ -169,7 +218,7 @@ The NAT traversal classes are developed in such a way that repeatedly arriving
 messages do not affect the communication between peers.
 
 
-## NAT traversal method
+### NAT traversal method
 The sequence of messages when a new peer is arriving and another peer has
 already been incorporated into the team is shown in the diagram below:
 
@@ -199,7 +248,7 @@ The same principle applies if there is more than monitor or more than one
 already incorporated peer.
 
 
-## Retrying incorporation
+### Retrying incorporation
 When a peer fails to receive hello messages from one or more incorporated peers,
 it retries to join the team with a new UDP socket:
 
@@ -241,3 +290,4 @@ communication of a peer once it is incorporated into the team.
 [2]: http://slides.p2psp.org/BCN-2015
 [3]: https://wiki.asterisk.org/wiki/display/TOP/NAT+Traversal+Testing
 [4]: https://tools.ietf.org/id/draft-takeda-symmetric-nat-traversal-00.txt
+[5]: http://samy.pl/pwnat/pwnat.pdf
