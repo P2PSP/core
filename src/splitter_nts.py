@@ -121,7 +121,7 @@ class Splitter_NTS(Splitter_DBS):
             # Also send the port step of the existing peer, in case
             # it is behind a sequentially allocating NAT
             message = self.ids[p] + struct.pack("4sHH", socket.inet_aton(p[ADDR]), \
-                socket.htons(self.last_source_port[p]), self.port_steps[p])
+                socket.htons(self.last_source_port[p]), socket.htons(self.port_steps[p]))
             peer_serve_socket.sendall(message)
 
         # }}}
