@@ -50,13 +50,11 @@ trivial.
 
 * **Sequential port allocation (SYMSP):**
 To allocate a new public source port, the next free port number is selected, so
-the port number is incremented each time. This behaviour is covered by the P2PSP
-NTS of rules in algorithms 5 and 6.
+the port number is incremented each time. This is described in detail below.
 
 * **Random port allocation (SYMRP):**
-For each new pair `(dest. address, dest. port)` a completely random public
-source port is selected. A connection between two peers each behind this NAT
-type cannot be established, as each other's public source port is unpredictable.
+For each new pair `(dest. address, dest. port)` a completely random and
+therefore unpredictable public source port is selected.
 
 
 ### NAT type determination
@@ -100,8 +98,8 @@ predict the source ports chosen next by the NAT. See details below.
 NAT devices (all but the FCN type) only forward packets from a peer to the local
 network if previously a packet to the peer address and port has been sent and
 therefore a NAT entry exists (for RCN, a packet must have been sent to the peer
-address and *any* port). Therefore hello packets are sent continuously between two
-peers until both peers have received a packet from each other.
+address and **any** port). Therefore hello packets are sent continuously between
+two peers until both peers have received a packet from each other.
 
 
 ### Source port prediction
