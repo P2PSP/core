@@ -265,9 +265,13 @@ class Splitter_NTS(Splitter_DBS):
                     socket.htons(source_ports_to_monitors[peer_number]))
             else:
                 # Send all information necessary for port prediction to the existing peers
+                # The peers start port prediction at the minimum known source port,
+                # counting up using their peer_number
+                min_known_source_port = min(source_ports_to_monitors + [new_peer[1]])
+                # The peer_number is increased by 1, as the splitter also got a packet
                 message = peer_id + struct.pack("4sHHH", socket.inet_aton(new_peer[0]), \
-                    socket.htons(new_peer[1]), socket.htons(self.port_steps[new_peer]), \
-                    socket.htons(peer_number))
+                    socket.htons(min_known_source_port), \
+                    socket.htons(self.port_steps[new_peer]), socket.htons(peer_number+1))
 
             # Hopefully one of these packets arrives
             self.team_socket.sendto(message, peer)
