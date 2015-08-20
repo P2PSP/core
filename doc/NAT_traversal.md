@@ -279,6 +279,18 @@ The NAT traversal classes are developed in such a way that repeatedly arriving
 messages do not affect the communication between peers.
 
 
+### SYMSP source port update
+The splitter saves the last known source port of all peers. When a new peer
+arrives a long time after the last peer has arrived, then this information may
+be out of date, if another UDP packet has been sent from any host behind the
+same SYMSP NAT. To retrieve the currently allocated source port of such a peer,
+during incorporation of a new peer all already incorporated peers with a
+`port_step > 0` send a hello message to a new temporary UDP socket at the
+splitter, for which a new source port at the peers is allocated. So if the
+arriving peer fails to connect to one of the peers, when retrying incorporation
+it can rely on an up to date source port.
+
+
 ### NAT traversal method
 The sequence of messages when a new peer is arriving and another peer has
 already been incorporated into the team is shown in the diagram below:
@@ -294,8 +306,11 @@ already been incorporated into the team is shown in the diagram below:
   until an acknowledge is received.
 * The monitor forwards the hello message to the splitter, appending the source
   port of peer 2 towards the monitor.
-* The splitter determines the port step of peer 2 using the hello messages, and
-  sends address, port and determined port step to peer 1.
+* The splitter determines the port step of peer 2 using the hello messages.
+* The splitter binds a new socket to a random port and sends address, port and
+  determined port step of peer 2 and the port of the new socket to peer 1.
+* Peer 1 sends a hello message to the new splitter socket to determine its
+  currently allocated source port for later peer arrivals.
 * Peer 1 and 2 start sending hello messages to each other, each for a number of
   predicted possible ports, until an acknowledge is received.
 * When receiving a hello message, the peers send the used source port of the
@@ -327,8 +342,11 @@ it retries to join the team with a new UDP socket:
   incorporated.
 * The monitor forwards the retry message to the splitter, appending the source
   port of peer 2 towards the monitor.
-* The splitter determines the port step of peer 2 using the retry messages, and
-  sends address, port and determined port step to peer 1.
+* The splitter determines the port step of peer 2 using the retry messages.
+* The splitter binds a new socket to a random port and sends address, port and
+  determined port step of peer 2 and the port of the new socket to peer 1.
+* Peer 1 sends a hello message to the new splitter socket to determine its
+  currently allocated source port for later peer arrivals.
 * Peer 1 and 2 start sending hello messages to each other, each for a number of
   predicted possible ports, until an acknowledge is received.
 * When receiving a hello message, the peers send the used source port of the
