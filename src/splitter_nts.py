@@ -337,18 +337,17 @@ class Splitter_NTS(Splitter_DBS):
                 # The peers start port prediction at the minimum known source port,
                 # counting up using their peer_number
                 min_known_source_port = min(source_ports_to_monitors + [new_peer[1]])
-                # The peer_number is increased by 1, as the splitter also got a packet
                 if self.port_steps[peer] == 0:
                     message = peer_id + struct.pack("4sHHH", socket.inet_aton(new_peer[0]), \
                         socket.htons(min_known_source_port), \
-                        socket.htons(self.port_steps[new_peer]), socket.htons(peer_number+1))
+                        socket.htons(self.port_steps[new_peer]), socket.htons(peer_number))
                 else:
                     # Send the port of self.extra_socket to determine the currently
                     # allocated source port of the incorporated peer
                     message = peer_id + struct.pack("4sHHHH", socket.inet_aton(new_peer[0]), \
                         socket.htons(min_known_source_port), \
                         socket.htons(self.port_steps[new_peer]), \
-                        socket.htons(peer_number+1), socket.htons(extra_listen_port))
+                        socket.htons(peer_number), socket.htons(extra_listen_port))
 
             # Hopefully one of these packets arrives
             self.team_socket.sendto(message, peer)
