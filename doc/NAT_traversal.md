@@ -264,17 +264,16 @@ video broadcasting. As UDP is per design an unreliable protocol and packets may
 drop or arrive several times in any order, important data (needed for
 establishing connections between peers) is sent continuously in regular
 intervals. The receiver then sends exactly the same message as an acknowledge
-back to the sender, once for each received message.
+back to the sender:
+
+![acknowledge message](images/acknowledge_message.png)
 
 The splitter has the most important role in P2PSP streaming. To reduce load on
 the splitter, it does not automatically resend messages continuously in a thread
 but only replies to peers if a message is received. To ensure that a message
-reaches the peer, it is sent several (currently 3) times at once.
+reaches the peer, it is sent several (currently 3) times at once:
 
-In the following diagrams, this is symbolized by a second arrow in the opposing
-direction below or two arrows in the same direction, respectively:
-
-![acknowledge message and message by splitter](images/acknowledge_message.png)
+![message from splitter](images/message_from_splitter.png)
 
 The NAT traversal classes are developed in such a way that repeatedly arriving
 messages do not affect the communication between peers.
