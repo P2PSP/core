@@ -112,7 +112,7 @@ class Peer_NTS(Peer_DBS):
             with self.hello_messages_lock:
                 for message_data in messages_to_remove:
                     if message_data in self.hello_messages:
-                        print("NTS: Removed message (%s) to %s due to timeout\n"
+                        print("NTS: Removed message (%s) to %s due to timeout"
                             % (message_data[0][:common.PEER_ID_LENGTH], message_data[1]))
                         self.hello_messages.remove(message_data)
                         del self.hello_messages_times[message_data]
@@ -357,6 +357,28 @@ class Peer_NTS(Peer_DBS):
             additional_ports = self.get_probable_source_ports(source_port_to_splitter,
                 port_diff, peer_number)
             self.say_hello(peer, additional_ports)
+            # Directly start packet sending
+            self.hello_messages_event.set()
+        elif sender == self.splitter and \
+                len(message) == common.PEER_ID_LENGTH + struct.calcsize("4sHHHH"):
+            # [say hello to (X)] received from splitter
+            peer_id = message[:common.PEER_ID_LENGTH]
+            IP_addr, source_port_to_splitter, port_diff, peer_number, extra_splitter_port = \
+                struct.unpack("4sHHHH", message[common.PEER_ID_LENGTH:]) # Ojo, !H ????
+            IP_addr = socket.inet_ntoa(IP_addr)
+            source_port_to_splitter = socket.ntohs(source_port_to_splitter)
+            port_diff = socket.ntohs(port_diff)
+            peer_number = socket.ntohs(peer_number)
+            extra_splitter_port = socket.ntohs(extra_splitter_port)
+
+            peer = (IP_addr, source_port_to_splitter) # Peer endpoint known to splitter
+            print("NTS: Received [send hello to %s %s]" % (peer_id, peer))
+            # Here the port prediction happens:
+            additional_ports = self.get_probable_source_ports(source_port_to_splitter,
+                port_diff, peer_number)
+            self.say_hello(peer, additional_ports)
+            # Send to extra splitter port to determine currently allocated source port
+            self.say_hello((self.splitter[0], extra_splitter_port))
             # Directly start packet sending
             self.hello_messages_event.set()
         elif message == self.peer_id or (sender == self.splitter and \

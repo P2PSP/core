@@ -66,6 +66,13 @@ class Splitter_NTS(Splitter_DBS):
         # for too long and removes them after a timeout
         threading.Thread(target=self.check_timeout_thread).start()
 
+        # This socket is closed and created again when a new peer arrives,
+        # and all incorporated peers with a port_step != 0 send a message to this
+        # socket to determine the currently allocated source port
+        self.extra_socket = None
+        # The thread listens to self.extra_socket and reports source ports
+        threading.Thread(target=self.listen_extra_socket_thread).start()
+
         # }}}
 
     def say_goodbye(self, node, sock):
@@ -182,6 +189,59 @@ class Splitter_NTS(Splitter_DBS):
 
         # }}}
 
+    def listen_extra_socket_thread(self):
+        # {{{
+
+        # The thread listens to self.extra_socket to determine the currently
+        # allocated source port of incorporated peers behind SYMSP NATs
+
+        # Wait until socket is created
+        while self.alive and self.extra_socket == None:
+            time.sleep(1)
+
+        while self.alive:
+            # {{{
+
+            extra_listen_port = self.extra_socket.getsockname()[1]
+            try:
+                message, sender = self.extra_socket.recvfrom(common.PEER_ID_LENGTH)
+            except socket.timeout:
+                continue
+            except:
+                print("NTS: Unexpected error:", sys.exc_info()[0])
+                continue
+
+            if len(message) == common.PEER_ID_LENGTH:
+                # Send acknowledge
+                self.extra_socket.sendto(message, sender)
+
+                peer_id = message
+                peer = None
+                for peer_data in self.ids.iteritems():
+                    if peer_id == peer_data[1]:
+                        peer = peer_data[0]
+                        break
+                if peer == None:
+                    print('NTS: Peer ID %s unknown' % peer_id)
+                    continue
+                # Check sender address
+                if sender[0] != peer[0]:
+                    print('NTS: Peer %s switched from %s to %s, ignoring request' \
+                        % (peer_id, peer[0], sender[0]))
+                    continue
+                # Update source port information
+                print('NTS: Received current source port %d of peer %s\n' \
+                    % (sender[1], peer_id))
+                self.update_port_step(peer, sender[1])
+            else:
+                print('NTS: Ignoring packet of length %d from %s to extra_socket' \
+                    % (len(message), sender))
+
+
+            # }}}
+
+        # }}}
+
     def handle_a_peer_arrival(self, connection):
         # {{{
 
@@ -254,6 +314,15 @@ class Splitter_NTS(Splitter_DBS):
     def send_new_peer(self, peer_id, new_peer, source_ports_to_monitors):
         # {{{
 
+        # Recreate self.extra_socket
+        if self.extra_socket != None:
+            self.extra_socket.close()
+        self.extra_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.extra_socket.bind(('', 0))
+        self.extra_socket.settimeout(1) # To not block the thread forever
+        extra_listen_port = self.extra_socket.getsockname()[1]
+        print("NTS: Listening to the extra port %d" % extra_listen_port)
+
         if __debug__:
             print("NTS: Sending [send hello to %s]" % (new_peer,))
         # Send packets to all peers;
@@ -269,9 +338,17 @@ class Splitter_NTS(Splitter_DBS):
                 # counting up using their peer_number
                 min_known_source_port = min(source_ports_to_monitors + [new_peer[1]])
                 # The peer_number is increased by 1, as the splitter also got a packet
-                message = peer_id + struct.pack("4sHHH", socket.inet_aton(new_peer[0]), \
-                    socket.htons(min_known_source_port), \
-                    socket.htons(self.port_steps[new_peer]), socket.htons(peer_number+1))
+                if self.port_steps[peer] == 0:
+                    message = peer_id + struct.pack("4sHHH", socket.inet_aton(new_peer[0]), \
+                        socket.htons(min_known_source_port), \
+                        socket.htons(self.port_steps[new_peer]), socket.htons(peer_number+1))
+                else:
+                    # Send the port of self.extra_socket to determine the currently
+                    # allocated source port of the incorporated peer
+                    message = peer_id + struct.pack("4sHHHH", socket.inet_aton(new_peer[0]), \
+                        socket.htons(min_known_source_port), \
+                        socket.htons(self.port_steps[new_peer]), \
+                        socket.htons(peer_number+1), socket.htons(extra_listen_port))
 
             # Hopefully one of these packets arrives
             self.team_socket.sendto(message, peer)
@@ -454,7 +531,7 @@ class Splitter_NTS(Splitter_DBS):
                 # Check sender address
                 if sender[0] != self.incorporating_peers[peer_id][0][0]:
                     print('NTS: Peer %s switched from %s to %s, ignoring request' \
-                        % (peer_id, sender[0], self.incorporating_peers[peer_id][0][0]))
+                        % (peer_id, self.incorporating_peers[peer_id][0][0], sender[0]))
                     continue
 
                 if message[-1] == 'Y':
