@@ -44,6 +44,7 @@ from lossy_peer import Lossy_Peer
 from malicious_peer import MaliciousPeer
 from trusted_peer import TrustedPeer
 from peer_strpeds import Peer_StrpeDs
+from peer_strpeds_malicious import Peer_StrpeDsMalicious
 
 # }}}
 
@@ -83,9 +84,19 @@ class Peer():
 
         parser.add_argument('--use_localhost', action="store_true", help='Forces the peer to use localhost instead of the IP of the adapter to connect to the splitter.')
 
-        parser.add_argument('--malicious', action="store_true", help='Forces the peer to send poisoned chunks to other peers.')
+        parser.add_argument('--malicious', action="store_true", help='Enables the malicious activity for peer.')
+
+        parser.add_argument('--persistent', action="store_true", help='Forces the peer to send poisoned chunks to other peers.')
+
+        parser.add_argument('--on_off_ratio', help='Enables on-off attack and sets ratio for on off (from 1 to 100)')
+
+        parser.add_argument('--selective', nargs='+', type=str, help='Enables selective attack for given set of peers.')
+
+        parser.add_argument('--bad_mouth', nargs='+', type=str, help='Enables Bad Mouth attack for given set of peers.')
 
         parser.add_argument('--trusted', action="store_true", help='Forces the peer to send hashes of chunks to splitter')
+
+        parser.add_argument('--checkall', action="store_true", help='Forces the peer to send hashes of every chunks to splitter (works only with trusted option)')
 
         parser.add_argument('--strpeds', action="store_true", help='Enables STrPe-DS')
 
@@ -138,8 +149,6 @@ class Peer():
             # {{{ This is an "unicast" peer.
 
             peer = Peer_DBS(peer)
-            if args.malicious and not args.strpeds: # workaround for malicous strpeds peer
-                peer = MaliciousPeer(peer)
             peer.receive_my_endpoint()
             peer.receive_the_number_of_peers()
             print("===============> number_of_peers =", peer.number_of_peers)
@@ -163,12 +172,34 @@ class Peer():
 
         # }}}
 
+        if args.strpeds:
+            peer = Peer_StrpeDs(peer)
+            peer.receive_dsa_key()
+
+        if args.malicious and not args.strpeds: # workaround for malicous strpeds peer
+            peer = MaliciousPeer(peer)
+            if args.persistent:
+                peer.setPersistentAttack(True)
+            if args.on_off_ratio:
+                peer.setOnOffAttack(True, int(args.on_off_ratio))
+            if args.selective:
+                peer.setSelectiveAttack(True, args.selective)
+
+        if args.malicious and args.strpeds:
+            peer = Peer_StrpeDsMalicious(peer)
+            if args.persistent:
+                peer.setPersistentAttack(True)
+            if args.on_off_ratio:
+                peer.setOnOffAttack(True, int(args.on_off_ratio))
+            if args.selective:
+                peer.setSelectiveAttack(True, args.selective)
+            if args.bad_mouth:
+                peer.setBadMouthAttack(True, args.bad_mouth)
+
         if args.trusted:
             peer = TrustedPeer(peer)
-
-        if args.strpeds:
-            peer = Peer_StrpeDs(peer, args.malicious)
-            peer.receive_dsa_key()
+            if args.checkall:
+                peer.setCheckAll(True)
 
         if args.strpe_log != None:
             peer.LOGGING = True

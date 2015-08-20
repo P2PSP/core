@@ -76,6 +76,8 @@ class Splitter():
 
         parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks. Makes sense only in multicast mode. Default = "{}".'.format(Splitter_IMS.MCAST_ADDR))
 
+        parser.add_argument('--monitor_number', help='Number of monitors in the team. The first connecting peers will automatically become monitors. Default = "{}".'.format(Splitter_DBS.MONITOR_NUMBER))
+
         parser.add_argument('--port', help='Port to serve the peers. Default = "{}".'.format(Splitter_IMS.PORT))
 
         parser.add_argument('--source_addr', help='IP address or hostname of the streaming server. Default = "{}".'.format(Splitter_IMS.SOURCE_ADDR))
@@ -87,6 +89,8 @@ class Splitter():
         parser.add_argument('--strpeds', nargs='+', type=str, help='Enables STrPe-DS')
 
         parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
+
+        parser.add_argument('--strpeds_majority_decision', help='Set majority decision ratio.')
 
         try:
             argcomplete.autocomplete(parser)
@@ -106,6 +110,9 @@ class Splitter():
 
         if args.header_size:
             Splitter_IMS.HEADER_SIZE = int(args.header_size)
+
+        if args.monitor_number:
+            Splitter_DBS.MONITOR_NUMBER = int(args.monitor_number)
 
         if args.port:
             Splitter_IMS.PORT = int(args.port)
@@ -136,6 +143,8 @@ class Splitter():
                 splitter = self.init_strpe_splitter('strpe', args.strpe, args.strpe_log)
             elif (args.strpeds):
                 splitter = self.init_strpe_splitter('strpeds', args.strpeds, args.strpe_log)
+                if args.strpeds_majority_decision:
+                    splitter.setMajorityRatio(float(args.strpeds_majority_decision))
             else:
                 splitter = Splitter_LRS()
 

@@ -23,6 +23,8 @@ class TrustedPeer(Peer_DBS):
     PASS_NUMBER = 10
     SAMPLING_EFFORT = 2
 
+    checkAll = False
+
     def __init__(self, peer):
         sys.stdout.write(Color.yellow)
         _print_("Trusted Peer")
@@ -86,5 +88,10 @@ class TrustedPeer(Peer_DBS):
         self.team_socket.sendto(msg, self.splitter)
 
     def calculate_next_sampled(self):
+        if self.checkAll:
+            return 0
         max_random = len(self.peer_list) / TrustedPeer.SAMPLING_EFFORT
-        return random.randint(1, max(1, max_random)) + TrustedPeer.PASS_NUMBER
+        return random.randint(0, max(1, max_random)) + TrustedPeer.PASS_NUMBER
+
+    def setCheckAll(self, value):
+        self.checkAll = value

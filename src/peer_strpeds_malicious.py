@@ -15,20 +15,20 @@ import random
 from color import Color
 from _print_ import _print_
 from peer_dbs import Peer_DBS
+from peer_strpeds import Peer_StrpeDs
 
-class MaliciousPeer(Peer_DBS):
+class Peer_StrpeDsMalicious(Peer_StrpeDs):
 
     persistentAttack = False
     onOffAttack = False
-    onOffRatio = 100
+    onOffRatio = 1.0
     selectiveAttack = False
-    selectedPeersForAttack = []
+    selectedPeersForSelectiveAttack = []
+    badMouthAttack = False
 
     def __init__(self, peer):
-        # {{{
-
         sys.stdout.write(Color.yellow)
-        _print_("Malicious Peer")
+        _print_("STrPe-DS Malicious Peer")
         sys.stdout.write(Color.none)
 
         threading.Thread.__init__(self)
@@ -38,20 +38,27 @@ class MaliciousPeer(Peer_DBS):
         self.buffer_size = peer.buffer_size
         self.splitter = peer.splitter
         self.chunk_size = peer.chunk_size
+        self.peer_list = peer.peer_list
+        self.debt = peer.debt
         self.message_format = peer.message_format
-
-        # }}}
-
-    def print_the_module_name(self):
-        # {{{
-
-        sys.stdout.write(Color.yellow)
-        _print_("Malicious Peer")
-        sys.stdout.write(Color.none)
-
-        # }}}
+        self.team_socket = peer.team_socket
+        self.bad_peers = peer.bad_peers
+        self.dsa_key = peer.dsa_key
 
     def process_message(self, message, sender):
+        if sender in self.bad_peers:
+            return -1
+
+        if self.is_current_message_from_splitter() or self.check_message(message, sender):
+            if self.is_control_message(message) and message == 'B':
+                return self.handle_bad_peers_request()
+            else:
+                return self.dbs_process_message(message, sender)
+        else:
+            self.process_bad_message(message, sender)
+            return -1
+
+    def dbs_process_message(self, message, sender):
         # {{{ Now, receive and send.
 
         if len(message) == struct.calcsize(self.message_format):
@@ -184,8 +191,8 @@ class MaliciousPeer(Peer_DBS):
             return
 
         if self.onOffAttack:
-            r = random.randint(1, 100)
-            if r <= self.onOffRatio:
+            x = random.randint(1, 100)
+            if (x <= self.onOffRatio):
                 self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
             else:
                 self.team_socket.sendto(self.receive_and_feed_previous, peer)
@@ -194,7 +201,7 @@ class MaliciousPeer(Peer_DBS):
             return
 
         if self.selectiveAttack:
-            if peer in self.selectedPeersForAttack:
+            if peer in self.selectedPeersForSelectiveAttack:
                 self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
             else:
                 self.team_socket.sendto(self.receive_and_feed_previous, peer)
@@ -205,16 +212,18 @@ class MaliciousPeer(Peer_DBS):
         self.team_socket.sendto(self.receive_and_feed_previous, peer)
         self.sendto_counter += 1
 
-    def get_poisoned_chunk(self, chunk):
-        chunk_number, chunk = struct.unpack(self.message_format, chunk)
-        return struct.pack(self.message_format, chunk_number, '0')
+    def get_poisoned_chunk(self, message):
+        if len(message) == struct.calcsize(self.message_format):
+            n, m, k1, k2 = struct.unpack(self.message_format, message)
+            return struct.pack(self.message_format, n, "0", k1, k2)
+        return message
 
     def setPersistentAttack(self, value):
         self.persistentAttack = value
 
     def setOnOffAttack(self, value, ratio):
-        self.onOffAttack = True
-        self.onOffRatio = ratio
+        self.onOffAttack = value
+        self.OnOffRatio = ratio
 
     def setSelectiveAttack(self, value, selected):
         self.selectiveAttack = True
@@ -222,3 +231,13 @@ class MaliciousPeer(Peer_DBS):
             l = peer.split(':')
             peer_obj = (l[0], int(l[1]))
             self.selectedPeersForAttack.append(peer_obj)
+
+    def setBadMouthAttack(self, value, selected):
+        self.badMouthAttack = value
+        if value:
+            for peer in selected:
+                l = peer.split(':')
+                peer_obj = (l[0], int(l[1]))
+                self.bad_peers.append(peer_obj)
+        else:
+            self.bad_peers = []

@@ -19,8 +19,8 @@ def checkdir():
 def usage():
     print "args error"
 
-def run(runStr):
-    proc = subprocess.Popen(shlex.split(runStr), stdout=DEVNULL, stderr=DEVNULL)
+def run(runStr, out = DEVNULL):
+    proc = subprocess.Popen(shlex.split(runStr), stdout=out, stderr=out)
     processes.append(proc)
 
 def killall():
@@ -39,7 +39,7 @@ def runSplitter(trustedPeers, ds = False):
         tps += "\"{0}\" ".format(p)
     prefix = ""
     if ds: prefix = "ds"
-    run("../src/splitter.py --source_port 8080 --strpe{0} {1} --strpe_log strpe-testing/splitter.log".format(prefix, tps))
+    run("../src/splitter.py --buffer_size 1024 --source_port 8080 --strpe{0} {1} --strpe_log strpe-testing/splitter.log".format(prefix, tps))
     time.sleep(1)
 
 def runPeer(port, playerPort, trusted = False, malicious = False, ds = False):
@@ -48,12 +48,12 @@ def runPeer(port, playerPort, trusted = False, malicious = False, ds = False):
     if ds: strpeds = "--strpeds"
     runStr = "../src/peer.py --use_localhost --port {0} --player_port {1} {2}".format(port, playerPort, strpeds)
     if trusted and not ds:
-        runStr += " --trusted"
+        runStr += " --trusted --checkall"
     if malicious:
-        runStr += " --malicious"
+        runStr += " --malicious --persistent"
     if not malicious:
          runStr += " --strpe_log ./strpe-testing/peer{0}.log".format(port)
-    run(runStr)
+    run(runStr, open("strpe-testing/peer{0}.out".format(port), "w"))
     time.sleep(1)
     #run netcat
     run("nc 127.0.0.1 {0}".format(playerPort))
@@ -63,7 +63,7 @@ def check(x):
         for line in fh:
             pass
         result = re.match("(\d*.\d*)\t(\d*)\s(\d*).*", line)
-        if result != None and int(result.group(3)) == x:
+        if result != None and int(result.group(3)) <= x:
             return True
     return False
 
