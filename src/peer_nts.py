@@ -20,6 +20,8 @@ import traceback
 from color import Color
 from _print_ import _print_
 from peer_dbs import Peer_DBS
+from symsp_peer import Symsp_Peer
+from symsp_socket import symsp_socket
 
 # }}}
 
@@ -244,7 +246,10 @@ class Peer_NTS(Peer_DBS):
                 # Recreate the socket
                 # This similar to Peer_DBS.listen_to_the_team, but binds to a new random port
                 self.team_socket.close()
-                self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                if Symsp_Peer.PORT_STEP:
+                    self.team_socket = symsp_socket(Symsp_Peer.PORT_STEP, socket.AF_INET, socket.SOCK_DGRAM)
+                else:
+                    self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 try:
                     self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 except Exception as e:
