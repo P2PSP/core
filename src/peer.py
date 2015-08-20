@@ -172,6 +172,10 @@ class Peer():
 
         # }}}
 
+        if args.strpeds:
+            peer = Peer_StrpeDs(peer)
+            peer.receive_dsa_key()
+
         if args.malicious and not args.strpeds: # workaround for malicous strpeds peer
             peer = MaliciousPeer(peer)
             if args.persistent:
@@ -181,24 +185,21 @@ class Peer():
             if args.selective:
                 peer.setSelectiveAttack(True, args.selective)
 
+        if args.malicious and args.strpeds:
+            peer = Peer_StrpeDsMalicious(peer)
+            if args.persistent:
+                peer.setPersistentAttack(True)
+            if args.on_off_ratio:
+                peer.setOnOffAttack(True, int(args.on_off_ratio))
+            if args.selective:
+                peer.setSelectiveAttack(True, args.selective)
+            if args.bad_mouth:
+                peer.setBadMouthAttack(True, args.bad_mouth)
+
         if args.trusted:
             peer = TrustedPeer(peer)
             if args.checkall:
                 peer.setCheckAll(True)
-
-        if args.strpeds:
-            peer = Peer_StrpeDs(peer)
-            peer.receive_dsa_key()
-            if args.malicious:
-                peer = Peer_StrpeDsMalicious(peer)
-                if args.persistent:
-                    peer.setPersistentAttack(True)
-                if args.on_off_ratio:
-                    peer.setOnOffAttack(True, int(args.on_off_ratio))
-                if args.selective:
-                    peer.setSelectiveAttack(True, args.selective)
-                if args.bad_mouth:
-                    peer.setBadMouthAttack(True, args.bad_mouth)
 
         if args.strpe_log != None:
             peer.LOGGING = True

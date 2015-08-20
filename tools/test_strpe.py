@@ -50,7 +50,7 @@ def runPeer(port, playerPort, trusted = False, malicious = False, ds = False):
     if trusted and not ds:
         runStr += " --trusted --checkall"
     if malicious:
-        runStr += " --malicious --on_off_ratio 100"
+        runStr += " --malicious --persistent"
     if not malicious:
          runStr += " --strpe_log ./strpe-testing/peer{0}.log".format(port)
     run(runStr, open("strpe-testing/peer{0}.out".format(port), "w"))
