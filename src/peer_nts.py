@@ -232,8 +232,8 @@ class Peer_NTS(Peer_DBS):
         while len(self.initial_peer_list) > 0:
             if time.time() - incorporation_time > common.MAX_PEER_ARRIVING_TIME:
                 # Retry incorporation into the team
-                print("NTS: Timed out with %d peers left to connect. Retrying incorporation." \
-                    % len(self.initial_peer_list))
+                print("NTS: Retrying incorporation with %d peers left to connect: %s" \
+                    % (len(self.initial_peer_list), self.initial_peer_list))
                 incorporation_time = time.time()
                 # Cleaning hello messages
                 with self.hello_messages_lock:
