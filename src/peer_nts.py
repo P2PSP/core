@@ -16,6 +16,7 @@ import time
 import sys
 import struct
 import socket
+import traceback
 from color import Color
 from _print_ import _print_
 from peer_dbs import Peer_DBS
@@ -187,9 +188,10 @@ class Peer_NTS(Peer_DBS):
 
         try:
             self.try_to_disconnect_from_the_splitter()
-        except Exception as e:
+        except:
+            traceback.print_exc()
             sys.stderr.write(
-                "NTS: '%s': Probably the splitter removed this peer due to timeout\n" % e)
+                "NTS: Probably the splitter removed this peer due to timeout\n")
             self.player_alive = False
             sys.exit(1)
 
