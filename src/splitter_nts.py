@@ -117,7 +117,12 @@ class Splitter_NTS(Splitter_DBS):
         # {{{
 
         # Send all peers except the monitor peers with their peer ID
-        number_of_other_peers = len(self.peer_list)-self.MONITOR_NUMBER
+        # plus all peers currently being incorporated
+        number_of_other_peers = len(self.peer_list) - self.MONITOR_NUMBER \
+            + len(self.incorporating_peers)
+        if peer in self.ids:
+            # Then peer is also in self.incorporating_peers
+            number_of_other_peers -= 1
         if __debug__:
             print("NTS: Sending the list of peers except the monitor (%d peers)" \
                 % number_of_other_peers)
@@ -128,6 +133,14 @@ class Splitter_NTS(Splitter_DBS):
             # Also send the port step of the existing peer, in case
             # it is behind a sequentially allocating NAT
             message = self.ids[p] + struct.pack("4sHH", socket.inet_aton(p[ADDR]), \
+                socket.htons(self.last_source_port[p]), socket.htons(self.port_steps[p]))
+            peer_serve_socket.sendall(message)
+        # Send the peers currently being incorporated
+        for peer_id in self.incorporating_peers:
+            if peer in self.ids and peer_id == self.ids[peer]: continue
+            print("NTS: Sending peer %s to %s" % (peer_id, peer))
+            p = self.incorporating_peers[peer_id][0]
+            message = peer_id + struct.pack("4sHH", socket.inet_aton(p[ADDR]), \
                 socket.htons(self.last_source_port[p]), socket.htons(self.port_steps[p]))
             peer_serve_socket.sendall(message)
 
@@ -325,6 +338,9 @@ class Splitter_NTS(Splitter_DBS):
 
         if __debug__:
             print("NTS: Sending [send hello to %s]" % (new_peer,))
+        # The peers start port prediction at the minimum known source port,
+        # counting up using their peer_number
+        min_known_source_port = min(source_ports_to_monitors + [new_peer[1]])
         # Send packets to all peers;
         for peer_number, peer in enumerate(self.peer_list):
             if peer_number < self.MONITOR_NUMBER:
@@ -334,9 +350,6 @@ class Splitter_NTS(Splitter_DBS):
                     socket.htons(source_ports_to_monitors[peer_number]))
             else:
                 # Send all information necessary for port prediction to the existing peers
-                # The peers start port prediction at the minimum known source port,
-                # counting up using their peer_number
-                min_known_source_port = min(source_ports_to_monitors + [new_peer[1]])
                 if self.port_steps[peer] == 0:
                     message = peer_id + struct.pack("4sHHH", socket.inet_aton(new_peer[0]), \
                         socket.htons(min_known_source_port), \
@@ -349,6 +362,19 @@ class Splitter_NTS(Splitter_DBS):
                         socket.htons(self.port_steps[new_peer]), \
                         socket.htons(peer_number), socket.htons(extra_listen_port))
 
+            # Hopefully one of these packets arrives
+            self.team_socket.sendto(message, peer)
+            self.team_socket.sendto(message, peer)
+            self.team_socket.sendto(message, peer)
+
+        # Send packets to peers currently being incorporated
+        for inc_peer_id in self.incorporating_peers:
+            print("NTS: Sending peer %s to %s" % (new_peer, inc_peer_id))
+            peer = self.incorporating_peers[inc_peer_id][0]
+            # Send the length of the peer_list as peer_number
+            message = peer_id + struct.pack("4sHHH", socket.inet_aton(new_peer[0]), \
+                socket.htons(min_known_source_port), \
+                socket.htons(self.port_steps[new_peer]), socket.htons(len(self.peer_list)))
             # Hopefully one of these packets arrives
             self.team_socket.sendto(message, peer)
             self.team_socket.sendto(message, peer)
