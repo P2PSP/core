@@ -1,14 +1,13 @@
 #!/bin/bash
 
 # Configuration
-nat_configs="rcn prcn sympp symsp symrp" # fcn not tested (results same as rcn)
+nat_configs="fcn rcn prcn sympp symsp symrp"
 user="ladmin"
 dir="p2psp/src"
 source_filename="Big_Buck_Bunny_small.ogv"
 # As local source address you have to specify the local IP address of the host
 # that is reachable by the virtual machines
 local_source_addr=192.168.57.1
-tmpdir="/tmp/p2psp_output"
 sequential_runs=5
 parallel_runs=10
 testruns=$((sequential_runs*parallel_runs))
@@ -40,10 +39,6 @@ trap stop_processes EXIT
 
 # Exit on error
 set -e
-
-# Clean output directory
-rm -rf "$tmpdir"
-mkdir -p "$tmpdir"
 
 # Get P2PSP configuration from code
 splitter_class="$(ssh $user@$splitter cat $dir/splitter.py \
@@ -88,23 +83,27 @@ $nat1_config "
             # parameters: splitter_port, peer_port, player_port
 
             # Run splitter
-            splitter_output="$tmpdir/$nat1_config.$nat2_config.$1.splitter.txt"
             ssh "$user@$splitter" python2 -u "$dir/splitter.py" --source_addr "$local_source_addr" \
-                --source_port "$local_source_port" --port "$splitter_port" >"$splitter_output" &
-
-            # Build output filenames
-            monitor_output="$tmpdir/$nat1_config.$nat2_config.$1.monitor.txt"
-            peer1_output="$tmpdir/$nat1_config.$nat2_config.$1.peer1.txt"
-            peer2_output="$tmpdir/$nat1_config.$nat2_config.$1.peer2.txt"
+                --source_port "$local_source_port" --port "$splitter_port" >/dev/null &
 
             # Run monitor on same host as splitter
             peer_cmd="python2 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
+                --splitter_port '$1' --port '$2' | sed 's_[^m]*m__g'"
+            peer_cmd_symsp="python2 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
                 --splitter_port '$1' --port '$2' --port_step 1 | sed 's_[^m]*m__g'"
-            ssh "$user@$splitter" "$peer_cmd" >"$monitor_output" &
+            ssh "$user@$splitter" "$peer_cmd" >/dev/null &
 
             # Run peers
-            ssh "$user@$pc1" "$peer_cmd" >"$peer1_output" &
-            ssh "$user@$pc2" "$peer_cmd" >"$peer2_output" &
+            if [ "$nat1_config" == "symsp" ]; then
+                ssh "$user@$pc1" "$peer_cmd_symsp" >/dev/null &
+            else
+                ssh "$user@$pc1" "$peer_cmd" >/dev/null &
+            fi
+            if [ "$nat2_config" == "symsp" ]; then
+                ssh "$user@$pc2" "$peer_cmd_symsp" >/dev/null &
+            else
+                ssh "$user@$pc2" "$peer_cmd" >/dev/null &
+            fi
             sleep 1
 
             # Run players
