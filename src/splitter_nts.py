@@ -394,6 +394,9 @@ class Splitter_NTS(Splitter_DBS):
 
         # Send packets to peers currently being incorporated
         for inc_peer_id in self.incorporating_peers:
+            if inc_peer_id == peer_id:
+                # Do not send the peer endpoint to the peer itself
+                continue
             if __debug__:
                 print("NTS: Sending peer %s to %s" % (new_peer, inc_peer_id))
             peer = self.incorporating_peers[inc_peer_id][0]
