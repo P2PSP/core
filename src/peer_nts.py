@@ -99,13 +99,14 @@ class Peer_NTS(Peer_DBS):
                     messages_to_remove.append(message_data)
                     continue
                 message, peer = message_data
-                if message == self.peer_id:
-                    print("NTS: Sending hello (%s) to %s (trying %d ports)"
-                        % (message, peer, len(hello_messages_ports[message_data])))
-                else:
-                    print("NTS: Sending message (%s) of length %d to %s (trying %d ports)"
-                        % (message[:common.PEER_ID_LENGTH], len(message), peer,
-                        len(hello_messages_ports[message_data])))
+                if __debug__:
+                    if message == self.peer_id:
+                        print("NTS: Sending hello (%s) to %s (trying %d ports)"
+                            % (message, peer, len(hello_messages_ports[message_data])))
+                    else:
+                        print("NTS: Sending message (%s) of length %d to %s (trying %d ports)"
+                            % (message[:common.PEER_ID_LENGTH], len(message), peer,
+                            len(hello_messages_ports[message_data])))
                 for port in hello_messages_ports[message_data]:
                     self.team_socket.sendto(message, (peer[0], port))
                     # Avoid network congestion
@@ -114,8 +115,9 @@ class Peer_NTS(Peer_DBS):
             with self.hello_messages_lock:
                 for message_data in messages_to_remove:
                     if message_data in self.hello_messages:
-                        print("NTS: Removed message (%s) to %s due to timeout"
-                            % (message_data[0][:common.PEER_ID_LENGTH], message_data[1]))
+                        if __debug__:
+                            print("NTS: Removed message (%s) to %s due to timeout"
+                                % (message_data[0][:common.PEER_ID_LENGTH], message_data[1]))
                         self.hello_messages.remove(message_data)
                         del self.hello_messages_times[message_data]
                         del self.hello_messages_ports[message_data]
@@ -174,7 +176,8 @@ class Peer_NTS(Peer_DBS):
                 probable_source_ports = list(range(port+port_step,
                     port+(number_of_ports+1)*port_step, port_step))
             self.say_hello(peer, probable_source_ports)
-            print("NTS: [hello] sent to %s" % (peer,))
+            if __debug__:
+                print("NTS: [hello] sent to %s" % (peer,))
 
         # Directly start packet sending
         self.hello_messages_event.set()
@@ -357,7 +360,8 @@ class Peer_NTS(Peer_DBS):
             peer_number = socket.ntohs(peer_number)
 
             peer = (IP_addr, source_port_to_splitter) # Peer endpoint known to splitter
-            print("NTS: Received [send hello to %s %s]" % (peer_id, peer))
+            if __debug__:
+                print("NTS: Received [send hello to %s %s]" % (peer_id, peer))
             # Here the port prediction happens:
             additional_ports = self.get_probable_source_ports(source_port_to_splitter,
                 port_diff, peer_number)
@@ -377,7 +381,8 @@ class Peer_NTS(Peer_DBS):
             extra_splitter_port = socket.ntohs(extra_splitter_port)
 
             peer = (IP_addr, source_port_to_splitter) # Peer endpoint known to splitter
-            print("NTS: Received [send hello to %s %s]" % (peer_id, peer))
+            if __debug__:
+                print("NTS: Received [send hello to %s %s]" % (peer_id, peer))
             # Here the port prediction happens:
             additional_ports = self.get_probable_source_ports(source_port_to_splitter,
                 port_diff, peer_number)
@@ -390,12 +395,14 @@ class Peer_NTS(Peer_DBS):
                 len(message) == common.PEER_ID_LENGTH + struct.calcsize("H")) or \
                 (sender == self.splitter and \
                 len(message) == common.PEER_ID_LENGTH+1 + struct.calcsize("H")) or \
-                len(message) == common.PEER_ID_LENGTH+1:
+                len(message) == common.PEER_ID_LENGTH+1: # All sent message sizes
+            # Acknowledge received; stop sending the message
             with self.hello_messages_lock:
                 for hello_data in self.hello_messages:
                     if message == hello_data[0] and sender[0] == hello_data[1][0] \
                             and sender[1] in self.hello_messages_ports[hello_data]:
-                        print("NTS: Received acknowledge from %s" % (sender,))
+                        if __debug__:
+                            print("NTS: Received acknowledge from %s" % (sender,))
                         self.hello_messages.remove(hello_data)
                         del self.hello_messages_times[hello_data]
                         del self.hello_messages_ports[hello_data]
@@ -403,11 +410,13 @@ class Peer_NTS(Peer_DBS):
             print("NTS: Received acknowledge from unknown host %s" % (sender,))
         elif len(message) == common.PEER_ID_LENGTH:
             peer_id = message
-            print("NTS: Received hello (ID %s) from %s" % (message, sender))
+            if __debug__:
+                print("NTS: Received hello (ID %s) from %s" % (message, sender))
             # Send acknowledge
             self.team_socket.sendto(message, sender)
 
             if sender not in self.peer_list:
+                print("NTS: Appending peer %s %s to list" % (peer_id, peer))
                 self.peer_list.append(sender)
                 self.debt[sender] = 0
                 # Send source port information to splitter
@@ -422,7 +431,8 @@ class Peer_NTS(Peer_DBS):
             # in receive_the_list_of_peers() before a Peer_NTS instance is created
             pass
         elif sender != self.splitter and sender not in self.peer_list:
-            print("NTS: Ignoring message of length %d from unknown host %s" % (len(message), sender))
+            if __debug__:
+                print("NTS: Ignoring message of length %d from unknown host %s" % (len(message), sender))
         elif len(self.initial_peer_list) == 0: # Start receiving chunks when fully incorporated
             return Peer_DBS.process_message(self, message, sender)
 

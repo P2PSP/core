@@ -9,7 +9,9 @@
 
 import socket
 
+# Proxy object for socket.socket
 class symsp_socket():
+    # {{{
 
     def __init__(self, port_step, *p):
         self._sock = socket.socket(*p)
@@ -22,7 +24,8 @@ class symsp_socket():
         # For each destination endpoint that was not sent to yet, this socket
         # wrapper creates a temporary socket and connects to the destination a
         # specified number of times before sending from the original socket.
-        # This forces the NAT to create a new mapping entry.
+        # This forces the NAT to create a new mapping entry and therefore
+        # to increment the source port of self._sock by self.port_step.
 
         if destination not in self.destinations:
             for _ in range(self.port_step):
@@ -51,3 +54,5 @@ class symsp_socket():
 
     def close(self, *p):
         return self._sock.close(*p)
+
+    # }}}

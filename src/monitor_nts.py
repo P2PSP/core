@@ -29,22 +29,13 @@ class Monitor_NTS(Peer_NTS):
         # {{{
 
         sys.stdout.write(Color.yellow)
-        _print_("Monitor NTS (list)")
-        sys.stdout.write(Color.none)
-
-        # }}}
-
-    def print_the_module_name(self):
-        # {{{
-
-        sys.stdout.write(Color.red)
         _print_("Monitor NTS")
         sys.stdout.write(Color.none)
 
         # }}}
 
     def complain(self, chunk_number):
-        # {{{
+        # {{{ This is from Monitor_DBS
 
         message = struct.pack("!H", chunk_number)
         self.team_socket.sendto(message, self.splitter)
@@ -57,7 +48,7 @@ class Monitor_NTS(Peer_NTS):
         # }}}
 
     def find_next_chunk(self):
-        # {{{
+        # {{{ This is from Monitor_DBS
 
         chunk_number = (self.played_chunk + 1) % common.MAX_CHUNK_NUMBER
         while not self.received_flag[chunk_number % self.buffer_size]:
@@ -90,13 +81,16 @@ class Monitor_NTS(Peer_NTS):
 
         if sender != self.splitter and (len(message) == common.PEER_ID_LENGTH or
             len(message) == common.PEER_ID_LENGTH+1):
-            print("NTS: Received hello (ID %s) from %s" \
-                % (message[:common.PEER_ID_LENGTH], sender))
+            # Hello message received from peer
+            if __debug__:
+                print("NTS: Received hello (ID %s) from %s" \
+                    % (message[:common.PEER_ID_LENGTH], sender))
             # Send acknowledge
             self.team_socket.sendto(message, sender)
 
-            print("NTS: Forwarding ID %s and source port %s to splitter"
-                % (message[:common.PEER_ID_LENGTH], sender[1]))
+            if __debug__:
+                print("NTS: Forwarding ID %s and source port %s to splitter"
+                    % (message[:common.PEER_ID_LENGTH], sender[1]))
             message += struct.pack("H", socket.htons(sender[1]))
             message_data = (message, self.splitter)
             self.send_message(message_data)
@@ -108,9 +102,11 @@ class Monitor_NTS(Peer_NTS):
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
-            print("NTS: Received peer ID %s %s" % (peer_id, peer))
+            if __debug__:
+                print("NTS: Received peer ID %s %s" % (peer_id, peer))
             # Sending hello not needed as monitor and peer already communicated
             if peer not in self.peer_list:
+                print("NTS: Appending peer %s %s to list" % (peer_id, peer))
                 self.peer_list.append(peer)
                 self.debt[peer] = 0
         else:

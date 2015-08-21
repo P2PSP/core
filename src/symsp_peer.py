@@ -36,6 +36,7 @@ class Symsp_Peer(Peer_DBS):
     def listen_to_the_team(self):
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
+        # Create a special socket to force source port increment on SYMSP NATs
         self.team_socket = symsp_socket(self.PORT_STEP, socket.AF_INET, socket.SOCK_DGRAM)
         try:
             # In Windows systems this call doesn't work!
