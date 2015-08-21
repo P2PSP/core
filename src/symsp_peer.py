@@ -37,13 +37,14 @@ class Symsp_Peer(Peer_DBS):
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
         # Create a special socket to force source port increment on SYMSP NATs
-        self.team_socket = symsp_socket(self.PORT_STEP, socket.AF_INET, socket.SOCK_DGRAM)
+        self.team_socket = symsp_socket(self.PORT_STEP, socket.AF_INET,
+                                        socket.SOCK_DGRAM)
         try:
             # In Windows systems this call doesn't work!
-            self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.team_socket.setsockopt( \
+                socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         except Exception as e:
             print ("NTS:", e)
-            pass
         self.team_socket.bind(('', self.splitter_socket.getsockname()[PORT]))
 
         # This is the maximum time the peer will wait for a chunk

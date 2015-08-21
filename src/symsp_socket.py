@@ -10,7 +10,7 @@
 import socket
 
 # Proxy object for socket.socket
-class symsp_socket():
+class symsp_socket(object):
     # {{{
 
     def __init__(self, port_step, *p):
