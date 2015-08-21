@@ -439,7 +439,7 @@ class Peer_NTS(Peer_DBS):
             self.team_socket.sendto(message, sender)
 
             if sender not in self.peer_list:
-                print("NTS: Appending peer %s %s to list" % (peer_id, peer))
+                print("NTS: Appending peer %s %s to list" % (peer_id, sender))
                 self.peer_list.append(sender)
                 self.debt[sender] = 0
                 # Send source port information to splitter
