@@ -79,6 +79,17 @@ class Splitter_NTS(Splitter_DBS):
         # each message to avoid network congestion.
         self.message_queue = Queue.Queue()
         threading.Thread(target=self.send_message_thread).start()
+        # An event that is set for each chunk received by the source
+        self.chunk_received_event = threading.Event()
+
+        # }}}
+
+    def receive_chunk(self):
+        # {{{
+
+        chunk = Splitter_DBS.receive_chunk(self)
+        self.chunk_received_event.set()
+        return chunk
 
         # }}}
 
@@ -90,8 +101,9 @@ class Splitter_NTS(Splitter_DBS):
             message, peer = self.message_queue.get()
             # Send the message
             self.team_socket.sendto(message, peer)
-            # Wait to avoid network congestion
-            time.sleep(0.001)
+            # Wait for a chunk from source to avoid network congestion
+            self.chunk_received_event.wait()
+            self.chunk_received_event.clear()
             self.message_queue.task_done()
 
         # }}}
