@@ -90,7 +90,7 @@ class Add_Controller():
         
         """
         Verify channel configuration and add it to the iconview where channels
-        are listed.
+        are listed and to the channel store.
         """
         
         name = self.box.name.get_text()
@@ -105,14 +105,14 @@ class Add_Controller():
             msg_dialog.run()
             msg_dialog.destroy()
             return
-        if desc == "":
+        elif desc == "":
             msg_dialog = Gtk.MessageDialog(self.parent_window, 0, Gtk.MessageType.ERROR,
             Gtk.ButtonsType.CLOSE, "CHANNEL DESCRIPTION IS EMPTY")
             msg_dialog.format_secondary_text("Channel's details should be provided.")
             msg_dialog.run()
             msg_dialog.destroy()
             return
-        if url_util.verify_url(str(thumbnail)) == False:
+        elif url_util.verify_url(str(thumbnail)) == False:
             msg_dialog = Gtk.MessageDialog(self.parent_window, 0, Gtk.MessageType.ERROR,
             Gtk.ButtonsType.CLOSE, "INVALID URL")
             msg_dialog.format_secondary_text(str(thumbnail))

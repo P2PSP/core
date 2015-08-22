@@ -28,12 +28,16 @@ class JSON_Importer():
     def from_JSON(self,path):
         
         """
-        Returns data inside a given json file.
+        Returns data inside a given json file. If the path is invalid , 
+        "NoneType" Object is returned.
         
         @param  : path
         @return : data (JSON data)
         """
-        json_file = open(path,"r")
+        try:
+            json_file = open(path,"r")
+        except IOError:
+            return None
         data = json.load(json_file)
         json_file.close()
         return data
