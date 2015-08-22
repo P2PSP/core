@@ -63,6 +63,10 @@ class Category():
         
         del(self.channels[key])
 
+    def replace_key(self,prev_key,key):
+        self.add(key,self.get_channel(prev_key))
+        self.remove(prev_key)
+        
     def get_channel(self,key):
         return self.channels[key]
 

@@ -30,8 +30,11 @@ try:
     from model.channel_store import Channel_Store
     from channel_import_controller import Import_Controller
     from channel_export_controller import Export_Controller
+    from channel_add_controller import Add_Controller
+    from channel_edit_controller import Edit_Controller
     import common.graphics_util as graphics_util
     from common.json_exporter import JSON_Exporter
+    from common.json_importer import JSON_Importer
     from model.channel_encoder import Channel_Encoder
 except ImportError as msg:
     traceback.print_exc()
@@ -43,7 +46,7 @@ class Main_Controller():
     """
     Controller which controls the signals from the main window. It is
     responsible for communication between models and  widgets in main window.
-    It uses Adapters to update data from the core package to the 
+    It uses Adapters to update data from the core package to the
     """
 
     ## MRL of default local P2PSP Peer Stream.
@@ -76,7 +79,7 @@ class Main_Controller():
         ## Whether player is fullscreen.
         self.player_fullscreen  = False
 
-        #### Whether channel_Iconview  is revealed.
+        ## Whether channel_Iconview  is revealed.
         self.channels_revealed = True
 
         ## Whether player status box is hidden.
@@ -115,6 +118,10 @@ class Main_Controller():
 
         #self.show_monitor_channel()
         self.export_sample_monitor()
+        
+        
+        self.restore_app_state()
+        self.treepath_played = None
 
     @exc_handler
     def export_sample_monitor(self):
@@ -140,6 +147,25 @@ class Main_Controller():
        exporter  = JSON_Exporter()
        exporter.to_JSON(path,{"monitor":monitor_channel},Channel_Encoder)
 
+    
+    def restore_app_state(self):
+        _file =file_util.find_file(__file__,
+                                   "../../data/channels/saved_channels")
+        if _file == '':
+            return
+        importer = JSON_Importer()
+        self.restored_data = importer.from_JSON(_file)
+        if self.restored_data is not None:
+            all_category = Channel_Store.ALL
+            for channel in self.restored_data:
+                restored_channel = Channel(self.restored_data[channel])
+                all_category.add(channel,restored_channel)
+                (channel_name,image_url,desc) = (channel
+                                ,restored_channel.get_thumbnail_url()
+                                ,restored_channel.get_description())
+                scaled_image = graphics_util.get_scaled_image(image_url,180)
+                self.app_window.icon_list_store.append([scaled_image,channel_name,desc])
+                
     @exc_handler
     def show_monitor_channel(self):#only for testing purpose
 
@@ -154,7 +180,7 @@ class Main_Controller():
                                 ,channel.get_thumbnail_url()
                                 ,channel.get_description())
         scaled_image = graphics_util.get_scaled_image(image_url,180)
-        for i in range(0,20):
+        for i in range(0,1):
             self.app_window.icon_list_store.append([scaled_image,name,desc])
 
     @exc_handler
@@ -200,15 +226,41 @@ class Main_Controller():
         ,'on_TogglePlaybackButton_clicked'      : self.toggle_player_playback
         ,'on_ToggleChannels_button_press_event' : self.toggle_channel_box
         ,'on_FullscreenButton_clicked'          : self.toggle_player_fullscreen
-        ,'on_ChannelIconView_button_press_event': self.play_selected_channel
+        ,'on_ChannelIconView_button_press_event': self.handle_selected_channel
         ,'on_Import_activate'                   : self.import_channels
         ,'on_Export_activate'                   : self.export_channels
         ,'on_VolumeButton_value_changed'        : self.control_player_volume
         ,'on_Surface_key_press_event'           : self.toggle_status_box
+        ,'on_ViewPlayerStatusBox_toggled'       : self.toggle_status_box
+        ,'on_Add_activate'                      : self.add_channel
+        ,'on_Play_activate'                     : self.handle_on_Play
+        ,'on_Edit_activate'                     : self.handle_on_Edit
+        ,'on_Remove_activate'                     : self.handle_on_Remove
                 }
         return signals
 
+    def add_channel(self,widget,data=None):
 
+        controller = Add_Controller(self.app_window)
+        
+    def handle_on_Play(self,widget,data=None):
+
+        self.play_selection()
+        
+    def handle_on_Edit(self,widget,data=None):
+        controller = Edit_Controller(self.app_window)
+
+    def handle_on_Remove(self,widget,data=None):
+        selection = self.app_window.channel_iconview.get_selected_items()[0]
+        model = self.app_window.icon_list_store
+        channel_key = self.app_window.icon_list_store[selection][1]
+        channel = Channel_Store.ALL.remove(channel_key)
+        _iter = model.get_iter(selection)
+        model.remove(_iter)
+        if self.treepath_played == selection:
+            self.stop_player(None,data=None)
+        
+        
     @exc_handler
     def import_channels(self,widget,data=None):
 
@@ -267,6 +319,15 @@ class Main_Controller():
         self.app_window.playback_toggle_button.set_image(self.app_window.play_image)
         self.app_window.buffer_status_bar.hide()
 
+
+    def save_app_state(self):
+        exporter  = JSON_Exporter()
+        path = file_util.find_file(__file__,
+                                   "../../data/channels/saved_channels")
+        if path != '':
+            exporter.to_JSON(path
+                            ,Channel_Store.ALL.get_channels()
+                            ,Channel_Encoder)
     @exc_handler
     def quit(self):
 
@@ -278,6 +339,8 @@ class Main_Controller():
         path = file_util.find_file(__file__,
                                     "../../data/channels/to_import_sample_data.p2psp")
         file_util.file_del(path)
+        
+        self.save_app_state()
 
 
     def end_callback(self):
@@ -330,12 +393,10 @@ class Main_Controller():
         """
 
         if self.channels_revealed == True:
-            self.app_window.channel_box.hide()
-            self.app_window.channel_revealer.set_label('<<')
+            self.app_window.hide_channels_box()
             self.channels_revealed = False
         elif self.channels_revealed == False:
-            self.app_window.channel_box.show()
-            self.app_window.channel_revealer.set_label('>>')
+            self.app_window.show_channels_box()
             self.channels_revealed = True
 
     @exc_handler
@@ -348,12 +409,14 @@ class Main_Controller():
         if self.player_fullscreen == False:
             self.app_window.hide_all_but_surface()
             self.app_window.window.fullscreen()
+            self.app_window.player_fullscreen_button.set_image(self.app_window.unfullscreen_image)
             self.player_fullscreen = True
             self.status_box_hidden = True
             self.app_window.player_surface.grab_focus()
         else:
             self.show()
             self.app_window.window.unfullscreen()
+            self.app_window.player_fullscreen_button.set_image(self.app_window.fullscreen_image)
             self.player_fullscreen = False
             self.status_box_hidden = False
 
@@ -373,16 +436,22 @@ class Main_Controller():
         Check whether key pressed  is of type GDK_ESCAPE.
         """
 
-        if self.player_fullscreen == True and data.keyval == 65307:
-            if self.status_box_hidden == False :
-                self.app_window.hide_status_box()
-                self.status_box_hidden = True
-            else:
-                self.app_window.show_status_box()
-                self.status_box_hidden = False
+        if self.player_fullscreen == True and data.keyval == Gdk.KEY_Escape:
+            self.toggle_player_status_bar()
+        elif self.player_fullscreen == False:
+            self.toggle_player_status_bar()
 
     @exc_handler
-    def play_selected_channel(self,widget,data=None):
+    def toggle_player_status_bar(self):
+        if self.status_box_hidden == False :
+            self.app_window.hide_status_box()
+            self.status_box_hidden = True
+        else:
+            self.app_window.show_status_box()
+            self.status_box_hidden = False
+
+    @exc_handler
+    def handle_selected_channel(self,widget,data=None):
 
         """
         Plays selected channel from the channels list in Iconview widget.
@@ -391,14 +460,21 @@ class Main_Controller():
         Get the selected channel and play it.
         """
 
-        if data.type == Gdk.EventType._2BUTTON_PRESS:
+        if  len(self.app_window.channel_iconview.get_selected_items()) == 0:
+            return
+        if data.type == Gdk.EventType._2BUTTON_PRESS and data.button == 1:
             if  len(widget.get_selected_items()) == 0:
                 return
             else:
-                self.play_selection(widget)
+                self.play_selection()
+        elif data.type == Gdk.EventType.BUTTON_PRESS and data.button == 3:
+            self.app_window.popup_menu.popup(None, None, 
+                   None,
+                   None, data.button, data.time)
+            return
 
     @exc_handler
-    def play_selection(self,iconview):
+    def play_selection(self):
 
         """
         Play selected channel.
@@ -416,7 +492,8 @@ class Main_Controller():
         Toggle player type.
         """
 
-        item  = iconview.get_selected_items()[0]
+        item  = self.app_window.channel_iconview.get_selected_items()[0]
+        self.treepath_played = item
         channel_key = self.app_window.icon_list_store[item][1]
         channel = Channel_Store.ALL.get_channel(channel_key)
         data = (channel.get_splitter_addr()

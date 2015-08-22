@@ -2,6 +2,40 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.0"/>
+  <object class="GtkMenu" id="ChannelPopupMenu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="Play">
+        <property name="label">gtk-media-play</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_Play_activate" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="Edit">
+        <property name="label">gtk-edit</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_Edit_activate" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="Remove">
+        <property name="label">gtk-remove</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_Remove_activate" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkImage" id="FullscreenImage">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -30,6 +64,11 @@
     <property name="tooltip_text" translatable="yes">Stop</property>
     <property name="stock">gtk-media-stop</property>
     <property name="icon_size">3</property>
+  </object>
+  <object class="GtkImage" id="UnFullscreenImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-leave-fullscreen</property>
   </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
@@ -75,15 +114,7 @@
                             <property name="can_focus">False</property>
                             <property name="use_underline">True</property>
                             <property name="use_stock">True</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkImageMenuItem" id="Open">
-                            <property name="label">gtk-open</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="use_underline">True</property>
-                            <property name="use_stock">True</property>
+                            <signal name="activate" handler="on_Add_activate" swapped="no"/>
                           </object>
                         </child>
                         <child>
@@ -122,6 +153,22 @@
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">_View</property>
                     <property name="use_underline">True</property>
+                    <child type="submenu">
+                      <object class="GtkMenu" id="ViewMenu">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkCheckMenuItem" id="ViewPlayerStatusBox">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label">Show Player Box</property>
+                            <property name="active">True</property>
+                            <property name="draw_as_radio">True</property>
+                            <signal name="toggled" handler="on_ViewPlayerStatusBox_toggled" swapped="no"/>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
                 <child>
@@ -193,7 +240,6 @@
               <object class="GtkBox" id="PlayerAndStatusBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="opacity">0.75</property>
                 <child>
                   <object class="GtkButton" id="TogglePlaybackButton">
                     <property name="visible">True</property>

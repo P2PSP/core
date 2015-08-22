@@ -124,6 +124,18 @@ class Main_Window():
         ## widgets to display channels as icons.
         self.channel_iconview = self.interface.get_object('ChannelIconView')
 
+        ## SubMenu to toggle visibility of channels.
+        self.toggle_channel_box = self.interface.get_object('ViewChannelBox')
+        
+        ## fullscreen icon image
+        self.fullscreen_image =  self.interface.get_object('FullscreenImage')
+
+        ## leave fullscreen icon image
+        self.unfullscreen_image = self.interface.get_object('UnFullscreenImage')
+        
+        ## The Popup Menu
+        self.popup_menu = self.interface.get_object('ChannelPopupMenu')
+
     def configure_player_surface(self):
 
         """
@@ -167,7 +179,7 @@ class Main_Window():
 
         """
         Set the model which is used to display icons in the icon_view.
-        
+
         @param : model
         """
 
@@ -194,3 +206,29 @@ class Main_Window():
         Show Player Status Box.
         """
         self.status_box.show()
+
+
+    def hide_channels_box(self):
+
+        """
+        Hide Channels Box.
+        """
+
+        self.channel_box.hide()
+        self.channel_revealer.set_label('<<')
+
+    def show_channels_box(self):
+
+        """
+        Show Channels Box.
+        """
+
+        self.channel_box.show()
+        self.channel_revealer.set_label('>>')
+
+    def show_minimal_interface(self):
+
+        """
+        Hide Application Title Bar.
+        """
+        self.window.fullscreen()
