@@ -31,6 +31,7 @@ try:
     from channel_import_controller import Import_Controller
     from channel_export_controller import Export_Controller
     from channel_add_controller import Add_Controller
+    from channel_edit_controller import Edit_Controller
     import common.graphics_util as graphics_util
     from common.json_exporter import JSON_Exporter
     from model.channel_encoder import Channel_Encoder
@@ -116,6 +117,8 @@ class Main_Controller():
 
         self.show_monitor_channel()
         self.export_sample_monitor()
+        
+        self.treepath_played = None
 
     @exc_handler
     def export_sample_monitor(self):
@@ -201,22 +204,41 @@ class Main_Controller():
         ,'on_TogglePlaybackButton_clicked'      : self.toggle_player_playback
         ,'on_ToggleChannels_button_press_event' : self.toggle_channel_box
         ,'on_FullscreenButton_clicked'          : self.toggle_player_fullscreen
-        ,'on_ChannelIconView_button_press_event': self.play_selected_channel
+        ,'on_ChannelIconView_button_press_event': self.handle_selected_channel
         ,'on_Import_activate'                   : self.import_channels
         ,'on_Export_activate'                   : self.export_channels
         ,'on_VolumeButton_value_changed'        : self.control_player_volume
         ,'on_Surface_key_press_event'           : self.toggle_status_box
         ,'on_ViewPlayerStatusBox_toggled'       : self.toggle_status_box
         ,'on_Add_activate'                      : self.add_channel
+        ,'on_Play_activate'                     : self.handle_on_Play
+        ,'on_Edit_activate'                     : self.handle_on_Edit
+        ,'on_Remove_activate'                     : self.handle_on_Remove
                 }
         return signals
 
     def add_channel(self,widget,data=None):
 
         controller = Add_Controller(self.app_window)
+        
+    def handle_on_Play(self,widget,data=None):
 
+        self.play_selection()
+        
+    def handle_on_Edit(self,widget,data=None):
+        controller = Edit_Controller(self.app_window)
 
-
+    def handle_on_Remove(self,widget,data=None):
+        selection = self.app_window.channel_iconview.get_selected_items()[0]
+        model = self.app_window.icon_list_store
+        channel_key = self.app_window.icon_list_store[selection][1]
+        channel = Channel_Store.ALL.remove(channel_key)
+        _iter = model.get_iter(selection)
+        model.remove(_iter)
+        if self.treepath_played == selection:
+            self.stop_player(None,data=None)
+        
+        
     @exc_handler
     def import_channels(self,widget,data=None):
 
@@ -396,7 +418,7 @@ class Main_Controller():
             self.status_box_hidden = False
 
     @exc_handler
-    def play_selected_channel(self,widget,data=None):
+    def handle_selected_channel(self,widget,data=None):
 
         """
         Plays selected channel from the channels list in Iconview widget.
@@ -405,14 +427,21 @@ class Main_Controller():
         Get the selected channel and play it.
         """
 
-        if data.type == Gdk.EventType._2BUTTON_PRESS:
+        if  len(self.app_window.channel_iconview.get_selected_items()) == 0:
+            return
+        if data.type == Gdk.EventType._2BUTTON_PRESS and data.button == 1:
             if  len(widget.get_selected_items()) == 0:
                 return
             else:
-                self.play_selection(widget)
+                self.play_selection()
+        elif data.type == Gdk.EventType.BUTTON_PRESS and data.button == 3:
+            self.app_window.popup_menu.popup(None, None, 
+                   None,
+                   None, data.button, data.time)
+            return
 
     @exc_handler
-    def play_selection(self,iconview):
+    def play_selection(self):
 
         """
         Play selected channel.
@@ -430,7 +459,8 @@ class Main_Controller():
         Toggle player type.
         """
 
-        item  = iconview.get_selected_items()[0]
+        item  = self.app_window.channel_iconview.get_selected_items()[0]
+        self.treepath_played = item
         channel_key = self.app_window.icon_list_store[item][1]
         channel = Channel_Store.ALL.get_channel(channel_key)
         data = (channel.get_splitter_addr()

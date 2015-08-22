@@ -1,6 +1,6 @@
 """
 @package controller
-channel_add_controller module
+channel_edit_controller module
 """
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
@@ -15,7 +15,7 @@ channel_add_controller module
 
 from model.channel_store import Channel_Store
 from model.channel import Channel
-from view.add_box import Add_Box
+from view.edit_box import Edit_Box
 from common.decorators import exc_handler
 import common.url_util as url_util
 import common.graphics_util as graphics_util
@@ -23,7 +23,7 @@ from gi.repository import Gtk
 
 # }}}
 
-class Add_Controller():
+class Edit_Controller():
 
     """
     Add channels.
@@ -48,13 +48,22 @@ class Add_Controller():
         self.parent_window = main_window.window
         self.app_view = main_window
 
-        self.box = Add_Box()
+        self.box = Edit_Box()
         self.box.interface.connect_signals(self.setup_signals())
         self.box.dialog.set_transient_for(self.parent_window)
 
         ## Width and Height of the parent window.
         width,height = self.parent_window.get_size()
         self.box.dialog.set_size_request(width/2,height/2)
+        
+        self.item  = self.app_view.channel_iconview.get_selected_items()[0]
+        self.channel_key = self.app_view.icon_list_store[self.item][1]
+        self.channel = Channel_Store.ALL.get_channel(self.channel_key)
+        self.box.name.set_text(self.channel.name)
+        self.box.description.set_text(self.channel.description)
+        self.box.thumbnail.set_text("file://"+self.channel.thumbnail_url)
+        self.box.address.set_text(self.channel.splitter_addr)
+        self.box.port.set_value(int(self.channel.splitter_port))
         
         self.box.dialog.show()
 
@@ -70,28 +79,14 @@ class Add_Controller():
         """
 
         signals = {
-        'on_AddButton_clicked'                   : self.add
+        'on_OkButton_clicked'                   : self.edit
         ,'on_CancelButton_clicked'               : self.cancel
                 }
         return signals 
         
         
     @exc_handler
-    def add(self,widget,data=None):
-
-        #verify thumbnil url,address,port validity
-        #if not verified show proper message.
-        #elif verified:
-        #currently implemented only for local thumbnail images.
-        #get texts from all the entries.
-        #create channel with given data.
-        #add the channel to store
-        #get channel data and display it in iconview
-        
-        """
-        Verify channel configuration and add it to the iconview where channels
-        are listed.
-        """
+    def edit(self,widget,data=None):
         
         name = self.box.name.get_text()
         desc = self.box.description.get_text()
@@ -134,23 +129,24 @@ class Add_Controller():
             msg_dialog.destroy()
             return
         else :
-            channel_data = {"name" : name
-            ,"thumbnail_url" : url_util.get_path(str(thumbnail))
-            ,"description"   : desc
-            ,"splitter_addr" : address
-            ,"splitter_port" : port
-            }
-            channel = Channel(channel_data)
-            store = Channel_Store()
-            store.get_default().add(channel.name,channel)
-            (name,image_url,desc) = (channel.get_name()
-                                    ,channel.get_thumbnail_url()
-                                    ,channel.get_description())
+            self.channel.name = name
+            self.channel.description = desc
+            self.channel.thumbnail_url = thumbnail
+            self.channel.splitter_addr = address
+            self.channel.splitter_port = port
+            (name,image_url,desc) = (self.channel.get_name()
+                                    ,self.channel.get_thumbnail_url()
+                                    ,self.channel.get_description())
             scaled_image = graphics_util.get_scaled_image(image_url,180)
-            self.app_view.icon_list_store.append([scaled_image
-                                                          ,name
-                                                          ,desc])
-            self.box.dialog.destroy()
+            self.app_view.icon_list_store[self.item][0] = scaled_image
+            self.app_view.icon_list_store[self.item][1] = name
+            self.app_view.icon_list_store[self.item][2] = desc
+            if self.channel_key == name:
+                self.box.dialog.destroy()
+                return
+            store = Channel_Store()
+            store.get_default().replace_key(self.channel_key,name)
+        self.box.dialog.destroy()
 
     @exc_handler
     def cancel(self,widget,data=None):

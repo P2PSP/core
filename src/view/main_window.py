@@ -132,6 +132,9 @@ class Main_Window():
 
         ## leave fullscreen icon image
         self.unfullscreen_image = self.interface.get_object('UnFullscreenImage')
+        
+        ## The Popup Menu
+        self.popup_menu = self.interface.get_object('ChannelPopupMenu')
 
     def configure_player_surface(self):
 
