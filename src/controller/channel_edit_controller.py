@@ -77,7 +77,7 @@ class Edit_Controller():
         """
 
         signals = {
-        'on_OkButton_clicked'                   : self.edit
+        'on_OkButton_clicked'                    : self.edit
         ,'on_CancelButton_clicked'               : self.cancel
                 }
         return signals 
@@ -85,6 +85,21 @@ class Edit_Controller():
         
     @exc_handler
     def edit(self,widget,data=None):
+        
+        
+        #verify thumbnil url,address,port validity
+        #if not verified show proper message.
+        #elif verified:
+        #currently implemented only for local thumbnail images.
+        #get texts from all the entries.
+        #create channel with given data.
+        #add the channel to store
+        #get channel data and display it in iconview
+        
+        """
+        Verify channel configuration and add it to the iconview where channels
+        are listed and also to the channel store.
+        """
         
         name = self.box.name.get_text()
         desc = self.box.description.get_text()
@@ -98,14 +113,14 @@ class Edit_Controller():
             msg_dialog.run()
             msg_dialog.destroy()
             return
-        if desc == "":
+        elif desc == "":
             msg_dialog = Gtk.MessageDialog(self.parent_window, 0, Gtk.MessageType.ERROR,
             Gtk.ButtonsType.CLOSE, "CHANNEL DESCRIPTION IS EMPTY")
             msg_dialog.format_secondary_text("Channel's details should be provided.")
             msg_dialog.run()
             msg_dialog.destroy()
             return
-        if url_util.verify_url(str(thumbnail)) == False:
+        elif url_util.verify_url(str(thumbnail)) == False:
             msg_dialog = Gtk.MessageDialog(self.parent_window, 0, Gtk.MessageType.ERROR,
             Gtk.ButtonsType.CLOSE, "INVALID URL")
             msg_dialog.format_secondary_text(str(thumbnail))
@@ -129,7 +144,7 @@ class Edit_Controller():
         else :
             self.channel.name = name
             self.channel.description = desc
-            self.channel.thumbnail_url = thumbnail
+            self.channel.thumbnail_url = url_util.get_path(str(thumbnail))
             self.channel.splitter_addr = address
             self.channel.splitter_port = port
             (name,image_url,desc) = (self.channel.get_name()

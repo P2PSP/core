@@ -121,6 +121,8 @@ class Main_Controller():
         
         
         self.restore_app_state()
+        
+        ## Current selection which is being played
         self.treepath_played = None
 
     @exc_handler
@@ -149,10 +151,15 @@ class Main_Controller():
 
     
     def restore_app_state(self):
+        
+        """
+        Restore channels present in last session of app.
+        
+        Channels are restored after importing channels from JSON File.
+        """
+        
         _file =file_util.find_file(__file__,
                                    "../../data/channels/saved_channels")
-        if _file == '':
-            return
         importer = JSON_Importer()
         self.restored_data = importer.from_JSON(_file)
         if self.restored_data is not None:
@@ -241,16 +248,40 @@ class Main_Controller():
 
     def add_channel(self,widget,data=None):
 
+        """
+        Call the Add Controller to add channels.
+        """
+        
         controller = Add_Controller(self.app_window)
         
     def handle_on_Play(self,widget,data=None):
 
+        """
+        Call the Play Controller to play channels.
+        """
+        
         self.play_selection()
         
     def handle_on_Edit(self,widget,data=None):
+        
+        """
+        Call the Edit Controller to edit channels.
+        """
+        
         controller = Edit_Controller(self.app_window)
 
     def handle_on_Remove(self,widget,data=None):
+        
+        
+        """
+        Get the selected item in channel iconview.
+        Get list store associated with the iconview.
+        
+        Remove channel from Channel Store and iconview's list store.
+        
+        If the channel is being played , stop the player.
+        """
+        
         selection = self.app_window.channel_iconview.get_selected_items()[0]
         model = self.app_window.icon_list_store
         channel_key = self.app_window.icon_list_store[selection][1]
@@ -321,6 +352,14 @@ class Main_Controller():
 
 
     def save_app_state(self):
+        
+        """
+        App state saved.
+        
+        The channels in the default category is exported to a JSON File.
+        This file is used to restore channels which have been there in the app
+        while it was closed.
+        """
         exporter  = JSON_Exporter()
         path = file_util.find_file(__file__,
                                    "../../data/channels/saved_channels")
