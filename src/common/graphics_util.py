@@ -15,6 +15,10 @@ graphics_util module
 from gi.repository import Gdk
 from gi.repository.GdkPixbuf import Pixbuf
 from decorators import exc_handler
+import file_util
+
+p2psp_logo_path = file_util.find_file(__file__,
+                                    '../../data/images/monitor_thumbnail.png')
 
 # }}}
 
@@ -38,7 +42,10 @@ def get_scaled_image(path,image_width):
     @return : scaled_pix
     """
     default_image_width = image_width
-    pixbuf = Pixbuf.new_from_file(path)
+    try:
+        pixbuf = Pixbuf.new_from_file(path)
+    except Exception as msg:
+        return get_scaled_image(p2psp_logo_path,image_width)
     pix_w = pixbuf.get_width()
     pix_h = pixbuf.get_height()
     new_h = (pix_h * default_image_width) / pix_w

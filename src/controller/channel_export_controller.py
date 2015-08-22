@@ -42,7 +42,7 @@ class Export_Controller():
         Get the reference of the main window.
 
         Intansiate Export Dialog Box.
-        Connect the signals associated with the Box glad file.
+        Connect the signals associated with the Box glade file.
         Set Box as transient for parent window.
         Set the dimensions of Box which are half of parent window.
 

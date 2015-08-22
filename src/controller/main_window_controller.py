@@ -30,6 +30,7 @@ try:
     from model.channel_store import Channel_Store
     from channel_import_controller import Import_Controller
     from channel_export_controller import Export_Controller
+    from channel_add_controller import Add_Controller
     import common.graphics_util as graphics_util
     from common.json_exporter import JSON_Exporter
     from model.channel_encoder import Channel_Encoder
@@ -113,7 +114,7 @@ class Main_Controller():
         except Exception as msg:
             traceback.print_exc()
 
-        #self.show_monitor_channel()
+        self.show_monitor_channel()
         self.export_sample_monitor()
 
     @exc_handler
@@ -154,7 +155,7 @@ class Main_Controller():
                                 ,channel.get_thumbnail_url()
                                 ,channel.get_description())
         scaled_image = graphics_util.get_scaled_image(image_url,180)
-        for i in range(0,20):
+        for i in range(0,1):
             self.app_window.icon_list_store.append([scaled_image,name,desc])
 
     @exc_handler
@@ -206,8 +207,15 @@ class Main_Controller():
         ,'on_VolumeButton_value_changed'        : self.control_player_volume
         ,'on_Surface_key_press_event'           : self.toggle_status_box
         ,'on_ViewPlayerStatusBox_toggled'       : self.toggle_status_box
+        ,'on_Add_activate'                      : self.add_channel
                 }
         return signals
+
+    def add_channel(self,widget,data=None):
+
+        controller = Add_Controller(self.app_window)
+
+
 
     @exc_handler
     def import_channels(self,widget,data=None):
@@ -373,7 +381,7 @@ class Main_Controller():
         Check whether key pressed  is of type GDK_ESCAPE.
         """
 
-        if self.player_fullscreen == True and data.keyval == 65307:
+        if self.player_fullscreen == True and data.keyval == Gdk.KEY_Escape:
             self.toggle_player_status_bar()
         elif self.player_fullscreen == False:
             self.toggle_player_status_bar()

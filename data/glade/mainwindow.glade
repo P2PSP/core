@@ -84,15 +84,7 @@
                             <property name="can_focus">False</property>
                             <property name="use_underline">True</property>
                             <property name="use_stock">True</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkImageMenuItem" id="Open">
-                            <property name="label">gtk-open</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="use_underline">True</property>
-                            <property name="use_stock">True</property>
+                            <signal name="activate" handler="on_Add_activate" swapped="no"/>
                           </object>
                         </child>
                         <child>
@@ -218,7 +210,6 @@
               <object class="GtkBox" id="PlayerAndStatusBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="opacity">0.75</property>
                 <child>
                   <object class="GtkButton" id="TogglePlaybackButton">
                     <property name="visible">True</property>
