@@ -26,10 +26,8 @@ from gi.repository import Gtk
 class Edit_Controller():
 
     """
-    Add channels.
+    Edit channels.
     
-    This Task is achieved by creating a separate Box after selecting "Add" 
-    SubMenu in File Menu.
     """
     
     def __init__(self,main_window):
@@ -37,7 +35,7 @@ class Edit_Controller():
         """
         Get the reference of the main window.
 
-        Intansiate Add Dialog Box.
+        Intansiate Edit Dialog Box.
         Connect the signals associated with the Box glade file.
         Set Box as transient for parent window.
         Set the dimensions of Box which are half of parent window.
@@ -152,6 +150,6 @@ class Edit_Controller():
     def cancel(self,widget,data=None):
        
         """
-        Close Add Dialog Box.
+        Close Edit Dialog Box.
         """
         self.box.dialog.destroy()

@@ -34,6 +34,7 @@ try:
     from channel_edit_controller import Edit_Controller
     import common.graphics_util as graphics_util
     from common.json_exporter import JSON_Exporter
+    from common.json_importer import JSON_Importer
     from model.channel_encoder import Channel_Encoder
 except ImportError as msg:
     traceback.print_exc()
@@ -115,9 +116,11 @@ class Main_Controller():
         except Exception as msg:
             traceback.print_exc()
 
-        self.show_monitor_channel()
+        #self.show_monitor_channel()
         self.export_sample_monitor()
         
+        
+        self.restore_app_state()
         self.treepath_played = None
 
     @exc_handler
@@ -144,6 +147,25 @@ class Main_Controller():
        exporter  = JSON_Exporter()
        exporter.to_JSON(path,{"monitor":monitor_channel},Channel_Encoder)
 
+    
+    def restore_app_state(self):
+        _file =file_util.find_file(__file__,
+                                   "../../data/channels/saved_channels")
+        if _file == '':
+            return
+        importer = JSON_Importer()
+        self.restored_data = importer.from_JSON(_file)
+        if self.restored_data is not None:
+            all_category = Channel_Store.ALL
+            for channel in self.restored_data:
+                restored_channel = Channel(self.restored_data[channel])
+                all_category.add(channel,restored_channel)
+                (channel_name,image_url,desc) = (channel
+                                ,restored_channel.get_thumbnail_url()
+                                ,restored_channel.get_description())
+                scaled_image = graphics_util.get_scaled_image(image_url,180)
+                self.app_window.icon_list_store.append([scaled_image,channel_name,desc])
+                
     @exc_handler
     def show_monitor_channel(self):#only for testing purpose
 
@@ -297,6 +319,15 @@ class Main_Controller():
         self.app_window.playback_toggle_button.set_image(self.app_window.play_image)
         self.app_window.buffer_status_bar.hide()
 
+
+    def save_app_state(self):
+        exporter  = JSON_Exporter()
+        path = file_util.find_file(__file__,
+                                   "../../data/channels/saved_channels")
+        if path != '':
+            exporter.to_JSON(path
+                            ,Channel_Store.ALL.get_channels()
+                            ,Channel_Encoder)
     @exc_handler
     def quit(self):
 
@@ -308,6 +339,8 @@ class Main_Controller():
         path = file_util.find_file(__file__,
                                     "../../data/channels/to_import_sample_data.p2psp")
         file_util.file_del(path)
+        
+        self.save_app_state()
 
 
     def end_callback(self):
