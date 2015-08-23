@@ -223,7 +223,7 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
 
     def setOnOffAttack(self, value, ratio):
         self.onOffAttack = value
-        self.OnOffRatio = ratio
+        self.onOffRatio = ratio
 
     def setSelectiveAttack(self, value, selected):
         self.selectiveAttack = True
