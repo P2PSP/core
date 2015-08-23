@@ -242,7 +242,8 @@ class Main_Controller():
         ,'on_Add_activate'                      : self.add_channel
         ,'on_Play_activate'                     : self.handle_on_Play
         ,'on_Edit_activate'                     : self.handle_on_Edit
-        ,'on_Remove_activate'                     : self.handle_on_Remove
+        ,'on_Remove_activate'                   : self.handle_on_Remove
+        ,'on_PlayerEventBox_button_press_event' : self.handle_PlayerEventBox
                 }
         return signals
 
@@ -438,13 +439,18 @@ class Main_Controller():
             self.app_window.show_channels_box()
             self.channels_revealed = True
 
+    
+    @exc_handler
+    def handle_PlayerEventBox(self, widget, data=None):
+        if data.type == Gdk.EventType._2BUTTON_PRESS and data.button == 1:
+            self.toggle_player_fullscreen(None,None)
+            
     @exc_handler
     def toggle_player_fullscreen(self, widget, data=None):
 
         """
         Control fullscreen display of media playing in player's window.
         """
-
         if self.player_fullscreen == False:
             self.app_window.hide_all_but_surface()
             self.app_window.window.fullscreen()
