@@ -224,11 +224,30 @@
               </packing>
             </child>
             <child>
-              <object class="GtkDrawingArea" id="Surface">
+              <object class="GtkEventBox" id="PlayerEventBox">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="events">GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
-                <signal name="key-press-event" handler="on_Surface_key_press_event" swapped="no"/>
+                <property name="can_focus">False</property>
+                <signal name="button-press-event" handler="on_PlayerEventBox_button_press_event" swapped="no"/>
+                <child>
+                  <object class="GtkBox" id="box1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkDrawingArea" id="Surface">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="events">GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
+                        <signal name="key-press-event" handler="on_Surface_key_press_event" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">True</property>
