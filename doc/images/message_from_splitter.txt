@@ -1,0 +1,12 @@
+  sending the message repeatedly 
+  so that it arrives at least once: 
+
+  message from splitter
+ -------------------------> 
+  message from splitter (again) 
+ -------------------------> 
+  message from splitter (again) 
+ -------------------------> 
+  (no further message sending, 
+  hopefully the message arrives) 
+

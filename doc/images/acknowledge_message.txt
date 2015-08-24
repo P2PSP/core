@@ -1,0 +1,14 @@
+  sending the message until 
+  acknowledge is received: 
+
+  message from peer
+ <------------------------- 
+  message from peer (retry) 
+ <------------------------- 
+  message from peer (retry) 
+ <------------------------- 
+  message from peer (retry) 
+ <------------------------- 
+  acknowledge from splitter 
+ -------------------------> 
+
