@@ -24,6 +24,7 @@ import argparse
 from color import Color
 from splitter_ims import Splitter_IMS
 from splitter_dbs import Splitter_DBS
+from splitter_nts import Splitter_NTS
 from splitter_fns import Splitter_FNS
 from splitter_acs import Splitter_ACS
 from splitter_lrs import Splitter_LRS
@@ -74,6 +75,8 @@ class Splitter():
 
         parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks. Makes sense only in multicast mode. Default = "{}".'.format(Splitter_IMS.MCAST_ADDR))
 
+        parser.add_argument('--monitor_number', help='Number of monitors in the team. The first connecting peers will automatically become monitors. Default = "{}".'.format(Splitter_DBS.MONITOR_NUMBER))
+
         parser.add_argument('--port', help='Port to serve the peers. Default = "{}".'.format(Splitter_IMS.PORT))
 
         parser.add_argument('--source_addr', help='IP address or hostname of the streaming server. Default = "{}".'.format(Splitter_IMS.SOURCE_ADDR))
@@ -99,6 +102,9 @@ class Splitter():
         if args.header_size:
             Splitter_IMS.HEADER_SIZE = int(args.header_size)
 
+        if args.monitor_number:
+            Splitter_DBS.MONITOR_NUMBER = int(args.monitor_number)
+
         if args.port:
             Splitter_IMS.PORT = int(args.port)
 
@@ -123,9 +129,10 @@ class Splitter():
                 Splitter_DBS.MAX_CHUNK_LOSS = int(args.max_chunk_loss)
 
             #splitter = Splitter_DBS()
+            splitter = Splitter_NTS()
             #splitter = Splitter_FNS()
             #splitter = Splitter_ACS()
-            splitter = Splitter_LRS()
+            #splitter = Splitter_LRS()
 
         # }}}
 
@@ -167,16 +174,17 @@ class Splitter():
                     print(p, end= ' ')
                     sys.stdout.write(Color.red)
                     print(str('%3d' % splitter.losses[p]) + '/' + str('%3d' % chunks_sendto), splitter.MAX_CHUNK_LOSS, end=' ')
-                    try:
-                        sys.stdout.write(Color.yellow)
-                        print('%3d' % splitter.period[p], end= ' ')
-                        sys.stdout.write(Color.purple)
-                        print(repr((splitter.number_of_sent_chunks_per_peer[p] * splitter.CHUNK_SIZE * 8) / 1000).rjust(10), end = ' ')
-                        splitter.number_of_sent_chunks_per_peer[p] = 0
-                    except KeyError as e:
-                        print("!", e, "--")
-                        print(splitter.period[p])
-                        pass
+                    if splitter is Splitter_ACS:
+                        try:
+                            sys.stdout.write(Color.yellow)
+                            print('%3d' % splitter.period[p], end= ' ')
+                            sys.stdout.write(Color.purple)
+                            print(repr((splitter.number_of_sent_chunks_per_peer[p] * splitter.CHUNK_SIZE * 8) / 1000).rjust(10), end = ' ')
+                            splitter.number_of_sent_chunks_per_peer[p] = 0
+                        except KeyError as e:
+                            print("!", e, "--")
+                            print(splitter.period[p])
+                            pass
                     sys.stdout.write(Color.none)
                     print('', end=' ')
                 print()

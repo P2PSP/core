@@ -97,7 +97,7 @@ class Peer_IMS(threading.Thread):
             #my_ip = '127.0.0.1'
         else:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(("gmail.com",80))
+            s.connect(self.splitter)
             #my_ip = socket.gethostbyname(socket.gethostname())
             my_ip = s.getsockname()[0]
             s.close()
@@ -258,24 +258,32 @@ class Peer_IMS(threading.Thread):
         return message, sender
 
         # }}}
-        
+
     def process_next_message(self):
         # {{{
         try:
-            # {{{ Receive a chunk
+            # {{{ Receive the next message and process it
 
             message, sender = self.receive_the_next_message()
-            chunk_number, chunk = self.unpack_message(message)
-            
-            self.chunks[chunk_number % self.buffer_size] = chunk
-            self.received_flag[chunk_number % self.buffer_size] = True
-            self.received_counter += 1
-
-            return chunk_number
+            # The process_message method can be overridden by inheriting peers
+            return self.process_message(message, sender)
 
             # }}}
         except socket.timeout:
             return -2
+
+        # }}}
+
+    def process_message(self, message, sender):
+        # {{{ Receive a chunk
+
+        chunk_number, chunk = self.unpack_message(message)
+
+        self.chunks[chunk_number % self.buffer_size] = chunk
+        self.received_flag[chunk_number % self.buffer_size] = True
+        self.received_counter += 1
+
+        return chunk_number
 
         # }}}
 

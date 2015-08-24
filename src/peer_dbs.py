@@ -68,7 +68,9 @@ class Peer_DBS(Peer_IMS):
         self.peer_list = [] # The list of peers structure.
 
         sys.stdout.write(Color.green)
-        _print_("DBS: Requesting the number of peers to", self.splitter_socket.getpeername())
+        _print_("DBS: Requesting the number of monitors and peers to", self.splitter_socket.getpeername())
+        self.number_of_monitors = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
+        _print_("DBS: The number of monitors is", self.number_of_monitors)
         self.number_of_peers = socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
         _print_("DBS: The size of the team is", self.number_of_peers, "(apart from me)")
 
@@ -139,93 +141,44 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
 
-    def process_next_message(self):
+    def process_message(self, message, sender):
         # {{{ Now, receive and send.
 
-        try:
-            # {{{ Receive and send
+        if len(message) == struct.calcsize(self.message_format):
+            # {{{ A video chunk has been received
 
-            message, sender = self.receive_the_next_message()
+            chunk_number, chunk = self.unpack_message(message)
+            self.chunks[chunk_number % self.buffer_size] = chunk
+            self.received_flag[chunk_number % self.buffer_size] = True
+            self.received_counter += 1
 
-            if len(message) == struct.calcsize(self.message_format):
-                # {{{ A video chunk has been received
+            if sender == self.splitter:
+                # {{{ Send the previous chunk in burst sending
+                # mode if the chunk has not been sent to all
+                # the peers of the list of peers.
 
-                chunk_number, chunk = self.unpack_message(message)
-                self.chunks[chunk_number % self.buffer_size] = chunk
-                self.received_flag[chunk_number % self.buffer_size] = True
-                self.received_counter += 1
+                # {{{ debug
 
-                if sender == self.splitter:
-                    # {{{ Send the previous chunk in burst sending
-                    # mode if the chunk has not been sent to all
-                    # the peers of the list of peers.
+                if __debug__:
+                    _print_("DBS:", self.team_socket.getsockname(), \
+                        Color.red, "<-", Color.none, chunk_number, "-", sender)
 
-                    # {{{ debug
+                # }}}
 
-                    if __debug__:
-                        _print_("DBS:", self.team_socket.getsockname(), \
-                            Color.red, "<-", Color.none, chunk_number, "-", sender)
-
-                    # }}}
-
-                    while( (self.receive_and_feed_counter < len(self.peer_list)) and (self.receive_and_feed_counter > 0) ):
-                        peer = self.peer_list[self.receive_and_feed_counter]
-                        self.team_socket.sendto(self.receive_and_feed_previous, peer)
-                        self.sendto_counter += 1
-
-                        # {{{ debug
-
-                        if __debug__:
-                            print ("DBS:", self.team_socket.getsockname(), "-",\
-                                socket.ntohs(struct.unpack(self.message_format, \
-                                                               self.receive_and_feed_previous)[0]),\
-                                Color.green, "->", Color.none, peer)
-
-                        # }}}
-
-                        self.debt[peer] += 1
-                        if self.debt[peer] > self.MAX_CHUNK_DEBT:
-                            print (Color.red, "DBS:", peer, 'removed by unsupportive (' + str(self.debt[peer]) + ' lossess)', Color.none)
-                            del self.debt[peer]
-                            self.peer_list.remove(peer)
-
-                        self.receive_and_feed_counter += 1
-
-                    self.receive_and_feed_counter = 0
-                    self.receive_and_feed_previous = message
-
-                   # }}}
-                else:
-                    # {{{ The sender is a peer
-
-                    # {{{ debug
-
-                    if __debug__:
-                        print ("DBS:", self.team_socket.getsockname(), \
-                            Color.green, "<-", Color.none, chunk_number, "-", sender)
-
-                    # }}}
-
-                    if sender not in self.peer_list:
-                        # The peer is new
-                        self.peer_list.append(sender)
-                        self.debt[sender] = 0
-                        print (Color.green, "DBS:", sender, 'added by chunk', \
-                            chunk_number, Color.none)
-                    else:
-                        self.debt[sender] -= 1
-
-                    # }}}
-
-                # {{{ A new chunk has arrived and the
-                # previous must be forwarded to next peer of the
-                # list of peers.
-                if ( self.receive_and_feed_counter < len(self.peer_list) and ( self.receive_and_feed_previous != '') ):
-                    # {{{ Send the previous chunk in congestion avoiding mode.
-
+                while( (self.receive_and_feed_counter < len(self.peer_list)) and (self.receive_and_feed_counter > 0) ):
                     peer = self.peer_list[self.receive_and_feed_counter]
                     self.team_socket.sendto(self.receive_and_feed_previous, peer)
                     self.sendto_counter += 1
+
+                    # {{{ debug
+
+                    if __debug__:
+                        print ("DBS:", self.team_socket.getsockname(), "-",\
+                            socket.ntohs(struct.unpack(self.message_format, \
+                                                           self.receive_and_feed_previous)[0]),\
+                            Color.green, "->", Color.none, peer)
+
+                    # }}}
 
                     self.debt[peer] += 1
                     if self.debt[peer] > self.MAX_CHUNK_DEBT:
@@ -233,48 +186,86 @@ class Peer_DBS(Peer_IMS):
                         del self.debt[peer]
                         self.peer_list.remove(peer)
 
-                    # {{{ debug
-
-                    if __debug__:
-                        print ("DBS:", self.team_socket.getsockname(), "-", \
-                            socket.ntohs(struct.unpack(self.message_format, self.receive_and_feed_previous)[0]),\
-                            Color.green, "->", Color.none, peer)
-
-                    # }}}
-
                     self.receive_and_feed_counter += 1
 
-                    # }}}
-                # }}}
-                
-                return chunk_number
+                self.receive_and_feed_counter = 0
+                self.receive_and_feed_previous = message
 
-                # }}}
+               # }}}
             else:
-                # {{{ A control chunk has been received
-                print("DBS: Control received")
-                if message == 'H':
-                    if sender not in self.peer_list:
-                        # The peer is new
-                        self.peer_list.append(sender)
-                        self.debt[sender] = 0
-                        print (Color.green, "DBS:", sender, 'added by [hello]', Color.none)
-                else:
-                    if sender in self.peer_list:
-                        sys.stdout.write(Color.red)
-                        print ("DBS:", self.team_socket.getsockname(), '\b: received "goodbye" from', sender)
-                        sys.stdout.write(Color.none)
-                        self.peer_list.remove(sender)
-                        del self.debt[sender]
-                return -1
+                # {{{ The sender is a peer
+
+                # {{{ debug
+
+                if __debug__:
+                    print ("DBS:", self.team_socket.getsockname(), \
+                        Color.green, "<-", Color.none, chunk_number, "-", sender)
 
                 # }}}
+
+                if sender not in self.peer_list:
+                    # The peer is new
+                    self.peer_list.append(sender)
+                    self.debt[sender] = 0
+                    print (Color.green, "DBS:", sender, 'added by chunk', \
+                        chunk_number, Color.none)
+                else:
+                    self.debt[sender] -= 1
+
+                # }}}
+
+            # {{{ A new chunk has arrived and the
+            # previous must be forwarded to next peer of the
+            # list of peers.
+            if ( self.receive_and_feed_counter < len(self.peer_list) and ( self.receive_and_feed_previous != '') ):
+                # {{{ Send the previous chunk in congestion avoiding mode.
+
+                peer = self.peer_list[self.receive_and_feed_counter]
+                self.team_socket.sendto(self.receive_and_feed_previous, peer)
+                self.sendto_counter += 1
+
+                self.debt[peer] += 1
+                if self.debt[peer] > self.MAX_CHUNK_DEBT:
+                    print (Color.red, "DBS:", peer, 'removed by unsupportive (' + str(self.debt[peer]) + ' lossess)', Color.none)
+                    del self.debt[peer]
+                    self.peer_list.remove(peer)
+
+                # {{{ debug
+
+                if __debug__:
+                    print ("DBS:", self.team_socket.getsockname(), "-", \
+                        socket.ntohs(struct.unpack(self.message_format, self.receive_and_feed_previous)[0]),\
+                        Color.green, "->", Color.none, peer)
+
+                # }}}
+
+                self.receive_and_feed_counter += 1
+
+                # }}}
+            # }}}
+
+            return chunk_number
 
             # }}}
-        except socket.timeout:
-            return -2
-        #except socket.error:
-        #    return -3
+        else:
+            # {{{ A control chunk has been received
+            print("DBS: Control received")
+            if message == 'H':
+                if sender not in self.peer_list:
+                    # The peer is new
+                    self.peer_list.append(sender)
+                    self.debt[sender] = 0
+                    print (Color.green, "DBS:", sender, 'added by [hello]', Color.none)
+            else:
+                if sender in self.peer_list:
+                    sys.stdout.write(Color.red)
+                    print ("DBS:", self.team_socket.getsockname(), '\b: received "goodbye" from', sender)
+                    sys.stdout.write(Color.none)
+                    self.peer_list.remove(sender)
+                    del self.debt[sender]
+            return -1
+
+            # }}}
 
         # }}}
 
@@ -347,8 +338,8 @@ class Peer_DBS(Peer_IMS):
 
     def am_i_a_monitor(self):
         # {{{
-        if self.number_of_peers == 0:
-            # Only the first peer of the team is the monitor peer
+        if self.number_of_peers < self.number_of_monitors:
+            # Only the first peers of the team are monitor peers
             return True
         else:
             return False

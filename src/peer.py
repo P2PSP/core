@@ -36,12 +36,15 @@ except ImportError:
 
 from peer_ims import Peer_IMS
 from peer_dbs import Peer_DBS
+from peer_nts import Peer_NTS
 from peer_fns import Peer_FNS
 from monitor_dbs import Monitor_DBS
+from monitor_nts import Monitor_NTS
 from monitor_fns import Monitor_FNS
 #from peer_lossy import Peer_Lossy
 from monitor_lrs import Monitor_LRS
 from lossy_peer import Lossy_Peer
+from symsp_peer import Symsp_Peer
 
 # }}}
 
@@ -72,6 +75,8 @@ class Peer():
         parser.add_argument('--max_chunk_debt', help='The maximun number of times that other peer can not send a chunk to this peer. Defaut = {}'.format(Peer_DBS.MAX_CHUNK_DEBT))
 
         parser.add_argument('--player_port', help='Port to communicate with the player. Default = {}'.format(Peer_IMS.PLAYER_PORT))
+
+        parser.add_argument('--port_step', help='Source port step forced when behind a sequentially port allocating NAT (conflicts with --chunk_loss_period). Default = {}'.format(Symsp_Peer.PORT_STEP))
 
         parser.add_argument('--splitter_addr', help='IP address or hostname of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_ADDR))
 
@@ -129,6 +134,11 @@ class Peer():
             # {{{ This is an "unicast" peer.
 
             peer = Peer_DBS(peer)
+            if args.port_step:
+                Symsp_Peer.PORT_STEP = int(args.port_step)
+                print('PORT_STEP =', Symsp_Peer.PORT_STEP)
+                if int(args.port_step) != 0:
+                    peer = Symsp_Peer(peer)
             peer.receive_my_endpoint()
             peer.receive_the_number_of_peers()
             print("===============> number_of_peers =", peer.number_of_peers)
@@ -138,10 +148,11 @@ class Peer():
 
             if peer.am_i_a_monitor():
                 #peer = Monitor_DBS(peer)
+                peer = Monitor_NTS(peer)
                 #peer = Monitor_FNS(peer)
-                peer = Monitor_LRS(peer)
+                #peer = Monitor_LRS(peer)
             else:
-                peer = Peer_FNS(peer)
+                peer = Peer_NTS(peer)
                 if args.chunk_loss_period:
                     Lossy_Peer.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
                     print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
