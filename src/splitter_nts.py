@@ -10,6 +10,7 @@
 # {{{ Imports
 import common
 from fractions import gcd
+import Queue
 import random
 import string
 import sys
@@ -72,6 +73,38 @@ class Splitter_NTS(Splitter_DBS):
         self.extra_socket = None
         # The thread listens to self.extra_socket and reports source ports
         threading.Thread(target=self.listen_extra_socket_thread).start()
+
+        # This message queue stores tuples (message, sender) that will be sent
+        # in a dedicated thread instead of the main thread, with a delay between
+        # each message to avoid network congestion.
+        self.message_queue = Queue.Queue()
+        threading.Thread(target=self.send_message_thread).start()
+        # An event that is set for each chunk received by the source
+        self.chunk_received_event = threading.Event()
+
+        # }}}
+
+    def receive_chunk(self):
+        # {{{
+
+        chunk = Splitter_DBS.receive_chunk(self)
+        self.chunk_received_event.set()
+        return chunk
+
+        # }}}
+
+    def send_message_thread(self):
+        # {{{
+
+        while self.alive:
+            # Wait for an enqueued message
+            message, peer = self.message_queue.get()
+            # Send the message
+            self.team_socket.sendto(message, peer)
+            # Wait for a chunk from source to avoid network congestion
+            self.chunk_received_event.wait()
+            self.chunk_received_event.clear()
+            self.message_queue.task_done()
 
         # }}}
 
@@ -388,9 +421,9 @@ class Splitter_NTS(Splitter_DBS):
                         socket.htons(extra_listen_port))
 
             # Hopefully one of these packets arrives
-            self.team_socket.sendto(message, peer)
-            self.team_socket.sendto(message, peer)
-            self.team_socket.sendto(message, peer)
+            self.message_queue.put((message, peer))
+            self.message_queue.put((message, peer))
+            self.message_queue.put((message, peer))
 
         # Send packets to peers currently being incorporated
         for inc_peer_id in self.incorporating_peers:
@@ -407,9 +440,9 @@ class Splitter_NTS(Splitter_DBS):
                 socket.htons(self.port_steps[new_peer]),
                 socket.htons(len(self.peer_list)))
             # Hopefully one of these packets arrives
-            self.team_socket.sendto(message, peer)
-            self.team_socket.sendto(message, peer)
-            self.team_socket.sendto(message, peer)
+            self.message_queue.put((message, peer))
+            self.message_queue.put((message, peer))
+            self.message_queue.put((message, peer))
 
         # }}}
 
@@ -514,7 +547,7 @@ class Splitter_NTS(Splitter_DBS):
                     print('NTS: Received hello (ID %s) from %s' \
                           % (peer_id, sender))
                 # Send acknowledge
-                self.team_socket.sendto(message, sender)
+                self.message_queue.put((message, sender))
                 if peer_id not in self.arriving_peers:
                     if __debug__:
                         print('NTS: Peer ID %s is not an arriving peer' \
@@ -545,7 +578,7 @@ class Splitter_NTS(Splitter_DBS):
                     print('NTS: Received forwarded hello (ID %s) from %s' \
                           % (peer_id, sender))
                 # Send acknowledge
-                self.team_socket.sendto(message, sender)
+                self.message_queue.put((message, sender))
                 if peer_id not in self.arriving_peers:
                     if __debug__:
                         print('NTS: Peer ID %s is not an arriving peer' \
@@ -572,7 +605,7 @@ class Splitter_NTS(Splitter_DBS):
                     print('NTS: Received source port of peer %s from %s' \
                           % (peer_id, sender))
                 # Send acknowledge
-                self.team_socket.sendto(message, sender)
+                self.message_queue.put((message, sender))
 
                 peer = None
                 for peer_data in self.ids.iteritems():
@@ -595,7 +628,7 @@ class Splitter_NTS(Splitter_DBS):
                 # A peer succeeded or failed to be incorporated into the team
                 peer_id = message[:common.PEER_ID_LENGTH]
                 # Send acknowledge
-                self.team_socket.sendto(message, sender)
+                self.message_queue.put((message, sender))
 
                 if peer_id not in self.incorporating_peers:
                     if __debug__:
@@ -645,7 +678,7 @@ class Splitter_NTS(Splitter_DBS):
                     print('NTS: Received forwarded retry hello (ID %s)' \
                           % (peer_id,))
                 # Send acknowledge
-                self.team_socket.sendto(message, sender)
+                self.message_queue.put((message, sender))
                 if peer_id not in self.incorporating_peers:
                     if __debug__:
                         print('NTS: Peer ID %s is not an incorporating peer' \
