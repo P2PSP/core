@@ -1,3 +1,5 @@
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
@@ -56,7 +58,7 @@ class Splitter_DBS(Splitter_IMS):
         self.peer_list = []
 
         # }}}
-        
+
         # {{{ Destination peers of the chunk, indexed by a chunk
         # number. Used to find the peer to which a chunk has been
         # sent.
@@ -103,7 +105,7 @@ class Splitter_DBS(Splitter_IMS):
         self.send_the_list_size(peer_serve_socket)
 
         #peer_serve_socket.sendall(self.message)
-        
+
         if __debug__:
             counter = 0
         for p in self.peer_list:
@@ -143,7 +145,7 @@ class Splitter_DBS(Splitter_IMS):
     def send_configuration(self, sock):
         Splitter_IMS.send_configuration(self, sock)
         self.send_the_peer_endpoint(sock)
-        
+
     def insert_peer(self, peer):
         # {{{
         if peer not in self.peer_list: # Probar a quitar -----------------------------------------------------
@@ -176,9 +178,9 @@ class Splitter_DBS(Splitter_IMS):
         self.insert_peer(incomming_peer)
         serve_socket.close()
         return incomming_peer
-                
+
         # }}}
-        
+
     def receive_message(self):
         # {{{
 
@@ -200,7 +202,7 @@ class Splitter_DBS(Splitter_IMS):
 
     def get_losser(self, lost_chunk_number):
         # {{{
-        
+
         return self.destination_of_chunk[lost_chunk_number % self.BUFFER_SIZE]
 
         # }}}
@@ -252,7 +254,7 @@ class Splitter_DBS(Splitter_IMS):
         destination = self.get_losser(lost_chunk_number)
 
         if __debug__:
-            
+
             sys.stdout.write(Color.cyan)
             print("DBS: ", sender, "complains about lost chunk", lost_chunk_number, "sent to", destination)
             sys.stdout.write(Color.none)
@@ -300,7 +302,7 @@ class Splitter_DBS(Splitter_IMS):
                 # }}}
 
             else:
-                
+
                 # {{{ The peer wants to leave the team.
 
                 # A !2-length payload means that the peer wants to go
@@ -376,7 +378,7 @@ class Splitter_DBS(Splitter_IMS):
 
         message_format = self.chunk_number_format \
                         + str(self.CHUNK_SIZE) + "s"
-                        
+
         #header_load_counter = 0
         while self.alive:
 
@@ -397,4 +399,3 @@ class Splitter_DBS(Splitter_IMS):
         # }}}
 
     # }}}
-

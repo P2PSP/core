@@ -6,8 +6,8 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
-# The P2PSP.org project has been supported by the Junta de Andalucía
-# through the Proyecto Motriz "Codificación de Vídeo Escalable y su
+# The P2PSP.org project has been supported by the Junta de Andalucï¿½a
+# through the Proyecto Motriz "Codificaciï¿½n de Vï¿½deo Escalable y su
 # Streaming sobre Internet" (P10-TIC-6548).
 
 # PYTHON_ARGCOMPLETE_OK
@@ -39,9 +39,12 @@ from peer_dbs import Peer_DBS
 from peer_fns import Peer_FNS
 from monitor_dbs import Monitor_DBS
 from monitor_fns import Monitor_FNS
-#from peer_lossy import Peer_Lossy
 from monitor_lrs import Monitor_LRS
 from lossy_peer import Lossy_Peer
+from malicious_peer import MaliciousPeer
+from trusted_peer import TrustedPeer
+from peer_strpeds import Peer_StrpeDs
+from peer_strpeds_malicious import Peer_StrpeDsMalicious
 
 # }}}
 
@@ -57,7 +60,7 @@ class Peer():
             colorama.init()
         except Exception:
             pass
-    
+
         _print_("Running in", end=' ')
         if __debug__:
             print("debug mode")
@@ -80,6 +83,24 @@ class Peer():
         parser.add_argument('--port', help='Port to communicate with the peers. Default {} (the OS will chose it).'.format(Peer_IMS.PORT))
 
         parser.add_argument('--use_localhost', action="store_true", help='Forces the peer to use localhost instead of the IP of the adapter to connect to the splitter.')
+
+        parser.add_argument('--malicious', action="store_true", help='Enables the malicious activity for peer.')
+
+        parser.add_argument('--persistent', action="store_true", help='Forces the peer to send poisoned chunks to other peers.')
+
+        parser.add_argument('--on_off_ratio', help='Enables on-off attack and sets ratio for on off (from 1 to 100)')
+
+        parser.add_argument('--selective', nargs='+', type=str, help='Enables selective attack for given set of peers.')
+
+        parser.add_argument('--bad_mouth', nargs='+', type=str, help='Enables Bad Mouth attack for given set of peers.')
+
+        parser.add_argument('--trusted', action="store_true", help='Forces the peer to send hashes of chunks to splitter')
+
+        parser.add_argument('--checkall', action="store_true", help='Forces the peer to send hashes of every chunks to splitter (works only with trusted option)')
+
+        parser.add_argument('--strpeds', action="store_true", help='Enables STrPe-DS')
+
+        parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
 
         try:
             argcomplete.autocomplete(parser)
@@ -121,9 +142,8 @@ class Peer():
         peer.receive_the_chunk_size()
         peer.receive_the_header()
         peer.receive_the_buffer_size()
-        #peer.receive_configuration()
         _print_("IP Multicast address =", peer.mcast_addr)
-        
+
         # A multicast address is always received, even for DBS peers.
         if peer.mcast_addr == "0.0.0.0":
             # {{{ This is an "unicast" peer.
@@ -137,8 +157,6 @@ class Peer():
             peer.receive_the_list_of_peers()
 
             if peer.am_i_a_monitor():
-                #peer = Monitor_DBS(peer)
-                #peer = Monitor_FNS(peer)
                 peer = Monitor_LRS(peer)
             else:
                 peer = Peer_FNS(peer)
@@ -147,14 +165,45 @@ class Peer():
                     print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
                     if int(args.chunk_loss_period) != 0:
                         peer = Lossy_Peer(peer)
-                    
-            #peer.receive_my_endpoint()
-            
+
             # }}}
         else:
             peer.listen_to_the_team()
 
         # }}}
+
+        if args.strpeds:
+            peer = Peer_StrpeDs(peer)
+            peer.receive_dsa_key()
+
+        if args.malicious and not args.strpeds: # workaround for malicous strpeds peer
+            peer = MaliciousPeer(peer)
+            if args.persistent:
+                peer.setPersistentAttack(True)
+            if args.on_off_ratio:
+                peer.setOnOffAttack(True, int(args.on_off_ratio))
+            if args.selective:
+                peer.setSelectiveAttack(True, args.selective)
+
+        if args.malicious and args.strpeds:
+            peer = Peer_StrpeDsMalicious(peer)
+            if args.persistent:
+                peer.setPersistentAttack(True)
+            if args.on_off_ratio:
+                peer.setOnOffAttack(True, int(args.on_off_ratio))
+            if args.selective:
+                peer.setSelectiveAttack(True, args.selective)
+            if args.bad_mouth:
+                peer.setBadMouthAttack(True, args.bad_mouth)
+
+        if args.trusted:
+            peer = TrustedPeer(peer)
+            if args.checkall:
+                peer.setCheckAll(True)
+
+        if args.strpe_log != None:
+            peer.LOGGING = True
+            peer.LOG_FILE = open(args.strpe_log, 'w', 0)
 
         # {{{ Run!
         peer.disconnect_from_the_splitter()

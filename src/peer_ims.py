@@ -1,3 +1,5 @@
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
@@ -81,14 +83,14 @@ class Peer_IMS(threading.Thread):
         self.player_socket = self.player_socket.accept()[0]
         #self.player_socket.setblocking(0)
         _print_("The player is", self.player_socket.getpeername())
-        
+
         # }}}
 
     def connect_to_the_splitter(self):
         # {{{ Setup "splitter" and "splitter_socket"
 
         # Nota: Ahora no reconvertimos de TCP a UDP!
-        
+
         self.splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.splitter = (self.SPLITTER_ADDR, self.SPLITTER_PORT)
         print("use_localhost=", self.USE_LOCALHOST)
@@ -120,7 +122,7 @@ class Peer_IMS(threading.Thread):
             print(e)
             sys.exit("Sorry. Can't connect to the splitter at " + str(self.splitter))
         _print_("Connected to the splitter at", self.splitter)
-        
+
         # }}}
 
     def disconnect_from_the_splitter(self):
@@ -129,7 +131,7 @@ class Peer_IMS(threading.Thread):
         self.splitter_socket.close()
 
         # }}}
-        
+
     def receive_the_mcast_endpoint(self):
         # {{{
         message = self.splitter_socket.recv(struct.calcsize("4sH"))
@@ -139,7 +141,7 @@ class Peer_IMS(threading.Thread):
         mcast_endpoint = (self.mcast_addr, self.mcast_port)
         if __debug__:
             print("mcast_endpoint =", mcast_endpoint)
-    
+
         # }}}
 
     def receive_the_header(self):
@@ -176,7 +178,7 @@ class Peer_IMS(threading.Thread):
         self.message_format = "H" + str(self.chunk_size) + "s"
         if __debug__:
             print ("message_format = ", self.message_format)
-        
+
         # }}}
 
     def receive_the_header_size(self):
@@ -221,13 +223,13 @@ class Peer_IMS(threading.Thread):
         mreq = struct.pack("4sl", socket.inet_aton(self.mcast_addr), socket.INADDR_ANY)
         self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         _print_("Listening to the mcast_channel =", (self.mcast_addr, self.mcast_port))
-        
+
         # This is the maximum time the peer will wait for a chunk
         # (from the splitter).
         self.team_socket.settimeout(1)
         if __debug__:
             print(self.team_socket.getsockname(), "\b.timeout = 1")
-        
+
         # }}}
 
     def unpack_message(self, message):
@@ -239,7 +241,7 @@ class Peer_IMS(threading.Thread):
         return chunk_number, chunk
 
         # }}}
-        
+
     def receive_the_next_message(self):
         # {{{
 
@@ -317,7 +319,7 @@ class Peer_IMS(threading.Thread):
         # buffer_size: the smaller the buffer size, the lower start-up
         # time, the higher chunk-loss ratio. However, for the sake of
         # simpliticy, all peers will use the same buffer size.
-        
+
         self.chunks = [""]*self.buffer_size
         self.received_flag = [False]*self.buffer_size
         self.received_counter = 0
@@ -414,7 +416,7 @@ class Peer_IMS(threading.Thread):
 
     def play(self):
         # {{{
-        
+
         while self.player_alive:
             #self.keep_the_buffer_full()
             self.play_next_chunk()
@@ -431,7 +433,7 @@ class Peer_IMS(threading.Thread):
     ##     self.receive_the_buffer_size()
 
     ##     # }}}
-        
+
     def keep_the_buffer_full(self):
         # {{{
 

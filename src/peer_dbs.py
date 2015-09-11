@@ -1,3 +1,5 @@
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
@@ -34,6 +36,9 @@ class Peer_DBS(Peer_IMS):
 
     MAX_CHUNK_DEBT = 128
 
+    LOGGING = False
+    LOG_FILE = ""
+
     # }}}
 
     def __init__(self, peer):
@@ -44,7 +49,7 @@ class Peer_DBS(Peer_IMS):
         sys.stdout.write(Color.none)
 
         _print_("DBS: max_chunk_debt =", self.MAX_CHUNK_DEBT)
-        
+
         # }}}
 
     def say_hello(self, node):
@@ -110,7 +115,7 @@ class Peer_DBS(Peer_IMS):
         sys.stdout.write(Color.none)
 
         # }}}
-        
+
     def receive_my_endpoint(self):
         # {{{
 
@@ -122,7 +127,7 @@ class Peer_DBS(Peer_IMS):
         _print_("DBS: me =", self.me)
 
         # }}}
-        
+
     def listen_to_the_team(self):
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
@@ -162,6 +167,10 @@ class Peer_DBS(Peer_IMS):
                 if __debug__:
                     _print_("DBS:", self.team_socket.getsockname(), \
                         Color.red, "<-", Color.none, chunk_number, "-", sender)
+
+                if self.LOGGING:
+                    self.log_message("buffer correctnes {0}".format(self.calc_buffer_correctnes()))
+                    self.log_message("buffer filling {0}".format(self.calc_buffer_filling()))
 
                 # }}}
 
@@ -326,7 +335,7 @@ class Peer_DBS(Peer_IMS):
         Peer_IMS.buffer_data(self)
 
         # }}}
-        
+
     def run(self):
         # {{{
 
@@ -352,3 +361,28 @@ class Peer_DBS(Peer_IMS):
         # }}}
 
     # }}}
+
+    def calc_buffer_correctnes(self):
+        zerochunk = struct.pack("1024s", "0")
+        goodchunks = badchunks = 0
+        for i in range(self.buffer_size):
+            if self.received_flag[i]:
+                if self.chunks[i] == zerochunk:
+                    badchunks += 1
+                else:
+                    goodchunks += 1
+        return goodchunks / float(goodchunks + badchunks)
+
+    def calc_buffer_filling(self):
+        chunks = 0
+        for i in range(self.buffer_size):
+            if self.received_flag[i]:
+                chunks += 1
+        return chunks / float(self.buffer_size)
+
+    def log_message(self, message):
+        self.LOG_FILE.write(self.build_log_message(message) + "\n")
+        #print >>self.LOG_FILE, self.build_log_message(message)
+
+    def build_log_message(self, message):
+        return "{0}\t{1}".format(repr(time.time()), message)

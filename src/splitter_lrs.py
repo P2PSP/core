@@ -1,3 +1,5 @@
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
@@ -62,7 +64,7 @@ class Splitter_LRS(Splitter_ACS):
 
         Splitter_ACS.send_chunk(self, message, peer)
         self.buffer[self.chunk_number % self.BUFFER_SIZE] = message
-        
+
         # }}}
 
 

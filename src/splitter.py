@@ -6,8 +6,8 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
-# The P2PSP.org project has been supported by the Junta de Andalucía
-# through the Proyecto Motriz "Codificación de Vídeo Escalable y su
+# The P2PSP.org project has been supported by the Junta de Andalucï¿½a
+# through the Proyecto Motriz "Codificaciï¿½n de Vï¿½deo Escalable y su
 # Streaming sobre Internet" (P10-TIC-6548).
 
 # PYTHON_ARGCOMPLETE_OK
@@ -27,6 +27,8 @@ from splitter_dbs import Splitter_DBS
 from splitter_fns import Splitter_FNS
 from splitter_acs import Splitter_ACS
 from splitter_lrs import Splitter_LRS
+from splitter_strpe import StrpeSplitter
+from splitter_strpeds import StrpeDsSplitter
 import common
 from _print_ import _print_
 try:
@@ -82,6 +84,14 @@ class Splitter():
 
         parser.add_argument('--source_port', help='Port where the streaming server is listening. Default = {}.'.format(Splitter_IMS.SOURCE_PORT))
 
+        parser.add_argument('--strpe', nargs='+', type=str, help='Enables STrPe')
+
+        parser.add_argument('--strpeds', nargs='+', type=str, help='Enables STrPe-DS')
+
+        parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
+
+        parser.add_argument('--strpeds_majority_decision', help='Set majority decision ratio.')
+
         try:
             argcomplete.autocomplete(parser)
         except Exception:
@@ -123,14 +133,20 @@ class Splitter():
             splitter.peer_list = []
 
         else:
-
             if args.max_chunk_loss:
                 Splitter_DBS.MAX_CHUNK_LOSS = int(args.max_chunk_loss)
 
             #splitter = Splitter_DBS()
             #splitter = Splitter_FNS()
             #splitter = Splitter_ACS()
-            splitter = Splitter_LRS()
+            if (args.strpe):
+                splitter = self.init_strpe_splitter('strpe', args.strpe, args.strpe_log)
+            elif (args.strpeds):
+                splitter = self.init_strpe_splitter('strpeds', args.strpeds, args.strpe_log)
+                if args.strpeds_majority_decision:
+                    splitter.setMajorityRatio(float(args.strpeds_majority_decision))
+            else:
+                splitter = Splitter_LRS()
 
         # }}}
 
@@ -223,5 +239,18 @@ class Splitter():
             # }}}
 
         # }}}
+
+    def init_strpe_splitter(self, type, trusted_peers, log_file = None):
+        if type == 'strpe':
+            re = StrpeSplitter()
+        if type == 'strpeds':
+            re = StrpeDsSplitter()
+        for peer in trusted_peers:
+            re.add_trusted_peer(peer)
+        if log_file != None:
+            re.LOGGING = True
+            re.LOG_FILE = open(log_file, 'w', 0)
+        return re
+
 
 x = Splitter()
