@@ -15,8 +15,9 @@ from color import Color
 import common
 import time
 from _print_ import _print_
-from peer_ims import Peer_IMS
-from peer_dbs import Peer_DBS
+#from peer_ims import Peer_IMS
+#from peer_dbs import Peer_DBS
+from peer_nts import Peer_NTS
 from Crypto.PublicKey import DSA
 from Crypto.Hash import SHA256
 
@@ -24,7 +25,7 @@ from Crypto.Hash import SHA256
 ADDR = 0
 PORT = 1
 
-class Peer_StrpeDs(Peer_DBS):
+class Peer_StrpeDs(Peer_NTS):
 
     def __init__(self, peer):
         sys.stdout.write(Color.yellow)

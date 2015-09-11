@@ -18,10 +18,11 @@ from Crypto.Random import random
 from Crypto.PublicKey import DSA
 from Crypto.Hash import SHA256
 from splitter_dbs import Splitter_DBS
-from splitter_lrs import Splitter_LRS
+#from splitter_lrs import Splitter_LRS
+from splitter_nts import Splitter_NTS
 import time
 
-class StrpeDsSplitter(Splitter_LRS):
+class StrpeDsSplitter(Splitter_NTS):
 
     DIGEST_SIZE = 40
     GATHER_BAD_PEERS_SLEEP = 5
