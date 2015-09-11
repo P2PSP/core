@@ -25,6 +25,7 @@ import threading
 from lossy_socket import lossy_socket
 import common
 from _print_ import _print_
+from gi.repository import GObject
 try:
     import colorama
 except ImportError:
@@ -48,6 +49,10 @@ from trusted_peer import TrustedPeer
 from peer_strpeds import Peer_StrpeDs
 from peer_strpeds_malicious import Peer_StrpeDsMalicious
 from symsp_peer import Symsp_Peer
+try:
+    from adapter import speed_adapter
+except ImportError as msg:
+    pass
 
 # }}}
 
@@ -251,6 +256,13 @@ class Peer():
             kbps_expected_sent = int(kbps_expected_recv*team_ratio)
             kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
             last_sendto_counter = peer.sendto_counter
+            try:
+                if common.CONSOLE_MODE == False :
+                    GObject.idle_add(speed_adapter.update_widget,str(kbps_recvfrom) + ' kbps'
+                                            ,str(kbps_sendto) + ' kbps'
+                                            ,str(len(peer.peer_list)+1))
+            except Exception as msg:
+                pass
             if kbps_recvfrom > 0 and kbps_expected_recv > 0:
                 nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
             else:
@@ -281,7 +293,11 @@ class Peer():
                 else:
                     break
             print()
-
+        try:
+            if common.CONSOLE_MODE == False :
+                GObject.idle_add(speed_adapter.update_widget,str(0)+' kbps',str(0)+' kbps',str(0))
+        except  Exception as msg:
+            pass
             # }}}
 if __name__ == "__main__":
     x = Peer()

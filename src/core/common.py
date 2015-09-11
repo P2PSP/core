@@ -11,3 +11,4 @@ HELLO_PACKET_TIMING = 1 # Time between continuously sent packets
 MAX_PEER_ARRIVING_TIME = 15 # Maximum time after peer retries incorporation
 MAX_TOTAL_INCORPORATION_TIME = 60 # Peers needing longer to incorporate are removed from team
 MAX_PREDICTED_PORTS = 20 # Number of probable source ports that will be tried
+CONSOLE_MODE = True

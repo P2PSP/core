@@ -20,6 +20,12 @@ from color import Color
 import common
 import time
 from _print_ import _print_
+from gi.repository import GObject
+try:
+    from adapter import buffering_adapter
+except ImportError as msg:
+    pass
+
 
 # }}}
 
@@ -34,6 +40,7 @@ class Peer_IMS(threading.Thread):
     SPLITTER_PORT = 4552        # Port of the splitter.
     PORT = 0                    # TCP->UDP port used to communicate.
     USE_LOCALHOST = False       # Use localhost instead the IP of the addapter
+    BUFFER_STATUS = int(0)
 
     # }}}
 
@@ -53,7 +60,6 @@ class Peer_IMS(threading.Thread):
 
     def __init__(self):
         # {{{
-
         threading.Thread.__init__(self)
         sys.stdout.write(Color.yellow)
         _print_("Peer IMS")
@@ -358,6 +364,11 @@ class Peer_IMS(threading.Thread):
         # Now, fill up to the half of the buffer.
         for x in range(int(self.buffer_size/2)):
             _print_("{:.2%}\r".format((1.0*x)/(self.buffer_size/2)), end='')
+            BUFFER_STATUS = (100*x)/(self.buffer_size/2) +1
+            if common.CONSOLE_MODE == False :
+                GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
+            else:
+                pass
             #print("!", end='')
             sys.stdout.flush()
             while self.process_next_message() < 0:
