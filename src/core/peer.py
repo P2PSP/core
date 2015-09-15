@@ -1,4 +1,4 @@
-#!/usr/bin/python -O
+#!/usr/bin/env python -O
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -173,11 +173,12 @@ class Peer():
 
             if peer.am_i_a_monitor():
                 #peer = Monitor_LRS(peer)
-                #peer = Monitor_DBS(peer)
-                peer = Monitor_NTS(peer)
+                peer = Monitor_DBS(peer)
+                #peer = Monitor_NTS(peer)
                 #peer = Monitor_FNS(peer)
             else:
-                peer = Peer_NTS(peer)
+                peer= Peer_NTS(peer)
+                #peer = Peer_NTS(peer)
                 if args.chunk_loss_period:
                     Lossy_Peer.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
                     print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)

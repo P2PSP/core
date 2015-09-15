@@ -1,4 +1,4 @@
-#!/usr/bin/python -O
+#!/usr/bin/env python -O
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -137,8 +137,8 @@ class Splitter():
             if args.max_chunk_loss:
                 Splitter_DBS.MAX_CHUNK_LOSS = int(args.max_chunk_loss)
 
-            #splitter = Splitter_DBS()
-            splitter = Splitter_NTS()
+            splitter = Splitter_DBS()
+            #splitter = Splitter_NTS()
             #splitter = Splitter_FNS()
             #splitter = Splitter_ACS()
             if (args.strpe):
