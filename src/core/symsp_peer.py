@@ -8,11 +8,13 @@
 # Streaming sobre Internet" (P10-TIC-6548).
 
 # {{{ Imports
+
 import sys
 import socket
 from peer_dbs import Peer_DBS
 from color import Color
 from symsp_socket import symsp_socket
+
 # }}}
 
 # Some useful definitions.

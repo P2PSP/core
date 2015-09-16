@@ -131,7 +131,10 @@ class Peer_IMS(threading.Thread):
             self.splitter_socket.connect(self.splitter)
         except Exception as e:
             _p_(e)
-            sys.exit("Sorry. Can't connect to the splitter at " + str(self.splitter))
+            #sys.stdout.write(Color.red)
+            #sys.exit("Sorry. Can't connect to the splitter at " + str(self.splitter))
+            #sys.stdout.write(Color.none)
+            sys.exit()
         _p_("Connected to the splitter at", self.splitter)
 
         # }}}
@@ -367,7 +370,7 @@ class Peer_IMS(threading.Thread):
 
         # Now, fill up to the half of the buffer.
         for x in range(int(self.buffer_size/2)):
-            _p_("{:.2%}\r".format((1.0*x)/(self.buffer_size/2)), end='')
+            _print_("{:.2%}\r".format((1.0*x)/(self.buffer_size/2)), end='')
             BUFFER_STATUS = (100*x)/(self.buffer_size/2) +1
             if common.CONSOLE_MODE == False :
                 GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)

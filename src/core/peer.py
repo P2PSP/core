@@ -34,6 +34,7 @@ except ImportError:
 
 from peer_ims import Peer_IMS
 from peer_dbs import Peer_DBS
+from symsp_peer import Symsp_Peer
 
 # }}}
 
@@ -131,7 +132,9 @@ class Peer():
             _print_("Am I a monitor peer? =", peer.am_i_a_monitor())
             peer.listen_to_the_team()
             peer.receive_the_list_of_peers()
+            _print_("List of peers received")
             peer.receive_magic_flags()
+            _print_("Magic flags =", peer.magic_flags)
 
             # After receiving the list of peers, the peer can check
             # whether is a monitor peer or not (only the first
@@ -181,7 +184,6 @@ class Peer():
                 Symsp_Peer.PORT_STEP = int(args.port_step)
                 print('PORT_STEP =', Symsp_Peer.PORT_STEP)
                 if int(args.port_step) != 0:
-                    from symsp_peer import Symsp_Peer
                     peer = Symsp_Peer(peer)
 
             if args.strpeds:

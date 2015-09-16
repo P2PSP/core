@@ -40,10 +40,16 @@ class Splitter():
 
     def __init__(self):
 
+        # {{{ colorama.init()
+
         try:
             colorama.init()
         except Exception:
             pass
+
+        # }}}
+
+        # {{{ Running in debug/release mode
 
         _print_("Running in", end=' ')
         if __debug__:
@@ -51,7 +57,9 @@ class Splitter():
         else:
             print("release mode")
 
-        # {{{ General parameters
+        # }}}
+
+        # {{{ Arguments handling
 
         parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP team.  The splitter is in charge of defining the Set or Rules (SoR) that will control the team. By default, DBS (unicast transmissions) will be used.')
         #parser.add_argument('--splitter_addr', help='IP address to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR)) <- no ahora
@@ -268,6 +276,8 @@ class Splitter():
 
         # }}}
 
+    # {{{# -COM-
+
     def init_strpe_splitter(self, type, trusted_peers, log_file = None):
         if type == 'strpe':
             re = StrpeSplitter()
@@ -279,6 +289,8 @@ class Splitter():
             re.LOGGING = True
             re.LOG_FILE = open(log_file, 'w', 0)
         return re
+
+    # }}}
 
 
 x = Splitter()

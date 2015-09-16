@@ -72,7 +72,7 @@ class Peer_DBS(Peer_IMS):
         # }}}
 
     def receive_magic_flags(self):
-        self.magic_flags = struck.unpack("B",self.splitter_socket.revc(struct.calcsize("B")))[0]
+        self.magic_flags = struct.unpack("B",self.splitter_socket.recv(struct.calcsize("B")))[0]
         if __debug__:
             _p_("Magic flags =", self.magic_flags)
         
