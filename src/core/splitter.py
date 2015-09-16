@@ -1,14 +1,10 @@
-#!/usr/bin/env python -O
+#!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
-
-# The P2PSP.org project has been supported by the Junta de Andaluc�a
-# through the Proyecto Motriz "Codificaci�n de V�deo Escalable y su
-# Streaming sobre Internet" (P10-TIC-6548).
 
 # PYTHON_ARGCOMPLETE_OK
 
@@ -20,26 +16,24 @@ import sys
 import socket
 import threading
 import struct
-import argparse
-from color import Color
+
 from splitter_ims import Splitter_IMS
 from splitter_dbs import Splitter_DBS
-from splitter_nts import Splitter_NTS
-from splitter_fns import Splitter_FNS
-from splitter_acs import Splitter_ACS
-from splitter_lrs import Splitter_LRS
-from splitter_strpe import StrpeSplitter
-from splitter_strpeds import StrpeDsSplitter
 import common
 from _print_ import _print_
+
+from color import Color
 try:
-    import colorama
+    import colorama                       # Enable console color using ANSI codes in Windows
 except ImportError:
     pass
+
+import argparse
 try:
-    import argcomplete
+    import argcomplete                    # Bash tab completion for argparse in Unixes
 except ImportError:
     pass
+
 # }}}
 
 class Splitter():
@@ -57,41 +51,29 @@ class Splitter():
         else:
             print("release mode")
 
-        # {{{ Args parsing and instantiation
+        # {{{ General parameters
 
-        parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP team.')
-
+        parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP team.  The splitter is in charge of defining the Set or Rules (SoR) that will control the team. By default, DBS (unicast transmissions) will be used.')
         #parser.add_argument('--splitter_addr', help='IP address to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR)) <- no ahora
-
         parser.add_argument('--buffer_size', help='size of the video buffer in blocks. Default = {}.'.format(Splitter_IMS.BUFFER_SIZE))
-
         parser.add_argument('--channel', help='Name of the channel served by the streaming source. Default = "{}".'.format(Splitter_IMS.CHANNEL))
-
         parser.add_argument('--chunk_size', help='Chunk size in bytes. Default = {}.'.format(Splitter_IMS.CHUNK_SIZE))
-
         parser.add_argument('--header_size', help='Size of the header of the stream in chunks. Default = {}.'.format(Splitter_IMS.HEADER_SIZE))
-
         parser.add_argument('--max_chunk_loss', help='Maximum number of lost chunks for an unsupportive peer. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.MAX_CHUNK_LOSS))
-
-        parser.add_argument("--mcast", action="store_true", help="Uses the IP multicast infrastructure, if available.")
-
+        parser.add_argument('--max_number_of_monitor_peers', help='Maxium number of monitors in the team. The first connecting peers will automatically become monitors. Default = "{}".'.format(Splitter_DBS.MONITOR_NUMBER))
         parser.add_argument('--mcast_addr', help='IP multicast address used to serve the chunks. Makes sense only in multicast mode. Default = "{}".'.format(Splitter_IMS.MCAST_ADDR))
-
-        parser.add_argument('--monitor_number', help='Number of monitors in the team. The first connecting peers will automatically become monitors. Default = "{}".'.format(Splitter_DBS.MONITOR_NUMBER))
-
         parser.add_argument('--port', help='Port to serve the peers. Default = "{}".'.format(Splitter_IMS.PORT))
-
         parser.add_argument('--source_addr', help='IP address or hostname of the streaming server. Default = "{}".'.format(Splitter_IMS.SOURCE_ADDR))
-
         parser.add_argument('--source_port', help='Port where the streaming server is listening. Default = {}.'.format(Splitter_IMS.SOURCE_PORT))
-
-        parser.add_argument('--strpe', nargs='+', type=str, help='Enables STrPe')
-
-        parser.add_argument('--strpeds', nargs='+', type=str, help='Enables STrPe-DS')
-
+        parser.add_argument("--IMS", action="store_true", help="Uses the IP multicast infrastructure, if available. IMS mode is incompatible with ACS, LRS, DIS and NTS modes.")
+        parser.add_argument("--NTS", action="store_true", help="Enables NAT traversal.")
+        parser.add_argument("--ACS", action="store_true", help="Enables Adaptive Chunk-rate.")
+        parser.add_argument("--LRS", action="store_true", help="Enables Lost chunk Recovery.")
+        parser.add_argument("--DIS", action="store_true", help="Enables Data Integrity check.")
+        parser.add_argument('--strpe', nargs='+', type=str, help='Selects STrPe model for DIS')
+        parser.add_argument('--strpeds', nargs='+', type=str, help='Selects STrPe-DS model for DIS')
+        parser.add_argument('--strpeds_majority_decision', help='Sets majority decision ratio for STrPe-DS model.')
         parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
-
-        parser.add_argument('--strpeds_majority_decision', help='Set majority decision ratio.')
 
         try:
             argcomplete.autocomplete(parser)
@@ -102,53 +84,96 @@ class Splitter():
 
         if args.buffer_size:
             Splitter_IMS.BUFFER_SIZE = int(args.buffer_size)
+        _print_("Buffer size =", Splitter_IMS.BUFFER_SIZE)
 
         if args.channel:
             Splitter_IMS.CHANNEL = args.channel
+        _print_("Channel = \"" + Splitter_IMS.CHANNEL + "\"")
 
         if args.chunk_size:
             Splitter_IMS.CHUNK_SIZE = int(args.chunk_size)
+        _print_("Chunk size =", Splitter_IMS.CHUNK_SIZE)
 
         if args.header_size:
             Splitter_IMS.HEADER_SIZE = int(args.header_size)
-
-        if args.monitor_number:
-            Splitter_DBS.MONITOR_NUMBER = int(args.monitor_number)
+        _print_("Header size =", Splitter_IMS.HEADER_SIZE)
 
         if args.port:
             Splitter_IMS.PORT = int(args.port)
+        _print_("Listening port =", Splitter_IMS.PORT)
 
         if args.source_addr:
             Splitter_IMS.SOURCE_ADDR = socket.gethostbyname(args.source_addr)
+        _print_("Source address = ", Splitter_IMS.SOURCE_ADDR)
 
         if args.source_port:
             Splitter_IMS.SOURCE_PORT = int(args.source_port)
+        _print_("Source port =", Splitter_IMS.SOURCE_PORT)
 
-        if args.mcast:
-            print("IP multicast mode selected")
+        if args.IMS:
+            _print_("IP multicast (IMS) mode selected")
 
             if args.mcast_addr:
-                Splitter_IMS.MCAST_ADDR = args.mcast_addr
+                    Splitter_IMS.MCAST_ADDR = args.mcast_addr
 
             splitter = Splitter_IMS()
-            splitter.peer_list = []
-
+            splitter.peer_list = [] # No peer_list is used in IMS.
+                
         else:
+            _print_("IP unicast mode selected")
+
             if args.max_chunk_loss:
                 Splitter_DBS.MAX_CHUNK_LOSS = int(args.max_chunk_loss)
+            _print_("Maximun chunk loss =", Splitter_DBS.MAX_CHUNK_LOSS)
+
+            if args.max_number_of_monitor_peers:
+                Splitter_DBS.MONITOR_NUMBER = int(args.monitor_number)
+            _print_("Maximun number of monitor peers =", Splitter_DBS.MONITOR_NUMBER)
 
             splitter = Splitter_DBS()
-            #splitter = Splitter_NTS()
-            #splitter = Splitter_FNS()
+            if args.NTS:
+                from splitter_nts import Splitter_NTS
+                splitter = Splitter_NTS(splitter)
+                _print_("NTS enabled")
+            if args.ACS:
+                from splitter_acs import Splitter_ACS
+                splitter = Splitter_ACS(splitter)
+                _print_("ACS enabled")
+            if args.LRS:
+                from splitter_lrs import Splitter_LRS
+                splitter = Splitter_LRS(splitter)
+                _print_("LRS enabled")
+            if args.DIS:
+                from splitter_strpe import StrpeSplitter
+                from splitter_strpeds import StrpeDsSplitter
+                _print_("DIS enabled")
+                if args.strpe:
+                    splitter = Splitter_strpe(splitter)
+                    print("strpe mode selected")
+                    for peer in args.strpe:
+                        splitter.add_trusted_peer(peer)
+                if args.strpeds:
+                    splitter = StrpeSplitter(splitter)
+                    _print_("strpeds mode selected")
+                    for peer in args.strpeds:
+                        splitter.add_trusted_peer(peer)
+                    if args.strpeds_majority_decision:
+                        _print_("strpeds_majority_decision mode selected")
+                        splitter = Splitter_strpeds_majority_decision(splitter)
+                        splitter.setMajorityRatio(float(args.strpeds_majority_decision))
+                if args.strpe_log:
+                    splitter.LOGGING = True
+                    splitter.LOG_FILE = open(strpe_log, 'w', 0)
+
             #splitter = Splitter_ACS()
-            if (args.strpe):
-                splitter = self.init_strpe_splitter('strpe', args.strpe, args.strpe_log)
-            elif (args.strpeds):
-                splitter = self.init_strpe_splitter('strpeds', args.strpeds, args.strpe_log)
-                if args.strpeds_majority_decision:
-                    splitter.setMajorityRatio(float(args.strpeds_majority_decision))
-            else:
-                splitter = Splitter_LRS()
+#            if (args.strpe):
+#                splitter = self.init_strpe_splitter('strpe', args.strpe, args.strpe_log)
+#            elif (args.strpeds):
+#                splitter = self.init_strpe_splitter('strpeds', args.strpeds, args.strpe_log)
+#                if args.strpeds_majority_decision:
+#                    splitter.setMajorityRatio(float(args.strpeds_majority_decision))
+#            else:
+#                splitter = Splitter_LRS()
 
         # }}}
 
@@ -208,16 +233,16 @@ class Splitter():
             except KeyboardInterrupt:
                 print('Keyboard interrupt detected ... Exiting!')
 
-                # Say to the daemon threads that the work has been finished,
+                # Say to daemon threads that the work has been finished,
                 splitter.alive = False
 
-                # Wake up the "moderate_the_team" daemon, which is waiting
-                # in a cluster_sock.recvfrom(...).
-                if not args.mcast:
+                # Wake up the "moderate_the_team" daemon, which is
+                # waiting in a recvfrom().
+                if not args.IMS:
                     splitter.say_goodbye(("127.0.0.1", splitter.PORT), splitter.team_socket)
 
                 # Wake up the "handle_arrivals" daemon, which is waiting
-                # in a peer_connection_sock.accept().
+                # in a accept().
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.connect(("127.0.0.1", splitter.PORT))
                 sock.recv(struct.calcsize("4sH")) # Multicast channel
@@ -225,7 +250,7 @@ class Splitter():
                 sock.recv(struct.calcsize("H")) # Chunk size
                 sock.recv(splitter.CHUNK_SIZE*splitter.HEADER_SIZE) # Header
                 sock.recv(struct.calcsize("H")) # Buffer size
-                if args.mcast:
+                if args.IMS:
                     number_of_peers = 0
                 else:
                     number_of_peers = socket.ntohs(struct.unpack("H", sock.recv(struct.calcsize("H")))[0])

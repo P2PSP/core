@@ -5,9 +5,7 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
-# The P2PSP.org project has been supported by the Junta de Andalucia
-# through the Proyecto Motriz "Codificacion de Video Escalable y su
-# Streaming sobre Internet" (P10-TIC-6548).
+# DBS: Data Broadcasting Set of rules
 
 # {{{ Imports
 
@@ -23,7 +21,6 @@ import common
 
 # }}}
 
-# DBS: Data Broadcasting Set of rules
 class Monitor_DBS(Peer_DBS):
     # {{{
 

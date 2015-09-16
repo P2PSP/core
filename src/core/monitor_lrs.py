@@ -5,9 +5,7 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
-# The P2PSP.org project has been supported by the Junta de Andalucia
-# through the Proyecto Motriz "Codificacion de Video Escalable y su
-# Streaming sobre Internet" (P10-TIC-6548).
+# LRS: Lost chunks Recovery Set of rules
 
 # {{{ Imports
 
@@ -19,8 +17,7 @@ from color import Color
 
 # }}}
 
-# LRS: Lost chunks Recovery Set of rules
-class Monitor_LRS(Monitor_FNS):
+class Monitor_LRS(Monitor_DBS):
     # {{{
 
     def __init__(self, peer):
