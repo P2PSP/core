@@ -19,7 +19,7 @@ import traceback
 try:
     import core.peer as peer
     import core.common as common
-    from core.peer_ims import  Peer_IMS
+    from core.peer_ims_gui import Peer_IMS_GUI # Peer_IMS should use only the console :-/
     from common.decorators import exc_handler
 except ImportError as msg:
     traceback.print_exc()

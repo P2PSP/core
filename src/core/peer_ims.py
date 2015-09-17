@@ -18,7 +18,7 @@ from color import Color
 import common
 import time
 from _print_ import _print_
-from gi.repository import GObject
+#from gi.repository import GObject
 try:
     from adapter import buffering_adapter
 except ImportError as msg:
@@ -372,10 +372,10 @@ class Peer_IMS(threading.Thread):
         for x in range(int(self.buffer_size/2)):
             _print_("{:.2%}\r".format((1.0*x)/(self.buffer_size/2)), end='')
             BUFFER_STATUS = (100*x)/(self.buffer_size/2) +1
-            if common.CONSOLE_MODE == False :
-                GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
-            else:
-                pass
+            #if common.CONSOLE_MODE == False :
+            #    GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
+            #else:
+            #    pass
             #print("!", end='')
             sys.stdout.flush()
             while self.process_next_message() < 0:

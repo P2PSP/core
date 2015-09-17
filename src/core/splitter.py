@@ -19,6 +19,7 @@ import struct
 
 from splitter_ims import Splitter_IMS
 from splitter_dbs import Splitter_DBS
+from splitter_acs import Splitter_ACS
 import common
 from _print_ import _print_
 
@@ -144,7 +145,6 @@ class Splitter():
                 splitter = Splitter_NTS(splitter)
                 _print_("NTS enabled")
             if args.ACS:
-                from splitter_acs import Splitter_ACS
                 splitter = Splitter_ACS(splitter)
                 _print_("ACS enabled")
             if args.LRS:

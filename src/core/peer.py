@@ -109,7 +109,7 @@ class Peer():
 
         if args.use_localhost:
             Peer_IMS.USE_LOCALHOST = True
-        _print_('Using localhost address')
+            _print_('Using localhost address')
 
         peer = Peer_IMS()
         peer.wait_for_the_player()
