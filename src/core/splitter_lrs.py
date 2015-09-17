@@ -5,9 +5,7 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
-# The P2PSP.org project has been supported by the Junta de Andalucia
-# through the Proyecto Motriz "Codificacion de Video Escalable y su
-# Streaming sobre Internet" (P10-TIC-6548).
+# LRS: Lost chunk Recovery Set of rules
 
 # {{{ Imports
 
@@ -20,49 +18,58 @@ import time
 from color import Color
 import common
 from _print_ import _print_
-from splitter_ims import Splitter_IMS
+#from splitter_ims import Splitter_IMS
 from splitter_dbs import Splitter_DBS
-from splitter_fns import Splitter_FNS
-from splitter_acs import Splitter_ACS
+#from splitter_fns import Splitter_FNS
+#from splitter_acs import Splitter_ACS
 
 # }}}
 
-# LRS: Lost chunk Recovery Set of rules
-class Splitter_LRS(Splitter_ACS):
+def _p_(*args, **kwargs):
+    """Colorize the output."""
+    sys.stdout.write(Color.cyan)
+    _print_("LRS:", *args)
+    sys.stdout.write(Color.none)
+
+class Splitter_LRS(Splitter_DBS):
     # {{{
 
-    def __init__(self):
+    def __init__(self, splitter):
         # {{{
 
-        Splitter_ACS.__init__(self)
-        sys.stdout.write(Color.yellow)
-        print("Using LRS")
-        sys.stdout.write(Color.none)
+        #Splitter_ACS.__init__(self)
+        #sys.stdout.write(Color.yellow)
+        #print("Using LRS")
+        #sys.stdout.write(Color.none)
 
-        # A circular array of messages (chunk_number, chunk) in
-        # network endian
+        # Massively lost chunks are retransmitted. So, the splitter
+        # needs to remember the chunks sent recently. Buffer is A
+        # circular array of messages (chunk_number, chunk) in network
+        # endian format.
         self.buffer = [""]*self.BUFFER_SIZE
 
+        _p_("Initialized")
+        
         # }}}
 
     def process_lost_chunk(self, lost_chunk_number, sender):
         # {{{
 
-        Splitter_ACS.process_lost_chunk(self, lost_chunk_number, sender)
+        Splitter_DBS.process_lost_chunk(self, lost_chunk_number, sender)
         message = self.buffer[lost_chunk_number % self.BUFFER_SIZE]
         peer = self.peer_list[0]
         self.team_socket.sendto(message, peer)
         if __debug__:
-            sys.stdout.write(Color.cyan)
-            print ("LRS: Re-sending", lost_chunk_number, "to", peer)
-            sys.stdout.write(Color.none)
+            #sys.stdout.write(Color.cyan)
+            _p_("Re-sending", lost_chunk_number, "to", peer)
+            #sys.stdout.write(Color.none)
 
         # }}}
 
     def send_chunk(self, message, peer):
         # {{{
 
-        Splitter_ACS.send_chunk(self, message, peer)
+        Splitter_DBS.send_chunk(self, message, peer)
         self.buffer[self.chunk_number % self.BUFFER_SIZE] = message
 
         # }}}

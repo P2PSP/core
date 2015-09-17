@@ -5,9 +5,7 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
-# The P2PSP.org project has been supported by the Junta de Andalucia
-# through the Proyecto Motriz "Codificacion de Video Escalable y su
-# Streaming sobre Internet" (P10-TIC-6548).
+# IMS: Ip Multicasting Set of rules
 
 # {{{ Imports
 
@@ -20,7 +18,7 @@ from color import Color
 import common
 import time
 from _print_ import _print_
-from gi.repository import GObject
+#from gi.repository import GObject
 try:
     from adapter import buffering_adapter
 except ImportError as msg:
@@ -29,7 +27,12 @@ except ImportError as msg:
 
 # }}}
 
-# IMS: Ip Multicasting Set of rules
+def _p_(*args, **kwargs):
+    """Colorize the output."""
+    sys.stdout.write(Color.red)
+    _print_("IMS:", *args)
+    sys.stdout.write(Color.none)
+
 class Peer_IMS(threading.Thread):
     # {{{
 
@@ -62,15 +65,17 @@ class Peer_IMS(threading.Thread):
         # {{{
         threading.Thread.__init__(self)
         sys.stdout.write(Color.yellow)
-        _print_("Peer IMS")
         sys.stdout.write(Color.none)
 
         threading.Thread.__init__(self)
 
-        _print_("Player port =", self.PLAYER_PORT)
-        _print_("Splitter =", self.SPLITTER_ADDR)
-        _print_("(Peer) port =", self.PORT)
+        if __debug__:
+            _p_("Player port =", self.PLAYER_PORT)
+            _p_("Splitter =", self.SPLITTER_ADDR)
+            _p_("(Peer) port =", self.PORT)
 
+        _p_("Initialized")
+        
         # }}}
 
     def wait_for_the_player(self):
@@ -81,14 +86,14 @@ class Peer_IMS(threading.Thread):
             # In Windows systems this call doesn't work!
             self.player_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         except Exception as e:
-            _print_ (e)
+            _p_(e)
             pass
         self.player_socket.bind(('', self.PLAYER_PORT))
         self.player_socket.listen(0)
-        _print_("Waiting for the player at", self.player_socket.getsockname())
+        _p_("Waiting for the player at", self.player_socket.getsockname())
         self.player_socket = self.player_socket.accept()[0]
         #self.player_socket.setblocking(0)
-        _print_("The player is", self.player_socket.getpeername())
+        _p_("The player is", self.player_socket.getpeername())
 
         # }}}
 
@@ -99,7 +104,7 @@ class Peer_IMS(threading.Thread):
 
         self.splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.splitter = (self.SPLITTER_ADDR, self.SPLITTER_PORT)
-        print("use_localhost=", self.USE_LOCALHOST)
+        _p_("use_localhost=", self.USE_LOCALHOST)
         if self.USE_LOCALHOST:
             my_ip = '0.0.0.0' # Or '127.0.0.1'
             #my_ip = '127.0.0.1'
@@ -109,15 +114,15 @@ class Peer_IMS(threading.Thread):
             #my_ip = socket.gethostbyname(socket.gethostname())
             my_ip = s.getsockname()[0]
             s.close()
-        _print_("Connecting to the splitter at", self.splitter, "from", my_ip)
+        _p_("Connecting to the splitter at", self.splitter, "from", my_ip)
         if self.PORT != 0:
             try:
                 self.splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             except Exception as e:
-                print (e)
+                _p_(e)
                 pass
             sys.stdout.write(Color.purple)
-            _print_("I'm using port the port", self.PORT)
+            _p_("I'm using port the port", self.PORT)
             sys.stdout.write(Color.none)
             self.splitter_socket.bind((my_ip, self.PORT))
         else:
@@ -125,9 +130,12 @@ class Peer_IMS(threading.Thread):
         try:
             self.splitter_socket.connect(self.splitter)
         except Exception as e:
-            print(e)
-            sys.exit("Sorry. Can't connect to the splitter at " + str(self.splitter))
-        _print_("Connected to the splitter at", self.splitter)
+            _p_(e)
+            #sys.stdout.write(Color.red)
+            #sys.exit("Sorry. Can't connect to the splitter at " + str(self.splitter))
+            #sys.stdout.write(Color.none)
+            sys.exit()
+        _p_("Connected to the splitter at", self.splitter)
 
         # }}}
 
@@ -146,7 +154,7 @@ class Peer_IMS(threading.Thread):
         self.mcast_port = socket.ntohs(port)
         mcast_endpoint = (self.mcast_addr, self.mcast_port)
         if __debug__:
-            print("mcast_endpoint =", mcast_endpoint)
+            _p_("mcast_endpoint =", mcast_endpoint)
 
         # }}}
 
@@ -159,17 +167,17 @@ class Peer_IMS(threading.Thread):
         while received < header_size_in_bytes:
             data = self.splitter_socket.recv(header_size_in_bytes - received)
             received += len(data)
-            _print_("Percentage of header received = {:.2%}".format((1.0*received)/header_size_in_bytes))
+            _p_("Percentage of header received = {:.2%}".format((1.0*received)/header_size_in_bytes))
             try:
                 self.player_socket.sendall(data)
             except Exception as e:
-                print (e)
-                print ("error sending data to the player")
-                print ("len(data) =", len(data))
+                _p_(e)
+                _p_("error sending data to the player")
+                _p_("len(data) =", len(data))
                 time.sleep(1)
-            _print_("received bytes:", received, "\r", end="")
+            _p_("received bytes:", received, "\r", end="")
 
-        _print_("Received", received, "bytes of header")
+        _p_("Received", received, "bytes of header")
 
         # }}}
 
@@ -180,10 +188,10 @@ class Peer_IMS(threading.Thread):
         message = self.splitter_socket.recv(struct.calcsize("H"))
         chunk_size = struct.unpack("H", message)[0]
         self.chunk_size = socket.ntohs(chunk_size)
-        _print_("chunk_size (bytes) =", self.chunk_size)
+        _p_("chunk_size (bytes) =", self.chunk_size)
         self.message_format = "H" + str(self.chunk_size) + "s"
         if __debug__:
-            print ("message_format = ", self.message_format)
+            _p_("message_format = ", self.message_format)
 
         # }}}
 
@@ -193,7 +201,7 @@ class Peer_IMS(threading.Thread):
         message = self.splitter_socket.recv(struct.calcsize("H"))
         value = struct.unpack("H", message)[0]
         self.header_size_in_chunks = socket.ntohs(value)
-        _print_("header_size (in chunks) =", self.header_size_in_chunks)
+        _p_("header_size (in chunks) =", self.header_size_in_chunks)
 
         # }}}
 
@@ -203,7 +211,7 @@ class Peer_IMS(threading.Thread):
         message = self.splitter_socket.recv(struct.calcsize("H"))
         buffer_size = struct.unpack("H", message)[0]
         self.buffer_size = socket.ntohs(buffer_size)
-        _print_("buffer_size =", self.buffer_size)
+        _p_("buffer_size =", self.buffer_size)
 
         # }}}
 
@@ -214,13 +222,13 @@ class Peer_IMS(threading.Thread):
         try:
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         except Exception as e:
-            print (e)
+            _p_(e)
             pass
 
         try:
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         except Exception as e:
-            print (e)
+            _p_(e)
             pass
 
         self.team_socket.bind(('', self.mcast_port))
@@ -228,13 +236,13 @@ class Peer_IMS(threading.Thread):
 
         mreq = struct.pack("4sl", socket.inet_aton(self.mcast_addr), socket.INADDR_ANY)
         self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-        _print_("Listening to the mcast_channel =", (self.mcast_addr, self.mcast_port))
+        _p_("Listening to the mcast_channel =", (self.mcast_addr, self.mcast_port))
 
         # This is the maximum time the peer will wait for a chunk
         # (from the splitter).
         self.team_socket.settimeout(1)
         if __debug__:
-            print(self.team_socket.getsockname(), "\b.timeout = 1")
+            _p_(self.team_socket.getsockname(), "\b.timeout = 1")
 
         # }}}
 
@@ -252,15 +260,14 @@ class Peer_IMS(threading.Thread):
         # {{{
 
         if __debug__:
-            print ("Waiting for a chunk at {} ...".format(self.team_socket.getsockname()))
+            _p_("Waiting for a chunk at {} ...".format(self.team_socket.getsockname()))
 
         message, sender = self.team_socket.recvfrom(struct.calcsize(self.message_format))
         self.recvfrom_counter += 1
 
         # {{{ debug
         if __debug__:
-            print (Color.cyan, "Received a message from", sender, \
-                "of length", len(message), Color.none)
+            _p_("Received a message from", sender, "of length", len(message))
         # }}}
 
         return message, sender
@@ -346,7 +353,7 @@ class Peer_IMS(threading.Thread):
         # waiting for traveling the player, we wil fill only the half of the
         # circular queue.
 
-        _print_(self.team_socket.getsockname(), "\b: buffering = 000.00%")
+        _p_(self.team_socket.getsockname(), "\b: buffering = 000.00%")
         sys.stdout.flush()
 
         # First chunk to be sent to the player.  The
@@ -356,19 +363,19 @@ class Peer_IMS(threading.Thread):
         chunk_number = self.process_next_message()
         while chunk_number < 0:
             chunk_number = self.process_next_message()
-            print(chunk_number)
+            _p_(chunk_number)
         self.played_chunk = chunk_number
-        _print_("First chunk to play", self.played_chunk)
-        _print_(self.team_socket.getsockname(), "\b: buffering (\b", repr(100.0/self.buffer_size).rjust(4))
+        _p_("First chunk to play", self.played_chunk)
+        _p_(self.team_socket.getsockname(), "\b: buffering (\b", repr(100.0/self.buffer_size).rjust(4))
 
         # Now, fill up to the half of the buffer.
         for x in range(int(self.buffer_size/2)):
             _print_("{:.2%}\r".format((1.0*x)/(self.buffer_size/2)), end='')
             BUFFER_STATUS = (100*x)/(self.buffer_size/2) +1
-            if common.CONSOLE_MODE == False :
-                GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
-            else:
-                pass
+            #if common.CONSOLE_MODE == False :
+            #    GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
+            #else:
+            #    pass
             #print("!", end='')
             sys.stdout.flush()
             while self.process_next_message() < 0:
@@ -376,8 +383,8 @@ class Peer_IMS(threading.Thread):
 
         print()
         latency = time.time() - start_time
-        _print_('latency =', latency, 'seconds')
-        _print_("buffering done.")
+        _p_('latency =', latency, 'seconds')
+        _p_("buffering done.")
         sys.stdout.flush()
 
         # }}}
@@ -392,7 +399,7 @@ class Peer_IMS(threading.Thread):
         chunk_number = (self.played_chunk + 1) % common.MAX_CHUNK_NUMBER
         while not self.received_flag[chunk_number % self.buffer_size]:
             sys.stdout.write(Color.cyan)
-            _print_("lost chunk", chunk_number)
+            _p_("lost chunk", chunk_number)
             sys.stdout.write(Color.none)
             chunk_number = (chunk_number + 1) % common.MAX_CHUNK_NUMBER
             #counter += 1
@@ -409,7 +416,7 @@ class Peer_IMS(threading.Thread):
             self.player_socket.sendall(self.chunks[chunk % self.buffer_size])
         except socket.error:
             #print(e)
-            _print_("Player disconnected!")
+            _p_("Player disconnected!")
             self.player_alive = False
 
         # }}}
@@ -470,7 +477,7 @@ class Peer_IMS(threading.Thread):
                     sys.stdout.write('.')
             print ()
             #print (self.team_socket.getsockname(),)
-            sys.stdout.write(Color.none)
+            #sys.stdout.write(Color.none)
 
         # }}}
 

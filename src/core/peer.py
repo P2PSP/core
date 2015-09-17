@@ -1,14 +1,10 @@
-#!/usr/bin/env python -O
+#!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
-
-# The P2PSP.org project has been supported by the Junta de Andaluc�a
-# through the Proyecto Motriz "Codificaci�n de V�deo Escalable y su
-# Streaming sobre Internet" (P10-TIC-6548).
 
 # PYTHON_ARGCOMPLETE_OK
 
@@ -19,40 +15,26 @@ import sys
 import socket
 import struct
 import time
-import argparse
-from color import Color
 import threading
 from lossy_socket import lossy_socket
 import common
 from _print_ import _print_
-from gi.repository import GObject
+
+from color import Color
 try:
-    import colorama
+    import colorama                       # Enable console color using ANSI codes in Windows
 except ImportError:
     pass
+
+import argparse
 try:
-    import argcomplete
+    import argcomplete                    # Bash tab completion for argparse in Unixes
 except ImportError:
     pass
 
 from peer_ims import Peer_IMS
 from peer_dbs import Peer_DBS
-from peer_nts import Peer_NTS
-from peer_fns import Peer_FNS
-from monitor_dbs import Monitor_DBS
-from monitor_nts import Monitor_NTS
-from monitor_fns import Monitor_FNS
-from monitor_lrs import Monitor_LRS
-from lossy_peer import Lossy_Peer
-from malicious_peer import MaliciousPeer
-from trusted_peer import TrustedPeer
-from peer_strpeds import Peer_StrpeDs
-from peer_strpeds_malicious import Peer_StrpeDsMalicious
 from symsp_peer import Symsp_Peer
-try:
-    from adapter import speed_adapter
-except ImportError as msg:
-    pass
 
 # }}}
 
@@ -76,40 +58,25 @@ class Peer():
             print("release mode")
 
         # {{{ Args handling and object instantiation
+
         parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP team.')
 
-        parser.add_argument('--chunk_loss_period', help='0 -> no chunk loss, 1 -> lost all chunks, 2, lost half of the chunks ... Default = {}'.format(Lossy_Peer.CHUNK_LOSS_PERIOD))
-
+        parser.add_argument('--enable_chunk_loss', help='Forces a lost of chunks')
         parser.add_argument('--max_chunk_debt', help='The maximun number of times that other peer can not send a chunk to this peer. Defaut = {}'.format(Peer_DBS.MAX_CHUNK_DEBT))
-
         parser.add_argument('--player_port', help='Port to communicate with the player. Default = {}'.format(Peer_IMS.PLAYER_PORT))
-
         parser.add_argument('--port_step', help='Source port step forced when behind a sequentially port allocating NAT (conflicts with --chunk_loss_period). Default = {}'.format(Symsp_Peer.PORT_STEP))
-
         parser.add_argument('--splitter_addr', help='IP address or hostname of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_ADDR))
-
         parser.add_argument('--splitter_port', help='Listening port of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_PORT))
-
         parser.add_argument('--port', help='Port to communicate with the peers. Default {} (the OS will chose it).'.format(Peer_IMS.PORT))
-
-        parser.add_argument('--use_localhost', action="store_true", help='Forces the peer to use localhost instead of the IP of the adapter to connect to the splitter.')
-
+        parser.add_argument('--use_localhost', action="store_true", help='Forces the peer to use localhost instead of the IP of the adapter to connect to the splitter. Notice that in this case, peers that run outside of the host will not be able to communicate with this peer.')
         parser.add_argument('--malicious', action="store_true", help='Enables the malicious activity for peer.')
-
         parser.add_argument('--persistent', action="store_true", help='Forces the peer to send poisoned chunks to other peers.')
-
         parser.add_argument('--on_off_ratio', help='Enables on-off attack and sets ratio for on off (from 1 to 100)')
-
         parser.add_argument('--selective', nargs='+', type=str, help='Enables selective attack for given set of peers.')
-
         parser.add_argument('--bad_mouth', nargs='+', type=str, help='Enables Bad Mouth attack for given set of peers.')
-
         parser.add_argument('--trusted', action="store_true", help='Forces the peer to send hashes of chunks to splitter')
-
         parser.add_argument('--checkall', action="store_true", help='Forces the peer to send hashes of every chunks to splitter (works only with trusted option)')
-
         parser.add_argument('--strpeds', action="store_true", help='Enables STrPe-DS')
-
         parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
 
         try:
@@ -122,27 +89,27 @@ class Peer():
 
         if args.splitter_addr:
             Peer_IMS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
-            print ('SPLITTER_ADDR =', Peer_IMS.SPLITTER_ADDR)
+        _print_('Splitter address =', Peer_IMS.SPLITTER_ADDR)
 
         if args.splitter_port:
             Peer_IMS.SPLITTER_PORT = int(args.splitter_port)
-            print ('SPLITTER_PORT =', Peer_IMS.SPLITTER_PORT)
+        _print_('Splitter port =', Peer_IMS.SPLITTER_PORT)
 
         if args.port:
             Peer_IMS.PORT = int(args.port)
-            print ('(Peer) PORT =', Peer_IMS.PORT)
+        _print_('(Peer) PORT =', Peer_IMS.PORT)
 
         if args.player_port:
             Peer_IMS.PLAYER_PORT = int(args.player_port)
-            print ('PLAYER_PORT =', Peer_IMS.PLAYER_PORT)
+        _print_('Listening port (player) =', Peer_IMS.PLAYER_PORT)
 
         if args.max_chunk_debt:
             Peer_DBS.MAX_CHUNK_DEBT = int(args.max_chunk_debt)
-            print ('MAX_CHUNK_DEBT =', Peer_DBS.MAX_CHUNK_DEBT)
+        _print_('Maximun chunk debt =', Peer_DBS.MAX_CHUNK_DEBT)
 
         if args.use_localhost:
             Peer_IMS.USE_LOCALHOST = True
-            print('Using localhost!')
+            _print_('Using localhost address')
 
         peer = Peer_IMS()
         peer.wait_for_the_player()
@@ -152,79 +119,123 @@ class Peer():
         peer.receive_the_chunk_size()
         peer.receive_the_header()
         peer.receive_the_buffer_size()
-        _print_("IP Multicast address =", peer.mcast_addr)
+        _print_("Using IP Multicast address =", peer.mcast_addr)
 
         # A multicast address is always received, even for DBS peers.
         if peer.mcast_addr == "0.0.0.0":
-            # {{{ This is an "unicast" peer.
+            # {{{ IP unicast mode.
 
             peer = Peer_DBS(peer)
+            peer.receive_my_endpoint()
+            peer.receive_the_number_of_peers()
+            _print_("Number of peers in the team (excluding me) =", peer.number_of_peers)
+            _print_("Am I a monitor peer? =", peer.am_i_a_monitor())
+            peer.listen_to_the_team()
+            peer.receive_the_list_of_peers()
+            _print_("List of peers received")
+            peer.receive_magic_flags()
+            _print_("Magic flags =", peer.magic_flags)
+
+            # After receiving the list of peers, the peer can check
+            # whether is a monitor peer or not (only the first
+            # arriving peers are monitors)
+            if peer.am_i_a_monitor():
+                from monitor_dbs import Monitor_DBS
+                peer = Monitor_DBS(peer)
+                _print_("Monitor DBS")
+
+                # The peer is a monitor. Now it's time to know the sets of rules that control this team.
+
+                if (peer.magic_flags & common.LRS):
+                    from monitor_lrs import Monitor_LRS
+                    peer = Monitor_LSR(peer)
+                    _print_("Monitor LRS")
+                if (peer.magic_flags & common.NTS):
+                    from monitor_nts import Monitor_NTS
+                    peer = Monitor_NTS(peer)
+                    _print_("Monitor NTS")
+            else:
+                peer = Peer_DBS(peer)
+                _print_("Peer DBS")
+
+                # The peer is a normal peer. Let's know the sets of rules that control this team.
+                
+                if (peer.magic_flags & common.ACS):
+                    peer = Peer_ACR(peer)
+                    _print_("Peer ACS")
+                if (peer.magic_flags & common.LRS):
+                    peer = Peer_LSR(peer)
+                    _print_("Peer LRS")
+                if (peer.magic_flags & common.NTS):
+                    from peer_nts import Peer_NTS
+                    peer = Peeer_NTS(peer)
+                    _print_("Peer NTS")
+
+                if args.enable_chunk_loss:
+                
+                    if args.chunk_loss_period:
+                        Lossy_Peer.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
+                        print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
+                        if int(args.chunk_loss_period) != 0:
+                            from lossy_peer import Lossy_Peer
+                            peer = Lossy_Peer(peer)
+
             if args.port_step:
                 Symsp_Peer.PORT_STEP = int(args.port_step)
                 print('PORT_STEP =', Symsp_Peer.PORT_STEP)
                 if int(args.port_step) != 0:
                     peer = Symsp_Peer(peer)
-            peer.receive_my_endpoint()
-            peer.receive_the_number_of_peers()
-            print("===============> number_of_peers =", peer.number_of_peers)
-            print("===============> is_a_monitor =",peer.am_i_a_monitor())
-            peer.listen_to_the_team()
-            peer.receive_the_list_of_peers()
 
-            if peer.am_i_a_monitor():
-                #peer = Monitor_LRS(peer)
-                peer = Monitor_DBS(peer)
-                #peer = Monitor_NTS(peer)
-                #peer = Monitor_FNS(peer)
-            else:
-                peer= Peer_NTS(peer)
-                #peer = Peer_NTS(peer)
-                if args.chunk_loss_period:
-                    Lossy_Peer.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
-                    print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
-                    if int(args.chunk_loss_period) != 0:
-                        peer = Lossy_Peer(peer)
+            if args.strpeds:
+                from peer_strpeds import Peer_StrpeDs
+                peer = Peer_StrpeDs(peer)
+                peer.receive_dsa_key()
+
+            if args.malicious and not args.strpeds: # workaround for malicous strpeds peer
+                from malicious_peer import MaliciousPeer
+                peer = MaliciousPeer(peer)
+                if args.persistent:
+                    peer.setPersistentAttack(True)
+                if args.on_off_ratio:
+                    peer.setOnOffAttack(True, int(args.on_off_ratio))
+                if args.selective:
+                    peer.setSelectiveAttack(True, args.selective)
+
+            if args.malicious and args.strpeds:
+                from peer_strpeds_malicious import Peer_StrpeDsMalicious
+                peer = Peer_StrpeDsMalicious(peer)
+                if args.persistent:
+                    peer.setPersistentAttack(True)
+                if args.on_off_ratio:
+                    peer.setOnOffAttack(True, int(args.on_off_ratio))
+                if args.selective:
+                    peer.setSelectiveAttack(True, args.selective)
+                if args.bad_mouth:
+                    peer.setBadMouthAttack(True, args.bad_mouth)
+
+            if args.trusted:
+                from trusted_peer import TrustedPeer
+                peer = TrustedPeer(peer)
+                if args.checkall:
+                    peer.setCheckAll(True)
+
+            if args.strpe_log != None:
+                peer.LOGGING = True
+                peer.LOG_FILE = open(args.strpe_log, 'w', 0)
 
             # }}}
         else:
+            # {{{ IP multicast mode
+
             peer.listen_to_the_team()
+
+            # }}}
 
         # }}}
 
-        if args.strpeds:
-            peer = Peer_StrpeDs(peer)
-            peer.receive_dsa_key()
-
-        if args.malicious and not args.strpeds: # workaround for malicous strpeds peer
-            peer = MaliciousPeer(peer)
-            if args.persistent:
-                peer.setPersistentAttack(True)
-            if args.on_off_ratio:
-                peer.setOnOffAttack(True, int(args.on_off_ratio))
-            if args.selective:
-                peer.setSelectiveAttack(True, args.selective)
-
-        if args.malicious and args.strpeds:
-            peer = Peer_StrpeDsMalicious(peer)
-            if args.persistent:
-                peer.setPersistentAttack(True)
-            if args.on_off_ratio:
-                peer.setOnOffAttack(True, int(args.on_off_ratio))
-            if args.selective:
-                peer.setSelectiveAttack(True, args.selective)
-            if args.bad_mouth:
-                peer.setBadMouthAttack(True, args.bad_mouth)
-
-        if args.trusted:
-            peer = TrustedPeer(peer)
-            if args.checkall:
-                peer.setCheckAll(True)
-
-        if args.strpe_log != None:
-            peer.LOGGING = True
-            peer.LOG_FILE = open(args.strpe_log, 'w', 0)
 
         # {{{ Run!
+
         peer.disconnect_from_the_splitter()
         peer.buffer_data()
         peer.start()
@@ -259,6 +270,11 @@ class Peer():
             last_sendto_counter = peer.sendto_counter
             try:
                 if common.CONSOLE_MODE == False :
+                    from gi.repository import GObject
+                    try:
+                        from adapter import speed_adapter
+                    except ImportError as msg:
+                        pass
                     GObject.idle_add(speed_adapter.update_widget,str(kbps_recvfrom) + ' kbps'
                                             ,str(kbps_sendto) + ' kbps'
                                             ,str(len(peer.peer_list)+1))
@@ -300,5 +316,6 @@ class Peer():
         except  Exception as msg:
             pass
             # }}}
+
 if __name__ == "__main__":
     x = Peer()

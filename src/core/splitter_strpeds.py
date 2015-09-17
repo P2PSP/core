@@ -56,6 +56,7 @@ class StrpeDsSplitter(Splitter_NTS):
         sys.stdout.write(Color.none)
         self.send_configuration(serve_socket)
         self.send_the_list_of_peers(serve_socket)
+        self.send_magic_flags(serve_socket)
         self.send_dsa_key(serve_socket)
         self.insert_peer(incomming_peer)
         serve_socket.close()

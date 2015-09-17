@@ -5,9 +5,7 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
-# The P2PSP.org project has been supported by the Junta de Andalucia
-# through the Proyecto Motriz "Codificacion de Video Escalable y su
-# Streaming sobre Internet" (P10-TIC-6548).
+# DBS: Data Broadcasting Set of rules
 
 # {{{
 
@@ -28,7 +26,12 @@ from peer_ims import Peer_IMS
 ADDR = 0
 PORT = 1
 
-# DBS: Data Broadcasting Set of rules
+def _p_(*args, **kwargs):
+    """Colorize the output."""
+    sys.stdout.write(Color.red)
+    _print_("IMS:", *args)
+    sys.stdout.write(Color.none)
+
 class Peer_DBS(Peer_IMS):
     # {{{
 
@@ -39,6 +42,8 @@ class Peer_DBS(Peer_IMS):
     LOGGING = False
     LOG_FILE = ""
 
+    MAGIC_FLAG = 0b00000000
+    
     # }}}
 
     def __init__(self, peer):
@@ -66,6 +71,11 @@ class Peer_DBS(Peer_IMS):
 
         # }}}
 
+    def receive_magic_flags(self):
+        self.magic_flags = struct.unpack("B",self.splitter_socket.recv(struct.calcsize("B")))[0]
+        if __debug__:
+            _p_("Magic flags =", self.magic_flags)
+        
     def receive_the_number_of_peers(self):
         # {{{
 
@@ -82,6 +92,7 @@ class Peer_DBS(Peer_IMS):
         sys.stdout.write(Color.none)
 
         # }}}
+        
     def receive_the_list_of_peers(self):
         # {{{
 
