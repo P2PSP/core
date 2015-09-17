@@ -13,5 +13,5 @@ P2PSP.org has been supported by:
    implementation, and (3) Implementation of the NAT Traversal Set
    (NTS) of rules of the Peer-to-Peer Straightforward Protocol.
 
-4. Luxunda, S.L. http://www.luxunda.com.
+4. Luxunda, S.L. http://www.luxunda.es.
 
