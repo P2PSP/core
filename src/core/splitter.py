@@ -83,7 +83,7 @@ class Splitter():
         parser.add_argument('--strpeds', nargs='+', type=str, help='Selects STrPe-DS model for DIS')
         parser.add_argument('--strpeds_majority_decision', help='Sets majority decision ratio for STrPe-DS model.')
         parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
-        parser.add_argument('--ttl', help='Time To Live of the multicast messages. Default = {}.'.format(Splitter_IMS.TTL))
+        parser.add_argument('--TTL', help='Time To Live of the multicast messages. Default = {}.'.format(Splitter_IMS.TTL))
         
         try:
             argcomplete.autocomplete(parser)
@@ -125,6 +125,11 @@ class Splitter():
 
             if args.mcast_addr:
                     Splitter_IMS.MCAST_ADDR = args.mcast_addr
+            _print_("Multicast address =", Splitter_IMS.MCAST_ADDR)
+
+            if args.TTL:
+                    Splitter_IMS.TTL = args.TTL
+            _print_("Multicast TTL =", Splitter_IMS.TTL)
 
             splitter = Splitter_IMS()
             splitter.peer_list = [] # No peer_list is used in IMS.

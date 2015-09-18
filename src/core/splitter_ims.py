@@ -277,7 +277,7 @@ class Splitter_IMS(threading.Thread):
         # it corresponds to a multicast channel.
 
         self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 0)
+        self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, self.TTL)
 
         try:
             # This does not work in Windows systems !!
