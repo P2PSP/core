@@ -75,6 +75,8 @@ class Splitter_IMS(threading.Thread):
     MCAST_ADDR = "224.0.0.1" # All Systems on this subnet
     #MCAST_ADDR = "224.0.0.2"
 
+    TTL = 1 # Time To Live of multicast packets.
+    
     # }}}
 
     def __new__(typ, *args, **kwargs):
