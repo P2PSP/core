@@ -1,3 +1,8 @@
+"""
+@package core
+monitor_dbs splitter_nts
+"""
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -13,13 +18,20 @@ import sys
 import socket
 import struct
 import threading
-from peer_ims import Peer_IMS
-from peer_dbs import Peer_DBS
-from _print_ import _print_
-from color import Color
+
 import common
+from core.peer_ims import Peer_IMS
+from core.peer_dbs import Peer_DBS
+from core._print_ import _print_
+from core.color import Color
 
 # }}}
+
+def _p_(*args, **kwargs):
+    """Colorize the output."""
+    sys.stdout.write(Color.green)
+    _print_("DBS:", *args)
+    sys.stdout.write(Color.none)
 
 class Monitor_DBS(Peer_DBS):
     # {{{
@@ -27,18 +39,16 @@ class Monitor_DBS(Peer_DBS):
     def __init__(self, peer):
         # {{{
 
-        sys.stdout.write(Color.yellow)
-        _print_("Monitor DBS (list)")
-        sys.stdout.write(Color.none)
-
+        if __debug__:
+            _p_("Initialized")
         # }}}
 
-    def print_the_module_name(self):
+    #def print_the_module_name(self):
         # {{{
 
-        sys.stdout.write(Color.red)
-        _print_("Monitor DBS")
-        sys.stdout.write(Color.none)
+        #sys.stdout.write(Color.red)
+        #_print_("Monitor DBS")
+        #sys.stdout.write(Color.none)
 
         # }}}
 
@@ -49,9 +59,7 @@ class Monitor_DBS(Peer_DBS):
         self.team_socket.sendto(message, self.splitter)
 
         if __debug__:
-            sys.stdout.write(Color.cyan)
-            print ("lost chunk:", chunk_number)
-            sys.stdout.write(Color.none)
+            _p_ ("lost chunk:", chunk_number)
 
         # }}}
 

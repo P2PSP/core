@@ -1,3 +1,8 @@
+"""
+@package core
+peer_dbs module
+"""
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -14,9 +19,10 @@ import threading
 import sys
 import socket
 import struct
-from core.color import Color
-import common
 import time
+
+import common
+from core.color import Color
 from core._print_ import _print_
 from core.peer_ims import Peer_IMS
 
@@ -37,21 +43,17 @@ class Peer_DBS(Peer_IMS):
 
     # {{{ Class "constants"
 
-    MAX_CHUNK_DEBT = 128
+    MAX_CHUNK_DEBT = 128 # Peer's rejecting threshold
 
     LOGGING = False
     LOG_FILE = ""
 
-    MAGIC_FLAG = 0b00000000
+    #MAGIC_FLAG = 0b00000000
     
     # }}}
 
     def __init__(self, peer):
         # {{{
-
-        #sys.stdout.write(Color.yellow)
-        #_print_("Peer DBS (list)")
-        #sys.stdout.write(Color.none)
 
         _p_("Initialized")
         if __debug__:

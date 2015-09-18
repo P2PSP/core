@@ -1,11 +1,12 @@
+"""
+@package core
+peer_dbs splitter_nts
+"""
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2015, the P2PSP team
 # http://www.p2psp.org
-
-# The P2PSP.org project has been supported by the Junta de Andalucia
-# through the Proyecto Motriz "Codificacion de Video Escalable y su
-# Streaming sobre Internet" (P10-TIC-6548).
 
 # NTS: NAT Traversal Set of rules
 
@@ -21,9 +22,10 @@ import struct
 import socket
 import threading
 import time
-from splitter_dbs import Splitter_DBS, ADDR, PORT
-from color import Color
-from _print_ import _print_
+
+from core.splitter_dbs import Splitter_DBS, ADDR, PORT
+from core.color import Color
+from core._print_ import _print_
 
 # }}}
 

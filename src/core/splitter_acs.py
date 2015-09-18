@@ -1,3 +1,8 @@
+"""
+@package core
+splitter_ace module
+"""
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -15,11 +20,11 @@ import sys
 import socket
 import struct
 import time
-from color import Color
+from core.color import Color
 import common
-from _print_ import _print_
+from core._print_ import _print_
 #from splitter_ims import Splitter_IMS
-from splitter_dbs import Splitter_DBS
+from core.splitter_dbs import Splitter_DBS
 #from splitter_fns import Splitter_FNS
 
 # }}}

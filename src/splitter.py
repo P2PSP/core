@@ -17,13 +17,13 @@ import socket
 import threading
 import struct
 
-from splitter_ims import Splitter_IMS
-from splitter_dbs import Splitter_DBS
-from splitter_acs import Splitter_ACS
-import common
-from _print_ import _print_
+from core.splitter_ims import Splitter_IMS
+from core.splitter_dbs import Splitter_DBS
+from core.splitter_acs import Splitter_ACS
+import core.common
+from core._print_ import _print_
+from core.color import Color
 
-from color import Color
 try:
     import colorama                       # Enable console color using ANSI codes in Windows
 except ImportError:

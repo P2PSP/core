@@ -35,6 +35,15 @@ from core.peer_ims import Peer_IMS
 from core.peer_dbs import Peer_DBS
 from core.lossy_socket import lossy_socket
 from core.symsp_peer import Symsp_Peer
+from core.monitor_dbs import Monitor_DBS
+from core.monitor_lrs import Monitor_LRS
+from core.monitor_nts import Monitor_NTS
+from core.peer_nts import Peer_NTS
+from core.lossy_peer import Lossy_Peer
+from core.peer_strpeds import Peer_StrpeDs
+from core.malicious_peer import MaliciousPeer # Other dir, maybe "DIS" ??
+from core.peer_strpeds_malicious import Peer_StrpeDsMalicious
+from core.trusted_peer import TrustedPeer
 
 # }}}
 
@@ -140,18 +149,15 @@ class Peer():
             # whether is a monitor peer or not (only the first
             # arriving peers are monitors)
             if peer.am_i_a_monitor():
-                from monitor_dbs import Monitor_DBS
                 peer = Monitor_DBS(peer)
                 _print_("Monitor DBS")
 
                 # The peer is a monitor. Now it's time to know the sets of rules that control this team.
 
                 if (peer.magic_flags & common.LRS):
-                    from monitor_lrs import Monitor_LRS
                     peer = Monitor_LSR(peer)
                     _print_("Monitor LRS")
                 if (peer.magic_flags & common.NTS):
-                    from monitor_nts import Monitor_NTS
                     peer = Monitor_NTS(peer)
                     _print_("Monitor NTS")
             else:
@@ -167,7 +173,6 @@ class Peer():
                     peer = Peer_LSR(peer)
                     _print_("Peer LRS")
                 if (peer.magic_flags & common.NTS):
-                    from peer_nts import Peer_NTS
                     peer = Peeer_NTS(peer)
                     _print_("Peer NTS")
 
@@ -177,7 +182,6 @@ class Peer():
                         Lossy_Peer.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
                         print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
                         if int(args.chunk_loss_period) != 0:
-                            from lossy_peer import Lossy_Peer
                             peer = Lossy_Peer(peer)
 
             if args.port_step:
@@ -187,12 +191,10 @@ class Peer():
                     peer = Symsp_Peer(peer)
 
             if args.strpeds:
-                from peer_strpeds import Peer_StrpeDs
                 peer = Peer_StrpeDs(peer)
                 peer.receive_dsa_key()
 
             if args.malicious and not args.strpeds: # workaround for malicous strpeds peer
-                from malicious_peer import MaliciousPeer
                 peer = MaliciousPeer(peer)
                 if args.persistent:
                     peer.setPersistentAttack(True)
@@ -202,7 +204,6 @@ class Peer():
                     peer.setSelectiveAttack(True, args.selective)
 
             if args.malicious and args.strpeds:
-                from peer_strpeds_malicious import Peer_StrpeDsMalicious
                 peer = Peer_StrpeDsMalicious(peer)
                 if args.persistent:
                     peer.setPersistentAttack(True)
@@ -214,7 +215,6 @@ class Peer():
                     peer.setBadMouthAttack(True, args.bad_mouth)
 
             if args.trusted:
-                from trusted_peer import TrustedPeer
                 peer = TrustedPeer(peer)
                 if args.checkall:
                     peer.setCheckAll(True)

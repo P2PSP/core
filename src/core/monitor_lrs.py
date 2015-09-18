@@ -11,11 +11,18 @@
 
 import sys
 import threading
-from _print_ import _print_
-from monitor_fns import Monitor_FNS
-from color import Color
+
+from core._print_ import _print_
+from core.monitor_fns import Monitor_FNS
+from core.color import Color
 
 # }}}
+
+def _p_(*args, **kwargs):
+    """Colorize the output."""
+    sys.stdout.write(Color.purple)
+    _print_("ACS:", *args)
+    sys.stdout.write(Color.none)
 
 class Monitor_LRS(Monitor_DBS):
     # {{{
@@ -23,9 +30,8 @@ class Monitor_LRS(Monitor_DBS):
     def __init__(self, peer):
         # {{{
 
-        sys.stdout.write(Color.yellow)
-        _print_("Monitor LRS")
-        sys.stdout.write(Color.none)
+        if __debug__:
+            _p_("Initialized")
 
         # }}}
 
@@ -39,7 +45,7 @@ class Monitor_LRS(Monitor_DBS):
         # in order to complains before the rest of peers reach them in
         # their buffers.
         self.buffer_size /= 2
-        print ("buffer_size =", self.buffer_size)
+        _p_("buffer_size =", self.buffer_size)
 
         # }}}
 

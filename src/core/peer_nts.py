@@ -15,11 +15,12 @@ import sys
 import struct
 import socket
 import traceback
+
 from color import Color
-from _print_ import _print_
-from peer_dbs import Peer_DBS
-from symsp_peer import Symsp_Peer
-from symsp_socket import symsp_socket
+from core._print_ import _print_
+from core.peer_dbs import Peer_DBS
+from core.symsp_peer import Symsp_Peer
+from core.symsp_socket import symsp_socket
 
 # }}}
 
@@ -29,9 +30,9 @@ class Peer_NTS(Peer_DBS):
     def __init__(self, peer):
         # {{{
 
-        sys.stdout.write(Color.yellow)
+        #sys.stdout.write(Color.yellow)
         _print_("Peer NTS")
-        sys.stdout.write(Color.none)
+        #sys.stdout.write(Color.none)
 
         # }}}
 

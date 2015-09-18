@@ -1,3 +1,8 @@
+"""
+@package core
+splitter_ims module
+"""
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -14,10 +19,10 @@ import sys,os
 import socket
 import threading
 import struct
-from color import Color
-import common
 import time
-from _print_ import _print_
+from core._print_ import _print_
+from core.color import Color
+import common
 
 # }}}
 
@@ -32,50 +37,19 @@ class Splitter_IMS(threading.Thread):
 
     # {{{ Class "constants"
 
-    # {{{ The buffer_size (in chunks). It must be larger or equal than
-    # the team size.
-    # }}}
-    BUFFER_SIZE = 256
-
-    # {{{ Channel served by the source.
-    # }}}
-    CHANNEL = "BBB-134.ogv"
+    BUFFER_SIZE = 256              # Buffer size in chunks
+    CHANNEL = "BBB-134.ogv"        # Default channel
     #CHANNEL = ""
-
-    # {{{ The chunk_size (in bytes). It depends mainly on the network
-    # technology and should be selected as big as possible, depending
-    # on the MTU and the bit-error rate.
-    # }}}
-    CHUNK_SIZE = 1024
-
-    # {{{ Number of chunks of the header.
-    # }}}
-    HEADER_SIZE = 10
-
-    # {{{ The unicast IP address of the splitter server.
-    # }}}
-    #SPLITTER_ADDR = "127.0.0.1" # No por ahora
-
-    # {{{ Port used to serve the peers (listening port).
-    # }}}
-    PORT = 4552
-
-    # {{{ The host where the streaming server is running.
-    # }}}
+    CHUNK_SIZE = 1024              # Chunk size in bytes (larger than MTU)
+    HEADER_SIZE = 10               # Chunks/header
+    #SPLITTER_ADDR = "127.0.0.1"
+    PORT = 4552                    # Listening port
     #SOURCE_ADDR = "127.0.0.1"
-    SOURCE_ADDR = "150.214.150.68"
-
-    # {{{ Port where the streaming server is listening.
-    # }}}
-    #SOURCE_PORT = 8000
-    SOURCE_PORT = 4551
-
-    # {{{ The multicast IP address of the team, used to send the chunks.
-    # }}}
-    MCAST_ADDR = "224.0.0.1" # All Systems on this subnet
-    #MCAST_ADDR = "224.0.0.2"
-
-    TTL = 1 # Time To Live of multicast packets.
+    SOURCE_ADDR = "150.214.150.68" # Streaming server's host
+    SOURCE_PORT = 4551             # Streaming server's listening port
+    MCAST_ADDR = "224.0.0.1"       # All Systems on this subnet
+    #MCAST_ADDR = "224.0.0.2"      # Default IP multicast channel
+    TTL = 1                        # Time To Live of multicast packets
     
     # }}}
 
