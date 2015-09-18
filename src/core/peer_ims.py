@@ -1,3 +1,8 @@
+"""
+@package core
+peer_ims module
+"""
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -14,10 +19,10 @@ import threading
 import sys
 import socket
 import struct
-from color import Color
+from core.color import Color
 import common
 import time
-from _print_ import _print_
+from core._print_ import _print_
 #from gi.repository import GObject
 try:
     from adapter import buffering_adapter
@@ -43,7 +48,7 @@ class Peer_IMS(threading.Thread):
     SPLITTER_PORT = 4552        # Port of the splitter.
     PORT = 0                    # TCP->UDP port used to communicate.
     USE_LOCALHOST = False       # Use localhost instead the IP of the addapter
-    BUFFER_STATUS = int(0)
+    BUFFER_STATUS = int(0)      # ?
 
     # }}}
 
@@ -63,10 +68,6 @@ class Peer_IMS(threading.Thread):
 
     def __init__(self):
         # {{{
-        threading.Thread.__init__(self)
-        sys.stdout.write(Color.yellow)
-        sys.stdout.write(Color.none)
-
         threading.Thread.__init__(self)
 
         if __debug__:
@@ -104,7 +105,7 @@ class Peer_IMS(threading.Thread):
 
         self.splitter_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.splitter = (self.SPLITTER_ADDR, self.SPLITTER_PORT)
-        _p_("use_localhost=", self.USE_LOCALHOST)
+        _p_("use_localhost =", self.USE_LOCALHOST)
         if self.USE_LOCALHOST:
             my_ip = '0.0.0.0' # Or '127.0.0.1'
             #my_ip = '127.0.0.1'

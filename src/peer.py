@@ -16,15 +16,6 @@ import socket
 import struct
 import time
 import threading
-from lossy_socket import lossy_socket
-import common
-from _print_ import _print_
-
-from color import Color
-try:
-    import colorama                       # Enable console color using ANSI codes in Windows
-except ImportError:
-    pass
 
 import argparse
 try:
@@ -32,9 +23,18 @@ try:
 except ImportError:
     pass
 
-from peer_ims import Peer_IMS
-from peer_dbs import Peer_DBS
-from symsp_peer import Symsp_Peer
+try:
+    import colorama                       # Enable console color using ANSI codes in Windows
+except ImportError:
+    pass
+
+import core.common
+from core.color import Color
+from core._print_ import _print_
+from core.peer_ims import Peer_IMS
+from core.peer_dbs import Peer_DBS
+from core.lossy_socket import lossy_socket
+from core.symsp_peer import Symsp_Peer
 
 # }}}
 
@@ -140,7 +140,7 @@ class Peer():
             # whether is a monitor peer or not (only the first
             # arriving peers are monitors)
             if peer.am_i_a_monitor():
-                from core.monitor_dbs import Monitor_DBS
+                from monitor_dbs import Monitor_DBS
                 peer = Monitor_DBS(peer)
                 _print_("Monitor DBS")
 

@@ -11,9 +11,9 @@
 
 import sys
 import socket
-from peer_dbs import Peer_DBS
-from color import Color
-from symsp_socket import symsp_socket
+from core.peer_dbs import Peer_DBS
+from core.color import Color
+from core.symsp_socket import symsp_socket
 
 # }}}
 
