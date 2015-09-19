@@ -12,6 +12,7 @@ import sys
 import socket
 import struct
 import time
+#import traceback
 
 import common
 from core.color import Color
@@ -19,8 +20,13 @@ from core._print_ import _print_
 #from peer_ims import Peer_IMS
 #from peer_dbs import Peer_DBS
 from peer_nts import Peer_NTS
-from Crypto.PublicKey import DSA
-from Crypto.Hash import SHA256
+try:
+    from Crypto.PublicKey import DSA
+    from Crypto.Hash import SHA256
+except ImportError:
+    pass
+#except Exception as msg:
+#    traceback.print_exc()
 
 # Some useful definitions.
 ADDR = 0

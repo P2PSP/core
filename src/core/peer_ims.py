@@ -23,6 +23,7 @@ import time
 
 import common
 from core._print_ import _print_
+from core.color import Color
 
 #from gi.repository import GObject
 try:
@@ -34,9 +35,10 @@ except ImportError as msg:
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(common.IMS_COLOR)
-    _print_("IMS:", *args)
-    sys.stdout.write(Color.none)
+    if __debug__:
+        sys.stdout.write(common.IMS_COLOR)
+        _print_("IMS:", *args)
+        sys.stdout.write(Color.none)
 
 class Peer_IMS(threading.Thread):
     # {{{
@@ -49,6 +51,7 @@ class Peer_IMS(threading.Thread):
     PORT = 0                    # TCP->UDP port used to communicate.
     USE_LOCALHOST = False       # Use localhost instead the IP of the addapter
     BUFFER_STATUS = int(0)      # ?
+    SHOW_BUFFER = False
 
     # }}}
 
@@ -70,11 +73,9 @@ class Peer_IMS(threading.Thread):
         # {{{
         threading.Thread.__init__(self)
 
-        if __debug__:
-            _p_("Player port =", self.PLAYER_PORT)
-            _p_("Splitter =", self.SPLITTER_ADDR)
-            _p_("(Peer) port =", self.PORT)
-
+        _p_("Player port =", self.PLAYER_PORT)
+        _p_("Splitter =", self.SPLITTER_ADDR)
+        _p_("(Peer) port =", self.PORT)
         _p_("Initialized")
         
         # }}}
@@ -154,8 +155,7 @@ class Peer_IMS(threading.Thread):
         self.mcast_addr = socket.inet_ntoa(addr)
         self.mcast_port = socket.ntohs(port)
         mcast_endpoint = (self.mcast_addr, self.mcast_port)
-        if __debug__:
-            _p_("mcast_endpoint =", mcast_endpoint)
+        _p_("mcast_endpoint =", mcast_endpoint)
 
         # }}}
 
@@ -191,8 +191,7 @@ class Peer_IMS(threading.Thread):
         self.chunk_size = socket.ntohs(chunk_size)
         _p_("chunk_size (bytes) =", self.chunk_size)
         self.message_format = "H" + str(self.chunk_size) + "s"
-        if __debug__:
-            _p_("message_format = ", self.message_format)
+        _p_("message_format = ", self.message_format)
 
         # }}}
 
@@ -242,8 +241,7 @@ class Peer_IMS(threading.Thread):
         # This is the maximum time the peer will wait for a chunk
         # (from the splitter).
         self.team_socket.settimeout(1)
-        if __debug__:
-            _p_(self.team_socket.getsockname(), "\b.timeout = 1")
+        _p_(self.team_socket.getsockname(), "\b.timeout = 1")
 
         # }}}
 
@@ -260,16 +258,12 @@ class Peer_IMS(threading.Thread):
     def receive_the_next_message(self):
         # {{{
 
-        if __debug__:
-            _p_("Waiting for a chunk at {} ...".format(self.team_socket.getsockname()))
+        _p_("Waiting for a chunk at {} ...".format(self.team_socket.getsockname()))
 
         message, sender = self.team_socket.recvfrom(struct.calcsize(self.message_format))
         self.recvfrom_counter += 1
 
-        # {{{ debug
-        if __debug__:
-            _p_("Received a message from", sender, "of length", len(message))
-        # }}}
+        _p_("Received a message from", sender, "of length", len(message))
 
         return message, sender
 
@@ -470,7 +464,7 @@ class Peer_IMS(threading.Thread):
             while chunk_number < 0:
                 chunk_number = self.process_next_message()
 
-        if __debug__:
+        if self.SHOW_BUFFER:
             for i in range(self.buffer_size):
                 if self.received_flag[i]:
                     sys.stdout.write(str(i%10))

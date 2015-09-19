@@ -32,9 +32,9 @@ try:
 except ImportError:
     pass
 
-from peer_ims import Peer_IMS
-from peer_dbs import Peer_DBS
-from symsp_peer import Symsp_Peer
+from core.peer_ims import Peer_IMS
+from core.peer_dbs import Peer_DBS
+from core.symsp_peer import Symsp_Peer
 
 # }}}
 
@@ -78,6 +78,7 @@ class Peer():
         parser.add_argument('--checkall', action="store_true", help='Forces the peer to send hashes of every chunks to splitter (works only with trusted option)')
         parser.add_argument('--strpeds', action="store_true", help='Enables STrPe-DS')
         parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
+        parser.add_argument('--show_buffer', action="store_true", help='Shows the status of the buffer of chunks.')
 
         try:
             argcomplete.autocomplete(parser)
@@ -121,6 +122,9 @@ class Peer():
         peer.receive_the_buffer_size()
         _print_("Using IP Multicast address =", peer.mcast_addr)
 
+        if args.show_buffer:
+            Peer_IMS.SHOW_BUFFER = True
+        
         # A multicast address is always received, even for DBS peers.
         if peer.mcast_addr == "0.0.0.0":
             # {{{ IP unicast mode.
@@ -147,11 +151,11 @@ class Peer():
                 # The peer is a monitor. Now it's time to know the sets of rules that control this team.
 
                 if (peer.magic_flags & common.LRS):
-                    from monitor_lrs import Monitor_LRS
+                    from core.monitor_lrs import Monitor_LRS
                     peer = Monitor_LSR(peer)
                     _print_("Monitor LRS")
                 if (peer.magic_flags & common.NTS):
-                    from monitor_nts import Monitor_NTS
+                    from core.monitor_nts import Monitor_NTS
                     peer = Monitor_NTS(peer)
                     _print_("Monitor NTS")
             else:
@@ -187,12 +191,12 @@ class Peer():
                     peer = Symsp_Peer(peer)
 
             if args.strpeds:
-                from peer_strpeds import Peer_StrpeDs
+                from core.peer_strpeds import Peer_StrpeDs
                 peer = Peer_StrpeDs(peer)
                 peer.receive_dsa_key()
 
             if args.malicious and not args.strpeds: # workaround for malicous strpeds peer
-                from malicious_peer import MaliciousPeer
+                from core.malicious_peer import MaliciousPeer
                 peer = MaliciousPeer(peer)
                 if args.persistent:
                     peer.setPersistentAttack(True)
@@ -202,7 +206,7 @@ class Peer():
                     peer.setSelectiveAttack(True, args.selective)
 
             if args.malicious and args.strpeds:
-                from peer_strpeds_malicious import Peer_StrpeDsMalicious
+                from core.peer_strpeds_malicious import Peer_StrpeDsMalicious
                 peer = Peer_StrpeDsMalicious(peer)
                 if args.persistent:
                     peer.setPersistentAttack(True)
@@ -214,7 +218,7 @@ class Peer():
                     peer.setBadMouthAttack(True, args.bad_mouth)
 
             if args.trusted:
-                from trusted_peer import TrustedPeer
+                from core.trusted_peer import TrustedPeer
                 peer = TrustedPeer(peer)
                 if args.checkall:
                     peer.setCheckAll(True)

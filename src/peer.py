@@ -24,11 +24,12 @@ except ImportError:
     pass
 
 try:
-    import colorama                       # Enable console color using ANSI codes in Windows
+    import colorama # Enable console color using ANSI codes in Windows
 except ImportError:
     pass
 
-import core.common
+from core import common
+#import common
 from core.color import Color
 from core._print_ import _print_
 from core.peer_ims import Peer_IMS
@@ -87,6 +88,7 @@ class Peer():
         parser.add_argument('--checkall', action="store_true", help='Forces the peer to send hashes of every chunks to splitter (works only with trusted option)')
         parser.add_argument('--strpeds', action="store_true", help='Enables STrPe-DS')
         parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
+        parser.add_argument('--show_buffer', action="store_true", help='Shows the status of the buffer of chunks.')
 
         try:
             argcomplete.autocomplete(parser)
@@ -130,6 +132,9 @@ class Peer():
         peer.receive_the_buffer_size()
         _print_("Using IP Multicast address =", peer.mcast_addr)
 
+        if args.show_buffer:
+            Peer_IMS.SHOW_BUFFER = True
+        
         # A multicast address is always received, even for DBS peers.
         if peer.mcast_addr == "0.0.0.0":
             # {{{ IP unicast mode.

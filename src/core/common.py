@@ -1,3 +1,8 @@
+"""
+@package core
+common module
+"""
+
 MAX_CHUNK_NUMBER = 65536
 #MAX_CHUNK_NUMBER = 2048
 #COUNTERS_TIMING = 0.1

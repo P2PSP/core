@@ -22,7 +22,7 @@ import struct
 import time
 
 import common
-#from core.color import Color
+from core.color import Color
 from core._print_ import _print_
 from core.peer_ims import Peer_IMS
 
@@ -34,9 +34,10 @@ PORT = 1
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(common.DBS_COLOR)
-    _print_("DBS:", *args)
-    sys.stdout.write(Color.none)
+    if __debug__:
+        sys.stdout.write(common.DBS_COLOR)
+        _print_("DBS:", *args)
+        sys.stdout.write(Color.none)
 
 class Peer_DBS(Peer_IMS):
     # {{{
@@ -55,9 +56,8 @@ class Peer_DBS(Peer_IMS):
     def __init__(self, peer):
         # {{{
 
+        _p_("max_chunk_debt =", self.MAX_CHUNK_DEBT)
         _p_("Initialized")
-        if __debug__:
-            _p_("max_chunk_debt =", self.MAX_CHUNK_DEBT)
 
         # }}}
 
@@ -77,8 +77,7 @@ class Peer_DBS(Peer_IMS):
 
     def receive_magic_flags(self):
         self.magic_flags = struct.unpack("B",self.splitter_socket.recv(struct.calcsize("B")))[0]
-        if __debug__:
-            _p_("Magic flags =", self.magic_flags)
+        _p_("Magic flags =", self.magic_flags)
         
     def receive_the_number_of_peers(self):
         # {{{
@@ -120,7 +119,7 @@ class Peer_DBS(Peer_IMS):
             if __debug__:
                 _p_("[%5d]" % tmp, peer)
             else:
-                _p_("{:.2%}\r".format((self.number_of_peers-tmp)/self.number_of_peers), end='')
+                _print_("{:.2%}\r".format((self.number_of_peers-tmp)/self.number_of_peers), end='')
 
             self.peer_list.append(peer)
             self.debt[peer] = 0
@@ -179,12 +178,12 @@ class Peer_DBS(Peer_IMS):
 
                 # {{{ debug
 
+                _p_(self.team_socket.getsockname(), "<-", chunk_number, "-", sender)
                 if __debug__:
-                    _p_(self.team_socket.getsockname(), "<-", chunk_number, "-", sender)
 
-                if self.LOGGING:
-                    self.log_message("buffer correctnes {0}".format(self.calc_buffer_correctnes()))
-                    self.log_message("buffer filling {0}".format(self.calc_buffer_filling()))
+                    if self.LOGGING:
+                        self.log_message("buffer correctnes {0}".format(self.calc_buffer_correctnes()))
+                        self.log_message("buffer filling {0}".format(self.calc_buffer_filling()))
 
                 # }}}
 
@@ -193,15 +192,10 @@ class Peer_DBS(Peer_IMS):
                     self.team_socket.sendto(self.receive_and_feed_previous, peer)
                     self.sendto_counter += 1
 
-                    # {{{ debug
-
-                    if __debug__:
-                        _p_(self.team_socket.getsockname(), "-",\
-                            socket.ntohs(struct.unpack(self.message_format, \
-                                                       self.receive_and_feed_previous)[0]),\
-                            "->", peer)
-
-                    # }}}
+                    _p_(self.team_socket.getsockname(), "-",\
+                        socket.ntohs(struct.unpack(self.message_format, \
+                                                   self.receive_and_feed_previous)[0]),\
+                        "->", peer)
 
                     self.debt[peer] += 1
                     if self.debt[peer] > self.MAX_CHUNK_DEBT:
@@ -218,13 +212,8 @@ class Peer_DBS(Peer_IMS):
             else:
                 # {{{ The sender is a peer
 
-                # {{{ debug
-
-                if __debug__:
-                    _p_(self.team_socket.getsockname(), \
-                        "<-", chunk_number, "-", sender)
-
-                # }}}
+                _p_(self.team_socket.getsockname(), \
+                    "<-", chunk_number, "-", sender)
 
                 if sender not in self.peer_list:
                     # The peer is new
@@ -252,14 +241,9 @@ class Peer_DBS(Peer_IMS):
                     del self.debt[peer]
                     self.peer_list.remove(peer)
 
-                # {{{ debug
-
-                if __debug__:
-                    _p_(self.team_socket.getsockname(), "-", \
-                        socket.ntohs(struct.unpack(self.message_format, self.receive_and_feed_previous)[0]),\
-                        "->", peer)
-
-                # }}}
+                _p_(self.team_socket.getsockname(), "-", \
+                    socket.ntohs(struct.unpack(self.message_format, self.receive_and_feed_previous)[0]),\
+                    "->", peer)
 
                 self.receive_and_feed_counter += 1
 

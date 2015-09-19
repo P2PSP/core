@@ -23,15 +23,16 @@ import common
 from core.peer_ims import Peer_IMS
 from core.peer_dbs import Peer_DBS
 from core._print_ import _print_
-#from core.color import Color
+from core.color import Color
 
 # }}}
 
 def _p_(*args, **kwargs):
-    """Colorize the output."""
-    sys.stdout.write(common.DBS_COLOR)
-    _print_("DBS:", *args)
-    sys.stdout.write(Color.none)
+    if __debug__:
+        """Colorize the output."""
+        sys.stdout.write(common.DBS_COLOR)
+        _print_("DBS:", *args)
+        sys.stdout.write(Color.none)
 
 class Monitor_DBS(Peer_DBS):
     # {{{
@@ -39,8 +40,8 @@ class Monitor_DBS(Peer_DBS):
     def __init__(self, peer):
         # {{{
 
-        if __debug__:
-            _p_("Initialized")
+        _p_("Initialized")
+
         # }}}
 
     #def print_the_module_name(self):
@@ -58,9 +59,8 @@ class Monitor_DBS(Peer_DBS):
         message = struct.pack("!H", chunk_number)
         self.team_socket.sendto(message, self.splitter)
 
-        if __debug__:
-            _p_ ("lost chunk:", chunk_number)
-
+        _p_ ("lost chunk:", chunk_number)
+            
         # }}}
 
     def find_next_chunk(self):

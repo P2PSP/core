@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see

@@ -34,9 +34,10 @@ PORT = 1
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(common.DBS_COLOR)
-    _print_("DBS:", *args)
-    sys.stdout.write(Color.none)
+    if __debug__:
+        sys.stdout.write(common.DBS_COLOR)
+        _print_("DBS:", *args)
+        sys.stdout.write(Color.none)
     
 class Splitter_DBS(Splitter_IMS):
     # {{{
@@ -75,13 +76,11 @@ class Splitter_DBS(Splitter_IMS):
         #    self.destination_of_chunk.append(('0.0.0.0',0))
 
         self.losses = {}
-
-        _p_("Initialized")
-        if __debug__:
-            _p_("max_chunk_loss =", self.MAX_CHUNK_LOSS)
-            _p_("mcast_addr =", self.MCAST_ADDR)
-
         self.magic_flags = common.DBS
+        
+        _p_("max_chunk_loss =", self.MAX_CHUNK_LOSS)
+        _p_("mcast_addr =", self.MCAST_ADDR)
+        _p_("Initialized")
 
         # }}}
 
@@ -100,12 +99,10 @@ class Splitter_DBS(Splitter_IMS):
     def send_the_list_size(self, peer_serve_socket):
         # {{{
 
-        if __debug__:
-            _p_("Sending the number of monitors", self.MONITOR_NUMBER)
+        _p_("Sending the number of monitors", self.MONITOR_NUMBER)
         message = struct.pack("H", socket.htons(self.MONITOR_NUMBER))
         peer_serve_socket.sendall(message)
-        if __debug__:
-            _p_("Sending a list of peers of size", len(self.peer_list))
+        _p_("Sending a list of peers of size", len(self.peer_list))
         message = struct.pack("H", socket.htons(len(self.peer_list)))
         peer_serve_socket.sendall(message)
 
@@ -205,8 +202,7 @@ class Splitter_DBS(Splitter_IMS):
         try:
             return self.team_socket.recvfrom(struct.calcsize("H"))
         except:
-            if __debug__:
-                _p_("Unexpected error:", sys.exc_info()[0])
+            _p_("Unexpected error:", sys.exc_info()[0])
             pass
 
         # }}}
@@ -248,13 +244,11 @@ class Splitter_DBS(Splitter_IMS):
         try:
             self.losses[peer] += 1
         except KeyError:
-            if __debug__:
-                _p_("the unsupportive peer", peer, "does not exist!")
+            _p_("the unsupportive peer", peer, "does not exist!")
         else:
-            if __debug__:
-                #sys.stdout.write(Color.blue)
-                _p_(peer, "has loss", self.losses[peer], "chunks")
-                #sys.stdout.write(Color.none)
+            #sys.stdout.write(Color.blue)
+            _p_(peer, "has loss", self.losses[peer], "chunks")
+            #sys.stdout.write(Color.none)
             if self.losses[peer] > self.MAX_CHUNK_LOSS:
                 if peer not in self.peer_list[:self.MONITOR_NUMBER]:
                     #sys.stdout.write(Color.red)
@@ -410,8 +404,7 @@ class Splitter_DBS(Splitter_IMS):
                 self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
                 self.compute_next_peer_number(peer)
             except IndexError:
-                if __debug__:
-                    _p_("The monitor peer has died!")
+                _p_("The monitor peer has died!")
 
 
         # }}}
