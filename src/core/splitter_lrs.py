@@ -1,3 +1,8 @@
+"""
+@package core
+splitter_lrs splitter_nts
+"""
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -15,11 +20,12 @@ import sys
 import socket
 import struct
 import time
-from color import Color
+
 import common
-from _print_ import _print_
+from core.color import Color
+from core._print_ import _print_
 #from splitter_ims import Splitter_IMS
-from splitter_dbs import Splitter_DBS
+from core.splitter_dbs import Splitter_DBS
 #from splitter_fns import Splitter_FNS
 #from splitter_acs import Splitter_ACS
 
@@ -27,7 +33,7 @@ from splitter_dbs import Splitter_DBS
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(Color.cyan)
+    sys.stdout.write(common.LRS_COLOR)
     _print_("LRS:", *args)
     sys.stdout.write(Color.none)
 

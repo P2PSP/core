@@ -14,11 +14,13 @@ import threading
 import sys
 import socket
 import struct
-from color import Color
-import common
 import time
-from _print_ import _print_
 from gi.repository import GObject
+
+import common
+#from color import Color
+from _print_ import _print_
+
 try:
     from adapter import buffering_adapter
 except ImportError as msg:
@@ -28,7 +30,7 @@ except ImportError as msg:
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(Color.red)
+    sys.stdout.write(common.IMS_COLOR)
     _print_("IMS:", *args)
     sys.stdout.write(Color.none)
 

@@ -11,10 +11,11 @@ import threading
 import sys
 import socket
 import struct
-from color import Color
-import common
 import time
-from _print_ import _print_
+
+import common
+from core.color import Color
+from core._print_ import _print_
 #from peer_ims import Peer_IMS
 #from peer_dbs import Peer_DBS
 from peer_nts import Peer_NTS
@@ -25,6 +26,12 @@ from Crypto.Hash import SHA256
 ADDR = 0
 PORT = 1
 
+def _p_(*args, **kwargs):
+    """Colorize the output."""
+    sys.stdout.write(Color.green)
+    _print_("STRPEDS:", *args)
+    sys.stdout.write(Color.none)
+
 class Peer_StrpeDs(Peer_NTS):
 
     def __init__(self, peer):
@@ -34,15 +41,6 @@ class Peer_StrpeDs(Peer_NTS):
 
         threading.Thread.__init__(self)
 
-        self.splitter_socket = peer.splitter_socket
-        self.player_socket = peer.player_socket
-        self.buffer_size = peer.buffer_size
-        self.splitter = peer.splitter
-        self.chunk_size = peer.chunk_size
-        self.peer_list = peer.peer_list
-        self.debt = peer.debt
-        self.message_format = peer.message_format
-        self.team_socket = peer.team_socket
         self.message_format += '40s40s'
         self.bad_peers = []
 

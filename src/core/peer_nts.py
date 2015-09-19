@@ -1,3 +1,10 @@
+"""
+@package core
+peer_nts splitter_nts
+"""
+
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2015, the P2PSP team.
@@ -16,13 +23,19 @@ import struct
 import socket
 import traceback
 
-from color import Color
+#from color import Color
 from core._print_ import _print_
 from core.peer_dbs import Peer_DBS
 from core.symsp_peer import Symsp_Peer
 from core.symsp_socket import symsp_socket
 
 # }}}
+
+def _p_(*args, **kwargs):
+    """Colorize the output."""
+    sys.stdout.write(common.NTS_COLOR)
+    _print_("NTS:", *args)
+    sys.stdout.write(Color.none)
 
 class Peer_NTS(Peer_DBS):
     # {{{
@@ -31,8 +44,10 @@ class Peer_NTS(Peer_DBS):
         # {{{
 
         #sys.stdout.write(Color.yellow)
-        _print_("Peer NTS")
+        #_print_("Peer NTS")
         #sys.stdout.write(Color.none)
+        if __debug__:
+            _p_("Initialized")
 
         # }}}
 
@@ -150,9 +165,9 @@ class Peer_NTS(Peer_DBS):
         # The monitor peer endpoints have already been received
         assert len(self.peer_list) == self.number_of_monitors
 
-        sys.stdout.write(Color.green)
-        _print_("NTS: Requesting the number of peers from splitter")
-        sys.stdout.write(Color.none)
+        #sys.stdout.write(Color.green)
+        _p_("Requesting the number of peers from splitter")
+        #sys.stdout.write(Color.none)
         # Add 1 as the monitor peer was already received
         message = self.splitter_socket.recv(struct.calcsize("H"))
         self.number_of_peers = socket.ntohs(struct.unpack("H", message)[0]) \
@@ -189,9 +204,9 @@ class Peer_NTS(Peer_DBS):
         # Directly start packet sending
         self.hello_messages_event.set()
 
-        sys.stdout.write(Color.green)
-        _print_("NTS: List of peers received")
-        sys.stdout.write(Color.none)
+        #sys.stdout.write(Color.green)
+        _p_("NTS: List of peers received")
+        #sys.stdout.write(Color.none)
 
         # }}}
 

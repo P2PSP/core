@@ -23,13 +23,13 @@ import common
 from core.peer_ims import Peer_IMS
 from core.peer_dbs import Peer_DBS
 from core._print_ import _print_
-from core.color import Color
+#from core.color import Color
 
 # }}}
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(Color.green)
+    sys.stdout.write(common.DBS_COLOR)
     _print_("DBS:", *args)
     sys.stdout.write(Color.none)
 

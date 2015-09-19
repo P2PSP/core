@@ -23,7 +23,6 @@ import time
 
 import common
 from core._print_ import _print_
-from core.color import Color
 
 #from gi.repository import GObject
 try:
@@ -35,7 +34,7 @@ except ImportError as msg:
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(Color.red)
+    sys.stdout.write(common.IMS_COLOR)
     _print_("IMS:", *args)
     sys.stdout.write(Color.none)
 
@@ -123,9 +122,9 @@ class Peer_IMS(threading.Thread):
             except Exception as e:
                 _p_(e)
                 pass
-            sys.stdout.write(Color.purple)
+            #sys.stdout.write(Color.purple)
             _p_("I'm using port the port", self.PORT)
-            sys.stdout.write(Color.none)
+            #sys.stdout.write(Color.none)
             self.splitter_socket.bind((my_ip, self.PORT))
         else:
             self.splitter_socket.bind((my_ip, 0))
@@ -400,9 +399,9 @@ class Peer_IMS(threading.Thread):
         #counter = 0
         chunk_number = (self.played_chunk + 1) % common.MAX_CHUNK_NUMBER
         while not self.received_flag[chunk_number % self.buffer_size]:
-            sys.stdout.write(Color.cyan)
+            #sys.stdout.write(Color.cyan)
             _p_("lost chunk", chunk_number)
-            sys.stdout.write(Color.none)
+            #sys.stdout.write(Color.none)
             chunk_number = (chunk_number + 1) % common.MAX_CHUNK_NUMBER
             #counter += 1
             #if counter > self.buffer_size:

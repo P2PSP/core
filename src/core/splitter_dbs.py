@@ -34,7 +34,7 @@ PORT = 1
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(Color.green)
+    sys.stdout.write(common.DBS_COLOR)
     _print_("DBS:", *args)
     sys.stdout.write(Color.none)
     
@@ -185,11 +185,11 @@ class Splitter_DBS(Splitter_IMS):
 
         serve_socket = connection[0]
         incomming_peer = connection[1]
-        sys.stdout.write(Color.green)
+        #sys.stdout.write(Color.green)
         #print(serve_socket.getsockname(), '\b: DBS: accepted connection from peer', \
         #      incomming_peer)
         _p_('accepted connection from peer', incomming_peer)
-        sys.stdout.write(Color.none)
+        #sys.stdout.write(Color.none)
         self.send_configuration(serve_socket)
         self.send_the_list_of_peers(serve_socket)
         self.send_magic_flags(serve_socket)
@@ -252,15 +252,15 @@ class Splitter_DBS(Splitter_IMS):
                 _p_("the unsupportive peer", peer, "does not exist!")
         else:
             if __debug__:
-                sys.stdout.write(Color.blue)
+                #sys.stdout.write(Color.blue)
                 _p_(peer, "has loss", self.losses[peer], "chunks")
-                sys.stdout.write(Color.none)
+                #sys.stdout.write(Color.none)
             if self.losses[peer] > self.MAX_CHUNK_LOSS:
                 if peer not in self.peer_list[:self.MONITOR_NUMBER]:
-                    sys.stdout.write(Color.red)
+                    #sys.stdout.write(Color.red)
                     _p_(peer, 'removed')
                     self.remove_peer(peer)
-                    sys.stdout.write(Color.none)
+                    #sys.stdout.write(Color.none)
         finally:
            pass
 
@@ -287,9 +287,9 @@ class Splitter_DBS(Splitter_IMS):
     def process_goodbye(self, peer):
         # {{{
 
-        sys.stdout.write(Color.green)
+        #sys.stdout.write(Color.green)
         _p_('Received "goodbye" from', peer)
-        sys.stdout.write(Color.none)
+        #sys.stdout.write(Color.none)
         sys.stdout.flush()
 
         #if peer not in self.peer_list[:self.MONITOR_NUMBER]:

@@ -24,14 +24,14 @@ import threading
 import time
 
 from core.splitter_dbs import Splitter_DBS, ADDR, PORT
-from core.color import Color
+#from core.color import Color
 from core._print_ import _print_
 
 # }}}
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(Color.purple)
+    sys.stdout.write(common.NTS_COLOR)
     _print_("ACS:", *args)
     sys.stdout.write(Color.none)
 

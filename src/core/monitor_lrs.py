@@ -1,3 +1,8 @@
+"""
+@package core
+monitor_lrs splitter_nts
+"""
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -13,14 +18,14 @@ import sys
 import threading
 
 from core._print_ import _print_
-from core.monitor_fns import Monitor_FNS
+from core.monitor_dbs import Monitor_DBS
 from core.color import Color
 
 # }}}
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(Color.purple)
+    sys.stdout.write(common.FLS_COLOR)
     _print_("ACS:", *args)
     sys.stdout.write(Color.none)
 

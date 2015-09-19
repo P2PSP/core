@@ -20,15 +20,16 @@ import socket
 import threading
 import struct
 import time
+
+import common
 from core._print_ import _print_
 from core.color import Color
-import common
 
 # }}}
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(Color.red)
+    sys.stdout.write(common.IMS_COLOR)
     _print_("IMS:", *args)
     sys.stdout.write(Color.none)
 
@@ -390,7 +391,7 @@ class Splitter_IMS(threading.Thread):
         self.team_socket.sendto(message, destination)
 
         if __debug__:
-            _p_('%5d' % self.chunk_number, Color.red, '->', Color.none, destination)
+            _p_('%5d' % self.chunk_number, '->', destination)
             sys.stdout.flush()
 
         self.sendto_counter += 1

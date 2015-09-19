@@ -20,8 +20,9 @@ import sys
 import socket
 import struct
 import time
-from core.color import Color
+
 import common
+#from core.color import Color
 from core._print_ import _print_
 #from splitter_ims import Splitter_IMS
 from core.splitter_dbs import Splitter_DBS
@@ -31,7 +32,7 @@ from core.splitter_dbs import Splitter_DBS
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(Color.blue)
+    sys.stdout.write(common.ACS_COLOR)
     _print_("ACS:", *args)
     sys.stdout.write(Color.none)
 
