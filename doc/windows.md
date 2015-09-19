@@ -3,12 +3,12 @@ P2PSP windows installation
 
 1. Download and install Python 3.
 
-2. Add the Python path to the PATH variable:  
+2. Add the Python path to the PATH variable:
+
 Computer -> Properties -> System Advanced Configuration -> Environment variables  
 Search the PATH variable and add the Python's directory.  
 
-3. (Optional) Install colorama from https://pypi.python.org/pypi/colorama.  
-When downloades, run:  
+3. (Optional) Install colorama. Download https://pypi.python.org/pypi/colorama and run:  
 
   ```
   python setup.py install
