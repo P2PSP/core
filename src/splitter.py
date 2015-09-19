@@ -92,6 +92,8 @@ class Splitter():
         args = parser.parse_args()
         #args = parser.parse_known_args()[0]
 
+        _print_("My IP address is =", socket.gethostbyname(socket.gethostname()))
+        
         if args.buffer_size:
             Splitter_IMS.BUFFER_SIZE = int(args.buffer_size)
         _print_("Buffer size =", Splitter_IMS.BUFFER_SIZE)
