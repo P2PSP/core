@@ -7,6 +7,9 @@ from core.color import Color
 
 class Common:
 
+    BUFFER_SIZE = 256                 # Buffer size in chunks
+    CHANNEL = "BBB-134.ogv   "        # Default channel
+
     MAX_CHUNK_NUMBER = 65536
     #MAX_CHUNK_NUMBER = 2048
     #COUNTERS_TIMING = 0.1
@@ -23,6 +26,7 @@ class Common:
                                       # ports that will be tried
     CONSOLE_MODE = True
 
+    # IMS is enables by defining an IP multicast address
     DBS = 0b00000000                  # DBS magic number
     ACS = 0b00000001                  # ACS magic number
     LRS = 0b00000010                  # LRS magic number

@@ -161,7 +161,7 @@ class Peer():
                 # The peer is a monitor. Now it's time to know the sets of rules that control this team.
 
                 if (peer.magic_flags & Common.LRS):
-                    peer = Monitor_LSR(peer)
+                    peer = Monitor_LRS(peer)
                     _print_("Monitor LRS")
                 if (peer.magic_flags & Common.NTS):
                     peer = Monitor_NTS(peer)

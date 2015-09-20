@@ -39,8 +39,8 @@ class Splitter_IMS(threading.Thread):
 
     # {{{ Class "constants"
 
-    BUFFER_SIZE = 256              # Buffer size in chunks
-    CHANNEL = "BBB-134.ogv"        # Default channel
+    #BUFFER_SIZE = 256              # Buffer size in chunks
+    #CHANNEL = "BBB-134.ogv"        # Default channel
     #CHANNEL = ""
     CHUNK_SIZE = 1024              # Chunk size in bytes (larger than MTU)
     HEADER_SIZE = 10               # Chunks/header
@@ -77,9 +77,9 @@ class Splitter_IMS(threading.Thread):
         #print("Using IMS")
         #sys.stdout.write(Color.none)
 
-        _p_("Buffer size (in chunks) =", self.BUFFER_SIZE)
+        _p_("Buffer size (in chunks) =", Common.BUFFER_SIZE)
         _p_("Chunk size (in bytes) =", self.CHUNK_SIZE)
-        _p_('Channel ="', self.CHANNEL, '"')
+        _p_('Channel ="', Common.CHANNEL, '"')
         _p_("Header size (in chunks) =", self.HEADER_SIZE)
         #print("IMS: Splitter address =", self.SPLITTER_ADDR) # No ahora
         _p_("Listening (and multicast) port =", self.PORT)
@@ -144,8 +144,8 @@ class Splitter_IMS(threading.Thread):
     def send_the_buffer_size(self, peer_serve_socket):
         # {{{
 
-        _p_("Sending a buffer_size of", self.BUFFER_SIZE, "bytes")
-        message = struct.pack("H", socket.htons(self.BUFFER_SIZE))
+        _p_("Sending a buffer_size of", Common.BUFFER_SIZE, "bytes")
+        message = struct.pack("H", socket.htons(Common.BUFFER_SIZE))
         try:
             peer_serve_socket.sendall(message)
         except:

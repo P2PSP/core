@@ -19,7 +19,7 @@ import socket
 import threading
 import struct
 
-#from core.common import Common
+from core.common import Common
 from core._print_ import _print_
 from core.color import Color
 from core.splitter_ims import Splitter_IMS
@@ -67,8 +67,8 @@ class Splitter():
 
         parser = argparse.ArgumentParser(description='This is the splitter node of a P2PSP team.  The splitter is in charge of defining the Set or Rules (SoR) that will control the team. By default, DBS (unicast transmissions) will be used.')
         #parser.add_argument('--splitter_addr', help='IP address to serve (TCP) the peers. (Default = "{}")'.format(Splitter_IMS.SPLITTER_ADDR)) <- no ahora
-        parser.add_argument('--buffer_size', help='size of the video buffer in blocks. Default = {}.'.format(Splitter_IMS.BUFFER_SIZE))
-        parser.add_argument('--channel', help='Name of the channel served by the streaming source. Default = "{}".'.format(Splitter_IMS.CHANNEL))
+        parser.add_argument('--buffer_size', help='size of the video buffer in blocks. Default = {}.'.format(Common.BUFFER_SIZE))
+        parser.add_argument('--channel', help='Name of the channel served by the streaming source. Default = "{}".'.format(Common.CHANNEL))
         parser.add_argument('--chunk_size', help='Chunk size in bytes. Default = {}.'.format(Splitter_IMS.CHUNK_SIZE))
         parser.add_argument('--header_size', help='Size of the header of the stream in chunks. Default = {}.'.format(Splitter_IMS.HEADER_SIZE))
         parser.add_argument('--max_chunk_loss', help='Maximum number of lost chunks for an unsupportive peer. Makes sense only in unicast mode. Default = {}.'.format(Splitter_DBS.MAX_CHUNK_LOSS))
@@ -98,8 +98,8 @@ class Splitter():
         _print_("My IP address is =", socket.gethostbyname(socket.gethostname()))
         
         if args.buffer_size:
-            Splitter_IMS.BUFFER_SIZE = int(args.buffer_size)
-        _print_("Buffer size =", Splitter_IMS.BUFFER_SIZE)
+            Common.BUFFER_SIZE = int(args.buffer_size)
+        _print_("Buffer size =", Common.BUFFER_SIZE)
 
         if args.channel:
             Splitter_IMS.CHANNEL = args.channel
@@ -158,7 +158,7 @@ class Splitter():
                 splitter = Splitter_ACS(splitter)
                 _print_("ACS enabled")
             if args.LRS:
-                from splitter_lrs import Splitter_LRS
+                from core.splitter_lrs import Splitter_LRS
                 splitter = Splitter_LRS(splitter)
                 _print_("LRS enabled")
             if args.DIS:

@@ -1,6 +1,6 @@
 """
 @package core
-splitter_lrs splitter_nts
+splitter_lrs module
 """
 
 # -*- coding: iso-8859-15 -*-
@@ -21,7 +21,7 @@ import socket
 import struct
 import time
 
-import common
+from core.common import Common
 from core.color import Color
 from core._print_ import _print_
 #from splitter_ims import Splitter_IMS
@@ -33,7 +33,7 @@ from core.splitter_dbs import Splitter_DBS
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(common.LRS_COLOR)
+    sys.stdout.write(Common.LRS_COLOR)
     _print_("LRS:", *args)
     sys.stdout.write(Color.none)
 
@@ -52,7 +52,8 @@ class Splitter_LRS(Splitter_DBS):
         # needs to remember the chunks sent recently. Buffer is A
         # circular array of messages (chunk_number, chunk) in network
         # endian format.
-        self.buffer = [""]*self.BUFFER_SIZE
+        self.buffer = [""]*Common.BUFFER_SIZE
+        self.magic_flags |= Common.LRS
 
         _p_("Initialized")
         
@@ -62,7 +63,7 @@ class Splitter_LRS(Splitter_DBS):
         # {{{
 
         Splitter_DBS.process_lost_chunk(self, lost_chunk_number, sender)
-        message = self.buffer[lost_chunk_number % self.BUFFER_SIZE]
+        message = self.buffer[lost_chunk_number % Common.BUFFER_SIZE]
         peer = self.peer_list[0]
         self.team_socket.sendto(message, peer)
         if __debug__:
@@ -76,7 +77,7 @@ class Splitter_LRS(Splitter_DBS):
         # {{{
 
         Splitter_DBS.send_chunk(self, message, peer)
-        self.buffer[self.chunk_number % self.BUFFER_SIZE] = message
+        self.buffer[self.chunk_number % Common.BUFFER_SIZE] = message
 
         # }}}
 

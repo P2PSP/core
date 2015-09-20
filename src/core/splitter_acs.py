@@ -22,7 +22,7 @@ import struct
 import time
 
 from core.common import Common
-#from core.color import Color
+from core.color import Color
 from core._print_ import _print_
 #from splitter_ims import Splitter_IMS
 from core.splitter_dbs import Splitter_DBS
@@ -118,7 +118,7 @@ class Splitter_ACS(Splitter_DBS):
     def send_chunk(self, chunk, peer):
         # {{{
 
-        Splitter_IMS.send_chunk(self, chunk, peer)
+        Splitter_DBS.send_chunk(self, chunk, peer)
         try:
             self.number_of_sent_chunks_per_peer[peer] += 1
         except KeyError:
