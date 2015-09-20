@@ -95,7 +95,9 @@ class Splitter_DBS(Splitter_IMS):
 
         message = struct.pack("B", self.magic_flags)
         peer_serve_socket.sendall(message)
-        
+        if __debug__:
+            _p_("Sending magic flags =",self.magic_flags)
+            
     def send_the_list_size(self, peer_serve_socket):
         # {{{
 
