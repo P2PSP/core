@@ -1,6 +1,6 @@
 """
 @package core
-monitor_lrs splitter_nts
+monitor_lrs module
 """
 
 # -*- coding: iso-8859-15 -*-

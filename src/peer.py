@@ -1,4 +1,6 @@
+#!/opt/local/bin/python3.4
 #!/usr/bin/python -O
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -147,7 +149,7 @@ class Peer():
             peer.receive_the_list_of_peers()
             _print_("List of peers received")
             peer.receive_magic_flags()
-            _print_("Magic flags =", peer.magic_flags)
+            _print_("Magic flags =", bin(peer.magic_flags))
 
             # After receiving the list of peers, the peer can check
             # whether is a monitor peer or not (only the first

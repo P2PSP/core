@@ -24,7 +24,7 @@ import time
 
 from core.common import Common
 from core.splitter_dbs import Splitter_DBS, ADDR, PORT
-#from core.color import Color
+from core.color import Color
 from core._print_ import _print_
 
 # }}}

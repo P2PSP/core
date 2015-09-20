@@ -1,5 +1,6 @@
-#!/opt/local/bin/python3.4 -O
+#!/opt/local/bin/python3.4
 #!/usr/bin/python -O
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
