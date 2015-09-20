@@ -28,8 +28,7 @@ try:
 except ImportError:
     pass
 
-from core import common
-#import common
+from core.common import Common
 from core.color import Color
 from core._print_ import _print_
 from core.peer_ims import Peer_IMS
@@ -159,10 +158,10 @@ class Peer():
 
                 # The peer is a monitor. Now it's time to know the sets of rules that control this team.
 
-                if (peer.magic_flags & common.LRS):
+                if (peer.magic_flags & Common.LRS):
                     peer = Monitor_LSR(peer)
                     _print_("Monitor LRS")
-                if (peer.magic_flags & common.NTS):
+                if (peer.magic_flags & Common.NTS):
                     peer = Monitor_NTS(peer)
                     _print_("Monitor NTS")
             else:
@@ -171,13 +170,13 @@ class Peer():
 
                 # The peer is a normal peer. Let's know the sets of rules that control this team.
                 
-                if (peer.magic_flags & common.ACS):
+                if (peer.magic_flags & Common.ACS):
                     peer = Peer_ACR(peer)
                     _print_("Peer ACS")
-                if (peer.magic_flags & common.LRS):
+                if (peer.magic_flags & Common.LRS):
                     peer = Peer_LSR(peer)
                     _print_("Peer LRS")
-                if (peer.magic_flags & common.NTS):
+                if (peer.magic_flags & Common.NTS):
                     peer = Peeer_NTS(peer)
                     _print_("Peer NTS")
 
@@ -274,7 +273,7 @@ class Peer():
             kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
             last_sendto_counter = peer.sendto_counter
             try:
-                if common.CONSOLE_MODE == False :
+                if Common.CONSOLE_MODE == False :
                     from gi.repository import GObject
                     try:
                         from adapter import speed_adapter
@@ -316,7 +315,7 @@ class Peer():
                     break
             print()
         try:
-            if common.CONSOLE_MODE == False :
+            if Common.CONSOLE_MODE == False :
                 GObject.idle_add(speed_adapter.update_widget,str(0)+' kbps',str(0)+' kbps',str(0))
         except  Exception as msg:
             pass

@@ -1,3 +1,4 @@
+#!/opt/local/bin/python3.4 -O
 #!/usr/bin/python -O
 # -*- coding: iso-8859-15 -*-
 
@@ -17,12 +18,13 @@ import socket
 import threading
 import struct
 
+#from core.common import Common
+from core._print_ import _print_
+from core.color import Color
 from core.splitter_ims import Splitter_IMS
 from core.splitter_dbs import Splitter_DBS
 from core.splitter_acs import Splitter_ACS
-import core.common
-from core._print_ import _print_
-from core.color import Color
+from core.splitter_nts import Splitter_NTS
 
 try:
     import colorama                       # Enable console color using ANSI codes in Windows
@@ -149,7 +151,6 @@ class Splitter():
 
             splitter = Splitter_DBS()
             if args.NTS:
-                from splitter_nts import Splitter_NTS
                 splitter = Splitter_NTS(splitter)
                 _print_("NTS enabled")
             if args.ACS:

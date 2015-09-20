@@ -1,4 +1,8 @@
-#!/usr/bin/python -O
+"""
+@package core
+malicious_peer module
+"""
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -6,17 +10,23 @@
 # Copyright (C) 2015, the P2PSP team.
 # http://www.p2psp.org
 
-from peer_dbs import Peer_DBS
-
 import struct
 import sys
 import socket
-from color import Color
-from _print_ import _print_
 import threading
 import hashlib
 import random
 import time
+
+from core.color import Color
+from core._print_ import _print_
+from core.peer_dbs import Peer_DBS
+
+def _p_(*args, **kwargs):
+    """Colorize the output."""
+    sys.stdout.write(Common.DBS)
+    _print_("DBS (trusted peer):", *args)
+    sys.stdout.write(Color.none)
 
 class TrustedPeer(Peer_DBS):
 
@@ -26,33 +36,10 @@ class TrustedPeer(Peer_DBS):
     checkAll = False
 
     def __init__(self, peer):
-        sys.stdout.write(Color.yellow)
-        _print_("Trusted Peer")
-        sys.stdout.write(Color.none)
 
-        threading.Thread.__init__(self)
-
-        self.splitter_socket = peer.splitter_socket
-        self.player_socket = peer.player_socket
-        self.buffer_size = peer.buffer_size
-        self.splitter = peer.splitter
-        self.chunk_size = peer.chunk_size
-        self.peer_list = peer.peer_list
-        self.debt = peer.debt
-        self.message_format = peer.message_format
-        self.team_socket = peer.team_socket
         self.next_sampled_index = 0
         self.counter = 1
-
-        # }}}
-    def print_the_module_name(self):
-        # {{{
-
-        sys.stdout.write(Color.yellow)
-        _print_("Trusted Peer")
-        sys.stdout.write(Color.none)
-
-        # }}}
+        _p_("Initialized")
 
     def process_next_message(self):
         chunk_number = Peer_DBS.process_next_message(self)

@@ -21,7 +21,7 @@ import socket
 import struct
 import time
 
-import common
+from core.common import Common
 from core._print_ import _print_
 from core.color import Color
 
@@ -36,7 +36,7 @@ except ImportError as msg:
 def _p_(*args, **kwargs):
     """Colorize the output."""
     if __debug__:
-        sys.stdout.write(common.IMS_COLOR)
+        sys.stdout.write(Common.IMS_COLOR)
         _print_("IMS:", *args)
         sys.stdout.write(Color.none)
 
@@ -121,7 +121,7 @@ class Peer_IMS(threading.Thread):
             try:
                 self.splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             except Exception as e:
-                _p_(e)
+                _print_(e)
                 pass
             #sys.stdout.write(Color.purple)
             _p_("I'm using port the port", self.PORT)
@@ -132,7 +132,10 @@ class Peer_IMS(threading.Thread):
         try:
             self.splitter_socket.connect(self.splitter)
         except Exception as e:
-            _p_(e)
+            if __debug__:
+                _p_(e)
+            else:
+                _print_(e)
             #sys.stdout.write(Color.red)
             #sys.exit("Sorry. Can't connect to the splitter at " + str(self.splitter))
             #sys.stdout.write(Color.none)
@@ -367,7 +370,7 @@ class Peer_IMS(threading.Thread):
         for x in range(int(self.buffer_size/2)):
             _print_("{:.2%}\r".format((1.0*x)/(self.buffer_size/2)), end='')
             BUFFER_STATUS = (100*x)/(self.buffer_size/2) +1
-            #if common.CONSOLE_MODE == False :
+            #if Common.CONSOLE_MODE == False :
             #    GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
             #else:
             #    pass
@@ -391,12 +394,12 @@ class Peer_IMS(threading.Thread):
         # {{{
         #print (".")
         #counter = 0
-        chunk_number = (self.played_chunk + 1) % common.MAX_CHUNK_NUMBER
+        chunk_number = (self.played_chunk + 1) % Common.MAX_CHUNK_NUMBER
         while not self.received_flag[chunk_number % self.buffer_size]:
             #sys.stdout.write(Color.cyan)
             _p_("lost chunk", chunk_number)
             #sys.stdout.write(Color.none)
-            chunk_number = (chunk_number + 1) % common.MAX_CHUNK_NUMBER
+            chunk_number = (chunk_number + 1) % Common.MAX_CHUNK_NUMBER
             #counter += 1
             #if counter > self.buffer_size:
             #    break

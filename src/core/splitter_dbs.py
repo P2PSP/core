@@ -21,7 +21,7 @@ import socket
 import struct
 import time
 
-import common
+from core.common import Common
 from core._print_ import _print_
 from core.splitter_ims import Splitter_IMS
 from core.color import Color
@@ -35,7 +35,7 @@ PORT = 1
 def _p_(*args, **kwargs):
     """Colorize the output."""
     if __debug__:
-        sys.stdout.write(common.DBS_COLOR)
+        sys.stdout.write(Common.DBS_COLOR)
         _print_("DBS:", *args)
         sys.stdout.write(Color.none)
     
@@ -76,7 +76,7 @@ class Splitter_DBS(Splitter_IMS):
         #    self.destination_of_chunk.append(('0.0.0.0',0))
 
         self.losses = {}
-        self.magic_flags = common.DBS
+        self.magic_flags = Common.DBS
         
         _p_("max_chunk_loss =", self.MAX_CHUNK_LOSS)
         _p_("mcast_addr =", self.MCAST_ADDR)
@@ -355,7 +355,7 @@ class Splitter_DBS(Splitter_IMS):
 
         while self.alive:
             self.reset_counters()
-            time.sleep(common.COUNTERS_TIMING)
+            time.sleep(Common.COUNTERS_TIMING)
 
         # }}}
 
@@ -401,7 +401,7 @@ class Splitter_DBS(Splitter_IMS):
                 self.send_chunk(message, peer)
 
                 self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
-                self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
+                self.chunk_number = (self.chunk_number + 1) % Common.MAX_CHUNK_NUMBER
                 self.compute_next_peer_number(peer)
             except IndexError:
                 _p_("The monitor peer has died!")

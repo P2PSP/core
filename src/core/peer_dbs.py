@@ -21,7 +21,7 @@ import socket
 import struct
 import time
 
-import common
+from core.common import Common
 from core.color import Color
 from core._print_ import _print_
 from core.peer_ims import Peer_IMS
@@ -35,7 +35,7 @@ PORT = 1
 def _p_(*args, **kwargs):
     """Colorize the output."""
     if __debug__:
-        sys.stdout.write(common.DBS_COLOR)
+        sys.stdout.write(Common.DBS_COLOR)
         _print_("DBS:", *args)
         sys.stdout.write(Color.none)
 

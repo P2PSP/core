@@ -1,3 +1,8 @@
+"""
+@package core
+lossy_peer module
+"""
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -5,25 +10,32 @@
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
-# The P2PSP.org project has been supported by the Junta de Andalucia
-# through the Proyecto Motriz "Codificacion de Video Escalable y su
-# Streaming sobre Internet" (P10-TIC-6548).
-
 # {{{ Imports
+
 import threading
 import sys
 import socket
-from peer_fns import Peer_FNS
-from color import Color
-from _print_ import _print_
-from lossy_socket import lossy_socket
+
+from core.common import Common
+from core.color import Color
+from core._print_ import _print_
+from core.lossy_socket import lossy_socket
+from core.peer_dbs import Peer_DBS
+
 # }}}
 
 # Some useful definitions.
 ADDR = 0
 PORT = 1
 
-class Lossy_Peer(Peer_FNS):
+def _p_(*args, **kwargs):
+    if __debug__:
+        """Colorize the output."""
+        sys.stdout.write(Common.DBS_COLOR)
+        _print_("DBS:", *args)
+        sys.stdout.write(Color.none)
+
+class Lossy_Peer(Peer_DBS):
     # {{{
 
     CHUNK_LOSS_PERIOD = 10
@@ -31,9 +43,7 @@ class Lossy_Peer(Peer_FNS):
     def __init__(self, peer):
         # {{{
 
-        sys.stdout.write(Color.yellow)
-        _print_("Lossy Peer")
-        sys.stdout.write(Color.none)
+        _p_("Initialized")
 
         # }}}
 

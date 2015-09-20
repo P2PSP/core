@@ -1,6 +1,6 @@
 """
 @package core
-monitor_nts splitter_nts
+monitor_nts module
 """
 
 # This code is distributed under the GNU General Public License (see
@@ -16,7 +16,7 @@ import sys
 import struct
 import socket
 
-import common
+from core.common import Common
 from core.peer_dbs import Peer_DBS
 from core.peer_nts import Peer_NTS
 from core._print_ import _print_
@@ -24,15 +24,20 @@ from core.color import Color
 
 # }}}
 
+def _p_(*args, **kwargs):
+    if __debug__:
+        """Colorize the output."""
+        sys.stdout.write(Common.NTS_COLOR)
+        _print_("NTS:", *args)
+        sys.stdout.write(Color.none)
+
 class Monitor_NTS(Peer_NTS):
     # {{{
 
     def __init__(self, peer):
         # {{{
 
-        sys.stdout.write(Color.yellow)
-        _print_("Monitor NTS")
-        sys.stdout.write(Color.none)
+        _p_("Initialized")
 
         # }}}
 
@@ -52,10 +57,10 @@ class Monitor_NTS(Peer_NTS):
     def find_next_chunk(self):
         # {{{ This is from Monitor_DBS
 
-        chunk_number = (self.played_chunk + 1) % common.MAX_CHUNK_NUMBER
+        chunk_number = (self.played_chunk + 1) % Common.MAX_CHUNK_NUMBER
         while not self.received_flag[chunk_number % self.buffer_size]:
             self.complain(chunk_number)
-            chunk_number = (chunk_number + 1) % common.MAX_CHUNK_NUMBER
+            chunk_number = (chunk_number + 1) % Common.MAX_CHUNK_NUMBER
         return chunk_number
 
         # }}}
@@ -82,27 +87,27 @@ class Monitor_NTS(Peer_NTS):
         # {{{ Handle NTS messages; pass other messages to base class
 
         if sender != self.splitter and \
-        (len(message) == common.PEER_ID_LENGTH or
-         len(message) == common.PEER_ID_LENGTH+1):
+        (len(message) == Common.PEER_ID_LENGTH or
+         len(message) == Common.PEER_ID_LENGTH+1):
             # Hello message received from peer
             if __debug__:
                 print("NTS: Received hello (ID %s) from %s" \
-                    % (message[:common.PEER_ID_LENGTH], sender))
+                    % (message[:Common.PEER_ID_LENGTH], sender))
             # Send acknowledge
             self.team_socket.sendto(message, sender)
 
             if __debug__:
                 print("NTS: Forwarding ID %s and source port %s to splitter"
-                      % (message[:common.PEER_ID_LENGTH], sender[1]))
+                      % (message[:Common.PEER_ID_LENGTH], sender[1]))
             message += struct.pack("H", socket.htons(sender[1]))
             message_data = (message, self.splitter)
             self.send_message(message_data)
         elif sender == self.splitter and \
-                len(message) == common.PEER_ID_LENGTH + struct.calcsize("4sH"):
+                len(message) == Common.PEER_ID_LENGTH + struct.calcsize("4sH"):
             # [say hello to (X)] received from splitter
-            peer_id = message[:common.PEER_ID_LENGTH]
+            peer_id = message[:Common.PEER_ID_LENGTH]
             IP_addr, port = \
-                struct.unpack("4sH", message[common.PEER_ID_LENGTH:]) # Ojo, !H?
+                struct.unpack("4sH", message[Common.PEER_ID_LENGTH:]) # Ojo, !H?
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)

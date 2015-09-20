@@ -21,7 +21,7 @@ import threading
 import struct
 import time
 
-import common
+from core.common import Common
 from core._print_ import _print_
 from core.color import Color
 
@@ -30,7 +30,7 @@ from core.color import Color
 def _p_(*args, **kwargs):
     """Colorize the output."""
     if __debug__:
-        sys.stdout.write(common.IMS_COLOR)
+        sys.stdout.write(Common.IMS_COLOR)
         _print_("IMS:", *args)
         sys.stdout.write(Color.none)
 
@@ -422,7 +422,7 @@ class Splitter_IMS(threading.Thread):
             message = struct.pack(message_format, socket.htons(self.chunk_number), chunk)
             #self.send_chunk(self.receive_chunk(header_load_counter), self.mcast_channel)
             self.send_chunk(message, self.mcast_channel)
-            self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
+            self.chunk_number = (self.chunk_number + 1) % Common.MAX_CHUNK_NUMBER
 
         # }}}
 
