@@ -1,5 +1,5 @@
-#!/opt/local/bin/python3.4
-#!/usr/bin/python -O
+##!/opt/local/bin/python3.4
+##!/usr/bin/python -O
 
 # -*- coding: iso-8859-15 -*-
 
