@@ -71,8 +71,8 @@ class Splitter_DBS(Splitter_IMS):
         # number. Used to find the peer to which a chunk has been
         # sent.
         # }}}
-        self.destination_of_chunk = [('0.0.0.0',0)] * Common.BUFFER_SIZE
-        #for i in range(Common.BUFFER_SIZE):
+        self.destination_of_chunk = [('0.0.0.0',0)] * self.BUFFER_SIZE
+        #for i in range(self.BUFFER_SIZE):
         #    self.destination_of_chunk.append(('0.0.0.0',0))
 
         self.losses = {}
@@ -95,8 +95,7 @@ class Splitter_DBS(Splitter_IMS):
 
         message = struct.pack("B", self.magic_flags)
         peer_serve_socket.sendall(message)
-        if __debug__:
-            _p_("Sending magic flags =",bin(self.magic_flags))
+        _print_("Magic flags =",bin(self.magic_flags))
             
     def send_the_list_size(self, peer_serve_socket):
         # {{{
@@ -219,7 +218,7 @@ class Splitter_DBS(Splitter_IMS):
     def get_losser(self, lost_chunk_number):
         # {{{
 
-        return self.destination_of_chunk[lost_chunk_number % Common.BUFFER_SIZE]
+        return self.destination_of_chunk[lost_chunk_number % self.BUFFER_SIZE]
 
         # }}}
 
@@ -402,7 +401,7 @@ class Splitter_DBS(Splitter_IMS):
                 message = struct.pack(message_format, socket.htons(self.chunk_number), chunk)
                 self.send_chunk(message, peer)
 
-                self.destination_of_chunk[self.chunk_number % Common.BUFFER_SIZE] = peer
+                self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
                 self.chunk_number = (self.chunk_number + 1) % Common.MAX_CHUNK_NUMBER
                 self.compute_next_peer_number(peer)
             except IndexError:

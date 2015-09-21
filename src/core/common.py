@@ -7,9 +7,6 @@ from core.color import Color
 
 class Common:
 
-    BUFFER_SIZE = 256                 # Buffer size in chunks
-    CHANNEL = "BBB-134.ogv   "        # Default channel
-
     MAX_CHUNK_NUMBER = 65536
     #MAX_CHUNK_NUMBER = 2048
     #COUNTERS_TIMING = 0.1

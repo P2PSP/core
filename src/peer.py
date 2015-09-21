@@ -156,31 +156,31 @@ class Peer():
             # arriving peers are monitors)
             if peer.am_i_a_monitor():
                 peer = Monitor_DBS(peer)
-                _print_("Monitor DBS")
+                _print_("Monitor DBS enabled")
 
                 # The peer is a monitor. Now it's time to know the sets of rules that control this team.
 
                 if (peer.magic_flags & Common.LRS):
                     peer = Monitor_LRS(peer)
-                    _print_("Monitor LRS")
+                    _print_("Monitor LRS enabled")
                 if (peer.magic_flags & Common.NTS):
                     peer = Monitor_NTS(peer)
-                    _print_("Monitor NTS")
+                    _print_("Monitor NTS enabled")
             else:
                 peer = Peer_DBS(peer)
-                _print_("Peer DBS")
+                _print_("Peer DBS enabled")
 
                 # The peer is a normal peer. Let's know the sets of rules that control this team.
                 
                 if (peer.magic_flags & Common.ACS):
                     peer = Peer_ACR(peer)
-                    _print_("Peer ACS")
+                    _print_("Peer ACS enabled")
                 if (peer.magic_flags & Common.LRS):
                     peer = Peer_LSR(peer)
-                    _print_("Peer LRS")
+                    _print_("Peer LRS enabled")
                 if (peer.magic_flags & Common.NTS):
                     peer = Peeer_NTS(peer)
-                    _print_("Peer NTS")
+                    _print_("Peer NTS enabled")
 
                 if args.enable_chunk_loss:
                 
@@ -189,6 +189,7 @@ class Peer():
                         print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
                         if int(args.chunk_loss_period) != 0:
                             peer = Lossy_Peer(peer)
+                            _print_("Lost of chunks enabled")
 
             if args.port_step:
                 Symsp_Peer.PORT_STEP = int(args.port_step)
