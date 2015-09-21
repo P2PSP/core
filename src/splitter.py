@@ -260,7 +260,7 @@ class Splitter():
                     splitter.say_goodbye(("127.0.0.1", splitter.PORT), splitter.team_socket)
 
                 # Wake up the "handle_arrivals" daemon, which is waiting
-                # in a accept().
+                # in an accept().
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.connect(("127.0.0.1", splitter.PORT))
                 sock.recv(struct.calcsize("4sH")) # Multicast channel
@@ -268,6 +268,8 @@ class Splitter():
                 sock.recv(struct.calcsize("H")) # Chunk size
                 sock.recv(splitter.CHUNK_SIZE*splitter.HEADER_SIZE) # Header
                 sock.recv(struct.calcsize("H")) # Buffer size
+                sock.recv(struct.calcsize("4sH")) # Endpoint
+                sock.recv(struct.calcsize("B")) # Magic flags
                 if args.IMS:
                     number_of_peers = 0
                 else:

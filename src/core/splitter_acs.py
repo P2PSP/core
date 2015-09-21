@@ -32,9 +32,10 @@ from core.splitter_dbs import Splitter_DBS
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(Common.ACS_COLOR)
-    _print_("ACS:", *args)
-    sys.stdout.write(Color.none)
+    if __debug__:
+        sys.stdout.write(Common.ACS_COLOR)
+        _print_("ACS:", *args)
+        sys.stdout.write(Color.none)
 
 class Splitter_ACS(Splitter_DBS):
     # {{{

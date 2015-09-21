@@ -142,14 +142,14 @@ class Peer():
 
             peer = Peer_DBS(peer)
             peer.receive_my_endpoint()
+            peer.receive_magic_flags()
+            _print_("Magic flags =", bin(peer.magic_flags))
             peer.receive_the_number_of_peers()
             _print_("Number of peers in the team (excluding me) =", peer.number_of_peers)
             _print_("Am I a monitor peer? =", peer.am_i_a_monitor())
             peer.listen_to_the_team()
             peer.receive_the_list_of_peers()
             _print_("List of peers received")
-            peer.receive_magic_flags()
-            _print_("Magic flags =", bin(peer.magic_flags))
 
             # After receiving the list of peers, the peer can check
             # whether is a monitor peer or not (only the first

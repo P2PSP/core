@@ -159,6 +159,7 @@ class Splitter_DBS(Splitter_IMS):
     def send_configuration(self, sock):
         Splitter_IMS.send_configuration(self, sock)
         self.send_the_peer_endpoint(sock)
+        self.send_magic_flags(sock)
 
     def insert_peer(self, peer):
         # {{{
@@ -190,7 +191,6 @@ class Splitter_DBS(Splitter_IMS):
         #sys.stdout.write(Color.none)
         self.send_configuration(serve_socket)
         self.send_the_list_of_peers(serve_socket)
-        self.send_magic_flags(serve_socket)
         serve_socket.close()
         self.insert_peer(incomming_peer)
         return incomming_peer
