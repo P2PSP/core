@@ -22,7 +22,7 @@ import struct
 import socket
 import traceback
 
-#from color import Color
+from core.color import Color
 from core.common import Common
 from core._print_ import _print_
 from core.peer_dbs import Peer_DBS

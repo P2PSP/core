@@ -179,7 +179,7 @@ class Peer():
                     peer = Peer_LSR(peer)
                     _print_("Peer LRS enabled")
                 if (peer.magic_flags & Common.NTS):
-                    peer = Peeer_NTS(peer)
+                    peer = Peer_NTS(peer)
                     _print_("Peer NTS enabled")
 
                 if args.enable_chunk_loss:
