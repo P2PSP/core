@@ -84,10 +84,10 @@ class Splitter_DBS(Splitter_IMS):
 
         # }}}
 
-    def say_goodbye(self, node, sock):
+        #def say_goodbye(self, node, sock):
         # {{{
 
-        sock.sendto(b'', node)
+        #sock.sendto(b'', node)
 
         # }}}
 

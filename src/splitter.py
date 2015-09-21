@@ -257,7 +257,8 @@ class Splitter():
                 # Wake up the "moderate_the_team" daemon, which is
                 # waiting in a recvfrom().
                 if not args.IMS:
-                    splitter.say_goodbye(("127.0.0.1", splitter.PORT), splitter.team_socket)
+                    #splitter.say_goodbye(("127.0.0.1", splitter.PORT), splitter.team_socket)
+                    splitter.team_socket.sendto(b'', ("127.0.0.1", splitter.PORT))
 
                 # Wake up the "handle_arrivals" daemon, which is waiting
                 # in an accept().
