@@ -267,29 +267,21 @@ class Peer_IMS(threading.Thread):
         self.recvfrom_counter += 1
 
         _p_("Received a message from", sender, "of length", len(message))
+        if __debug__:
+            if len(message) < 10:
+                _p_("Message content =", message)
 
         return message, sender
 
         # }}}
 
-    def process_next_message(self):
-        # {{{
-        try:
-            # {{{ Receive the next message and process it
-
-            message, sender = self.receive_the_next_message()
-            # The process_message method can be overridden by inheriting peers
-            return self.process_message(message, sender)
-
-            # }}}
-        except socket.timeout:
-            return -2
-
-        # }}}
-
+    # This method is overridden by the inheriting classes DBS and NTS
     def process_message(self, message, sender):
-        # {{{ Receive a chunk
+        # {{{ 
 
+        # Ojo, an attacker could send a packet smaller and pollute the
+        # buffer, althought this is difficult in IP multicst
+        
         chunk_number, chunk = self.unpack_message(message)
 
         self.chunks[chunk_number % self.buffer_size] = chunk
@@ -297,6 +289,20 @@ class Peer_IMS(threading.Thread):
         self.received_counter += 1
 
         return chunk_number
+
+        # }}}
+
+    def process_next_message(self):
+        # {{{
+        try:
+            message, sender = self.receive_the_next_message()
+        except socket.timeout:
+            return -2
+
+        return self.process_message(message, sender)
+
+        #except Exception:
+        #    return -1
 
         # }}}
 

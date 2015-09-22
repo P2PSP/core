@@ -172,12 +172,6 @@ class Peer():
 
                 # The peer is a normal peer. Let's know the sets of rules that control this team.
                 
-                if (peer.magic_flags & Common.ACS):
-                    peer = Peer_ACR(peer)
-                    _print_("Peer ACS enabled")
-                if (peer.magic_flags & Common.LRS):
-                    peer = Peer_LSR(peer)
-                    _print_("Peer LRS enabled")
                 if (peer.magic_flags & Common.NTS):
                     peer = Peer_NTS(peer)
                     _print_("Peer NTS enabled")
@@ -253,8 +247,9 @@ class Peer():
         print("|       (Expected values are between parenthesis)     |")
         print("------------------------------------------------------+")
         print()
-        print("    Time |     Received (Expected) |          Sent (Expected) | Team description")
-        print("---------+-------------------------+--------------------------+-----------------...")
+        print("         |     Received (kbps) |          Sent (kbps) |")
+        print("    Time |      Real  Expected |       Real  Expected | Team description")
+        print("---------+---------------------+----------------------+-----------------------------------...")
 
         last_chunk_number = peer.played_chunk
         if hasattr(peer, 'sendto_counter'):
@@ -296,16 +291,16 @@ class Peer():
                 sys.stdout.write(Color.red)
             elif kbps_expected_recv > kbps_recvfrom:
                 sys.stdout.write(Color.green)
-            print(repr(kbps_expected_recv).rjust(12), end=Color.none)
-            print(('(' + repr(kbps_recvfrom) + ')').rjust(12), end=' | ')
+            print(repr(int(kbps_expected_recv)).rjust(10), end=Color.none)
+            print(repr(int(kbps_recvfrom)).rjust(10), end=' | ')
             #print(("{:.1f}".format(nice)).rjust(6), end=' | ')
             #sys.stdout.write(Color.none)
             if kbps_expected_sent > kbps_sendto:
                 sys.stdout.write(Color.red)
             elif kbps_expected_sent < kbps_sendto:
                 sys.stdout.write(Color.green)
-            print(repr(kbps_sendto).rjust(12), end=Color.none)
-            print(('(' + repr(kbps_expected_sent) + ')').rjust(12), end=' | ')
+            print(repr(int(kbps_sendto)).rjust(10), end=Color.none)
+            print(repr(int(kbps_expected_sent)).rjust(10), end=' | ')
             #sys.stdout.write(Color.none)
             #print(repr(nice).ljust(1)[:6], end=' ')
             print(len(peer.peer_list), end=' ')

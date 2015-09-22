@@ -218,7 +218,7 @@ class Splitter():
                 last_sendto_counter = splitter.sendto_counter
                 last_recvfrom_counter = splitter.recvfrom_counter
                 sys.stdout.write(Color.none)
-                _print_("|" + repr(kbps_recvfrom).rjust(10) + " |" + repr(kbps_sendto).rjust(10), end=" | ")
+                _print_("|" + repr(int(kbps_recvfrom)).rjust(10) + " |" + repr(int(kbps_sendto)).rjust(10), end=" | ")
                 #print('%5d' % splitter.chunk_number, end=' ')
                 sys.stdout.write(Color.cyan)
                 print(len(splitter.peer_list), end=' ')

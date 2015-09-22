@@ -31,9 +31,10 @@ from core._print_ import _print_
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(Common.NTS_COLOR)
-    _print_("ACS:", *args)
-    sys.stdout.write(Color.none)
+    if __debug__:
+        sys.stdout.write(Common.NTS_COLOR)
+        _print_("NTS:", *args)
+        sys.stdout.write(Color.none)
 
 class Splitter_NTS(Splitter_DBS):
     # {{{

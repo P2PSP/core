@@ -65,6 +65,7 @@ class Peer_DBS(Peer_IMS):
         # {{{
 
         self.team_socket.sendto(b'H', node)
+        _p_("[Hello] sent to %s" % str(node))
 
         # }}}
 
@@ -72,6 +73,7 @@ class Peer_DBS(Peer_IMS):
         # {{{
 
         self.team_socket.sendto(b'G', node)
+        _p_("[Goodbye] sent to %s" % str(node))
 
         # }}}
 
@@ -114,7 +116,7 @@ class Peer_DBS(Peer_IMS):
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
-            print("DBS: [hello] sent to", peer)
+            _p_("[hello] sent to", peer)
             self.say_hello(peer)
             if __debug__:
                 _p_("[%5d]" % tmp, peer)
@@ -283,12 +285,12 @@ class Peer_DBS(Peer_IMS):
             for i in self.debt:
                 self.debt[i] /= 2
 
-        if __debug__:
-            _p_("Number of peers in the team:", len(self.peer_list)+1)
-            _p_(self.team_socket.getsockname(),)
-            for p in self.peer_list:
-                print ("DBS:", p,)
-            print ()
+        #_p_("Number of peers in the team:", len(self.peer_list)+1)
+        #_p_(self.team_socket.getsockname(),)
+        #if __debug__:
+        #    for p in self.peer_list:
+        #        print ("DBS:", p,)
+        #    print ()
 
         # }}}
 
@@ -357,6 +359,8 @@ class Peer_DBS(Peer_IMS):
 
     # }}}
 
+    # The following methods should be inheritaged ...
+    
     def calc_buffer_correctnes(self):
         zerochunk = struct.pack("1024s", "0")
         goodchunks = badchunks = 0

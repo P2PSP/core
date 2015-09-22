@@ -8,7 +8,6 @@ This document documents the NAT traversal methods developed in the GSoC 2015
 project "NAT traversal using UDP hole punching" as a python implementation in
 the NAT Traversal Set of rules (NTS) classes.
 
-
 ## NAT types
 The behaviour of different implementations of NAT devices (i.e. routers), can be
 grouped into a few different NAT types. A short description from [this page][3]:
@@ -41,7 +40,7 @@ external host that receives a packet can send a packet back to the internal
 host."
 
 As described in [this paper][4], the symmetric NATs can be divided again into
-these subtypes, depending on the allocation of the source port of the NAT:
+these three subtypes, depending on the allocation of the source port of the NAT:
 
 * **Port preservation (SYMPP):**
 The public source port of the NAT is the same as the source port of the local
@@ -92,7 +91,6 @@ If the determined port step is 0, the NAT is one of the FCN, RCN, PRCN, SYMPP
 types and NAT traversal is trivial. Otherwise the P2PSP software will try to
 predict the source ports chosen next by the NAT. See details below.
 
-
 ## UDP hole punching and port prediction
 ### UDP hole punching
 NAT devices (all but the FCN type) only forward packets from a peer to the local
@@ -100,7 +98,6 @@ network if previously a packet to the peer address and port has been sent and
 therefore a NAT entry exists (for RCN, a packet must have been sent to the peer
 address and **any** port). Therefore hello packets are sent continuously between
 two peers until both peers have received a packet from each other.
-
 
 ### Source port prediction
 In case peer A and B want to connect to each other and peer A is behind a NAT
@@ -207,7 +204,6 @@ above, the algorithm yields:
     port_diffs = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 25,
         30, 40, 50]
     ```
-
 
 ### Limits for UDP hole punching and port prediction
 In some scenarios UDP hole punching with port prediction cannot work by design.
