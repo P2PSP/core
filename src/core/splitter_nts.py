@@ -42,7 +42,7 @@ class Splitter_NTS(Splitter_DBS):
     def __init__(self, splitter):
         # {{{
 
-        #Splitter_DBS.__init__(self)
+        #Splitter_DBS.__init__(self)    # Ojo, comentar
         #sys.stdout.write(Color.yellow)
         #print("Using NTS")
         #sys.stdout.write(Color.none)
@@ -115,7 +115,7 @@ class Splitter_NTS(Splitter_DBS):
             # Wait for an enqueued message
             message, peer = self.message_queue.get()
             # Send the message
-            self.team_socket.sendto(message, peer)
+            self.team_socket.sendto(message.encode(), peer)
             # Wait for a chunk from source to avoid network congestion
             self.chunk_received_event.wait()
             self.chunk_received_event.clear()
@@ -289,31 +289,25 @@ class Splitter_NTS(Splitter_DBS):
                 # Send acknowledge
                 self.extra_socket.sendto(message, sender)
 
-                peer_id = message
+                peer_id = message.decode()
+                
                 peer = None
                 for peer_data in self.ids.iteritems():
                     if peer_id == peer_data[1]:
                         peer = peer_data[0]
                         break
                 if peer == None:
-                    if __debug__:
-                        _p_('Peer ID %s unknown' % peer_id)
+                    _p_('Peer ID %s unknown' % peer_id)
                     continue
                 # Check sender address
                 if sender[0] != peer[0]:
-                    if __debug__:
-                        _p_('Peer %s switched from %s to %s, ignoring' \
-                            % (peer_id, peer[0], sender[0]))
+                    _p_('Peer %s switched from %s to %s, ignoring' % (peer_id, peer[0], sender[0]))
                     continue
                 # Update source port information
-                if __debug__:
-                    _p_('Received current source port %d of peer %s\n' \
-                        % (sender[1], peer_id))
+                _p_('Received current source port %d of peer %s\n' % (sender[1], peer_id))
                 self.update_port_step(peer, sender[1])
             else:
-                if __debug__:
-                    _p_('Ignoring packet of length %d from %s' \
-                        % (len(message), sender))
+                _p_('Ignoring packet of length %d from %s' % (len(message), sender))
 
 
             # }}}
@@ -336,6 +330,7 @@ class Splitter_NTS(Splitter_DBS):
         # Send the generated ID to peer
         peer_id = self.generate_id()
         _p_("Sending ID %s to peer %s" % (peer_id, new_peer))
+        #message = struct.pack(str(Common.PEER_ID_LENGTH) + "s", bytes(peer_id).encode())
         serve_socket.sendall(peer_id.encode())
         if len(self.peer_list) < self.MONITOR_NUMBER:
             # Directly incorporate the monitor peer into the team.
@@ -532,11 +527,13 @@ class Splitter_NTS(Splitter_DBS):
                 # The longest possible message has length
                 # Common.PEER_ID_LENGTH+1 + struct.calcsize("H")
                 message, sender = self.team_socket.recvfrom(
-                    Common.PEER_ID_LENGTH+1 + struct.calcsize("H"))
+                    Common.PEER_ID_LENGTH + 1 + struct.calcsize("H"))
             except:
                 _p_("Unexpected error:", sys.exc_info()[0])
                 continue
 
+            _p_("Message length = %d" % len(message))
+            
             if len(message) == 2:
 
                 # {{{ The peer complains about a lost chunk.
@@ -551,35 +548,46 @@ class Splitter_NTS(Splitter_DBS):
 
                 # }}}
 
-            elif message == 'G': # 'G'oodbye
+            elif message == b'G': # 'G'oodbye
+
                 # {{{ The peer wants to leave the team.
+
                 self.process_goodbye(sender)
+
                 # }}}
+                
             elif len(message) == Common.PEER_ID_LENGTH:
+
                 # Packet is from the arriving peer itself
-                peer_id = message
-                if __debug__:
-                    _p_('Received hello (ID %s) from %s' \
-                          % (peer_id, sender))
+                peer_id = message.decode()
+                
+                _p_("Received [hello, I'm %s] from %s" % (peer_id, sender))
+
                 # Send acknowledge
-                self.message_queue.put((message, sender))
+                self.message_queue.put((peer_id, sender))
                 if peer_id not in self.arriving_peers:
-                    if __debug__:
-                        _p_('Peer ID %s is not an arriving peer' \
-                              % peer_id)
+                    _p_('Peer ID %s is not an arriving peer' % peer_id)
                     continue
 
-                if self.arriving_peers[peer_id][1] != sender[0]:
-                    _p_('ID %s: peer address over TCP (%s) and ' \
-                         'UDP (%s) is different' % ( \
-                         peer_id, self.arriving_peers[peer_id][1], sender[0]))
+                if __debug__:
+                    if self.arriving_peers[peer_id][1] != sender[0]:
+                        _p_('ID %s: peer address over TCP (%s) and ' \
+                             'UDP (%s) is different' % ( \
+                             peer_id, self.arriving_peers[peer_id][1], sender[0]))
+
                 source_port_to_splitter = sender[1]
+
                 # Update peer information
+                _p_("Updating peer %s" % peer_id)
+                
                 self.arriving_peers[peer_id] = \
                     self.arriving_peers[peer_id][:2] \
                     + (source_port_to_splitter,) \
                     + self.arriving_peers[peer_id][3:]
 
+                _p_("self.arriving_peers[peer_id][2] = %s" % self.arriving_peers[peer_id][2])
+                _p_("self.arriving_peers[peer_id][3] = %s" % self.arriving_peers[peer_id][3])
+                
                 if self.arriving_peers[peer_id][2] != 0 and \
                     0 not in self.arriving_peers[peer_id][3]:
                     # Source ports are known, incorporate the peer
@@ -587,24 +595,24 @@ class Splitter_NTS(Splitter_DBS):
 
             elif sender in self.peer_list[:self.MONITOR_NUMBER] and \
                 len(message) == Common.PEER_ID_LENGTH + struct.calcsize("H"):
-                # Packet is from monitor
-                peer_id = message[:Common.PEER_ID_LENGTH]
-                if __debug__:
-                    _p_('Received forwarded hello (ID %s) from %s' \
-                          % (peer_id, sender))
+
+                # Message is from monitor
+                peer_id = message[:Common.PEER_ID_LENGTH].decode()
+                _p_('Received forwarded hello (ID %s) from %s' % (peer_id, sender))
+
                 # Send acknowledge
-                self.message_queue.put((message, sender))
+                self.message_queue.put((peer_id, sender))
                 if peer_id not in self.arriving_peers:
-                    if __debug__:
-                        _p_('Peer ID %s is not an arriving peer' \
-                              % peer_id)
+                    _p_('Peer ID %s is not an arriving peer' % peer_id)
                     continue
 
                 source_port_to_monitor = struct.unpack( \
                     "H", message[Common.PEER_ID_LENGTH:])[0]
                 source_port_to_monitor = socket.ntohs(source_port_to_monitor)
+
                 # Get monitor number
                 index = self.peer_list.index(sender)
+
                 # Update peer information
                 self.arriving_peers[peer_id][3][index] = source_port_to_monitor
 
@@ -614,66 +622,72 @@ class Splitter_NTS(Splitter_DBS):
                     self.incorporate_peer(peer_id)
 
             elif len(message) == Common.PEER_ID_LENGTH + struct.calcsize("H"):
+
                 # Received source port of a peer from another peer
-                peer_id = message[:Common.PEER_ID_LENGTH]
-                if __debug__:
-                    _p_('Received source port of peer %s from %s' \
-                          % (peer_id, sender))
+                peer_id = message[:Common.PEER_ID_LENGTH].decode()
+                _p_('Received source port of peer %s from %s' % (peer_id, sender))
+
                 # Send acknowledge
-                self.message_queue.put((message, sender))
+                self.message_queue.put((peer_id, sender))
 
                 peer = None
                 for peer_data in self.ids.iteritems():
                     if peer_id == peer_data[1]:
                         peer = peer_data[0]
                         break
+
                 if peer == None:
-                    if __debug__:
-                        _p_('Peer ID %s unknown' % peer_id)
+                    _p_('Peer ID %s unknown' % peer_id)
                     continue
 
-                source_port = struct.unpack( \
-                    "H", message[Common.PEER_ID_LENGTH:])[0]
+                source_port = struct.unpack("H", message[Common.PEER_ID_LENGTH:])[0]
                 source_port = socket.ntohs(source_port)
 
                 # Update source port information
                 self.update_port_step(peer, source_port)
 
             elif len(message) == Common.PEER_ID_LENGTH + 1:
+
                 # A peer succeeded or failed to be incorporated into the team
-                peer_id = message[:Common.PEER_ID_LENGTH]
+                peer_id = message[:Common.PEER_ID_LENGTH].decode()
+
                 # Send acknowledge
-                self.message_queue.put((message, sender))
+                self.message_queue.put((peer_id, sender))
 
                 if peer_id not in self.incorporating_peers:
                     if __debug__:
                         _p_('Unknown peer %s' % peer_id)
                     continue
+
                 # Check sender address
                 if sender[0] != self.incorporating_peers[peer_id][0][0]:
-                    if __debug__:
-                        _p_('Peer %s switched from %s to %s, ignoring' \
-                              % (peer_id,
-                                 self.incorporating_peers[peer_id][0][0],
-                                 sender[0]))
+                    _p_('Peer %s switched from %s to %s, ignoring' \
+                          % (peer_id,
+                             self.incorporating_peers[peer_id][0][0],
+                             sender[0]))
                     continue
 
-                if message[-1] == 'Y':
+                if message[-1] == b'Y':
+
                     _p_('Peer %s successfully incorporated' % peer_id)
+
                     # Close TCP socket
                     self.incorporating_peers[peer_id][4].close()
                     self.insert_peer(self.incorporating_peers[peer_id][0])
                     del self.incorporating_peers[peer_id]
+
                 else:
+
                     if sender[1] == self.incorporating_peers[peer_id][0][1]:
+
                         # This could be due to a duplicate UDP packet
-                        if __debug__:
-                            _p_('Peer %s retries incorporation from ' \
-                                  'same port, ignoring' % peer_id)
+                        _p_('Peer %s retries incorporation from ' 'same port, ignoring' % peer_id)
                         continue
-                    _p_('Peer %s retries incorporation from %s' \
-                        % (peer_id, sender))
+
+                    _p_('Peer %s retries incorporation from %s' % (peer_id, sender))
+
                     source_port_to_splitter = sender[1]
+
                     # Update peer information
                     self.incorporating_peers[peer_id] = \
                         self.incorporating_peers[peer_id][:2] \
@@ -687,27 +701,26 @@ class Splitter_NTS(Splitter_DBS):
 
             elif sender in self.peer_list[:self.MONITOR_NUMBER] and \
                 len(message) == Common.PEER_ID_LENGTH+1 + struct.calcsize("H"):
-                # Packet is from monitor
-                peer_id = message[:Common.PEER_ID_LENGTH]
-                if __debug__:
-                    _p_('Received forwarded retry hello (ID %s)' \
-                          % (peer_id,))
+
+                # Message is from monitor
+                peer_id = message[:Common.PEER_ID_LENGTH].decode()
+                _p_('Received forwarded retry hello (ID %s)' % (peer_id,))
+
                 # Send acknowledge
-                self.message_queue.put((message, sender))
+                self.message_queue.put((peer_id, sender))
                 if peer_id not in self.incorporating_peers:
-                    if __debug__:
-                        _p_('Peer ID %s is not an incorporating peer' \
-                              % peer_id)
+                    _p_('Peer ID %s is not an incorporating peer' % peer_id)
                     continue
 
                 source_port_to_monitor = struct.unpack( \
                     "H", message[Common.PEER_ID_LENGTH+1:])[0]
                 source_port_to_monitor = socket.ntohs(source_port_to_monitor)
+
                 # Get monitor number
                 index = self.peer_list.index(sender)
+
                 # Update peer information
-                self.incorporating_peers[peer_id][3][index] = \
-                    source_port_to_monitor
+                self.incorporating_peers[peer_id][3][index] = source_port_to_monitor
 
                 if self.incorporating_peers[peer_id][2] != 0 and \
                     0 not in self.incorporating_peers[peer_id][3]:
@@ -715,9 +728,7 @@ class Splitter_NTS(Splitter_DBS):
                     self.retry_to_incorporate_peer(peer_id)
 
             else:
-                if __debug__:
-                    _p_('Ignoring packet of length %d from %s' \
-                        % (len(message), sender))
+                _p_('Ignoring packet of length %d from %s' % (len(message), sender))
 
             # }}}
 

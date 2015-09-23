@@ -14,7 +14,7 @@ splitter_dbs module
 
 # {{{ Imports
 
-from __future__ import print_function
+#from __future__ import print_function
 import threading
 import sys
 import socket
@@ -163,6 +163,7 @@ class Splitter_DBS(Splitter_IMS):
 
     def insert_peer(self, peer):
         # {{{
+
         if peer not in self.peer_list: # Probar a quitar -----------------------------------------------------
             #self.peer_list.insert(self.peer_number, peer)
             self.peer_list.append(peer)
@@ -361,7 +362,11 @@ class Splitter_DBS(Splitter_IMS):
         # }}}
 
     def compute_next_peer_number(self, peer):
+        # {{{ 
+
         self.peer_number = (self.peer_number + 1) % len(self.peer_list)
+
+        # }}}
 
     def run(self):
         # {{{

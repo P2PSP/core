@@ -46,11 +46,9 @@ class Peer_DBS(Peer_IMS):
 
     MAX_CHUNK_DEBT = 128 # Peer's rejecting threshold
 
-    LOGGING = False
-    LOG_FILE = ""
+    LOGGING = False # A IMS???
+    LOG_FILE = ""   # A IMS???
 
-    #MAGIC_FLAG = 0b00000000
-    
     # }}}
 
     def __init__(self, peer):
@@ -181,7 +179,7 @@ class Peer_DBS(Peer_IMS):
                 # {{{ debug
 
                 _p_(self.team_socket.getsockname(), "<-", chunk_number, "-", sender)
-                if __debug__:
+                if __debug__: # No aqui. Tal vez, DIS
 
                     if self.LOGGING:
                         self.log_message("buffer correctnes {0}".format(self.calc_buffer_correctnes()))
@@ -359,7 +357,7 @@ class Peer_DBS(Peer_IMS):
 
     # }}}
 
-    # The following methods should be inheritaged ...
+    # The following methods should be inheritaged ... in DIS??
     
     def calc_buffer_correctnes(self):
         zerochunk = struct.pack("1024s", "0")

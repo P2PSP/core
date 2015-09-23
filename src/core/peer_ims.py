@@ -280,7 +280,8 @@ class Peer_IMS(threading.Thread):
         # {{{ 
 
         # Ojo, an attacker could send a packet smaller and pollute the
-        # buffer, althought this is difficult in IP multicst
+        # buffer, althought this is difficult in IP multicst. This
+        # method should be inheritaged to solve this issue.
         
         chunk_number, chunk = self.unpack_message(message)
 

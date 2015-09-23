@@ -11,7 +11,8 @@ class Common:
     #MAX_CHUNK_NUMBER = 2048
     #COUNTERS_TIMING = 0.1
     COUNTERS_TIMING = 1
-    PEER_ID_LENGTH = 7
+    PEER_ID_LENGTH = 7                # Size of the IDs used in NTS
+                                      # for incorporating peers
     HELLO_PACKET_TIMING = 1           # Time between continuously sent
                                       # packets
     MAX_PEER_ARRIVING_TIME = 15       # Maximum time after peer
