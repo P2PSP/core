@@ -151,16 +151,20 @@ class Splitter():
             _print_("Maximun number of monitor peers =", Splitter_DBS.MONITOR_NUMBER)
 
             splitter = Splitter_DBS()
+
             if args.NTS:
                 splitter = Splitter_NTS(splitter)
                 _print_("NTS enabled")
+
             if args.ACS:
                 splitter = Splitter_ACS(splitter)
                 _print_("ACS enabled")
+
             if args.LRS:
                 from core.splitter_lrs import Splitter_LRS
                 splitter = Splitter_LRS(splitter)
                 _print_("LRS enabled")
+
             if args.DIS:
                 from splitter_strpe import StrpeSplitter
                 from splitter_strpeds import StrpeDsSplitter
