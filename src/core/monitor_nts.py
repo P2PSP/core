@@ -121,4 +121,7 @@ class Monitor_NTS(Peer_NTS):
         else:
             return Peer_NTS.process_message(self, message, sender)
 
+        # No chunk number, as no chunk was received
+        return -1
+
         # }}}
