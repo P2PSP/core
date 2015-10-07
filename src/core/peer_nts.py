@@ -382,7 +382,7 @@ class Peer_NTS(Peer_DBS):
         if sender == self.splitter and \
         len(message) == Common.PEER_ID_LENGTH + struct.calcsize("4sHHH"):
             # say [hello to (X)] received from splitter
-            peer_id = message[:Common.PEER_ID_LENGTH]
+            peer_id = message[:Common.PEER_ID_LENGTH].decode()
             IP_addr, source_port_to_splitter, port_diff, peer_number = \
                 struct.unpack("4sHHH", message[Common.PEER_ID_LENGTH:])
             IP_addr = socket.inet_ntoa(IP_addr)
@@ -404,7 +404,7 @@ class Peer_NTS(Peer_DBS):
         elif sender == self.splitter and \
         len(message) == Common.PEER_ID_LENGTH + struct.calcsize("4sHHHH"):
             # say [hello to (X)] received from splitter
-            peer_id = message[:Common.PEER_ID_LENGTH]
+            peer_id = message[:Common.PEER_ID_LENGTH].decode()
             IP_addr, source_port_to_splitter, port_diff, peer_number, \
                 extra_splitter_port = struct.unpack( \
                 "4sHHHH", message[Common.PEER_ID_LENGTH:]) # Ojo, !H ????
@@ -426,7 +426,7 @@ class Peer_NTS(Peer_DBS):
             self.say_hello((self.splitter[0], extra_splitter_port))
             # Directly start packet sending
             self.hello_messages_event.set()
-        elif message == self.peer_id or (sender == self.splitter and \
+        elif message == self.peer_id.encode() or (sender == self.splitter and \
         len(message) == Common.PEER_ID_LENGTH + struct.calcsize("H")) or \
         (sender == self.splitter and \
         len(message) == Common.PEER_ID_LENGTH+1 + struct.calcsize("H")) or \
@@ -445,7 +445,7 @@ class Peer_NTS(Peer_DBS):
                         return -1
             _print_(Common.NTS_COLOR + "NTS: Received acknowledge from unknown host %s" % (sender,) + Color.none)
         elif len(message) == Common.PEER_ID_LENGTH:
-            peer_id = message
+            peer_id = message.decode()
             _p_("Received [hello (ID %s)] from %s" % (message, sender))
             # Send acknowledge
             self.team_socket.sendto(message, sender)

@@ -562,7 +562,7 @@ class Splitter_NTS(Splitter_DBS):
                 _p_("Received [hello, I'm %s] from %s" % (peer_id, sender))
 
                 # Send acknowledge
-                self.message_queue.put((peer_id.encode(), sender))
+                self.message_queue.put((message, sender))
                 if peer_id not in self.arriving_peers:
                     _p_('Peer ID %s is not an arriving peer' % peer_id)
                     continue
@@ -599,7 +599,7 @@ class Splitter_NTS(Splitter_DBS):
                 _p_('Received forwarded hello (ID %s) from %s' % (peer_id, sender))
 
                 # Send acknowledge
-                self.message_queue.put((peer_id.encode(), sender))
+                self.message_queue.put((message, sender))
                 if peer_id not in self.arriving_peers:
                     _p_('Peer ID %s is not an arriving peer' % peer_id)
                     continue
@@ -626,7 +626,7 @@ class Splitter_NTS(Splitter_DBS):
                 _p_('Received source port of peer %s from %s' % (peer_id, sender))
 
                 # Send acknowledge
-                self.message_queue.put((peer_id.encode(), sender))
+                self.message_queue.put((message, sender))
 
                 peer = None
                 for peer_data in self.ids.items():
@@ -650,7 +650,7 @@ class Splitter_NTS(Splitter_DBS):
                 peer_id = message[:Common.PEER_ID_LENGTH].decode()
 
                 # Send acknowledge
-                self.message_queue.put((peer_id.encode(), sender))
+                self.message_queue.put((message, sender))
 
                 if peer_id not in self.incorporating_peers:
                     if __debug__:
@@ -665,7 +665,7 @@ class Splitter_NTS(Splitter_DBS):
                              sender[0]))
                     continue
 
-                if message[-1] == b'Y':
+                if message[-1] == b'Y'[0]:
 
                     _p_('Peer %s successfully incorporated' % peer_id)
 
@@ -705,7 +705,7 @@ class Splitter_NTS(Splitter_DBS):
                 _p_('Received forwarded retry hello (ID %s)' % (peer_id,))
 
                 # Send acknowledge
-                self.message_queue.put((peer_id.encode(), sender))
+                self.message_queue.put((message, sender))
                 if peer_id not in self.incorporating_peers:
                     _p_('Peer ID %s is not an incorporating peer' % peer_id)
                     continue
