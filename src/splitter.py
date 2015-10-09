@@ -147,7 +147,7 @@ class Splitter():
             _print_("Maximun chunk loss =", Splitter_DBS.MAX_CHUNK_LOSS)
 
             if args.max_number_of_monitor_peers:
-                Splitter_DBS.MONITOR_NUMBER = int(args.monitor_number)
+                Splitter_DBS.MONITOR_NUMBER = int(args.max_number_of_monitor_peers)
             _print_("Maximun number of monitor peers =", Splitter_DBS.MONITOR_NUMBER)
 
             splitter = Splitter_DBS()
