@@ -701,7 +701,7 @@ class Splitter_NTS(Splitter_DBS):
                 len(message) == Common.PEER_ID_LENGTH+1 + struct.calcsize("H"):
 
                 # Message is from monitor
-                peer_id = message.decode()[:Common.PEER_ID_LENGTH]
+                peer_id = message[:Common.PEER_ID_LENGTH].decode()
                 _p_('Received forwarded retry hello (ID %s)' % (peer_id,))
 
                 # Send acknowledge

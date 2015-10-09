@@ -181,7 +181,7 @@ class Peer_NTS(Peer_DBS):
         for _ in range(self.number_of_peers - self.number_of_monitors):
             message = self.splitter_socket.recv(Common.PEER_ID_LENGTH +
                                                 struct.calcsize("4sHH"))
-            peer_id = message[:Common.PEER_ID_LENGTH]
+            peer_id = message[:Common.PEER_ID_LENGTH].decode()
             IP_addr, port, port_step = \
                 struct.unpack("4sHH", message[Common.PEER_ID_LENGTH:]) # Ojo, !H
             IP_addr = socket.inet_ntoa(IP_addr)
@@ -298,7 +298,6 @@ class Peer_NTS(Peer_DBS):
             try:
                 message, sender = self.team_socket.recvfrom( \
                     struct.calcsize(self.message_format))
-                message = message.decode()
                 self.process_message(message, sender)
             except socket.timeout:
                 pass
@@ -307,6 +306,7 @@ class Peer_NTS(Peer_DBS):
         Peer_DBS.disconnect_from_the_splitter(self)
         # The peer is now successfully incorporated; inform the splitter
         self.send_message((self.peer_id.encode() + b'Y', self.splitter))
+        _p_("Incorporation successful")
 
         # }}}
 
