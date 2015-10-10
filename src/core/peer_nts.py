@@ -55,7 +55,7 @@ class Peer_NTS(Peer_DBS):
         # {{{
 
         with self.hello_messages_lock:
-            message = self.peer_id
+            message = self.peer_id.encode()
             hello_data = (message, peer)
             if hello_data not in self.hello_messages:
                 self.hello_messages.append(hello_data)
@@ -128,7 +128,7 @@ class Peer_NTS(Peer_DBS):
                               % (message[:Common.PEER_ID_LENGTH], len(message),
                                  peer, len(hello_messages_ports[message_data])))
                 for port in hello_messages_ports[message_data]:
-                    self.team_socket.sendto(message.encode(), (peer[0], port))
+                    self.team_socket.sendto(message, (peer[0], port))
                     # Avoid network congestion
                     time.sleep(0.001)
             # Remove messages that timed out
@@ -181,7 +181,7 @@ class Peer_NTS(Peer_DBS):
         for _ in range(self.number_of_peers - self.number_of_monitors):
             message = self.splitter_socket.recv(Common.PEER_ID_LENGTH +
                                                 struct.calcsize("4sHH"))
-            peer_id = message[:Common.PEER_ID_LENGTH]
+            peer_id = message[:Common.PEER_ID_LENGTH].decode()
             IP_addr, port, port_step = \
                 struct.unpack("4sHH", message[Common.PEER_ID_LENGTH:]) # Ojo, !H
             IP_addr = socket.inet_ntoa(IP_addr)
@@ -287,7 +287,7 @@ class Peer_NTS(Peer_DBS):
                 self.team_socket.settimeout(1)
                 # Say hello to splitter again, to retry incorporation
                 # 'N' for 'not incorporated'
-                self.send_message((self.peer_id + 'N', self.splitter))
+                self.send_message((self.peer_id.encode() + b'N', self.splitter))
                 # Say hello to monitors again, to keep the NAT entry alive
                 for peer in self.peer_list[:self.number_of_monitors]:
                     self.send_message((self.peer_id + 'N', peer))
@@ -298,7 +298,6 @@ class Peer_NTS(Peer_DBS):
             try:
                 message, sender = self.team_socket.recvfrom( \
                     struct.calcsize(self.message_format))
-                message = message.decode()
                 self.process_message(message, sender)
             except socket.timeout:
                 pass
@@ -306,7 +305,8 @@ class Peer_NTS(Peer_DBS):
         # Close the TCP socket
         Peer_DBS.disconnect_from_the_splitter(self)
         # The peer is now successfully incorporated; inform the splitter
-        self.send_message((self.peer_id + 'Y', self.splitter))
+        self.send_message((self.peer_id.encode() + b'Y', self.splitter))
+        _p_("Incorporation successful")
 
         # }}}
 
@@ -382,7 +382,7 @@ class Peer_NTS(Peer_DBS):
         if sender == self.splitter and \
         len(message) == Common.PEER_ID_LENGTH + struct.calcsize("4sHHH"):
             # say [hello to (X)] received from splitter
-            peer_id = message[:Common.PEER_ID_LENGTH]
+            peer_id = message[:Common.PEER_ID_LENGTH].decode()
             IP_addr, source_port_to_splitter, port_diff, peer_number = \
                 struct.unpack("4sHHH", message[Common.PEER_ID_LENGTH:])
             IP_addr = socket.inet_ntoa(IP_addr)
@@ -404,7 +404,7 @@ class Peer_NTS(Peer_DBS):
         elif sender == self.splitter and \
         len(message) == Common.PEER_ID_LENGTH + struct.calcsize("4sHHHH"):
             # say [hello to (X)] received from splitter
-            peer_id = message[:Common.PEER_ID_LENGTH]
+            peer_id = message[:Common.PEER_ID_LENGTH].decode()
             IP_addr, source_port_to_splitter, port_diff, peer_number, \
                 extra_splitter_port = struct.unpack( \
                 "4sHHHH", message[Common.PEER_ID_LENGTH:]) # Ojo, !H ????
@@ -426,7 +426,7 @@ class Peer_NTS(Peer_DBS):
             self.say_hello((self.splitter[0], extra_splitter_port))
             # Directly start packet sending
             self.hello_messages_event.set()
-        elif message == self.peer_id or (sender == self.splitter and \
+        elif message == self.peer_id.encode() or (sender == self.splitter and \
         len(message) == Common.PEER_ID_LENGTH + struct.calcsize("H")) or \
         (sender == self.splitter and \
         len(message) == Common.PEER_ID_LENGTH+1 + struct.calcsize("H")) or \
@@ -441,13 +441,14 @@ class Peer_NTS(Peer_DBS):
                         self.hello_messages.remove(hello_data)
                         del self.hello_messages_times[hello_data]
                         del self.hello_messages_ports[hello_data]
-                        return
+                        # No chunk number, as no chunk was received
+                        return -1
             _print_(Common.NTS_COLOR + "NTS: Received acknowledge from unknown host %s" % (sender,) + Color.none)
         elif len(message) == Common.PEER_ID_LENGTH:
-            peer_id = message
+            peer_id = message.decode()
             _p_("Received [hello (ID %s)] from %s" % (message, sender))
             # Send acknowledge
-            self.team_socket.sendto(message.encode(), sender)
+            self.team_socket.sendto(message, sender)
 
             if sender not in self.peer_list:
                 _p_("Appending peer %s %s to list" % (peer_id, sender))
@@ -469,9 +470,11 @@ class Peer_NTS(Peer_DBS):
             _p_("Ignoring message \"%s\" of length %d from unknown %s" \
                   % (message, len(message), sender))
         elif len(self.initial_peer_list) == 0:
-            _p_("Chunk received and processed by DBS")
             # Start receiving chunks when fully incorporated
             return Peer_DBS.process_message(self, message, sender)
+
+        # No chunk number, as no chunk was received
+        return -1
 
     # }}}
 

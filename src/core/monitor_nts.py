@@ -105,7 +105,7 @@ class Monitor_NTS(Peer_NTS):
         elif sender == self.splitter and \
                 len(message) == Common.PEER_ID_LENGTH + struct.calcsize("4sH"):
             # [say hello to (X)] received from splitter
-            peer_id = message[:Common.PEER_ID_LENGTH]
+            peer_id = message[:Common.PEER_ID_LENGTH].decode()
             IP_addr, port = \
                 struct.unpack("4sH", message[Common.PEER_ID_LENGTH:]) # Ojo, !H?
             IP_addr = socket.inet_ntoa(IP_addr)
@@ -120,5 +120,8 @@ class Monitor_NTS(Peer_NTS):
                 self.debt[peer] = 0
         else:
             return Peer_NTS.process_message(self, message, sender)
+
+        # No chunk number, as no chunk was received
+        return -1
 
         # }}}
