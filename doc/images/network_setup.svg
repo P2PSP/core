@@ -1,0 +1,107 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Created with ASCIIToSVG (http://9vx.org/~dho/a2s/) -->
+<svg width="658px" height="352px" version="1.1"
+  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <filter id="dsFilterNoBlur" width="150%" height="150%">
+      <feOffset result="offOut" in="SourceGraphic" dx="3" dy="3"/>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix" values="0.2 0 0 0 0 0 0.2 0 0 0 0 0 0.2 0 0 0 0 0 1 0"/>
+      <feBlend in="SourceGraphic" in2="matrixOut" mode="normal"/>
+    </filter>
+    <filter id="dsFilter" width="150%" height="150%">
+      <feOffset result="offOut" in="SourceGraphic" dx="3" dy="3"/>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix" values="0.2 0 0 0 0 0 0.2 0 0 0 0 0 0.2 0 0 0 0 0 1 0"/>
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="3"/>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"/>
+    </filter>
+    <marker id="iPointer"
+      viewBox="0 0 10 10" refX="5" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="8" markerHeight="7"
+      orient="auto">
+      <path d="M 10 0 L 10 10 L 0 5 z" />
+    </marker>
+    <marker id="Pointer"
+      viewBox="0 0 10 10" refX="5" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="8" markerHeight="7"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+  </defs><g id="boxes" stroke="black" stroke-width="2" fill="none" >
+<g id="group0">
+	<path id="path0" filter="url(#dsFilter)" fill="#fff" d="M 220.5 18 Q 220.5 8 230.5 8 L 300.5 8 Q 310.5 8 310.5 18 L 310.5 78 Q 310.5 88 300.5 88 L 230.5 88 Q 220.5 88 220.5 78 Z" />
+	<text x="233.1" y="44.8" id="text0" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Splitter </text>
+
+	<text x="233.1" y="60.8" id="text0" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >+Monitor </text>
+
+</g>
+<g id="group2">
+	<path id="path2" filter="url(#dsFilter)" fill="#fff" d="M 328.5 18 Q 328.5 8 338.5 8 L 408.5 8 Q 418.5 8 418.5 18 L 418.5 78 Q 418.5 88 408.5 88 L 338.5 88 Q 328.5 88 328.5 78 Z" />
+	<text x="341.1" y="44.8" id="text2" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Second </text>
+
+	<text x="341.1" y="60.8" id="text2" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Monitor </text>
+
+</g>
+<g id="group9">
+	<path id="path9" filter="url(#dsFilter)" fill="#fff" d="M 4.5 130 Q 4.5 120 14.5 120 L 66.5 120 Q 76.5 120 76.5 130 L 76.5 174 Q 76.5 184 66.5 184 L 14.5 184 Q 4.5 184 4.5 174 Z" />
+	<text x="17.1" y="156.8" id="text9" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Peer1 </text>
+
+</g>
+<g id="group11">
+	<path id="path11" filter="url(#dsFilter)" fill="#fff" d="M 148.5 120 L 238.5 120 L 238.5 184 L 148.5 184 Z" />
+	<text x="170.1" y="156.8" id="text11" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >NAT 1 </text>
+
+</g>
+<g id="group13">
+	<path id="path13" filter="url(#dsFilter)" fill="#fff" d="M 400.5 120 L 490.5 120 L 490.5 184 L 400.5 184 Z" />
+	<text x="422.1" y="156.8" id="text13" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >NAT 2 </text>
+
+</g>
+<g id="group15">
+	<path id="path15" filter="url(#dsFilter)" fill="#fff" d="M 562.5 130 Q 562.5 120 572.5 120 L 624.5 120 Q 634.5 120 634.5 130 L 634.5 174 Q 634.5 184 624.5 184 L 572.5 184 Q 562.5 184 562.5 174 Z" />
+	<text x="575.1" y="156.8" id="text15" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Peer2 </text>
+
+</g>
+<g id="group30">
+	<path id="path30" filter="url(#dsFilter)" fill="#fff" d="M 274.5 232 L 364.5 232 L 364.5 312 L 274.5 312 Z" />
+	<text x="296.1" y="268.8" id="text30" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Local </text>
+
+	<text x="296.1" y="284.8" id="text30" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >host </text>
+
+</g>
+</g>
+<g id="lines" stroke="black" stroke-width="2" fill="none" >
+<g id="group243">
+	<path id="path243" marker-start="url(#iPointer)" marker-end="url(#Pointer)" d="M 85.5 152 L 112.5 152 L 139.5 152 " />
+</g>
+<g id="group309">
+	<path id="path309" stroke-dasharray="5 5" marker-end="url(#Pointer)" d="M 112.5 152 L 112.5 264 L 265.5 264 " />
+</g>
+<g id="group640">
+	<path id="path640" marker-start="url(#iPointer)" marker-end="url(#Pointer)" d="M 247.5 152 L 265.5 152 L 319.5 152 L 373.5 152 L 391.5 152 " />
+</g>
+<g id="group681">
+	<path id="path681" marker-start="url(#iPointer)" d="M 265.5 104 L 265.5 152 " />
+</g>
+<g id="group816">
+	<path id="path816" stroke-dasharray="5 5" marker-end="url(#Pointer)" d="M 319.5 152 L 319.5 216 " />
+</g>
+<g id="group946">
+	<path id="path946" marker-start="url(#iPointer)" d="M 373.5 104 L 373.5 152 " />
+</g>
+<g id="group956">
+	<path id="path956" stroke-dasharray="5 5" marker-start="url(#iPointer)" marker-end="url(#Pointer)" d="M 373.5 264 L 526.5 264 L 526.5 152 L 553.5 152 " />
+</g>
+<g id="group1257">
+	<path id="path1257" marker-start="url(#iPointer)" d="M 499.5 152 L 526.5 152 " />
+</g>
+</g>
+<g id="text" fill="black" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >
+<text x="98.1" y="140.8" id="text4" fill="#000" >LAN1 </text>
+<text x="278.1" y="140.8" id="text5" fill="#000" >&quot;internet&quot; </text>
+<text x="512.1" y="140.8" id="text6" fill="#000" >LAN2 </text>
+</g>
+</svg>

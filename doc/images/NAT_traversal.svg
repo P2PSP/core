@@ -1,0 +1,191 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Created with ASCIIToSVG (http://9vx.org/~dho/a2s/) -->
+<svg width="838px" height="864px" version="1.1"
+  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <filter id="dsFilterNoBlur" width="150%" height="150%">
+      <feOffset result="offOut" in="SourceGraphic" dx="3" dy="3"/>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix" values="0.2 0 0 0 0 0 0.2 0 0 0 0 0 0.2 0 0 0 0 0 1 0"/>
+      <feBlend in="SourceGraphic" in2="matrixOut" mode="normal"/>
+    </filter>
+    <filter id="dsFilter" width="150%" height="150%">
+      <feOffset result="offOut" in="SourceGraphic" dx="3" dy="3"/>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix" values="0.2 0 0 0 0 0 0.2 0 0 0 0 0 0.2 0 0 0 0 0 1 0"/>
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="3"/>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"/>
+    </filter>
+    <marker id="iPointer"
+      viewBox="0 0 10 10" refX="5" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="8" markerHeight="7"
+      orient="auto">
+      <path d="M 10 0 L 10 10 L 0 5 z" />
+    </marker>
+    <marker id="Pointer"
+      viewBox="0 0 10 10" refX="5" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="8" markerHeight="7"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+  </defs><g id="boxes" stroke="black" stroke-width="2" fill="none" >
+<g id="group__Monitor_peer_">
+	<path id="path__Monitor_peer_" filter="url(#dsFilter)" fill="#f0f0f0" d="M 166.5 18 Q 166.5 8 176.5 8 L 328.5 8 L 328.5 824 L 176.5 824 Q 166.5 824 166.5 814 Z" />
+	<text x="197.1" y="28.8" id="text__Monitor_peer_" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Monitor peer </text>
+
+	<text x="233.1" y="76.8" id="text__Monitor_peer_" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >connection </text>
+
+	<text x="242.1" y="348.8" id="text__Monitor_peer_" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >forwarded </text>
+
+</g>
+<g id="group____Splitter___">
+	<path id="path____Splitter___" filter="url(#dsFilter)" fill="#fbfbfb" d="M 328.5 8 L 490.5 8 L 490.5 824 L 328.5 824 Z" />
+	<text x="377.1" y="28.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Splitter </text>
+
+	<text x="341.1" y="76.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >established </text>
+
+	<text x="395.1" y="124.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >connection </text>
+
+	<text x="449.1" y="252.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >list </text>
+
+	<text x="341.1" y="348.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >hello+port </text>
+
+	<text x="341.1" y="396.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >splitter creates </text>
+
+	<text x="341.1" y="412.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >a</text>
+
+	<text x="359.1" y="412.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >new temporary </text>
+
+	<text x="341.1" y="428.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >UDP socket </text>
+
+	<text x="413.1" y="460.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >endpoint </text>
+
+	<text x="386.1" y="492.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >port of the </text>
+
+	<text x="413.1" y="524.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >hello to </text>
+
+	<text x="431.1" y="604.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >source </text>
+
+	<text x="386.1" y="700.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >source port </text>
+
+	<text x="350.1" y="796.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >splitter closes </text>
+
+	<text x="350.1" y="812.8" id="text____Splitter___" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >TCP socket </text>
+
+</g>
+<g id="group_____Peer_1____">
+	<path id="path_____Peer_1____" filter="url(#dsFilter)" fill="#f0f0f0" d="M 490.5 8 L 652.5 8 L 652.5 824 L 490.5 824 Z" />
+	<text x="548.1" y="28.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Peer 1 </text>
+
+	<text x="503.1" y="124.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >established </text>
+
+	<text x="521.1" y="204.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >hello (TCP) </text>
+
+	<text x="503.1" y="252.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >of peers (TCP) </text>
+
+	<text x="503.1" y="300.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >hello </text>
+
+	<text x="548.1" y="348.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >hello </text>
+
+	<text x="503.1" y="460.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >of peer 2 and </text>
+
+	<text x="503.1" y="492.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >temporary socket </text>
+
+	<text x="503.1" y="524.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >new socket </text>
+
+	<text x="602.1" y="556.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >hello </text>
+
+	<text x="503.1" y="604.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >port of peer 1 </text>
+
+	<text x="602.1" y="652.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >hello </text>
+
+	<text x="503.1" y="700.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >of peer 2 </text>
+
+	<text x="503.1" y="748.8" id="text_____Peer_1____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >success message </text>
+
+</g>
+<g id="group_____Peer_2____">
+	<path id="path_____Peer_2____" filter="url(#dsFilter)" fill="#fbfbfb" d="M 652.5 8 L 804.5 8 Q 814.5 8 814.5 18 L 814.5 814 Q 814.5 824 804.5 824 L 652.5 824 Z" />
+	<text x="710.1" y="28.8" id="text_____Peer_2____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Peer 2 </text>
+
+	<text x="674.1" y="796.8" id="text_____Peer_2____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >peer closes </text>
+
+	<text x="674.1" y="812.8" id="text_____Peer_2____" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >TCP socket </text>
+
+</g>
+<g id="group10">
+	<path id="path10" filter="url(#dsFilter)" fill="#fff" d="M 4.5 66 Q 4.5 56 14.5 56 L 138.5 56 Q 148.5 56 148.5 66 L 148.5 78 Q 148.5 88 138.5 88 L 14.5 88 Q 4.5 88 4.5 78 Z" />
+	<text x="17.1" y="76.8" id="text10" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Initial state </text>
+
+</g>
+<g id="group24">
+	<path id="path24" filter="url(#dsFilter)" fill="#fff" d="M 4.5 194 Q 4.5 184 14.5 184 L 138.5 184 Q 148.5 184 148.5 194 L 148.5 206 Q 148.5 216 138.5 216 L 14.5 216 Q 4.5 216 4.5 206 Z" />
+	<text x="17.1" y="204.8" id="text24" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Peer 2 arrives </text>
+
+</g>
+<g id="group48">
+	<path id="path48" filter="url(#dsFilter)" fill="#fff" d="M 4.5 786 Q 4.5 776 14.5 776 L 138.5 776 Q 148.5 776 148.5 786 L 148.5 814 Q 148.5 824 138.5 824 L 14.5 824 Q 4.5 824 4.5 814 Z" />
+	<text x="17.1" y="796.8" id="text48" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Incorporation </text>
+
+	<text x="17.1" y="812.8" id="text48" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >successful </text>
+
+</g>
+</g>
+<g id="lines" stroke="black" stroke-width="2" fill="none" >
+<g id="group1031">
+	<path id="path1031" d="M 166.5 40 L 328.5 40 L 490.5 40 L 652.5 40 L 814.5 40 " />
+</g>
+<g id="group1040">
+	<path id="path1040" stroke-dasharray="5 5" d="M 166.5 168 L 328.5 168 L 490.5 168 L 652.5 168 L 814.5 168 " />
+</g>
+<g id="group1576">
+	<path id="path1576" marker-start="url(#iPointer)" marker-end="url(#Pointer)" d="M 256.5 88 L 328.5 88 L 400.5 88 " />
+</g>
+<g id="group1579">
+	<path id="path1579" marker-start="url(#iPointer)" marker-end="url(#Pointer)" d="M 256.5 136 L 328.5 136 L 490.5 136 L 562.5 136 " />
+</g>
+<g id="group1590">
+	<path id="path1590" marker-start="url(#iPointer)" d="M 256.5 312 L 328.5 312 L 490.5 312 L 652.5 312 L 724.5 312 " />
+</g>
+<g id="group1593">
+	<path id="path1593" marker-end="url(#Pointer)" d="M 256.5 360 L 328.5 360 L 400.5 360 " />
+</g>
+<g id="group2548">
+	<path id="path2548" marker-start="url(#iPointer)" marker-end="url(#Pointer)" d="M 418.5 88 L 490.5 88 L 562.5 88 " />
+</g>
+<g id="group2556">
+	<path id="path2556" marker-start="url(#iPointer)" d="M 418.5 216 L 490.5 216 L 652.5 216 L 724.5 216 " />
+</g>
+<g id="group2559">
+	<path id="path2559" marker-end="url(#Pointer)" d="M 418.5 264 L 490.5 264 L 652.5 264 L 724.5 264 " />
+</g>
+<g id="group2565">
+	<path id="path2565" marker-start="url(#iPointer)" d="M 418.5 360 L 490.5 360 L 652.5 360 L 724.5 360 " />
+</g>
+<g id="group2572">
+	<path id="path2572" marker-end="url(#Pointer)" d="M 418.5 472 L 490.5 472 L 562.5 472 " />
+</g>
+<g id="group2576">
+	<path id="path2576" marker-start="url(#iPointer)" d="M 418.5 536 L 490.5 536 L 562.5 536 " />
+</g>
+<g id="group2581">
+	<path id="path2581" marker-start="url(#iPointer)" d="M 418.5 616 L 490.5 616 L 652.5 616 L 724.5 616 " />
+</g>
+<g id="group2587">
+	<path id="path2587" marker-start="url(#iPointer)" d="M 418.5 712 L 490.5 712 L 544.5 712 " />
+</g>
+<g id="group2590">
+	<path id="path2590" marker-start="url(#iPointer)" d="M 418.5 760 L 490.5 760 L 652.5 760 L 724.5 760 " />
+</g>
+<g id="group3550">
+	<path id="path3550" marker-end="url(#Pointer)" d="M 580.5 568 L 652.5 568 L 724.5 568 " />
+</g>
+<g id="group3556">
+	<path id="path3556" marker-start="url(#iPointer)" d="M 580.5 664 L 652.5 664 L 724.5 664 " />
+</g>
+</g>
+<g id="text" fill="black" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >
+</g>
+</svg>
