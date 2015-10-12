@@ -1,177 +1,48 @@
-P2PSP manual
-============
+Peer-to-Peer Straightforward Protocol (P2PSP)
+=============================================
 
-# Peer manual:
+# Definition
 
-How to:
+P2PSP is an application-layer protocol designed for real-time
+broadcasting of data on a P2P overlay network. P2PSP mimics the IP
+multicast behaviour, where a source sends only a copy of the stream to
+a collection of peers which interchange between them those chunks of
+data that are needed for the rest of the peers.
 
-1. Watch the default channel:
+# Motivation
 
-    ```
-    ./peer.py &
-    vlc http://localhost:9999
-    ```
-or simply:
-    ```
-    ./play.sh &
-    ```
-    
-2. Change the local port (9998) to communicate with VLC:
+Efficient large scale distribution of media (real-time video, for
+example) is one of the big challenges of the Internet. To achieve
+this, IETF designed IP multicast. In this transmission model, a source
+sends only one copy of the stream which is delivered to a set of
+receivers thanks to the automatic replication of data in the IP
+multicast routers. Unfortunately, IP multicast does not fit the
+bussines model of most Internet Service Providers (ISP) which disables
+this functionality to end-users.
 
-    ```
-    ./peer.py --player_port=9998 &
-    vlc http://localhost:9998 &
-    ```
-    
-3. Watch a particular channel (in the port 4554):
+# Related work
 
-    ```
-    ./peer.py --splitter_port=4554 &
-    vlc http://localhost:9999 &
-    ```
-    
-4. Use a specific team port (8888) for communicating with the rest of
-   the team (you should use this feature, for example, after having
-   created a NAT entry manualy):
+There are plenty of P2P straeming protocols. Depending on the overhaly
+topology, they can be clasified in chains, trees or meshes. A chain
+overlay is quite rare because churn can degrade significatively the
+Quality of Service (QoS) of the overlay, however, it has interesting
+characteristics such as peers does not need to interchange buffer maps
+and peers only send a copy of the stream regardless of the size of the
+overlay (we will refeer to this characteristics as "replication
+factor"). Tree overlays impose that peers must send so many copies of
+the stream (replication factor) as the degree of the tree, but like
+chains, the protocol is also push-based. Mesh-based protocols are more
+flexible regarding the overlay topology (which can be any) but peers
+must known the state of the buffer of their neighbours (the protocol
+is pull-based), and also are more flexible about the replication
+factor, which can be any. Obviously, push-based protocols are more
+efficient than pull-based one in terms of bandwidth.
 
-    ```
-    ./peer.py --team_port=8888 &
-    vlc http://localhost:9999 &
-    ```
+P2PSP is a fully-connected mesh-structured push-based protocol. Being
+$N$ the number of peers in the overlay (a "team" in the P2PSP jargon),
+$N$ is degree of the mesh. The replication factor in P2PSP is 1 by
+default, although as in mesh-based protocolos, it can be any other
+depending on the solidarity between the peers.
 
-5. Use a particular splitter host (1.2.3.4):
+# [IMS (Ip Multicast Set of rules)](IMS/index.html)
 
-    ```
-    ./peer.py --splitter_host=1.2.3.4 &
-    vlc http://localhost:9999 &
-    ```
-
-6. Decript a stream using the keyword "key" (not yet implemented):
-
-    ```
-    ./peer.py --keyword=key &
-    vlc http://localhost:9999 &
-    ```
-
-7. Join a private team using the password "pass" (not yet implemented):
-
-    ```
-    ./peer.py --password=pass &
-    vlc http://localhost:9999 &
-    ```
-
-8. Deliberately loss a chunk of each 100 (usually for testing purposes):
-
-    ```
-    ./peer.py --chunk_loss_period=100
-    ```
-
-# Splitter manual:
-
-1. Create a channel using the default parameters (run "splitter --help"):
-
-    ```
-    splitter &
-    ```
-
-2. Change the listening port to 5555:
-
-    ```
-    splitter --port=5555 &
-    ```
-
-3. Change the buffer size to 512 chunks:
-
-    ```
-    splitter --buffer_size=512 &
-    ```
-
-4. Change the source channel (media stream) to "new_channel":
-
-    ```
-    splitter --channel=new_channel &
-    ```
-
-5. Change the chunk size to 512 bytes:
-
-    ```
-    splitter --chunk_size=512 &
-    ```
-
-6. Change the source host (which runs Icecast for example) to
-   "new_host":
-
-    ```
-    splitter --source_host=new_host &
-    ```
-
-7. Change the source port (where Icecast is listening) to 6666:
-
-    ```
-    splitter --source_port=6666 &
-    ```
-
-8. Create a private team using the password "pass" (not yet implemented):
-
-    ```
-    splitter --password=pass &
-    ```
-
-9. Encrypt the stream using the keyword "key" (not yet implemented):
-
-    ```
-    splitter --keyword=key &
-    ```
-
-10. Use the IP multicast mode (if available):
-
-    ```
-    splitter --mcast &
-    ```
-
-11. Select a particular IP multicast address 224.0.1.1:
-
-    ```
-    splitter --mcast --mcast_addr=224.0.1.1 &
-    ```
-
-# Miscellaneous:
-
-* Download http://commons.wikimedia.org/wiki/File:Big_Buck_Bunny_small.ogv.
-
-* Feed a local Icecast server, forever (until kill the process):
-
-    ```
-    xterm -e './tools/feed_icecast.sh' &
-    ```
-
-* Use VLC as source (support several HTTP clients).
-
-   Media -> Broadcast -> Select the archive -> Broadcast -> Next -> HTTP ->
-   Show in local + Add + Path=/x.ogv -> Not transcode -> Next -> Stream
-
-* Create (manually) a local team (usually for testing purposes):
-
- #Remember first to feed the local Icecast server!!!
-                                                             
-        xterm -e './src/splitter.py' &                # Run a splitter
-        xterm -e './src/peer.py' &                    # Run a (monitor) peer
-        xterm -e './src/peer.py --player_port=9998' & # Run a peer
-        vlc http://localhost:9999 &                   # Run a player for the monitor
-        vlc http://localhost:9998 &                   # Run a player for the peer
-
-* Create (automatically) a local team:
-
-    #Remember first to feed the local Icecast server!!!
-    
-        ./tools/create_a_team.sh # Create the team
-
-* To run in debug mode:
-
-        python -d example.py
-
-* Autocomplete support:
-
-        sudo pip install argcomplete
-        sudo activate-global-python-argcomplete
-        
