@@ -11,11 +11,11 @@ NAT. General information about the test can be found
 The setup with network interfaces and IP addresses as used in the
 tests is shown in the following diagram:
 
-![network setup details](images/network_setup_details.png)
+![network setup details](images/network_setup_details.svg)
 
 On a Linux machine with network namespaces, the network can be
 automatically set up by running
-[this script](../tools/setup_NAT_network.sh) as root. The network can
+[this script](../tools/setup_NAT_network.sh) as root.  The network can
 also be set up using virtual machines for each host in the diagram.
 
 ## NAT types
@@ -101,6 +101,5 @@ network interface. As the test script runs each configuration several
 times, it can be estimated how reliably a connection can be
 established between different NAT types under different network
 conditions.
-
 
 [1]: http://www.linuxfoundation.org/collaborate/workgroups/networking/netem
