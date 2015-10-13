@@ -17,7 +17,7 @@ NAT types
 
 The behaviour of different implementations of NAT devices (i.e.
 routers), can be grouped into a few different NAT types. A short
-description from @3:
+description from [@3b]:
 
 -   <span>**Full-cone NAT (FCN)**</span>:
 
@@ -440,3 +440,11 @@ After the splitter has received a message of success, a peer cannot
 retry incorporation anymore. This is to ensure that an attacker cannot
 disturb the communication of a peer once it is incorporated into the
 team.
+
+<span>9</span>
+
+<http://p2psp.org/en/p2psp-protocol?cap=indexsu9.html>
+<http://slides.p2psp.org/BCN-2015>
+<https://wiki.asterisk.org/wiki/display/TOP/NAT+Traversal+Testing>
+<https://tools.ietf.org/id/draft-takeda-symmetric-nat-traversal-00.txt>
+<http://samy.pl/pwnat/pwnat.pdf>
