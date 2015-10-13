@@ -7,22 +7,24 @@ peers of the team.
 # Rules
 
 1. The splitter sends the stream (of chunks) to a IP multicast
-address:port (channel), which peers listen to.
+   address:port (channel), which peers listen to.
 
 2. Incomming peers contact the splitter in order to join know the
-channel.
+   channel.
 
 3. Chunks are enumerated by the splitter and buffered in the peers in
-order to hide the network jitter. We define:
+   order to hide the network jitter. We define:
 
 	```
 	IMS_packet = [chunk_index, chunk]
 	```
 
-Each peer can use a different buffer size $B$. By performance reasons,
-it must be hold that
+   Each peer can use a different buffer size $B$. By performance
+   reasons, it must be hold that
 
-$M = pB$
+   \begin{equation}
+   M = pB
+   \end{equation}
 
-where $M-1$ is the maximun chunk index.
+   where $M-1$ is the maximun chunk index and $p$ is a positive integer.
 
