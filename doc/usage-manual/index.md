@@ -175,3 +175,76 @@ or simply:
         sudo pip install argcomplete
         sudo activate-global-python-argcomplete
         
+# Windows installation
+
+1. Download and install Python 3.
+
+2. Add the Python path to the PATH variable:
+
+Computer -> Properties -> System Advanced Configuration -> Environment variables  
+Search the PATH variable and add the Python's directory.  
+
+3. (Optional) Install colorama. Download https://pypi.python.org/pypi/colorama and run:  
+
+  ```
+  python setup.py install
+  ```  
+
+4. Download and install Bazaar for Windows. You don't need to add
+Bazaar's path to the PATH variable.
+
+5. Download P2PSP:  
+Into the "bzr command line tool, write:
+
+  ```
+  bzr branch lp:p2psp
+  ```  
+
+6. That's all!. To run the P2PSP, see P2PSP.md.
+
+PD: "console" can help!
+
+# Running a team between different VirtualBox guests
+
+1. Create a "NAT Network":
+
+    ```
+    VBoxManage natnetwork add -t localnet -n "192.168.15.0/24" -e -h on
+    ```
+
+2. In the "Splitter" machine:
+
+    1. Run the source (see VLC.md).
+
+    2. Run the splitter:
+
+       ```
+       ./splitter.py --source_port 8080
+       ```
+
+    3. Run the monitor:
+
+       ```
+       ./peer.py --splitter_host 192.168.15.4
+       ```
+
+    4. Run the monitor's player:
+
+       ```
+       vlc http://localhost:9999 &
+       ```
+
+2. In the "Peer" machine:
+
+   1. Run the peer:
+
+      ```
+      ./peer.py --splitter_host 192.168.15.4
+      ```
+
+   2. Run the peer's player:
+
+      ```
+      vlc http://localhost:9999 &
+      ```
+

@@ -16,8 +16,15 @@ channel.
 order to hide the network jitter. We define:
 
 	```
-	IMS_packet = [chunk_number, chunk]
+	IMS_packet = [chunk_index, chunk]
 	```
 
-Each peer can use a different buffer size $B$. The relation between the buffer size and the maximun chunk number is
+Each peer can use a different buffer size $B$. By performance reasons,
+it must be hold that
+
+$
+M = pB
+$
+
+where $M-1$ is the maximun chunk index.
 
