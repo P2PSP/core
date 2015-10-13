@@ -44,5 +44,5 @@ $N$ is degree of the mesh. The replication factor in P2PSP is 1 by
 default, although as in mesh-based protocolos, it can be any other
 depending on the solidarity between the peers.
 
-# [IMS (Ip Multicast Set of rules)](IMS/index.html)
+# [IMS (Ip Multicast Set of rules)](IMS/index)
 
