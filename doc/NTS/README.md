@@ -17,45 +17,45 @@ NAT types
 
 The behaviour of different implementations of NAT devices (i.e.
 routers), can be grouped into a few different NAT types. A short
-description from [this
-page](https://wiki.asterisk.org/wiki/display/TOP/NAT+Traversal+Testing):
+description from @3:
 
--   :
+-   <span>**Full-cone NAT (FCN)**</span>:
 
-    “A full-cone NAT is one where all requests from the same intern al
-    IP address and port are mapped to the same external IP address
-    and port. Any external host can send a packet to the internal host
-    simply by sending a packet to the mapped external address.”
+    > “A full-cone NAT is one where all requests from the same intern al
+    > IP address and port are mapped to the same external IP address
+    > and port. Any external host can send a packet to the internal host
+    > simply by sending a packet to the mapped external address.”
 
--   :
+-   <span>**Restricted cone NAT (RCN)**</span>:
 
-    “A restricted-cone NAT is one where all requests from the same
-    internal IP address and port are mapped to the same external IP
-    address and port. Unlike a full-cone NAT though, an external host
-    can send a packet to the internal host only if the internal host had
-    previously sent a packet to that external host.”
+    > “A restricted-cone NAT is one where all requests from the same
+    > internal IP address and port are mapped to the same external IP
+    > address and port. Unlike a full-cone NAT though, an external host
+    > can send a packet to the internal host only if the internal host
+    > had previously sent a packet to that external host.”
 
--   :
+-   <span>**Port-restricted cone NAT (PRCN)**</span>:
 
-    “A port-restricted cone NAT is like a restricted-cone NAT, but the
-    restriction also includes port numbers. An external host can send a
-    packet to the internal host only if the internal host had previously
-    sent a packet to that external host on the same port number.”
+    > “A port-restricted cone NAT is like a restricted-cone NAT, but the
+    > restriction also includes port numbers. An external host can send
+    > a packet to the internal host only if the internal host had
+    > previously sent a packet to that external host on the same
+    > port number.”
 
--   :
+-   <span>**Symmetric NAT (SYM)**</span>:
 
-    “A symmetric nat is a NAT where all requests from the same internal
-    IP address and port to a specific destination IP address and port
-    are mapped to the same external source IP address and port. If the
-    same internal host sends a packet with the same source address and
-    port to a different destination, a different mapping is used (these
-    mappings are referred to as NAT translations). Only the external
-    host that receives a packet can send a packet back to the
-    internal host.”
+    > “A symmetric nat is a NAT where all requests from the same
+    > internal IP address and port to a specific destination IP address
+    > and port are mapped to the same external source IP address
+    > and port. If the same internal host sends a packet with the same
+    > source address and port to a different destination, a different
+    > mapping is used (these mappings are referred to as
+    > NAT translations). Only the external host that receives a packet
+    > can send a packet back to the internal host.”
 
-    As described in \[this paper\]\[4\], the symmetric NATs can be
-    divided again into these three subtypes, depending on the allocation
-    of the source port of the NAT:
+    As described in @4, the symmetric NATs can be divided again into
+    these three subtypes, depending on the allocation of the source port
+    of the NAT:
 
     -   :
 
@@ -244,8 +244,7 @@ in the team of the peer that does the port prediction).
 The desired number of results can be approximately achieved. For the
 example above, the algorithm yields:
 
-        port_diffs = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 25,
-            30, 40, 50]
+        port_diffs = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 25, 0, 40, 50]
 
 Limits for UDP hole punching and port prediction
 ------------------------------------------------

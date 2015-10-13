@@ -1,6 +1,7 @@
 \documentclass{article}
 
-\usepackage{graphicsx}
+\usepackage{graphicx}
+\usepackage{hyperref}
 
 \title{NAT traversal techniques}
 
@@ -20,47 +21,55 @@ implementation in the NAT Traversal Set of rules (NTS) classes.
 
 The behaviour of different implementations of NAT devices
 (i.e. routers), can be grouped into a few different NAT types. A short
-description
-from \href{https://wiki.asterisk.org/wiki/display/TOP/NAT+Traversal+Testing}{this
-page}:
+description from \cite{3}:
 
 \begin{itemize}
 
-\item [Full-cone NAT (FCN)]:
+\item {\bf Full-cone NAT (FCN)}:
 
-"A full-cone NAT is one where all requests from the same intern al IP
-address and port are mapped to the same external IP address and
-port. Any external host can send a packet to the internal host simply
-by sending a packet to the mapped external address."
+  \begin{quote}
+    "A full-cone NAT is one where all requests from the same intern al
+    IP address and port are mapped to the same external IP address and
+    port. Any external host can send a packet to the internal host
+    simply by sending a packet to the mapped external address."
+\end{quote}
+    
+\item {\bf Restricted cone NAT (RCN)}:
 
-\item [Restricted cone NAT (RCN)]:
+  \begin{quote}
+    "A restricted-cone NAT is one where all requests from the same
+    internal IP address and port are mapped to the same external IP
+    address and port. Unlike a full-cone NAT though, an external host
+    can send a packet to the internal host only if the internal host
+    had previously sent a packet to that external host."
+  \end{quote}
+    
+\item {\bf Port-restricted cone NAT (PRCN)}:
 
-"A restricted-cone NAT is one where all requests from the same
-internal IP address and port are mapped to the same external IP
-address and port. Unlike a full-cone NAT though, an external host can
-send a packet to the internal host only if the internal host had
-previously sent a packet to that external host."
+  \begin{quote}
+    "A port-restricted cone NAT is like a restricted-cone NAT, but the
+    restriction also includes port numbers. An external host can send
+    a packet to the internal host only if the internal host had
+    previously sent a packet to that external host on the same port
+    number."
+  \end{quote}
+    
+\item {\bf Symmetric NAT (SYM)}:
 
-\item [Port-restricted cone NAT (PRCN)]:
-
-"A port-restricted cone NAT is like a restricted-cone NAT, but the
-restriction also includes port numbers. An external host can send a
-packet to the internal host only if the internal host had previously
-sent a packet to that external host on the same port number."
-
-\item [Symmetric NAT (SYM)]:
-
-"A symmetric nat is a NAT where all requests from the same internal IP
-address and port to a specific destination IP address and port are
-mapped to the same external source IP address and port. If the same
-internal host sends a packet with the same source address and port to
-a different destination, a different mapping is used (these mappings
-are referred to as NAT translations). Only the external host that
-receives a packet can send a packet back to the internal host."
-
-As described in [this paper][4], the symmetric NATs can be divided
-again into these three subtypes, depending on the allocation of the
-source port of the NAT:
+  \begin{quote}
+    "A symmetric nat is a NAT where all requests from the same
+    internal IP address and port to a specific destination IP address
+    and port are mapped to the same external source IP address and
+    port. If the same internal host sends a packet with the same
+    source address and port to a different destination, a different
+    mapping is used (these mappings are referred to as NAT
+    translations). Only the external host that receives a packet can
+    send a packet back to the internal host."
+  \end{quote}
+  
+As described in \cite{4}, the symmetric NATs can be divided again into
+these three subtypes, depending on the allocation of the source port
+of the NAT:
 
 \begin{itemize}
 
@@ -270,8 +279,7 @@ The desired number of results can be approximately achieved. For the
 example above, the algorithm yields:
 
 \begin{verbatim}
-    port_diffs = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 25,
-        30, 40, 50]
+    port_diffs = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 25, 0, 40, 50]
 \end{verbatim}
 
 \subsection{Limits for UDP hole punching and port prediction}
@@ -493,6 +501,16 @@ disturb the communication of a peer once it is incorporated into the
 team.
 
 \end{document}
+
+\begin{thebibliography}{9}
+
+\bibitem{1} \url{http://p2psp.org/en/p2psp-protocol?cap=indexsu9.html}
+\bibitem{2} \url{http://slides.p2psp.org/BCN-2015}
+\bibitem{3} \url{https://wiki.asterisk.org/wiki/display/TOP/NAT+Traversal+Testing}
+\bibitem{4} \url{https://tools.ietf.org/id/draft-takeda-symmetric-nat-traversal-00.txt}
+\bibitem{5} \url{http://samy.pl/pwnat/pwnat.pdf}
+
+\end{thebibliography}
 
 %[1]: http://p2psp.org/en/p2psp-protocol?cap=indexsu9.html
 %[2]: http://slides.p2psp.org/BCN-2015
