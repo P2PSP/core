@@ -24,6 +24,7 @@ peers of the team.
 
    \begin{equation}
    M = pB
+   \label{eq:chunk_index_buffer_size_relation}
    \end{equation}
 
    where $M-1$ is the maximun chunk index and $p$ is a positive integer.
