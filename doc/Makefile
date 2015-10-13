@@ -6,9 +6,9 @@ all:	index.html
 	@for i in $(DIRs); do \
 		make -C "$$i" all;\
 	done
-	rm -f index.html
 
 clean:
+	rm -f index.html
 	@for i in $(DIRs); do \
 		make -C "$$i" clean;\
 	done
@@ -17,4 +17,4 @@ info:
 	@echo $(DIRs)
 
 index.html:	index.md
-		pandoc --number-sections -c ../templates/utf-8.css -c ../templates/table.css -i index.md -o index.html
+		pandoc --number-sections -s --mathml -i index.md -o index.html

@@ -22,9 +22,7 @@ order to hide the network jitter. We define:
 Each peer can use a different buffer size $B$. By performance reasons,
 it must be hold that
 
-$
-M = pB
-$
+$M = pB$
 
 where $M-1$ is the maximun chunk index.
 
