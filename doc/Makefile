@@ -1,14 +1,16 @@
-default:	all
-
 DIRs := $(shell find . -maxdepth 1 \! -name .svn \! -name . -type d)
 
-all:	index.html
+default:	README.md
+
+all:	all
 	@for i in $(DIRs); do \
 		make -C "$$i" all;\
 	done
 
 clean:
-	rm -f index.html
+	rm -f README.md
+
+mrproper:	clean
 	@for i in $(DIRs); do \
 		make -C "$$i" clean;\
 	done
@@ -16,5 +18,5 @@ clean:
 info:
 	@echo $(DIRs)
 
-index.html:	index.md
-		pandoc --number-sections -s --mathml -i index.md -o index.html
+README.md:	README.tex
+		pandoc --number-sections -s --mathml -i README.tex -t markdown -o README.md
