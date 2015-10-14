@@ -1,12 +1,11 @@
----
-title: 'IMS (Ip Multicast Set of rules)'
-...
+IMS (Ip Multicast Set of rules)
+===============================
 
 IMS can be enabled if IP multicast is avaiable for connecting the peers
 of the team.
 
 Rules
-=====
+-----
 
 1.  The splitter sends the stream (of chunks) to a IP multicast
     address:port (channel), which peers listen to.
@@ -17,7 +16,6 @@ Rules
 3.  Chunks are enumerated by the splitter and buffered in the peers in
     order to hide the network jitter. We define:
 
-        }
         IMS_packet = [chunk_index, chunk]
 
     Each peer can use a different buffer size $B$. By performance
@@ -28,3 +26,5 @@ Rules
 
     where $M-1$ is the maximun chunk index and $p$ is a
     positive integer.
+
+

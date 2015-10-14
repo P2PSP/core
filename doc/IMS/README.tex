@@ -1,15 +1,17 @@
-\documentclass{article}
+\documentclass{minimal}
 
 \title{IMS (Ip Multicast Set of rules)}
 
 \begin{document}
 
-\maketitle
+\section{IMS (Ip Multicast Set of rules)}
+
+%\maketitle
 
 IMS can be enabled if IP multicast is avaiable for connecting the
 peers of the team.
 
-\section{Rules}
+\subsection{Rules}
 
 \begin{enumerate}
 \item The splitter sends the stream (of chunks) to a IP multicast
@@ -21,7 +23,7 @@ peers of the team.
 \item Chunks are enumerated by the splitter and buffered in the peers
   in order to hide the network jitter. We define:
 
-\begin{verbatim}}
+\begin{verbatim}
 IMS_packet = [chunk_index, chunk]
 \end{verbatim}
 
