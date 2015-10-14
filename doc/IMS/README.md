@@ -10,8 +10,7 @@ Rules
 1.  The splitter sends the stream (of chunks) to a IP multicast
     address:port (channel), which peers listen to.
 
-2.  Incomming peers contact the splitter in order to join know
-    the channel.
+2.  Incomming peers contact the splitter in order to join the channel.
 
 3.  Chunks are enumerated by the splitter and buffered in the peers in
     order to hide the network jitter. We define:
@@ -21,8 +20,10 @@ Rules
     Each peer can use a different buffer size $B$. By performance
     reasons, it must be hold that
 
-    $$M = pB
-       \label{eq:chunk_index_buffer_size_relation}$$
+    \begin{equaiton}
+      M = pB
+      \label{eq:chunk_index_buffer_size_relation}
+    \end{equation}
 
     where $M-1$ is the maximun chunk index and $p$ is a
     positive integer.
