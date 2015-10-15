@@ -22,8 +22,19 @@ Unfortunately, IP multicast does not fit the bussines model of most
 Internet Service Providers (ISP) which disables this functionality to
 end-users.
 
-Topologies
-----------
+Icecast technology
+------------------
+
+[Icecast](http://icecast.org/) is an open-source server of Theora,
+Vorbis, MP3 and WebM streams. The following figure shows an example of
+a Icecast streaming system:
+
+Icecast + P2PSP technology
+--------------------------
+
+P2PSP extends Icecast overlays in order to decrease the load of the
+server (Source) side. Hybrid Icecast+P2PSP structures are more
+scalable. The following figure shows an example of this concept:
 
 Related work
 ------------
