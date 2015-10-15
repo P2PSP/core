@@ -5,10 +5,10 @@ Definition
 ----------
 
 P2PSP is an application-layer protocol designed for real-time
-broadcasting of data on a P2P overlay network. P2PSP mimics the IP
-multicast behaviour, where a source sends only a copy of the stream to a
-collection of peers which interchange between them those chunks of data
-that are needed for the rest of the peers.
+broadcasting of data from a source to networked peers. P2PSP mimics
+the IP multicast behaviour, where the source sends only a copy of the
+stream to a the peers which interchange between them those chunks of
+data that are needed for the rest of the peers.
 
 Motivation
 ----------
@@ -22,24 +22,28 @@ Unfortunately, IP multicast does not fit the bussines model of most
 Internet Service Providers (ISP) which disables this functionality to
 end-users.
 
+Topologies
+----------
+
 Related work
 ------------
 
-There are plenty of P2P straeming protocols. Depending on the overhaly
-topology, they can be clasified in chains, trees or meshes. A chain
-overlay is quite rare because churn can degrade significatively the
-Quality of Service (QoS) of the overlay, however, it has interesting
-characteristics such as peers does not need to interchange buffer maps
-and peers only send a copy of the stream regardless of the size of the
-overlay (we will refeer to this characteristics as “replication
-factor”). Tree overlays impose that peers must send so many copies of
-the stream (replication factor) as the degree of the tree, but like
-chains, the protocol is also push-based. Mesh-based protocols are more
-flexible regarding the overlay topology (which can be any) but peers
-must known the state of the buffer of their neighbours (the protocol is
-pull-based), and also are more flexible about the replication factor,
-which can be any. Obviously, push-based protocols are more efficient
-than pull-based one in terms of bandwidth.
+There are plenty of P2P straeming protocols. Depending on the topology
+of the overlay network, they can be clasified in chains, trees or
+meshes. A chain overlay is quite rare because churn can degrade
+significatively the Quality of Service (QoS) of the overlay, however,
+it has interesting characteristics such as peers does not need to
+interchange buffer maps and peers only send a copy of the stream
+regardless of the size of the overlay (we will refeer to this
+characteristics as “replication factor”). Tree overlays impose that
+peers must send so many copies of the stream (replication factor) as
+the degree of the tree, but like chains, the protocol is also
+push-based. Mesh-based protocols are more flexible regarding the
+overlay topology (which can be any) but peers must known the state of
+the buffer of their neighbours (the protocol is pull-based), and also
+are more flexible about the replication factor, which can be
+any. Obviously, push-based protocols are more efficient than
+pull-based one in terms of bandwidth.
 
 P2PSP is a fully-connected mesh-structured push-based protocol. Being
 $N$ the number of peers in the overlay (a “team” in the P2PSP jargon),
