@@ -149,8 +149,8 @@ Rules
 	trigger the following succession of events:
 
 	1.  In the rest of peers $\{P_j, i\neq j\}$, the free-riding
-		control mechanism (see Rule~\ref{rul:free-riding-avoiding}) will
-		remove $P_i$ from the list of peers.
+		control mechanism (see the rule **Free-riding control in the
+		peers**) will remove $P_i$ from the list of peers.
 		
     2.  All monitor peers will complain to the splitter about chunks
 		that the splitter has sent to P$_i$.
@@ -193,8 +193,8 @@ Rules
     the team (always in the conditions imposed by the
     Equation~\ref{eq:bit-rate-limit}). In order to guarantee this, the
     splitter counts the number of complains (sent by the monitor(s)
-    peer(s)) that each peer produces. If
-    this number exceeds a given threshold, then the unsupportive peer
-    will be rejected from the team (it will be removed from the list of the
-    splitter and the lists of all peers of the team (see
-    \ref{rul:free-riding-avoiding-peers})).
+    peer(s)) that each peer produces. If this number exceeds a given
+    threshold, then the unsupportive peer will be rejected from the
+    team (it will be removed from the list of the splitter and the
+    lists of all peers of the team (see the rule **Free-riding control
+    in the peers**).
