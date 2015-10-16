@@ -136,7 +136,7 @@ Rules
 		of the team will transmit the same amount of data that they
 		receive.
 
-	3.  In order to minimize the number of loss reports (see Rule
+	3.  In order to minimize the number of loss reports (see the rule
 		**Chunk-tracking**, in [LRS](../LRS/README.md)) in the team,
 		the monitor peers are the only entities allowed to complain to
 		the splitter about lost chunks.
@@ -152,7 +152,7 @@ Rules
 		control mechanism (see Rule~\ref{rul:free-riding-avoiding}) will
 		remove $P_i$ from the list of peers.
 		
-    2-  All monitor peers will complain to the splitter about chunks
+    2.  All monitor peers will complain to the splitter about chunks
 		that the splitter has sent to P$_i$.
 	
     3.  After receiving a sufficient number of complains, the splitter
