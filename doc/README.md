@@ -25,19 +25,28 @@ end-users.
 Icecast technology
 ------------------
 
-[Icecast](http://icecast.org/) is an open-source server of Theora,
-Vorbis, MP3 and WebM streams. The following figure shows an example of
-a Icecast streaming system:
+[Icecast](http://icecast.org/) is an open-source media server of
+[Theora](http://www.theora.org/), [Vorbis](http://www.vorbis.com/),
+[Opus](https://www.opus-codec.org/),
+[MP3](https://en.wikipedia.org/wiki/MP3) and
+[WebM](http://www.webmproject.org/) streams. The following figure
+shows an example of a Icecast streaming system:
+
+![A Icecast overlay][images/icecast-model]
 
 Icecast + P2PSP technology
 --------------------------
 
-P2PSP extends Icecast overlays in order to decrease the load of the
-server (Source) side. Hybrid Icecast+P2PSP structures are more
-scalable. The following figure shows an example of this concept:
+Basically, P2PSP extends Icecast overlays in order to decrease the
+load of the server (Source) side, generating hybrid Icecast+P2PSP
+structures that are more scalable. The following figures shows
+examples of this concept:
 
-Related work
-------------
+![A Icecast+P2PSP overlay][images/icecast-P2PSP-model1]
+![A Icecast+P2PSP overlay][images/icecast-P2PSP-model2]
+
+Related P2P systems
+----------------
 
 There are plenty of P2P straeming protocols. Depending on the topology
 of the overlay network, they can be clasified in chains, trees or
