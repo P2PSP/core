@@ -29,13 +29,13 @@ Round-Robing scheduler (at the splitter) in which the team cicle of a
 peer P is proportional to the packet loss ratio of P. Using ACS, a
 class-A peer will receive from the splitter more chunks than a class-B
 peer and therefore, a class-A peer will enter in the burst mode (see
-Rule~\ref{rul:burst_mode}) more often than a class-B peer. This is
-something that goes against the throughtput of the class-A peer and
-that, in some moment, could produce a lost of chunks (remember that
-the burst mode can congest the upload channel of the
-peers). Therefore, the throughtput of a class-A peer will grow until
-reaching its congestion threshold, instant in which the monitors peers
-will report the lost of this class-A peer and the splitter will
+the rule [**Burst transmission**](../DBS/README.md)) more often than a
+class-B peer. This is something that goes against the throughtput of
+the class-A peer and that, in some moment, could produce a lost of
+chunks (remember that the burst mode can congest the upload channel of
+the peers). Therefore, the throughtput of a class-A peer will grow
+until reaching its congestion threshold, instant in which the monitors
+peers will report the lost of this class-A peer and the splitter will
 decrease its chunk-rate.
 
 Another consecuence of implementing ACS is that class-A peers will
