@@ -85,9 +85,9 @@ Rules
 	this requirement, each peer P$_i$ assigns a counter to each other
 	peer P$_j$ of the team. When a chunk is sent to P$_j$, its counter
 	/P$_j$/ is incremented and when a chunk is received from it,
-	/P$_j$/ is decremented. If /P$_j$/ reaches a given threshold,
-	P$_j$ is deleted from the list of peers of P$_i$ and it will not
-	be served any more by P$_i$.
+	/P$_j$/ is decremented. If /P$_j$/ reaches a given threshold
+	('MAX_CHUNK_COUNTER'), P$_j$ is deleted from the list of peers of
+	P$_i$ and it will not be served any more by P$_i$.
 
 	Notice that this rule will remove also from the peer's lists those
 	peers that perform a impolite churn (peers that leave the team
@@ -137,9 +137,9 @@ Rules
 		receive.
 
 	3.  In order to minimize the number of loss reports (see the rule
-		**Chunk-tracking**, in [LRS](../LRS/README.md)) in the team,
-		the monitor peers are the only entities allowed to complain to
-		the splitter about lost chunks.
+		**Loss-report messages generation**, in [LRS](../LRS/README.md))
+		in the team, the monitor peers are the only entities allowed to
+		complain to the splitter about lost chunks.
 
 7.  **Peer departure:** Peers are required to send a [goodbye]
 	message to the splitter and the rest of peers of the team when they

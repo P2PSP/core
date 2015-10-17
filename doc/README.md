@@ -75,3 +75,7 @@ depending on the solidarity between the peers.
 ------------------------------------------------
 [DBS (Data Broadcasting Set of rules)](DBS/README.md)
 -----------------------------------------------------
+[LRS (Lost Recovery Set of rules)](LRS/README.md)
+-------------------------------------------------
+[ACS (Adaptive Chunk-rate Set of rules)](ACS/README.md)
+-------------------------------------------------------
