@@ -14,6 +14,7 @@ peer_nts module
 
 # {{{
 
+import functools
 import math
 import threading
 import time
@@ -313,7 +314,7 @@ class Peer_NTS(Peer_DBS):
     def get_factors(self, n):
         # {{{ This function is from http://stackoverflow.com/a/6800214
 
-        return sorted(set(reduce(list.__add__,
+        return sorted(set(functools.reduce(list.__add__,
                                  ([i, n//i] for i in \
                                   range(1, int(n**0.5) + 1) if n % i == 0))))
 
@@ -327,7 +328,7 @@ class Peer_NTS(Peer_DBS):
         # Example: the number is 10, the factors are 1, 2, 5, 10.
         # Products <=10: 1*1, ..., 1*10, 2*1, ..., 2*5, 5*1, 5*2, 10*1.
         # So for each factor there are "n/factor" products:
-        return reduce(lambda a, b: a + b, factors)
+        return functools.reduce(lambda a, b: a + b, factors)
 
         # }}}
 
@@ -344,7 +345,7 @@ class Peer_NTS(Peer_DBS):
         num_combinations = self.count_combinations(factors)
         count_factor = Common.MAX_PREDICTED_PORTS/float(num_combinations)
 
-        port_diffs = sorted(set(reduce(list.__add__, (list(
+        port_diffs = functools.sorted(set(reduce(list.__add__, (list(
             # For each previous peer and skip, the source port is incremented
             port_step * (peer_number + skips)
             # For each assumed port_step, "port_diff/port_step" different skips

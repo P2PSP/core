@@ -28,7 +28,7 @@ nat2_pub="192.168.57.5"
 function stop_processes() {
     set +e
     for host in $splitter $pc1 $pc2; do
-        ssh "$user@$host" "pkill -f 'python2 -u $dir'" 2>/dev/null
+        ssh "$user@$host" "pkill -f 'python3 -u $dir'" 2>/dev/null
     done
     killall vlc 2>/dev/null
     killall netcat 2>/dev/null
@@ -83,13 +83,13 @@ $nat1_config "
             # parameters: splitter_port, peer_port, player_port
 
             # Run splitter
-            ssh "$user@$splitter" python2 -u "$dir/splitter.py" --source_addr "$local_source_addr" \
+            ssh "$user@$splitter" python3 -u "$dir/splitter.py" --source_addr "$local_source_addr" \
                 --source_port "$local_source_port" --port "$splitter_port" >/dev/null &
 
             # Run monitor on same host as splitter
-            peer_cmd="python2 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
+            peer_cmd="python3 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
                 --splitter_port '$1' --port '$2' | sed 's_[^m]*m__g'"
-            peer_cmd_symsp="python2 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
+            peer_cmd_symsp="python3 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
                 --splitter_port '$1' --port '$2' --port_step 1 | sed 's_[^m]*m__g'"
             ssh "$user@$splitter" "$peer_cmd" >/dev/null &
 

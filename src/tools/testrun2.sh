@@ -18,7 +18,7 @@ local_source_addr=192.168.57.1
 set -e
 function stop_processes() {
     for host in $splitter $server $pc1 $pc2; do
-        ssh $user@$host 'pkill -f "python2 -u"'
+        ssh $user@$host 'pkill -f "python3 -u"'
     done
 }
 # Register cleanup trap function
@@ -28,19 +28,21 @@ trap stop_processes EXIT
 ssh "root@192.168.56.5" "conntrack -F" 2>/dev/null
 ssh "root@192.168.58.4" "conntrack -F" 2>/dev/null
 
-ssh $user@$splitter python2 -u "$dir/splitter.py" --source_addr "$local_source_addr" \
-    --source_port "4551"  --port "$splitter_port" --monitor_number 2 \
-    | sed -n -e 's_.*NTS:\(.*\)_\x1b[93mSplitter:\1\x1b[0m_p' &
-ssh $user@$splitter python2 -u $dir/peer.py --splitter_addr "$splitter" \
+ssh $user@$splitter python3 -u "$dir/splitter.py" --source_addr "$local_source_addr" \
+    --source_port "8080"  --port "$splitter_port" --NTS &
+    #~ | sed -n -e 's_.*NTS:\(.*\)_\x1b[93mSplitter:\1\x1b[0m_p' &
+sleep 10
+echo continue
+ssh $user@$splitter python3 -u $dir/peer.py --splitter_addr "$splitter" \
     --splitter_port "$splitter_port" --port "$peer_port" \
     | sed -n -e 's_.*NTS:\(.*\)_\x1b[92mMonitor1:\1\x1b[0m_p' &
-ssh $user@$server python2 -u $dir/peer.py --splitter_addr "$splitter" \
-    --splitter_port "$splitter_port" --port "$peer_port" \
-    | sed -n -e 's_.*NTS:\(.*\)_\x1b[96mMonitor2:\1\x1b[0m_p' &
-ssh $user@$pc1 python2 -u $dir/peer.py --splitter_addr "$splitter" \
+#ssh $user@$server python3 -u $dir/peer.py --splitter_addr "$splitter" \
+#    --splitter_port "$splitter_port" --port "$peer_port" \
+#    | sed -n -e 's_.*NTS:\(.*\)_\x1b[96mMonitor2:\1\x1b[0m_p' &
+ssh $user@$pc1 python3 -u $dir/peer.py --splitter_addr "$splitter" \
     --splitter_port "$splitter_port" --port "$peer_port" --port_step 1 \
     | sed -n -e 's_.*NTS:\(.*\)_\x1b[94mPeer1:   \1\x1b[0m_p' &
-ssh $user@$pc2 python2 -u $dir/peer.py --splitter_addr "$splitter" \
+ssh $user@$pc2 python3 -u $dir/peer.py --splitter_addr "$splitter" \
     --splitter_port "$splitter_port" --port "$peer_port" --port_step 1 \
     | sed -n -e 's_.*NTS:\(.*\)_\x1b[95mPeer2:   \1\x1b[0m_p' &
 sleep 1
