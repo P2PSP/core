@@ -13,14 +13,14 @@ channel_store module
 
 # {{{ Imports
 
-from category import Category
-import common.file_util as file_util
+from gui.model.category import Category
+from gui.common import file_util
 
 # }}}
 
 ## path to the thumbnail of the default peer.
 path = file_util.find_file(__file__,
-                                    '../../data/images/monitor_thumbnail.png')
+                                    '../data/images/monitor_thumbnail.png')
 
 def get_monitor_data():
     

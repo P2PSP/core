@@ -14,7 +14,7 @@ json_exporter module
 # {{{ Imports
 
 import json
-from decorators import exc_handler
+from gui.common.decorators import exc_handler
 
 # }}}
 

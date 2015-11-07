@@ -21,10 +21,11 @@ import socket
 import struct
 import time
 
-import common
+from . import common
 from core.color import Color
 from core._print_ import _print_
-from core.peer_ims import Peer_IMS
+#from core.peer_ims import Peer_IMS
+from core.peer_ims_gui import Peer_IMS_GUI as Peer_IMS
 
 # }}}
 

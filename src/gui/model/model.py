@@ -15,7 +15,7 @@ model module
 
 import traceback
 try:
-    from vlc_player import VLC_Player
+    from gui.model.vlc_player import VLC_Player
 except ImportError as msg:
     traceback.print_exc()
     

@@ -32,7 +32,8 @@ from core import common
 #import common
 from core.color import Color
 from core._print_ import _print_
-from core.peer_ims import Peer_IMS
+#from core.peer_ims import Peer_IMS
+from core.peer_ims_gui import Peer_IMS_GUI as Peer_IMS
 from core.peer_dbs import Peer_DBS
 from core.lossy_socket import lossy_socket
 from core.symsp_peer import Symsp_Peer
@@ -277,7 +278,7 @@ class Peer():
                 if common.CONSOLE_MODE == False :
                     from gi.repository import GObject
                     try:
-                        from adapter import speed_adapter
+                        from gui.adapter import speed_adapter
                     except ImportError as msg:
                         pass
                     GObject.idle_add(speed_adapter.update_widget,str(kbps_recvfrom) + ' kbps'
