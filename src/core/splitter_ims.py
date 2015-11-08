@@ -21,7 +21,7 @@ import threading
 import struct
 import time
 
-import common
+from . import common
 from core._print_ import _print_
 from core.color import Color
 

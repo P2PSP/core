@@ -16,7 +16,7 @@ import sys
 import struct
 import socket
 
-import common
+from . import common
 from core.peer_dbs import Peer_DBS
 from core.peer_nts import Peer_NTS
 from core._print_ import _print_

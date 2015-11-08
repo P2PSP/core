@@ -13,10 +13,10 @@ import traceback
 try:
     from gi.repository import GObject
     from gi.repository import Gtk
-    from controller.main_window_controller import Main_Controller
-    from view.main_window import Main_Window
-    from model.model import Model
-    from common.decorators import exc_handler
+    from gui.controller.main_window_controller import Main_Controller
+    from gui.view.main_window import Main_Window
+    from gui.model.model import Model
+    from gui.common.decorators import exc_handler
 except Exception as msg:
     traceback.print_exc()
 

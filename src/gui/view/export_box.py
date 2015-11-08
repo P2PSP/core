@@ -15,8 +15,8 @@ export_box module
 import traceback
 try:
     from gi.repository import Gtk
-    import common.file_util as file_util
-    from common.decorators import exc_handler
+    from gui.common import file_util
+    from gui.common.decorators import exc_handler
 except ImportError as msg:
     traceback.print_exc()
 
@@ -41,13 +41,13 @@ class Export_Box():
         """
 
         self.interface = file_util.get_user_interface(__file__,
-                                        '../../data/glade/exportbox.glade')
+                                        '../data/glade/exportbox.glade')
         self.load_widgets()
 
         ## List_Store to store channel data.
         self.list_store = Gtk.ListStore(str, str,str,str,str)
         self.listview.set_model(self.list_store)
-        
+
         ## Name of columns in the Gtk ListView.
         self.column_string = None
         self.create_list_view()
@@ -78,20 +78,20 @@ class Export_Box():
     @exc_handler
     def add_channel_list_column(self, title, columnId):
 
-		"""
-		This function adds a column to the list view.
-		First it create the Gtk TreeViewColumn and then set
-		some needed properties.
-		
-		@param : title (name of the column)
-        @param : columnId (index of the column in the ListView)
-		"""
+        """
+        This function adds a column to the list view.
+        First it create the Gtk TreeViewColumn and then set
+        some needed properties.
 
-		column = Gtk.TreeViewColumn(title, Gtk.CellRendererText()
-			, text=columnId)
-		column.set_resizable(True)
-		column.set_sort_column_id(columnId)
-		self.listview.append_column(column)
+        @param : title (name of the column)
+        @param : columnId (index of the column in the ListView)
+        """
+
+        column = Gtk.TreeViewColumn(title, Gtk.CellRendererText()
+                , text=columnId)
+        column.set_resizable(True)
+        column.set_sort_column_id(columnId)
+        self.listview.append_column(column)
 
     @exc_handler
     def create_list_view(self):

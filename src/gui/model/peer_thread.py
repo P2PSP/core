@@ -17,10 +17,10 @@ import threading
 import traceback
 
 try:
-    import core.peer as peer
-    import core.common as common
-    from core.peer_ims_gui import Peer_IMS_GUI # Peer_IMS should use only the console :-/
-    from common.decorators import exc_handler
+    from peer import Peer
+    from core import common
+    from core.peer_ims_gui import Peer_IMS_GUI as Peer_IMS # Peer_IMS should use only the console :-/
+    from gui.common.decorators import exc_handler
 except ImportError as msg:
     traceback.print_exc()
 
@@ -74,5 +74,5 @@ class Peer_Thread (threading.Thread):
         
         print("Starting " + self.name)
         self.peer_active = True
-        self._peer = peer.Peer()
+        self._peer = Peer()
         print("Exiting " + self.name)

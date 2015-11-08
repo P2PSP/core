@@ -13,10 +13,10 @@
 import threading
 import sys
 import socket
-from peer_fns import Peer_FNS
-from color import Color
-from _print_ import _print_
-from lossy_socket import lossy_socket
+from core.peer_fns import Peer_FNS
+from core.color import Color
+from core._print_ import _print_
+from core.lossy_socket import lossy_socket
 # }}}
 
 # Some useful definitions.

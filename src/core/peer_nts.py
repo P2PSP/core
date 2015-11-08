@@ -14,7 +14,7 @@ peer_nts splitter_nts
 
 # {{{
 
-import common
+from . import common
 import math
 import threading
 import time

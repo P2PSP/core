@@ -12,8 +12,8 @@
 # {{{ Imports
 import sys
 import struct
-from splitter_dbs import Splitter_DBS
-from color import Color
+from core.splitter_dbs import Splitter_DBS
+from core.color import Color
 # }}}
 
 # FNS: Full-cone Nat Set of rules

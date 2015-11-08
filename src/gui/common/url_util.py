@@ -14,9 +14,9 @@ url_util module
 
 import traceback
 import socket
-from urlparse import urlparse
+from urllib.parse import urlparse
 try:
-    from decorators import exc_handler
+    from gui.common.decorators import exc_handler
 except ImportError as msg:
     traceback.print_exc()
 

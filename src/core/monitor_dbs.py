@@ -19,7 +19,7 @@ import socket
 import struct
 import threading
 
-import common
+from . import common
 from core.peer_ims import Peer_IMS
 from core.peer_dbs import Peer_DBS
 from core._print_ import _print_

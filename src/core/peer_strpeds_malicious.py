@@ -12,10 +12,10 @@ import sys
 import threading
 import random
 
-from color import Color
-from _print_ import _print_
-from peer_dbs import Peer_DBS
-from peer_strpeds import Peer_StrpeDs
+from core.color import Color
+from core._print_ import _print_
+from core.peer_dbs import Peer_DBS
+from core.peer_strpeds import Peer_StrpeDs
 
 class Peer_StrpeDsMalicious(Peer_StrpeDs):
 

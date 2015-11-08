@@ -14,8 +14,8 @@ graphics_util module
 # {{{ Imports
 from gi.repository import Gdk
 from gi.repository.GdkPixbuf import Pixbuf
-from decorators import exc_handler
-import file_util
+from gui.common.decorators import exc_handler
+from . import file_util
 
 p2psp_logo_path = file_util.find_file(__file__,
                                     '../../data/images/monitor_thumbnail.png')

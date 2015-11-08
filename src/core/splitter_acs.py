@@ -21,7 +21,7 @@ import socket
 import struct
 import time
 
-import common
+from . import common
 #from core.color import Color
 from core._print_ import _print_
 #from splitter_ims import Splitter_IMS

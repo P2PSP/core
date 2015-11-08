@@ -15,7 +15,7 @@ vlc_player module
 
 import traceback
 try:
-    from lib import vlc
+    from gui.lib import vlc
 except ImportError as msg:
     traceback.print_exc()
     
