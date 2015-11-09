@@ -25,7 +25,44 @@ class PeerIMS {
 
   static const bool kShowBuffer = false;
 
+  unsigned int buffer_size_;
+  unsigned int chunk_size_;
+  unsigned int chunks_;
+  unsigned int header_size_in_chunks_;
+  unsigned int mcast_addr_;
+  unsigned int mcast_port_;
+  unsigned int message_format_;
+  unsigned int played_chunk_;
+  unsigned int player_alive_;
+  unsigned int player_socket_;
+  unsigned int received_counter_;
+  unsigned int received_flag_;
+  unsigned int recvfrom_counter_;
+  unsigned int splitter_;
+  unsigned int splitter_socket_;
+  unsigned int team_socket_;
+
  public:
+  void wait_for_the_player();
+  void connect_to_the_splitter();
+  void disconnect_from_the_splitter();
+  void receive_the_mcast_endpoint();
+  void receive_the_header();
+  void receive_the_chunk_size();
+  void receive_the_header_size();
+  void receive_the_buffer_size();
+  void listen_to_the_team();
+  void unpack_message();  // TODO: (message)
+  void receive_the_next_message();
+  void process_message();  // TODO: (message, sender)
+  void process_next_message();
+  void buffer_data();
+  void find_next_chunk();
+  void play_chunk();
+  void play_next_chunk();  // TODO: (chunk)
+  void play();
+  void keep_the_buffer_full();
+  void run();
 };
 }
 
