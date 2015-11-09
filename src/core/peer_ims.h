@@ -43,26 +43,44 @@ class PeerIMS {
   unsigned int team_socket_;
 
  public:
-  void wait_for_the_player();
-  void connect_to_the_splitter();
-  void disconnect_from_the_splitter();
-  void receive_the_mcast_endpoint();
-  void receive_the_header();
-  void receive_the_chunk_size();
-  void receive_the_header_size();
-  void receive_the_buffer_size();
-  void listen_to_the_team();
-  void unpack_message();  // TODO: (message)
-  void receive_the_next_message();
-  void process_message();  // TODO: (message, sender)
-  void process_next_message();
-  void buffer_data();
-  void find_next_chunk();
-  void play_chunk();
-  void play_next_chunk();  // TODO: (chunk)
-  void play();
-  void keep_the_buffer_full();
-  void run();
+  PeerIMS();
+  ~PeerIMS();
+
+  /**
+   *  Setup "player_socket" and wait for the player
+   */
+  void WaitForThePlayer();
+
+  /**
+   *  Setup "splitter" and "splitter_socket"
+   */
+  void ConnectToTheSplitter();
+  void DisconnectFromTheSplitter();
+  void ReceiveTheMcasteEndpoint();
+  void ReceiveTheHeader();
+  void ReceiveTheChunkSize();
+  void ReceiveTheHeaderSize();
+  void ReceiveTheBufferSize();
+
+  /**
+   *  Create "team_socket" (UDP) for using the multicast channel
+   */
+  void ListenToTheTeam();
+  void UnpackMessage();  // TODO: (message)
+  void ReceiveTheNextMessage();
+  void ProcessMessage();  // TODO: (message, sender)
+  void ProcessNextMessage();
+
+  /**
+   *  Buffering
+   */
+  void BufferData();
+  void FindNextChunk();
+  void PlayChunk();
+  void PlayNextChunk();  // TODO: (chunk)
+  void Play();
+  void KeepTheBufferFull();
+  void Run();
 };
 }
 
