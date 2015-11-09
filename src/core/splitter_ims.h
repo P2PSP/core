@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <string>
 #include <tuple>
+#include <sstream>
 
 namespace p2psp {
 
@@ -27,7 +28,7 @@ class SplitterIMS {
   const int kHeaderSize;          // Chunks/header
   const int kPort;                // Listening port
   const std::string kSourceAddr;  // Streaming server's host
-  const int kSourcePort = 4551;   // Streaming server's listening port
+  const int kSourcePort;          // Streaming server's listening port
   const std::string kMCastAddr;   // All Systems on this subnet
   const int kTTL;                 // Time To Live of multicast packets
 

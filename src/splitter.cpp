@@ -8,6 +8,9 @@
 //  http://www.p2psp.org
 //
 
+#include <iostream>
+#include "splitter_ims.h"
+
 int main(int argc, const char *argv[]) {
   // TODO: Argument parser.
 
@@ -16,6 +19,8 @@ int main(int argc, const char *argv[]) {
   // TODO: Start the splitter's main thread
 
   // TODO: Print information about the status of the splitter
+
+  p2psp::SplitterIMS splitterIMS = p2psp::SplitterIMS();
 
   return 0;
 }
