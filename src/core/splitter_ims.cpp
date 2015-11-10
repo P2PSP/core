@@ -23,6 +23,7 @@ SplitterIMS::SplitterIMS()
       kSourcePort(4551),
       kMCastAddr("224.0.0.1"),
       kTTL(1),
+      io_service_(),
       peer_connection_socket_(io_service_),
       acceptor_(io_service_) {
   alive_ = true;
@@ -72,4 +73,20 @@ void SplitterIMS::SetupPeerConnectionSocket() {
   acceptor_.bind(endpoint);
   acceptor_.listen();
 }
+
+void SplitterIMS::ConfigureSockets() {
+  try {
+    SetupPeerConnectionSocket();
+  } catch (int e) {
+    // TODO: Print error and exit
+  }
+
+  try {
+    SetupTeamSocket();
+  } catch (int e) {
+    // TODO: Print error and exit
+  }
+}
+
+void SplitterIMS::SetupTeamSocket() {}
 }

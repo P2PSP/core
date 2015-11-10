@@ -9,7 +9,7 @@
 //
 
 #include <iostream>
-#include "splitter_ims.h"
+#include "core/splitter_ims.h"
 
 int main(int argc, const char *argv[]) {
   // TODO: Argument parser.
@@ -20,7 +20,7 @@ int main(int argc, const char *argv[]) {
 
   // TODO: Print information about the status of the splitter
 
-  p2psp::SplitterIMS splitterIMS = p2psp::SplitterIMS();
+  p2psp::SplitterIMS splitterIMS;
 
   return 0;
 }
