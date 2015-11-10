@@ -17,6 +17,7 @@
 #include <string>
 #include <tuple>
 #include <sstream>
+#include <boost/asio.hpp>
 
 namespace p2psp {
 
@@ -42,8 +43,14 @@ class SplitterIMS {
   // Number of the served chunk.
   int chunk_number_;
 
+  // Service for I/O operations
+  boost::asio::io_service io_service_;
+
   // Used to listen to the incomming peers.
-  int peer_connection_socket_;  // TODO: Socket descriptor?
+  boost::asio::ip::tcp::socket peer_connection_socket_;
+
+  // Acceptor used to listen for incoming connections.
+  boost::asio::ip::tcp::acceptor acceptor_;
 
   // Used to listen the team messages.
   int team_socket_;  // TODO: Socket descriptor?
