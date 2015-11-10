@@ -2,67 +2,110 @@
 #ifndef P2PSP_CORE_PEER_IMS_H
 #define P2PSP_CORE_PEER_IMS_H
 
+#include <vector>
+#include <string>
+#include <memory>
+
 namespace p2psp {
 
 class PeerIMS {
-  // Port used to serve the player.
+  // Default port used to serve the player.
   static const unsigned short kPlayerPort = 9999;
 
-  // Address of the splitter.
+  // Default address of the splitter.
   constexpr static const char kSplitterAddr[] = "127.0.0.1";
 
-  // Port of the splitter.
+  // Default port of the splitter.
   static const unsigned short kSplitterPort = 4552;
 
-  // TCP->UDP port used to communicate.
+  // Default TCP->UDP port used to communicate.
   static const unsigned short kPort = 0;
 
-  // Use localhost instead the IP of the addapter
+  // Default use localhost instead the IP of the addapter
   static const bool kUseLocalhost = false;
 
-  // ?
+  // Default ?
   static const int kBufferStatus = 0;
 
+  // Default
   static const bool kShowBuffer = false;
+
+  // Port used to serve the player.
+  unsigned short player_port_;
+
+  // Address of the splitter.
+  std::string splitter_addr_;
+
+  // Port of the splitter.
+  unsigned short splitter_port_;
+
+  // TCP->UDP port used to communicate.
+  unsigned short port_;
+
+  // Use localhost instead the IP of the addapter
+  bool use_localhost_;
+
+  // ?
+  int buffer_status_;
+
+  bool show_buffer_;
 
   unsigned int buffer_size_;
   unsigned int chunk_size_;
-  unsigned int chunks_;
+  std::vector<char> chunks_;
   unsigned int header_size_in_chunks_;
-  unsigned int mcast_addr_;
-  unsigned int mcast_port_;
+  std::string mcast_addr_;
+  unsigned short mcast_port_;
   unsigned int message_format_;
-  unsigned int played_chunk_;
-  unsigned int player_alive_;
-  unsigned int player_socket_;
+  std::shared_ptr<char> played_chunk_;  // Dynamic pointer
+  bool player_alive_;
+  int player_socket_;
   unsigned int received_counter_;
-  unsigned int received_flag_;
+  std::vector<bool> received_flag_;
   unsigned int recvfrom_counter_;
   unsigned int splitter_;
-  unsigned int splitter_socket_;
-  unsigned int team_socket_;
+  int splitter_socket_;
+  int team_socket_;
 
  public:
-  void wait_for_the_player();
-  void connect_to_the_splitter();
-  void disconnect_from_the_splitter();
-  void receive_the_mcast_endpoint();
-  void receive_the_header();
-  void receive_the_chunk_size();
-  void receive_the_header_size();
-  void receive_the_buffer_size();
-  void listen_to_the_team();
-  void unpack_message();  // TODO: (message)
-  void receive_the_next_message();
-  void process_message();  // TODO: (message, sender)
-  void process_next_message();
-  void buffer_data();
-  void find_next_chunk();
-  void play_chunk();
-  void play_next_chunk();  // TODO: (chunk)
-  void play();
-  void keep_the_buffer_full();
-  void run();
+  PeerIMS();
+  ~PeerIMS();
+
+  /**
+   *  Setup "player_socket" and wait for the player
+   */
+  void WaitForThePlayer();
+
+  /**
+   *  Setup "splitter" and "splitter_socket"
+   */
+  void ConnectToTheSplitter();
+  void DisconnectFromTheSplitter();
+  void ReceiveTheMcasteEndpoint();
+  void ReceiveTheHeader();
+  void ReceiveTheChunkSize();
+  void ReceiveTheHeaderSize();
+  void ReceiveTheBufferSize();
+
+  /**
+   *  Create "team_socket" (UDP) for using the multicast channel
+   */
+  void ListenToTheTeam();
+  void UnpackMessage();  // TODO: (message)
+  void ReceiveTheNextMessage();
+  void ProcessMessage();  // TODO: (message, sender)
+  void ProcessNextMessage();
+
+  /**
+   *  Buffering
+   */
+  void BufferData();
+  void FindNextChunk();
+  void PlayChunk();
+  void PlayNextChunk();  // TODO: (chunk)
+  void Play();
+  void KeepTheBufferFull();
+  void Run();
 };
 }
 
