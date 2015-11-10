@@ -4,7 +4,7 @@
 
 #include <vector>
 #include <string>
-#include <memory>
+#include <tuple>
 #include <boost/asio.hpp>
 
 namespace p2psp {
@@ -64,7 +64,7 @@ class PeerIMS {
   unsigned int received_counter_;
   std::vector<bool> received_flag_;
   unsigned int recvfrom_counter_;
-  unsigned int splitter_;
+  std::tuple<std::string, std::string> splitter_;
 
   // Service for I/O operations
   boost::asio::io_service io_service_;

@@ -11,6 +11,8 @@ int main(int argc, const char* argv[]) {
 
   peer.WaitForThePlayer();
 
+  peer.ConnectToTheSplitter();
+
   // TODO: Decide type of peer to work with
 
   // TODO: Start the peer's main thread
