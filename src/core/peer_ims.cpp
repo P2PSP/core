@@ -1,12 +1,14 @@
 
 #include "peer_ims.h"
+#include <iostream>
 
 namespace p2psp {
 
 constexpr char PeerIMS::kSplitterAddr[];
 
 PeerIMS::PeerIMS()
-    : acceptor_(io_service_),
+    : io_service_(),
+      acceptor_(io_service_),
       player_socket_(io_service_),
       splitter_socket_(io_service_),
       team_socket_(io_service_) {
@@ -45,5 +47,6 @@ void PeerIMS::WaitForThePlayer() {
   acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
   acceptor_.bind(endpoint);
   acceptor_.listen();
+  acceptor_.accept(player_socket_);
 }
 }
