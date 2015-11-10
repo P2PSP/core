@@ -31,24 +31,24 @@ class PeerIMS {
   static const bool kShowBuffer = false;
 
   // Port used to serve the player.
-  unsigned short player_port;
+  unsigned short player_port_;
 
   // Address of the splitter.
-  std::string splitter_addr;
+  std::string splitter_addr_;
 
   // Port of the splitter.
-  unsigned short splitter_port;
+  unsigned short splitter_port_;
 
   // TCP->UDP port used to communicate.
-  unsigned short port;
+  unsigned short port_;
 
   // Use localhost instead the IP of the addapter
-  bool use_localhost;
+  bool use_localhost_;
 
   // ?
-  int buffer_status;
+  int buffer_status_;
 
-  bool show_buffer;
+  bool show_buffer_;
 
   unsigned int buffer_size_;
   unsigned int chunk_size_;
