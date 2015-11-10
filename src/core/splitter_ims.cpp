@@ -22,10 +22,12 @@ SplitterIMS::SplitterIMS()
       kSourceAddr("150.214.150.68"),
       kSourcePort(4551),
       kMCastAddr("224.0.0.1"),
-      kTTL(1) {
+      kTTL(1),
+      peer_connection_socket_(io_service_),
+      acceptor_(io_service_) {
   alive_ = true;
   chunk_number_ = 0;
-  peer_connection_socket_ = 0;
+
   team_socket_ = 0;
   source_socket_ = 0;
 
@@ -58,4 +60,16 @@ SplitterIMS::SplitterIMS()
 }
 
 SplitterIMS::~SplitterIMS() {}
+
+void SplitterIMS::SetupPeerConnectionSocket() {
+  boost::asio::ip::tcp::resolver resolver(io_service_);
+
+  // TODO: Remove hard coded strings and use variables instead
+  boost::asio::ip::tcp::endpoint endpoint =
+      *resolver.resolve({"127.0.0.1", "4552"});
+  acceptor_.open(endpoint.protocol());
+  acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
+  acceptor_.bind(endpoint);
+  acceptor_.listen();
+}
 }
