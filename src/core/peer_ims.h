@@ -2,45 +2,70 @@
 #ifndef P2PSP_CORE_PEER_IMS_H
 #define P2PSP_CORE_PEER_IMS_H
 
+#include <vector>
+#include <string>
+#include <memory>
+
 namespace p2psp {
 
 class PeerIMS {
-  // Port used to serve the player.
+  // Default port used to serve the player.
   static const unsigned short kPlayerPort = 9999;
 
-  // Address of the splitter.
+  // Default address of the splitter.
   constexpr static const char kSplitterAddr[] = "127.0.0.1";
 
-  // Port of the splitter.
+  // Default port of the splitter.
   static const unsigned short kSplitterPort = 4552;
 
-  // TCP->UDP port used to communicate.
+  // Default TCP->UDP port used to communicate.
   static const unsigned short kPort = 0;
 
-  // Use localhost instead the IP of the addapter
+  // Default use localhost instead the IP of the addapter
   static const bool kUseLocalhost = false;
 
-  // ?
+  // Default ?
   static const int kBufferStatus = 0;
 
+  // Default
   static const bool kShowBuffer = false;
+
+  // Port used to serve the player.
+  unsigned short player_port;
+
+  // Address of the splitter.
+  std::string splitter_addr;
+
+  // Port of the splitter.
+  unsigned short splitter_port;
+
+  // TCP->UDP port used to communicate.
+  unsigned short port;
+
+  // Use localhost instead the IP of the addapter
+  bool use_localhost;
+
+  // ?
+  int buffer_status;
+
+  bool show_buffer;
 
   unsigned int buffer_size_;
   unsigned int chunk_size_;
-  unsigned int chunks_;
+  std::vector<char> chunks_;
   unsigned int header_size_in_chunks_;
-  unsigned int mcast_addr_;
-  unsigned int mcast_port_;
+  std::string mcast_addr_;
+  unsigned short mcast_port_;
   unsigned int message_format_;
-  unsigned int played_chunk_;
-  unsigned int player_alive_;
-  unsigned int player_socket_;
+  std::shared_ptr<char> played_chunk_;  // Dynamic pointer
+  bool player_alive_;
+  int player_socket_;
   unsigned int received_counter_;
-  unsigned int received_flag_;
+  std::vector<bool> received_flag_;
   unsigned int recvfrom_counter_;
   unsigned int splitter_;
-  unsigned int splitter_socket_;
-  unsigned int team_socket_;
+  int splitter_socket_;
+  int team_socket_;
 
  public:
   PeerIMS();
