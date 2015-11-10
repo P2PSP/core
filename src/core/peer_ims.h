@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <boost/asio.hpp>
 
 namespace p2psp {
 
@@ -13,7 +14,7 @@ class PeerIMS {
   static const unsigned short kPlayerPort = 9999;
 
   // Default address of the splitter.
-  constexpr static const char kSplitterAddr[] = "127.0.0.1";
+  static constexpr char kSplitterAddr[] = "127.0.0.1";
 
   // Default port of the splitter.
   static const unsigned short kSplitterPort = 4552;
@@ -59,13 +60,25 @@ class PeerIMS {
   unsigned int message_format_;
   std::shared_ptr<char> played_chunk_;  // Dynamic pointer
   bool player_alive_;
-  int player_socket_;
+
+  // Used to listen to the player
+  boost::asio::ip::tcp::socket player_socket_;
   unsigned int received_counter_;
   std::vector<bool> received_flag_;
   unsigned int recvfrom_counter_;
   unsigned int splitter_;
-  int splitter_socket_;
-  int team_socket_;
+
+  // Used to listen to the splitter
+  boost::asio::ip::tcp::socket splitter_socket_;
+
+  // Used to communicate with the rest of the team
+  boost::asio::ip::tcp::socket team_socket_;
+
+  // Service for I/O operations
+  boost::asio::io_service io_service_;
+
+  // Acceptor used to listen to incoming connections.
+  boost::asio::ip::tcp::acceptor acceptor_;
 
  public:
   PeerIMS();

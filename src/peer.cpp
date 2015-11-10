@@ -1,5 +1,6 @@
 
 // TODO: include all needed libraries
+#include "core/peer_ims.h"
 
 int main(int argc, const char * argv[]) {
   
