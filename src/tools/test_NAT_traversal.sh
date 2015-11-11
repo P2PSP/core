@@ -83,8 +83,8 @@ $nat1_config "
             # parameters: splitter_port, peer_port, player_port
 
             # Run splitter
-            ssh "$user@$splitter" python3 -u "$dir/splitter.py" --source_addr "$local_source_addr" \
-                --source_port "$local_source_port" --port "$splitter_port" >/dev/null &
+            ssh "$user@$splitter" python3 -u "$dir/splitter.py" --NTS --source_addr "$local_source_addr" \
+                --source_port "$local_source_port" --channel "$source_filename" --port "$splitter_port" >/dev/null &
 
             # Run monitor on same host as splitter
             peer_cmd="python3 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
@@ -122,8 +122,8 @@ $nat1_config "
         for sequential_run in $(seq $sequential_runs); do
             date
             # Run stream source
-            cvlc --sout "#duplicate{dst=standard{mux=ogg,dst=:$local_source_port,access=http}}" \
-                "$source_filename" 2>/dev/null &
+            cvlc --sout "#duplicate{dst=standard{mux=ogg,dst=:/$source_filename,access=http}}" \
+                "$source_filename" --http-port "$local_source_port" 2>/dev/null &
             sleep 1
             player_port=$((splitter_port+(parallel_runs*testruns)))
             for parallel_run in $(seq $parallel_runs); do
