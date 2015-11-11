@@ -60,6 +60,9 @@ class SplitterIMS {
   // Used to talk to the source
   boost::asio::ip::tcp::socket source_socket_;
 
+  // The video header
+  boost::asio::streambuf header_;
+
   // Some other useful definitions.
   std::tuple<std::string, int> source_;
   std::string GET_message_;
@@ -86,8 +89,8 @@ class SplitterIMS {
   void RequestTheVideoFromTheSource();
   void ConfigureSockets();
   void LoadTheVideoHeader();
-  void ReceiveNextChunk();  // TODO: Return chunk
-  void ReceiveChunk();      // TODO: Return chunk
+  size_t ReceiveNextChunk(boost::asio::streambuf &chunk);
+  void ReceiveChunk();  // TODO: Return chunk
   void SendChunk(std::string message, std::string destination);
   void ReceiveTheHeader();
 
