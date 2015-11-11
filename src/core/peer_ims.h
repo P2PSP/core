@@ -58,7 +58,7 @@ class PeerIMS {
   unsigned int header_size_in_chunks_;
   std::string mcast_addr_;
   unsigned short mcast_port_;
-  unsigned int message_format_;
+
   std::shared_ptr<char> played_chunk_;  // Dynamic pointer
   bool player_alive_;
 

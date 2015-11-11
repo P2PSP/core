@@ -11,7 +11,7 @@ int main(int argc, const char* argv[]) {
   peer.ConnectToTheSplitter();
   peer.ReceiveTheMcasteEndpoint();
   peer.ReceiveTheHeaderSize();
-  // TODO: peer.ReceiveTheChunkSize();
+  peer.ReceiveTheChunkSize();
   // TODO: peer.ReceiveTheHeader();
   // TODO: peer.ReceiveTheBufferSize();*/
 

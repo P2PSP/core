@@ -24,10 +24,14 @@ PeerIMS::PeerIMS()
   buffer_size_ = 0;
   chunk_size_ = 0;
   chunks_ = std::vector<char>();
+
+  // Initialized in PeerIMS::ReceiveTheHeaderSize()
   header_size_in_chunks_ = 0;
+
+  // Initialized in PeerIMS::ReceiveTheMcasteEndpoint()
   mcast_addr_ = "0.0.0.0";
   mcast_port_ = 0;
-  message_format_ = 0;
+
   played_chunk_ = 0;
   player_alive_ = false;
 
@@ -137,12 +141,25 @@ void PeerIMS::ReceiveTheHeaderSize() {
   boost::array<char, 2> buffer;
   boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
 
-  // Reverse header endianness
+  // Reverse header size endianness
   char* raw_data = buffer.c_array();
   std::reverse(raw_data, raw_data + buffer.size());
 
   header_size_in_chunks_ = *(short*)(raw_data);
 
   // TODO: Log.D("header_size (in chunks) =", header_size_in_chunks_)
+}
+
+void PeerIMS::ReceiveTheChunkSize() {
+  boost::array<char, 2> buffer;
+  boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
+
+  // Reverse chunk size endianness
+  char* raw_data = buffer.c_array();
+  std::reverse(raw_data, raw_data + buffer.size());
+
+  chunk_size_ = *(short*)(raw_data);
+
+  // TODO: Log.D("chunk_size (bytes) =", chunk_size_)
 }
 }
