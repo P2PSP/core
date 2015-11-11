@@ -10,8 +10,8 @@ int main(int argc, const char* argv[]) {
   p2psp::PeerIMS peer;
 
   peer.WaitForThePlayer();
-
   peer.ConnectToTheSplitter();
+  peer.ReceiveTheMcasteEndpoint();
 
   // TODO: Decide type of peer to work with
 

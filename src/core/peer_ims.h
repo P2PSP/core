@@ -6,6 +6,7 @@
 #include <string>
 #include <tuple>
 #include <boost/asio.hpp>
+#include <boost/array.hpp>
 
 namespace p2psp {
 

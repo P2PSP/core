@@ -87,11 +87,13 @@ void PeerIMS::ConnectToTheSplitter() {
     // TODO: Log.D("I'm using port", port_)
     tcp_endpoint = boost::asio::ip::tcp::endpoint(
         boost::asio::ip::address::from_string(my_ip), port_);
+    splitter_socket_.set_option(
+        boost::asio::ip::udp::socket::reuse_address(true));
     splitter_socket_.bind(tcp_endpoint);
   } else {
     tcp_endpoint = boost::asio::ip::tcp::endpoint(
         boost::asio::ip::address::from_string(my_ip), 0);
-    splitter_socket_.bind(tcp_endpoint);
+    // splitter_socket_.bind(tcp_endpoint);
   }
 
   try {
@@ -108,5 +110,26 @@ void PeerIMS::ConnectToTheSplitter() {
   }
 
   // TODO: Log.D("Connected to the splitter at", splitter_tcp_endpoint)
+}
+
+void PeerIMS::DisconnectFromTheSplitter() { splitter_socket_.close(); }
+
+void PeerIMS::ReceiveTheMcasteEndpoint() {
+  boost::array<char, 6> buffer;
+  boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
+
+  // Reverse ip/port endianness
+  char* raw_message = buffer.c_array();
+  std::reverse(raw_message, raw_message + 4);
+  std::reverse(raw_message + 4, raw_message + 6);
+
+  // New IPv4 address
+  boost::asio::ip::address_v4 ip(*(unsigned int*)raw_message);
+  unsigned short port = *(short*)(raw_message + 4);
+
+  mcast_addr_ = ip.to_string();
+  mcast_port_ = port;
+
+  // TODO: Log.D("mcast_endpoint =", mcast_addr_ + mcast_port_)
 }
 }
