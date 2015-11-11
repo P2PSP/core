@@ -91,13 +91,16 @@ void SplitterIMS::ConfigureSockets() {
 void SplitterIMS::SetupTeamSocket() {}
 
 void SplitterIMS::RequestTheVideoFromTheSource() {
+  boost::system::error_code ec;
   boost::asio::ip::tcp::endpoint endpoint(
       boost::asio::ip::address::from_string(kSourceAddr), kSourcePort);
 
-  try {
-    source_socket_.connect(endpoint);
-  } catch (boost::system::error_code e) {
+  source_socket_.connect(endpoint, ec);
+
+  if (ec) {
     // TODO: print(e)
+    std::cout << "Error: " << ec.message() << std::endl;
+
     // TODO: print(sockname, "\b: unable to connect to the source ", source)
     source_socket_.close();
     exit(-1);
