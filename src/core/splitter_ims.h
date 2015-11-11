@@ -56,7 +56,7 @@ class SplitterIMS {
   int team_socket_;  // TODO: Socket descriptor?
 
   // Used to talk to the source
-  int source_socket_;  // TODO: Socket descriptor?
+  boost::asio::ip::tcp::socket source_socket_;
 
   // Some other useful definitions.
   std::tuple<std::string, int> source_;
