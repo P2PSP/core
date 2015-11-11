@@ -109,4 +109,22 @@ void SplitterIMS::RequestTheVideoFromTheSource() {
 
   // TODO: print(sockname, "IMS: GET_message =", GET_message_)
 }
+
+void SplitterIMS::ReceiveNextChunk() {
+  boost::system::error_code ec;
+  boost::asio::streambuf chunk;
+
+  size_t bytes_transferred = boost::asio::read(
+      source_socket_, chunk, boost::asio::transfer_exactly(kChunkSize), ec);
+
+  if (ec) {
+    // TODO: Use a print class to show errors
+    std::cout << "Error: " << ec.message() << std::endl;
+  }
+
+  // Remove data that was read.
+  chunk.consume(bytes_transferred);
+
+  // TODO: Return chunk, decide type (streambuf, vector, string...)
+}
 }
