@@ -25,12 +25,12 @@ SplitterIMS::SplitterIMS()
       kTTL(1),
       io_service_(),
       peer_connection_socket_(io_service_),
+      source_socket_(io_service_),
       acceptor_(io_service_) {
   alive_ = true;
   chunk_number_ = 0;
 
   team_socket_ = 0;
-  source_socket_ = 0;
 
   // Auxiliar stringstream
   std::stringstream ss;
@@ -89,4 +89,24 @@ void SplitterIMS::ConfigureSockets() {
 }
 
 void SplitterIMS::SetupTeamSocket() {}
+
+void SplitterIMS::RequestTheVideoFromTheSource() {
+  boost::asio::ip::tcp::endpoint endpoint(
+      boost::asio::ip::address::from_string(kSourceAddr), kSourcePort);
+
+  try {
+    source_socket_.connect(endpoint);
+  } catch (boost::system::error_code e) {
+    // TODO: print(e)
+    // TODO: print(sockname, "\b: unable to connect to the source ", source)
+    source_socket_.close();
+    exit(-1);
+  }
+
+  // TODO: print(sockname, "connected to", source)
+
+  source_socket_.send(boost::asio::buffer(GET_message_));
+
+  // TODO: print(sockname, "IMS: GET_message =", GET_message_)
+}
 }
