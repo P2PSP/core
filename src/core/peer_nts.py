@@ -27,7 +27,6 @@ from core.color import Color
 from core.common import Common
 from core._print_ import _print_
 from core.peer_dbs import Peer_DBS
-from core.symsp_peer import Symsp_Peer
 from core.symsp_socket import symsp_socket
 
 # }}}
@@ -272,13 +271,7 @@ class Peer_NTS(Peer_DBS):
                 # Recreate the socket
                 # Similar to Peer_DBS.listen_to_the_team, binds to a random port
                 self.team_socket.close()
-                if Symsp_Peer.PORT_STEP:
-                    self.team_socket = symsp_socket(Symsp_Peer.PORT_STEP,
-                                                    socket.AF_INET,
-                                                    socket.SOCK_DGRAM)
-                else:
-                    self.team_socket = socket.socket(socket.AF_INET,
-                                                     socket.SOCK_DGRAM)
+                self.create_team_socket()
                 try:
                     self.team_socket.setsockopt(socket.SOL_SOCKET,
                                                 socket.SO_REUSEADDR, 1)
