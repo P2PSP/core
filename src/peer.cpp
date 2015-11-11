@@ -12,7 +12,7 @@ int main(int argc, const char* argv[]) {
   peer.ReceiveTheMcasteEndpoint();
   peer.ReceiveTheHeaderSize();
   peer.ReceiveTheChunkSize();
-  // TODO: peer.ReceiveTheHeader();
+  peer.ReceiveTheHeader();
   // TODO: peer.ReceiveTheBufferSize();*/
 
   // TODO: Decide type of peer to work with

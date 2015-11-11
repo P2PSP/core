@@ -22,6 +22,8 @@ PeerIMS::PeerIMS()
   show_buffer_ = kShowBuffer;
 
   buffer_size_ = 0;
+
+  // Initialized in PeerIMS::ReceiveTheChunkSize()
   chunk_size_ = 0;
   chunks_ = std::vector<char>();
 
@@ -161,5 +163,31 @@ void PeerIMS::ReceiveTheChunkSize() {
   chunk_size_ = *(short*)(raw_data);
 
   // TODO: Log.D("chunk_size (bytes) =", chunk_size_)
+}
+
+void PeerIMS::ReceiveTheHeader() {
+  int header_size_in_bytes = header_size_in_chunks_ * chunk_size_;
+  std::vector<char> header(header_size_in_bytes);
+
+  boost::system::error_code ec;
+  boost::asio::streambuf chunk;
+
+  boost::asio::read(splitter_socket_, chunk,
+                    boost::asio::transfer_exactly(header_size_in_bytes), ec);
+  if (ec) {
+    // TODO: Use a print class to show errors
+    std::cout << "Error: " << ec.message() << std::endl;
+  }
+
+  try {
+    boost::asio::write(player_socket_, chunk);
+  } catch (std::exception e) {
+    // TODO: print(e)
+    // TODO: print("error sending data to the player")
+    // TODO: print("len(data) =", len(data))
+    // FIX: boost::this_thread::sleep(boost::posix_time::seconds(1));
+  }
+
+  // TODO: print("Received", header_size_in_bytes, "bytes of header")
 }
 }
