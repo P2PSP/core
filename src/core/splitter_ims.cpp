@@ -63,11 +63,9 @@ SplitterIMS::SplitterIMS()
 SplitterIMS::~SplitterIMS() {}
 
 void SplitterIMS::SetupPeerConnectionSocket() {
-  boost::asio::ip::tcp::resolver resolver(io_service_);
-
   // TODO: Remove hard coded strings and use variables instead
-  boost::asio::ip::tcp::endpoint endpoint =
-      *resolver.resolve({"127.0.0.1", "4552"});
+  boost::asio::ip::tcp::endpoint endpoint(
+      boost::asio::ip::address::from_string("127.0.0.1"), kPort);
   acceptor_.open(endpoint.protocol());
   acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
   acceptor_.bind(endpoint);
