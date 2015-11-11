@@ -63,11 +63,9 @@ SplitterIMS::SplitterIMS()
 SplitterIMS::~SplitterIMS() {}
 
 void SplitterIMS::SetupPeerConnectionSocket() {
-  boost::asio::ip::tcp::resolver resolver(io_service_);
-
   // TODO: Remove hard coded strings and use variables instead
-  boost::asio::ip::tcp::endpoint endpoint =
-      *resolver.resolve({"127.0.0.1", "4552"});
+  boost::asio::ip::tcp::endpoint endpoint(
+      boost::asio::ip::address::from_string("127.0.0.1"), kPort);
   acceptor_.open(endpoint.protocol());
   acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
   acceptor_.bind(endpoint);
@@ -91,13 +89,16 @@ void SplitterIMS::ConfigureSockets() {
 void SplitterIMS::SetupTeamSocket() {}
 
 void SplitterIMS::RequestTheVideoFromTheSource() {
+  boost::system::error_code ec;
   boost::asio::ip::tcp::endpoint endpoint(
       boost::asio::ip::address::from_string(kSourceAddr), kSourcePort);
 
-  try {
-    source_socket_.connect(endpoint);
-  } catch (boost::system::error_code e) {
+  source_socket_.connect(endpoint, ec);
+
+  if (ec) {
     // TODO: print(e)
+    std::cout << "Error: " << ec.message() << std::endl;
+
     // TODO: print(sockname, "\b: unable to connect to the source ", source)
     source_socket_.close();
     exit(-1);
@@ -108,5 +109,23 @@ void SplitterIMS::RequestTheVideoFromTheSource() {
   source_socket_.send(boost::asio::buffer(GET_message_));
 
   // TODO: print(sockname, "IMS: GET_message =", GET_message_)
+}
+
+void SplitterIMS::ReceiveNextChunk() {
+  boost::system::error_code ec;
+  boost::asio::streambuf chunk;
+
+  size_t bytes_transferred = boost::asio::read(
+      source_socket_, chunk, boost::asio::transfer_exactly(kChunkSize), ec);
+
+  if (ec) {
+    // TODO: Use a print class to show errors
+    std::cout << "Error: " << ec.message() << std::endl;
+  }
+
+  // Remove data that was read.
+  chunk.consume(bytes_transferred);
+
+  // TODO: Return chunk, decide type (streambuf, vector, string...)
 }
 }
