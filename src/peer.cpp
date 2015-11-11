@@ -5,13 +5,15 @@
 int main(int argc, const char* argv[]) {
   // TODO: Argument parser. Decide how to implement it
 
-  // TODO: Connect to the splitter to receive configuration before initialize
-  // any kind of peer.
   p2psp::PeerIMS peer;
 
   peer.WaitForThePlayer();
   peer.ConnectToTheSplitter();
   peer.ReceiveTheMcasteEndpoint();
+  peer.ReceiveTheHeaderSize();
+  // TODO: peer.ReceiveTheChunkSize();
+  // TODO: peer.ReceiveTheHeader();
+  // TODO: peer.ReceiveTheBufferSize();*/
 
   // TODO: Decide type of peer to work with
 

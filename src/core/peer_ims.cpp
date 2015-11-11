@@ -119,17 +119,30 @@ void PeerIMS::ReceiveTheMcasteEndpoint() {
   boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
 
   // Reverse ip/port endianness
-  char* raw_message = buffer.c_array();
-  std::reverse(raw_message, raw_message + 4);
-  std::reverse(raw_message + 4, raw_message + 6);
+  char* raw_data = buffer.c_array();
+  std::reverse(raw_data, raw_data + 4);
+  std::reverse(raw_data + 4, raw_data + 6);
 
   // New IPv4 address
-  boost::asio::ip::address_v4 ip(*(unsigned int*)raw_message);
-  unsigned short port = *(short*)(raw_message + 4);
+  boost::asio::ip::address_v4 ip(*(unsigned int*)raw_data);
+  unsigned short port = *(short*)(raw_data + 4);
 
   mcast_addr_ = ip.to_string();
   mcast_port_ = port;
 
   // TODO: Log.D("mcast_endpoint =", mcast_addr_ + mcast_port_)
+}
+
+void PeerIMS::ReceiveTheHeaderSize() {
+  boost::array<char, 2> buffer;
+  boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
+
+  // Reverse header endianness
+  char* raw_data = buffer.c_array();
+  std::reverse(raw_data, raw_data + buffer.size());
+
+  header_size_in_chunks_ = *(short*)(raw_data);
+
+  // TODO: Log.D("header_size (in chunks) =", header_size_in_chunks_)
 }
 }
