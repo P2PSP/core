@@ -228,7 +228,7 @@ position in the team of the peer that does the port prediction).
     # Influence the prediction to achieve the desired number of results
     count_factor = common.MAX_PREDICTED_PORTS/float(num_combinations)
 
-    port_diffs = functools.sorted(set(reduce(list.__add__, (list(
+    port_diffs = sorted(set(functools.reduce(list.__add__, (list(
         # For each previous peer and each skip, the source port is incremented
         port_step * (peer_number + skips)
         # For each assumed port_step, "port_diff/port_step" different port skips
