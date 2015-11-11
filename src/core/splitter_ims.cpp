@@ -126,9 +126,20 @@ size_t SplitterIMS::ReceiveNextChunk(boost::asio::streambuf &chunk) {
 }
 
 void SplitterIMS::LoadTheVideoHeader() {
-  boost::asio::streambuf chunk;
   for (int i = 0; i < kHeaderSize; i++) {
     ReceiveNextChunk(header_);
   }
+}
+
+void SplitterIMS::ReceiveTheHeader() {
+  // TODO: Use the util class for printing logs
+  std::cout << "Requesting the stream header ..." << std::endl;
+
+  ConfigureSockets();
+  RequestTheVideoFromTheSource();
+  LoadTheVideoHeader();
+
+  // TODO: Use the util class for printing logs
+  std::cout << "Stream header received!" << std::endl;
 }
 }
