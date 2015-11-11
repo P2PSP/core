@@ -42,23 +42,23 @@ ssh $user@$server python3 -u $dir/peer.py --splitter_addr "$splitter" \
     --splitter_port "$splitter_port" --port "$peer_port" \
     | sed -n -e 's_.*NTS:\(.*\)_\x1b[96mMonitor2:\1\x1b[0m_p' &
 ssh $user@$pc1 python3 -u $dir/peer.py --splitter_addr "$splitter" \
-    --splitter_port "$splitter_port" --port "$peer_port" --port_step 1 & \
-    #| sed -n -e 's_.*NTS:\(.*\)_\x1b[94mPeer1:   \1\x1b[0m_p' &
-#~ ssh $user@$pc2 python3 -u $dir/peer.py --splitter_addr "$splitter" \
-    #~ --splitter_port "$splitter_port" --port "$peer_port" --port_step 1 \
-    #~ | sed -n -e 's_.*NTS:\(.*\)_\x1b[95mPeer2:   \1\x1b[0m_p' &
+    --splitter_port "$splitter_port" --port "$peer_port" --port_step 1 \
+    | sed -n -e 's_.*NTS:\(.*\)_\x1b[94mPeer1:   \1\x1b[0m_p' &
+ssh $user@$pc2 python3 -u $dir/peer.py --splitter_addr "$splitter" \
+    --splitter_port "$splitter_port" --port "$peer_port" --port_step 1 \
+    | sed -n -e 's_.*NTS:\(.*\)_\x1b[95mPeer2:   \1\x1b[0m_p' &
 sleep 2
-vlc "http://$splitter:9999" &
+cvlc "http://$splitter:9999" --vout none --aout none 2>/dev/null &
 id0=$!
 sleep 1
-vlc "http://$server:9999" &
+cvlc "http://$server:9999" --vout none --aout none 2>/dev/null &
 id1=$!
 sleep 1
-vlc "http://$pc1:9999" &
+cvlc "http://$pc1:9999" --vout none --aout none 2>/dev/null &
 id2=$!
-#~ sleep 1
-#~ cvlc "http://$pc2:9999" --vout none --aout none 2>/dev/null &
-#~ id3=$!
+sleep 1
+cvlc "http://$pc2:9999" --vout none --aout none 2>/dev/null &
+id3=$!
 sleep 20
 set +e
 kill $id0
