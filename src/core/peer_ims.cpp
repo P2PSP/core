@@ -55,15 +55,18 @@ void PeerIMS::WaitForThePlayer() {
   acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
   acceptor_.bind(endpoint);
   acceptor_.listen();
-  // TODO: Log.D("Waiting for the player at", player_socket_.local_endpoint())
+
+  LOG("Waiting for the player at (" + endpoint.address().to_string() + "," +
+      std::to_string(endpoint.port()) + ")");
   acceptor_.accept(player_socket_);
-  // TODO: Log.D("The player is", player_socket_.local_endpoint())
+
+  LOG("The player is (" +
+      player_socket_.remote_endpoint().address().to_string() + "," +
+      std::to_string(player_socket_.remote_endpoint().port()) + ")");
 }
 
 void PeerIMS::ConnectToTheSplitter() {
   std::string my_ip;
-
-  // splitter_ = {splitter_addr_, std::to_string(splitter_port_)};
 
   // TCP endpoint object to connect to splitter
   boost::asio::ip::tcp::endpoint splitter_tcp_endpoint(
@@ -74,7 +77,7 @@ void PeerIMS::ConnectToTheSplitter() {
 
   boost::asio::ip::tcp::endpoint tcp_endpoint;
 
-  // TODO: Log.D("use_localhost =", use_localhost)
+  LOG("use_localhost = " + std::string((use_localhost_ ? "True" : "False")));
   if (use_localhost_) {
     my_ip = "0.0.0.0";
   } else {
@@ -82,18 +85,20 @@ void PeerIMS::ConnectToTheSplitter() {
     try {
       s.connect(splitter_udp_endpoint);
     } catch (boost::system::system_error e) {
-      // TODO: print(e)
+      LOG(e.what());
     }
 
     my_ip = s.remote_endpoint().address().to_string();
     s.close();
   }
 
-  splitter_socket_.open(boost::asio::ip::tcp::v4());
+  splitter_socket_.open(splitter_tcp_endpoint.protocol());
 
-  // TODO: Log.D("Connecting to the splitter at", splitter_, "from", my_ip)
+  LOG("Connecting to the splitter at (" +
+      splitter_tcp_endpoint.address().to_string() + "," +
+      std::to_string(splitter_tcp_endpoint.port()) + ") from " + my_ip);
   if (port_ != 0) {
-    // TODO: Log.D("I'm using port", port_)
+    LOG("I'm using port" + std::to_string(port_));
     tcp_endpoint = boost::asio::ip::tcp::endpoint(
         boost::asio::ip::address::from_string(my_ip), port_);
     splitter_socket_.set_option(
@@ -108,17 +113,17 @@ void PeerIMS::ConnectToTheSplitter() {
   try {
     splitter_socket_.connect(splitter_tcp_endpoint);
   } catch (boost::system::system_error e) {
-    // TODO: print(e)
-
-    // TODO: if (true) {
-    // Log.D(e);
-    //} else {
-    // print(e)
-    //}
+    if (IFF_DEBUG) {
+      LOG(e.what());
+    } else {
+      LOG(e.what());
+    }
     exit(-1);
   }
 
-  // TODO: Log.D("Connected to the splitter at", splitter_tcp_endpoint)
+  LOG("Connected to the splitter at (" +
+      splitter_tcp_endpoint.address().to_string() + "," +
+      std::to_string(splitter_tcp_endpoint.port()) + ")");
 }
 
 void PeerIMS::DisconnectFromTheSplitter() { splitter_socket_.close(); }
@@ -133,7 +138,8 @@ void PeerIMS::ReceiveTheMcasteEndpoint() {
   mcast_addr_ = inet_ntoa(ip_raw);
   mcast_port_ = ntohs(*(short*)(raw_data + 4));
 
-  // TODO: Log.D("mcast_endpoint =", mcast_addr_ + mcast_port_)
+  LOG("mcast_endpoint = (" + mcast_addr_ + "," + std::to_string(mcast_port_) +
+      ")");
 }
 
 void PeerIMS::ReceiveTheHeaderSize() {
@@ -142,7 +148,7 @@ void PeerIMS::ReceiveTheHeaderSize() {
 
   header_size_in_chunks_ = ntohs(*(short*)(buffer.c_array()));
 
-  // TODO: Log.D("header_size (in chunks) =", header_size_in_chunks_)
+  LOG("header_size (in chunks) = " + std::to_string(header_size_in_chunks_));
 }
 
 void PeerIMS::ReceiveTheChunkSize() {
@@ -151,7 +157,7 @@ void PeerIMS::ReceiveTheChunkSize() {
 
   chunk_size_ = ntohs(*(short*)(buffer.c_array()));
 
-  // TODO: Log.D("chunk_size (bytes) =", chunk_size_)
+  LOG("chunk_size (bytes) = " + std::to_string(chunk_size_));
 }
 
 void PeerIMS::ReceiveTheHeader() {
@@ -164,20 +170,19 @@ void PeerIMS::ReceiveTheHeader() {
   boost::asio::read(splitter_socket_, chunk,
                     boost::asio::transfer_exactly(header_size_in_bytes), ec);
   if (ec) {
-    // TODO: Use a print class to show errors
-    std::cout << "Error: " << ec.message() << std::endl;
+    LOG("Error: " + ec.message());
   }
 
   try {
     boost::asio::write(player_socket_, chunk);
   } catch (std::exception e) {
-    // TODO: print(e)
-    // TODO: print("error sending data to the player")
-    // TODO: print("len(data) =", len(data))
+    LOG(e.what());
+    LOG("error sending data to the player");
+    LOG("len(data) =" + std::to_string(chunk.size()));
     // FIX: boost::this_thread::sleep(boost::posix_time::seconds(1));
   }
 
-  // TODO: print("Received", header_size_in_bytes, "bytes of header")
+  LOG("Received " + std::to_string(header_size_in_bytes) + "bytes of header");
 }
 
 void PeerIMS::ReceiveTheBufferSize() {
@@ -186,6 +191,6 @@ void PeerIMS::ReceiveTheBufferSize() {
 
   buffer_size_ = ntohs(*(short*)(buffer.c_array()));
 
-  // TODO: Log.D("buffer_size_ =", buffer_size_)
+  LOG("buffer_size_ = " + std::to_string(buffer_size_));
 }
 }
