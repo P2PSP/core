@@ -89,6 +89,8 @@ void PeerIMS::ConnectToTheSplitter() {
     s.close();
   }
 
+  splitter_socket_.open(boost::asio::ip::tcp::v4());
+
   // TODO: Log.D("Connecting to the splitter at", splitter_, "from", my_ip)
   if (port_ != 0) {
     // TODO: Log.D("I'm using port", port_)
@@ -96,12 +98,12 @@ void PeerIMS::ConnectToTheSplitter() {
         boost::asio::ip::address::from_string(my_ip), port_);
     splitter_socket_.set_option(
         boost::asio::ip::udp::socket::reuse_address(true));
-    splitter_socket_.bind(tcp_endpoint);
   } else {
     tcp_endpoint = boost::asio::ip::tcp::endpoint(
         boost::asio::ip::address::from_string(my_ip), 0);
-    // splitter_socket_.bind(tcp_endpoint);
   }
+
+  splitter_socket_.bind(tcp_endpoint);
 
   try {
     splitter_socket_.connect(splitter_tcp_endpoint);
