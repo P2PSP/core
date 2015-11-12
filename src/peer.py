@@ -135,12 +135,13 @@ class Peer():
 
         if args.show_buffer:
             Peer_IMS.SHOW_BUFFER = True
-        
+
         # A multicast address is always received, even for DBS peers.
         if peer.mcast_addr == "0.0.0.0":
             # {{{ IP unicast mode.
 
             peer = Peer_DBS(peer)
+            _print_("Peer DBS enabled")
             peer.receive_my_endpoint()
             peer.receive_magic_flags()
             _print_("Magic flags =", bin(peer.magic_flags))
@@ -161,23 +162,24 @@ class Peer():
                 # The peer is a monitor. Now it's time to know the sets of rules that control this team.
 
                 if (peer.magic_flags & Common.LRS):
+                    peer = Peer_LRS(peer)
+                    _print_("Peer LRS enabled")
                     peer = Monitor_LRS(peer)
                     _print_("Monitor LRS enabled")
                 if (peer.magic_flags & Common.NTS):
+                    peer = Peer_NTS(peer)
+                    _print_("Peer NTS enabled")
                     peer = Monitor_NTS(peer)
                     _print_("Monitor NTS enabled")
             else:
-                peer = Peer_DBS(peer)
-                _print_("Peer DBS enabled")
-
                 # The peer is a normal peer. Let's know the sets of rules that control this team.
-                
+
                 if (peer.magic_flags & Common.NTS):
                     peer = Peer_NTS(peer)
                     _print_("Peer NTS enabled")
 
                 if args.enable_chunk_loss:
-                
+
                     if args.chunk_loss_period:
                         Lossy_Peer.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
                         print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
@@ -234,6 +236,7 @@ class Peer():
 
         # }}}
 
+        print("Created new peer of type %s\n" % peer.__class__.__name__)
 
         # {{{ Run!
 

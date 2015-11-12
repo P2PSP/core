@@ -55,17 +55,19 @@ class Peer_IMS(threading.Thread):
 
     # }}}
 
-    def __new__(typ, *args, **kwargs):
+    def __new__(new_type, *args, **kwargs):
         # {{{
 
         if len(args) == 1 and isinstance(args[0], Peer_IMS):
             # Parameter is a peer instance; extending its class instead of nesting:
             instance = args[0]
-            instance.__class__ = typ
+            old_type = instance.__class__
+            new_class_name = old_type.__name__ + '.' + new_type.__name__
+            instance.__class__ = type(new_class_name, (old_type,), dict(new_type.__dict__))
             return instance
         else:
             # Use default object creation
-            return object.__new__(typ, *args, **kwargs)
+            return object.__new__(new_type, *args, **kwargs)
 
         # }}}
 
@@ -77,7 +79,7 @@ class Peer_IMS(threading.Thread):
         _p_("Splitter =", self.SPLITTER_ADDR)
         _p_("(Peer) port =", self.PORT)
         _p_("Initialized")
-        
+
         # }}}
 
     def wait_for_the_player(self):
@@ -218,10 +220,18 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
+    def create_team_socket(self):
+        # {{{ Create "team_socket" (UDP) for using the multicast channel
+
+        # This method can be overridden to use special socket types
+        self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+
+        # }}}
+
     def listen_to_the_team(self):
         # {{{ Create "team_socket" (UDP) for using the multicast channel
 
-        self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.create_team_socket()
         try:
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         except Exception as e:
@@ -277,12 +287,12 @@ class Peer_IMS(threading.Thread):
 
     # This method is overridden by the inheriting classes DBS and NTS
     def process_message(self, message, sender):
-        # {{{ 
+        # {{{
 
         # Ojo, an attacker could send a packet smaller and pollute the
         # buffer, althought this is difficult in IP multicst. This
         # method should be inheritaged to solve this issue.
-        
+
         chunk_number, chunk = self.unpack_message(message)
 
         self.chunks[chunk_number % self.buffer_size] = chunk

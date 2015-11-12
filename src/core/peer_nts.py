@@ -14,6 +14,7 @@ peer_nts module
 
 # {{{
 
+import functools
 import math
 import threading
 import time
@@ -26,7 +27,6 @@ from core.color import Color
 from core.common import Common
 from core._print_ import _print_
 from core.peer_dbs import Peer_DBS
-from core.symsp_peer import Symsp_Peer
 from core.symsp_socket import symsp_socket
 
 # }}}
@@ -271,13 +271,7 @@ class Peer_NTS(Peer_DBS):
                 # Recreate the socket
                 # Similar to Peer_DBS.listen_to_the_team, binds to a random port
                 self.team_socket.close()
-                if Symsp_Peer.PORT_STEP:
-                    self.team_socket = symsp_socket(Symsp_Peer.PORT_STEP,
-                                                    socket.AF_INET,
-                                                    socket.SOCK_DGRAM)
-                else:
-                    self.team_socket = socket.socket(socket.AF_INET,
-                                                     socket.SOCK_DGRAM)
+                self.create_team_socket()
                 try:
                     self.team_socket.setsockopt(socket.SOL_SOCKET,
                                                 socket.SO_REUSEADDR, 1)
@@ -313,7 +307,7 @@ class Peer_NTS(Peer_DBS):
     def get_factors(self, n):
         # {{{ This function is from http://stackoverflow.com/a/6800214
 
-        return sorted(set(reduce(list.__add__,
+        return sorted(set(functools.reduce(list.__add__,
                                  ([i, n//i] for i in \
                                   range(1, int(n**0.5) + 1) if n % i == 0))))
 
@@ -327,7 +321,7 @@ class Peer_NTS(Peer_DBS):
         # Example: the number is 10, the factors are 1, 2, 5, 10.
         # Products <=10: 1*1, ..., 1*10, 2*1, ..., 2*5, 5*1, 5*2, 10*1.
         # So for each factor there are "n/factor" products:
-        return reduce(lambda a, b: a + b, factors)
+        return functools.reduce(lambda a, b: a + b, factors)
 
         # }}}
 
@@ -344,7 +338,7 @@ class Peer_NTS(Peer_DBS):
         num_combinations = self.count_combinations(factors)
         count_factor = Common.MAX_PREDICTED_PORTS/float(num_combinations)
 
-        port_diffs = sorted(set(reduce(list.__add__, (list(
+        port_diffs = functools.sorted(set(reduce(list.__add__, (list(
             # For each previous peer and skip, the source port is incremented
             port_step * (peer_number + skips)
             # For each assumed port_step, "port_diff/port_step" different skips
