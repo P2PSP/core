@@ -13,7 +13,7 @@ int main(int argc, const char* argv[]) {
   peer.ReceiveTheHeaderSize();
   peer.ReceiveTheChunkSize();
   peer.ReceiveTheHeader();
-  // TODO: peer.ReceiveTheBufferSize();*/
+  peer.ReceiveTheBufferSize();
 
   // TODO: Decide type of peer to work with
 

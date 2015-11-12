@@ -21,6 +21,7 @@ PeerIMS::PeerIMS()
   buffer_status_ = kBufferStatus;
   show_buffer_ = kShowBuffer;
 
+  // Initialized in PeerIMS::ReceiveTheBufferSize()
   buffer_size_ = 0;
 
   // Initialized in PeerIMS::ReceiveTheChunkSize()
@@ -189,5 +190,18 @@ void PeerIMS::ReceiveTheHeader() {
   }
 
   // TODO: print("Received", header_size_in_bytes, "bytes of header")
+}
+
+void PeerIMS::ReceiveTheBufferSize() {
+  boost::array<char, 2> buffer;
+  boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
+
+  // Reverse buffer endianness
+  char* raw_data = buffer.c_array();
+  std::reverse(raw_data, raw_data + buffer.size());
+
+  buffer_size_ = *(short*)(raw_data);
+
+  // TODO: Log.D("buffer_size_ =", buffer_size_)
 }
 }
