@@ -125,6 +125,12 @@ class PeerIMS {
   void Play();
   void KeepTheBufferFull();
   void Run();
+
+  /**
+   *  Getter/setters
+   */
+  std::string GetMcastAddr();
+  void SetShowBuffer(bool);
 };
 }
 

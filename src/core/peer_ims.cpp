@@ -193,4 +193,8 @@ void PeerIMS::ReceiveTheBufferSize() {
 
   LOG("buffer_size_ = " + std::to_string(buffer_size_));
 }
+
+std::string PeerIMS::GetMcastAddr() { return mcast_addr_; }
+
+void PeerIMS::SetShowBuffer(bool show_buffer) { show_buffer_ = show_buffer; }
 }
