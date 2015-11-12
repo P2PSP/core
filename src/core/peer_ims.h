@@ -10,9 +10,15 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/thread.hpp>
 #include <arpa/inet.h>
+#include <ctime>
 #include "../util/trace.h"
 
 namespace p2psp {
+
+struct Chunk {
+  std::vector<char> data;
+  bool received;
+};
 
 class PeerIMS {
   // Default port used to serve the player.
@@ -58,12 +64,12 @@ class PeerIMS {
 
   unsigned int buffer_size_;
   unsigned int chunk_size_;
-  std::vector<char> chunks_;
+  std::vector<Chunk> chunks_;
   unsigned int header_size_in_chunks_;
   boost::asio::ip::address mcast_addr_;
   unsigned short mcast_port_;
 
-  std::shared_ptr<char> played_chunk_;  // Dynamic pointer
+  int played_chunk_;
   bool player_alive_;
 
   unsigned int received_counter_;
@@ -112,7 +118,7 @@ class PeerIMS {
   void UnpackMessage();  // TODO: (message)
   void ReceiveTheNextMessage();
   void ProcessMessage();  // TODO: (message, sender)
-  void ProcessNextMessage();
+  int ProcessNextMessage();
 
   /**
    *  Buffering

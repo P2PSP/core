@@ -26,7 +26,7 @@ PeerIMS::PeerIMS()
 
   // Initialized in PeerIMS::ReceiveTheChunkSize()
   chunk_size_ = 0;
-  chunks_ = std::vector<char>();
+  chunks_ = std::vector<Chunk>();
 
   // Initialized in PeerIMS::ReceiveTheHeaderSize()
   header_size_in_chunks_ = 0;
@@ -206,6 +206,87 @@ void PeerIMS::ListenToTheTeam() {
   // TODO: handle timeout
   LOG("Listening to the mcast_channel = (" + mcast_addr_.to_string() + "," +
       std::to_string(mcast_port_) + ")");
+}
+
+void PeerIMS::BufferData() {
+  // The peer dies if the player disconnects.
+  player_alive_ = true;
+
+  // The last chunk sent to the player.
+  played_chunk_ = 0;
+
+  // Counts the number of executions of the recvfrom() function.
+  recvfrom_counter_ = 0;
+
+  // The buffer of chunks is a structure that is used to delay the playback of
+  // the chunks in order to accommodate the network jittter. Two components are
+  // needed: (1) the "chunks" buffer that stores the received chunks and (2) the
+  // "received" buffer that stores if a chunk has been received or not. Notice
+  // that each peer can use a different buffer_size: the smaller the buffer
+  // size, the lower start-up time, the higher chunk-loss ratio. However, for
+  // the sake of simpliticy, all peers will use the same buffer size.
+
+  chunks_.resize(buffer_size_);
+  received_counter_ = 0;
+
+  // Wall time (execution time plus waiting time).
+  clock_t start_time = clock();
+
+  // We will send a chunk to the player when a new chunk is received. Besides,
+  // those slots in the buffer that have not been filled by a new chunk will not
+  // be send to the player. Moreover, chunks can be delayed an unknown time.
+  // This means that (due to the jitter) after chunk X, the chunk X+Y can be
+  // received (instead of the chunk X+1). Alike, the chunk X-Y could follow the
+  // chunk X. Because we implement the buffer as a circular queue, in order to
+  // minimize the probability of a delayed chunk overwrites a new chunk that is
+  // waiting for traveling the player, we wil fill only the half of the circular
+  // queue.
+
+  LOG("(" + team_socket_.local_endpoint().address().to_string() + "," +
+      std::to_string(team_socket_.local_endpoint().port()) + ")" +
+      "\b: buffering = 000.00%");
+  TraceSystem::logStream().flush();
+
+  // First chunk to be sent to the player.  The process_next_message() procedure
+  // returns the chunk number if a packet has been received or -2 if a time-out
+  // exception has been arised.
+
+  int chunk_number = ProcessNextMessage();
+  while (chunk_number < 0) {
+    chunk_number = ProcessNextMessage();
+    LOG(std::to_string(chunk_number));
+  }
+  played_chunk_ = chunk_number;
+  LOG("First chunk to play " + std::to_string(played_chunk_));
+  LOG("(" + team_socket_.local_endpoint().address().to_string() + "," +
+      std::to_string(team_socket_.local_endpoint().port()) + ")" +
+      "\b: buffering (\b" + std::to_string(100.0 / buffer_size_));
+  // TODO: Justify: .rjust(4)
+
+  // Now, fill up to the half of the buffer.
+
+  float BUFFER_STATUS = 0.0f;
+  for (int x = 0; x < buffer_size_ / 2; x++) {
+    // TODO Format string
+    // LOG("{:.2%}\r".format((1.0*x)/(buffer_size_/2)), end='');
+    BUFFER_STATUS = (100 * x) / (buffer_size_ / 2.0f) + 1;
+
+    // if(!Common.CONSOLE_MODE){
+    //    GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
+    // }else{
+    //    pass
+    //}
+    // LOG("!", end='')
+    TraceSystem::logStream().flush();
+
+    while (ProcessNextMessage() < 0)
+      ;
+  }
+
+  LOG("");
+  LOG("latency = " + std::to_string(clock() - start_time) + " seconds");
+  LOG("buffering done.");
+  TraceSystem::logStream().flush();
 }
 
 std::string PeerIMS::GetMcastAddr() { return mcast_addr_.to_string(); }
