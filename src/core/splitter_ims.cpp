@@ -167,7 +167,26 @@ void SplitterIMS::SendChunk(boost::asio::streambuf &message,
   sendto_counter_++;
 }
 
-void SplitterIMS::Run() { std::cout << "Run" << std::endl; }
+void SplitterIMS::SendConfiguration(boost::asio::ip::tcp::socket &sock) {}
+
+void SplitterIMS::HandleAPeerArrival(
+    boost::asio::ip::tcp::socket &serve_socket) {
+  std::cout << serve_socket.local_endpoint().address().to_string()
+            << "\b: IMS: accepted connection from peer "
+            << serve_socket.remote_endpoint().address().to_string()
+            << std::endl;
+
+  SendConfiguration(serve_socket);
+  serve_socket.close();
+}
+
+void SplitterIMS::Run() {
+  std::cout << "Run" << std::endl;
+
+  boost::asio::ip::tcp::socket serve_socket(io_service_);
+  acceptor_.accept(serve_socket);
+  HandleAPeerArrival(serve_socket);
+}
 
 void SplitterIMS::Start() {
   std::cout << "Start" << std::endl;

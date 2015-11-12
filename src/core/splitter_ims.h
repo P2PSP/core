@@ -85,8 +85,8 @@ class SplitterIMS {
   void SendTheChunkSize(int peer_serve_socket);
   void SendTheMcastChannel(int peer_serve_socket);
   void SendTheHeaderSize(int peer_serve_socket);
-  void SendConfiguration(int sock);
-  void HandleAPeerArrival(std::tuple<int, std::string> connection);
+  void SendConfiguration(boost::asio::ip::tcp::socket &sock);
+  void HandleAPeerArrival(boost::asio::ip::tcp::socket &serve_socket);
   void HandleArrivals();
   void SetupPeerConnectionSocket();
   void SetupTeamSocket();
