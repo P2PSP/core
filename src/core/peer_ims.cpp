@@ -88,7 +88,7 @@ void PeerIMS::ConnectToTheSplitter() {
       LOG(e.what());
     }
 
-    my_ip = s.remote_endpoint().address().to_string();
+    my_ip = s.local_endpoint().address().to_string();
     s.close();
   }
 
