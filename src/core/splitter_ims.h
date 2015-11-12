@@ -21,6 +21,7 @@
 #include <boost/array.hpp>
 #include <boost/thread/thread.hpp>
 #include <iostream>
+#include "../util/trace.h"
 
 namespace p2psp {
 
