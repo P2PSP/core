@@ -125,17 +125,11 @@ void PeerIMS::ReceiveTheMcasteEndpoint() {
   boost::array<char, 6> buffer;
   boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
 
-  // Reverse ip/port endianness
   char* raw_data = buffer.c_array();
-  std::reverse(raw_data, raw_data + 4);
-  std::reverse(raw_data + 4, raw_data + 6);
 
-  // New IPv4 address
-  boost::asio::ip::address_v4 ip(*(unsigned int*)raw_data);
-  unsigned short port = *(short*)(raw_data + 4);
-
-  mcast_addr_ = ip.to_string();
-  mcast_port_ = port;
+  in_addr ip_raw = *(in_addr*)(raw_data);
+  mcast_addr_ = inet_ntoa(ip_raw);
+  mcast_port_ = ntohs(*(short*)(raw_data + 4));
 
   // TODO: Log.D("mcast_endpoint =", mcast_addr_ + mcast_port_)
 }
@@ -144,11 +138,7 @@ void PeerIMS::ReceiveTheHeaderSize() {
   boost::array<char, 2> buffer;
   boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
 
-  // Reverse header size endianness
-  char* raw_data = buffer.c_array();
-  std::reverse(raw_data, raw_data + buffer.size());
-
-  header_size_in_chunks_ = *(short*)(raw_data);
+  header_size_in_chunks_ = ntohs(*(short*)(buffer.c_array()));
 
   // TODO: Log.D("header_size (in chunks) =", header_size_in_chunks_)
 }
@@ -157,11 +147,7 @@ void PeerIMS::ReceiveTheChunkSize() {
   boost::array<char, 2> buffer;
   boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
 
-  // Reverse chunk size endianness
-  char* raw_data = buffer.c_array();
-  std::reverse(raw_data, raw_data + buffer.size());
-
-  chunk_size_ = *(short*)(raw_data);
+  chunk_size_ = ntohs(*(short*)(buffer.c_array()));
 
   // TODO: Log.D("chunk_size (bytes) =", chunk_size_)
 }
@@ -196,11 +182,7 @@ void PeerIMS::ReceiveTheBufferSize() {
   boost::array<char, 2> buffer;
   boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
 
-  // Reverse buffer endianness
-  char* raw_data = buffer.c_array();
-  std::reverse(raw_data, raw_data + buffer.size());
-
-  buffer_size_ = *(short*)(raw_data);
+  buffer_size_ = ntohs(*(short*)(buffer.c_array()));
 
   // TODO: Log.D("buffer_size_ =", buffer_size_)
 }
