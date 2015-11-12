@@ -19,7 +19,9 @@
 #include <sstream>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
+#include <boost/thread/thread.hpp>
 #include <iostream>
+#include "../util/trace.h"
 
 namespace p2psp {
 
@@ -55,7 +57,7 @@ class SplitterIMS {
   boost::asio::ip::tcp::acceptor acceptor_;
 
   // Used to listen the team messages.
-  int team_socket_;  // TODO: Socket descriptor?
+  boost::asio::ip::udp::socket team_socket_;
 
   // Used to talk to the source
   boost::asio::ip::tcp::socket source_socket_;
@@ -67,11 +69,14 @@ class SplitterIMS {
   std::tuple<std::string, int> source_;
   std::string GET_message_;
   std::string chunk_number_format_;
-  std::tuple<std::string, int> mcast_channel_;
+  boost::asio::ip::udp::endpoint mcast_channel_;
 
   int recvfrom_counter_;
   int sendto_counter_;
   int header_load_counter_;
+
+  // Thread management
+  void Run();
 
  public:
   SplitterIMS();
@@ -81,8 +86,8 @@ class SplitterIMS {
   void SendTheChunkSize(int peer_serve_socket);
   void SendTheMcastChannel(int peer_serve_socket);
   void SendTheHeaderSize(int peer_serve_socket);
-  void SendConfiguration(int sock);
-  void HandleAPeerArrival(std::tuple<int, std::string> connection);
+  void SendConfiguration(boost::asio::ip::tcp::socket &sock);
+  void HandleAPeerArrival(boost::asio::ip::tcp::socket &serve_socket);
   void HandleArrivals();
   void SetupPeerConnectionSocket();
   void SetupTeamSocket();
@@ -91,10 +96,12 @@ class SplitterIMS {
   void LoadTheVideoHeader();
   size_t ReceiveNextChunk(boost::asio::streambuf &chunk);
   void ReceiveChunk();  // TODO: Return chunk
-  void SendChunk(std::string message, std::string destination);
+  void SendChunk(boost::asio::streambuf &message,
+                 boost::asio::ip::udp::endpoint destination);
   void ReceiveTheHeader();
 
-  // TODO: run method and Thread management
+  // Thread management
+  void Start();
 };
 }
 

@@ -23,14 +23,14 @@ SplitterIMS::SplitterIMS()
       kSourcePort(4551),
       kMCastAddr("224.0.0.1"),
       kTTL(1),
+      mcast_channel_(boost::asio::ip::address::from_string(kMCastAddr), kPort),
       io_service_(),
       peer_connection_socket_(io_service_),
       source_socket_(io_service_),
+      team_socket_(io_service_, mcast_channel_.protocol()),
       acceptor_(io_service_) {
   alive_ = true;
   chunk_number_ = 0;
-
-  team_socket_ = 0;
 
   // Auxiliar stringstream
   std::stringstream ss;
@@ -48,11 +48,6 @@ SplitterIMS::SplitterIMS()
 
   // Initialize chunk_number_format_
   chunk_number_format_ = "H";
-
-  // Initialize mcast_channel_
-  ss << kMCastAddr;
-  mcast_channel_ = {ss.str(), kPort};
-  ss.str("");
 
   // Initialize counters
   recvfrom_counter_ = 0;
@@ -76,17 +71,37 @@ void SplitterIMS::ConfigureSockets() {
   try {
     SetupPeerConnectionSocket();
   } catch (int e) {
-    // TODO: Print error and exit
+    LOG(e);
+    LOG(peer_connection_socket_.local_endpoint().address().to_string() +
+        "\b: unable to bind the port " + std::to_string(kPort));
+    exit(-1);
   }
 
   try {
     SetupTeamSocket();
   } catch (int e) {
-    // TODO: Print error and exit
+    LOG(e);
+    // TODO: print getsockname unable to bind to (gethostname, port)
+    exit(-1);
   }
 }
 
-void SplitterIMS::SetupTeamSocket() {}
+void SplitterIMS::SetupTeamSocket() {
+  boost::system::error_code ec;
+
+  // Implements the IPPROTO_IP/IP_MULTICAST_TTL socket option.
+  boost::asio::ip::multicast::hops ttl(4);
+  team_socket_.set_option(ttl);
+
+  boost::asio::socket_base::reuse_address reuseAddress(true);
+  team_socket_.set_option(reuseAddress, ec);
+
+  if (ec) {
+    LOG("Error: " + ec.message());
+  }
+
+  // TODO: Check if reuse_port option exists
+}
 
 void SplitterIMS::RequestTheVideoFromTheSource() {
   boost::system::error_code ec;
@@ -96,19 +111,23 @@ void SplitterIMS::RequestTheVideoFromTheSource() {
   source_socket_.connect(endpoint, ec);
 
   if (ec) {
-    // TODO: print(e)
-    std::cout << "Error: " << ec.message() << std::endl;
+    LOG("Error: " << ec.message());
+    LOG(source_socket_.local_endpoint().address().to_string() +
+        "\b: unable to connect to the source (" + kSourceAddr + ", " +
+        std::to_string(kSourcePort) + ")");
 
-    // TODO: print(sockname, "\b: unable to connect to the source ", source)
     source_socket_.close();
     exit(-1);
   }
 
-  // TODO: print(sockname, "connected to", source)
+  LOG(source_socket_.local_endpoint().address().to_string() +
+      " connected to (" + kSourceAddr + ", " + std::to_string(kSourcePort) +
+      ")");
 
   source_socket_.send(boost::asio::buffer(GET_message_));
 
-  // TODO: print(sockname, "IMS: GET_message =", GET_message_)
+  LOG(source_socket_.local_endpoint().address().to_string() +
+      "IMS: GET_message = " + GET_message_);
 }
 
 size_t SplitterIMS::ReceiveNextChunk(boost::asio::streambuf &chunk) {
@@ -118,28 +137,69 @@ size_t SplitterIMS::ReceiveNextChunk(boost::asio::streambuf &chunk) {
       source_socket_, chunk, boost::asio::transfer_exactly(kChunkSize), ec);
 
   if (ec) {
-    // TODO: Use a print class to show errors
-    std::cout << "Error: " << ec.message() << std::endl;
+    LOG("Error: " + ec.message());
   }
 
   return bytes_transferred;
 }
 
 void SplitterIMS::LoadTheVideoHeader() {
+  LOG("Loading the video header");
   for (int i = 0; i < kHeaderSize; i++) {
     ReceiveNextChunk(header_);
   }
 }
 
 void SplitterIMS::ReceiveTheHeader() {
-  // TODO: Use the util class for printing logs
-  std::cout << "Requesting the stream header ..." << std::endl;
+  LOG("Requesting the stream header ...");
 
   ConfigureSockets();
   RequestTheVideoFromTheSource();
   LoadTheVideoHeader();
 
-  // TODO: Use the util class for printing logs
-  std::cout << "Stream header received!" << std::endl;
+  LOG("Stream header received!");
+}
+
+void SplitterIMS::SendChunk(boost::asio::streambuf &message,
+                            boost::asio::ip::udp::endpoint destination) {
+  boost::system::error_code ec;
+
+  size_t bytes_transferred =
+      team_socket_.send_to(message.data(), destination, 0, ec);
+
+  // Sent data is removed from message
+  message.consume(bytes_transferred);
+
+  sendto_counter_++;
+}
+
+void SplitterIMS::SendConfiguration(boost::asio::ip::tcp::socket &sock) {}
+
+void SplitterIMS::HandleAPeerArrival(
+    boost::asio::ip::tcp::socket &serve_socket) {
+  LOG(serve_socket.local_endpoint().address().to_string() +
+      "\b: IMS: accepted connection from peer (" +
+      serve_socket.remote_endpoint().address().to_string() + ", " +
+      std::to_string(serve_socket.remote_endpoint().port()) + ")");
+
+  SendConfiguration(serve_socket);
+  serve_socket.close();
+}
+
+void SplitterIMS::Run() {
+  LOG("Run");
+
+  ReceiveTheHeader();
+
+  boost::asio::ip::tcp::socket serve_socket(io_service_);
+  acceptor_.accept(serve_socket);
+  HandleAPeerArrival(serve_socket);
+}
+
+void SplitterIMS::Start() {
+  LOG("Start");
+  boost::thread t(boost::bind(&SplitterIMS::Run, this));
+  boost::this_thread::sleep(boost::posix_time::milliseconds(20000));
+  LOG("Exiting");
 }
 }
