@@ -180,9 +180,9 @@ void SplitterIMS::SendConfiguration(boost::asio::ip::tcp::socket &sock) {}
 void SplitterIMS::HandleAPeerArrival(
     boost::asio::ip::tcp::socket &serve_socket) {
   std::cout << serve_socket.local_endpoint().address().to_string()
-            << "\b: IMS: accepted connection from peer "
-            << serve_socket.remote_endpoint().address().to_string()
-            << std::endl;
+            << "\b: IMS: accepted connection from peer ("
+            << serve_socket.remote_endpoint().address().to_string() << ", "
+            << serve_socket.remote_endpoint().port() << ")" << std::endl;
 
   SendConfiguration(serve_socket);
   serve_socket.close();
@@ -201,5 +201,7 @@ void SplitterIMS::Run() {
 void SplitterIMS::Start() {
   std::cout << "Start" << std::endl;
   boost::thread t(boost::bind(&SplitterIMS::Run, this));
+  boost::this_thread::sleep(boost::posix_time::milliseconds(20000));
+  std::cout << "Exiting" << std::endl;
 }
 }
