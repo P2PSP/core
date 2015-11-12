@@ -25,14 +25,22 @@ int main(int argc, const char* argv[]) {
   if (peer.GetMcastAddr() == "0.0.0.0") {
     // TODO: IP multicast mode
     // TODO: DBS
+
+    // TODO: Decide type of peer to work with
   } else {
     // IP multicast mode
     peer.ListenToTheTeam();
   }
 
-  // TODO: Decide type of peer to work with
+  peer.DisconnectFromTheSplitter();
+  peer.BufferData();
 
-  // TODO: Start the peer's main thread
+  /*
+
+   // TODO: Start the peer's main thread
+   peer.start()
+
+   */
 
   // TODO: Print information about the status of the peer
 
