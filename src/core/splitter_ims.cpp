@@ -166,4 +166,11 @@ void SplitterIMS::SendChunk(boost::asio::streambuf &message,
 
   sendto_counter_++;
 }
+
+void SplitterIMS::Run() { std::cout << "Run" << std::endl; }
+
+void SplitterIMS::Start() {
+  std::cout << "Start" << std::endl;
+  boost::thread t(boost::bind(&SplitterIMS::Run, this));
+}
 }

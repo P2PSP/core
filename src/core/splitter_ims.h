@@ -19,6 +19,7 @@
 #include <sstream>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
+#include <boost/thread/thread.hpp>
 #include <iostream>
 
 namespace p2psp {
@@ -73,6 +74,9 @@ class SplitterIMS {
   int sendto_counter_;
   int header_load_counter_;
 
+  // Thread management
+  void Run();
+
  public:
   SplitterIMS();
   ~SplitterIMS();
@@ -95,7 +99,8 @@ class SplitterIMS {
                  boost::asio::ip::udp::endpoint destination);
   void ReceiveTheHeader();
 
-  // TODO: run method and Thread management
+  // Thread management
+  void Start();
 };
 }
 

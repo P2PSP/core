@@ -21,6 +21,7 @@ int main(int argc, const char *argv[]) {
   // TODO: Print information about the status of the splitter
 
   p2psp::SplitterIMS splitterIMS;
+  splitterIMS.Start();
 
   return 0;
 }
