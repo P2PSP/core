@@ -111,9 +111,8 @@ void SplitterIMS::RequestTheVideoFromTheSource() {
   // TODO: print(sockname, "IMS: GET_message =", GET_message_)
 }
 
-void SplitterIMS::ReceiveNextChunk() {
+size_t SplitterIMS::ReceiveNextChunk(boost::asio::streambuf &chunk) {
   boost::system::error_code ec;
-  boost::asio::streambuf chunk;
 
   size_t bytes_transferred = boost::asio::read(
       source_socket_, chunk, boost::asio::transfer_exactly(kChunkSize), ec);
@@ -123,9 +122,24 @@ void SplitterIMS::ReceiveNextChunk() {
     std::cout << "Error: " << ec.message() << std::endl;
   }
 
-  // Remove data that was read.
-  chunk.consume(bytes_transferred);
+  return bytes_transferred;
+}
 
-  // TODO: Return chunk, decide type (streambuf, vector, string...)
+void SplitterIMS::LoadTheVideoHeader() {
+  for (int i = 0; i < kHeaderSize; i++) {
+    ReceiveNextChunk(header_);
+  }
+}
+
+void SplitterIMS::ReceiveTheHeader() {
+  // TODO: Use the util class for printing logs
+  std::cout << "Requesting the stream header ..." << std::endl;
+
+  ConfigureSockets();
+  RequestTheVideoFromTheSource();
+  LoadTheVideoHeader();
+
+  // TODO: Use the util class for printing logs
+  std::cout << "Stream header received!" << std::endl;
 }
 }
