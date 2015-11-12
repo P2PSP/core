@@ -71,13 +71,20 @@ void SplitterIMS::ConfigureSockets() {
   try {
     SetupPeerConnectionSocket();
   } catch (int e) {
-    // TODO: Print error and exit
+    // TODO: Print error using util class and exit
+    std::cout << e << std::endl;
+    std::cout << peer_connection_socket_.local_endpoint().address().to_string()
+              << "\b: unable to bind the port " << kPort;
+    exit(-1);
   }
 
   try {
     SetupTeamSocket();
   } catch (int e) {
-    // TODO: Print error and exit
+    // TODO: Print error using util class and exit
+    std::cout << e << std::endl;
+    // TODO: print getsockname unable to bind to (gethostname, port)
+    exit(-1);
   }
 }
 
@@ -137,6 +144,7 @@ size_t SplitterIMS::ReceiveNextChunk(boost::asio::streambuf &chunk) {
 }
 
 void SplitterIMS::LoadTheVideoHeader() {
+  std::cout << "Loading the video header" << std::endl;
   for (int i = 0; i < kHeaderSize; i++) {
     ReceiveNextChunk(header_);
   }
@@ -182,6 +190,8 @@ void SplitterIMS::HandleAPeerArrival(
 
 void SplitterIMS::Run() {
   std::cout << "Run" << std::endl;
+
+  ReceiveTheHeader();
 
   boost::asio::ip::tcp::socket serve_socket(io_service_);
   acceptor_.accept(serve_socket);
