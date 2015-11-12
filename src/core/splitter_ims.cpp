@@ -158,7 +158,8 @@ void SplitterIMS::SendChunk(boost::asio::streambuf &message,
                             boost::asio::ip::udp::endpoint destination) {
   boost::system::error_code ec;
 
-  size_t bytes_transferred = team_socket_.send_to(message, destination, 0, ec);
+  size_t bytes_transferred =
+      team_socket_.send_to(message.data(), destination, 0, ec);
 
   // Sent data is removed from message
   message.consume(bytes_transferred);
