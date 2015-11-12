@@ -91,7 +91,8 @@ class SplitterIMS {
   void LoadTheVideoHeader();
   size_t ReceiveNextChunk(boost::asio::streambuf &chunk);
   void ReceiveChunk();  // TODO: Return chunk
-  void SendChunk(std::string message, std::string destination);
+  void SendChunk(boost::asio::streambuf &message,
+                 boost::asio::ip::udp::endpoint destination);
   void ReceiveTheHeader();
 
   // TODO: run method and Thread management
