@@ -23,14 +23,14 @@ SplitterIMS::SplitterIMS()
       kSourcePort(4551),
       kMCastAddr("224.0.0.1"),
       kTTL(1),
+      mcast_channel_(boost::asio::ip::address::from_string(kMCastAddr), kPort),
       io_service_(),
       peer_connection_socket_(io_service_),
       source_socket_(io_service_),
+      team_socket_(io_service_, mcast_channel_.protocol()),
       acceptor_(io_service_) {
   alive_ = true;
   chunk_number_ = 0;
-
-  team_socket_ = 0;
 
   // Auxiliar stringstream
   std::stringstream ss;
@@ -48,11 +48,6 @@ SplitterIMS::SplitterIMS()
 
   // Initialize chunk_number_format_
   chunk_number_format_ = "H";
-
-  // Initialize mcast_channel_
-  ss << kMCastAddr;
-  mcast_channel_ = {ss.str(), kPort};
-  ss.str("");
 
   // Initialize counters
   recvfrom_counter_ = 0;
@@ -86,7 +81,23 @@ void SplitterIMS::ConfigureSockets() {
   }
 }
 
-void SplitterIMS::SetupTeamSocket() {}
+void SplitterIMS::SetupTeamSocket() {
+  boost::system::error_code ec;
+
+  // Implements the IPPROTO_IP/IP_MULTICAST_TTL socket option.
+  boost::asio::ip::multicast::hops ttl(4);
+  team_socket_.set_option(ttl);
+
+  boost::asio::socket_base::reuse_address reuseAddress(true);
+  team_socket_.set_option(reuseAddress, ec);
+
+  if (ec) {
+    // TODO: print(e)
+    std::cout << "Error: " << ec.message() << std::endl;
+  }
+
+  // TODO: Check if reuse_port option exists
+}
 
 void SplitterIMS::RequestTheVideoFromTheSource() {
   boost::system::error_code ec;

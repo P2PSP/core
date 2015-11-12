@@ -55,7 +55,7 @@ class SplitterIMS {
   boost::asio::ip::tcp::acceptor acceptor_;
 
   // Used to listen the team messages.
-  int team_socket_;  // TODO: Socket descriptor?
+  boost::asio::ip::udp::socket team_socket_;
 
   // Used to talk to the source
   boost::asio::ip::tcp::socket source_socket_;
@@ -67,7 +67,7 @@ class SplitterIMS {
   std::tuple<std::string, int> source_;
   std::string GET_message_;
   std::string chunk_number_format_;
-  std::tuple<std::string, int> mcast_channel_;
+  boost::asio::ip::udp::endpoint mcast_channel_;
 
   int recvfrom_counter_;
   int sendto_counter_;
