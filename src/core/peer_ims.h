@@ -40,7 +40,7 @@ class PeerIMS {
   unsigned short player_port_;
 
   // Address of the splitter.
-  std::string splitter_addr_;
+  boost::asio::ip::address splitter_addr_;
 
   // Port of the splitter.
   unsigned short splitter_port_;
@@ -60,7 +60,7 @@ class PeerIMS {
   unsigned int chunk_size_;
   std::vector<char> chunks_;
   unsigned int header_size_in_chunks_;
-  std::string mcast_addr_;
+  boost::asio::ip::address mcast_addr_;
   unsigned short mcast_port_;
 
   std::shared_ptr<char> played_chunk_;  // Dynamic pointer
@@ -69,7 +69,6 @@ class PeerIMS {
   unsigned int received_counter_;
   std::vector<bool> received_flag_;
   unsigned int recvfrom_counter_;
-  std::tuple<std::string, std::string> splitter_;
 
   // Service for I/O operations
   boost::asio::io_service io_service_;
@@ -81,7 +80,7 @@ class PeerIMS {
   boost::asio::ip::tcp::socket splitter_socket_;
 
   // Used to communicate with the rest of the team
-  boost::asio::ip::tcp::socket team_socket_;
+  boost::asio::ip::udp::socket team_socket_;
 
   // Acceptor used to listen to incoming connections.
   boost::asio::ip::tcp::acceptor acceptor_;

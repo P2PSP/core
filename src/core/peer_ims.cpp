@@ -14,7 +14,7 @@ PeerIMS::PeerIMS()
       team_socket_(io_service_) {
   // Default values
   player_port_ = kPlayerPort;
-  splitter_addr_.assign(kSplitterAddr);
+  splitter_addr_ = boost::asio::ip::address::from_string(kSplitterAddr);
   splitter_port_ = kSplitterPort;
   port_ = kPort;
   use_localhost_ = kUseLocalhost;
@@ -32,7 +32,7 @@ PeerIMS::PeerIMS()
   header_size_in_chunks_ = 0;
 
   // Initialized in PeerIMS::ReceiveTheMcasteEndpoint()
-  mcast_addr_ = "0.0.0.0";
+  mcast_addr_ = boost::asio::ip::address::from_string("0.0.0.0");
   mcast_port_ = 0;
 
   played_chunk_ = 0;
@@ -41,7 +41,6 @@ PeerIMS::PeerIMS()
   received_counter_ = 0;
   received_flag_ = std::vector<bool>();
   recvfrom_counter_ = 0;
-  splitter_ = {splitter_addr_, std::to_string(splitter_port_)};
 }
 
 PeerIMS::~PeerIMS() {}
@@ -69,11 +68,11 @@ void PeerIMS::ConnectToTheSplitter() {
   std::string my_ip;
 
   // TCP endpoint object to connect to splitter
-  boost::asio::ip::tcp::endpoint splitter_tcp_endpoint(
-      boost::asio::ip::address::from_string(splitter_addr_), splitter_port_);
+  boost::asio::ip::tcp::endpoint splitter_tcp_endpoint(splitter_addr_,
+                                                       splitter_port_);
   // UDP endpoint object to connect to splitter
-  boost::asio::ip::udp::endpoint splitter_udp_endpoint(
-      boost::asio::ip::address::from_string(splitter_addr_), splitter_port_);
+  boost::asio::ip::udp::endpoint splitter_udp_endpoint(splitter_addr_,
+                                                       splitter_port_);
 
   boost::asio::ip::tcp::endpoint tcp_endpoint;
 
@@ -135,11 +134,11 @@ void PeerIMS::ReceiveTheMcasteEndpoint() {
   char* raw_data = buffer.c_array();
 
   in_addr ip_raw = *(in_addr*)(raw_data);
-  mcast_addr_ = inet_ntoa(ip_raw);
+  mcast_addr_ = boost::asio::ip::address::from_string(inet_ntoa(ip_raw));
   mcast_port_ = ntohs(*(short*)(raw_data + 4));
 
-  LOG("mcast_endpoint = (" + mcast_addr_ + "," + std::to_string(mcast_port_) +
-      ")");
+  LOG("mcast_endpoint = (" + mcast_addr_.to_string() + "," +
+      std::to_string(mcast_port_) + ")");
 }
 
 void PeerIMS::ReceiveTheHeaderSize() {
@@ -194,7 +193,22 @@ void PeerIMS::ReceiveTheBufferSize() {
   LOG("buffer_size_ = " + std::to_string(buffer_size_));
 }
 
-std::string PeerIMS::GetMcastAddr() { return mcast_addr_; }
+void PeerIMS::ListenToTheTeam() {
+  boost::asio::ip::udp::endpoint endpoint(boost::asio::ip::address_v4::any(),
+                                          mcast_port_);
+
+  team_socket_.open(endpoint.protocol());
+  team_socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+  team_socket_.bind(endpoint);
+
+  team_socket_.set_option(boost::asio::ip::multicast::join_group(mcast_addr_));
+
+  // TODO: handle timeout
+  LOG("Listening to the mcast_channel = (" + mcast_addr_.to_string() + "," +
+      std::to_string(mcast_port_) + ")");
+}
+
+std::string PeerIMS::GetMcastAddr() { return mcast_addr_.to_string(); }
 
 void PeerIMS::SetShowBuffer(bool show_buffer) { show_buffer_ = show_buffer; }
 }
