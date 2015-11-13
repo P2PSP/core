@@ -178,6 +178,7 @@ void SplitterIMS::SendTheMcastChannel(
     boost::asio::ip::tcp::socket &peer_serve_socket) {
   LOG("Communicating the multicast channel (" + mcast_addr_ + ", " +
       std::to_string(port_) + ")");
+
   char message[6];
   in_addr addr;
   inet_aton(mcast_addr_.c_str(), &addr);
@@ -186,8 +187,23 @@ void SplitterIMS::SendTheMcastChannel(
   peer_serve_socket.send(boost::asio::buffer(message));
 }
 
+void SplitterIMS::SendTheHeaderSize(
+    boost::asio::ip::tcp::socket &peer_serve_socket) {
+  LOG("Communicating the header size " + std::to_string(header_size_));
+
+  boost::system::error_code ec;
+  char message[2];
+  (*(unsigned short *)&message) = htons(header_size_);
+  peer_serve_socket.send(boost::asio::buffer(message), 0, ec);
+
+  if (ec) {
+    LOG("Error: " + ec.message());
+  }
+}
+
 void SplitterIMS::SendConfiguration(boost::asio::ip::tcp::socket &sock) {
   SendTheMcastChannel(sock);
+  SendTheHeaderSize(sock);
 }
 
 void SplitterIMS::HandleAPeerArrival(
