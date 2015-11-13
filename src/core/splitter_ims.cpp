@@ -14,21 +14,22 @@
 
 namespace p2psp {
 SplitterIMS::SplitterIMS()
-    : kBufferSize(256),
-      kChannel("BBB-134.ogv"),
-      kChunkSize(1024),
-      kHeaderSize(10),
-      kPort(4552),
-      kSourceAddr("150.214.150.68"),
-      kSourcePort(4551),
-      kMCastAddr("224.0.0.1"),
-      kTTL(1),
-      mcast_channel_(boost::asio::ip::address::from_string(kMCastAddr), kPort),
+    : mcast_channel_(boost::asio::ip::address::from_string(kMCastAddr), kPort),
       io_service_(),
       peer_connection_socket_(io_service_),
       source_socket_(io_service_),
       team_socket_(io_service_, mcast_channel_.protocol()),
       acceptor_(io_service_) {
+  buffer_size_ = kBufferSize;
+  channel_ = kChannel;
+  chunk_size_ = kChunkSize;
+  header_size_ = kHeaderSize;
+  port_ = kPort;
+  source_addr_ = kSourceAddr;
+  source_port_ = kSourcePort;
+  mcast_addr_ = kMCastAddr;
+  ttl_ = kTTL;
+
   alive_ = true;
   chunk_number_ = 0;
 
@@ -60,7 +61,7 @@ SplitterIMS::~SplitterIMS() {}
 void SplitterIMS::SetupPeerConnectionSocket() {
   // TODO: Remove hard coded strings and use variables instead
   boost::asio::ip::tcp::endpoint endpoint(
-      boost::asio::ip::address::from_string("127.0.0.1"), kPort);
+      boost::asio::ip::address::from_string("127.0.0.1"), port_);
   acceptor_.open(endpoint.protocol());
   acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
   acceptor_.bind(endpoint);
@@ -73,7 +74,7 @@ void SplitterIMS::ConfigureSockets() {
   } catch (int e) {
     LOG(e);
     LOG(peer_connection_socket_.local_endpoint().address().to_string() +
-        "\b: unable to bind the port " + std::to_string(kPort));
+        "\b: unable to bind the port " + std::to_string(port_));
     exit(-1);
   }
 
@@ -90,7 +91,7 @@ void SplitterIMS::SetupTeamSocket() {
   boost::system::error_code ec;
 
   // Implements the IPPROTO_IP/IP_MULTICAST_TTL socket option.
-  boost::asio::ip::multicast::hops ttl(4);
+  boost::asio::ip::multicast::hops ttl(ttl_);
   team_socket_.set_option(ttl);
 
   boost::asio::socket_base::reuse_address reuseAddress(true);
@@ -106,22 +107,22 @@ void SplitterIMS::SetupTeamSocket() {
 void SplitterIMS::RequestTheVideoFromTheSource() {
   boost::system::error_code ec;
   boost::asio::ip::tcp::endpoint endpoint(
-      boost::asio::ip::address::from_string(kSourceAddr), kSourcePort);
+      boost::asio::ip::address::from_string(source_addr_), source_port_);
 
   source_socket_.connect(endpoint, ec);
 
   if (ec) {
     LOG("Error: " << ec.message());
     LOG(source_socket_.local_endpoint().address().to_string() +
-        "\b: unable to connect to the source (" + kSourceAddr + ", " +
-        std::to_string(kSourcePort) + ")");
+        "\b: unable to connect to the source (" + source_addr_ + ", " +
+        std::to_string(source_port_) + ")");
 
     source_socket_.close();
     exit(-1);
   }
 
   LOG(source_socket_.local_endpoint().address().to_string() +
-      " connected to (" + kSourceAddr + ", " + std::to_string(kSourcePort) +
+      " connected to (" + source_addr_ + ", " + std::to_string(source_port_) +
       ")");
 
   source_socket_.send(boost::asio::buffer(GET_message_));
@@ -134,7 +135,7 @@ size_t SplitterIMS::ReceiveNextChunk(boost::asio::streambuf &chunk) {
   boost::system::error_code ec;
 
   size_t bytes_transferred = boost::asio::read(
-      source_socket_, chunk, boost::asio::transfer_exactly(kChunkSize), ec);
+      source_socket_, chunk, boost::asio::transfer_exactly(chunk_size_), ec);
 
   if (ec) {
     LOG("Error: " + ec.message());
@@ -145,7 +146,7 @@ size_t SplitterIMS::ReceiveNextChunk(boost::asio::streambuf &chunk) {
 
 void SplitterIMS::LoadTheVideoHeader() {
   LOG("Loading the video header");
-  for (int i = 0; i < kHeaderSize; i++) {
+  for (int i = 0; i < header_size_; i++) {
     ReceiveNextChunk(header_);
   }
 }
