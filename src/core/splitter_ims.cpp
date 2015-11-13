@@ -18,7 +18,7 @@ SplitterIMS::SplitterIMS()
       io_service_(),
       peer_connection_socket_(io_service_),
       source_socket_(io_service_),
-      team_socket_(io_service_, mcast_channel_.protocol()),
+      team_socket_(io_service_),
       acceptor_(io_service_) {
   buffer_size_ = kBufferSize;
   channel_ = kChannel;
@@ -89,6 +89,8 @@ void SplitterIMS::ConfigureSockets() {
 
 void SplitterIMS::SetupTeamSocket() {
   boost::system::error_code ec;
+
+  team_socket_.open(mcast_channel_.protocol());
 
   // Implements the IPPROTO_IP/IP_MULTICAST_TTL socket option.
   boost::asio::ip::multicast::hops ttl(ttl_);
@@ -175,15 +177,20 @@ void SplitterIMS::ReceiveTheHeader() {
   LOG("Stream header received!");
 }
 
-void SplitterIMS::SendChunk(boost::asio::streambuf &message,
+void SplitterIMS::SendChunk(std::vector<char> &message,
                             boost::asio::ip::udp::endpoint destination) {
   boost::system::error_code ec;
 
-  size_t bytes_transferred =
-      team_socket_.send_to(message.data(), destination, 0, ec);
+  LOG(std::to_string(ntohs(*(unsigned short *)message.data())));
 
-  // Sent data is removed from message
-  message.consume(bytes_transferred);
+  size_t bytes_transferred =
+      team_socket_.send_to(boost::asio::buffer(message), destination, 0, ec);
+
+  LOG("Bytes transferred: " + std::to_string(bytes_transferred));
+
+  if (ec) {
+    LOG("Error sending chunk: " + ec.message());
+  }
 
   sendto_counter_++;
 }
@@ -282,12 +289,36 @@ void SplitterIMS::Run() {
   boost::asio::ip::tcp::socket serve_socket(io_service_);
   acceptor_.accept(serve_socket);
   HandleAPeerArrival(serve_socket);
+
+  // TODO: Handle future peer arrivals using a thread
+
+  boost::asio::streambuf chunk;
+
+  std::vector<char> message(sizeof(unsigned short) + chunk_size_);
+  size_t bytes_transferred;
+
+  while (alive_) {
+    bytes_transferred = ReceiveChunk(chunk);
+    LOG(std::to_string(bytes_transferred) + " bytes received");
+
+    (*(unsigned short *)message.data()) = htons(chunk_number_);
+
+    (*(message.data() + 2)) =
+        *(boost::asio::buffer_cast<const char *>(chunk.data()));
+
+    SendChunk(message, mcast_channel_);
+
+    // TODO: Use Common.MAX_CHUNK_NUMBER instead of a hard coded number
+    chunk_number_ = (chunk_number_ + 1) % 65536;
+    LOG("Chunk number: " + std::to_string(chunk_number_));
+    chunk.consume(bytes_transferred);
+  }
 }
 
 void SplitterIMS::Start() {
   LOG("Start");
   boost::thread t(boost::bind(&SplitterIMS::Run, this));
-  boost::this_thread::sleep(boost::posix_time::milliseconds(20000));
+  boost::this_thread::sleep(boost::posix_time::milliseconds(60000));
   LOG("Exiting");
 }
 }
