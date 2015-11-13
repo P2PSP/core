@@ -94,7 +94,7 @@ class SplitterIMS {
   ~SplitterIMS();
   void SendTheHeader(int peer_serve_socket);
   void SendTheBufferSize(int peer_serve_socket);
-  void SendTheChunkSize(int peer_serve_socket);
+  void SendTheChunkSize(boost::asio::ip::tcp::socket &peer_serve_socket);
   void SendTheMcastChannel(boost::asio::ip::tcp::socket &peer_serve_socket);
   void SendTheHeaderSize(boost::asio::ip::tcp::socket &peer_serve_socket);
   void SendConfiguration(boost::asio::ip::tcp::socket &sock);
