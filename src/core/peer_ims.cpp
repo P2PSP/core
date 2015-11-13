@@ -1,6 +1,5 @@
 
 #include "peer_ims.h"
-#include <iostream>
 
 namespace p2psp {
 
@@ -178,7 +177,7 @@ void PeerIMS::ReceiveTheHeader() {
     LOG(e.what());
     LOG("error sending data to the player");
     LOG("len(data) =" + std::to_string(chunk.size()));
-    // FIX: boost::this_thread::sleep(boost::posix_time::seconds(1));
+    boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
   }
 
   LOG("Received " + std::to_string(header_size_in_bytes) + "bytes of header");
@@ -343,7 +342,95 @@ int PeerIMS::ProcessMessage(std::vector<char> message,
   return chunk_number;
 }
 
+void PeerIMS::KeepTheBufferFull() {
+  // Receive chunks while the buffer is not full
+  // while True:
+  //    chunk_number = self.process_next_message()
+  //    if chunk_number >= 0:
+  //        break
+
+  int chunk_number = ProcessNextMessage();
+  while (chunk_number < 0) {
+    chunk_number = ProcessNextMessage();
+  }
+  // while ((chunk_number - self.played_chunk) % self.buffer_size) <
+  // self.buffer_size/2:
+  while (received_counter_ < buffer_size_ / 2) {
+    chunk_number = ProcessNextMessage();
+    while (chunk_number < 0) {
+      chunk_number = ProcessNextMessage();
+    }
+  }
+
+  if (show_buffer_) {
+    for (int i = 0; buffer_size_; i++) {
+      if (chunks_[i].received) {
+        // TODO: Avoid line feed in LOG function
+        LOG(std::to_string(i % 10));
+      } else {
+        LOG(".");
+      }
+    }
+    LOG("");
+  }
+
+  // print (self.team_socket.getsockname(),)
+  // sys.stdout.write(Color.none)
+}
+
+void PeerIMS::PlayNextChunk() {
+  played_chunk_ = FindNextChunk();
+  PlayChunk(played_chunk_);
+  chunks_[played_chunk_].received = false;
+  received_counter_ -= 1;
+}
+
+// Tiene pinta de que los tres siguientes metodos pueden simplificarse...
+int PeerIMS::FindNextChunk() {
+  // print (".")
+  // counter = 0
+
+  // TODO: change 65536 to Common.MAX_CHUNK_NUMBER
+  int chunk_number = (played_chunk_ + 1) % 65536;
+
+  while (!chunks_[chunk_number % buffer_size_].received) {
+    // sys.stdout.write(Color.cyan)
+    LOG("lost chunk " + std::to_string(chunk_number));
+    // sys.stdout.write(Color.none)
+
+    // TODO: change 65536 to Common.MAX_CHUNK_NUMBER
+    chunk_number = (played_chunk_ + 1) % 65536;
+  }
+  // counter += 1
+  // if counter > self.buffer_size:
+  //    break
+  return chunk_number;
+}
+
+void PeerIMS::PlayChunk(int chunk) {
+  try {
+    boost::asio::write(player_socket_,
+                       boost::asio::buffer(chunks_[chunk % buffer_size_].data));
+  } catch (std::exception e) {
+    LOG("Player disconnected!");
+    player_alive_ = false;
+  }
+}
+
+void PeerIMS::Run() {
+  while (player_alive_) {
+    KeepTheBufferFull();
+    PlayNextChunk();
+  }
+}
+
+void PeerIMS::Start() {
+  thread_.reset(new boost::thread(boost::bind(&PeerIMS::Run, this)));
+}
+
 std::string PeerIMS::GetMcastAddr() { return mcast_addr_.to_string(); }
 
 void PeerIMS::SetShowBuffer(bool show_buffer) { show_buffer_ = show_buffer; }
+
+bool PeerIMS::isPlayerAlive() { return player_alive_; }
 }

@@ -34,15 +34,11 @@ int main(int argc, const char* argv[]) {
 
   peer.DisconnectFromTheSplitter();
   peer.BufferData();
+  peer.Start();
 
-  /*
-
-   // TODO: Start the peer's main thread
-   peer.start()
-
-   */
-
-  // TODO: Print information about the status of the peer
+  while (peer.isPlayerAlive()) {
+    // TODO: Print information about the status of the peer
+  }
 
   return 0;
 }
