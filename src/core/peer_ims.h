@@ -125,8 +125,8 @@ class PeerIMS {
    *  Buffering
    */
   void BufferData();
-  void FindNextChunk();
-  void PlayChunk();
+  int FindNextChunk();
+  void PlayChunk(int);
   void PlayNextChunk();  // TODO: (chunk)
   void Play();
   void KeepTheBufferFull();

@@ -378,6 +378,13 @@ void PeerIMS::KeepTheBufferFull() {
   // sys.stdout.write(Color.none)
 }
 
+void PeerIMS::PlayNextChunk() {
+  played_chunk_ = FindNextChunk();
+  PlayChunk(played_chunk_);
+  chunks_[played_chunk_].received = false;
+  received_counter_ -= 1;
+}
+
 void PeerIMS::Run() {
   while (player_alive_) {
     KeepTheBufferFull();
