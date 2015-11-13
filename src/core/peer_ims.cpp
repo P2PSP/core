@@ -385,6 +385,16 @@ void PeerIMS::PlayNextChunk() {
   received_counter_ -= 1;
 }
 
+void PeerIMS::PlayChunk(int chunk) {
+  try {
+    player_socket_.write_some(
+        boost::asio::buffer(chunks_[chunk % buffer_size_].data));
+  } catch (std::exception e) {
+    LOG("Player disconnected!");
+    player_alive_ = false;
+  }
+}
+
 void PeerIMS::Run() {
   while (player_alive_) {
     KeepTheBufferFull();
