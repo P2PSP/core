@@ -385,6 +385,28 @@ void PeerIMS::PlayNextChunk() {
   received_counter_ -= 1;
 }
 
+// Tiene pinta de que los tres siguientes metodos pueden simplificarse...
+int PeerIMS::FindNextChunk() {
+  // print (".")
+  // counter = 0
+
+  // TODO: change 65536 to Common.MAX_CHUNK_NUMBER
+  int chunk_number = (played_chunk_ + 1) % 65536;
+
+  while (!chunks_[chunk_number % buffer_size_].received) {
+    // sys.stdout.write(Color.cyan)
+    LOG("lost chunk " + std::to_string(chunk_number));
+    // sys.stdout.write(Color.none)
+
+    // TODO: change 65536 to Common.MAX_CHUNK_NUMBER
+    chunk_number = (played_chunk_ + 1) % 65536;
+  }
+  // counter += 1
+  // if counter > self.buffer_size:
+  //    break
+  return chunk_number;
+}
+
 void PeerIMS::PlayChunk(int chunk) {
   try {
     player_socket_.write_some(
