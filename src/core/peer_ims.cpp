@@ -1,6 +1,5 @@
 
 #include "peer_ims.h"
-#include <iostream>
 
 namespace p2psp {
 
@@ -178,7 +177,7 @@ void PeerIMS::ReceiveTheHeader() {
     LOG(e.what());
     LOG("error sending data to the player");
     LOG("len(data) =" + std::to_string(chunk.size()));
-    // FIX: boost::this_thread::sleep(boost::posix_time::seconds(1));
+    // FIX boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
   }
 
   LOG("Received " + std::to_string(header_size_in_bytes) + "bytes of header");
@@ -341,6 +340,49 @@ int PeerIMS::ProcessMessage(std::vector<char> message,
   received_counter_ += 1;
 
   return chunk_number;
+}
+
+void PeerIMS::KeepTheBufferFull() {
+  // Receive chunks while the buffer is not full
+  // while True:
+  //    chunk_number = self.process_next_message()
+  //    if chunk_number >= 0:
+  //        break
+
+  int chunk_number = ProcessNextMessage();
+  while (chunk_number < 0) {
+    chunk_number = ProcessNextMessage();
+  }
+  // while ((chunk_number - self.played_chunk) % self.buffer_size) <
+  // self.buffer_size/2:
+  while (received_counter_ < buffer_size_ / 2) {
+    chunk_number = ProcessNextMessage();
+    while (chunk_number < 0) {
+      chunk_number = ProcessNextMessage();
+    }
+  }
+
+  if (show_buffer_) {
+    for (int i = 0; buffer_size_; i++) {
+      if (chunks_[i].received) {
+        // TODO: Avoid line feed in LOG function
+        LOG(std::to_string(i % 10));
+      } else {
+        LOG(".");
+      }
+    }
+    LOG("");
+  }
+
+  // print (self.team_socket.getsockname(),)
+  // sys.stdout.write(Color.none)
+}
+
+void PeerIMS::Run() {
+  while (player_alive_) {
+    KeepTheBufferFull();
+    PlayNextChunk();
+  }
 }
 
 std::string PeerIMS::GetMcastAddr() { return mcast_addr_.to_string(); }
