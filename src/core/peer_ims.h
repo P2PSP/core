@@ -116,8 +116,9 @@ class PeerIMS {
    */
   void ListenToTheTeam();
   void UnpackMessage();  // TODO: (message)
-  void ReceiveTheNextMessage();
-  void ProcessMessage();  // TODO: (message, sender)
+  void ReceiveTheNextMessage(std::vector<char>*,
+                             boost::asio::ip::udp::endpoint);
+  int ProcessMessage(std::vector<char>, boost::asio::ip::udp::endpoint);
   int ProcessNextMessage();
 
   /**

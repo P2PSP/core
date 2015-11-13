@@ -131,11 +131,11 @@ void PeerIMS::ReceiveTheMcasteEndpoint() {
   boost::array<char, 6> buffer;
   boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
 
-  char* raw_data = buffer.c_array();
+  char *raw_data = buffer.c_array();
 
-  in_addr ip_raw = *(in_addr*)(raw_data);
+  in_addr ip_raw = *(in_addr *)(raw_data);
   mcast_addr_ = boost::asio::ip::address::from_string(inet_ntoa(ip_raw));
-  mcast_port_ = ntohs(*(short*)(raw_data + 4));
+  mcast_port_ = ntohs(*(short *)(raw_data + 4));
 
   LOG("mcast_endpoint = (" + mcast_addr_.to_string() + "," +
       std::to_string(mcast_port_) + ")");
@@ -145,7 +145,7 @@ void PeerIMS::ReceiveTheHeaderSize() {
   boost::array<char, 2> buffer;
   boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
 
-  header_size_in_chunks_ = ntohs(*(short*)(buffer.c_array()));
+  header_size_in_chunks_ = ntohs(*(short *)(buffer.c_array()));
 
   LOG("header_size (in chunks) = " + std::to_string(header_size_in_chunks_));
 }
@@ -154,7 +154,7 @@ void PeerIMS::ReceiveTheChunkSize() {
   boost::array<char, 2> buffer;
   boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
 
-  chunk_size_ = ntohs(*(short*)(buffer.c_array()));
+  chunk_size_ = ntohs(*(short *)(buffer.c_array()));
 
   LOG("chunk_size (bytes) = " + std::to_string(chunk_size_));
 }
@@ -188,7 +188,7 @@ void PeerIMS::ReceiveTheBufferSize() {
   boost::array<char, 2> buffer;
   boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
 
-  buffer_size_ = ntohs(*(short*)(buffer.c_array()));
+  buffer_size_ = ntohs(*(short *)(buffer.c_array()));
 
   LOG("buffer_size_ = " + std::to_string(buffer_size_));
 }
@@ -284,9 +284,63 @@ void PeerIMS::BufferData() {
   }
 
   LOG("");
-  LOG("latency = " + std::to_string(clock() - start_time) + " seconds");
+  LOG("latency = " +
+      std::to_string((clock() - start_time) / (float)CLOCKS_PER_SEC) +
+      " seconds");
   LOG("buffering done.");
   TraceSystem::logStream().flush();
+}
+
+int PeerIMS::ProcessNextMessage() {
+  // (Chunk number + chunk payload) length
+  std::vector<char> message(sizeof(unsigned short) + chunk_size_);
+  boost::asio::ip::udp::endpoint sender;
+
+  try {
+    ReceiveTheNextMessage(&message, sender);
+  } catch (std::exception e) {
+    return -2;
+  }
+
+  return ProcessMessage(message, sender);
+}
+
+void PeerIMS::ReceiveTheNextMessage(std::vector<char> *message,
+                                    boost::asio::ip::udp::endpoint sender) {
+  LOG("Waiting for a chunk at (" +
+      team_socket_.local_endpoint().address().to_string() + "," +
+      std::to_string(team_socket_.local_endpoint().port()) + ")");
+
+  team_socket_.receive_from(boost::asio::buffer(*message), sender);
+  recvfrom_counter_ += 1;
+
+  LOG("Received a message from (" + sender.address().to_string() + "," +
+      std::to_string(sender.port()) + ") of length " +
+      std::to_string(message->size()));
+
+  // TODO: if(DEBUG){
+  if (message->size() < 10) {
+    LOG("Message content =" + std::string(message->data()));
+  }
+  //}
+}
+
+int PeerIMS::ProcessMessage(std::vector<char> message,
+                            boost::asio::ip::udp::endpoint sender) {
+  // Ojo, an attacker could send a packet smaller and pollute the buffer,
+  // althought this is difficult in IP multicst. This method should be
+  // inheritaged to solve this issue.
+
+  unsigned short chunk_number = ntohs(*(short *)message.data());
+
+  chunks_[chunk_number % buffer_size_] = {
+      std::vector<char>(message.data() + sizeof(unsigned short),
+                        message.data() + message.size()),
+      true};
+
+  received_counter_ += 1;
+
+  return chunk_number;
 }
 
 std::string PeerIMS::GetMcastAddr() { return mcast_addr_.to_string(); }
