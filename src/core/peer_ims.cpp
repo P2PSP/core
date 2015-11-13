@@ -177,7 +177,7 @@ void PeerIMS::ReceiveTheHeader() {
     LOG(e.what());
     LOG("error sending data to the player");
     LOG("len(data) =" + std::to_string(chunk.size()));
-    // FIX boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+    boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
   }
 
   LOG("Received " + std::to_string(header_size_in_bytes) + "bytes of header");
@@ -409,8 +409,8 @@ int PeerIMS::FindNextChunk() {
 
 void PeerIMS::PlayChunk(int chunk) {
   try {
-    player_socket_.write_some(
-        boost::asio::buffer(chunks_[chunk % buffer_size_].data));
+    boost::asio::write(player_socket_,
+                       boost::asio::buffer(chunks_[chunk % buffer_size_].data));
   } catch (std::exception e) {
     LOG("Player disconnected!");
     player_alive_ = false;
@@ -424,7 +424,13 @@ void PeerIMS::Run() {
   }
 }
 
+void PeerIMS::Start() {
+  thread_.reset(new boost::thread(boost::bind(&PeerIMS::Run, this)));
+}
+
 std::string PeerIMS::GetMcastAddr() { return mcast_addr_.to_string(); }
 
 void PeerIMS::SetShowBuffer(bool show_buffer) { show_buffer_ = show_buffer; }
+
+bool PeerIMS::isPlayerAlive() { return player_alive_; }
 }

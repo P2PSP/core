@@ -91,6 +91,9 @@ class PeerIMS {
   // Acceptor used to listen to incoming connections.
   boost::asio::ip::tcp::acceptor acceptor_;
 
+  // Thread to start the peer
+  std::unique_ptr<boost::thread> thread_;
+
  public:
   PeerIMS();
   ~PeerIMS();
@@ -131,11 +134,13 @@ class PeerIMS {
   void Play();
   void KeepTheBufferFull();
   void Run();
+  void Start();
 
   /**
    *  Getter/setters
    */
   std::string GetMcastAddr();
+  bool isPlayerAlive();
   void SetShowBuffer(bool);
 };
 }
