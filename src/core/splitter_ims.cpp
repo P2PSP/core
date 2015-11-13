@@ -227,11 +227,26 @@ void SplitterIMS::SendTheHeader(
   }
 }
 
+void SplitterIMS::SendTheBufferSize(
+    boost::asio::ip::tcp::socket &peer_serve_socket) {
+  LOG("Sending a buffer_size of " + std::to_string(buffer_size_) + " bytes");
+
+  boost::system::error_code ec;
+  char message[2];
+  (*(unsigned short *)&message) = htons(buffer_size_);
+  peer_serve_socket.send(boost::asio::buffer(message), 0, ec);
+
+  if (ec) {
+    LOG("Error: " + ec.message());
+  }
+}
+
 void SplitterIMS::SendConfiguration(boost::asio::ip::tcp::socket &sock) {
   SendTheMcastChannel(sock);
   SendTheHeaderSize(sock);
   SendTheChunkSize(sock);
   SendTheHeader(sock);
+  SendTheBufferSize(sock);
 }
 
 void SplitterIMS::HandleAPeerArrival(
