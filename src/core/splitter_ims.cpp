@@ -215,10 +215,23 @@ void SplitterIMS::SendTheChunkSize(
   }
 }
 
+void SplitterIMS::SendTheHeader(
+    boost::asio::ip::tcp::socket &peer_serve_socket) {
+  LOG("Sending a header of " + std::to_string(header_.size()) + " bytes");
+
+  boost::system::error_code ec;
+  peer_serve_socket.send(header_.data(), 0, ec);
+
+  if (ec) {
+    LOG("Error: " + ec.message());
+  }
+}
+
 void SplitterIMS::SendConfiguration(boost::asio::ip::tcp::socket &sock) {
   SendTheMcastChannel(sock);
   SendTheHeaderSize(sock);
   SendTheChunkSize(sock);
+  SendTheHeader(sock);
 }
 
 void SplitterIMS::HandleAPeerArrival(
