@@ -22,6 +22,7 @@
 #include <boost/thread/thread.hpp>
 #include <iostream>
 #include "../util/trace.h"
+#include <arpa/inet.h>
 
 namespace p2psp {
 
@@ -94,7 +95,7 @@ class SplitterIMS {
   void SendTheHeader(int peer_serve_socket);
   void SendTheBufferSize(int peer_serve_socket);
   void SendTheChunkSize(int peer_serve_socket);
-  void SendTheMcastChannel(int peer_serve_socket);
+  void SendTheMcastChannel(boost::asio::ip::tcp::socket &peer_serve_socket);
   void SendTheHeaderSize(int peer_serve_socket);
   void SendConfiguration(boost::asio::ip::tcp::socket &sock);
   void HandleAPeerArrival(boost::asio::ip::tcp::socket &serve_socket);

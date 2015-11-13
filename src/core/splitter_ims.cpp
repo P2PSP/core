@@ -174,7 +174,21 @@ void SplitterIMS::SendChunk(boost::asio::streambuf &message,
   sendto_counter_++;
 }
 
-void SplitterIMS::SendConfiguration(boost::asio::ip::tcp::socket &sock) {}
+void SplitterIMS::SendTheMcastChannel(
+    boost::asio::ip::tcp::socket &peer_serve_socket) {
+  LOG("Communicating the multicast channel (" + mcast_addr_ + ", " +
+      std::to_string(port_) + ")");
+  char message[6];
+  in_addr addr;
+  inet_aton(mcast_addr_.c_str(), &addr);
+  (*(in_addr *)&message) = addr;
+  (*(unsigned short *)(message + 4)) = htons(port_);
+  peer_serve_socket.send(boost::asio::buffer(message));
+}
+
+void SplitterIMS::SendConfiguration(boost::asio::ip::tcp::socket &sock) {
+  SendTheMcastChannel(sock);
+}
 
 void SplitterIMS::HandleAPeerArrival(
     boost::asio::ip::tcp::socket &serve_socket) {
