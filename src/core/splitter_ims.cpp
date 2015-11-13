@@ -144,6 +144,20 @@ size_t SplitterIMS::ReceiveNextChunk(boost::asio::streambuf &chunk) {
   return bytes_transferred;
 }
 
+size_t SplitterIMS::ReceiveChunk(boost::asio::streambuf &chunk) {
+  size_t bytes_transferred = ReceiveNextChunk(chunk);
+
+  if (header_load_counter_ > 0) {
+    // TODO: Check how to copy from a streambuf to another
+    // header += chunk
+    header_load_counter_--;
+    LOG("Loaded" + std::to_string(header_.size()) + " bytes of header");
+  }
+  recvfrom_counter_++;
+
+  return bytes_transferred;
+}
+
 void SplitterIMS::LoadTheVideoHeader() {
   LOG("Loading the video header");
   for (int i = 0; i < header_size_; i++) {
