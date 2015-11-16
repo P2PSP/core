@@ -60,6 +60,9 @@ class PeerIMS {
   // ?
   int buffer_status_;
 
+  // Initialized to -1 in clases that don't use it
+  int sendto_counter_;
+
   bool show_buffer_;
 
   unsigned int buffer_size_;
@@ -93,6 +96,9 @@ class PeerIMS {
 
   // Thread to start the peer
   std::unique_ptr<boost::thread> thread_;
+
+  // DBS variables
+  std::vector<boost::asio::ip::udp::endpoint> peer_list_;
 
  public:
   PeerIMS();
@@ -140,8 +146,14 @@ class PeerIMS {
    *  Getter/setters
    */
   std::string GetMcastAddr();
-  bool isPlayerAlive();
+  bool IsPlayerAlive();
+  int GetPlayedChunk();
+  int GetChunkSize();
+  int GetSendtoCounter();
+  std::vector<boost::asio::ip::udp::endpoint>* GetPeerList();
+  int GetRecvfromCounter();
   void SetShowBuffer(bool);
+  void SetSendtoCounter(int);
 };
 }
 

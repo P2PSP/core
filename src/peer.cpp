@@ -36,8 +36,116 @@ int main(int argc, const char* argv[]) {
   peer.BufferData();
   peer.Start();
 
-  while (peer.isPlayerAlive()) {
-    // TODO: Print information about the status of the peer
+  LOG("+-----------------------------------------------------+");
+  LOG("| Received = Received kbps, including retransmissions |");
+  LOG("|     Sent = Sent kbps                                |");
+  LOG("|       (Expected values are between parenthesis)     |");
+  LOG("------------------------------------------------------+");
+  LOG("");
+  LOG("         |     Received (kbps) |          Sent (kbps) |");
+  LOG("    Time |      Real  Expected |       Real  Expected | Team "
+      "description");
+  LOG("---------+---------------------+----------------------+-----------------"
+      "------------------...");
+
+  int last_chunk_number = peer.GetPlayedChunk();
+  int last_sendto_counter = -1;
+  if (peer.GetSendtoCounter() < 0) {
+    last_sendto_counter = 0;
+  } else {
+    peer.SetSendtoCounter(0);
+    last_sendto_counter = 0;
+  }
+
+  int last_recvfrom_counter = peer.GetRecvfromCounter();
+  float kbps_expected_recv = 0.0f;
+  float kbps_recvfrom = 0.0f;
+  float team_ratio = 0.0f;
+  float kbps_sendto = 0.0f;
+  float kbps_expected_sent = 0.0f;
+  float nice = 0.0f;
+  int counter = 0;
+
+  while (peer.IsPlayerAlive()) {
+    boost::this_thread::sleep(boost::posix_time::seconds(1));
+    kbps_expected_recv = ((peer.GetPlayedChunk() - last_chunk_number) *
+                          peer.GetChunkSize() * 8) /
+                         1000.0f;
+    last_chunk_number = peer.GetPlayedChunk();
+    kbps_recvfrom = ((peer.GetRecvfromCounter() - last_recvfrom_counter) *
+                     peer.GetChunkSize() * 8) /
+                    1000.0f;
+    last_recvfrom_counter = peer.GetRecvfromCounter();
+    team_ratio =
+        peer.GetPeerList()->size() / (peer.GetPeerList()->size() + 1.0f);
+    kbps_expected_sent = (int)(kbps_expected_recv * team_ratio);
+    kbps_sendto = ((peer.GetSendtoCounter() - last_sendto_counter) *
+                   peer.GetChunkSize() * 8) /
+                  1000.0f;
+    last_sendto_counter = peer.GetSendtoCounter();
+
+    /*try:
+    if Common.CONSOLE_MODE == False :
+      from gi.repository import GObject
+      try:
+      from adapter import speed_adapter
+      except ImportError as msg:
+      pass
+      GObject.idle_add(speed_adapter.update_widget,str(kbps_recvfrom) + ' kbps'
+                       ,str(kbps_sendto) + ' kbps'
+                       ,str(len(peer.peer_list)+1))
+      except Exception as msg:
+      pass*/
+
+    if (kbps_recvfrom > 0 and kbps_expected_recv > 0) {
+      nice = 100.0 / (kbps_expected_recv / kbps_recvfrom) *
+             (peer.GetPeerList()->size() + 1.0f);
+    } else {
+      nice = 0.0f;
+      LOG("|");
+      if (kbps_expected_recv < kbps_recvfrom) {
+        LOG(_SET_COLOR(_RED));
+      } else if (kbps_expected_recv > kbps_recvfrom) {
+        LOG(_SET_COLOR(_GREEN));
+        // TODO: format
+        // print(repr(int(kbps_expected_recv)).rjust(10), end=Color.none)
+        // print(repr(int(kbps_recvfrom)).rjust(10), end=' | ')
+      }
+    }
+
+    if (kbps_expected_sent > kbps_sendto) {
+      LOG(_SET_COLOR(_RED));
+    } else if (kbps_expected_sent < kbps_sendto) {
+      LOG(_SET_COLOR(_GREEN));
+      // TODO: format
+      // print(repr(int(kbps_sendto)).rjust(10), end=Color.none)
+      // print(repr(int(kbps_expected_sent)).rjust(10), end=' | ')
+      // sys.stdout.write(Color.none)
+      // print(repr(nice).ljust(1)[:6], end=' ')
+      LOG(peer.GetPeerList()->size());
+      counter = 0;
+      for (std::vector<boost::asio::ip::udp::endpoint>::iterator p =
+               peer.GetPeerList()->begin();
+           p != peer.GetPeerList()->end(); ++p) {
+        if (counter < 5) {
+          LOG("(" << p->address().to_string() << ","
+                  << std::to_string(p->port()) << ")");
+          counter++;
+        } else {
+          break;
+          LOG("");
+          /*
+            try:
+            if Common.CONSOLE_MODE == False :
+              GObject.idle_add(speed_adapter.update_widget,str(0)+'
+            kbps',str(0)+' kbps',str(0))
+              except  Exception as msg:
+              pass
+              }
+           */
+        }
+      }
+    }
   }
 
   return 0;

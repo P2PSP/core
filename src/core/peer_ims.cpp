@@ -40,6 +40,8 @@ PeerIMS::PeerIMS()
   received_counter_ = 0;
   received_flag_ = std::vector<bool>();
   recvfrom_counter_ = 0;
+
+  sendto_counter_ = -1;
 }
 
 PeerIMS::~PeerIMS() {}
@@ -432,5 +434,20 @@ std::string PeerIMS::GetMcastAddr() { return mcast_addr_.to_string(); }
 
 void PeerIMS::SetShowBuffer(bool show_buffer) { show_buffer_ = show_buffer; }
 
-bool PeerIMS::isPlayerAlive() { return player_alive_; }
+bool PeerIMS::IsPlayerAlive() { return player_alive_; }
+
+int PeerIMS::GetPlayedChunk() { return played_chunk_; }
+
+int PeerIMS::GetChunkSize() { return chunk_size_; }
+
+int PeerIMS::GetRecvfromCounter() { return recvfrom_counter_; }
+
+std::vector<boost::asio::ip::udp::endpoint> *PeerIMS::GetPeerList() {
+  return &peer_list_;
+}
+
+int PeerIMS::GetSendtoCounter() { return sendto_counter_; }
+void PeerIMS::SetSendtoCounter(int sendto_counter) {
+  sendto_counter_ = sendto_counter;
+}
 }
