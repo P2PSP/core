@@ -15,7 +15,7 @@ int main(int argc, const char* argv[]) {
   peer.ReceiveTheChunkSize();
   peer.ReceiveTheHeader();
   peer.ReceiveTheBufferSize();
-  LOG("Using IP Multicast address = " + peer.GetMcastAddr());
+  LOG("Using IP Multicast address = " << peer.GetMcastAddr());
 
   // TODO: if(args.show_buffer){
   // peer.SetShowBuffer(true);
@@ -91,8 +91,8 @@ int main(int argc, const char* argv[]) {
       from adapter import speed_adapter
       except ImportError as msg:
       pass
-      GObject.idle_add(speed_adapter.update_widget,str(kbps_recvfrom) + ' kbps'
-                       ,str(kbps_sendto) + ' kbps'
+      GObject.idle_add(speed_adapter.update_widget,str(kbps_recvfrom) << ' kbps'
+                       ,str(kbps_sendto) << ' kbps'
                        ,str(len(peer.peer_list)+1))
       except Exception as msg:
       pass*/

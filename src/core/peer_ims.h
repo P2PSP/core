@@ -22,16 +22,16 @@ struct Chunk {
 
 class PeerIMS {
   // Default port used to serve the player.
-  static const unsigned short kPlayerPort = 9999;
+  static const uint16_t kPlayerPort = 9999;
 
   // Default address of the splitter.
   static constexpr char kSplitterAddr[] = "127.0.0.1";
 
   // Default port of the splitter.
-  static const unsigned short kSplitterPort = 4552;
+  static const uint16_t kSplitterPort = 4552;
 
   // Default TCP->UDP port used to communicate.
-  static const unsigned short kPort = 0;
+  static const uint16_t kPort = 0;
 
   // Default use localhost instead the IP of the addapter
   static const bool kUseLocalhost = false;
@@ -43,16 +43,16 @@ class PeerIMS {
   static const bool kShowBuffer = false;
 
   // Port used to serve the player.
-  unsigned short player_port_;
+  uint16_t player_port_;
 
   // Address of the splitter.
   boost::asio::ip::address splitter_addr_;
 
   // Port of the splitter.
-  unsigned short splitter_port_;
+  uint16_t splitter_port_;
 
   // TCP->UDP port used to communicate.
-  unsigned short port_;
+  uint16_t port_;
 
   // Use localhost instead the IP of the addapter
   bool use_localhost_;
@@ -65,19 +65,19 @@ class PeerIMS {
 
   bool show_buffer_;
 
-  unsigned int buffer_size_;
-  unsigned int chunk_size_;
+  int buffer_size_;
+  int chunk_size_;
   std::vector<Chunk> chunks_;
-  unsigned int header_size_in_chunks_;
+  int header_size_in_chunks_;
   boost::asio::ip::address mcast_addr_;
-  unsigned short mcast_port_;
+  uint16_t mcast_port_;
 
   int played_chunk_;
   bool player_alive_;
 
-  unsigned int received_counter_;
+  int received_counter_;
   std::vector<bool> received_flag_;
-  unsigned int recvfrom_counter_;
+  int recvfrom_counter_;
 
   // Service for I/O operations
   boost::asio::io_service io_service_;

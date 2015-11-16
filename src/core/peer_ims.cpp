@@ -56,13 +56,13 @@ void PeerIMS::WaitForThePlayer() {
   acceptor_.bind(endpoint);
   acceptor_.listen();
 
-  LOG("Waiting for the player at (" + endpoint.address().to_string() + "," +
-      std::to_string(endpoint.port()) + ")");
+  LOG("Waiting for the player at (" << endpoint.address().to_string() << ","
+                                    << std::to_string(endpoint.port()) << ")");
   acceptor_.accept(player_socket_);
 
-  LOG("The player is (" +
-      player_socket_.remote_endpoint().address().to_string() + "," +
-      std::to_string(player_socket_.remote_endpoint().port()) + ")");
+  LOG("The player is ("
+      << player_socket_.remote_endpoint().address().to_string() << ","
+      << std::to_string(player_socket_.remote_endpoint().port()) << ")");
 }
 
 void PeerIMS::ConnectToTheSplitter() {
@@ -77,7 +77,7 @@ void PeerIMS::ConnectToTheSplitter() {
 
   boost::asio::ip::tcp::endpoint tcp_endpoint;
 
-  LOG("use_localhost = " + std::string((use_localhost_ ? "True" : "False")));
+  LOG("use_localhost = " << std::string((use_localhost_ ? "True" : "False")));
   if (use_localhost_) {
     my_ip = "0.0.0.0";
   } else {
@@ -94,11 +94,11 @@ void PeerIMS::ConnectToTheSplitter() {
 
   splitter_socket_.open(splitter_tcp_endpoint.protocol());
 
-  LOG("Connecting to the splitter at (" +
-      splitter_tcp_endpoint.address().to_string() + "," +
-      std::to_string(splitter_tcp_endpoint.port()) + ") from " + my_ip);
+  LOG("Connecting to the splitter at ("
+      << splitter_tcp_endpoint.address().to_string() << ","
+      << std::to_string(splitter_tcp_endpoint.port()) << ") from " << my_ip);
   if (port_ != 0) {
-    LOG("I'm using port" + std::to_string(port_));
+    LOG("I'm using port" << std::to_string(port_));
     tcp_endpoint = boost::asio::ip::tcp::endpoint(
         boost::asio::ip::address::from_string(my_ip), port_);
     splitter_socket_.set_option(
@@ -121,9 +121,9 @@ void PeerIMS::ConnectToTheSplitter() {
     exit(-1);
   }
 
-  LOG("Connected to the splitter at (" +
-      splitter_tcp_endpoint.address().to_string() + "," +
-      std::to_string(splitter_tcp_endpoint.port()) + ")");
+  LOG("Connected to the splitter at ("
+      << splitter_tcp_endpoint.address().to_string() << ","
+      << std::to_string(splitter_tcp_endpoint.port()) << ")");
 }
 
 void PeerIMS::DisconnectFromTheSplitter() { splitter_socket_.close(); }
@@ -138,8 +138,8 @@ void PeerIMS::ReceiveTheMcasteEndpoint() {
   mcast_addr_ = boost::asio::ip::address::from_string(inet_ntoa(ip_raw));
   mcast_port_ = ntohs(*(short *)(raw_data + 4));
 
-  LOG("mcast_endpoint = (" + mcast_addr_.to_string() + "," +
-      std::to_string(mcast_port_) + ")");
+  LOG("mcast_endpoint = (" << mcast_addr_.to_string() << ","
+                           << std::to_string(mcast_port_) << ")");
 }
 
 void PeerIMS::ReceiveTheHeaderSize() {
@@ -148,7 +148,7 @@ void PeerIMS::ReceiveTheHeaderSize() {
 
   header_size_in_chunks_ = ntohs(*(short *)(buffer.c_array()));
 
-  LOG("header_size (in chunks) = " + std::to_string(header_size_in_chunks_));
+  LOG("header_size (in chunks) = " << std::to_string(header_size_in_chunks_));
 }
 
 void PeerIMS::ReceiveTheChunkSize() {
@@ -157,7 +157,7 @@ void PeerIMS::ReceiveTheChunkSize() {
 
   chunk_size_ = ntohs(*(short *)(buffer.c_array()));
 
-  LOG("chunk_size (bytes) = " + std::to_string(chunk_size_));
+  LOG("chunk_size (bytes) = " << std::to_string(chunk_size_));
 }
 
 void PeerIMS::ReceiveTheHeader() {
@@ -170,7 +170,7 @@ void PeerIMS::ReceiveTheHeader() {
   boost::asio::read(splitter_socket_, chunk,
                     boost::asio::transfer_exactly(header_size_in_bytes), ec);
   if (ec) {
-    LOG("Error: " + ec.message());
+    LOG("Error: " << ec.message());
   }
 
   try {
@@ -178,11 +178,11 @@ void PeerIMS::ReceiveTheHeader() {
   } catch (std::exception e) {
     LOG(e.what());
     LOG("error sending data to the player");
-    LOG("len(data) =" + std::to_string(chunk.size()));
+    LOG("len(data) =" << std::to_string(chunk.size()));
     boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
   }
 
-  LOG("Received " + std::to_string(header_size_in_bytes) + "bytes of header");
+  LOG("Received " << std::to_string(header_size_in_bytes) << "bytes of header");
 }
 
 void PeerIMS::ReceiveTheBufferSize() {
@@ -191,7 +191,7 @@ void PeerIMS::ReceiveTheBufferSize() {
 
   buffer_size_ = ntohs(*(short *)(buffer.c_array()));
 
-  LOG("buffer_size_ = " + std::to_string(buffer_size_));
+  LOG("buffer_size_ = " << std::to_string(buffer_size_));
 }
 
 void PeerIMS::ListenToTheTeam() {
@@ -205,8 +205,8 @@ void PeerIMS::ListenToTheTeam() {
   team_socket_.set_option(boost::asio::ip::multicast::join_group(mcast_addr_));
 
   // TODO: handle timeout
-  LOG("Listening to the mcast_channel = (" + mcast_addr_.to_string() + "," +
-      std::to_string(mcast_port_) + ")");
+  LOG("Listening to the mcast_channel = ("
+      << mcast_addr_.to_string() << "," << std::to_string(mcast_port_) << ")");
 }
 
 void PeerIMS::BufferData() {
@@ -243,9 +243,9 @@ void PeerIMS::BufferData() {
   // waiting for traveling the player, we wil fill only the half of the circular
   // queue.
 
-  LOG("(" + team_socket_.local_endpoint().address().to_string() + "," +
-      std::to_string(team_socket_.local_endpoint().port()) + ")" +
-      "\b: buffering = 000.00%");
+  LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
+          << std::to_string(team_socket_.local_endpoint().port()) << ")"
+          << "\b: buffering = 000.00%");
   TraceSystem::logStream().flush();
 
   // First chunk to be sent to the player.  The process_next_message() procedure
@@ -258,10 +258,10 @@ void PeerIMS::BufferData() {
     LOG(std::to_string(chunk_number));
   }
   played_chunk_ = chunk_number;
-  LOG("First chunk to play " + std::to_string(played_chunk_));
-  LOG("(" + team_socket_.local_endpoint().address().to_string() + "," +
-      std::to_string(team_socket_.local_endpoint().port()) + ")" +
-      "\b: buffering (\b" + std::to_string(100.0 / buffer_size_));
+  LOG("First chunk to play " << std::to_string(played_chunk_));
+  LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
+          << std::to_string(team_socket_.local_endpoint().port()) << ")"
+          << "\b: buffering (\b" << std::to_string(100.0 / buffer_size_));
   // TODO: Justify: .rjust(4)
 
   // Now, fill up to the half of the buffer.
@@ -285,16 +285,15 @@ void PeerIMS::BufferData() {
   }
 
   LOG("");
-  LOG("latency = " +
-      std::to_string((clock() - start_time) / (float)CLOCKS_PER_SEC) +
-      " seconds");
+  LOG("latency = " << std::to_string((clock() - start_time) /
+                                     (float)CLOCKS_PER_SEC) << " seconds");
   LOG("buffering done.");
   TraceSystem::logStream().flush();
 }
 
 int PeerIMS::ProcessNextMessage() {
   // (Chunk number + chunk payload) length
-  std::vector<char> message(sizeof(unsigned short) + chunk_size_);
+  std::vector<char> message(sizeof(uint16_t) + chunk_size_);
   boost::asio::ip::udp::endpoint sender;
 
   try {
@@ -308,20 +307,20 @@ int PeerIMS::ProcessNextMessage() {
 
 void PeerIMS::ReceiveTheNextMessage(std::vector<char> *message,
                                     boost::asio::ip::udp::endpoint sender) {
-  LOG("Waiting for a chunk at (" +
-      team_socket_.local_endpoint().address().to_string() + "," +
-      std::to_string(team_socket_.local_endpoint().port()) + ")");
+  LOG("Waiting for a chunk at ("
+      << team_socket_.local_endpoint().address().to_string() << ","
+      << std::to_string(team_socket_.local_endpoint().port()) << ")");
 
   team_socket_.receive_from(boost::asio::buffer(*message), sender);
-  recvfrom_counter_ += 1;
+  recvfrom_counter_++;
 
-  LOG("Received a message from (" + sender.address().to_string() + "," +
-      std::to_string(sender.port()) + ") of length " +
-      std::to_string(message->size()));
+  LOG("Received a message from ("
+      << sender.address().to_string() << "," << std::to_string(sender.port())
+      << ") of length " << std::to_string(message->size()));
 
   // TODO: if(DEBUG){
   if (message->size() < 10) {
-    LOG("Message content =" + std::string(message->data()));
+    LOG("Message content =" << std::string(message->data()));
   }
   //}
 }
@@ -332,14 +331,14 @@ int PeerIMS::ProcessMessage(std::vector<char> message,
   // althought this is difficult in IP multicst. This method should be
   // inheritaged to solve this issue.
 
-  unsigned short chunk_number = ntohs(*(short *)message.data());
+  uint16_t chunk_number = ntohs(*(short *)message.data());
 
   chunks_[chunk_number % buffer_size_] = {
-      std::vector<char>(message.data() + sizeof(unsigned short),
+      std::vector<char>(message.data() + sizeof(uint16_t),
                         message.data() + message.size()),
       true};
 
-  received_counter_ += 1;
+  received_counter_++;
 
   return chunk_number;
 }
@@ -384,7 +383,7 @@ void PeerIMS::PlayNextChunk() {
   played_chunk_ = FindNextChunk();
   PlayChunk(played_chunk_);
   chunks_[played_chunk_].received = false;
-  received_counter_ -= 1;
+  received_counter_--;
 }
 
 // Tiene pinta de que los tres siguientes metodos pueden simplificarse...
@@ -397,13 +396,13 @@ int PeerIMS::FindNextChunk() {
 
   while (!chunks_[chunk_number % buffer_size_].received) {
     // sys.stdout.write(Color.cyan)
-    LOG("lost chunk " + std::to_string(chunk_number));
+    LOG("lost chunk " << std::to_string(chunk_number));
     // sys.stdout.write(Color.none)
 
     // TODO: change 65536 to Common.MAX_CHUNK_NUMBER
     chunk_number = (played_chunk_ + 1) % 65536;
   }
-  // counter += 1
+  // counter++
   // if counter > self.buffer_size:
   //    break
   return chunk_number;
