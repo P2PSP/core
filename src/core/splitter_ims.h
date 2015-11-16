@@ -22,20 +22,31 @@
 #include <boost/thread/thread.hpp>
 #include <iostream>
 #include "../util/trace.h"
+#include <arpa/inet.h>
 
 namespace p2psp {
 
 class SplitterIMS {
  private:
-  const int kBufferSize;          // Buffer size in chunks
-  const std::string kChannel;     // Default channel
-  const int kChunkSize;           // Chunk size in bytes (larger than MTU)
-  const int kHeaderSize;          // Chunks/header
-  const int kPort;                // Listening port
-  const std::string kSourceAddr;  // Streaming server's host
-  const int kSourcePort;          // Streaming server's listening port
-  const std::string kMCastAddr;   // All Systems on this subnet
-  const int kTTL;                 // Time To Live of multicast packets
+  const int kBufferSize = 256;                 // Buffer size in chunks
+  const std::string kChannel = "BBB-134.ogv";  // Default channel
+  const int kChunkSize = 1024;        // Chunk size in bytes (larger than MTU)
+  const int kHeaderSize = 10;         // Chunks/header
+  const unsigned short kPort = 4552;  // Listening port
+  const std::string kSourceAddr = "150.214.150.68";  // Streaming server's host
+  const int kSourcePort = 4551;  // Streaming server's listening port
+  const std::string kMCastAddr = "224.0.0.1";  // All Systems on this subnet
+  const int kTTL = 1;  // Time To Live of multicast packets
+
+  int buffer_size_;
+  std::string channel_;
+  int chunk_size_;
+  int header_size_;
+  unsigned short port_;
+  std::string source_addr_;
+  unsigned short source_port_;
+  std::string mcast_addr_;
+  int ttl_;
 
   /*
    An IMS splitter runs 2 threads. The main one serves the
@@ -81,11 +92,11 @@ class SplitterIMS {
  public:
   SplitterIMS();
   ~SplitterIMS();
-  void SendTheHeader(int peer_serve_socket);
-  void SendTheBufferSize(int peer_serve_socket);
-  void SendTheChunkSize(int peer_serve_socket);
-  void SendTheMcastChannel(int peer_serve_socket);
-  void SendTheHeaderSize(int peer_serve_socket);
+  void SendTheHeader(boost::asio::ip::tcp::socket &peer_serve_socket);
+  void SendTheBufferSize(boost::asio::ip::tcp::socket &peer_serve_socket);
+  void SendTheChunkSize(boost::asio::ip::tcp::socket &peer_serve_socket);
+  void SendTheMcastChannel(boost::asio::ip::tcp::socket &peer_serve_socket);
+  void SendTheHeaderSize(boost::asio::ip::tcp::socket &peer_serve_socket);
   void SendConfiguration(boost::asio::ip::tcp::socket &sock);
   void HandleAPeerArrival(boost::asio::ip::tcp::socket &serve_socket);
   void HandleArrivals();
@@ -95,8 +106,8 @@ class SplitterIMS {
   void ConfigureSockets();
   void LoadTheVideoHeader();
   size_t ReceiveNextChunk(boost::asio::streambuf &chunk);
-  void ReceiveChunk();  // TODO: Return chunk
-  void SendChunk(boost::asio::streambuf &message,
+  size_t ReceiveChunk(boost::asio::streambuf &chunk);
+  void SendChunk(std::vector<char> &message,
                  boost::asio::ip::udp::endpoint destination);
   void ReceiveTheHeader();
 
