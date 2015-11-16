@@ -181,7 +181,7 @@ void SplitterIMS::SendChunk(std::vector<char> &message,
                             boost::asio::ip::udp::endpoint destination) {
   boost::system::error_code ec;
 
-  LOG(std::to_string(ntohs(*(unsigned short *)message.data())));
+  // LOG(std::to_string(ntohs(*(unsigned short *)message.data())));
 
   size_t bytes_transferred =
       team_socket_.send_to(boost::asio::buffer(message), destination, 0, ec);
@@ -303,8 +303,10 @@ void SplitterIMS::Run() {
 
     (*(unsigned short *)message.data()) = htons(chunk_number_);
 
-    (*(message.data() + 2)) =
-        *(boost::asio::buffer_cast<const char *>(chunk.data()));
+    std::copy(
+        boost::asio::buffer_cast<const char *>(chunk.data()),
+        boost::asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
+        message.data() + sizeof(unsigned short));
 
     SendChunk(message, mcast_channel_);
 
