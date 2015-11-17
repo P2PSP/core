@@ -13,7 +13,7 @@ PeerIMS::PeerIMS()
       team_socket_(io_service_) {
   // Default values
   player_port_ = kPlayerPort;
-  splitter_addr_ = boost::asio::ip::address::from_string(kSplitterAddr);
+  splitter_addr_ = ip::address::from_string(kSplitterAddr);
   splitter_port_ = kSplitterPort;
   port_ = kPort;
   use_localhost_ = kUseLocalhost;
@@ -31,7 +31,7 @@ PeerIMS::PeerIMS()
   header_size_in_chunks_ = 0;
 
   // Initialized in PeerIMS::ReceiveTheMcasteEndpoint()
-  mcast_addr_ = boost::asio::ip::address::from_string("0.0.0.0");
+  mcast_addr_ = ip::address::from_string("0.0.0.0");
   mcast_port_ = 0;
 
   played_chunk_ = 0;
@@ -48,11 +48,11 @@ PeerIMS::~PeerIMS() {}
 
 void PeerIMS::WaitForThePlayer() {
   std::string port = std::to_string(player_port_);
-  boost::asio::ip::tcp::resolver resolver(io_service_);
-  boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({"", port});
+  ip::tcp::resolver resolver(io_service_);
+  ip::tcp::endpoint endpoint = *resolver.resolve({"", port});
 
   acceptor_.open(endpoint.protocol());
-  acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
+  acceptor_.set_option(ip::tcp::acceptor::reuse_address(true));
   acceptor_.bind(endpoint);
   acceptor_.listen();
 
@@ -69,19 +69,17 @@ void PeerIMS::ConnectToTheSplitter() {
   std::string my_ip;
 
   // TCP endpoint object to connect to splitter
-  boost::asio::ip::tcp::endpoint splitter_tcp_endpoint(splitter_addr_,
-                                                       splitter_port_);
+  ip::tcp::endpoint splitter_tcp_endpoint(splitter_addr_, splitter_port_);
   // UDP endpoint object to connect to splitter
-  boost::asio::ip::udp::endpoint splitter_udp_endpoint(splitter_addr_,
-                                                       splitter_port_);
+  ip::udp::endpoint splitter_udp_endpoint(splitter_addr_, splitter_port_);
 
-  boost::asio::ip::tcp::endpoint tcp_endpoint;
+  ip::tcp::endpoint tcp_endpoint;
 
   LOG("use_localhost = " << std::string((use_localhost_ ? "True" : "False")));
   if (use_localhost_) {
     my_ip = "0.0.0.0";
   } else {
-    boost::asio::ip::udp::socket s(io_service_);
+    ip::udp::socket s(io_service_);
     try {
       s.connect(splitter_udp_endpoint);
     } catch (boost::system::system_error e) {
@@ -99,13 +97,10 @@ void PeerIMS::ConnectToTheSplitter() {
       << std::to_string(splitter_tcp_endpoint.port()) << ") from " << my_ip);
   if (port_ != 0) {
     LOG("I'm using port" << std::to_string(port_));
-    tcp_endpoint = boost::asio::ip::tcp::endpoint(
-        boost::asio::ip::address::from_string(my_ip), port_);
-    splitter_socket_.set_option(
-        boost::asio::ip::udp::socket::reuse_address(true));
+    tcp_endpoint = ip::tcp::endpoint(ip::address::from_string(my_ip), port_);
+    splitter_socket_.set_option(ip::udp::socket::reuse_address(true));
   } else {
-    tcp_endpoint = boost::asio::ip::tcp::endpoint(
-        boost::asio::ip::address::from_string(my_ip), 0);
+    tcp_endpoint = ip::tcp::endpoint(ip::address::from_string(my_ip), 0);
   }
 
   splitter_socket_.bind(tcp_endpoint);
@@ -130,12 +125,12 @@ void PeerIMS::DisconnectFromTheSplitter() { splitter_socket_.close(); }
 
 void PeerIMS::ReceiveTheMcasteEndpoint() {
   boost::array<char, 6> buffer;
-  boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
+  read(splitter_socket_, ::buffer(buffer));
 
   char *raw_data = buffer.c_array();
 
   in_addr ip_raw = *(in_addr *)(raw_data);
-  mcast_addr_ = boost::asio::ip::address::from_string(inet_ntoa(ip_raw));
+  mcast_addr_ = ip::address::from_string(inet_ntoa(ip_raw));
   mcast_port_ = ntohs(*(short *)(raw_data + 4));
 
   LOG("mcast_endpoint = (" << mcast_addr_.to_string() << ","
@@ -144,7 +139,7 @@ void PeerIMS::ReceiveTheMcasteEndpoint() {
 
 void PeerIMS::ReceiveTheHeaderSize() {
   boost::array<char, 2> buffer;
-  boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
+  read(splitter_socket_, ::buffer(buffer));
 
   header_size_in_chunks_ = ntohs(*(short *)(buffer.c_array()));
 
@@ -153,7 +148,7 @@ void PeerIMS::ReceiveTheHeaderSize() {
 
 void PeerIMS::ReceiveTheChunkSize() {
   boost::array<char, 2> buffer;
-  boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
+  read(splitter_socket_, ::buffer(buffer));
 
   chunk_size_ = ntohs(*(short *)(buffer.c_array()));
 
@@ -165,16 +160,15 @@ void PeerIMS::ReceiveTheHeader() {
   std::vector<char> header(header_size_in_bytes);
 
   boost::system::error_code ec;
-  boost::asio::streambuf chunk;
+  streambuf chunk;
 
-  boost::asio::read(splitter_socket_, chunk,
-                    boost::asio::transfer_exactly(header_size_in_bytes), ec);
+  read(splitter_socket_, chunk, transfer_exactly(header_size_in_bytes), ec);
   if (ec) {
     LOG("Error: " << ec.message());
   }
 
   try {
-    boost::asio::write(player_socket_, chunk);
+    write(player_socket_, chunk);
   } catch (std::exception e) {
     LOG(e.what());
     LOG("error sending data to the player");
@@ -187,7 +181,7 @@ void PeerIMS::ReceiveTheHeader() {
 
 void PeerIMS::ReceiveTheBufferSize() {
   boost::array<char, 2> buffer;
-  boost::asio::read(splitter_socket_, boost::asio::buffer(buffer));
+  read(splitter_socket_, ::buffer(buffer));
 
   buffer_size_ = ntohs(*(short *)(buffer.c_array()));
 
@@ -195,14 +189,13 @@ void PeerIMS::ReceiveTheBufferSize() {
 }
 
 void PeerIMS::ListenToTheTeam() {
-  boost::asio::ip::udp::endpoint endpoint(boost::asio::ip::address_v4::any(),
-                                          mcast_port_);
+  ip::udp::endpoint endpoint(ip::address_v4::any(), mcast_port_);
 
   team_socket_.open(endpoint.protocol());
-  team_socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+  team_socket_.set_option(ip::udp::socket::reuse_address(true));
   team_socket_.bind(endpoint);
 
-  team_socket_.set_option(boost::asio::ip::multicast::join_group(mcast_addr_));
+  team_socket_.set_option(ip::multicast::join_group(mcast_addr_));
 
   // TODO: handle timeout
   LOG("Listening to the mcast_channel = ("
@@ -294,7 +287,7 @@ void PeerIMS::BufferData() {
 int PeerIMS::ProcessNextMessage() {
   // (Chunk number + chunk payload) length
   std::vector<char> message(sizeof(uint16_t) + chunk_size_);
-  boost::asio::ip::udp::endpoint sender;
+  ip::udp::endpoint sender;
 
   try {
     ReceiveTheNextMessage(&message, sender);
@@ -306,12 +299,12 @@ int PeerIMS::ProcessNextMessage() {
 }
 
 void PeerIMS::ReceiveTheNextMessage(std::vector<char> *message,
-                                    boost::asio::ip::udp::endpoint sender) {
+                                    ip::udp::endpoint sender) {
   LOG("Waiting for a chunk at ("
       << team_socket_.local_endpoint().address().to_string() << ","
       << std::to_string(team_socket_.local_endpoint().port()) << ")");
 
-  team_socket_.receive_from(boost::asio::buffer(*message), sender);
+  team_socket_.receive_from(buffer(*message), sender);
   recvfrom_counter_++;
 
   LOG("Received a message from ("
@@ -326,7 +319,7 @@ void PeerIMS::ReceiveTheNextMessage(std::vector<char> *message,
 }
 
 int PeerIMS::ProcessMessage(std::vector<char> message,
-                            boost::asio::ip::udp::endpoint sender) {
+                            ip::udp::endpoint sender) {
   // Ojo, an attacker could send a packet smaller and pollute the buffer,
   // althought this is difficult in IP multicst. This method should be
   // inheritaged to solve this issue.
@@ -410,8 +403,7 @@ int PeerIMS::FindNextChunk() {
 
 void PeerIMS::PlayChunk(int chunk) {
   try {
-    boost::asio::write(player_socket_,
-                       boost::asio::buffer(chunks_[chunk % buffer_size_].data));
+    write(player_socket_, buffer(chunks_[chunk % buffer_size_].data));
   } catch (std::exception e) {
     LOG("Player disconnected!");
     player_alive_ = false;
@@ -441,9 +433,7 @@ int PeerIMS::GetChunkSize() { return chunk_size_; }
 
 int PeerIMS::GetRecvfromCounter() { return recvfrom_counter_; }
 
-std::vector<boost::asio::ip::udp::endpoint> *PeerIMS::GetPeerList() {
-  return &peer_list_;
-}
+std::vector<ip::udp::endpoint> *PeerIMS::GetPeerList() { return &peer_list_; }
 
 int PeerIMS::GetSendtoCounter() { return sendto_counter_; }
 void PeerIMS::SetSendtoCounter(int sendto_counter) {
