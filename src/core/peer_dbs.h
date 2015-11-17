@@ -27,9 +27,20 @@ using namespace boost::asio;
 namespace p2psp {
 
 class PeerDBS : PeerIMS {
+ protected:
+  int kMaxChunkDebt = 128;  // Peer's rejecting threshold
+
+  bool kLogging = false;  // A IMS???
+  std::string kLogFile;   // A IMS???
+
+  int kAddr = 0;
+  int kPort = 1;
+
  public:
   PeerDBS();
   ~PeerDBS();
+  void SayHello(ip::udp::endpoint);
+  void SayGoodbye(ip::udp::endpoint);
 };
 }
 
