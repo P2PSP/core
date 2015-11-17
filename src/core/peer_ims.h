@@ -13,6 +13,8 @@
 #include <ctime>
 #include "../util/trace.h"
 
+using namespace boost::asio;
+
 namespace p2psp {
 
 struct Chunk {
@@ -46,7 +48,7 @@ class PeerIMS {
   uint16_t player_port_;
 
   // Address of the splitter.
-  boost::asio::ip::address splitter_addr_;
+  ip::address splitter_addr_;
 
   // Port of the splitter.
   uint16_t splitter_port_;
@@ -69,7 +71,7 @@ class PeerIMS {
   int chunk_size_;
   std::vector<Chunk> chunks_;
   int header_size_in_chunks_;
-  boost::asio::ip::address mcast_addr_;
+  ip::address mcast_addr_;
   uint16_t mcast_port_;
 
   int played_chunk_;
@@ -80,25 +82,25 @@ class PeerIMS {
   int recvfrom_counter_;
 
   // Service for I/O operations
-  boost::asio::io_service io_service_;
+  io_service io_service_;
 
   // Used to listen to the player
-  boost::asio::ip::tcp::socket player_socket_;
+  ip::tcp::socket player_socket_;
 
   // Used to listen to the splitter
-  boost::asio::ip::tcp::socket splitter_socket_;
+  ip::tcp::socket splitter_socket_;
 
   // Used to communicate with the rest of the team
-  boost::asio::ip::udp::socket team_socket_;
+  ip::udp::socket team_socket_;
 
   // Acceptor used to listen to incoming connections.
-  boost::asio::ip::tcp::acceptor acceptor_;
+  ip::tcp::acceptor acceptor_;
 
   // Thread to start the peer
   std::unique_ptr<boost::thread> thread_;
 
   // DBS variables
-  std::vector<boost::asio::ip::udp::endpoint> peer_list_;
+  std::vector<ip::udp::endpoint> peer_list_;
 
  public:
   PeerIMS();
@@ -125,9 +127,8 @@ class PeerIMS {
    */
   void ListenToTheTeam();
   void UnpackMessage();  // TODO: (message)
-  void ReceiveTheNextMessage(std::vector<char>*,
-                             boost::asio::ip::udp::endpoint);
-  int ProcessMessage(std::vector<char>, boost::asio::ip::udp::endpoint);
+  void ReceiveTheNextMessage(std::vector<char>*, ip::udp::endpoint);
+  int ProcessMessage(std::vector<char>, ip::udp::endpoint);
   int ProcessNextMessage();
 
   /**
@@ -150,7 +151,7 @@ class PeerIMS {
   int GetPlayedChunk();
   int GetChunkSize();
   int GetSendtoCounter();
-  std::vector<boost::asio::ip::udp::endpoint>* GetPeerList();
+  std::vector<ip::udp::endpoint>* GetPeerList();
   int GetRecvfromCounter();
   void SetShowBuffer(bool);
   void SetSendtoCounter(int);
