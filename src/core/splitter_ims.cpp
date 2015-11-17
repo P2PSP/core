@@ -204,7 +204,7 @@ void SplitterIMS::SendTheMcastChannel(
   in_addr addr;
   inet_aton(mcast_addr_.c_str(), &addr);
   (*(in_addr *)&message) = addr;
-  (*(unsigned short *)(message + 4)) = htons(port_);
+  (*(uint16_t *)(message + 4)) = htons(port_);
   peer_serve_socket.send(boost::asio::buffer(message));
 }
 
@@ -214,7 +214,7 @@ void SplitterIMS::SendTheHeaderSize(
 
   boost::system::error_code ec;
   char message[2];
-  (*(unsigned short *)&message) = htons(header_size_);
+  (*(uint16_t *)&message) = htons(header_size_);
   peer_serve_socket.send(boost::asio::buffer(message), 0, ec);
 
   if (ec) {
@@ -228,7 +228,7 @@ void SplitterIMS::SendTheChunkSize(
 
   boost::system::error_code ec;
   char message[2];
-  (*(unsigned short *)&message) = htons(chunk_size_);
+  (*(uint16_t *)&message) = htons(chunk_size_);
   peer_serve_socket.send(boost::asio::buffer(message), 0, ec);
 
   if (ec) {
@@ -254,7 +254,7 @@ void SplitterIMS::SendTheBufferSize(
 
   boost::system::error_code ec;
   char message[2];
-  (*(unsigned short *)&message) = htons(buffer_size_);
+  (*(uint16_t *)&message) = htons(buffer_size_);
   peer_serve_socket.send(boost::asio::buffer(message), 0, ec);
 
   if (ec) {
@@ -294,19 +294,19 @@ void SplitterIMS::Run() {
 
   boost::asio::streambuf chunk;
 
-  std::vector<char> message(sizeof(unsigned short) + chunk_size_);
+  std::vector<char> message(sizeof(uint16_t) + chunk_size_);
   size_t bytes_transferred;
 
   while (alive_) {
     bytes_transferred = ReceiveChunk(chunk);
     LOG(std::to_string(bytes_transferred) << " bytes received");
 
-    (*(unsigned short *)message.data()) = htons(chunk_number_);
+    (*(uint16_t *)message.data()) = htons(chunk_number_);
 
     std::copy(
         boost::asio::buffer_cast<const char *>(chunk.data()),
         boost::asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
-        message.data() + sizeof(unsigned short));
+        message.data() + sizeof(uint16_t));
 
     SendChunk(message, mcast_channel_);
 
