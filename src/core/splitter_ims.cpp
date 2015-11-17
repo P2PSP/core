@@ -100,7 +100,7 @@ void SplitterIMS::SetupTeamSocket() {
   team_socket_.set_option(reuseAddress, ec);
 
   if (ec) {
-    LOG("Error: " + ec.message());
+    LOG("Error: " << ec.message());
   }
 
   // TODO: Check if reuse_port option exists
@@ -115,22 +115,22 @@ void SplitterIMS::RequestTheVideoFromTheSource() {
 
   if (ec) {
     LOG("Error: " << ec.message());
-    LOG(source_socket_.local_endpoint().address().to_string() +
-        "\b: unable to connect to the source (" + source_addr_ + ", " +
-        std::to_string(source_port_) + ")");
+    LOG(source_socket_.local_endpoint().address().to_string()
+        << "\b: unable to connect to the source (" << source_addr_ << ", "
+        << std::to_string(source_port_) << ")");
 
     source_socket_.close();
     exit(-1);
   }
 
-  LOG(source_socket_.local_endpoint().address().to_string() +
-      " connected to (" + source_addr_ + ", " + std::to_string(source_port_) +
-      ")");
+  LOG(source_socket_.local_endpoint().address().to_string()
+      << " connected to (" << source_addr_ << ", "
+      << std::to_string(source_port_) << ")");
 
   source_socket_.send(boost::asio::buffer(GET_message_));
 
-  LOG(source_socket_.local_endpoint().address().to_string() +
-      "IMS: GET_message = " + GET_message_);
+  LOG(source_socket_.local_endpoint().address().to_string()
+      << "IMS: GET_message = " << GET_message_);
 }
 
 size_t SplitterIMS::ReceiveNextChunk(boost::asio::streambuf &chunk) {
@@ -140,7 +140,7 @@ size_t SplitterIMS::ReceiveNextChunk(boost::asio::streambuf &chunk) {
       source_socket_, chunk, boost::asio::transfer_exactly(chunk_size_), ec);
 
   if (ec) {
-    LOG("Error: " + ec.message());
+    LOG("Error: " << ec.message());
   }
 
   return bytes_transferred;
@@ -153,7 +153,7 @@ size_t SplitterIMS::ReceiveChunk(boost::asio::streambuf &chunk) {
     // TODO: Check how to copy from a streambuf to another
     // header += chunk
     header_load_counter_--;
-    LOG("Loaded" + std::to_string(header_.size()) + " bytes of header");
+    LOG("Loaded" << std::to_string(header_.size()) << " bytes of header");
   }
   recvfrom_counter_++;
 
@@ -181,15 +181,15 @@ void SplitterIMS::SendChunk(std::vector<char> &message,
                             boost::asio::ip::udp::endpoint destination) {
   boost::system::error_code ec;
 
-  LOG(std::to_string(ntohs(*(unsigned short *)message.data())));
+  // LOG(std::to_string(ntohs(*(unsigned short *)message.data())));
 
   size_t bytes_transferred =
       team_socket_.send_to(boost::asio::buffer(message), destination, 0, ec);
 
-  LOG("Bytes transferred: " + std::to_string(bytes_transferred));
+  LOG("Bytes transferred: " << std::to_string(bytes_transferred));
 
   if (ec) {
-    LOG("Error sending chunk: " + ec.message());
+    LOG("Error sending chunk: " << ec.message());
   }
 
   sendto_counter_++;
@@ -197,68 +197,68 @@ void SplitterIMS::SendChunk(std::vector<char> &message,
 
 void SplitterIMS::SendTheMcastChannel(
     boost::asio::ip::tcp::socket &peer_serve_socket) {
-  LOG("Communicating the multicast channel (" + mcast_addr_ + ", " +
-      std::to_string(port_) + ")");
+  LOG("Communicating the multicast channel (" << mcast_addr_ << ", "
+                                              << std::to_string(port_) << ")");
 
   char message[6];
   in_addr addr;
   inet_aton(mcast_addr_.c_str(), &addr);
   (*(in_addr *)&message) = addr;
-  (*(unsigned short *)(message + 4)) = htons(port_);
+  (*(uint16_t *)(message + 4)) = htons(port_);
   peer_serve_socket.send(boost::asio::buffer(message));
 }
 
 void SplitterIMS::SendTheHeaderSize(
     boost::asio::ip::tcp::socket &peer_serve_socket) {
-  LOG("Communicating the header size " + std::to_string(header_size_));
+  LOG("Communicating the header size " << std::to_string(header_size_));
 
   boost::system::error_code ec;
   char message[2];
-  (*(unsigned short *)&message) = htons(header_size_);
+  (*(uint16_t *)&message) = htons(header_size_);
   peer_serve_socket.send(boost::asio::buffer(message), 0, ec);
 
   if (ec) {
-    LOG("Error: " + ec.message());
+    LOG("Error: " << ec.message());
   }
 }
 
 void SplitterIMS::SendTheChunkSize(
     boost::asio::ip::tcp::socket &peer_serve_socket) {
-  LOG("Sending a chunk_size of " + std::to_string(chunk_size_) + " bytes");
+  LOG("Sending a chunk_size of " << std::to_string(chunk_size_) << " bytes");
 
   boost::system::error_code ec;
   char message[2];
-  (*(unsigned short *)&message) = htons(chunk_size_);
+  (*(uint16_t *)&message) = htons(chunk_size_);
   peer_serve_socket.send(boost::asio::buffer(message), 0, ec);
 
   if (ec) {
-    LOG("Error: " + ec.message());
+    LOG("Error: " << ec.message());
   }
 }
 
 void SplitterIMS::SendTheHeader(
     boost::asio::ip::tcp::socket &peer_serve_socket) {
-  LOG("Sending a header of " + std::to_string(header_.size()) + " bytes");
+  LOG("Sending a header of " << std::to_string(header_.size()) << " bytes");
 
   boost::system::error_code ec;
   peer_serve_socket.send(header_.data(), 0, ec);
 
   if (ec) {
-    LOG("Error: " + ec.message());
+    LOG("Error: " << ec.message());
   }
 }
 
 void SplitterIMS::SendTheBufferSize(
     boost::asio::ip::tcp::socket &peer_serve_socket) {
-  LOG("Sending a buffer_size of " + std::to_string(buffer_size_) + " bytes");
+  LOG("Sending a buffer_size of " << std::to_string(buffer_size_) << " bytes");
 
   boost::system::error_code ec;
   char message[2];
-  (*(unsigned short *)&message) = htons(buffer_size_);
+  (*(uint16_t *)&message) = htons(buffer_size_);
   peer_serve_socket.send(boost::asio::buffer(message), 0, ec);
 
   if (ec) {
-    LOG("Error: " + ec.message());
+    LOG("Error: " << ec.message());
   }
 }
 
@@ -272,10 +272,10 @@ void SplitterIMS::SendConfiguration(boost::asio::ip::tcp::socket &sock) {
 
 void SplitterIMS::HandleAPeerArrival(
     boost::asio::ip::tcp::socket &serve_socket) {
-  LOG(serve_socket.local_endpoint().address().to_string() +
-      "\b: IMS: accepted connection from peer (" +
-      serve_socket.remote_endpoint().address().to_string() + ", " +
-      std::to_string(serve_socket.remote_endpoint().port()) + ")");
+  LOG(serve_socket.local_endpoint().address().to_string()
+      << "\b: IMS: accepted connection from peer ("
+      << serve_socket.remote_endpoint().address().to_string() << ", "
+      << std::to_string(serve_socket.remote_endpoint().port()) << ")");
 
   SendConfiguration(serve_socket);
   serve_socket.close();
@@ -294,23 +294,25 @@ void SplitterIMS::Run() {
 
   boost::asio::streambuf chunk;
 
-  std::vector<char> message(sizeof(unsigned short) + chunk_size_);
+  std::vector<char> message(sizeof(uint16_t) + chunk_size_);
   size_t bytes_transferred;
 
   while (alive_) {
     bytes_transferred = ReceiveChunk(chunk);
-    LOG(std::to_string(bytes_transferred) + " bytes received");
+    LOG(std::to_string(bytes_transferred) << " bytes received");
 
-    (*(unsigned short *)message.data()) = htons(chunk_number_);
+    (*(uint16_t *)message.data()) = htons(chunk_number_);
 
-    (*(message.data() + 2)) =
-        *(boost::asio::buffer_cast<const char *>(chunk.data()));
+    std::copy(
+        boost::asio::buffer_cast<const char *>(chunk.data()),
+        boost::asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
+        message.data() + sizeof(uint16_t));
 
     SendChunk(message, mcast_channel_);
 
     // TODO: Use Common.MAX_CHUNK_NUMBER instead of a hard coded number
     chunk_number_ = (chunk_number_ + 1) % 65536;
-    LOG("Chunk number: " + std::to_string(chunk_number_));
+    LOG("Chunk number: " << std::to_string(chunk_number_));
     chunk.consume(bytes_transferred);
   }
 }
