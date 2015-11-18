@@ -36,12 +36,18 @@ class PeerDBS : PeerIMS {
   int kAddr = 0;
   int kPort = 1;
 
+  std::vector<Chunk> debt_;
+
+  int number_of_monitors_;
+  int number_of_peers_;
+
  public:
   PeerDBS();
   ~PeerDBS();
   void SayHello(ip::udp::endpoint);
   void SayGoodbye(ip::udp::endpoint);
   void ReceiveMagicFlags();
+  void ReceiveTheNumberOfPeers();
 };
 }
 

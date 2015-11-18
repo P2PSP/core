@@ -40,4 +40,19 @@ void PeerDBS::ReceiveMagicFlags() {
 
   LOG("Magic flags =" << std::bitset<8>(magic_flags[0]));
 }
+
+void PeerDBS::ReceiveTheNumberOfPeers() {
+  boost::array<char, 2> buffer;
+
+  // sys.stdout.write(Color.green)
+  LOG("Requesting the number of monitors and peers to ("
+      << splitter_socket_.remote_endpoint().address().to_string() << ","
+      << std::to_string(splitter_socket_.remote_endpoint().port()) << ")");
+  read(splitter_socket_, ::buffer(buffer));
+  number_of_monitors_ = ntohs(*(short *)(buffer.c_array()));
+  LOG("The number of monitors is " << number_of_monitors_);
+  read(splitter_socket_, ::buffer(buffer));
+  number_of_peers_ = ntohs(*(short *)(buffer.c_array()));
+  LOG("The size of the team is " << number_of_peers_ << " (apart from me)");
+}
 }
