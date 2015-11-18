@@ -85,7 +85,7 @@ void PeerDBS::ReceiveTheListOfPeers() {
     read(splitter_socket_, ::buffer(buffer));
     in_addr ip_raw = *(in_addr *)(raw_data);
     ip_addr = ip::address::from_string(inet_ntoa(ip_raw));
-    mcast_port_ = ntohs(*(short *)(raw_data + 4));
+    port = ntohs(*(short *)(raw_data + 4));
 
     peer = ip::udp::endpoint(ip_addr, port);
     LOG("[hello] sent to (" << peer.address().to_string() << ","
@@ -105,5 +105,23 @@ void PeerDBS::ReceiveTheListOfPeers() {
   }
 
   LOG("List of peers received");
+}
+
+void PeerDBS::ReceiveMyEndpoint() {
+  boost::array<char, 6> buffer;
+  char *raw_data;
+  ip::address ip_addr;
+  ip::udp::endpoint peer;
+  int port;
+
+  read(splitter_socket_, ::buffer(buffer));
+  in_addr ip_raw = *(in_addr *)(raw_data);
+  ip_addr = ip::address::from_string(inet_ntoa(ip_raw));
+  port = ntohs(*(short *)(raw_data + 4));
+
+  me_ = ip::udp::endpoint(ip_addr, port);
+
+  LOG("me = (" << me_.address().to_string() << "," << std::to_string(me_.port())
+               << ")");
 }
 }

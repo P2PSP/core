@@ -41,6 +41,8 @@ class PeerDBS : PeerIMS {
   int number_of_monitors_;
   int number_of_peers_;
 
+  ip::udp::endpoint me_;
+
  public:
   PeerDBS();
   ~PeerDBS();
@@ -49,6 +51,7 @@ class PeerDBS : PeerIMS {
   void ReceiveMagicFlags();
   void ReceiveTheNumberOfPeers();
   void ReceiveTheListOfPeers();
+  void ReceiveMyEndpoint();
 };
 }
 
