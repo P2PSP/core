@@ -92,13 +92,19 @@ class SplitterIMS {
  public:
   SplitterIMS();
   ~SplitterIMS();
-  void SendTheHeader(boost::asio::ip::tcp::socket &peer_serve_socket);
-  void SendTheBufferSize(boost::asio::ip::tcp::socket &peer_serve_socket);
-  void SendTheChunkSize(boost::asio::ip::tcp::socket &peer_serve_socket);
-  void SendTheMcastChannel(boost::asio::ip::tcp::socket &peer_serve_socket);
-  void SendTheHeaderSize(boost::asio::ip::tcp::socket &peer_serve_socket);
-  void SendConfiguration(boost::asio::ip::tcp::socket &sock);
-  void HandleAPeerArrival(boost::asio::ip::tcp::socket &serve_socket);
+  void SendTheHeader(
+      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+  void SendTheBufferSize(
+      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+  void SendTheChunkSize(
+      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+  void SendTheMcastChannel(
+      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+  void SendTheHeaderSize(
+      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+  void SendConfiguration(std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
+  void HandleAPeerArrival(
+      std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);
   void HandleArrivals();
   void SetupPeerConnectionSocket();
   void SetupTeamSocket();

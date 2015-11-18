@@ -199,7 +199,7 @@ void SplitterIMS::SendChunk(vector<char> &message,
 }
 
 void SplitterIMS::SendTheMcastChannel(
-    asio::ip::tcp::socket &peer_serve_socket) {
+    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   LOG("Communicating the multicast channel (" << mcast_addr_ << ", "
                                               << to_string(port_) << ")");
 
@@ -208,60 +208,65 @@ void SplitterIMS::SendTheMcastChannel(
   inet_aton(mcast_addr_.c_str(), &addr);
   (*(in_addr *)&message) = addr;
   (*(uint16_t *)(message + 4)) = htons(port_);
-  peer_serve_socket.send(asio::buffer(message));
+  peer_serve_socket->send(asio::buffer(message));
 }
 
-void SplitterIMS::SendTheHeaderSize(asio::ip::tcp::socket &peer_serve_socket) {
+void SplitterIMS::SendTheHeaderSize(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   LOG("Communicating the header size " << to_string(header_size_));
 
   system::error_code ec;
   char message[2];
   (*(uint16_t *)&message) = htons(header_size_);
-  peer_serve_socket.send(asio::buffer(message), 0, ec);
+  peer_serve_socket->send(asio::buffer(message), 0, ec);
 
   if (ec) {
     LOG("Error: " << ec.message());
   }
 }
 
-void SplitterIMS::SendTheChunkSize(asio::ip::tcp::socket &peer_serve_socket) {
+void SplitterIMS::SendTheChunkSize(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   LOG("Sending a chunk_size of " << to_string(chunk_size_) << " bytes");
 
   system::error_code ec;
   char message[2];
   (*(uint16_t *)&message) = htons(chunk_size_);
-  peer_serve_socket.send(asio::buffer(message), 0, ec);
+  peer_serve_socket->send(asio::buffer(message), 0, ec);
 
   if (ec) {
     LOG("Error: " << ec.message());
   }
 }
 
-void SplitterIMS::SendTheHeader(asio::ip::tcp::socket &peer_serve_socket) {
+void SplitterIMS::SendTheHeader(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   LOG("Sending a header of " << to_string(header_.size()) << " bytes");
 
   system::error_code ec;
-  peer_serve_socket.send(header_.data(), 0, ec);
+  peer_serve_socket->send(header_.data(), 0, ec);
 
   if (ec) {
     LOG("Error: " << ec.message());
   }
 }
 
-void SplitterIMS::SendTheBufferSize(asio::ip::tcp::socket &peer_serve_socket) {
+void SplitterIMS::SendTheBufferSize(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   LOG("Sending a buffer_size of " << to_string(buffer_size_) << " bytes");
 
   system::error_code ec;
   char message[2];
   (*(uint16_t *)&message) = htons(buffer_size_);
-  peer_serve_socket.send(asio::buffer(message), 0, ec);
+  peer_serve_socket->send(asio::buffer(message), 0, ec);
 
   if (ec) {
     LOG("Error: " << ec.message());
   }
 }
 
-void SplitterIMS::SendConfiguration(asio::ip::tcp::socket &sock) {
+void SplitterIMS::SendConfiguration(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
   SendTheMcastChannel(sock);
   SendTheHeaderSize(sock);
   SendTheChunkSize(sock);
@@ -269,14 +274,28 @@ void SplitterIMS::SendConfiguration(asio::ip::tcp::socket &sock) {
   SendTheBufferSize(sock);
 }
 
-void SplitterIMS::HandleAPeerArrival(asio::ip::tcp::socket &serve_socket) {
-  LOG(serve_socket.local_endpoint().address().to_string()
+void SplitterIMS::HandleAPeerArrival(
+    std::shared_ptr<asio::ip::tcp::socket> serve_socket) {
+  LOG(serve_socket->local_endpoint().address().to_string()
       << "\b: IMS: accepted connection from peer ("
-      << serve_socket.remote_endpoint().address().to_string() << ", "
-      << to_string(serve_socket.remote_endpoint().port()) << ")");
+      << serve_socket->remote_endpoint().address().to_string() << ", "
+      << to_string(serve_socket->remote_endpoint().port()) << ")");
 
   SendConfiguration(serve_socket);
-  serve_socket.close();
+  serve_socket->close();
+}
+
+void SplitterIMS::HandleArrivals() {
+  std::shared_ptr<asio::ip::tcp::socket> peer_serve_socket;
+  thread_group threads;
+
+  while (alive_) {
+    peer_serve_socket =
+        make_shared<asio::ip::tcp::socket>(boost::ref(io_service_));
+    acceptor_.accept(*peer_serve_socket);
+    threads.create_thread(
+        bind(&SplitterIMS::HandleAPeerArrival, this, peer_serve_socket));
+  }
 }
 
 void SplitterIMS::Run() {
@@ -284,11 +303,13 @@ void SplitterIMS::Run() {
 
   ReceiveTheHeader();
 
-  asio::ip::tcp::socket serve_socket(io_service_);
-  acceptor_.accept(serve_socket);
+  // asio::ip::tcp::socket serve_socket(io_service_);
+  std::shared_ptr<asio::ip::tcp::socket> serve_socket =
+      make_shared<asio::ip::tcp::socket>(boost::ref(io_service_));
+  acceptor_.accept(*serve_socket);
   HandleAPeerArrival(serve_socket);
 
-  // TODO: Handle future peer arrivals using a thread
+  thread t(bind(&SplitterIMS::HandleArrivals, this));
 
   asio::streambuf chunk;
 
@@ -316,8 +337,8 @@ void SplitterIMS::Run() {
 
 void SplitterIMS::Start() {
   LOG("Start");
-  thread t(boost::bind(&SplitterIMS::Run, this));
-  this_thread::sleep(boost::posix_time::milliseconds(60000));
+  thread t(bind(&SplitterIMS::Run, this));
+  this_thread::sleep(posix_time::milliseconds(60000));
   LOG("Exiting");
 }
 }
