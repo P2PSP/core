@@ -12,7 +12,7 @@
 
 #include <vector>
 #include <string>
-#include <unordered_map>
+#include <map>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -36,7 +36,7 @@ class PeerDBS : PeerIMS {
   int kAddr = 0;
   int kPort = 1;
 
-  std::unordered_map<ip::udp::endpoint, int> debt_;
+  std::map<ip::udp::endpoint, int> debt_;
 
   int number_of_monitors_;
   int number_of_peers_;
@@ -52,6 +52,7 @@ class PeerDBS : PeerIMS {
   void ReceiveTheNumberOfPeers();
   void ReceiveTheListOfPeers();
   void ReceiveMyEndpoint();
+  void ListenToTheTeam();
 };
 }
 

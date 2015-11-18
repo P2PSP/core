@@ -124,4 +124,17 @@ void PeerDBS::ReceiveMyEndpoint() {
   LOG("me = (" << me_.address().to_string() << "," << std::to_string(me_.port())
                << ")");
 }
+
+void PeerDBS::ListenToTheTeam() {
+  ip::udp::endpoint endpoint(ip::address_v4::any(),
+                             splitter_socket_.local_endpoint().port());
+
+  team_socket_.open(endpoint.protocol());
+  team_socket_.set_option(ip::udp::socket::reuse_address(true));
+  team_socket_.bind(endpoint);
+
+  // This is the maximum time the peer will wait for a chunk
+  // (from the splitter or from another peer).
+  team_socket_.set_option(socket_base::linger(true, 30));
+}
 }
