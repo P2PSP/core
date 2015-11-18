@@ -28,7 +28,7 @@ nat2_pub="192.168.57.5"
 function stop_processes() {
     set +e
     for host in $splitter $pc1 $pc2; do
-        ssh "$user@$host" "pkill -f 'python2 -u $dir'" 2>/dev/null
+        ssh "$user@$host" "pkill -f 'python3 -u $dir'" 2>/dev/null
     done
     killall vlc 2>/dev/null
     killall netcat 2>/dev/null
@@ -83,13 +83,13 @@ $nat1_config "
             # parameters: splitter_port, peer_port, player_port
 
             # Run splitter
-            ssh "$user@$splitter" python2 -u "$dir/splitter.py" --source_addr "$local_source_addr" \
-                --source_port "$local_source_port" --port "$splitter_port" >/dev/null &
+            ssh "$user@$splitter" python3 -u "$dir/splitter.py" --NTS --source_addr "$local_source_addr" \
+                --source_port "$local_source_port" --channel "$source_filename" --port "$splitter_port" >/dev/null &
 
             # Run monitor on same host as splitter
-            peer_cmd="python2 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
+            peer_cmd="python3 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
                 --splitter_port '$1' --port '$2' | sed 's_[^m]*m__g'"
-            peer_cmd_symsp="python2 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
+            peer_cmd_symsp="python3 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
                 --splitter_port '$1' --port '$2' --port_step 1 | sed 's_[^m]*m__g'"
             ssh "$user@$splitter" "$peer_cmd" >/dev/null &
 
@@ -122,8 +122,8 @@ $nat1_config "
         for sequential_run in $(seq $sequential_runs); do
             date
             # Run stream source
-            cvlc --sout "#duplicate{dst=standard{mux=ogg,dst=:$local_source_port,access=http}}" \
-                "$source_filename" 2>/dev/null &
+            cvlc --sout "#duplicate{dst=standard{mux=ogg,dst=:/$source_filename,access=http}}" \
+                "$source_filename" --http-port "$local_source_port" 2>/dev/null &
             sleep 1
             player_port=$((splitter_port+(parallel_runs*testruns)))
             for parallel_run in $(seq $parallel_runs); do

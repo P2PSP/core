@@ -35,23 +35,11 @@ class Symsp_Peer(Peer_DBS):
 
         # }}}
 
-    def listen_to_the_team(self):
-        # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
+    def create_team_socket(self):
+        # {{{ Create "team_socket" (UDP)
 
         # Create a special socket to force source port increment on SYMSP NATs
-        self.team_socket = symsp_socket(self.PORT_STEP, socket.AF_INET,
-                                        socket.SOCK_DGRAM)
-        try:
-            # In Windows systems this call doesn't work!
-            self.team_socket.setsockopt( \
-                socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except Exception as e:
-            print ("NTS:", e)
-        self.team_socket.bind(('', self.splitter_socket.getsockname()[PORT]))
-
-        # This is the maximum time the peer will wait for a chunk
-        # (from the splitter or from another peer).
-        self.team_socket.settimeout(1)
+        self.team_socket = symsp_socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 
         # }}}
 
