@@ -31,4 +31,13 @@ void PeerDBS::SayGoodbye(ip::udp::endpoint node) {
       << "(" << node.address().to_string() << "," << std::to_string(node.port())
       << ")");
 }
+
+void PeerDBS::ReceiveMagicFlags() {
+  std::vector<char> magic_flags(1);
+  ip::udp::endpoint sender;
+
+  team_socket_.receive_from(buffer(magic_flags), sender);
+
+  LOG("Magic flags =" << std::bitset<8>(magic_flags[0]));
+}
 }

@@ -41,6 +41,7 @@ class PeerDBS : PeerIMS {
   ~PeerDBS();
   void SayHello(ip::udp::endpoint);
   void SayGoodbye(ip::udp::endpoint);
+  void ReceiveMagicFlags();
 };
 }
 
