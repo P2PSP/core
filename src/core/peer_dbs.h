@@ -12,7 +12,7 @@
 
 #include <vector>
 #include <string>
-#include <tuple>
+#include <map>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -27,9 +27,32 @@ using namespace boost::asio;
 namespace p2psp {
 
 class PeerDBS : PeerIMS {
+ protected:
+  int kMaxChunkDebt = 128;  // Peer's rejecting threshold
+
+  bool kLogging = false;  // A IMS???
+  std::string kLogFile;   // A IMS???
+
+  int kAddr = 0;
+  int kPort = 1;
+
+  std::map<ip::udp::endpoint, int> debt_;
+
+  int number_of_monitors_;
+  int number_of_peers_;
+
+  ip::udp::endpoint me_;
+
  public:
   PeerDBS();
   ~PeerDBS();
+  void SayHello(ip::udp::endpoint);
+  void SayGoodbye(ip::udp::endpoint);
+  void ReceiveMagicFlags();
+  void ReceiveTheNumberOfPeers();
+  void ReceiveTheListOfPeers();
+  void ReceiveMyEndpoint();
+  void ListenToTheTeam();
 };
 }
 

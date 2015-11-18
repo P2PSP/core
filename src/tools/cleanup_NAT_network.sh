@@ -6,7 +6,7 @@ BRIDGES="brnet1 brinet brnet2"
 # Cleanup
 echo "Cleaning up"
 killall sshd
-pkill -f 'python2 -u'
+pkill -f 'python3 -u'
 for NAMESPACE in $NAMESPACES; do
     ip netns delete $NAMESPACE
 done
