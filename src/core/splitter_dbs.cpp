@@ -41,6 +41,15 @@ void SplitterDBS::ResetCounters() {
   }
 }
 
+void SplitterDBS::ResetCountersThread() {
+  while (alive_) {
+    ResetCounters();
+
+    // TODO: Use Common.COUNTERS_TIMING instead of a hard coded number
+    this_thread::sleep(posix_time::milliseconds(1000));
+  }
+}
+
 void SplitterDBS::ComputeNextPeerNumber() {
   peer_number_ = (peer_number_ + 1) % peer_list_.size();
 }
