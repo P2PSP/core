@@ -62,9 +62,7 @@ SplitterIMS::SplitterIMS()
 SplitterIMS::~SplitterIMS() {}
 
 void SplitterIMS::SetupPeerConnectionSocket() {
-  // TODO: Remove hard coded strings and use variables instead
-  asio::ip::tcp::endpoint endpoint(asio::ip::address::from_string("127.0.0.1"),
-                                   port_);
+  asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), port_);
   acceptor_.open(endpoint.protocol());
   acceptor_.set_option(asio::ip::tcp::acceptor::reuse_address(true));
   acceptor_.bind(endpoint);
