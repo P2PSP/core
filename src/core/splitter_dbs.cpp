@@ -33,4 +33,8 @@ SplitterDBS::SplitterDBS() : SplitterIMS(), magic_flags_(1) {
 }
 
 SplitterDBS::~SplitterDBS() {}
+
+void SplitterDBS::ComputeNextPeerNumber() {
+  peer_number_ = (peer_number_ + 1) % peer_list_.size();
+}
 }
