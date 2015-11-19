@@ -34,6 +34,22 @@ SplitterDBS::SplitterDBS() : SplitterIMS(), magic_flags_(1) {
 
 SplitterDBS::~SplitterDBS() {}
 
+void SplitterDBS::RemovePeer(asio::ip::udp::endpoint peer) {
+  try {
+    peer_list_.erase(remove(peer_list_.begin(), peer_list_.end(), peer),
+                     peer_list_.end());
+    peer_number_--;
+
+    // TODO: Decide if the key should be a string
+    std::ostringstream oss;
+    oss << peer.address().to_string() << ", " << to_string(peer.port());
+    losses_.erase(oss.str());
+
+  } catch (std::exception e) {
+    LOG("Error: " << e.what());
+  }
+}
+
 void SplitterDBS::SetupTeamSocket() {
   system::error_code ec;
   asio::ip::udp::endpoint endpoint(asio::ip::udp::v4(), port_);
