@@ -34,6 +34,21 @@ SplitterDBS::SplitterDBS() : SplitterIMS(), magic_flags_(1) {
 
 SplitterDBS::~SplitterDBS() {}
 
+void SplitterDBS::SetupTeamSocket() {
+  system::error_code ec;
+  asio::ip::udp::endpoint endpoint(asio::ip::udp::v4(), port_);
+
+  team_socket_.open(asio::ip::udp::v4());
+
+  asio::socket_base::reuse_address reuseAddress(true);
+  team_socket_.set_option(reuseAddress, ec);
+  team_socket_.bind(endpoint);
+
+  if (ec) {
+    LOG("Error: " << ec.message());
+  }
+}
+
 void SplitterDBS::ResetCounters() {
   unordered::unordered_map<string, int>::iterator it;
   for (it = losses_.begin(); it != losses_.end(); ++it) {

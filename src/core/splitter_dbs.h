@@ -66,6 +66,7 @@ class SplitterDBS : public SplitterIMS {
                         boost::asio::ip::udp::endpoint sender);
   void ProcessGoodbye(boost::asio::ip::udp::endpoint peer);
   void ModerateTheTeam();
+  void SetupTeamSocket();
   void ResetCounters();
   void ResetCountersThread();
   void ComputeNextPeerNumber();

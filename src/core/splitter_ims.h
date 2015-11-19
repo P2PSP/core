@@ -107,7 +107,7 @@ class SplitterIMS {
       std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);
   void HandleArrivals();
   void SetupPeerConnectionSocket();
-  void SetupTeamSocket();
+  virtual void SetupTeamSocket();
   void RequestTheVideoFromTheSource();
   void ConfigureSockets();
   void LoadTheVideoHeader();
