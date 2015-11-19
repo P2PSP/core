@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include "core/splitter_ims.h"
+#include "core/splitter_dbs.h"
 
 int main(int argc, const char *argv[]) {
   // TODO: Argument parser.
@@ -20,8 +21,10 @@ int main(int argc, const char *argv[]) {
 
   // TODO: Print information about the status of the splitter
 
-  p2psp::SplitterIMS splitterIMS;
-  splitterIMS.Start();
+  /*p2psp::SplitterIMS splitterIMS;
+  splitterIMS.Start();*/
+
+  p2psp::SplitterDBS splitterDBS;
 
   return 0;
 }

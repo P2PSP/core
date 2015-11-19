@@ -11,3 +11,26 @@
 //
 
 #include "splitter_dbs.h"
+
+namespace p2psp {
+using namespace std;
+using namespace boost;
+
+SplitterDBS::SplitterDBS() : SplitterIMS(), magic_flags_(1) {
+  // TODO: Check if there is a better way to replace kMcastAddr with 0.0.0.0
+  mcast_addr_ = "0.0.0.0";
+  max_chunk_loss_ = kMaxChunkLoss;
+  monitor_number_ = kMonitorNumber;
+
+  peer_number_ = 0;
+  destination_of_chunk_.reserve(buffer_size_);
+
+  // TODO: Initialize magic_flags with Common.DBS value
+
+  LOG("max_chunk_loss = " << max_chunk_loss_);
+  LOG("mcast_addr = " << mcast_addr_);
+  LOG("Initialized");
+}
+
+SplitterDBS::~SplitterDBS() {}
+}

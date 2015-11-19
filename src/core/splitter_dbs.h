@@ -14,5 +14,60 @@
 #define P2PSP_CORE_SPLITTER_DBS_H_
 
 #include <stdio.h>
+#include <string>
+#include <boost/asio.hpp>
+#include <boost/unordered_map.hpp>
+#include "../util/trace.h"
+#include "splitter_ims.h"
+
+namespace p2psp {
+class SplitterDBS : public SplitterIMS {
+ protected:
+  const int kMaxChunkLoss =
+      32;  // Chunk losses threshold to reject a peer from the team
+  const int kMonitorNumber = 1;
+
+  int max_chunk_loss_;
+  int monitor_number_;
+
+  int peer_number_;
+
+  // The list of peers in the team
+  std::vector<boost::asio::ip::udp::endpoint> peer_list_;
+
+  // Destination peers of the chunk, indexed by a chunk
+  // number. Used to find the peer to which a chunk has been sent
+  std::vector<boost::asio::ip::udp::endpoint> destination_of_chunk_;
+
+  boost::unordered_map<boost::asio::ip::udp::endpoint, int> losses_;
+
+  std::vector<char> magic_flags_;
+
+ public:
+  SplitterDBS();
+  ~SplitterDBS();
+  void SendMagicFlags(
+      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+  void SendTheListSize(
+      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+  void SendTheListOfPeers(
+      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+  void SendThePeerEndpoint(
+      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+  void InsertPeer(boost::asio::ip::udp::endpoint peer);
+  void ReceiveMessage();
+  void GetLostChunkNumber();  // TODO: Decide type for 'message' argument
+  void GetLosser(int lost_chunk_number);
+  void RemovePeer(boost::asio::ip::udp::endpoint peer);
+  void IncrementUnsupportivityOfPeer(boost::asio::ip::udp::endpoint peer);
+  void ProcessLostChunk(int lost_chunk_number,
+                        boost::asio::ip::udp::endpoint sender);
+  void ProcessGoodbye(boost::asio::ip::udp::endpoint peer);
+  void ModerateTheTeam();
+  void ResetCounters();
+  void ResetCountersThread();
+  void ComputeNextPeerNumber();
+};
+}
 
 #endif  // defined P2PSP_CORE_SPLITTER_DBS_H_

@@ -27,7 +27,7 @@
 namespace p2psp {
 
 class SplitterIMS {
- private:
+ protected:
   const int kBufferSize = 256;                 // Buffer size in chunks
   const std::string kChannel = "BBB-134.ogv";  // Default channel
   const int kChunkSize = 1024;        // Chunk size in bytes (larger than MTU)
