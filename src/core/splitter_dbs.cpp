@@ -34,6 +34,13 @@ SplitterDBS::SplitterDBS() : SplitterIMS(), magic_flags_(1) {
 
 SplitterDBS::~SplitterDBS() {}
 
+void SplitterDBS::ResetCounters() {
+  unordered::unordered_map<string, int>::iterator it;
+  for (it = losses_.begin(); it != losses_.end(); ++it) {
+    losses_[it->first] = it->second / 2;
+  }
+}
+
 void SplitterDBS::ComputeNextPeerNumber() {
   peer_number_ = (peer_number_ + 1) % peer_list_.size();
 }

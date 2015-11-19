@@ -39,7 +39,9 @@ class SplitterDBS : public SplitterIMS {
   // number. Used to find the peer to which a chunk has been sent
   std::vector<boost::asio::ip::udp::endpoint> destination_of_chunk_;
 
-  boost::unordered_map<boost::asio::ip::udp::endpoint, int> losses_;
+  // TODO: Endpoint doesn't implement hash_value, decide if string can be used
+  // instead
+  boost::unordered_map<std::string, int> losses_;
 
   std::vector<char> magic_flags_;
 
