@@ -70,7 +70,7 @@ class SplitterDBS : public SplitterIMS {
   void InsertPeer(boost::asio::ip::udp::endpoint peer);
   void ReceiveMessage();
   void GetLostChunkNumber();  // TODO: Decide type for 'message' argument
-  void GetLosser(int lost_chunk_number);
+  boost::asio::ip::udp::endpoint GetLosser(int lost_chunk_number);
   void RemovePeer(boost::asio::ip::udp::endpoint peer);
   void IncrementUnsupportivityOfPeer(boost::asio::ip::udp::endpoint peer);
   void ProcessLostChunk(int lost_chunk_number,

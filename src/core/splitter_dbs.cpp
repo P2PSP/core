@@ -35,6 +35,10 @@ SplitterDBS::SplitterDBS()
 
 SplitterDBS::~SplitterDBS() {}
 
+asio::ip::udp::endpoint SplitterDBS::GetLosser(int lost_chunk_number) {
+  return destination_of_chunk_[lost_chunk_number % buffer_size_];
+}
+
 void SplitterDBS::RemovePeer(asio::ip::udp::endpoint peer) {
   try {
     peer_list_.erase(remove(peer_list_.begin(), peer_list_.end(), peer),
