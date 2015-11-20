@@ -44,6 +44,33 @@ void SplitterDBS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
   }
 }
 
+void SplitterDBS::IncrementUnsupportivityOfPeer(
+    boost::asio::ip::udp::endpoint peer) {
+  bool peerExists = true;
+  std::stringstream ss;
+  ss << "(" << peer.address().to_string() + ", " + to_string(peer.port()) + ")";
+
+  try {
+    losses_[peer] += 1;
+  } catch (std::exception e) {
+    LOG("The unsupportive peer " << ss.str() << " does not exist!");
+    peerExists = false;
+  }
+
+  if (peerExists) {
+    LOG(ss.str() << " has lost " << to_string(losses_[peer]) << " chunks");
+
+    if (losses_[peer] > max_chunk_loss_) {
+      // TODO: Check this condition in original code, is it correct?
+      if (find(peer_list_.begin() + monitor_number_, peer_list_.end(), peer) ==
+          peer_list_.end()) {
+        LOG(ss.str() << " removed");
+        RemovePeer(peer);
+      }
+    }
+  }
+}
+
 asio::ip::udp::endpoint SplitterDBS::GetLosser(int lost_chunk_number) {
   return destination_of_chunk_[lost_chunk_number % buffer_size_];
 }
