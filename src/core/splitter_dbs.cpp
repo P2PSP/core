@@ -52,6 +52,14 @@ void SplitterDBS::RemovePeer(asio::ip::udp::endpoint peer) {
   }
 }
 
+void SplitterDBS::ProcessGoodbye(boost::asio::ip::udp::endpoint peer) {
+  LOG("Received 'goodbye' from " << peer);
+
+  // TODO: stdout flush?
+
+  RemovePeer(peer);
+}
+
 void SplitterDBS::SetupTeamSocket() {
   system::error_code ec;
   asio::ip::udp::endpoint endpoint(asio::ip::udp::v4(), port_);
