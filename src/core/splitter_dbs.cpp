@@ -16,7 +16,8 @@ namespace p2psp {
 using namespace std;
 using namespace boost;
 
-SplitterDBS::SplitterDBS() : SplitterIMS(), magic_flags_(1) {
+SplitterDBS::SplitterDBS()
+    : SplitterIMS(), magic_flags_(1), losses_(0, &SplitterDBS::GetHash) {
   // TODO: Check if there is a better way to replace kMcastAddr with 0.0.0.0
   mcast_addr_ = "0.0.0.0";
   max_chunk_loss_ = kMaxChunkLoss;
@@ -40,10 +41,7 @@ void SplitterDBS::RemovePeer(asio::ip::udp::endpoint peer) {
                      peer_list_.end());
     peer_number_--;
 
-    // TODO: Decide if the key should be a string
-    std::ostringstream oss;
-    oss << peer.address().to_string() << ", " << to_string(peer.port());
-    losses_.erase(oss.str());
+    losses_.erase(peer);
 
   } catch (std::exception e) {
     LOG("Error: " << e.what());
@@ -66,7 +64,7 @@ void SplitterDBS::SetupTeamSocket() {
 }
 
 void SplitterDBS::ResetCounters() {
-  unordered::unordered_map<string, int>::iterator it;
+  unordered::unordered_map<asio::ip::udp::endpoint, int>::iterator it;
   for (it = losses_.begin(); it != losses_.end(); ++it) {
     losses_[it->first] = it->second / 2;
   }

@@ -22,6 +22,15 @@
 
 namespace p2psp {
 class SplitterDBS : public SplitterIMS {
+ private:
+  // Hasher for unordered_map losses_
+  static std::size_t GetHash(const boost::asio::ip::udp::endpoint &endpoint) {
+    std::ostringstream stream;
+    stream << endpoint;
+    std::hash<std::string> hasher;
+    return hasher(stream.str());
+  };
+
  protected:
   const int kMaxChunkLoss =
       32;  // Chunk losses threshold to reject a peer from the team
@@ -41,7 +50,9 @@ class SplitterDBS : public SplitterIMS {
 
   // TODO: Endpoint doesn't implement hash_value, decide if string can be used
   // instead
-  boost::unordered_map<std::string, int> losses_;
+  boost::unordered_map<boost::asio::ip::udp::endpoint, int,
+                       std::size_t (*)(const boost::asio::ip::udp::endpoint &)>
+      losses_;
 
   std::vector<char> magic_flags_;
 
