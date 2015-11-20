@@ -35,6 +35,15 @@ SplitterDBS::SplitterDBS()
 
 SplitterDBS::~SplitterDBS() {}
 
+void SplitterDBS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
+  if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
+    peer_list_.push_back(peer);
+    losses_[peer] = 0;
+    LOG("Inserted peer (" << peer.address().to_string() << ", "
+                          << to_string(peer.port()) << ")");
+  }
+}
+
 asio::ip::udp::endpoint SplitterDBS::GetLosser(int lost_chunk_number) {
   return destination_of_chunk_[lost_chunk_number % buffer_size_];
 }
