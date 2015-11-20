@@ -71,6 +71,31 @@ void SplitterDBS::IncrementUnsupportivityOfPeer(
   }
 }
 
+void SplitterDBS::ProcessLostChunk(int lost_chunk_number,
+                                   boost::asio::ip::udp::endpoint sender) {
+  asio::ip::udp::endpoint destination = GetLosser(lost_chunk_number);
+  std::stringstream ssSender;
+  ssSender << "("
+           << sender.address().to_string() + ", " + to_string(sender.port()) +
+                  ")";
+  std::stringstream ssDestination;
+  ssDestination << "("
+                << destination.address().to_string() + ", " +
+                       to_string(destination.port()) + ")";
+
+  // TODO: Find a __debug__ flag in c++
+  LOG(ssSender.str() << " complains about lost chunk "
+                     << to_string(lost_chunk_number) << " sent to "
+                     << ssDestination.str());
+  if (find(peer_list_.begin() + monitor_number_, peer_list_.end(),
+           destination) != peer_list_.end()) {
+    LOG("Lost chunk index = " << lost_chunk_number);
+  }
+  // End TODO
+
+  IncrementUnsupportivityOfPeer(destination);
+}
+
 asio::ip::udp::endpoint SplitterDBS::GetLosser(int lost_chunk_number) {
   return destination_of_chunk_[lost_chunk_number % buffer_size_];
 }
