@@ -53,6 +53,11 @@ class PeerDBS : PeerIMS {
   void ReceiveTheListOfPeers();
   void ReceiveMyEndpoint();
   void ListenToTheTeam();
+  void ProcessMessage(std::vector<char>, ip::udp::endpoint);
+  void LogMessage(std::string);
+  void BuildLogMessage(std::string);
+  float CalcBufferCorrectness();
+  float CalcBufferFilling();
 };
 }
 

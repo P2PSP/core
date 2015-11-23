@@ -89,6 +89,8 @@ class PeerIMS {
   std::vector<bool> received_flag_;
   int recvfrom_counter_;
 
+  ip::udp::endpoint splitter_;
+
   // Service for I/O operations
   io_service io_service_;
 

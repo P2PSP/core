@@ -137,4 +137,50 @@ void PeerDBS::ListenToTheTeam() {
   // (from the splitter or from another peer).
   team_socket_.set_option(socket_base::linger(true, 30));
 }
+
+void PeerDBS::ProcessMessage(std::vector<char> message,
+                             ip::udp::endpoint sender) {
+  // Now, receive and send.
+
+  // if len(message) == struct.calcsize(self.message_format):
+
+  // A video chunk has been received
+
+  uint16_t chunk_number = ntohs(*(short *)message.data());
+
+  chunks_[chunk_number % buffer_size_] = {
+      std::vector<char>(message.data() + sizeof(uint16_t),
+                        message.data() + message.size()),
+      true};
+
+  received_counter_++;
+
+  if (sender == splitter_) {
+    // Send the previous chunk in burst sending
+    // mode if the chunk has not been sent to all
+    // the peers of the list of peers.
+
+    // debug
+
+    LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
+            << std::to_string(team_socket_.local_endpoint().port()) << ")"
+            << "<-" << std::to_string(chunk_number) << "-"
+            << "(" << sender.address().to_string() << ","
+            << std::to_string(sender.port()) << ")");
+    // TODO: if __debug__: # No aqui. Tal vez, DIS
+
+    if (kLogging) {
+      LogMessage("buffer correctnes " << (self.calc_buffer_correctnes()));
+      LogMessage("buffer filling {0}".format(self.calc_buffer_filling()));
+    }
+  }
+}
+
+void LogMessage(std::string message) {
+  // TODO: self.LOG_FILE.write(self.build_log_message(message) + "\n")
+  // print >>self.LOG_FILE, self.build_log_message(message)
+}
+void BuildLogMessage(std::string message) {
+  // return "{0}\t{1}".format(repr(time.time()), message)
+}
 }

@@ -71,7 +71,7 @@ void PeerIMS::ConnectToTheSplitter() {
   // TCP endpoint object to connect to splitter
   ip::tcp::endpoint splitter_tcp_endpoint(splitter_addr_, splitter_port_);
   // UDP endpoint object to connect to splitter
-  ip::udp::endpoint splitter_udp_endpoint(splitter_addr_, splitter_port_);
+  splitter_ = ip::udp::endpoint(splitter_addr_, splitter_port_);
 
   ip::tcp::endpoint tcp_endpoint;
 
@@ -81,7 +81,7 @@ void PeerIMS::ConnectToTheSplitter() {
   } else {
     ip::udp::socket s(io_service_);
     try {
-      s.connect(splitter_udp_endpoint);
+      s.connect(splitter_);
     } catch (boost::system::system_error e) {
       LOG(e.what());
     }
