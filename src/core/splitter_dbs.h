@@ -69,6 +69,8 @@ class SplitterDBS : public SplitterIMS {
       std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   void SendConfiguration(std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
   void InsertPeer(boost::asio::ip::udp::endpoint peer);
+  void HandleAPeerArrival(
+      std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);
   void ReceiveMessage();
   void GetLostChunkNumber();  // TODO: Decide type for 'message' argument
   boost::asio::ip::udp::endpoint GetLosser(int lost_chunk_number);

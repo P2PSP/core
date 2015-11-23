@@ -102,6 +102,30 @@ void SplitterDBS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
   }
 }
 
+void SplitterDBS::HandleAPeerArrival(
+    std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) {
+  /* In the DBS, the splitter sends to the incomming peer the
+   list of peers. Notice that the transmission of the list of
+   peers (something that could need some time if the team is
+   big or if the peer is slow) is done in a separate thread. This
+   helps to avoid DoS (Denial of Service) attacks.
+   */
+
+  asio::ip::tcp::endpoint incoming_peer = serve_socket->remote_endpoint();
+
+  LOG("Accepted connection from peer ("
+      << incoming_peer.address().to_string() << ", "
+      << to_string(incoming_peer.port()) << ")");
+
+  SendConfiguration(serve_socket);
+  SendTheListOfPeers(serve_socket);
+  serve_socket->close();
+  InsertPeer(boost::asio::ip::udp::endpoint(incoming_peer.address(),
+                                            incoming_peer.port()));
+
+  // TODO: In original code, incoming_peer is returned, but is not used
+}
+
 void SplitterDBS::IncrementUnsupportivityOfPeer(
     boost::asio::ip::udp::endpoint peer) {
   bool peerExists = true;

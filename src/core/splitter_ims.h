@@ -104,7 +104,7 @@ class SplitterIMS {
       std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   virtual void SendConfiguration(
       std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
-  void HandleAPeerArrival(
+  virtual void HandleAPeerArrival(
       std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);
   void HandleArrivals();
   void SetupPeerConnectionSocket();
