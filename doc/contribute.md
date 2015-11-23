@@ -1,19 +1,7 @@
-P2PSP installation
-==================
+P2PSP contribute
+================
 
-# As user:
-
-## Windows
-
-1. Install (as Administrator) [Python 3](https://www.python.org/downloads).
-
-2. Install [VLC](http://www.videolan.org/vlc/download-windows.html).
-
-3. Install [P2PSP](https://github.com/P2PSP/p2psp) (download ZIP file).
-
-# As contributor:
-
-## Windows
+# Windows
 
 1. Install (as Administrator) [Python 3](https://www.python.org/downloads).
 
@@ -29,5 +17,5 @@ P2PSP installation
 
 (remember that you will need to upload your public key in GitHub in order to push)
 
-
+# Mac
 
