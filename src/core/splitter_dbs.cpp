@@ -48,6 +48,32 @@ void SplitterDBS::SendTheListSize(
   peer_serve_socket->send(asio::buffer(message));
 }
 
+void SplitterDBS::SendTheListOfPeers(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+  SendTheListSize(peer_serve_socket);
+
+  // TODO: Find a __debug__ flag in c++
+  int counter = 0;
+  // End TODO
+
+  char message[6];
+  in_addr addr;
+
+  for (std::vector<asio::ip::udp::endpoint>::iterator it = peer_list_.begin();
+       it != peer_list_.end(); ++it) {
+    inet_aton(it->address().to_string().c_str(), &addr);
+    (*(in_addr *)&message) = addr;
+    (*(uint16_t *)(message + 4)) = htons(it->port());
+    peer_serve_socket->send(asio::buffer(message));
+
+    // TODO: Find a __debug__ flag in c++
+    LOG(to_string(counter) << ", (" << it->address().to_string() << ", "
+                           << to_string(it->port()) << ")");
+    counter++;
+    // End TODO
+  }
+}
+
 void SplitterDBS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
   if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
     peer_list_.push_back(peer);
