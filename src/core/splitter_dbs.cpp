@@ -86,6 +86,13 @@ void SplitterDBS::SendThePeerEndpoint(
   peer_serve_socket->send(asio::buffer(message));
 }
 
+void SplitterDBS::SendConfiguration(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
+  SplitterIMS::SendConfiguration(sock);
+  SplitterDBS::SendThePeerEndpoint(sock);
+  // TODO: Send magic flags
+}
+
 void SplitterDBS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
   if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
     peer_list_.push_back(peer);
