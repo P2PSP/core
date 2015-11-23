@@ -46,6 +46,8 @@ class PeerDBS : PeerIMS {
 
   ip::udp::endpoint me_;
 
+  int debt_memory_;
+
  public:
   PeerDBS();
   ~PeerDBS();
@@ -62,6 +64,8 @@ class PeerDBS : PeerIMS {
   float CalcBufferCorrectness();
   float CalcBufferFilling();
   void PoliteFarewell();
+  void BufferData();
+  void Run();
 };
 }
 

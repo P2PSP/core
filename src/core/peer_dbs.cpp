@@ -352,4 +352,31 @@ void PeerDBS::PoliteFarewell() {
     SayGoodbye(*it);
   }
 }
+
+void PeerDBS::BufferData() {
+  // Number of times that the previous received chunk has been sent to the team.
+  // If this counter is smaller than the number of peers in the team, the
+  // previous chunk must be sent in the burst mode because a new chunk from the
+  // splitter has arrived and the previous received chunk has not been sent to
+  // all the peers of the team. This can happen when one or more chunks that
+  // were routed towards this peer have been lost.
+  receive_and_feed_counter_ = 0;
+
+  // This "private and static" variable holds the previous chunk received from
+  // the splitter. It is used to send the previous received chunk in the
+  // congestion avoiding mode. In that mode, the peer sends a chunk only when it
+  // received a chunk from another peer or from the splitter.
+  receive_and_feed_previous_ = std::vector<char>();
+
+  sendto_counter_ = 0;
+
+  debt_memory_ = 1 << kMaxChunkDebt;
+
+  PeerIMS::BufferData();
+}
+
+void PeerDBS::Run() {
+  PeerIMS::Run();
+  PoliteFarewell();
+}
 }
