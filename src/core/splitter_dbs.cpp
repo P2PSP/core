@@ -192,6 +192,11 @@ void SplitterDBS::ProcessLostChunk(int lost_chunk_number,
   IncrementUnsupportivityOfPeer(destination);
 }
 
+uint16_t SplitterDBS::GetLostChunkNumber(std::vector<char> &message) {
+  // TODO: Check if this is totally correct
+  return ntohs(*(uint16_t *)message.data());
+}
+
 asio::ip::udp::endpoint SplitterDBS::GetLosser(int lost_chunk_number) {
   return destination_of_chunk_[lost_chunk_number % buffer_size_];
 }
