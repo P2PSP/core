@@ -170,17 +170,50 @@ void PeerDBS::ProcessMessage(std::vector<char> message,
     // TODO: if __debug__: # No aqui. Tal vez, DIS
 
     if (kLogging) {
-      LogMessage("buffer correctnes " << (self.calc_buffer_correctnes()));
-      LogMessage("buffer filling {0}".format(self.calc_buffer_filling()));
+      LogMessage("buffer correctnes " +
+                 std::to_string(CalcBufferCorrectness()));
+      LogMessage("buffer filling " + std::to_string(CalcBufferFilling()));
     }
   }
 }
 
-void LogMessage(std::string message) {
+void PeerDBS::LogMessage(std::string message) {
   // TODO: self.LOG_FILE.write(self.build_log_message(message) + "\n")
   // print >>self.LOG_FILE, self.build_log_message(message)
 }
-void BuildLogMessage(std::string message) {
+void PeerDBS::BuildLogMessage(std::string message) {
   // return "{0}\t{1}".format(repr(time.time()), message)
+}
+
+float PeerDBS::CalcBufferCorrectness() {
+  std::vector<char> zerochunk(1024);
+  memset(zerochunk.data(), 0, zerochunk.size());
+
+  int goodchunks = 0;
+  int badchunks = 0;
+
+  for (int i = 0; i < buffer_size_; i++) {
+    if (chunks_[i].received) {
+      if (chunks_[i].data == zerochunk) {
+        badchunks++;
+      } else {
+        goodchunks++;
+      }
+    }
+  }
+
+  return goodchunks / (float)(goodchunks + badchunks);
+}
+
+float PeerDBS::CalcBufferFilling() {
+  int chunks = 0;
+
+  for (int i = 0; i < buffer_size_; i++) {
+    if (chunks_[i].received) {
+      chunks++;
+    }
+  }
+
+  return chunks / (float)buffer_size_;
 }
 }
