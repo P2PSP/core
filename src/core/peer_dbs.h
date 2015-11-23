@@ -61,6 +61,7 @@ class PeerDBS : PeerIMS {
   void BuildLogMessage(std::string);
   float CalcBufferCorrectness();
   float CalcBufferFilling();
+  void PoliteFarewell();
 };
 }
 

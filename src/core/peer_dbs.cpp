@@ -294,7 +294,7 @@ int PeerDBS::ProcessMessage(std::vector<char> message,
       return -1;
     }
   }
-  
+
   return -1;
 }
 void PeerDBS::LogMessage(std::string message) {
@@ -312,9 +312,10 @@ float PeerDBS::CalcBufferCorrectness() {
   int goodchunks = 0;
   int badchunks = 0;
 
-  for (int i = 0; i < buffer_size_; i++) {
-    if (chunks_[i].received) {
-      if (chunks_[i].data == zerochunk) {
+  for (std::vector<Chunk>::iterator it = chunks_.begin(); it != chunks_.end();
+       ++it) {
+    if (it->received) {
+      if (it->data == zerochunk) {
         badchunks++;
       } else {
         goodchunks++;
@@ -328,12 +329,27 @@ float PeerDBS::CalcBufferCorrectness() {
 float PeerDBS::CalcBufferFilling() {
   int chunks = 0;
 
-  for (int i = 0; i < buffer_size_; i++) {
-    if (chunks_[i].received) {
+  for (std::vector<Chunk>::iterator it = chunks_.begin(); it != chunks_.end();
+       ++it) {
+    if (it->received) {
       chunks++;
     }
   }
 
   return chunks / (float)buffer_size_;
+}
+
+void PeerDBS::PoliteFarewell() {
+  LOG("Goodbye!");
+
+  for (int i = 0; i < 3; i++) {
+    ProcessNextMessage();
+    SayGoodbye(splitter_);
+  }
+
+  for (std::vector<ip::udp::endpoint>::iterator it = peer_list_.begin();
+       it != peer_list_.end(); ++it) {
+    SayGoodbye(*it);
+  }
 }
 }
