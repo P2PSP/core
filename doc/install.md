@@ -1,33 +1,56 @@
-P2PSP installation
-==================
+P2PSP user installation
+=======================
 
-# As user:
+# Install [P2PSP](https://github.com/P2PSP/p2psp): Ddownload and
+  expand the ZIP file.
 
-## Windows
-
-1. Install (as Administrator) [Python 3](https://www.python.org/downloads).
-
-2. Install [VLC](http://www.videolan.org/vlc/download-windows.html).
-
-3. Install [P2PSP](https://github.com/P2PSP/p2psp) (download ZIP file).
-
-# As contributor:
-
-## Windows
+# Windows
 
 1. Install (as Administrator) [Python 3](https://www.python.org/downloads).
 
 2. Install [VLC](http://www.videolan.org/vlc/download-windows.html).
 
-3. Install [Git](https://git-scm.com/download/win).
+3. Go to Install P2PSP:
 
-4. Install [P2PSP](https://github.com/P2PSP/p2psp). Run:
+# Mac
 
-	'''
-	git clone git@github.com:P2PSP/p2psp.git
-	'''
+1. Install [Python 3](https://www.python.org/downloads/mac-osx/).
 
-(remember that you will need to upload your public key in GitHub in order to push)
+2. Install [VLC](http://www.videolan.org/vlc/download-macosx.html).
 
+3. Go to "Install [P2PSP](https://github.com/P2PSP/p2psp)".
 
+# Ubuntu Linux
+
+1. Install Python 3:
+
+   '''
+   sudo apt-get update
+   sudo apt-get install python3
+   '''
+
+2. Install VLC:
+
+   '''
+   sudo apt-get install vlc
+   '''
+
+3. Go to Install P2PSP:
+
+# Arch Linux
+
+1. Install Python 3:
+
+   '''
+   sudo pacman -Sy
+   sudo pacman -S python3
+   '''
+
+2. Install VLC:
+
+   '''
+   sudo pacman -S vlc
+   '''
+
+3. Go to Install P2PSP:
 
