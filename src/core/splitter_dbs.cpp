@@ -35,6 +35,19 @@ SplitterDBS::SplitterDBS()
 
 SplitterDBS::~SplitterDBS() {}
 
+void SplitterDBS::SendTheListSize(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+  char message[2];
+
+  LOG("Sending the number of monitors " << monitor_number_);
+  (*(uint16_t *)&message) = htons(monitor_number_);
+  peer_serve_socket->send(asio::buffer(message));
+
+  LOG("Sending a list of peers of size " << to_string(peer_list_.size()));
+  (*(uint16_t *)&message) = htons(peer_list_.size());
+  peer_serve_socket->send(asio::buffer(message));
+}
+
 void SplitterDBS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
   if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
     peer_list_.push_back(peer);
