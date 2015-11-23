@@ -1,5 +1,15 @@
-P2PSP contribute
-================
+P2PSP developer contribution
+============================
+
+# Install [P2PSP](https://github.com/P2PSP/p2psp):
+
+	'''
+	git clone git@github.com:P2PSP/p2psp.git
+	'''
+
+(remember that you will need to upload your public key in GitHub in
+order to push)
+
 
 # Windows
 
@@ -9,13 +19,8 @@ P2PSP contribute
 
 3. Install [Git](https://git-scm.com/download/win).
 
-4. Install [P2PSP](https://github.com/P2PSP/p2psp). Run:
+4. Go to [P2PSP](https://github.com/P2PSP/p2psp).
 
-	'''
-	git clone git@github.com:P2PSP/p2psp.git
-	'''
-
-(remember that you will need to upload your public key in GitHub in order to push)
 
 # Mac
 
