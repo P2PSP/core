@@ -74,6 +74,18 @@ void SplitterDBS::SendTheListOfPeers(
   }
 }
 
+void SplitterDBS::SendThePeerEndpoint(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+  asio::ip::tcp::endpoint peer_endpoint = peer_serve_socket->remote_endpoint();
+
+  char message[6];
+  in_addr addr;
+  inet_aton(peer_endpoint.address().to_string().c_str(), &addr);
+  (*(in_addr *)&message) = addr;
+  (*(uint16_t *)(message + 4)) = htons(peer_endpoint.port());
+  peer_serve_socket->send(asio::buffer(message));
+}
+
 void SplitterDBS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
   if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
     peer_list_.push_back(peer);
