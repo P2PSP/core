@@ -41,6 +41,9 @@ class PeerDBS : PeerIMS {
   int number_of_monitors_;
   int number_of_peers_;
 
+  int receive_and_feed_counter_;
+  std::vector<char> receive_and_feed_previous_;
+
   ip::udp::endpoint me_;
 
  public:
@@ -53,7 +56,7 @@ class PeerDBS : PeerIMS {
   void ReceiveTheListOfPeers();
   void ReceiveMyEndpoint();
   void ListenToTheTeam();
-  void ProcessMessage(std::vector<char>, ip::udp::endpoint);
+  int ProcessMessage(std::vector<char>, ip::udp::endpoint);
   void LogMessage(std::string);
   void BuildLogMessage(std::string);
   float CalcBufferCorrectness();

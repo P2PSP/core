@@ -138,45 +138,165 @@ void PeerDBS::ListenToTheTeam() {
   team_socket_.set_option(socket_base::linger(true, 30));
 }
 
-void PeerDBS::ProcessMessage(std::vector<char> message,
-                             ip::udp::endpoint sender) {
+int PeerDBS::ProcessMessage(std::vector<char> message,
+                            ip::udp::endpoint sender) {
   // Now, receive and send.
 
-  // if len(message) == struct.calcsize(self.message_format):
+  // TODO: remove hardcoded values
+  if (message.size() == 1026) {
+    // A video chunk has been received
 
-  // A video chunk has been received
+    ip::udp::endpoint peer;
 
-  uint16_t chunk_number = ntohs(*(short *)message.data());
+    uint16_t chunk_number = ntohs(*(short *)message.data());
 
-  chunks_[chunk_number % buffer_size_] = {
-      std::vector<char>(message.data() + sizeof(uint16_t),
-                        message.data() + message.size()),
-      true};
+    chunks_[chunk_number % buffer_size_] = {
+        std::vector<char>(message.data() + sizeof(uint16_t),
+                          message.data() + message.size()),
+        true};
 
-  received_counter_++;
+    received_counter_++;
 
-  if (sender == splitter_) {
-    // Send the previous chunk in burst sending
-    // mode if the chunk has not been sent to all
-    // the peers of the list of peers.
+    if (sender == splitter_) {
+      // Send the previous chunk in burst sending
+      // mode if the chunk has not been sent to all
+      // the peers of the list of peers.
 
-    // debug
+      // debug
 
-    LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
-            << std::to_string(team_socket_.local_endpoint().port()) << ")"
-            << "<-" << std::to_string(chunk_number) << "-"
-            << "(" << sender.address().to_string() << ","
-            << std::to_string(sender.port()) << ")");
-    // TODO: if __debug__: # No aqui. Tal vez, DIS
+      LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
+              << std::to_string(team_socket_.local_endpoint().port()) << ")"
+              << "<-" << std::to_string(chunk_number) << "-"
+              << "(" << sender.address().to_string() << ","
+              << std::to_string(sender.port()) << ")");
+      // TODO: if __debug__: # No aqui. Tal vez, DIS
 
-    if (kLogging) {
-      LogMessage("buffer correctnes " +
-                 std::to_string(CalcBufferCorrectness()));
-      LogMessage("buffer filling " + std::to_string(CalcBufferFilling()));
+      if (kLogging) {
+        LogMessage("buffer correctnes " +
+                   std::to_string(CalcBufferCorrectness()));
+        LogMessage("buffer filling " + std::to_string(CalcBufferFilling()));
+      }
+
+      while (receive_and_feed_counter_ < peer_list_.size() &&
+             receive_and_feed_counter_ > 0) {
+        peer = peer_list_[receive_and_feed_counter_];
+        team_socket_.send_to(::buffer(receive_and_feed_previous_), peer);
+        sendto_counter_++;
+
+        LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
+                << std::to_string(team_socket_.local_endpoint().port()) << ")"
+                << "-" << std::to_string(ntohs(receive_and_feed_previous_[0]))
+                << "->"
+                << "(" << peer.address().to_string() << ","
+                << std::to_string(peer.port()) << ")");
+
+        debt_[peer]++;
+
+        if (debt_[peer] > kMaxChunkDebt) {
+          LOG("(" << peer.address().to_string() << ","
+                  << std::to_string(peer.port()) << ")"
+                  << " removed by unsupportive (" +
+                         std::to_string(debt_[peer]) + " lossess)");
+          debt_.erase(peer);
+          peer_list_.erase(
+              std::find(peer_list_.begin(), peer_list_.end(), peer));
+        }
+
+        receive_and_feed_counter_++;
+      }
+
+      receive_and_feed_counter_ = 0;
+      receive_and_feed_previous_ = message;
+    } else {
+      LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
+              << std::to_string(team_socket_.local_endpoint().port()) << ")"
+              << "<-" << std::to_string(chunk_number) << "-"
+              << "(" << sender.address().to_string() << ","
+              << std::to_string(sender.port()) << ")");
+
+      if (peer_list_.end() ==
+          std::find(peer_list_.begin(), peer_list_.end(), sender)) {
+        peer_list_.push_back(sender);
+        debt_[sender] = 0;
+        LOG("(" << sender.address().to_string() << ","
+                << std::to_string(sender.port()) << ")"
+                << " added by chunk " << std::to_string(chunk_number));
+      } else {
+        debt_[sender]--;
+      }
+    }
+
+    // A new chunk has arrived and the previous must be forwarded to next peer
+    // of
+    // the list of peers.
+
+    std::vector<char> empty(1024);
+    std::memset(empty.data(), 0, empty.size());
+
+    if (receive_and_feed_counter_ < peer_list_.size() &&
+        receive_and_feed_previous_ != empty) {
+      // Send the previous chunk in congestion avoiding mode.
+
+      peer = peer_list_[receive_and_feed_counter_];
+      team_socket_.send_to(::buffer(receive_and_feed_previous_), peer);
+      sendto_counter_++;
+
+      debt_[peer]++;
+
+      if (debt_[peer] > kMaxChunkDebt) {
+        LOG("(" << peer.address().to_string() << ","
+                << std::to_string(peer.port()) << ")"
+                << " removed by unsupportive (" + std::to_string(debt_[peer]) +
+                       " lossess)");
+        debt_.erase(peer);
+        peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), peer));
+      }
+
+      LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
+              << std::to_string(team_socket_.local_endpoint().port()) << ")"
+              << "-" << std::to_string(ntohs(receive_and_feed_previous_[0]))
+              << "->"
+              << "(" << peer.address().to_string() << ","
+              << std::to_string(peer.port()) << ")");
+
+      receive_and_feed_counter_++;
+    }
+  } else {
+    // A control chunk has been received
+
+    LOG("Control message received");
+
+    if (message[0] == 'H') {
+      if (peer_list_.end() ==
+          std::find(peer_list_.begin(), peer_list_.end(), sender)) {
+        // The peer is new
+        peer_list_.push_back(sender);
+        debt_[sender] = 0;
+        LOG("(" << sender.address().to_string() << ","
+                << std::to_string(sender.port()) << ")"
+                << " added by [hello] ");
+      } else {
+        if (peer_list_.end() !=
+            std::find(peer_list_.begin(), peer_list_.end(), sender)) {
+          // sys.stdout.write(Color.red)
+          LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
+                  << std::to_string(team_socket_.local_endpoint().port())
+                  << ") \b: received \"goodbye\" from ("
+                  << sender.address().to_string() << ","
+                  << std::to_string(sender.port()) << ")");
+          // sys.stdout.write(Color.none)
+          peer_list_.erase(
+              std::find(peer_list_.begin(), peer_list_.end(), sender));
+          debt_.erase(sender);
+        }
+      }
+
+      return -1;
     }
   }
+  
+  return -1;
 }
-
 void PeerDBS::LogMessage(std::string message) {
   // TODO: self.LOG_FILE.write(self.build_log_message(message) + "\n")
   // print >>self.LOG_FILE, self.build_log_message(message)
