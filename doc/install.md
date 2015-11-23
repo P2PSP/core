@@ -1,6 +1,24 @@
 P2PSP usage
 ===========
 
+# As user:
+
+# Windows
+
+1. Install (as Administrator) [Python 3](https://www.python.org/downloads).
+
+2. Install [P2PSP](https://github.com/P2PSP/p2psp) (download ZIP file).
+
+3. Install [VLC](http://www.videolan.org/vlc/download-windows.html)
+
+# As contributor:
+
+# Windows
+
+1. Install [Git](https://git-scm.com/download/win).
+
+2. Install (as Administrator) [Python 3](https://www.python.org/downloads).
+
 1. Download P2PSP:
 
 As a contributor of P2PSP:
