@@ -126,6 +126,20 @@ void SplitterDBS::HandleAPeerArrival(
   // TODO: In original code, incoming_peer is returned, but is not used
 }
 
+size_t SplitterDBS::ReceiveMessage(std::vector<char> &message,
+                                   boost::asio::ip::udp::endpoint &endpoint) {
+  system::error_code ec;
+
+  size_t bytes_transferred =
+      team_socket_.receive_from(asio::buffer(message), endpoint, 0, ec);
+
+  if (ec) {
+    LOG("Unexepected error: " << ec.message());
+  }
+
+  return bytes_transferred;
+}
+
 void SplitterDBS::IncrementUnsupportivityOfPeer(
     boost::asio::ip::udp::endpoint peer) {
   bool peerExists = true;
