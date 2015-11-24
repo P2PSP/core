@@ -35,6 +35,16 @@ SplitterDBS::SplitterDBS()
 
 SplitterDBS::~SplitterDBS() {}
 
+void SplitterDBS::SendMagicFlags(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+  char message[1];
+
+  // TODO: Replace 0 with Common.DBS
+  message[0] = 0;
+  peer_serve_socket->send(asio::buffer(message));
+  LOG("Magic flags = " << bitset<8>(message[0]));
+}
+
 void SplitterDBS::SendTheListSize(
     std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   char message[2];
@@ -89,8 +99,8 @@ void SplitterDBS::SendThePeerEndpoint(
 void SplitterDBS::SendConfiguration(
     std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
   SplitterIMS::SendConfiguration(sock);
-  SplitterDBS::SendThePeerEndpoint(sock);
-  // TODO: Send magic flags
+  SendThePeerEndpoint(sock);
+  SendMagicFlags(sock);
 }
 
 void SplitterDBS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
