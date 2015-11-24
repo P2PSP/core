@@ -10,12 +10,10 @@ Please, first head over [User Manual](../user-manual/README.md).
 
 1. Watch the default channel:
 <!-- {{{  -->
-
 	```
 	./peer.py &
 	vlc http://localhost:9999
 	```
-
 <!-- }}} -->
 
 2. Change the local port (9998) to communicate with VLC:
