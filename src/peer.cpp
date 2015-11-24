@@ -1,12 +1,13 @@
 
 // TODO: include all needed libraries
 #include "core/peer_ims.h"
+#include "core/peer_dbs.h"
 #include "util/trace.h"
 
 int main(int argc, const char* argv[]) {
   // TODO: Argument parser. Decide how to implement it
 
-  p2psp::PeerIMS peer;
+  p2psp::PeerDBS peer;
 
   peer.WaitForThePlayer();
   peer.ConnectToTheSplitter();
@@ -25,6 +26,45 @@ int main(int argc, const char* argv[]) {
   if (peer.GetMcastAddr() == "0.0.0.0") {
     // TODO: IP multicast mode
     // TODO: DBS
+
+    peer.ReceiveMyEndpoint();
+    peer.ReceiveMagicFlags();
+    // LOG("Magic flags =" << std::bitset<8>(peer.magic_flags));
+    peer.ReceiveTheNumberOfPeers();
+    LOG("Number of peers in the team (excluding me) ="
+        << std::to_string(peer.GetNumberOfPeers()));
+    LOG("Am I a monitor peer? =" << (peer.AmIAMonitor() ? "True" : "False"));
+    peer.ListenToTheTeam();
+    peer.ReceiveTheListOfPeers();
+    LOG("List of peers received");
+
+    // After receiving the list of peers, the peer can check whether is a
+    // monitor peer or not (only the first arriving peers are monitors)
+
+    if (peer.AmIAMonitor()) {
+      // TODO: peer = Monitor_DBS(peer)
+      LOG("Monitor DBS enabled");
+
+      // The peer is a monitor. Now it's time to know the sets of rules that
+      // control this team.
+
+      // TODO: Delete this
+      // if (peer.magic_flags & Common.LRS):
+      // peer = Monitor_LRS(peer)
+      // _print_("Monitor LRS enabled")
+      // if (peer.magic_flags & Common.NTS):
+      //  peer = Monitor_NTS(peer)
+      //  _print_("Monitor NTS enabled")
+    }else{
+      
+      //peer = Peer_DBS(peer)
+      LOG("Peer DBS enabled");
+      
+      // The peer is a normal peer. Let's know the sets of rules that control this team.
+      
+      
+      
+    }
 
     // TODO: Decide type of peer to work with
   } else {

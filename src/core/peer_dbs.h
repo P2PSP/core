@@ -26,7 +26,7 @@ using namespace boost::asio;
 
 namespace p2psp {
 
-class PeerDBS : PeerIMS {
+class PeerDBS : public PeerIMS {
  protected:
   int kMaxChunkDebt = 128;  // Peer's rejecting threshold
 
@@ -66,6 +66,9 @@ class PeerDBS : PeerIMS {
   void PoliteFarewell();
   void BufferData();
   void Run();
+  bool AmIAMonitor();
+
+  int GetNumberOfPeers();
 };
 }
 

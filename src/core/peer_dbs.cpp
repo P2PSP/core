@@ -34,10 +34,7 @@ void PeerDBS::SayGoodbye(ip::udp::endpoint node) {
 
 void PeerDBS::ReceiveMagicFlags() {
   std::vector<char> magic_flags(1);
-  ip::udp::endpoint sender;
-
-  team_socket_.receive_from(buffer(magic_flags), sender);
-
+  read(splitter_socket_, ::buffer(magic_flags));
   LOG("Magic flags =" << std::bitset<8>(magic_flags[0]));
 }
 
@@ -379,4 +376,17 @@ void PeerDBS::Run() {
   PeerIMS::Run();
   PoliteFarewell();
 }
+
+bool PeerDBS::AmIAMonitor() {
+  // Only the first peers of the team are monitor peers
+  return number_of_peers_ < number_of_monitors_;
+
+  // message = self.splitter_socket.recv(struct.calcsize("c"))
+  // if struct.unpack("c", message)[0] == '1':
+  //    return True
+  // else:
+  //    return False
+}
+
+int PeerDBS::GetNumberOfPeers() { return number_of_peers_; }
 }
