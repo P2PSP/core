@@ -222,6 +222,39 @@ void SplitterDBS::ProcessGoodbye(boost::asio::ip::udp::endpoint peer) {
   RemovePeer(peer);
 }
 
+void SplitterDBS::ModerateTheTeam() {
+  std::vector<char> message(2);
+  asio::ip::udp::endpoint sender;
+
+  while (alive_) {
+    size_t bytes_transferred = ReceiveMessage(message, sender);
+
+    if (bytes_transferred == 2) {
+      /*
+       The peer complains about a lost chunk.
+
+       In this situation, the splitter counts the number of
+       complains. If this number exceeds a threshold, the
+       unsupportive peer is expelled from the
+       team.
+       */
+
+      uint16_t lost_chunk_number = GetLostChunkNumber(message);
+      ProcessLostChunk(lost_chunk_number, sender);
+
+    } else {
+      /*
+       The peer wants to leave the team.
+
+       A !2-length payload means that the peer wants to go
+       away.
+       */
+
+      ProcessGoodbye(sender);
+    }
+  }
+}
+
 void SplitterDBS::SetupTeamSocket() {
   system::error_code ec;
   asio::ip::udp::endpoint endpoint(asio::ip::udp::v4(), port_);
