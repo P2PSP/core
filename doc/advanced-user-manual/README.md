@@ -4,14 +4,20 @@ P2PSP "advanced" manual
 Please, first head over [User Manual](../user-manual/README.md).
 
 # Peer:
+
 <!-- {{{  -->
+
 1. Watch the default channel:
+
 <!-- {{{  -->
-    ```
-    ./peer.py &
-    vlc http://localhost:9999
-    ```
+
+```
+./peer.py &
+ vlc http://localhost:9999
+```
+
 <!-- }}} -->
+
 2. Change the local port (9998) to communicate with VLC:<!-- {{{  -->	```	./peer.py --player_port=9998 &	vlc http://localhost:9998 &	```<!-- }}} -->3. Watch a particular channel (in the port 4554):<!-- {{{  -->    ```    ./peer.py --splitter_port=4554 &    vlc http://localhost:9999 &    ```<!-- }}} -->    4. Use a specific team port (8888) for communicating with the rest of   the team (you should use this feature, for example, after having   created a NAT entry manualy):<!-- {{{  -->    ```    ./peer.py --team_port=8888 &    vlc http://localhost:9999 &    ```<!-- }}} -->5. Use a particular splitter host (1.2.3.4):<!-- {{{  -->    ```    ./peer.py --splitter_host=1.2.3.4 &    vlc http://localhost:9999 &    ```<!-- }}} -->6. Decript a stream using the keyword "key" (not yet implemented):<!-- {{{  -->    ```    ./peer.py --keyword=key &    vlc http://localhost:9999 &    ```<!-- }}} -->7. Join a private team using the password "pass" (not yet implemented):<!-- {{{  -->    ```    ./peer.py --password=pass &    vlc http://localhost:9999 &    ```<!-- }}} -->8. Deliberately loss a chunk of each 100 (usually for testing purposes):<!-- {{{  -->    ```    ./peer.py --chunk_loss_period=100    ```<!-- }}} --><!-- }}} -->
 
 # Splitter:
