@@ -5,6 +5,9 @@ Please, first head over [User Manual](../user-manual/README.md).
 
 # Peer:
 
+1. proando
+2. and
+
 1. Watch the default channel:
 <!-- {{{  -->
 ```
