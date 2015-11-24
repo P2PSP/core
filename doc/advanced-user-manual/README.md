@@ -11,10 +11,10 @@ Please, first head over [User Manual](../user-manual/README.md).
 
 <!-- {{{  -->
 
-```
-./peer.py &
- vlc http://localhost:9999
-```
+    ```
+    ./peer.py &
+    vlc http://localhost:9999
+    ```
 
 <!-- }}} -->
 
