@@ -3,7 +3,7 @@ P2PSP "advanced" manual
 
 Please, first head over [User Manual](../user-manual/README.md).
 
-# Peer manual:
+# Peer:
 
 1. Watch the default channel:
 <!-- {{{  -->
@@ -88,7 +88,7 @@ Please, first head over [User Manual](../user-manual/README.md).
 
 <!-- }}} -->
 
-# Splitter manual:
+# Splitter:
 <!-- {{{  -->
 
 1. Create a channel using the default parameters (run "splitter --help"):
