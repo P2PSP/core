@@ -11,13 +11,13 @@ The following people have been involved in the design of the P2PSP:
 
 The following people have contributed significantly to the implementation of the P2PSP:
 
-Cristóbal Medina López
-Juan Alvaro Muñoz Naranjo
-José Juan Sánchez Hernández
-Max Mertens
-Ilshat Shakirov
-Prince Kumar
-Mahmut CAVDAR
-Nikhil Ramesh
-Vicente González Ruiz
+* Cristóbal Medina López
+* Juan Alvaro Muñoz Naranjo
+* José Juan Sánchez Hernández
+* Max Mertens
+* Ilshat Shakirov
+* Prince Kumar
+* Mahmut CAVDAR
+* Nikhil Ramesh
+* Vicente González Ruiz
 
