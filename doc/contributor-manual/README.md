@@ -1,13 +1,13 @@
-P2PSP developer contribution
-============================
+P2PSP contributor's manual
+==========================
 
 # Install [P2PSP](https://github.com/P2PSP/p2psp):
 
-	'''
+	```
 	git clone git@github.com:P2PSP/p2psp.git
-	'''
+	```
 
-(remember that you will need to upload your public key in GitHub in
+(remember that you will need to upload your public key to GitHub in
 order to push)
 
 

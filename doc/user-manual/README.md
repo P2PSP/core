@@ -1,5 +1,5 @@
-P2PSP user manual
-=================
+P2PSP user's manual
+===================
 
 # Step 1: Install [P2PSP](https://github.com/P2PSP/p2psp)
 <!-- {{{  -->
