@@ -371,6 +371,10 @@ void PeerDBS::BufferData() {
 
   PeerIMS::BufferData();
 }
+  
+  void PeerDBS::Start() {
+    thread_.reset(new boost::thread(boost::bind(&PeerDBS::Run, this)));
+  }
 
 void PeerDBS::Run() {
   PeerIMS::Run();

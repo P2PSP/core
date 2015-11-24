@@ -65,6 +65,7 @@ class PeerDBS : public PeerIMS {
   float CalcBufferFilling();
   void PoliteFarewell();
   void BufferData();
+  void Start();
   void Run();
   bool AmIAMonitor();
 
