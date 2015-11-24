@@ -8,8 +8,6 @@ Please, first head over [User Manual](../user-manual/README.md).
 1. Watch the default channel:
 <!-- {{{  -->
 
-<!-- {{{  -->
-
     ```
     ./peer.py &
     vlc http://localhost:9999
