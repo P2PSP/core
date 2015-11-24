@@ -25,6 +25,7 @@ int main(int argc, const char *argv[]) {
   splitterIMS.Start();*/
 
   p2psp::SplitterDBS splitterDBS;
+  splitterDBS.Start();
 
   return 0;
 }

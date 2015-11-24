@@ -104,12 +104,13 @@ void SplitterDBS::SendConfiguration(
 }
 
 void SplitterDBS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
-  if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
+  if (find(peer_list_.begin(), peer_list_.end(), peer) == peer_list_.end()) {
     peer_list_.push_back(peer);
-    losses_[peer] = 0;
-    LOG("Inserted peer (" << peer.address().to_string() << ", "
-                          << to_string(peer.port()) << ")");
   }
+
+  losses_[peer] = 0;
+  LOG("Inserted peer (" << peer.address().to_string() << ", "
+                        << to_string(peer.port()) << ")");
 }
 
 void SplitterDBS::HandleAPeerArrival(
@@ -168,8 +169,8 @@ void SplitterDBS::IncrementUnsupportivityOfPeer(
 
     if (losses_[peer] > max_chunk_loss_) {
       // TODO: Check this condition in original code, is it correct?
-      if (find(peer_list_.begin() + monitor_number_, peer_list_.end(), peer) ==
-          peer_list_.end()) {
+      if (find(peer_list_.begin(), peer_list_.begin() + monitor_number_,
+               peer) == peer_list_.end()) {
         LOG(ss.str() << " removed");
         RemovePeer(peer);
       }
@@ -309,9 +310,7 @@ void SplitterDBS::Run() {
    "reset_counters_thread" are new.
    */
 
-  LOG(peer_connection_socket_.local_endpoint().address().to_string() + ", "
-      << to_string(peer_connection_socket_.local_endpoint().port())
-      << ": waiting for the monitor peers ...");
+  LOG("waiting for the monitor peers ...");
 
   std::shared_ptr<asio::ip::tcp::socket> connection =
       make_shared<asio::ip::tcp::socket>(boost::ref(io_service_));
