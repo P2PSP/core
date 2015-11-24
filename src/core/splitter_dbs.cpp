@@ -299,4 +299,62 @@ void SplitterDBS::ResetCountersThread() {
 void SplitterDBS::ComputeNextPeerNumber() {
   peer_number_ = (peer_number_ + 1) % peer_list_.size();
 }
+
+void SplitterDBS::Run() {
+  ReceiveTheHeader();
+
+  /* A DBS splitter runs 4 threads. The main one and the
+   "handle_arrivals" thread are equivalent to the daemons used
+   by the IMS splitter. "moderate_the_team" and
+   "reset_counters_thread" are new.
+   */
+
+  LOG(peer_connection_socket_.local_endpoint().address().to_string() + ", "
+      << to_string(peer_connection_socket_.local_endpoint().port())
+      << ": waiting for the monitor peers ...");
+
+  std::shared_ptr<asio::ip::tcp::socket> connection =
+      make_shared<asio::ip::tcp::socket>(boost::ref(io_service_));
+  acceptor_.accept(*connection);
+  HandleAPeerArrival(connection);
+
+  // Threads
+  thread t1(bind(&SplitterIMS::HandleArrivals, this));
+  thread t2(bind(&SplitterDBS::ModerateTheTeam, this));
+  thread t3(bind(&SplitterDBS::ResetCountersThread, this));
+
+  vector<char> message(sizeof(uint16_t) + chunk_size_);
+  asio::ip::udp::endpoint peer;
+
+  while (alive_) {
+    asio::streambuf chunk;
+    size_t bytes_transferred = ReceiveChunk(chunk);
+    try {
+      peer = peer_list_[peer_number_];
+
+      (*(uint16_t *)message.data()) = htons(chunk_number_);
+
+      copy(asio::buffer_cast<const char *>(chunk.data()),
+           asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
+           message.data() + sizeof(uint16_t));
+
+      SendChunk(message, peer);
+
+      destination_of_chunk_[chunk_number_ % buffer_size_] = peer;
+      chunk_number_ = (chunk_number_ + 1) % 65536;
+      ComputeNextPeerNumber();
+    } catch (const std::out_of_range &oor) {
+      LOG("The monitor peer has died!");
+    }
+
+    chunk.consume(bytes_transferred);
+  }
+}
+
+void SplitterDBS::Start() {
+  LOG("Start");
+  thread t(bind(&SplitterDBS::Run, this));
+  this_thread::sleep(posix_time::milliseconds(60000));
+  LOG("Exiting");
+}
 }
