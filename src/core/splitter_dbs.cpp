@@ -35,6 +35,64 @@ SplitterDBS::SplitterDBS()
 
 SplitterDBS::~SplitterDBS() {}
 
+void SplitterDBS::SendTheListSize(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+  char message[2];
+
+  LOG("Sending the number of monitors " << monitor_number_);
+  (*(uint16_t *)&message) = htons(monitor_number_);
+  peer_serve_socket->send(asio::buffer(message));
+
+  LOG("Sending a list of peers of size " << to_string(peer_list_.size()));
+  (*(uint16_t *)&message) = htons(peer_list_.size());
+  peer_serve_socket->send(asio::buffer(message));
+}
+
+void SplitterDBS::SendTheListOfPeers(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+  SendTheListSize(peer_serve_socket);
+
+  // TODO: Find a __debug__ flag in c++
+  int counter = 0;
+  // End TODO
+
+  char message[6];
+  in_addr addr;
+
+  for (std::vector<asio::ip::udp::endpoint>::iterator it = peer_list_.begin();
+       it != peer_list_.end(); ++it) {
+    inet_aton(it->address().to_string().c_str(), &addr);
+    (*(in_addr *)&message) = addr;
+    (*(uint16_t *)(message + 4)) = htons(it->port());
+    peer_serve_socket->send(asio::buffer(message));
+
+    // TODO: Find a __debug__ flag in c++
+    LOG(to_string(counter) << ", (" << it->address().to_string() << ", "
+                           << to_string(it->port()) << ")");
+    counter++;
+    // End TODO
+  }
+}
+
+void SplitterDBS::SendThePeerEndpoint(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+  asio::ip::tcp::endpoint peer_endpoint = peer_serve_socket->remote_endpoint();
+
+  char message[6];
+  in_addr addr;
+  inet_aton(peer_endpoint.address().to_string().c_str(), &addr);
+  (*(in_addr *)&message) = addr;
+  (*(uint16_t *)(message + 4)) = htons(peer_endpoint.port());
+  peer_serve_socket->send(asio::buffer(message));
+}
+
+void SplitterDBS::SendConfiguration(
+    std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
+  SplitterIMS::SendConfiguration(sock);
+  SplitterDBS::SendThePeerEndpoint(sock);
+  // TODO: Send magic flags
+}
+
 void SplitterDBS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
   if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
     peer_list_.push_back(peer);
@@ -42,6 +100,44 @@ void SplitterDBS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
     LOG("Inserted peer (" << peer.address().to_string() << ", "
                           << to_string(peer.port()) << ")");
   }
+}
+
+void SplitterDBS::HandleAPeerArrival(
+    std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) {
+  /* In the DBS, the splitter sends to the incomming peer the
+   list of peers. Notice that the transmission of the list of
+   peers (something that could need some time if the team is
+   big or if the peer is slow) is done in a separate thread. This
+   helps to avoid DoS (Denial of Service) attacks.
+   */
+
+  asio::ip::tcp::endpoint incoming_peer = serve_socket->remote_endpoint();
+
+  LOG("Accepted connection from peer ("
+      << incoming_peer.address().to_string() << ", "
+      << to_string(incoming_peer.port()) << ")");
+
+  SendConfiguration(serve_socket);
+  SendTheListOfPeers(serve_socket);
+  serve_socket->close();
+  InsertPeer(boost::asio::ip::udp::endpoint(incoming_peer.address(),
+                                            incoming_peer.port()));
+
+  // TODO: In original code, incoming_peer is returned, but is not used
+}
+
+size_t SplitterDBS::ReceiveMessage(std::vector<char> &message,
+                                   boost::asio::ip::udp::endpoint &endpoint) {
+  system::error_code ec;
+
+  size_t bytes_transferred =
+      team_socket_.receive_from(asio::buffer(message), endpoint, 0, ec);
+
+  if (ec) {
+    LOG("Unexepected error: " << ec.message());
+  }
+
+  return bytes_transferred;
 }
 
 void SplitterDBS::IncrementUnsupportivityOfPeer(
@@ -94,6 +190,11 @@ void SplitterDBS::ProcessLostChunk(int lost_chunk_number,
   // End TODO
 
   IncrementUnsupportivityOfPeer(destination);
+}
+
+uint16_t SplitterDBS::GetLostChunkNumber(std::vector<char> &message) {
+  // TODO: Check if this is totally correct
+  return ntohs(*(uint16_t *)message.data());
 }
 
 asio::ip::udp::endpoint SplitterDBS::GetLosser(int lost_chunk_number) {
