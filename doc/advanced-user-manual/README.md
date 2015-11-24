@@ -217,7 +217,7 @@ Please, first head over [User Manual](../user-manual/README.md).
   between different VirtualBox guests:
 <!-- {{{  -->
 
-Run:
+	Run:
 
     ```
     VBoxManage natnetwork add -t localnet -n "192.168.15.0/24" -e -h on
