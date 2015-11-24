@@ -198,24 +198,30 @@ Please, first head over [User Manual](../user-manual/README.md).
 * Create (automatically) a local team:
 <!-- {{{  -->
 
+    ```
     # Remember first to feed the source server!!!
     ./tools/create_a_team.sh # Create the team
+    ```
 
 <!-- }}} -->
 
 * To run in debug mode:
 <!-- {{{  -->
 
-        python -d example.py
+    ```
+    python -d example.py
+    ```
 
 <!-- }}} -->
 
 * Autocomplete support:
 <!-- {{{  -->
 
-	sudo pip install argcomplete
-	sudo activate-global-python-argcomplete
-
+    ```
+    sudo pip install argcomplete
+    sudo activate-global-python-argcomplete
+    ```
+	
 <!-- }}} -->
         
 * Using VirtualBox for creating a NATed network in which run a team
