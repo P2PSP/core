@@ -16,6 +16,16 @@ P2PSP user manual
 <!-- {{{  -->
 
 1. Install (as Administrator) [Python 3](https://www.python.org/downloads).
+2. (Optional) Install
+   [colorama](https://pypi.python.org/pypi/coloram). In a console, run
+   (if you forget to update the PATH variable during the installation,
+   go to Computer -> Properties -> System Advanced Configuration ->
+   Environment variables, search the PATH variable and add the
+   Python's directory):
+
+  ```
+  python setup.py install
+  ```
 
 <!-- }}} -->
 
@@ -23,7 +33,7 @@ P2PSP user manual
 
 <!-- {{{  -->
 
-1. Install [Python 3](https://www.python.org/downloads/mac-osx/).
+Install [Python 3](https://www.python.org/downloads/mac-osx/).
 
 <!-- }}} -->
 
