@@ -4,6 +4,7 @@ P2PSP "advanced" manual
 Please, first head over [User Manual](../user-manual/README.md).
 
 # Peer:
+<!-- {{{  -->
 
 1. Watch the default channel:
 <!-- {{{  -->
@@ -156,6 +157,7 @@ Please, first head over [User Manual](../user-manual/README.md).
 <!-- }}} -->
 
 # Miscellaneous:
+<!-- {{{  -->
 
 * Download
 [Big_Buck_Bunny_small.ogv](http://commons.wikimedia.org/wiki/File:Big_Buck_Bunny_small.ogv).
@@ -225,3 +227,4 @@ Please, first head over [User Manual](../user-manual/README.md).
 
 <!-- }}} -->
 
+<!-- }}} -->
