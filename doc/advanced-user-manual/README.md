@@ -8,20 +8,20 @@ Please, first head over [User Manual](../user-manual/README.md).
 1. Watch the default channel:
 <!-- {{{  -->
 
-    ```
-    ./peer.py &
-    vlc http://localhost:9999
-    ```
+```
+./peer.py &
+vlc http://localhost:9999
+```
 
 <!-- }}} -->
     
 2. Change the local port (9998) to communicate with VLC:
 <!-- {{{  -->
 
-    ```
-    ./peer.py --player_port=9998 &
-    vlc http://localhost:9998 &
-    ```
+```
+./peer.py --player_port=9998 &
+vlc http://localhost:9998 &
+```
 
 <!-- }}} -->
     
@@ -246,8 +246,8 @@ Please, first head over [User Manual](../user-manual/README.md).
 * Autocomplete support:
 <!-- {{{  -->
 
-        sudo pip install argcomplete
-        sudo activate-global-python-argcomplete
+	sudo pip install argcomplete
+	sudo activate-global-python-argcomplete
 
 <!-- }}} -->
         
