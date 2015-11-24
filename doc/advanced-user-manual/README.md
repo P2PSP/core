@@ -9,7 +9,6 @@ Please, first head over [User Manual](../user-manual/README.md).
 2. and
 
 1. Watch the default channel:
-
 <!-- {{{  -->
 
 	```
@@ -20,7 +19,6 @@ Please, first head over [User Manual](../user-manual/README.md).
 <!-- }}} -->
 
 2. Change the local port (9998) to communicate with VLC:
-
 <!-- {{{  -->
 
 	```
@@ -31,7 +29,6 @@ Please, first head over [User Manual](../user-manual/README.md).
 <!-- }}} -->
 
 3. Watch a particular channel (in the port 4554):
-
 <!-- {{{  -->
 
     ```
