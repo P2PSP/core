@@ -13,7 +13,7 @@ Please, first head over [User Manual](../user-manual/README.md).
 vlc http://localhost:9999
 ```
 
-<!-- }}} -->
+<!-- }}}  -->
     
 2. Change the local port (9998) to communicate with VLC:
 <!-- {{{  -->
@@ -23,7 +23,7 @@ vlc http://localhost:9999
 vlc http://localhost:9998 &
 ```
 
-<!-- }}} -->
+<!-- }}}  -->
     
 3. Watch a particular channel (in the port 4554):
 <!-- {{{  -->
