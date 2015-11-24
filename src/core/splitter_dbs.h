@@ -56,6 +56,9 @@ class SplitterDBS : public SplitterIMS {
 
   std::vector<char> magic_flags_;
 
+  // Thread management
+  void Run();
+
  public:
   SplitterDBS();
   ~SplitterDBS();
@@ -85,6 +88,9 @@ class SplitterDBS : public SplitterIMS {
   void ResetCounters();
   void ResetCountersThread();
   void ComputeNextPeerNumber();
+
+  // Thread management
+  void Start();
 };
 }
 

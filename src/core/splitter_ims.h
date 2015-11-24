@@ -87,7 +87,7 @@ class SplitterIMS {
   int header_load_counter_;
 
   // Thread management
-  void Run();
+  virtual void Run();
 
  public:
   SplitterIMS();
@@ -119,7 +119,7 @@ class SplitterIMS {
   void ReceiveTheHeader();
 
   // Thread management
-  void Start();
+  virtual void Start();
 };
 }
 
