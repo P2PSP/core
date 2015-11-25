@@ -1,26 +1,14 @@
 P2PSP contributor's manual
 ==========================
 
-# Install [P2PSP](https://github.com/P2PSP/p2psp):
+1. Read the P2PSP documentation.
 
-	```
-	git clone git@github.com:P2PSP/p2psp.git
-	```
+2. Head over the P2PSP slides.
 
-(remember that you will need to upload your public key to GitHub in
-order to push)
+3. Read the P2PSP white paper.
 
+4. Read the TODO file.
 
-# Windows
+5. Contact to ... for futher instructions.
 
-1. Install (as Administrator) [Python 3](https://www.python.org/downloads).
-
-2. Install [VLC](http://www.videolan.org/vlc/download-windows.html).
-
-3. Install [Git](https://git-scm.com/download/win).
-
-4. Go to [P2PSP](https://github.com/P2PSP/p2psp).
-
-
-# Mac
-
+6. Thanks :-)
