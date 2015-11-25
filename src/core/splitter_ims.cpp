@@ -333,10 +333,10 @@ void SplitterIMS::Run() {
   }
 }
 
+bool SplitterIMS::isAlive() { return alive_; }
+
 void SplitterIMS::Start() {
   LOG("Start");
   thread_.reset(new boost::thread(boost::bind(&SplitterIMS::Run, this)));
-  this_thread::sleep(posix_time::milliseconds(60000));
-  LOG("Exiting");
 }
 }

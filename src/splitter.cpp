@@ -21,11 +21,15 @@ int main(int argc, const char *argv[]) {
 
   // TODO: Print information about the status of the splitter
 
-  /*p2psp::SplitterIMS splitterIMS;
-  splitterIMS.Start();*/
+  /*p2psp::SplitterIMS splitter;
+  splitter.Start();*/
 
-  p2psp::SplitterDBS splitterDBS;
-  splitterDBS.Start();
+  p2psp::SplitterDBS splitter;
+  splitter.Start();
+
+  while (splitter.isAlive()) {
+    boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+  }
 
   return 0;
 }

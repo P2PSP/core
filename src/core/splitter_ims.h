@@ -123,6 +123,9 @@ class SplitterIMS {
 
   // Thread management
   virtual void Start();
+
+  // Getters
+  bool isAlive();
 };
 }
 
