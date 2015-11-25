@@ -335,7 +335,7 @@ void SplitterIMS::Run() {
 
 void SplitterIMS::Start() {
   LOG("Start");
-  thread t(bind(&SplitterIMS::Run, this));
+  thread_.reset(new boost::thread(boost::bind(&SplitterIMS::Run, this)));
   this_thread::sleep(posix_time::milliseconds(60000));
   LOG("Exiting");
 }

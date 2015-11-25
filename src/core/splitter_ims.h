@@ -86,6 +86,9 @@ class SplitterIMS {
   int sendto_counter_;
   int header_load_counter_;
 
+  // Thread to start the Splitter
+  std::unique_ptr<boost::thread> thread_;
+
   // Thread management
   virtual void Run();
 

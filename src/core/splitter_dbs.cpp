@@ -352,7 +352,7 @@ void SplitterDBS::Run() {
 
 void SplitterDBS::Start() {
   LOG("Start");
-  thread t(bind(&SplitterDBS::Run, this));
+  thread_.reset(new boost::thread(boost::bind(&SplitterDBS::Run, this)));
   this_thread::sleep(posix_time::milliseconds(60000));
   LOG("Exiting");
 }
