@@ -329,7 +329,7 @@ void SplitterDBS::Run() {
     asio::streambuf chunk;
     size_t bytes_transferred = ReceiveChunk(chunk);
     try {
-      peer = peer_list_[peer_number_];
+      peer = peer_list_.at(peer_number_);
 
       (*(uint16_t *)message.data()) = htons(chunk_number_);
 
