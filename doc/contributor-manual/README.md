@@ -9,6 +9,6 @@ P2PSP contributor's manual
 
 4. Read the TODO file.
 
-5. Contact to ... for futher instructions.
+5. Contact to vicente.gonzalez.ruiz AT gmail.com for futher instructions.
 
 6. Thanks :-)
