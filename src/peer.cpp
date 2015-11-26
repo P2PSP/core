@@ -2,6 +2,7 @@
 // TODO: include all needed libraries
 #include "core/peer_ims.h"
 #include "core/peer_dbs.h"
+#include "core/common.h"
 #include "util/trace.h"
 
 int main(int argc, const char* argv[]) {
@@ -55,15 +56,12 @@ int main(int argc, const char* argv[]) {
       // if (peer.magic_flags & Common.NTS):
       //  peer = Monitor_NTS(peer)
       //  _print_("Monitor NTS enabled")
-    }else{
-      
-      //peer = Peer_DBS(peer)
+    } else {
+      // peer = Peer_DBS(peer)
       LOG("Peer DBS enabled");
-      
-      // The peer is a normal peer. Let's know the sets of rules that control this team.
-      
-      
-      
+
+      // The peer is a normal peer. Let's know the sets of rules that control
+      // this team.
     }
 
     // TODO: Decide type of peer to work with
@@ -124,9 +122,9 @@ int main(int argc, const char* argv[]) {
                   1000.0f;
     last_sendto_counter = peer.GetSendtoCounter();
 
-    /*try:
-    if Common.CONSOLE_MODE == False :
-      from gi.repository import GObject
+    // try:
+    if (p2psp::Common::kConsoleMode == false) {
+      /*from gi.repository import GObject
       try:
       from adapter import speed_adapter
       except ImportError as msg:
@@ -136,6 +134,7 @@ int main(int argc, const char* argv[]) {
                        ,str(len(peer.peer_list)+1))
       except Exception as msg:
       pass*/
+    }
 
     if (kbps_recvfrom > 0 and kbps_expected_recv > 0) {
       nice = 100.0 / (kbps_expected_recv / kbps_recvfrom) *
@@ -174,15 +173,16 @@ int main(int argc, const char* argv[]) {
         } else {
           break;
           LOG("");
-          /*
-            try:
-            if Common.CONSOLE_MODE == False :
-              GObject.idle_add(speed_adapter.update_widget,str(0)+'
-            kbps',str(0)+' kbps',str(0))
-              except  Exception as msg:
-              pass
-              }
-           */
+
+          // try:
+          if (p2psp::Common::kConsoleMode == false) {
+            /*GObject.idle_add(speed_adapter.update_widget,str(0)+'
+          kbps',str(0)+' kbps',str(0))
+            except  Exception as msg:
+            pass
+            }
+         */
+          }
         }
       }
     }
