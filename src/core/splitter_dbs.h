@@ -19,6 +19,7 @@
 #include <boost/unordered_map.hpp>
 #include "../util/trace.h"
 #include "splitter_ims.h"
+#include "common.h"
 
 namespace p2psp {
 class SplitterDBS : public SplitterIMS {
@@ -54,7 +55,7 @@ class SplitterDBS : public SplitterIMS {
                        std::size_t (*)(const boost::asio::ip::udp::endpoint &)>
       losses_;
 
-  std::vector<char> magic_flags_;
+  char magic_flags_;
 
   // Thread management
   void Run();

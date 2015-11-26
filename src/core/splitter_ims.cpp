@@ -326,8 +326,7 @@ void SplitterIMS::Run() {
 
     SendChunk(message, mcast_channel_);
 
-    // TODO: Use Common.MAX_CHUNK_NUMBER instead of a hard coded number
-    chunk_number_ = (chunk_number_ + 1) % 65536;
+    chunk_number_ = (chunk_number_ + 1) % Common::kMaxChunkNumber;
     LOG("Chunk number: " << to_string(chunk_number_));
     chunk.consume(bytes_transferred);
   }
