@@ -281,9 +281,7 @@ void SplitterDBS::ResetCounters() {
 void SplitterDBS::ResetCountersThread() {
   while (alive_) {
     ResetCounters();
-
-    // TODO: Use Common.COUNTERS_TIMING instead of a hard coded number
-    this_thread::sleep(posix_time::milliseconds(1000));
+    this_thread::sleep(posix_time::seconds(Common::kCountersTiming));
   }
 }
 
