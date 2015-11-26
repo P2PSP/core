@@ -16,7 +16,7 @@ namespace p2psp {
 class MonitorDBS : public PeerDBS {
   MonitorDBS();
   ~MonitorDBS();
-  void Complain(int);
+  void Complain(uint16_t);
   void FindNextChunk();
 };
 }
