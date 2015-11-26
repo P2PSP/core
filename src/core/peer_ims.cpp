@@ -265,12 +265,12 @@ void PeerIMS::BufferData() {
     // LOG("{:.2%}\r".format((1.0*x)/(buffer_size_/2)), end='');
     BUFFER_STATUS = (100 * x) / (buffer_size_ / 2.0f) + 1;
 
-    // if(!Common.CONSOLE_MODE){
-    //    GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
-    // }else{
-    //    pass
-    //}
-    // LOG("!", end='')
+    if (!Common::kConsoleMode) {
+      // GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
+    } else {
+      // pass
+    }
+    LOG("!");
     TraceSystem::logStream().flush();
 
     while (ProcessNextMessage() < 0)
@@ -384,16 +384,14 @@ int PeerIMS::FindNextChunk() {
   // print (".")
   // counter = 0
 
-  // TODO: change 65536 to Common.MAX_CHUNK_NUMBER
-  int chunk_number = (played_chunk_ + 1) % 65536;
+  int chunk_number = (played_chunk_ + 1) % Common::kMaxChunkNumber;
 
   while (!chunks_[chunk_number % buffer_size_].received) {
     // sys.stdout.write(Color.cyan)
     LOG("lost chunk " << std::to_string(chunk_number));
     // sys.stdout.write(Color.none)
 
-    // TODO: change 65536 to Common.MAX_CHUNK_NUMBER
-    chunk_number = (played_chunk_ + 1) % 65536;
+    chunk_number = (played_chunk_ + 1) % Common::kMaxChunkNumber;
   }
   // counter++
   // if counter > self.buffer_size:

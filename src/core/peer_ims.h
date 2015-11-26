@@ -19,6 +19,7 @@
 #include <arpa/inet.h>
 #include <ctime>
 #include "../util/trace.h"
+#include "common.h"
 
 using namespace boost::asio;
 
