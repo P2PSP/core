@@ -23,6 +23,7 @@
 #include <iostream>
 #include "../util/trace.h"
 #include <arpa/inet.h>
+#include "common.h"
 
 namespace p2psp {
 
