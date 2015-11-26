@@ -25,8 +25,7 @@ SplitterDBS::SplitterDBS()
 
   peer_number_ = 0;
   destination_of_chunk_.reserve(buffer_size_);
-
-  // TODO: Initialize magic_flags with Common.DBS value
+  magic_flags_ = Common::kDBS;
 
   LOG("max_chunk_loss = " << max_chunk_loss_);
   LOG("mcast_addr = " << mcast_addr_);
@@ -39,8 +38,7 @@ void SplitterDBS::SendMagicFlags(
     std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   char message[1];
 
-  // TODO: Replace 0 with Common.DBS
-  message[0] = 0;
+  message[0] = magic_flags_;
   peer_serve_socket->send(asio::buffer(message));
   LOG("Magic flags = " << bitset<8>(message[0]));
 }
@@ -340,7 +338,7 @@ void SplitterDBS::Run() {
       SendChunk(message, peer);
 
       destination_of_chunk_[chunk_number_ % buffer_size_] = peer;
-      chunk_number_ = (chunk_number_ + 1) % 65536;
+      chunk_number_ = (chunk_number_ + 1) % Common::kMaxChunkNumber;
       ComputeNextPeerNumber();
     } catch (const std::out_of_range &oor) {
       LOG("The monitor peer has died!");
