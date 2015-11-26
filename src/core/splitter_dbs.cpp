@@ -75,8 +75,7 @@ void SplitterDBS::SendTheListOfPeers(
     peer_serve_socket->send(asio::buffer(message));
 
     // TODO: Find a __debug__ flag in c++
-    LOG(to_string(counter) << ", (" << it->address().to_string() << ", "
-                           << to_string(it->port()) << ")");
+    LOG(to_string(counter) << ", " << *it);
     counter++;
     // End TODO
   }
@@ -107,8 +106,7 @@ void SplitterDBS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
   }
 
   losses_[peer] = 0;
-  LOG("Inserted peer (" << peer.address().to_string() << ", "
-                        << to_string(peer.port()) << ")");
+  LOG("Inserted peer " << peer);
 }
 
 void SplitterDBS::HandleAPeerArrival(
@@ -122,9 +120,7 @@ void SplitterDBS::HandleAPeerArrival(
 
   asio::ip::tcp::endpoint incoming_peer = serve_socket->remote_endpoint();
 
-  LOG("Accepted connection from peer ("
-      << incoming_peer.address().to_string() << ", "
-      << to_string(incoming_peer.port()) << ")");
+  LOG("Accepted connection from peer " << incoming_peer);
 
   SendConfiguration(serve_socket);
   SendTheListOfPeers(serve_socket);
@@ -152,24 +148,22 @@ size_t SplitterDBS::ReceiveMessage(std::vector<char> &message,
 void SplitterDBS::IncrementUnsupportivityOfPeer(
     boost::asio::ip::udp::endpoint peer) {
   bool peerExists = true;
-  std::stringstream ss;
-  ss << "(" << peer.address().to_string() + ", " + to_string(peer.port()) + ")";
 
   try {
     losses_[peer] += 1;
   } catch (std::exception e) {
-    LOG("The unsupportive peer " << ss.str() << " does not exist!");
+    LOG("The unsupportive peer " << peer << " does not exist!");
     peerExists = false;
   }
 
   if (peerExists) {
-    LOG(ss.str() << " has lost " << to_string(losses_[peer]) << " chunks");
+    LOG(peer << " has lost " << to_string(losses_[peer]) << " chunks");
 
     if (losses_[peer] > max_chunk_loss_) {
       // TODO: Check this condition in original code, is it correct?
       if (find(peer_list_.begin(), peer_list_.begin() + monitor_number_,
                peer) == peer_list_.end()) {
-        LOG(ss.str() << " removed");
+        LOG(peer << " removed");
         RemovePeer(peer);
       }
     }
@@ -179,19 +173,11 @@ void SplitterDBS::IncrementUnsupportivityOfPeer(
 void SplitterDBS::ProcessLostChunk(int lost_chunk_number,
                                    boost::asio::ip::udp::endpoint sender) {
   asio::ip::udp::endpoint destination = GetLosser(lost_chunk_number);
-  std::stringstream ssSender;
-  ssSender << "("
-           << sender.address().to_string() + ", " + to_string(sender.port()) +
-                  ")";
-  std::stringstream ssDestination;
-  ssDestination << "("
-                << destination.address().to_string() + ", " +
-                       to_string(destination.port()) + ")";
 
   // TODO: Find a __debug__ flag in c++
-  LOG(ssSender.str() << " complains about lost chunk "
-                     << to_string(lost_chunk_number) << " sent to "
-                     << ssDestination.str());
+  LOG(sender << " complains about lost chunk " << to_string(lost_chunk_number)
+             << " sent to " << destination);
+
   if (find(peer_list_.begin() + monitor_number_, peer_list_.end(),
            destination) != peer_list_.end()) {
     LOG("Lost chunk index = " << lost_chunk_number);
