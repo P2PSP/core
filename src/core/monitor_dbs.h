@@ -12,7 +12,12 @@
 
 namespace p2psp {
 
-class MonitorDBS : public PeerDBS {};
+class MonitorDBS : public PeerDBS {
+  MonitorDBS();
+  ~MonitorDBS();
+  void Complain(int);
+  void FindNextChunk();
+};
 }
 
 #endif  // P2PSP_CORE_MONITOR_DBS_H
