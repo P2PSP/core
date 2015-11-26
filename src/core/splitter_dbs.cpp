@@ -211,16 +211,22 @@ asio::ip::udp::endpoint SplitterDBS::GetLosser(int lost_chunk_number) {
 }
 
 void SplitterDBS::RemovePeer(asio::ip::udp::endpoint peer) {
-  try {
+  // If peer_list_ contains the peer, remove it
+  if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
     peer_list_.erase(remove(peer_list_.begin(), peer_list_.end(), peer),
                      peer_list_.end());
-    peer_number_--;
 
-    losses_.erase(peer);
-
-  } catch (std::exception e) {
-    LOG("Error: " << e.what());
+    // In order to avoid negative peer_number_ value while peer_list_ still
+    // contains any peer (in Python this is not necessary because negative
+    // indexes can be used)
+    if (peer_list_.size() > 0) {
+      peer_number_ = (peer_number_ - 1) % peer_list_.size();
+    } else {
+      peer_number_--;
+    }
   }
+
+  losses_.erase(peer);
 }
 
 void SplitterDBS::ProcessGoodbye(boost::asio::ip::udp::endpoint peer) {
