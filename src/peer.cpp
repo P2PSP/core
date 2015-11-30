@@ -2,13 +2,14 @@
 // TODO: include all needed libraries
 #include "core/peer_ims.h"
 #include "core/peer_dbs.h"
+#include "core/monitor_dbs.h"
 #include "core/common.h"
 #include "util/trace.h"
 
 int main(int argc, const char* argv[]) {
   // TODO: Argument parser. Decide how to implement it
 
-  p2psp::PeerDBS peer;
+  p2psp::MonitorDBS peer;
 
   peer.WaitForThePlayer();
   peer.ConnectToTheSplitter();
