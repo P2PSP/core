@@ -3,13 +3,14 @@
 #include "core/peer_ims.h"
 #include "core/peer_dbs.h"
 #include "core/monitor_dbs.h"
+#include "core/malicious_peer.h"
 #include "core/common.h"
 #include "util/trace.h"
 
 int main(int argc, const char* argv[]) {
   // TODO: Argument parser. Decide how to implement it
 
-  p2psp::MonitorDBS peer;
+  p2psp::MaliciousPeer peer;
 
   peer.WaitForThePlayer();
   peer.ConnectToTheSplitter();

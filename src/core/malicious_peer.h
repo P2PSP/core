@@ -6,12 +6,24 @@
 #ifndef P2PSP_CORE_MALICIOUS_PEER_H
 #define P2PSP_CORE_MALICIOUS_PEER_H
 
+#include <vector>
+#include <boost/asio.hpp>
+
 #include "peer_dbs.h"
 #include "../util/trace.h"
 
 namespace p2psp {
 
-class MaliciousDBS : public PeerDBS {};
+using namespace boost::asio;
+
+class MaliciousPeer : public PeerDBS {
+ protected:
+  bool persistent_attack_ = false;
+  bool on_off_attack_ = false;
+  int on_off_ratio_ = 100;
+  bool selective_attack_ = false;
+  std::vector<ip::udp::endpoint> selected_peers_for_attack_;
+};
 }
 
 #endif  // P2PSP_CORE_MALICIOUS_PEER_H
