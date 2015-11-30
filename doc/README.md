@@ -14,8 +14,8 @@ Motivation
 ----------
 
 Efficient large scale distribution of media (real-time video, for
-example) is one of the big challenges of the Internet. To achieve this,
-IETF designed IP multicast. In this transmission model, a source sends
+example) is one of the big challenges of the Internet. To achieve this (among other thigs),
+[IETF](https://www.ietf.org/) designed IP multicast. In this transmission model, a source sends
 only one copy of the stream which is delivered to a set of receivers
 thanks to the automatic replication of data in the IP multicast routers.
 Unfortunately, IP multicast does not fit the bussines model of most
@@ -48,14 +48,14 @@ examples of this concept:
 Related P2P systems
 ----------------
 
-There are plenty of P2P straeming protocols. Depending on the topology
+There are plenty of P2P streaming protocols. Depending on the topology
 of the overlay network, they can be clasified in chains, trees or
 meshes. A chain overlay is quite rare because churn can degrade
-significatively the Quality of Service (QoS) of the overlay, however,
+significatively the Quality of Service (QoS) of the overlay. However,
 it has interesting characteristics such as peers does not need to
 interchange buffer maps and peers only send a copy of the stream
 regardless of the size of the overlay (we will refeer to this
-characteristics as “replication factor”). Tree overlays impose that
+characteristics as “replication factor”). On the other hand, tree overlays impose that
 peers must send so many copies of the stream (replication factor) as
 the degree of the tree, but like chains, the protocol is also
 push-based. Mesh-based protocols are more flexible regarding the
