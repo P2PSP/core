@@ -38,7 +38,17 @@ void SplitterACS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
   // End TODO
 }
 void SplitterACS::IncrementUnsupportivityOfPeer(
-    boost::asio::ip::udp::endpoint peer) {}
+    boost::asio::ip::udp::endpoint peer) {
+  SplitterDBS::IncrementUnsupportivityOfPeer(peer);
+  try {
+    if (peer != peer_list_[0]) {
+      period_[peer] += 1;
+      period_counter_[peer] = period_[peer];
+    }
+  } catch (std::exception e) {
+    LOG("Error: " << e.what());
+  }
+}
 void SplitterACS::RemovePeer(boost::asio::ip::udp::endpoint peer) {}
 void SplitterACS::ResetCounters() {}
 void SplitterACS::SendChunk(std::vector<char> &message,
