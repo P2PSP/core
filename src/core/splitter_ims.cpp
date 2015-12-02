@@ -57,6 +57,7 @@ SplitterIMS::SplitterIMS()
   recvfrom_counter_ = 0;
   sendto_counter_ = 0;
   header_load_counter_ = 0;
+  LOG("Initialized IMS");
 }
 
 SplitterIMS::~SplitterIMS() {}

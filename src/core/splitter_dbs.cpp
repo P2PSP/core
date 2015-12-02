@@ -29,7 +29,7 @@ SplitterDBS::SplitterDBS()
 
   LOG("max_chunk_loss = " << max_chunk_loss_);
   LOG("mcast_addr = " << mcast_addr_);
-  LOG("Initialized");
+  LOG("Initialized DBS");
 }
 
 SplitterDBS::~SplitterDBS() {}

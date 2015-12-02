@@ -11,3 +11,28 @@
 //
 
 #include "splitter_acs.h"
+
+namespace p2psp {
+using namespace std;
+using namespace boost;
+
+SplitterACS::SplitterACS()
+    : SplitterDBS(),
+      period_(0, &SplitterDBS::GetHash),
+      period_counter_(0, &SplitterACS::GetHash),
+      number_of_sent_chunks_per_peer_(0, &SplitterACS::GetHash) {
+  magic_flags_ = Common::kACS;
+  LOG("Initialized ACS");
+}
+
+SplitterACS::~SplitterACS() {}
+
+void SplitterACS::InsertPeer(boost::asio::ip::udp::endpoint peer) {}
+void SplitterACS::IncrementUnsupportivityOfPeer(
+    boost::asio::ip::udp::endpoint peer) {}
+void SplitterACS::RemovePeer(boost::asio::ip::udp::endpoint peer) {}
+void SplitterACS::ResetCounters() {}
+void SplitterACS::SendChunk(std::vector<char> &message,
+                            boost::asio::ip::udp::endpoint destination) {}
+void SplitterACS::ComputeNextPeerNumber() {}
+}
