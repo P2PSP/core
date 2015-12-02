@@ -14,5 +14,35 @@
 #define P2PSP_CORE_SPLITTER_ACS_H_
 
 #include <stdio.h>
+#include <boost/asio.hpp>
+#include <boost/unordered_map.hpp>
+#include "../util/trace.h"
+#include "splitter_dbs.h"
+#include "common.h"
 
+namespace p2psp {
+class SplitterACS : public SplitterDBS {
+ protected:
+  boost::unordered_map<boost::asio::ip::udp::endpoint, int,
+                       std::size_t (*)(const boost::asio::ip::udp::endpoint &)>
+      period_;
+  boost::unordered_map<boost::asio::ip::udp::endpoint, int,
+                       std::size_t (*)(const boost::asio::ip::udp::endpoint &)>
+      period_counter_;
+  boost::unordered_map<boost::asio::ip::udp::endpoint, int,
+                       std::size_t (*)(const boost::asio::ip::udp::endpoint &)>
+      number_of_sent_chunks_per_peer_;
+
+ public:
+  SplitterACS();
+  ~SplitterACS();
+  void InsertPeer(boost::asio::ip::udp::endpoint peer);
+  void IncrementUnsupportivityOfPeer(boost::asio::ip::udp::endpoint peer);
+  void RemovePeer(boost::asio::ip::udp::endpoint peer);
+  void ResetCounters();
+  void SendChunk(std::vector<char> &message,
+                 boost::asio::ip::udp::endpoint destination);
+  void ComputeNextPeerNumber();
+};
+}
 #endif  // defined P2PSP_CORE_SPLITTER_ACS_H_
