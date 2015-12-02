@@ -7,7 +7,7 @@
 //  Copyright (C) 2014, the P2PSP team.
 //  http://www.p2psp.org
 //
-//  IMS: IP Multicast Set of rules.
+//  DBS: Data Broadcasting Set of rules
 //
 
 #include "splitter_dbs.h"
