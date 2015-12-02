@@ -27,7 +27,16 @@ SplitterACS::SplitterACS()
 
 SplitterACS::~SplitterACS() {}
 
-void SplitterACS::InsertPeer(boost::asio::ip::udp::endpoint peer) {}
+void SplitterACS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
+  SplitterDBS::InsertPeer(peer);
+  period_[peer] = 1;
+  period_counter_[peer] = 1;
+  number_of_sent_chunks_per_peer_[peer] = 0;
+
+  // TODO: Find a __debug__ flag in c++
+  LOG("Inserted " << peer);
+  // End TODO
+}
 void SplitterACS::IncrementUnsupportivityOfPeer(
     boost::asio::ip::udp::endpoint peer) {}
 void SplitterACS::RemovePeer(boost::asio::ip::udp::endpoint peer) {}
