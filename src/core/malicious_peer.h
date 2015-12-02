@@ -27,6 +27,7 @@ class MaliciousPeer : public PeerDBS {
  public:
   MaliciousPeer();
   ~MaliciousPeer();
+  virtual void Init();
 };
 }
 

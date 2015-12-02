@@ -46,6 +46,8 @@ PeerIMS::PeerIMS()
 
 PeerIMS::~PeerIMS() {}
 
+void PeerIMS::Init(){};
+
 void PeerIMS::WaitForThePlayer() {
   std::string port = std::to_string(player_port_);
   ip::tcp::resolver resolver(io_service_);

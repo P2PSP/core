@@ -3,12 +3,14 @@
 
 namespace p2psp {
 
-PeerDBS::PeerDBS() {
+PeerDBS::PeerDBS() {}
+
+PeerDBS::~PeerDBS() {}
+
+void PeerDBS::Init() {
   LOG("max_chunk_debt =" << std::to_string(kMaxChunkDebt));
   LOG("Initialized");
 }
-
-PeerDBS::~PeerDBS() {}
 
 void PeerDBS::SayHello(ip::udp::endpoint node) {
   std::vector<char> hello(1);
@@ -371,10 +373,10 @@ void PeerDBS::BufferData() {
 
   PeerIMS::BufferData();
 }
-  
-  void PeerDBS::Start() {
-    thread_.reset(new boost::thread(boost::bind(&PeerDBS::Run, this)));
-  }
+
+void PeerDBS::Start() {
+  thread_.reset(new boost::thread(boost::bind(&PeerDBS::Run, this)));
+}
 
 void PeerDBS::Run() {
   PeerIMS::Run();

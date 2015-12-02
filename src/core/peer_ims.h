@@ -118,6 +118,11 @@ class PeerIMS {
   ~PeerIMS();
 
   /**
+   *  This function must be called after constructing a new object.
+   */
+  virtual void Init();
+
+  /**
    *  Setup "player_socket" and wait for the player
    */
   void WaitForThePlayer();
