@@ -55,7 +55,18 @@ void SplitterACS::RemovePeer(boost::asio::ip::udp::endpoint peer) {
   period_counter_.erase(peer);
   number_of_sent_chunks_per_peer_.erase(peer);
 }
-void SplitterACS::ResetCounters() {}
+void SplitterACS::ResetCounters() {
+  SplitterDBS::ResetCounters();
+  
+  unordered::unordered_map<asio::ip::udp::endpoint, int>::iterator it;
+  for (it = period_.begin(); it != period_.end(); ++it) {
+    period_[it->first] = it->second - 1;
+    if (it->second < 1) {
+      period_[it->first] = 1;
+    }
+  }
+  
+}
 void SplitterACS::SendChunk(std::vector<char> &message,
                             boost::asio::ip::udp::endpoint destination) {}
 void SplitterACS::ComputeNextPeerNumber() {}
