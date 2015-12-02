@@ -37,6 +37,7 @@ void SplitterACS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
   LOG("Inserted " << peer);
   // End TODO
 }
+
 void SplitterACS::IncrementUnsupportivityOfPeer(
     boost::asio::ip::udp::endpoint peer) {
   SplitterDBS::IncrementUnsupportivityOfPeer(peer);
@@ -49,15 +50,17 @@ void SplitterACS::IncrementUnsupportivityOfPeer(
     LOG("Error: " << e.what());
   }
 }
+
 void SplitterACS::RemovePeer(boost::asio::ip::udp::endpoint peer) {
   SplitterDBS::RemovePeer(peer);
   period_.erase(peer);
   period_counter_.erase(peer);
   number_of_sent_chunks_per_peer_.erase(peer);
 }
+
 void SplitterACS::ResetCounters() {
   SplitterDBS::ResetCounters();
-  
+
   unordered::unordered_map<asio::ip::udp::endpoint, int>::iterator it;
   for (it = period_.begin(); it != period_.end(); ++it) {
     period_[it->first] = it->second - 1;
@@ -65,9 +68,18 @@ void SplitterACS::ResetCounters() {
       period_[it->first] = 1;
     }
   }
-  
 }
+
 void SplitterACS::SendChunk(std::vector<char> &message,
-                            boost::asio::ip::udp::endpoint destination) {}
+                            boost::asio::ip::udp::endpoint destination) {
+  SplitterDBS::SendChunk(message, destination);
+
+  try {
+    number_of_sent_chunks_per_peer_[destination] += 1;
+  } catch (std::exception e) {
+    LOG("Error: " << e.what());
+  }
+}
+
 void SplitterACS::ComputeNextPeerNumber() {}
 }
