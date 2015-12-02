@@ -3,9 +3,11 @@
 
 namespace p2psp {
 
-MonitorDBS::MonitorDBS() { LOG("Initialized"); };
+MonitorDBS::MonitorDBS(){};
 
 MonitorDBS::~MonitorDBS(){};
+
+void MonitorDBS::Init() { LOG("Initialized"); }
 
 // def print_the_module_name(self):
 // {{{

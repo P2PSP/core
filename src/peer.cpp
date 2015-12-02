@@ -11,6 +11,7 @@ int main(int argc, const char* argv[]) {
   // TODO: Argument parser. Decide how to implement it
 
   p2psp::MaliciousPeer peer;
+  peer.Init();
 
   peer.WaitForThePlayer();
   peer.ConnectToTheSplitter();
