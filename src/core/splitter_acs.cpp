@@ -81,5 +81,16 @@ void SplitterACS::SendChunk(std::vector<char> &message,
   }
 }
 
-void SplitterACS::ComputeNextPeerNumber() {}
+void SplitterACS::ComputeNextPeerNumber(asio::ip::udp::endpoint peer) {
+  try {
+    while (period_counter_[peer] != 0) {
+      period_counter_[peer] -= 1;
+      peer_number_ = (peer_number_ + 1) % peer_list_.size();
+      peer = peer_list_[peer_number_];
+    }
+    period_counter_[peer] = period_[peer];
+  } catch (std::exception e) {
+    LOG("Error: " << e.what());
+  }
+}
 }

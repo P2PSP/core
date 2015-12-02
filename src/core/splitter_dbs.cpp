@@ -285,7 +285,7 @@ void SplitterDBS::ResetCountersThread() {
   }
 }
 
-void SplitterDBS::ComputeNextPeerNumber() {
+void SplitterDBS::ComputeNextPeerNumber(asio::ip::udp::endpoint peer) {
   peer_number_ = (peer_number_ + 1) % peer_list_.size();
 }
 
@@ -329,7 +329,7 @@ void SplitterDBS::Run() {
 
       destination_of_chunk_[chunk_number_ % buffer_size_] = peer;
       chunk_number_ = (chunk_number_ + 1) % Common::kMaxChunkNumber;
-      ComputeNextPeerNumber();
+      ComputeNextPeerNumber(peer);
     } catch (const std::out_of_range &oor) {
       LOG("The monitor peer has died!");
     }
