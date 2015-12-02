@@ -28,6 +28,8 @@ class MaliciousPeer : public PeerDBS {
   MaliciousPeer();
   ~MaliciousPeer();
   virtual void Init();
+
+  void GetPoisonedChunk(std::vector<char>*);
 };
 }
 
