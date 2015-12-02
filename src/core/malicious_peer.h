@@ -23,6 +23,10 @@ class MaliciousPeer : public PeerDBS {
   int on_off_ratio_ = 100;
   bool selective_attack_ = false;
   std::vector<ip::udp::endpoint> selected_peers_for_attack_;
+
+ public:
+  MaliciousPeer();
+  ~MaliciousPeer();
 };
 }
 
