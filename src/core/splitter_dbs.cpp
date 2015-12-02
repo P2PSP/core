@@ -7,7 +7,7 @@
 //  Copyright (C) 2014, the P2PSP team.
 //  http://www.p2psp.org
 //
-//  IMS: IP Multicast Set of rules.
+//  DBS: Data Broadcasting Set of rules
 //
 
 #include "splitter_dbs.h"
@@ -29,7 +29,7 @@ SplitterDBS::SplitterDBS()
 
   LOG("max_chunk_loss = " << max_chunk_loss_);
   LOG("mcast_addr = " << mcast_addr_);
-  LOG("Initialized");
+  LOG("Initialized DBS");
 }
 
 SplitterDBS::~SplitterDBS() {}
@@ -285,7 +285,7 @@ void SplitterDBS::ResetCountersThread() {
   }
 }
 
-void SplitterDBS::ComputeNextPeerNumber() {
+void SplitterDBS::ComputeNextPeerNumber(asio::ip::udp::endpoint peer) {
   peer_number_ = (peer_number_ + 1) % peer_list_.size();
 }
 
@@ -329,7 +329,7 @@ void SplitterDBS::Run() {
 
       destination_of_chunk_[chunk_number_ % buffer_size_] = peer;
       chunk_number_ = (chunk_number_ + 1) % Common::kMaxChunkNumber;
-      ComputeNextPeerNumber();
+      ComputeNextPeerNumber(peer);
     } catch (const std::out_of_range &oor) {
       LOG("The monitor peer has died!");
     }

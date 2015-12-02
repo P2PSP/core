@@ -23,15 +23,6 @@
 
 namespace p2psp {
 class SplitterDBS : public SplitterIMS {
- private:
-  // Hasher for unordered_map losses_
-  static std::size_t GetHash(const boost::asio::ip::udp::endpoint &endpoint) {
-    std::ostringstream stream;
-    stream << endpoint;
-    std::hash<std::string> hasher;
-    return hasher(stream.str());
-  };
-
  protected:
   const int kMaxChunkLoss =
       32;  // Chunk losses threshold to reject a peer from the team
@@ -60,6 +51,14 @@ class SplitterDBS : public SplitterIMS {
   // Thread management
   void Run();
 
+  // Hasher for unordered_maps
+  static std::size_t GetHash(const boost::asio::ip::udp::endpoint &endpoint) {
+    std::ostringstream stream;
+    stream << endpoint;
+    std::hash<std::string> hasher;
+    return hasher(stream.str());
+  };
+
  public:
   SplitterDBS();
   ~SplitterDBS();
@@ -72,23 +71,24 @@ class SplitterDBS : public SplitterIMS {
   void SendThePeerEndpoint(
       std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   void SendConfiguration(std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
-  void InsertPeer(boost::asio::ip::udp::endpoint peer);
+  virtual void InsertPeer(boost::asio::ip::udp::endpoint peer);
   void HandleAPeerArrival(
       std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);
   size_t ReceiveMessage(std::vector<char> &message,
                         boost::asio::ip::udp::endpoint &endpoint);
   uint16_t GetLostChunkNumber(std::vector<char> &message);
   boost::asio::ip::udp::endpoint GetLosser(int lost_chunk_number);
-  void RemovePeer(boost::asio::ip::udp::endpoint peer);
-  void IncrementUnsupportivityOfPeer(boost::asio::ip::udp::endpoint peer);
+  virtual void RemovePeer(boost::asio::ip::udp::endpoint peer);
+  virtual void IncrementUnsupportivityOfPeer(
+      boost::asio::ip::udp::endpoint peer);
   void ProcessLostChunk(int lost_chunk_number,
                         boost::asio::ip::udp::endpoint sender);
   void ProcessGoodbye(boost::asio::ip::udp::endpoint peer);
   void ModerateTheTeam();
   void SetupTeamSocket();
-  void ResetCounters();
+  virtual void ResetCounters();
   void ResetCountersThread();
-  void ComputeNextPeerNumber();
+  virtual void ComputeNextPeerNumber(boost::asio::ip::udp::endpoint peer);
 
   // Thread management
   void Start();
