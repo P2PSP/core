@@ -81,8 +81,8 @@ class SplitterDBS : public SplitterIMS {
   virtual void RemovePeer(boost::asio::ip::udp::endpoint peer);
   virtual void IncrementUnsupportivityOfPeer(
       boost::asio::ip::udp::endpoint peer);
-  void ProcessLostChunk(int lost_chunk_number,
-                        boost::asio::ip::udp::endpoint sender);
+  virtual void ProcessLostChunk(int lost_chunk_number,
+                                boost::asio::ip::udp::endpoint sender);
   void ProcessGoodbye(boost::asio::ip::udp::endpoint peer);
   void ModerateTheTeam();
   void SetupTeamSocket();
