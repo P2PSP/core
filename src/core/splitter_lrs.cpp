@@ -11,3 +11,15 @@
 //
 
 #include "splitter_lrs.h"
+
+namespace p2psp {
+using namespace std;
+using namespace boost;
+
+SplitterLRS::SplitterLRS() : SplitterDBS(), buffer(buffer_size_) {
+  magic_flags_ = Common::kLRS;
+  LOG("Initialized LRS");
+}
+
+SplitterLRS::~SplitterLRS() {}
+}

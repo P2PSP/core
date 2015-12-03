@@ -21,7 +21,14 @@
 #include "common.h"
 
 namespace p2psp {
-class SplitterLRS : public SplitterDBS {};
+class SplitterLRS : public SplitterDBS {
+ protected:
+  std::vector<std::vector<char>> buffer;
+
+ public:
+  SplitterLRS();
+  ~SplitterLRS();
+};
 }
 
 #endif  // defined P2PSP_CORE_SPLITTER_LRS_H_

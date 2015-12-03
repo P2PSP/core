@@ -12,6 +12,7 @@
 #include "core/splitter_ims.h"
 #include "core/splitter_dbs.h"
 #include "core/splitter_acs.h"
+#include "core/splitter_lrs.h"
 
 int main(int argc, const char *argv[]) {
   // TODO: Argument parser.
@@ -22,12 +23,12 @@ int main(int argc, const char *argv[]) {
 
   // TODO: Print information about the status of the splitter
 
-  p2psp::SplitterACS splitter;
-  splitter.Start();
+  p2psp::SplitterLRS splitter;
+  /*splitter.Start();
 
   while (splitter.isAlive()) {
     boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
-  }
+  }*/
 
   return 0;
 }
