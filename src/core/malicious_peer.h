@@ -30,6 +30,9 @@ class MaliciousPeer : public PeerDBS {
   virtual void Init();
 
   void GetPoisonedChunk(std::vector<char>*);
+  void SetPersistentAttack(bool);
+  void SetOnOffAttack(bool, int);
+  void SetSelectiveAttack(bool,const std::vector<ip::udp::endpoint>);
 };
 }
 
