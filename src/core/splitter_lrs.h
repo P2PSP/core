@@ -23,11 +23,19 @@
 namespace p2psp {
 class SplitterLRS : public SplitterDBS {
  protected:
-  std::vector<std::vector<char>> buffer;
+  /* Massively lost chunks are retransmitted. So, the splitter
+   needs to remember the chunks sent recently. Buffer is A
+   circular array of messages (chunk_number, chunk) in network
+   endian format. */
+  std::vector<std::vector<char>> buffer_;
 
  public:
   SplitterLRS();
   ~SplitterLRS();
+  void ProcessLostChunk(int lost_chunk_number,
+                        boost::asio::ip::udp::endpoint sender);
+  void SendChunk(std::vector<char> &message,
+                 boost::asio::ip::udp::endpoint destination);
 };
 }
 
