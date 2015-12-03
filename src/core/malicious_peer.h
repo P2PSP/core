@@ -28,11 +28,12 @@ class MaliciousPeer : public PeerDBS {
   MaliciousPeer();
   ~MaliciousPeer();
   virtual void Init();
+  void SendChunk(ip::udp::endpoint);
 
   void GetPoisonedChunk(std::vector<char>*);
   void SetPersistentAttack(bool);
   void SetOnOffAttack(bool, int);
-  void SetSelectiveAttack(bool,const std::vector<ip::udp::endpoint>);
+  void SetSelectiveAttack(bool, const std::vector<ip::udp::endpoint>);
 };
 }
 
