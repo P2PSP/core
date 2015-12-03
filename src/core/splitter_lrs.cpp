@@ -45,5 +45,8 @@ void SplitterLRS::ProcessLostChunk(int lost_chunk_number,
 }
 
 void SplitterLRS::SendChunk(std::vector<char> &message,
-                            boost::asio::ip::udp::endpoint destination) {}
+                            boost::asio::ip::udp::endpoint destination) {
+  SplitterDBS::SendChunk(message, destination);
+  buffer_[chunk_number_ % buffer_size_] = message;
+}
 }
