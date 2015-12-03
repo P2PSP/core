@@ -260,6 +260,8 @@ int PeerDBS::ProcessMessage(std::vector<char> message,
 
       receive_and_feed_counter_++;
     }
+
+    return chunk_number;
   } else {
     // A control chunk has been received
 
