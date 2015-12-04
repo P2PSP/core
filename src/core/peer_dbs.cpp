@@ -108,7 +108,7 @@ void PeerDBS::ReceiveTheListOfPeers() {
 
 void PeerDBS::ReceiveMyEndpoint() {
   boost::array<char, 6> buffer;
-  char *raw_data;
+  char *raw_data = buffer.data();
   ip::address ip_addr;
   ip::udp::endpoint peer;
   int port;
