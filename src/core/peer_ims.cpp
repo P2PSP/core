@@ -129,7 +129,7 @@ void PeerIMS::ReceiveTheMcasteEndpoint() {
   boost::array<char, 6> buffer;
   read(splitter_socket_, ::buffer(buffer));
 
-  char *raw_data = buffer.c_array();
+  char *raw_data = buffer.data();
 
   in_addr ip_raw = *(in_addr *)(raw_data);
   mcast_addr_ = ip::address::from_string(inet_ntoa(ip_raw));

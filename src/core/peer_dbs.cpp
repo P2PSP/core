@@ -57,7 +57,7 @@ void PeerDBS::ReceiveTheNumberOfPeers() {
 
 void PeerDBS::ReceiveTheListOfPeers() {
   boost::array<char, 6> buffer;
-  char *raw_data;
+  char *raw_data = buffer.data();
   ip::address ip_addr;
   ip::udp::endpoint peer;
   int port;
@@ -73,13 +73,6 @@ void PeerDBS::ReceiveTheListOfPeers() {
   //_print_("The size of the team is", number_of_peers, "(apart from me)")
 
   int tmp = number_of_peers_;
-
-  raw_data = buffer.c_array();
-
-  in_addr ip_raw = *(in_addr *)(raw_data);
-  mcast_addr_ = ip::address::from_string(inet_ntoa(ip_raw));
-  mcast_port_ = ntohs(*(short *)(raw_data + 4));
-
   while (tmp > 0) {
     read(splitter_socket_, ::buffer(buffer));
     in_addr ip_raw = *(in_addr *)(raw_data);
