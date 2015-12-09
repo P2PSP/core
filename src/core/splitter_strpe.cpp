@@ -23,4 +23,8 @@ SplitterSTRPE::SplitterSTRPE()
 }
 
 SplitterSTRPE::~SplitterSTRPE() {}
+
+void SplitterSTRPE::AddTrustedPeer(boost::asio::ip::udp::endpoint peer) {
+  trusted_peers_.push_back(peer);
+}
 }

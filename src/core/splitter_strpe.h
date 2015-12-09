@@ -34,6 +34,7 @@ class SplitterSTRPE : public SplitterLRS {
  public:
   SplitterSTRPE();
   ~SplitterSTRPE();
+  void AddTrustedPeer(boost::asio::ip::udp::endpoint peer);
 };
 }
 
