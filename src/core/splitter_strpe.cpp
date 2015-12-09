@@ -15,12 +15,39 @@ using namespace std;
 using namespace boost;
 
 SplitterSTRPE::SplitterSTRPE()
-    : SplitterLRS(),
-      logging_(kLogging),
-      log_file_(kLogFile),
-      current_round_(kCurrentRound) {
+    : SplitterLRS(), logging_(kLogging), current_round_(kCurrentRound) {
   LOG("STrPe");
 }
 
 SplitterSTRPE::~SplitterSTRPE() {}
+
+void SplitterSTRPE::AddTrustedPeer(boost::asio::ip::udp::endpoint peer) {
+  trusted_peers_.push_back(peer);
+}
+
+void SplitterSTRPE::PunishMaliciousPeer(boost::asio::ip::udp::endpoint peer) {
+  if (logging_) {
+    LogMessage("!!! malicious peer" + peer.address().to_string() + ":" +
+               to_string(peer.port()));
+  }
+
+  LOG("!!! malicious peer " << peer);
+
+  RemovePeer(peer);
+}
+
+void SplitterSTRPE::SetLogFile(std::string filename) {
+  log_file_.open(filename);
+}
+
+void SplitterSTRPE::SetLogging(bool enabled) { logging_ = enabled; }
+
+void SplitterSTRPE::LogMessage(std::string message) {
+  log_file_ << BuildLogMessage(message);
+  // TODO: Where to close the ofstream?
+}
+
+string SplitterSTRPE::BuildLogMessage(std::string message) {
+  return to_string(time(NULL)) + "\t" + message;
+}
 }

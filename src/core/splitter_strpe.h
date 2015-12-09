@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <boost/asio.hpp>
 #include <boost/unordered_map.hpp>
+#include <fstream>
 #include "../util/trace.h"
 #include "splitter_lrs.h"
 #include "common.h"
@@ -22,11 +23,10 @@ namespace p2psp {
 class SplitterSTRPE : public SplitterLRS {
  protected:
   const bool kLogging = false;
-  const std::string kLogFile = "";
   const int kCurrentRound = 0;
 
   bool logging_;
-  std::string log_file_;
+  std::ofstream log_file_;
   int current_round_;
 
   std::vector<boost::asio::ip::udp::endpoint> trusted_peers_;
@@ -34,6 +34,12 @@ class SplitterSTRPE : public SplitterLRS {
  public:
   SplitterSTRPE();
   ~SplitterSTRPE();
+  void SetLogging(bool enabled);
+  void SetLogFile(std::string filename);
+  void AddTrustedPeer(boost::asio::ip::udp::endpoint peer);
+  void PunishMaliciousPeer(boost::asio::ip::udp::endpoint peer);
+  void LogMessage(std::string message);
+  std::string BuildLogMessage(std::string message);
 };
 }
 
