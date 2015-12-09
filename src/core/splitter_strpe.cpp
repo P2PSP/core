@@ -27,4 +27,15 @@ SplitterSTRPE::~SplitterSTRPE() {}
 void SplitterSTRPE::AddTrustedPeer(boost::asio::ip::udp::endpoint peer) {
   trusted_peers_.push_back(peer);
 }
+
+void SplitterSTRPE::PunishMaliciousPeer(boost::asio::ip::udp::endpoint peer) {
+  
+  if (logging_) {
+    // TODO: Log message
+  }
+  
+  LOG("!!! malicious peer " << peer);
+  
+  RemovePeer(peer);
+}
 }
