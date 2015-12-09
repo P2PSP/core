@@ -12,6 +12,8 @@
 #include "core/splitter_ims.h"
 #include "core/splitter_dbs.h"
 #include "core/splitter_acs.h"
+#include "core/splitter_lrs.h"
+#include "core/splitter_strpe.h"
 
 int main(int argc, const char *argv[]) {
   // TODO: Argument parser.
@@ -22,7 +24,7 @@ int main(int argc, const char *argv[]) {
 
   // TODO: Print information about the status of the splitter
 
-  p2psp::SplitterACS splitter;
+  p2psp::SplitterSTRPE splitter;
   /*splitter.Start();
 
   while (splitter.isAlive()) {
