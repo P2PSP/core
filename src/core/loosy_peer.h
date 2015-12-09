@@ -16,13 +16,14 @@ namespace p2psp {
 
 using namespace boost::asio;
 
-class LoosyPeer : public  MaliciousPeer{
-protected:
+class LoosyPeer : public MaliciousPeer {
+ protected:
   static const int kChunkLossPeriod = 10;
-  
-public:
+
+ public:
   LoosyPeer();
   ~LoosyPeer();
+  void PrintTheModuleName();
 };
 }
 
