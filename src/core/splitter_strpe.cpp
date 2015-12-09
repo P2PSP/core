@@ -43,7 +43,11 @@ void SplitterSTRPE::SetLogFile(std::string filename) {
 void SplitterSTRPE::SetLogging(bool enabled) { logging_ = enabled; }
 
 void SplitterSTRPE::LogMessage(std::string message) {
-  log_file_ << message;
+  log_file_ << BuildLogMessage(message);
   // TODO: Where to close the ofstream?
+}
+
+string SplitterSTRPE::BuildLogMessage(std::string message) {
+  return to_string(time(NULL)) + "\t" + message;
 }
 }
