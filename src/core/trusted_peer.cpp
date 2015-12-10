@@ -8,4 +8,5 @@ void TrustedPeer::Init() {
   counter_ = 1;
   LOG("Initialized");
 }
+void TrustedPeer::SetCheckAll(bool value) { check_all_ = value; };
 }
