@@ -34,6 +34,7 @@ class SplitterSTRPE : public SplitterLRS {
  public:
   SplitterSTRPE();
   ~SplitterSTRPE();
+  void ModerateTheTeam();
   void SetLogging(bool enabled);
   void SetLogFile(std::string filename);
   void AddTrustedPeer(boost::asio::ip::udp::endpoint peer);

@@ -21,6 +21,56 @@ SplitterSTRPE::SplitterSTRPE()
 
 SplitterSTRPE::~SplitterSTRPE() {}
 
+void SplitterSTRPE::ModerateTheTeam() {
+  // TODO: Check if something fails and a try catch statement has to be added
+
+  std::vector<char> message(34);
+  asio::ip::udp::endpoint sender;
+
+  while (alive_) {
+    size_t bytes_transferred = ReceiveMessage(message, sender);
+
+    if (bytes_transferred == 2) {
+      /*
+       The peer complains about a lost chunk.
+
+       In this situation, the splitter counts the number of
+       complains. If this number exceeds a threshold, the
+       unsupportive peer is expelled from the
+       team.
+       */
+
+      uint16_t lost_chunk_number = GetLostChunkNumber(message);
+      ProcessLostChunk(lost_chunk_number, sender);
+
+    } else if (bytes_transferred == 34) {
+      /*
+       Trusted peer sends hash of received chunk
+       number of chunk, hash (sha256) of chunk
+       */
+
+      if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) !=
+          trusted_peers_.end()) {
+        ProcessChunkHashMessage(message);
+      }
+    }
+
+    else {
+      /*
+       The peer wants to leave the team.
+
+       A !2-length payload means that the peer wants to go
+       away.
+       */
+
+      // 'G'oodbye
+      if (message.at(0) == 'G') {
+        ProcessGoodbye(sender);
+      }
+    }
+  }
+}
+
 void SplitterSTRPE::AddTrustedPeer(boost::asio::ip::udp::endpoint peer) {
   trusted_peers_.push_back(peer);
 }
