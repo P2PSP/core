@@ -49,7 +49,7 @@ class SplitterDBS : public SplitterIMS {
   char magic_flags_;
 
   // Thread management
-  void Run();
+  virtual void Run();
 
   // Hasher for unordered_maps
   static std::size_t GetHash(const boost::asio::ip::udp::endpoint &endpoint) {
@@ -91,7 +91,7 @@ class SplitterDBS : public SplitterIMS {
   virtual void ComputeNextPeerNumber(boost::asio::ip::udp::endpoint peer);
 
   // Thread management
-  void Start();
+  virtual void Start();
 };
 }
 

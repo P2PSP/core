@@ -124,4 +124,69 @@ void SplitterSTRPE::LogMessage(std::string message) {
 string SplitterSTRPE::BuildLogMessage(std::string message) {
   return to_string(time(NULL)) + "\t" + message;
 }
+
+void SplitterSTRPE::Run() {
+  ReceiveTheHeader();
+
+  /* A DBS splitter runs 4 threads. The main one and the
+   "handle_arrivals" thread are equivalent to the daemons used
+   by the IMS splitter. "moderate_the_team" and
+   "reset_counters_thread" are new.
+   */
+
+  LOG("waiting for the monitor peers ...");
+
+  std::shared_ptr<asio::ip::tcp::socket> connection =
+      make_shared<asio::ip::tcp::socket>(boost::ref(io_service_));
+  acceptor_.accept(*connection);
+  HandleAPeerArrival(connection);
+
+  // Threads
+  thread t1(bind(&SplitterIMS::HandleArrivals, this));
+  thread t2(bind(&SplitterDBS::ModerateTheTeam, this));
+  thread t3(bind(&SplitterDBS::ResetCountersThread, this));
+
+  vector<char> message(sizeof(uint16_t) + chunk_size_);
+  asio::ip::udp::endpoint peer;
+
+  while (alive_) {
+    asio::streambuf chunk;
+    size_t bytes_transferred = ReceiveChunk(chunk);
+    try {
+      peer = peer_list_.at(peer_number_);
+
+      (*(uint16_t *)message.data()) = htons(chunk_number_);
+
+      copy(asio::buffer_cast<const char *>(chunk.data()),
+           asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
+           message.data() + sizeof(uint16_t));
+
+      SendChunk(message, peer);
+
+      destination_of_chunk_[chunk_number_ % buffer_size_] = peer;
+      chunk_number_ = (chunk_number_ + 1) % Common::kMaxChunkNumber;
+      ComputeNextPeerNumber(peer);
+
+      if (logging_) {
+        if (peer_number_ == 0) {
+          current_round_++;
+
+          // TODO: Add the peers contained in peer_list_ to the message
+          std::string message =
+              to_string(current_round_) + to_string(peer_list_.size());
+          LogMessage(message);
+        }
+      }
+    } catch (const std::out_of_range &oor) {
+      LOG("The monitor peer has died!");
+    }
+
+    chunk.consume(bytes_transferred);
+  }
+}
+
+void SplitterSTRPE::Start() {
+  LOG("Start");
+  thread_.reset(new boost::thread(boost::bind(&SplitterSTRPE::Run, this)));
+}
 }

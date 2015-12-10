@@ -31,6 +31,9 @@ class SplitterSTRPE : public SplitterLRS {
 
   std::vector<boost::asio::ip::udp::endpoint> trusted_peers_;
 
+  // Thread management
+  void Run();
+
  public:
   SplitterSTRPE();
   ~SplitterSTRPE();
@@ -42,6 +45,9 @@ class SplitterSTRPE : public SplitterLRS {
   void ProcessChunkHashMessage(std::vector<char> &message);
   void LogMessage(std::string message);
   std::string BuildLogMessage(std::string message);
+
+  // Thread management
+  void Start();
 };
 }
 
