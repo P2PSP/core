@@ -31,6 +31,7 @@ class TrustedPeer : public MaliciousPeer {
   virtual void Init();
   
   void SetCheckAll(bool);
+  int CalculateNextSampled();
 };
 }
 
