@@ -125,52 +125,50 @@ class PeerIMS {
   /**
    *  Setup "player_socket" and wait for the player
    */
-  void WaitForThePlayer();
+  virtual void WaitForThePlayer();
 
   /**
    *  Setup "splitter" and "splitter_socket"
    */
-  void ConnectToTheSplitter();
-  void DisconnectFromTheSplitter();
-  void ReceiveTheMcasteEndpoint();
-  void ReceiveTheHeader();
-  void ReceiveTheChunkSize();
-  void ReceiveTheHeaderSize();
-  void ReceiveTheBufferSize();
+  virtual void ConnectToTheSplitter();
+  virtual void DisconnectFromTheSplitter();
+  virtual void ReceiveTheMcasteEndpoint();
+  virtual void ReceiveTheHeader();
+  virtual void ReceiveTheChunkSize();
+  virtual void ReceiveTheHeaderSize();
+  virtual void ReceiveTheBufferSize();
 
   /**
    *  Create "team_socket" (UDP) for using the multicast channel
    */
-  void ListenToTheTeam();
-  void UnpackMessage();  // TODO: (message)
-  void ReceiveTheNextMessage(std::vector<char>*, ip::udp::endpoint*);
-  int ProcessMessage(std::vector<char>, ip::udp::endpoint);
-  int ProcessNextMessage();
+  virtual void ListenToTheTeam();
+  virtual void ReceiveTheNextMessage(std::vector<char>*, ip::udp::endpoint*);
+  virtual int ProcessMessage(std::vector<char>, ip::udp::endpoint);
+  virtual int ProcessNextMessage();
 
   /**
    *  Buffering
    */
-  void BufferData();
-  int FindNextChunk();
-  void PlayChunk(int);
-  void PlayNextChunk();  // TODO: (chunk)
-  void Play();
-  void KeepTheBufferFull();
-  void Run();
-  void Start();
+  virtual void BufferData();
+  virtual int FindNextChunk();
+  virtual void PlayChunk(int);
+  virtual void PlayNextChunk();
+  virtual void KeepTheBufferFull();
+  virtual void Run();
+  virtual void Start();
 
   /**
    *  Getter/setters
    */
-  std::string GetMcastAddr();
-  bool IsPlayerAlive();
-  int GetPlayedChunk();
-  int GetChunkSize();
-  int GetSendtoCounter();
-  std::vector<ip::udp::endpoint>* GetPeerList();
-  int GetRecvfromCounter();
-  void SetShowBuffer(bool);
-  void SetSendtoCounter(int);
+  virtual std::string GetMcastAddr();
+  virtual bool IsPlayerAlive();
+  virtual int GetPlayedChunk();
+  virtual int GetChunkSize();
+  virtual int GetSendtoCounter();
+  virtual std::vector<ip::udp::endpoint>* GetPeerList();
+  virtual int GetRecvfromCounter();
+  virtual void SetShowBuffer(bool);
+  virtual void SetSendtoCounter(int);
 };
 }
 

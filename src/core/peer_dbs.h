@@ -52,25 +52,25 @@ class PeerDBS : public PeerIMS {
   PeerDBS();
   ~PeerDBS();
   virtual void Init();
-  void SayHello(ip::udp::endpoint);
-  void SayGoodbye(ip::udp::endpoint);
-  void ReceiveMagicFlags();
-  void ReceiveTheNumberOfPeers();
-  void ReceiveTheListOfPeers();
-  void ReceiveMyEndpoint();
-  void ListenToTheTeam();
-  int ProcessMessage(std::vector<char>, ip::udp::endpoint);
-  void LogMessage(std::string);
-  void BuildLogMessage(std::string);
-  float CalcBufferCorrectness();
-  float CalcBufferFilling();
-  void PoliteFarewell();
-  void BufferData();
-  void Start();
-  void Run();
-  bool AmIAMonitor();
+  virtual void SayHello(ip::udp::endpoint);
+  virtual void SayGoodbye(ip::udp::endpoint);
+  virtual void ReceiveMagicFlags();
+  virtual void ReceiveTheNumberOfPeers();
+  virtual void ReceiveTheListOfPeers();
+  virtual void ReceiveMyEndpoint();
+  virtual void ListenToTheTeam();
+  virtual int ProcessMessage(std::vector<char>, ip::udp::endpoint);
+  virtual void LogMessage(std::string);
+  virtual void BuildLogMessage(std::string);
+  virtual float CalcBufferCorrectness();
+  virtual float CalcBufferFilling();
+  virtual void PoliteFarewell();
+  virtual void BufferData();
+  virtual void Start();
+  virtual void Run();
+  virtual bool AmIAMonitor();
 
-  int GetNumberOfPeers();
+  virtual int GetNumberOfPeers();
 };
 }
 

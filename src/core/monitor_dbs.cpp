@@ -27,7 +27,7 @@ void MonitorDBS::Complain(uint16_t chunk_number) {
   LOG("lost chunk:" << std::to_string(chunk_number));
 };
 
-uint16_t MonitorDBS::FindNextChunk() {
+int MonitorDBS::FindNextChunk() {
   uint16_t chunk_number = (played_chunk_ + 1) % Common::kMaxChunkNumber;
 
   while (!chunks_[chunk_number % buffer_size_].received) {
