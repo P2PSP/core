@@ -16,7 +16,7 @@ int TrustedPeer::CalculateNextSampled() {
   }
   int max_random = (int)(peer_list_.size() / kSamplingEffort);
   return (int)((std::rand() % std::max(1, max_random)) + kPassNumber);
-};
+}
 
 void TrustedPeer::SendChunkHash(int chunk_number) {
   Chunk chunk = chunks_[chunk_number % buffer_size_];
@@ -24,9 +24,15 @@ void TrustedPeer::SendChunkHash(int chunk_number) {
 
   std::vector<char> msg(34);
 
-  *((short*)msg.data()) = htons((short)chunk_number);
+  *((short *)msg.data()) = htons((short)chunk_number);
   // TODO: SHA256 library
   // msg = struct.pack('H32s', chunk_number, chunk_hash)
   team_socket_.send_to(buffer(msg), splitter_);
-};
+}
+
+void TrustedPeer::ReceiveTheNextMessage(std::vector<char> *message,
+                                        ip::udp::endpoint *sender) {
+  PeerIMS::ReceiveTheNextMessage(message, sender);
+  current_sender_ = *sender;
+}
 }

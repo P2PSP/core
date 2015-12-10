@@ -292,7 +292,7 @@ int PeerIMS::ProcessNextMessage() {
   ip::udp::endpoint sender;
 
   try {
-    ReceiveTheNextMessage(&message, sender);
+    ReceiveTheNextMessage(&message, &sender);
   } catch (std::exception e) {
     return -2;
   }
@@ -301,16 +301,16 @@ int PeerIMS::ProcessNextMessage() {
 }
 
 void PeerIMS::ReceiveTheNextMessage(std::vector<char> *message,
-                                    ip::udp::endpoint sender) {
+                                    ip::udp::endpoint *sender) {
   LOG("Waiting for a chunk at ("
       << team_socket_.local_endpoint().address().to_string() << ","
       << std::to_string(team_socket_.local_endpoint().port()) << ")");
 
-  team_socket_.receive_from(buffer(*message), sender);
+  team_socket_.receive_from(buffer(*message), *sender);
   recvfrom_counter_++;
 
   LOG("Received a message from ("
-      << sender.address().to_string() << "," << std::to_string(sender.port())
+      << sender->address().to_string() << "," << std::to_string(sender->port())
       << ") of length " << std::to_string(message->size()));
 
   // TODO: if(DEBUG){

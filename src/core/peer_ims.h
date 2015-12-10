@@ -143,7 +143,7 @@ class PeerIMS {
    */
   void ListenToTheTeam();
   void UnpackMessage();  // TODO: (message)
-  void ReceiveTheNextMessage(std::vector<char>*, ip::udp::endpoint);
+  void ReceiveTheNextMessage(std::vector<char>*, ip::udp::endpoint*);
   int ProcessMessage(std::vector<char>, ip::udp::endpoint);
   int ProcessNextMessage();
 
