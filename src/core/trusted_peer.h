@@ -29,6 +29,10 @@ class TrustedPeer : public MaliciousPeer {
   TrustedPeer(){};
   ~TrustedPeer(){};
   virtual void Init();
+
+  void SetCheckAll(bool);
+  int CalculateNextSampled();
+  void SendChunkHash(int);
 };
 }
 
