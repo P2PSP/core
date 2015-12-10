@@ -222,8 +222,7 @@ int PeerDBS::ProcessMessage(std::vector<char> message,
     // of
     // the list of peers.
 
-    std::vector<char> empty(1024);
-    std::memset(empty.data(), 0, empty.size());
+    std::vector<char> empty(1024, 0);
 
     if (receive_and_feed_counter_ < peer_list_.size() &&
         receive_and_feed_previous_ != empty) {
