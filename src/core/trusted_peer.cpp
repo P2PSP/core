@@ -35,4 +35,24 @@ void TrustedPeer::ReceiveTheNextMessage(std::vector<char> *message,
   PeerIMS::ReceiveTheNextMessage(message, sender);
   current_sender_ = *sender;
 }
+
+float TrustedPeer::CalcBufferCorrectness() {
+  std::vector<char> zerochunk(1024, 0);
+
+  int goodchunks = 0;
+  int badchunks = 0;
+
+  for (std::vector<Chunk>::iterator it = chunks_.begin(); it != chunks_.end();
+       ++it) {
+    if (it->received) {
+      if (it->data == zerochunk) {
+        badchunks++;
+      } else {
+        goodchunks++;
+      }
+    }
+  }
+
+  return goodchunks / (float)(goodchunks + badchunks);
+}
 }

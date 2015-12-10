@@ -300,8 +300,7 @@ void PeerDBS::BuildLogMessage(std::string message) {
 }
 
 float PeerDBS::CalcBufferCorrectness() {
-  std::vector<char> zerochunk(1024);
-  memset(zerochunk.data(), 0, zerochunk.size());
+  std::vector<char> zerochunk(1024, 0);
 
   int goodchunks = 0;
   int badchunks = 0;
