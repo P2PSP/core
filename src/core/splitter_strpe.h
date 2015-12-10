@@ -31,15 +31,23 @@ class SplitterSTRPE : public SplitterLRS {
 
   std::vector<boost::asio::ip::udp::endpoint> trusted_peers_;
 
+  // Thread management
+  void Run();
+
  public:
   SplitterSTRPE();
   ~SplitterSTRPE();
+  void ModerateTheTeam();
   void SetLogging(bool enabled);
   void SetLogFile(std::string filename);
   void AddTrustedPeer(boost::asio::ip::udp::endpoint peer);
   void PunishMaliciousPeer(boost::asio::ip::udp::endpoint peer);
+  void ProcessChunkHashMessage(std::vector<char> &message);
   void LogMessage(std::string message);
   std::string BuildLogMessage(std::string message);
+
+  // Thread management
+  void Start();
 };
 }
 
