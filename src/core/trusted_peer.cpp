@@ -55,4 +55,19 @@ float TrustedPeer::CalcBufferCorrectness() {
 
   return goodchunks / (float)(goodchunks + badchunks);
 }
+
+int TrustedPeer::ProcessNextMessage() {
+  int chunk_number = PeerIMS::ProcessNextMessage();
+
+  if (chunk_number > 0 && current_sender_ != splitter_) {
+    if (counter_ == 0) {
+      SendChunkHash(chunk_number);
+      counter_ = CalculateNextSampled();
+    } else {
+      counter_--;
+    }
+  }
+
+  return chunk_number;
+}
 }

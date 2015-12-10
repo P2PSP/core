@@ -35,6 +35,7 @@ class TrustedPeer : public MaliciousPeer {
   void SendChunkHash(int);
   void ReceiveTheNextMessage(std::vector<char> *, ip::udp::endpoint *);
   float CalcBufferCorrectness();
+  int ProcessNextMessage();
 };
 }
 
