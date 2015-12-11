@@ -47,7 +47,7 @@ class Peer_IMS(threading.Thread):
 
     PLAYER_PORT = 9999          # Port used to serve the player.
     SPLITTER_ADDR = "127.0.0.1" # Address of the splitter.
-    SPLITTER_PORT = 4552        # Port of the splitter.
+    SPLITTER_PORT = 8001        # Port of the splitter.
     PORT = 0                    # TCP->UDP port used to communicate.
     USE_LOCALHOST = False       # Use localhost instead the IP of the addapter
     BUFFER_STATUS = int(0)      # ?
