@@ -41,11 +41,6 @@ class Common {
   // DIS_COLOR = Color.yellow
 
   static void sha256(std::vector<char> string, std::vector<char> &digest) {
-    /*SHA256_CTX ctx;
-    SHA256_Init(&ctx);
-    SHA256_Update(&ctx, string.data(), string.size());
-    SHA256_Final((unsigned char *)digest.data(), &ctx);*/
-
     SHA256((unsigned char *)string.data(), string.size(),
            (unsigned char *)digest.data());
   }
