@@ -17,9 +17,13 @@ namespace p2psp {
 using namespace boost::asio;
 
 class PeerStrpeDs : public TrustedPeer {
+ protected:
+  std::vector<ip::udp::endpoint> bad_peers_;
+
  public:
   PeerStrpeDs(){};
   ~PeerStrpeDs(){};
+  virtual void Init();
 };
 }
 
