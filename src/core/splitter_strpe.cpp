@@ -102,8 +102,9 @@ void SplitterSTRPE::ProcessChunkHashMessage(std::vector<char> &message) {
 
   stored_chunk_number = ntohs(stored_chunk_number);
 
-  // TODO: && hashlib.sha256(chunk).digest() != hash
-  if (stored_chunk_number == chunk_number) {
+  std::vector<char> digest(32);
+  Common::sha256(chunk, digest);
+  if (stored_chunk_number == chunk_number && digest != hash) {
     asio::ip::udp::endpoint peer =
         destination_of_chunk_[chunk_number % buffer_size_];
     PunishMaliciousPeer(peer);
