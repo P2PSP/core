@@ -10,4 +10,8 @@ void PeerStrpeDs::Init() {
 
   LOG("Initialized");
 }
+
+bool PeerStrpeDs::IsCurrentMessageFromSplitter() {
+  return current_sender_ == splitter_;
+}
 }

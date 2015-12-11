@@ -24,6 +24,7 @@ class PeerStrpeDs : public TrustedPeer {
   PeerStrpeDs(){};
   ~PeerStrpeDs(){};
   virtual void Init();
+  virtual bool IsCurrentMessageFromSplitter();
 };
 }
 
