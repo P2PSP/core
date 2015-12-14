@@ -19,4 +19,10 @@ void PeerStrpeDs::ReceiveTheNextMessage(std::vector<char> *message,
   PeerIMS::ReceiveTheNextMessage(message, sender);
   current_sender_ = *sender;
 }
+void PeerStrpeDs::ReceiveDsaKey() {
+  int number_of_bytes = 256 + 256 + 256 + 40;
+  std::vector<char> message(number_of_bytes);
+  read(splitter_socket_, ::buffer(message));
+  // TODO: finish implementation
+}
 }

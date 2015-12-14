@@ -26,6 +26,7 @@ class PeerStrpeDs : public TrustedPeer {
   virtual void Init();
   virtual bool IsCurrentMessageFromSplitter();
   virtual void ReceiveTheNextMessage(std::vector<char> *, ip::udp::endpoint *);
+  virtual void ReceiveDsaKey();
 };
 }
 
