@@ -9,7 +9,9 @@
 #include "core/common.h"
 #include "util/trace.h"
 
-int main(int argc, const char* argv[]) {
+// test
+int main(int argc, const char* argv[]) 
+{
   // TODO: Argument parser. Decide how to implement it
 
   p2psp::PeerStrpeDs peer;

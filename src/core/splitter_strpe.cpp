@@ -90,20 +90,21 @@ void SplitterSTRPE::ProcessChunkHashMessage(std::vector<char> &message) {
   uint16_t chunk_number = *(uint16_t *)message.data();
   std::vector<char> hash(32);
 
-  copy(message.data() + sizeof(uint16_t),
-       message.data() + message.size() - sizeof(uint16_t), hash.data());
+  copy(message.data() + sizeof(uint16_t), message.data() + message.size(),
+       hash.data());
 
   std::vector<char> chunk_message = buffer_[chunk_number % buffer_size_];
 
   uint16_t stored_chunk_number = *(uint16_t *)chunk_message.data();
   std::vector<char> chunk;
   copy(chunk_message.data() + sizeof(uint16_t),
-       chunk_message.data() + sizeof(uint16_t) + chunk_size_, chunk.data());
+       chunk_message.data() + chunk_size_, chunk.data());
 
   stored_chunk_number = ntohs(stored_chunk_number);
 
-  // TODO: && hashlib.sha256(chunk).digest() != hash
-  if (stored_chunk_number == chunk_number) {
+  std::vector<char> digest(32);
+  Common::sha256(chunk, digest);
+  if (stored_chunk_number == chunk_number && digest != hash) {
     asio::ip::udp::endpoint peer =
         destination_of_chunk_[chunk_number % buffer_size_];
     PunishMaliciousPeer(peer);
