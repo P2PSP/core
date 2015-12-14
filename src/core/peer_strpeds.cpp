@@ -14,4 +14,9 @@ void PeerStrpeDs::Init() {
 bool PeerStrpeDs::IsCurrentMessageFromSplitter() {
   return current_sender_ == splitter_;
 }
+void PeerStrpeDs::ReceiveTheNextMessage(std::vector<char> *message,
+                                        ip::udp::endpoint *sender) {
+  PeerIMS::ReceiveTheNextMessage(message, sender);
+  current_sender_ = *sender;
+}
 }
