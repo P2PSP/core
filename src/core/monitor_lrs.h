@@ -24,6 +24,7 @@ class MonitorLRS : public MonitorDBS {
   MonitorLRS(){};
   ~MonitorLRS(){};
   virtual void Init();
+  virtual void ReceiveTheBufferSize();
 };
 }
 
