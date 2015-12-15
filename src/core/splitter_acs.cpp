@@ -93,4 +93,18 @@ void SplitterACS::ComputeNextPeerNumber(asio::ip::udp::endpoint peer) {
     LOG("Error: " << e.what());
   }
 }
+
+int SplitterACS::GetPeriod(boost::asio::ip::udp::endpoint peer) {
+  return period_[peer];
+}
+
+int SplitterACS::GetNumberOfSentChunksPerPeer(
+    boost::asio::ip::udp::endpoint peer) {
+  return number_of_sent_chunks_per_peer_[peer];
+}
+
+void SplitterACS::SetNumberOfSentChunksPerPeer(
+    boost::asio::ip::udp::endpoint peer, int number_of_sent_chunks) {
+  number_of_sent_chunks_per_peer_[peer] = number_of_sent_chunks;
+}
 }

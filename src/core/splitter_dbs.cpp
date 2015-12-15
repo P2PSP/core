@@ -338,6 +338,16 @@ void SplitterDBS::Run() {
   }
 }
 
+std::vector<boost::asio::ip::udp::endpoint> SplitterDBS::GetPeerList() {
+  return peer_list_;
+}
+
+int SplitterDBS::GetMaxChunkLoss() { return max_chunk_loss_; }
+
+int SplitterDBS::GetLoss(boost::asio::ip::udp::endpoint peer) {
+  return losses_[peer];
+}
+
 void SplitterDBS::Start() {
   LOG("Start");
   thread_.reset(new boost::thread(boost::bind(&SplitterDBS::Run, this)));

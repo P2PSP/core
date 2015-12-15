@@ -43,6 +43,11 @@ class SplitterACS : public SplitterDBS {
   void SendChunk(std::vector<char> &message,
                  boost::asio::ip::udp::endpoint destination);
   void ComputeNextPeerNumber(boost::asio::ip::udp::endpoint peer);
+
+  int GetPeriod(boost::asio::ip::udp::endpoint peer);
+  int GetNumberOfSentChunksPerPeer(boost::asio::ip::udp::endpoint peer);
+  void SetNumberOfSentChunksPerPeer(boost::asio::ip::udp::endpoint peer,
+                                    int number_of_sent_chunks);
 };
 }
 #endif  // defined P2PSP_CORE_SPLITTER_ACS_H_

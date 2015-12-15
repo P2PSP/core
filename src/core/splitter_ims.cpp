@@ -335,6 +335,12 @@ void SplitterIMS::Run() {
 
 bool SplitterIMS::isAlive() { return alive_; }
 
+int SplitterIMS::GetRecvFromCounter() { return recvfrom_counter_; }
+
+int SplitterIMS::GetSendToCounter() { return sendto_counter_; }
+
+int SplitterIMS::GetChunkSize() { return chunk_size_; }
+
 void SplitterIMS::Start() {
   LOG("Start");
   thread_.reset(new boost::thread(boost::bind(&SplitterIMS::Run, this)));

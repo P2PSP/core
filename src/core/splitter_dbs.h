@@ -92,6 +92,11 @@ class SplitterDBS : public SplitterIMS {
 
   // Thread management
   virtual void Start();
+
+  // Getters
+  std::vector<boost::asio::ip::udp::endpoint> GetPeerList();
+  int GetMaxChunkLoss();
+  int GetLoss(boost::asio::ip::udp::endpoint peer);
 };
 }
 

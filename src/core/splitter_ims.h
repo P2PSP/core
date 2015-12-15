@@ -127,6 +127,9 @@ class SplitterIMS {
 
   // Getters
   bool isAlive();
+  int GetRecvFromCounter();
+  int GetSendToCounter();
+  int GetChunkSize();
 };
 }
 
