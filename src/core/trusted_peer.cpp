@@ -20,13 +20,15 @@ int TrustedPeer::CalculateNextSampled() {
 
 void TrustedPeer::SendChunkHash(int chunk_number) {
   Chunk chunk = chunks_[chunk_number % buffer_size_];
-  // chunk_hash = hashlib.sha256(chunk).digest()
+
+  std::vector<char> digest(32);
+  Common::sha256(chunk.data, digest);
 
   std::vector<char> msg(34);
 
-  *((short *)msg.data()) = htons((short)chunk_number);
-  // TODO: SHA256 library
-  // msg = struct.pack('H32s', chunk_number, chunk_hash)
+  *((uint16_t *)msg.data()) = htons((uint16_t)chunk_number);
+  std::strcpy(msg.data() + sizeof(uint16_t), digest.data());
+
   team_socket_.send_to(buffer(msg), splitter_);
 }
 
