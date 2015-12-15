@@ -11,6 +11,7 @@
 
 #include "malicious_peer.h"
 #include "../util/trace.h"
+#include "common.h"
 
 namespace p2psp {
 
