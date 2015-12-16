@@ -15,6 +15,7 @@
 #include "core/splitter_lrs.h"
 #include "core/splitter_strpe.h"
 #include <boost/program_options/parsers.hpp>
+#include <boost/program_options/variables_map.hpp>
 
 int main(int argc, const char *argv[]) {
   // TODO: Configure splitter
@@ -78,7 +79,40 @@ int main(int argc, const char *argv[]) {
       "TTL", boost::program_options::value<int>(),
       "Time To Live of the multicast messages. Default = '{}'.");
 
+  boost::program_options::variables_map vm;
+  boost::program_options::store(
+      boost::program_options::parse_command_line(argc, argv, desc), vm);
+  boost::program_options::notify(vm);
+
   p2psp::SplitterACS splitter;
+
+  if (vm.count("buffer_size")) {
+    splitter.SetBufferSize(vm["buffer_size"].as<int>());
+  }
+
+  if (vm.count("channel")) {
+    splitter.SetChannel(vm["channel"].as<std::string>());
+  }
+
+  if (vm.count("chunk_size")) {
+    splitter.SetBufferSize(vm["chunk_size"].as<int>());
+  }
+
+  if (vm.count("header_size")) {
+    splitter.SetHeaderSize(vm["header_size"].as<int>());
+  }
+
+  if (vm.count("port")) {
+    splitter.SetPort(vm["port"].as<int>());
+  }
+
+  if (vm.count("source_addr")) {
+    splitter.SetSourceAddr(vm["source_addr"].as<std::string>());
+  }
+
+  if (vm.count("source_port")) {
+    splitter.SetSourcePort(vm["source_port"].as<int>());
+  }
 
   splitter.Start();
 
