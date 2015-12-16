@@ -14,15 +14,69 @@
 #include "core/splitter_acs.h"
 #include "core/splitter_lrs.h"
 #include "core/splitter_strpe.h"
+#include <boost/program_options/parsers.hpp>
 
 int main(int argc, const char *argv[]) {
-  // TODO: Argument parser.
-
   // TODO: Configure splitter
 
   // TODO: Start the splitter's main thread
 
   // TODO: Print information about the status of the splitter
+
+  // Argument Parser
+  boost::program_options::options_description desc(
+      "This is the splitter node of a P2PSP team.  The splitter is in charge "
+      "of defining the Set or Rules (SoR) that will control the team. By "
+      "default, DBS (unicast transmissions) will be used.");
+
+  desc.add_options()("splitter_addr",
+                     boost::program_options::value<std::string>(),
+                     "IP address to serve (TCP) the peers. (Default = '{}')")(
+      "buffer_size", boost::program_options::value<int>(),
+      "size of the video buffer in blocks. Default = {}.")(
+      "channel", boost::program_options::value<std::string>(),
+      "Name of the channel served by the streaming source. Default = '{}'.")(
+      "chunk_size", boost::program_options::value<int>(),
+      "Chunk size in bytes. Default = '{}'.")(
+      "header_size", boost::program_options::value<int>(),
+      "Size of the header of the stream in chunks. Default = '{}'.")(
+      "max_chunk_loss", boost::program_options::value<int>(),
+      "Maximum number of lost chunks for an unsupportive peer. Makes sense "
+      "only in unicast mode. Default = '{}'.")(
+      "max_number_of_monitor_peers", boost::program_options::value<int>(),
+      "Maximum number of monitors in the team. The first connecting peers will "
+      "automatically become monitors. Default = '{}'.")(
+      "mcast_addr", boost::program_options::value<std::string>(),
+      "IP multicast address used to serve the chunks. Makes sense only in "
+      "multicast mode. Default = '{}'.")(
+      "port", boost::program_options::value<int>(),
+      "Port to serve the peers. Default = '{}'.")(
+      "source_addr", boost::program_options::value<std::string>(),
+      "IP address or hostname of the streaming server. Default = '{}'.")(
+      "source_port", boost::program_options::value<int>(),
+      "Port where the streaming server is listening. Default = '{}'.")(
+      "IMS", boost::program_options::value<bool>()->implicit_value(true),
+      "Uses the IP multicast infrastructure, if available. IMS mode is "
+      "incompatible with ACS, LRS, DIS and NTS modes.")(
+      "NTS", boost::program_options::value<bool>()->implicit_value(true),
+      "Enables NAT traversal.")(
+      "ACS", boost::program_options::value<bool>()->implicit_value(true),
+      "Enables Adaptative Chunk-rate.")(
+      "LRS", boost::program_options::value<bool>()->implicit_value(true),
+      "Enables Lost chunk Recovery")(
+      "DIS", boost::program_options::value<bool>()->implicit_value(true),
+      "Enables Data Integrity check.")(
+      "strpe", boost::program_options::value<bool>()->implicit_value(true),
+      "Selects STrPe model for DIS.")("strpeds",
+                                      boost::program_options::value<bool>(),
+                                      "Selects STrPe-DS model for DIS.")(
+      "strpeds_majority_decision",
+      boost::program_options::value<bool>()->implicit_value(true),
+      "Sets majority decision ratio for STrPe-DS model.")(
+      "strpe_log", boost::program_options::value<bool>()->implicit_value(true),
+      "Loggin STrPe & STrPe-DS specific data to file.")(
+      "TTL", boost::program_options::value<int>(),
+      "Time To Live of the multicast messages. Default = '{}'.");
 
   p2psp::SplitterACS splitter;
 
@@ -66,12 +120,15 @@ int main(int argc, const char *argv[]) {
       _SET_COLOR(_RED);
 
       // TODO: GetLoss and GetMaxChunkLoss are only in DBS and derivated classes
-      LOG(splitter.GetLoss(*it) << "/" << chunks_sendto << " " << splitter.GetMaxChunkLoss());
-      
+      LOG(splitter.GetLoss(*it) << "/" << chunks_sendto << " "
+                                << splitter.GetMaxChunkLoss());
+
       // TODO: If is ACS
       _SET_COLOR(_YELLOW);
       LOG(splitter.GetPeriod(*it));
-      LOG((splitter.GetNumberOfSentChunksPerPeer(*it) * splitter.GetChunkSize() * 8) / 1000);
+      LOG((splitter.GetNumberOfSentChunksPerPeer(*it) *
+           splitter.GetChunkSize() * 8) /
+          1000);
       splitter.SetNumberOfSentChunksPerPeer(*it, 0);
     }
   }
