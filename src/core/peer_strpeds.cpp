@@ -25,4 +25,11 @@ void PeerStrpeDs::ReceiveDsaKey() {
   read(splitter_socket_, ::buffer(message));
   // TODO: finish implementation
 }
+
+void PeerStrpeDs::ProcessBadMessage(std::vector<char> message,
+                                    ip::udp::endpoint sender) {
+  LOG("bad peer: " << sender);
+  bad_peers_.push_back(sender);
+  peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), sender));
+}
 }
