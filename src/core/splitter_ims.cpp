@@ -41,7 +41,7 @@ SplitterIMS::SplitterIMS()
 
   // Initialize source_
   ss << kSourceAddr;
-  source_ = {ss.str(), kSourcePort};
+  //source_ = {ss.str(), kSourcePort};
   ss.str("");
 
   // Initialize GET_message_
