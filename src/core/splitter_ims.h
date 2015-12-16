@@ -130,6 +130,15 @@ class SplitterIMS {
   int GetRecvFromCounter();
   int GetSendToCounter();
   int GetChunkSize();
+
+  // Setters
+  void SetBufferSize(int buffer_size);
+  void SetChannel(std::string channel);
+  void SetChunkSize(int chunk_size);
+  void SetHeaderSize(int header_size);
+  void SetPort(int port);
+  void SetSourceAddr(std::string source_addr);
+  void SetSourcePort(int source_port);
 };
 }
 
