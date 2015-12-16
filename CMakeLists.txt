@@ -40,18 +40,18 @@ else ()
 endif ()
 
 # Sources
-file(GLOB CORE_SOURCES "src/core/*.cpp")
-file(GLOB UTIL_SOURCES "src/util/*.cpp")
+file(GLOB CORE_SOURCES "src/core/*.cc")
+file(GLOB UTIL_SOURCES "src/util/*.cc")
 
 # Executables
 add_executable(peer 
-  "src/peer.cpp"
+  "src/peer.cc"
   ${CORE_SOURCES}
   ${UTIL_SOURCES}
 )
 
 add_executable(splitter
-  "src/splitter.cpp"
+  "src/splitter.cc"
   ${CORE_SOURCES}
   ${UTIL_SOURCES}
 )
