@@ -40,8 +40,8 @@ class SplitterACS : public SplitterDBS {
   void IncrementUnsupportivityOfPeer(boost::asio::ip::udp::endpoint peer);
   void RemovePeer(boost::asio::ip::udp::endpoint peer);
   void ResetCounters();
-  void SendChunk(std::vector<char> &message,
-                 boost::asio::ip::udp::endpoint destination);
+  virtual void SendChunk(std::vector<char> &message,
+                         boost::asio::ip::udp::endpoint destination);
   void ComputeNextPeerNumber(boost::asio::ip::udp::endpoint peer);
 
   int GetPeriod(boost::asio::ip::udp::endpoint peer);

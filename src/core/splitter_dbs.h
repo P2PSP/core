@@ -97,6 +97,9 @@ class SplitterDBS : public SplitterIMS {
   std::vector<boost::asio::ip::udp::endpoint> GetPeerList();
   int GetMaxChunkLoss();
   int GetLoss(boost::asio::ip::udp::endpoint peer);
+
+  void SetMaxChunkLoss(int max_chunk_loss);
+  void SetMonitorNumber(int monitor_number);
 };
 }
 

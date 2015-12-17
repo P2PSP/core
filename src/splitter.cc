@@ -18,18 +18,13 @@
 #include <boost/program_options/variables_map.hpp>
 
 int main(int argc, const char *argv[]) {
-  // TODO: Configure splitter
-
-  // TODO: Start the splitter's main thread
-
-  // TODO: Print information about the status of the splitter
-
   // Argument Parser
   boost::program_options::options_description desc(
       "This is the splitter node of a P2PSP team.  The splitter is in charge "
       "of defining the Set or Rules (SoR) that will control the team. By "
       "default, DBS (unicast transmissions) will be used.");
 
+  // TODO: strpe option should expect a list of arguments, not bool
   desc.add_options()("splitter_addr",
                      boost::program_options::value<std::string>(),
                      "IP address to serve (TCP) the peers. (Default = '{}')")(
@@ -74,7 +69,7 @@ int main(int argc, const char *argv[]) {
       "strpeds_majority_decision",
       boost::program_options::value<bool>()->implicit_value(true),
       "Sets majority decision ratio for STrPe-DS model.")(
-      "strpe_log", boost::program_options::value<bool>()->implicit_value(true),
+      "strpe_log", boost::program_options::value<std::string>(),
       "Loggin STrPe & STrPe-DS specific data to file.")(
       "TTL", boost::program_options::value<int>(),
       "Time To Live of the multicast messages. Default = '{}'.");
@@ -84,7 +79,7 @@ int main(int argc, const char *argv[]) {
       boost::program_options::parse_command_line(argc, argv, desc), vm);
   boost::program_options::notify(vm);
 
-  p2psp::SplitterACS splitter;
+  p2psp::SplitterSTRPE splitter;
 
   if (vm.count("buffer_size")) {
     splitter.SetBufferSize(vm["buffer_size"].as<int>());
@@ -114,6 +109,25 @@ int main(int argc, const char *argv[]) {
     splitter.SetSourcePort(vm["source_port"].as<int>());
   }
 
+  // Parameters if splitter is not IMS
+  if (vm.count("max_chunk_loss")) {
+    splitter.SetMaxChunkLoss(vm["max_chunk_loss"].as<int>());
+  }
+
+  if (vm.count("max_number_of_monitor_peers")) {
+    splitter.SetMonitorNumber(vm["max_number_of_monitor_peers"].as<int>());
+  }
+
+  // Parameters if STRPE
+  if (vm.count("strpe_log")) {
+    splitter.SetLogging(vm["strpe_log"].as<bool>());
+  }
+
+  if (vm.count("strpe_log")) {
+    splitter.SetLogging(true);
+    splitter.SetLogFile(vm["strpe_log"].as<std::string>());
+  }
+
   splitter.Start();
 
   LOG("         | Received  | Sent      | Number       losses/ losses");
@@ -129,8 +143,6 @@ int main(int argc, const char *argv[]) {
   int kbps_recvfrom = 0;
   int chunks_recvfrom = 0;
   std::vector<boost::asio::ip::udp::endpoint> peer_list;
-
-  int get_loss = 0;
 
   while (splitter.isAlive()) {
     boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
@@ -160,6 +172,7 @@ int main(int argc, const char *argv[]) {
       // TODO: If is ACS
       _SET_COLOR(_YELLOW);
       LOG(splitter.GetPeriod(*it));
+      // _SET_COLOR(_PURPLE)
       LOG((splitter.GetNumberOfSentChunksPerPeer(*it) *
            splitter.GetChunkSize() * 8) /
           1000);

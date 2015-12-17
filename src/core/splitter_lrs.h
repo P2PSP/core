@@ -17,11 +17,11 @@
 #include <boost/asio.hpp>
 #include <boost/unordered_map.hpp>
 #include "../util/trace.h"
-#include "splitter_dbs.h"
+#include "splitter_acs.h"
 #include "common.h"
 
 namespace p2psp {
-class SplitterLRS : public SplitterDBS {
+class SplitterLRS : public SplitterACS {
  protected:
   /* Massively lost chunks are retransmitted. So, the splitter
    needs to remember the chunks sent recently. Buffer is A

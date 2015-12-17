@@ -16,7 +16,7 @@ namespace p2psp {
 using namespace std;
 using namespace boost;
 
-SplitterLRS::SplitterLRS() : SplitterDBS(), buffer_(buffer_size_) {
+SplitterLRS::SplitterLRS() : SplitterACS(), buffer_(buffer_size_) {
   magic_flags_ = Common::kLRS;
   LOG("Initialized LRS");
 }
