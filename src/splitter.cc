@@ -84,7 +84,7 @@ int main(int argc, const char *argv[]) {
       boost::program_options::parse_command_line(argc, argv, desc), vm);
   boost::program_options::notify(vm);
 
-  p2psp::SplitterACS splitter;
+  p2psp::SplitterSTRPE splitter;
 
   if (vm.count("buffer_size")) {
     splitter.SetBufferSize(vm["buffer_size"].as<int>());
