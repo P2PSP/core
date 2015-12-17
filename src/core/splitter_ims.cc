@@ -41,7 +41,7 @@ SplitterIMS::SplitterIMS()
 
   // Initialize source_
   ss << kSourceAddr;
-  source_ = {ss.str(), kSourcePort};
+  //source_ = {ss.str(), kSourcePort};
   ss.str("");
 
   // Initialize GET_message_
@@ -340,6 +340,22 @@ int SplitterIMS::GetRecvFromCounter() { return recvfrom_counter_; }
 int SplitterIMS::GetSendToCounter() { return sendto_counter_; }
 
 int SplitterIMS::GetChunkSize() { return chunk_size_; }
+
+void SplitterIMS::SetBufferSize(int buffer_size) { buffer_size_ = buffer_size; }
+
+void SplitterIMS::SetChannel(std::string channel) { channel_ = channel; }
+
+void SplitterIMS::SetChunkSize(int chunk_size) { chunk_size_ = chunk_size; }
+
+void SplitterIMS::SetHeaderSize(int header_size) { header_size_ = header_size; }
+
+void SplitterIMS::SetPort(int port) { port_ = port; }
+
+void SplitterIMS::SetSourceAddr(std::string source_addr) {
+  source_addr_ = source_addr;
+}
+
+void SplitterIMS::SetSourcePort(int source_port) { source_port_ = source_port; }
 
 void SplitterIMS::Start() {
   LOG("Start");
