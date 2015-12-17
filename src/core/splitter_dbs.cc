@@ -348,6 +348,14 @@ int SplitterDBS::GetLoss(boost::asio::ip::udp::endpoint peer) {
   return losses_[peer];
 }
 
+void SplitterDBS::SetMaxChunkLoss(int max_chunk_loss) {
+  max_chunk_loss_ = max_chunk_loss;
+}
+
+void SplitterDBS::SetMonitorNumber(int monitor_number) {
+  monitor_number_ = monitor_number;
+}
+
 void SplitterDBS::Start() {
   LOG("Start");
   thread_.reset(new boost::thread(boost::bind(&SplitterDBS::Run, this)));
