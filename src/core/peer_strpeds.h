@@ -28,6 +28,7 @@ class PeerStrpeDs : public TrustedPeer {
   virtual void ReceiveTheNextMessage(std::vector<char> *, ip::udp::endpoint *);
   virtual void ReceiveDsaKey();
   virtual void ProcessBadMessage(std::vector<char>, ip::udp::endpoint);
+  virtual bool IsControlMessage(std::vector<char>);
 };
 }
 

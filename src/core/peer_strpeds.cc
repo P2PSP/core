@@ -32,4 +32,8 @@ void PeerStrpeDs::ProcessBadMessage(std::vector<char> message,
   bad_peers_.push_back(sender);
   peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), sender));
 }
+
+bool PeerStrpeDs::IsControlMessage(std::vector<char> message) {
+  return message.size() != (1026 + 40 + 40);
+}
 }
