@@ -31,6 +31,7 @@ class PeerStrpeDs : public TrustedPeer {
   virtual bool IsControlMessage(std::vector<char>);
   virtual bool CheckMessage(std::vector<char>, ip::udp::endpoint);
   virtual int HandleBadPeersRequest();
+  virtual int ProcessMessage(std::vector<char>, ip::udp::endpoint);
 };
 }
 
