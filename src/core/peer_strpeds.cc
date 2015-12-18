@@ -62,4 +62,29 @@ bool PeerStrpeDs::CheckMessage(std::vector<char> message,
 
   return true;
 }
+
+int PeerStrpeDs::HandleBadPeersRequest() {
+  std::string bad("bad");
+  std::vector<char> header(5);
+  std::vector<char> msg(8);
+  std::copy(bad.begin(), bad.end(), header.begin());
+  *((uint16_t *)(header.data() + bad.size())) = (uint16_t)bad_peers_.size();
+
+  team_socket_.send_to(buffer(header), splitter_);
+
+  for (std::vector<ip::udp::endpoint>::iterator peer = bad_peers_.begin();
+       peer != bad_peers_.end(); ++peer) {
+    char *raw_ip = (char *)((*peer).address().to_v4().to_ulong());
+    in_addr net_ip;
+    inet_aton(raw_ip, &net_ip);
+
+    std::memcpy(msg.data(), &net_ip, sizeof(net_ip));
+    int port = peer->port();
+    std::memcpy(msg.data() + sizeof(net_ip), &port, sizeof(port));
+
+    team_socket_.send_to(buffer(msg), splitter_);
+  }
+
+  return -1;
+}
 }
