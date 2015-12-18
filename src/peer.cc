@@ -6,15 +6,14 @@
 #include "core/malicious_peer.h"
 #include "core/trusted_peer.h"
 #include "core/peer_strpeds.h"
+#include "core/peer_strpeds_malicious.h"
 #include "core/common.h"
 #include "util/trace.h"
 
-// test
-int main(int argc, const char* argv[]) 
-{
+int main(int argc, const char* argv[]) {
   // TODO: Argument parser. Decide how to implement it
 
-  p2psp::PeerStrpeDs peer;
+  p2psp::PeerStrpeDsMalicious peer;
   peer.Init();
 
   peer.WaitForThePlayer();
