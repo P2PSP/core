@@ -5,12 +5,22 @@ import sys
 import shutil
 import platform
 
+bin_dir = 'bin'
 build_dir = 'build'
+
+try:
+    shutil.rmtree(bin_dir)
+except:
+    pass
 
 try:
     shutil.rmtree(build_dir)
 except:
     pass
+
+if len(sys.argv) >= 2:
+    if sys.argv[1] == 'clean':
+        quit()
 
 os.makedirs(build_dir)
 
