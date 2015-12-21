@@ -16,6 +16,19 @@
 #include "core/splitter_strpe.h"
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <signal.h>
+
+// TODO: LOG fails if splitter is defined outside the main
+// p2psp::SplitterSTRPE splitter;
+
+void HandlerCtrlC(int s) {
+  LOG("Keyboard interrupt detected ... Exiting!");
+
+  // Say to daemon threads that the work has been finished,
+  // splitter.SetAlive(false);
+
+  // TODO: Send goodbye to the team socket
+}
 
 int main(int argc, const char *argv[]) {
   // Argument Parser
@@ -143,6 +156,13 @@ int main(int argc, const char *argv[]) {
   int kbps_recvfrom = 0;
   int chunks_recvfrom = 0;
   std::vector<boost::asio::ip::udp::endpoint> peer_list;
+
+  // Listen to Ctrl-C interruption
+  struct sigaction sigIntHandler;
+  sigIntHandler.sa_handler = HandlerCtrlC;
+  sigemptyset(&sigIntHandler.sa_mask);
+  sigIntHandler.sa_flags = 0;
+  sigaction(SIGINT, &sigIntHandler, NULL);
 
   while (splitter.isAlive()) {
     boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
