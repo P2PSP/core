@@ -14,4 +14,12 @@ void PeerStrpeDsMalicious::SetBadMouthAttack(
     bad_peers_.clear();
   }
 }
+
+void PeerStrpeDsMalicious::SetSelectiveAttack(
+    bool value, std::vector<ip::udp::endpoint> selected) {
+  selective_attack_ = true;
+
+  selected_peers_for_attack_.insert(selected_peers_for_attack_.end(),
+                                    selected.begin(), selected.end());
+}
 }

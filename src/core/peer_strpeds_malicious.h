@@ -25,6 +25,7 @@ class PeerStrpeDsMalicious : public PeerStrpeDs {
   ~PeerStrpeDsMalicious(){};
   virtual void Init();
   virtual void SetBadMouthAttack(bool, std::vector<ip::udp::endpoint>);
+  virtual void SetSelectiveAttack(bool, std::vector<ip::udp::endpoint>);
 };
 }
 
