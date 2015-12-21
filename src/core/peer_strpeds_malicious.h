@@ -18,10 +18,13 @@ using namespace boost::asio;
 
 class PeerStrpeDsMalicious : public PeerStrpeDs {
  protected:
+  bool bad_mouth_attack_;
+
  public:
   PeerStrpeDsMalicious(){};
   ~PeerStrpeDsMalicious(){};
   virtual void Init();
+  virtual void SetBadMouthAttack(bool, std::vector<ip::udp::endpoint>);
 };
 }
 
