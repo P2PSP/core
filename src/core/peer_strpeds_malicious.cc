@@ -22,4 +22,9 @@ void PeerStrpeDsMalicious::SetSelectiveAttack(
   selected_peers_for_attack_.insert(selected_peers_for_attack_.end(),
                                     selected.begin(), selected.end());
 }
+
+void PeerStrpeDsMalicious::SetOnOffAttack(bool value, int ratio) {
+  on_off_ratio_ = value;
+  on_off_ratio_ = ratio;
+}
 }
