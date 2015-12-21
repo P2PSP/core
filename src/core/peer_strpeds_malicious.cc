@@ -27,4 +27,8 @@ void PeerStrpeDsMalicious::SetOnOffAttack(bool value, int ratio) {
   on_off_ratio_ = value;
   on_off_ratio_ = ratio;
 }
+
+void PeerStrpeDsMalicious::SetPersistentAttack(bool value) {
+  persistent_attack_ = value;
+}
 }
