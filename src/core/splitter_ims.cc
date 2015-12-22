@@ -41,7 +41,7 @@ SplitterIMS::SplitterIMS()
 
   // Initialize source_
   ss << kSourceAddr;
-  //source_ = {ss.str(), kSourcePort};
+  // source_ = {ss.str(), kSourcePort};
   ss.str("");
 
   // Initialize GET_message_
@@ -334,6 +334,8 @@ void SplitterIMS::Run() {
 }
 
 bool SplitterIMS::isAlive() { return alive_; }
+
+void SplitterIMS::SetAlive(bool alive) { alive_ = alive; }
 
 int SplitterIMS::GetRecvFromCounter() { return recvfrom_counter_; }
 

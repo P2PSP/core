@@ -132,6 +132,7 @@ class SplitterIMS {
   int GetChunkSize();
 
   // Setters
+  void SetAlive(bool alive);
   void SetBufferSize(int buffer_size);
   void SetChannel(std::string channel);
   void SetChunkSize(int chunk_size);
