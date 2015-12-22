@@ -7,6 +7,7 @@ import platform
 
 bin_dir = 'bin'
 build_dir = 'build'
+only_cmake = False
 
 try:
     shutil.rmtree(bin_dir)
@@ -21,6 +22,8 @@ except:
 if len(sys.argv) >= 2:
     if sys.argv[1] == 'clean':
         quit()
+    elif sys.argv[1] == 'only-cmake':
+        only_cmake = True
 
 os.makedirs(build_dir)
 
@@ -28,7 +31,9 @@ sys_name = platform.system()
 
 if sys_name == 'Linux':
     print '\nMaking for Linux...\n'
-    os.system('cd build && cmake .. && echo && make')
+    if os.system('cd build && cmake .. && echo') == 0:
+        if not only_cmake:
+            os.system('cd build && make')
     
 elif sys_name == 'Darwin':
     print '\nMaking for OS X...\n'

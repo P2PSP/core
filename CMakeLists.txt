@@ -1,6 +1,11 @@
 # Minimum CMake version required
 cmake_minimum_required(VERSION 2.8)
 
+option(BUILD_REDUCED_LIB "Build a reduced version" ON)
+
+option(BUILD_PEER "Build the peer" OFF)
+option(BUILD_SPLITTER "Build the splitter" OFF)
+
 # Project name
 project(p2psp C CXX)
 
@@ -52,7 +57,16 @@ else ()
 endif ()
 
 # Sources
-file(GLOB CORE_SOURCES "src/core/*.cc")
+if(NOT BUILD_REDUCED_LIB)
+  file(GLOB CORE_SOURCES "src/core/*.cc")
+else()
+  file(GLOB CORE_SOURCES 
+    "src/core/peer_ims.cc"
+    "src/core/peer_dbs.cc"
+    "src/core/python.cc"
+  )
+endif()
+
 file(GLOB UTIL_SOURCES "src/util/*.cc")
 
 # Executables
@@ -74,30 +88,34 @@ target_link_libraries(p2psp
 set_property(TARGET p2psp PROPERTY CXX_STANDARD 11)
 set_property(TARGET p2psp PROPERTY CXX_STANDARD_REQUIRED ON)
 
-# Executables
-add_executable(peer 
-  "src/peer.cc"
-)
+if(BUILD_PEER)
+  # Executable
+  add_executable(peer "src/peer.cc")
 
-add_executable(splitter
-  "src/splitter.cc"
-)
+  # Libraries
+  target_link_libraries(peer 
+    p2psp
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${Boost_LIBRARIES}
+  )
+  
+  # Enable C+11 for CMake 3.1.0 or later
+  set_property(TARGET peer PROPERTY CXX_STANDARD 11)
+  set_property(TARGET peer PROPERTY CXX_STANDARD_REQUIRED ON)
+endif()
 
-# Libraries
-target_link_libraries(peer 
-  p2psp
-  ${CMAKE_THREAD_LIBS_INIT}
-  ${Boost_LIBRARIES}
-)
+if(BUILD_SPLITTER)
+  # Executable
+  add_executable(splitter "src/splitter.cc")
+  
+  # Libraries
+  target_link_libraries(splitter 
+    p2psp
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${Boost_LIBRARIES}
+  )
 
-target_link_libraries(splitter 
-  p2psp
-  ${CMAKE_THREAD_LIBS_INIT}
-  ${Boost_LIBRARIES}
-)
-
-# The code below only works for CMake 3.1.0 or later for C++11 activation
-set_property(TARGET peer PROPERTY CXX_STANDARD 11)
-set_property(TARGET peer PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET splitter PROPERTY CXX_STANDARD 11)
-set_property(TARGET splitter PROPERTY CXX_STANDARD_REQUIRED ON)
+  # Enable C+11 for CMake 3.1.0 or later
+  set_property(TARGET splitter PROPERTY CXX_STANDARD 11)
+  set_property(TARGET splitter PROPERTY CXX_STANDARD_REQUIRED ON)
+endif()
