@@ -8,7 +8,7 @@ using namespace p2psp;
 using namespace boost::python;
 
 
-BOOST_PYTHON_MODULE(p2psp)
+BOOST_PYTHON_MODULE(libp2psp)
 {
     class_<PeerIMS, boost::noncopyable>("PeerIMS")
         .def("Init", &PeerIMS::Init)

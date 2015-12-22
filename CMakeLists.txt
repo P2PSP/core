@@ -12,15 +12,23 @@ find_package(Boost COMPONENTS
   timer
   thread
   program_options
+  python
 REQUIRED)
 
+find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
+find_package(PythonLibs REQUIRED)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
 
-include_directories(${Boost_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
+include_directories(
+  ${Boost_INCLUDE_DIR} 
+  ${OPENSSL_INCLUDE_DIR}
+  ${PYTHON_INCLUDE_DIRS}
+)
+
 link_directories(${Boost_LIBRARY_DIR})
 
 # Initialize CXXFLAGS
@@ -48,31 +56,42 @@ file(GLOB CORE_SOURCES "src/core/*.cc")
 file(GLOB UTIL_SOURCES "src/util/*.cc")
 
 # Executables
-add_executable(peer 
-  "src/peer.cc"
+add_library(p2psp SHARED
   ${CORE_SOURCES}
   ${UTIL_SOURCES}
+)
+
+# Libraries
+target_link_libraries(p2psp 
+  log4cpp 
+  ${OPENSSL_LIBRARIES}
+  ${CMAKE_THREAD_LIBS_INIT}
+  ${Boost_LIBRARIES}
+  ${PYTHON_LIBRARIES}
+)
+
+# The code below only works for CMake 3.1.0 or later for C++11 activation
+set_property(TARGET p2psp PROPERTY CXX_STANDARD 11)
+set_property(TARGET p2psp PROPERTY CXX_STANDARD_REQUIRED ON)
+
+# Executables
+add_executable(peer 
+  "src/peer.cc"
 )
 
 add_executable(splitter
   "src/splitter.cc"
-  ${CORE_SOURCES}
-  ${UTIL_SOURCES}
 )
-
-find_package(Threads)
 
 # Libraries
 target_link_libraries(peer 
-  log4cpp 
-  ${OPENSSL_LIBRARIES}
+  p2psp
   ${CMAKE_THREAD_LIBS_INIT}
   ${Boost_LIBRARIES}
 )
 
 target_link_libraries(splitter 
-  log4cpp
-  ${OPENSSL_LIBRARIES}
+  p2psp
   ${CMAKE_THREAD_LIBS_INIT}
   ${Boost_LIBRARIES}
 )
@@ -82,4 +101,3 @@ set_property(TARGET peer PROPERTY CXX_STANDARD 11)
 set_property(TARGET peer PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET splitter PROPERTY CXX_STANDARD 11)
 set_property(TARGET splitter PROPERTY CXX_STANDARD_REQUIRED ON)
-
