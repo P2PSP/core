@@ -31,4 +31,10 @@ void PeerStrpeDsMalicious::SetOnOffAttack(bool value, int ratio) {
 void PeerStrpeDsMalicious::SetPersistentAttack(bool value) {
   persistent_attack_ = value;
 }
+
+void PeerStrpeDsMalicious::GetPoisonedChunk(std::vector<char> &message) {
+  if (message.size() == (2 + 1024 + 40 + 40)) {
+    std::memset(message.data() + 2, 0, 1024);
+  }
+}
 }
