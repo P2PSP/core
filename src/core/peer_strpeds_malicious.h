@@ -30,6 +30,7 @@ class PeerStrpeDsMalicious : public PeerStrpeDs {
   virtual void SetPersistentAttack(bool);
   virtual void GetPoisonedChunk(std::vector<char>*);
   virtual void SendChunk(ip::udp::endpoint);
+  virtual int DbsProcessMessage(std::vector<char>, ip::udp::endpoint);
 };
 }
 
