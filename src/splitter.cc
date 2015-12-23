@@ -17,15 +17,17 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <signal.h>
+#include "util/trace.h"
 
 // TODO: LOG fails if splitter is defined outside the main
 // p2psp::SplitterSTRPE splitter;
+p2psp::SplitterSTRPE *splitter_ptr;
 
 void HandlerCtrlC(int s) {
   LOG("Keyboard interrupt detected ... Exiting!");
 
   // Say to daemon threads that the work has been finished,
-  // splitter.SetAlive(false);
+  splitter_ptr->SetAlive(false);
 
   // TODO: Send goodbye to the team socket
 }
@@ -94,54 +96,57 @@ int main(int argc, const char *argv[]) {
 
   p2psp::SplitterSTRPE splitter;
 
+  splitter_ptr = &splitter;
+
   if (vm.count("buffer_size")) {
-    splitter.SetBufferSize(vm["buffer_size"].as<int>());
+    splitter_ptr->SetBufferSize(vm["buffer_size"].as<int>());
   }
 
   if (vm.count("channel")) {
-    splitter.SetChannel(vm["channel"].as<std::string>());
+    splitter_ptr->SetChannel(vm["channel"].as<std::string>());
   }
 
   if (vm.count("chunk_size")) {
-    splitter.SetBufferSize(vm["chunk_size"].as<int>());
+    splitter_ptr->SetBufferSize(vm["chunk_size"].as<int>());
   }
 
   if (vm.count("header_size")) {
-    splitter.SetHeaderSize(vm["header_size"].as<int>());
+    splitter_ptr->SetHeaderSize(vm["header_size"].as<int>());
   }
 
   if (vm.count("port")) {
-    splitter.SetPort(vm["port"].as<int>());
+    splitter_ptr->SetPort(vm["port"].as<int>());
   }
 
   if (vm.count("source_addr")) {
-    splitter.SetSourceAddr(vm["source_addr"].as<std::string>());
+    splitter_ptr->SetSourceAddr(vm["source_addr"].as<std::string>());
   }
 
   if (vm.count("source_port")) {
-    splitter.SetSourcePort(vm["source_port"].as<int>());
+    splitter_ptr->SetSourcePort(vm["source_port"].as<int>());
   }
 
   // Parameters if splitter is not IMS
   if (vm.count("max_chunk_loss")) {
-    splitter.SetMaxChunkLoss(vm["max_chunk_loss"].as<int>());
+    splitter_ptr->SetMaxChunkLoss(vm["max_chunk_loss"].as<int>());
   }
 
   if (vm.count("max_number_of_monitor_peers")) {
-    splitter.SetMonitorNumber(vm["max_number_of_monitor_peers"].as<int>());
+    splitter_ptr->SetMonitorNumber(vm["max_number_of_monitor_peers"].as<int>());
   }
 
   // Parameters if STRPE
   if (vm.count("strpe_log")) {
-    splitter.SetLogging(vm["strpe_log"].as<bool>());
+    splitter_ptr->SetLogging(vm["strpe_log"].as<bool>());
+    splitter_ptr->SetLogging(vm["strpe_log"].as<bool>());
   }
 
   if (vm.count("strpe_log")) {
-    splitter.SetLogging(true);
-    splitter.SetLogFile(vm["strpe_log"].as<std::string>());
+    splitter_ptr->SetLogging(true);
+    splitter_ptr->SetLogFile(vm["strpe_log"].as<std::string>());
   }
-
-  splitter.Start();
+  
+  splitter_ptr->Start();
 
   LOG("         | Received  | Sent      | Number       losses/ losses");
   LOG("    Time | (kbps)    | (kbps)    | peers (peer) sents   threshold "
@@ -149,8 +154,9 @@ int main(int argc, const char *argv[]) {
   LOG("---------+-----------+-----------+-----------------------------------.."
       ".");
 
-  int last_sendto_counter = splitter.GetSendToCounter();
-  int last_recvfrom_counter = splitter.GetRecvFromCounter();
+  int last_sendto_counter = splitter_ptr->GetSendToCounter();
+  int last_recvfrom_counter = splitter_ptr->GetRecvFromCounter();
+
   int chunks_sendto = 0;
   int kbps_sendto = 0;
   int kbps_recvfrom = 0;
@@ -164,19 +170,22 @@ int main(int argc, const char *argv[]) {
   sigIntHandler.sa_flags = 0;
   sigaction(SIGINT, &sigIntHandler, NULL);
 
-  while (splitter.isAlive()) {
+  // while (splitter.isAlive()) {
+  while (splitter_ptr->isAlive()) {
     boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
-    chunks_sendto = splitter.GetSendToCounter() - last_sendto_counter;
-    kbps_sendto = (chunks_sendto * splitter.GetChunkSize() * 8) / 1000;
-    chunks_recvfrom = splitter.GetRecvFromCounter() - last_recvfrom_counter;
-    kbps_recvfrom = (chunks_recvfrom * splitter.GetChunkSize() * 8) / 1000;
-    last_sendto_counter = splitter.GetSendToCounter();
-    last_recvfrom_counter = splitter.GetRecvFromCounter();
+    chunks_sendto = splitter_ptr->GetSendToCounter() - last_sendto_counter;
+    kbps_sendto = (chunks_sendto * splitter_ptr->GetChunkSize() * 8) / 1000;
+    chunks_recvfrom =
+        splitter_ptr->GetRecvFromCounter() - last_recvfrom_counter;
+    kbps_recvfrom = (chunks_recvfrom * splitter_ptr->GetChunkSize() * 8) / 1000;
+    last_sendto_counter = splitter_ptr->GetSendToCounter();
+    last_recvfrom_counter = splitter_ptr->GetRecvFromCounter();
+
     LOG("|" << kbps_recvfrom << "|" << kbps_sendto << "|");
     // LOG(_SET_COLOR(_CYAN));
 
     // TODO: GetPeerList is only in DBS and derivated classes
-    peer_list = splitter.GetPeerList();
+    peer_list = splitter_ptr->GetPeerList();
     LOG("Size peer list: " << peer_list.size());
 
     std::vector<boost::asio::ip::udp::endpoint>::iterator it;
@@ -186,19 +195,22 @@ int main(int argc, const char *argv[]) {
       _SET_COLOR(_RED);
 
       // TODO: GetLoss and GetMaxChunkLoss are only in DBS and derivated classes
-      LOG(splitter.GetLoss(*it) << "/" << chunks_sendto << " "
-                                << splitter.GetMaxChunkLoss());
+      LOG(splitter_ptr->GetLoss(*it) << "/" << chunks_sendto << " "
+                                     << splitter_ptr->GetMaxChunkLoss());
 
       // TODO: If is ACS
       _SET_COLOR(_YELLOW);
-      LOG(splitter.GetPeriod(*it));
+      // LOG(splitter.GetPeriod(*it));
+      LOG(splitter_ptr->GetPeriod(*it));
       // _SET_COLOR(_PURPLE)
-      LOG((splitter.GetNumberOfSentChunksPerPeer(*it) *
-           splitter.GetChunkSize() * 8) /
+      LOG((splitter_ptr->GetNumberOfSentChunksPerPeer(*it) *
+           splitter_ptr->GetChunkSize() * 8) /
           1000);
-      splitter.SetNumberOfSentChunksPerPeer(*it, 0);
+      splitter_ptr->SetNumberOfSentChunksPerPeer(*it, 0);
     }
   }
+  
+  LOG("Ending");
 
   return 0;
 }
