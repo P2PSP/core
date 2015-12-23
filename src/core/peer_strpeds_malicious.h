@@ -31,6 +31,7 @@ class PeerStrpeDsMalicious : public PeerStrpeDs {
   virtual void GetPoisonedChunk(std::vector<char>*);
   virtual void SendChunk(ip::udp::endpoint);
   virtual int DbsProcessMessage(std::vector<char>, ip::udp::endpoint);
+  virtual int ProcessMessage(std::vector<char>, ip::udp::endpoint);
 };
 }
 

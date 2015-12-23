@@ -235,4 +235,24 @@ int PeerStrpeDsMalicious::DbsProcessMessage(std::vector<char> message,
 
   return -1;
 }
+
+int PeerStrpeDsMalicious::ProcessMessage(std::vector<char> message,
+                                         ip::udp::endpoint sender) {
+  if (std::find(bad_peers_.begin(), bad_peers_.end(), sender) ==
+      bad_peers_.end()) {
+    return -1;
+  }
+
+  if (IsCurrentMessageFromSplitter() || CheckMessage(message, sender)) {
+    if (IsControlMessage(message) and (message[0] == 'B')) {
+      return HandleBadPeersRequest();
+    } else {
+      return DbsProcessMessage(message, sender);
+    }
+  } else {
+    ProcessBadMessage(message, sender);
+  }
+
+  return -1;
+}
 }
