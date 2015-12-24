@@ -53,15 +53,14 @@ classified into three categories:
 significatively the [Quality of Service (QoS)](https://en.wikipedia.org/wiki/Quality_of_service). However,
 it has interesting characteristics such as peers does not need to request (explicitly) the chunks of data from their neighbors (this type of protocolos are called *push-based protocol*), peers only send one copy of the stream
 regardless of the size of the overlay (we will refeer to this
-characteristic as the *replication factor* $R$) and finally, although the chunks are not reordered by the protocol itself and the peers form a pure pipeline system, the latency for the last peer of the chain is $N$, being $N$ the number of peers. In a chain, the *diameter of the overlay* $D$ equals $N$.
+characteristic as the *replication factor* $R$) and finally, although the chunks are not reordered by the protocol itself and the peers form a pure pipeline system, the latency for the last peer of the chain is $N$, being $N$ the number of peers. In a chain, the *diameter of the overlay* $D$ equals $N$. The ratio $D/R$ which measures 
 
-2. Trees. Tree overlays impose that
+2. Trees. Tree overlays place peers into a tree structure and impose that
 peers must send so many copies of the stream (replication factor) as
 the degree of the tree (usually $R=2$). Like chains, most tree overlays are driven by
-push-based protocols. In this case, the latency is proportional to $D=\log_2(N)$.
+push-based protocols aothough in this case, the latency is proportional to $D=\log_2(N)$ (notice, at the expense of sending each chunk twice than in the previous case). Therefore, the ratio 
 
-3. Meshes. Mesh overlays are more flexible regarding the
-overlay topology and $R$. However, because chunks can follow different paths, peers need to ask to their neighbors
+3. Meshes. Mesh overlays are more flexible regarding the topology and $R$. However, because chunks can follow different paths, peers need to ask to their neighbors about the their availability. If this happens, we say that the overlay follows a *pull-based* protocol, which obviously, produce more transmission overhead that push-based ones.
 
 pull-based protocols (that are less efficient in terms of bandwidth and latency than push-based ones) are usually necessary.
 
