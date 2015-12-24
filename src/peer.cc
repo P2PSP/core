@@ -85,15 +85,6 @@ int main(int argc, const char* argv[]) {
   p2psp::PeerStrpeDsMalicious peer;
   peer.Init();
 
-  peer.WaitForThePlayer();
-  peer.ConnectToTheSplitter();
-  peer.ReceiveTheMcasteEndpoint();
-  peer.ReceiveTheHeaderSize();
-  peer.ReceiveTheChunkSize();
-  peer.ReceiveTheHeader();
-  peer.ReceiveTheBufferSize();
-  LOG("Using IP Multicast address = " << peer.GetMcastAddr());
-
   if (vm.count("show_buffer")) {
     peer.SetShowBuffer(true);
   }
@@ -149,6 +140,15 @@ int main(int argc, const char* argv[]) {
   if (vm.count("strpe_log")) {
     // TODO: Handle logging
   }
+
+  peer.WaitForThePlayer();
+  peer.ConnectToTheSplitter();
+  peer.ReceiveTheMcasteEndpoint();
+  peer.ReceiveTheHeaderSize();
+  peer.ReceiveTheChunkSize();
+  peer.ReceiveTheHeader();
+  peer.ReceiveTheBufferSize();
+  LOG("Using IP Multicast address = " << peer.GetMcastAddr());
 
   // A multicast address is always received, even for DBS peers.
   if (peer.GetMcastAddr() == "0.0.0.0") {
