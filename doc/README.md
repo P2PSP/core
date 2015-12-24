@@ -1,6 +1,9 @@
 Peer-to-Peer Straightforward Protocol (P2PSP)
 =============================================
 
+An application-layer protocol for real-time multicasting of data from
+a source to a set of networked entities (peers).
+
 [Multicasting](https://en.wikipedia.org/wiki/Multicast)
 -------------------------------------------------------
 
@@ -54,8 +57,7 @@ overlay topology and the replication factor. However, pull-based protocols (that
 Definition
 ----------
 
-P2PSP is an application-layer protocol designed for real-time
-broadcasting of data from a source to a set of networked entities (peers).
+P2PSP is 
 
 P2PSP mimics
 the IP multicast behaviour, where a data source sends only a copy of the
