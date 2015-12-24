@@ -69,6 +69,8 @@ void SplitterSTRPE::ModerateTheTeam() {
       }
     }
   }
+
+  LOG("Exiting moderate the team");
 }
 
 void SplitterSTRPE::AddTrustedPeer(boost::asio::ip::udp::endpoint peer) {
@@ -144,7 +146,7 @@ void SplitterSTRPE::Run() {
 
   // Threads
   thread t1(bind(&SplitterIMS::HandleArrivals, this));
-  thread t2(bind(&SplitterDBS::ModerateTheTeam, this));
+  thread t2(bind(&SplitterSTRPE::ModerateTheTeam, this));
   thread t3(bind(&SplitterDBS::ResetCountersThread, this));
 
   vector<char> message(sizeof(uint16_t) + chunk_size_);

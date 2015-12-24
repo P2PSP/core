@@ -122,6 +122,10 @@ class SplitterIMS {
                          boost::asio::ip::udp::endpoint destination);
   void ReceiveTheHeader();
 
+  // TODO: SendChunk can be used instead if the increment of sendto_counter
+  // doesn't matter
+  void SayGoodbye();
+
   // Thread management
   virtual void Start();
 
@@ -130,6 +134,7 @@ class SplitterIMS {
   int GetRecvFromCounter();
   int GetSendToCounter();
   int GetChunkSize();
+  int GetPort();
 
   // Setters
   void SetAlive(bool alive);

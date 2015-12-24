@@ -28,8 +28,26 @@ void HandlerCtrlC(int s) {
 
   // Say to daemon threads that the work has been finished,
   splitter_ptr->SetAlive(false);
+}
 
-  // TODO: Send goodbye to the team socket
+void HandlerEndOfExecution() {
+  // Wake up the "moderate_the_team" daemon, which is waiting in a recvfrom().
+  splitter_ptr->SayGoodbye();
+
+  // Wake up the "handle_arrivals" daemon, which is waiting in an accept().
+  boost::asio::io_service io_service_;
+  boost::system::error_code ec;
+  boost::asio::ip::tcp::socket socket(io_service_);
+  boost::asio::ip::tcp::endpoint endpoint(
+      boost::asio::ip::address::from_string("127.0.0.1"),
+      splitter_ptr->GetPort());
+
+  socket.connect(endpoint, ec);
+
+  // TODO: If "broken pipe" errors have to be avoided, replace the close method
+  // with multiple receive calls in order to read the configuration sent by the
+  // splitter
+  socket.close();
 }
 
 int main(int argc, const char *argv[]) {
@@ -145,7 +163,7 @@ int main(int argc, const char *argv[]) {
     splitter_ptr->SetLogging(true);
     splitter_ptr->SetLogFile(vm["strpe_log"].as<std::string>());
   }
-  
+
   splitter_ptr->Start();
 
   LOG("         | Received  | Sent      | Number       losses/ losses");
@@ -170,7 +188,6 @@ int main(int argc, const char *argv[]) {
   sigIntHandler.sa_flags = 0;
   sigaction(SIGINT, &sigIntHandler, NULL);
 
-  // while (splitter.isAlive()) {
   while (splitter_ptr->isAlive()) {
     boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
     chunks_sendto = splitter_ptr->GetSendToCounter() - last_sendto_counter;
@@ -200,7 +217,6 @@ int main(int argc, const char *argv[]) {
 
       // TODO: If is ACS
       _SET_COLOR(_YELLOW);
-      // LOG(splitter.GetPeriod(*it));
       LOG(splitter_ptr->GetPeriod(*it));
       // _SET_COLOR(_PURPLE)
       LOG((splitter_ptr->GetNumberOfSentChunksPerPeer(*it) *
@@ -209,8 +225,9 @@ int main(int argc, const char *argv[]) {
       splitter_ptr->SetNumberOfSentChunksPerPeer(*it, 0);
     }
   }
-  
+
   LOG("Ending");
+  HandlerEndOfExecution();
 
   return 0;
 }
