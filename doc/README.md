@@ -16,31 +16,40 @@ A (scalable) communication model where a source of information can send data to 
 
 On the Internet, multicasting can be performed with IP multicast,
 where the network infrastructure
-[Routers](https://en.wikipedia.org/wiki/Router_(computing)) are in
+([routers])(https://en.wikipedia.org/wiki/Router_(computing)) is in
 charge of replicating data.
 
 Availability of IP multicast
 ----------------------------
 
-Plain users can not use IP multicast if the source and destinations are in different [LANs](https://en.wikipedia.org/wiki/Local_area_network). The main reasons:
+In general, plain users can not use IP multicast if the source and
+destinations are in different
+[LANs](https://en.wikipedia.org/wiki/Local_area_network). The main
+reasons are:
 
-1. Sources (usually content providers) can not control how many times the media is replicated and where it is delivered.
+1. Sources (usually content providers) can not control how many times
+   the media is replicated and where it is delivered.
 2. [IP multicast can be used to perform DoS attacks.](https://tools.ietf.org/html/rfc4732#section-2.2.2)
-3. [ISPs](https://en.wikipedia.org/wiki/Internet_service_provider) are not able to measure the cost of the IP multicast traffic and therefore, can not charge that to the sources.
+3. [ISPs](https://en.wikipedia.org/wiki/Internet_service_provider) are
+   not able to measure the cost of the IP multicast traffic and
+   therefore, can not charge the rates to the sources.
 
 [Aplication Layer Multicast](https://en.wikipedia.org/wiki/Multicast#Application_layer_multicast)
 -------------------------------------------------------------------------------------------------
 
-Multicasting can be provided using (application level) alternatives to IP (network level) multicast. The most used:
+Multicasting can be provided (at application level) using alternatives
+to IP (network level) multicast. The most used techniques are:
 
-1. [Content delivery networks](https://en.wikipedia.org/wiki/Content_delivery_network).
-2. [P2P overlays](https://en.wikipedia.org/wiki/Peercasting).
+1. [Content delivery networks](https://en.wikipedia.org/wiki/Content_delivery_network). 
+2. [P2P systems](https://en.wikipedia.org/wiki/Peercasting).
 
 [P2P systems](https://en.wikipedia.org/wiki/Peer-to-peer)
 ---------------------------------------------------------
 
-Depending on the topology of the overlay network, P2P systems can be classified in chains, trees or
-meshes.
+Depending on the topology of the overlay network, P2P systems can be
+classified into three categories:
+
+1. Chains.
 
 Chain overlays are quite rare because [churn](https://en.wikipedia.org/wiki/Churn_rate) can degrade
 significatively the [Quality of Service (QoS)](https://en.wikipedia.org/wiki/Quality_of_service) provided. However,
@@ -49,13 +58,19 @@ interchange information about the availability of the stream, and therefore, it 
 regardless of the size of the overlay (we will refeer to this
 characteristic as the *replication factor*).
 
+2. Trees.
+
 Tree overlays impose that
 peers must send so many copies of the stream (replication factor) as
 the degree of the tree, but like chains, the protocol is also
 push-based.
 
+3. Meshes.
+
 Mesh overlays are more flexible regarding the
 overlay topology and the replication factor. However, pull-based protocols (that are less efficient in terms of bandwidth and latency than push-based ones) are usually necessary.
+
+chains, trees or meshes.
 
 Definition
 ----------
