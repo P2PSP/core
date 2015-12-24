@@ -64,38 +64,24 @@ push-based protocols aothough in this case, the latency is proportional to $D=\l
 
 ![](http://slides.p2psp.org/2015-06-Barcelona/FIGs/full-mesh.svg)
 
-Icecast technology
-------------------
+P2PSP characteristics
+---------------------
 
-[Icecast](http://icecast.org/) is an open-source media server of
-[Theora](http://www.theora.org/), [Vorbis](http://www.vorbis.com/),
-[Opus](https://www.opus-codec.org/),
-[MP3](https://en.wikipedia.org/wiki/MP3) and
-[WebM](http://www.webmproject.org/) streams. The following figure
-shows an example of a Icecast streaming system:
+1. P2PSP is not aware of the broadcasted content, the bit-rate, the format, etc.
+2. P2PSP has a modular architecture. The number of modules used depends on the requirements of the system to be deployed.
+3. P2PSP emulates the behaviour of IP multicast. If this is available, this facility is used.
+4. Due to usually lost chunks are spreaded along the time, P2PSP facilitates the use of error concealment techniques.
 
-![A Icecast overlay][images/icecast-model]
+Data partitioning
+-----------------
 
-Icecast + P2PSP technology
---------------------------
+P2PSP splits the media stream into *chunks*. All chunks have the same size. Chunks are transmitted over [UDP](https://en.wikipedia.org/wiki/User_Datagram_Protocol). A small chunk minimizes the average latency of the transmission but also increments the [overhead](https://en.wikipedia.org/wiki/Protocol_overhead).
 
-Basically, P2PSP extends Icecast overlays in order to decrease the
-load of the server (Source) side, generating hybrid Icecast+P2PSP
-structures that are more scalable. The following figures shows
-examples of this concept:
-
-![A Icecast+P2PSP overlay][images/icecast-P2PSP-model1]
-![A Icecast+P2PSP overlay][images/icecast-P2PSP-model2]
+Entities
+--------
 
 
 
-
-
-P2PSP is a fully-connected mesh-structured push-based protocol. Being
-$N$ the number of peers in the overlay (a “team” in the P2PSP jargon),
-$N$ is degree of the mesh. The replication factor in P2PSP is 1 by
-default, although as in mesh-based protocolos, it can be any other
-depending on the solidarity between the peers.
 
 [IMS (Ip Multicast Set of rules)](IMS/README.md)
 ------------------------------------------------
