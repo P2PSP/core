@@ -14,7 +14,10 @@ A (scalable) communication model where a source of information can send data to 
 [IP multicast](https://en.wikipedia.org/wiki/IP_multicast)
 ----------------------------------------------------------
 
-Using IP multicast, the source can multicast data using the network infrastructure. [Routers](https://en.wikipedia.org/wiki/Router_(computing)) replicate data.
+On the Internet, multicasting can be performed with IP multicast,
+where the network infrastructure
+[Routers](https://en.wikipedia.org/wiki/Router_(computing)) are in
+charge of replicating data.
 
 Availability of IP multicast
 ----------------------------
