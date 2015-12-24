@@ -60,32 +60,9 @@ peers must send so many copies of the stream (replication factor) as
 the degree of the tree (usually $R=2$). Like chains, most tree overlays are driven by
 push-based protocols aothough in this case, the latency is proportional to $D=\log_2(N)$ (notice, at the expense of sending each chunk twice than in the previous case). Therefore, the ratio 
 
-3. Meshes. Mesh overlays are more flexible regarding the topology and $R$. However, because chunks can follow different paths, peers need to ask to their neighbors about the their availability. If this happens, we say that the overlay follows a *pull-based* protocol, which obviously, produce more transmission overhead that push-based ones.
+3. Meshes. Mesh overlays are more flexible regarding their topology and $R$. However, because chunks can follow different paths, peers need to ask to their neighbors about the their availability. If this happens, we say that the overlay follows a *pull-based* protocol, which obviously, produce more transmission overhead that push-based ones. P2PSP is a push-based fully connected ($D=1$) $R=1$ mesh overlay.
 
-pull-based protocols (that are less efficient in terms of bandwidth and latency than push-based ones) are usually necessary.
-
-chains, trees or meshes.
-
-Definition
-----------
-
-P2PSP is 
-
-P2PSP mimics
-the IP multicast behaviour, where a data source sends only a copy of the
-stream to a the peers. However, differently to IP multicast where the routers replicate the chunks as many times as receivers, in P2PSP the peers are in charge of this task: peers must send to the rest of peers those chunks that have been received from the splitter.
-
-Motivation
-----------
-
-Efficient large scale distribution of real-time media (video, for
-example) is one of the big challenges of the Internet. To achieve this (among other thigs),
-[IETF](https://www.ietf.org/) designed IP multicast. In this transmission model, a source sends
-only one copy of the stream which is delivered to a set of receivers
-thanks to the automatic replication of data in the IP multicast routers.
-Unfortunately, IP multicast does not fit the bussines model of most
-Internet Service Providers (ISP) which disables this functionality to
-end-users.
+![](http://slides.p2psp.org/2015-06-Barcelona/FIGs/full-mesh.svg)
 
 Icecast technology
 ------------------
