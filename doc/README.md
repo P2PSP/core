@@ -75,19 +75,41 @@ P2PSP characteristics
 Data partitioning
 -----------------
 
-P2PSP splits the media stream into *chunks*. All chunks have the same size. Chunks are transmitted over [UDP](https://en.wikipedia.org/wiki/User_Datagram_Protocol). A small chunk minimizes the average latency of the transmission but also increments the [overhead](https://en.wikipedia.org/wiki/Protocol_overhead).
+P2PSP splits the media stream into *chunks*. At this moment (the following is something that could be change in the future in order to achieve that a chunk transport a unit of code-stream), all chunks have the same size. Chunks are transmitted over [UDP](https://en.wikipedia.org/wiki/User_Datagram_Protocol). A small chunk minimizes the average latency of the transmission but also increments the [overhead](https://en.wikipedia.org/wiki/Protocol_overhead).
 
 Entities
 --------
 
+A P2PSP overlay network is composed the entities (in general, nodes of the overlay).
 
+1. A source which produces the stream. Typically, it is a streaming
+  HTTP server using the HTTP protocol such as [Icecast](http://icecast.org/). The
+  source controls the transmission bit-rate in the P2PSP network and
+  in general can serve to several clients.
 
+2. Players request and consume (decode and play) the stream.
 
-[IMS (Ip Multicast Set of rules)](IMS/README.md)
-------------------------------------------------
-[DBS (Data Broadcasting Set of rules)](DBS/README.md)
------------------------------------------------------
-[LRS (Lost Recovery Set of rules)](LRS/README.md)
--------------------------------------------------
-[ACS (Adaptive Chunk-rate Set of rules)](ACS/README.md)
--------------------------------------------------------
+3. Splitters. This entity receives the stream from a
+  source, splits it into chunks and sends the chunks
+  to peers. A splitter feeds a team (of peers). Teams can be interconnected if peers works as sources.
+
+4. Peers that receive chunks from the splitter and from
+  other peers, ensembles the stream (usuatlly using buffering) and sends it to a player.
+
+Sets or Rules
+-------------
+
+The protocol is organized into layers, each of them implementing a different set of rules (SoR). Each SoR solves a specific problem. Some are compulsory and other are optional.
+
+1. [IMS (Ip Multicast Set of rules)](IMS/README.md)
+2. [DBS (Data Broadcasting Set of rules)](DBS/README.md)
+3. [LRS (Lost Recovery Set of rules)](LRS/README.md)
+4. [ACS (Adaptive Chunk-rate Set of rules)](ACS/README.md)
+5. [NTS (Nat Traversal Set of rules)](NTS/readme.md)
+7. [EMS (End-point Masquerading Set of rules)](EMS/readme.md)
+8. [CIS (Content Integrity Set of rules)](CIS/readme.md) 
+9. [DPS (Data Privacy Set of rules)](DPS/readme.md) 
+10. [MCS (Multi-Channel Set of rules)](MCS/readme.md)
+11. [RMS (Reliable Mode Set of rules)](RMS/readme.md)
+12. [Error (Resilience Set or rules)](ERS/readme.md)
+13. [TCS (Team Clustering Set of rules)](TCS/readme.md)
