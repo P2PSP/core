@@ -46,29 +46,24 @@ to IP (network level) multicast. The most used techniques are:
 [P2P systems](https://en.wikipedia.org/wiki/Peer-to-peer)
 ---------------------------------------------------------
 
-Depending on the topology of the overlay network, P2P systems can be
+Depending on the topology of the P2P [overlay network](https://en.wikipedia.org/wiki/Overlay_network), P2P systems can be
 classified into three categories:
 
-1. Chains.
-
-Chain overlays are quite rare because [churn](https://en.wikipedia.org/wiki/Churn_rate) can degrade
-significatively the [Quality of Service (QoS)](https://en.wikipedia.org/wiki/Quality_of_service) provided. However,
-it has interesting characteristics such as peers does not need to
-interchange information about the availability of the stream, and therefore, it can be transmitted using a *push-based protocol* and peers only send one copy of the stream
+1. Chains. Chain overlays are quite rare because [churn](https://en.wikipedia.org/wiki/Churn_rate) can degrade
+significatively the [Quality of Service (QoS)](https://en.wikipedia.org/wiki/Quality_of_service). However,
+it has interesting characteristics such as peers does not need to request (explicitly) the chunks of data from their neighbors (this type of protocolos are called *push-based protocol*), peers only send one copy of the stream
 regardless of the size of the overlay (we will refeer to this
-characteristic as the *replication factor*).
+characteristic as the *replication factor* $R$) and finally, although the chunks are not reordered by the protocol itself and the peers form a pure pipeline system, the latency for the last peer of the chain is $N$, being $N$ the number of peers. In a chain, the *diameter of the overlay* $D$ equals $N$.
 
-2. Trees.
-
-Tree overlays impose that
+2. Trees. Tree overlays impose that
 peers must send so many copies of the stream (replication factor) as
-the degree of the tree, but like chains, the protocol is also
-push-based.
+the degree of the tree (usually $R=2$). Like chains, most tree overlays are driven by
+push-based protocols. In this case, the latency is proportional to $D=\log_2(N)$.
 
-3. Meshes.
+3. Meshes. Mesh overlays are more flexible regarding the
+overlay topology and $R$. However, because chunks can follow different paths, peers need to ask to their neighbors
 
-Mesh overlays are more flexible regarding the
-overlay topology and the replication factor. However, pull-based protocols (that are less efficient in terms of bandwidth and latency than push-based ones) are usually necessary.
+pull-based protocols (that are less efficient in terms of bandwidth and latency than push-based ones) are usually necessary.
 
 chains, trees or meshes.
 
