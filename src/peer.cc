@@ -9,12 +9,137 @@
 #include "core/peer_strpeds_malicious.h"
 #include "core/common.h"
 #include "util/trace.h"
+#include <boost/program_options/parsers.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <boost/format.hpp>
 
 int main(int argc, const char* argv[]) {
-  // TODO: Argument parser. Decide how to implement it
+  // TODO: Format default options
+  boost::format format("Defaut = %5i");
+
+  // Argument Parser
+  boost::program_options::options_description desc(
+      "This is the peer node of a P2PSP team.");
+
+  // TODO: strpe option should expect a list of arguments, not bool
+  desc.add_options()("enable_chunk_loss",
+                     boost::program_options::value<std::string>(),
+                     "Forces a lost of chunks")(
+      "max_chunk_debt", boost::program_options::value<int>(),
+      "The maximun number of times that other peer "
+      "can not send a chunk to "
+      "this peer.")(  // TODO: (format % 10).str()).data())
+                      // --
+                      // format(Peer_DBS.MAX_CHUNK_DEBT)
+      "player_port", boost::program_options::value<uint16_t>(),
+      "Port to communicate with the player. "
+      "Default = {}")(  //.format(Peer_IMS.PLAYER_PORT)"
+      "port_step", boost::program_options::value<int>(),
+      "Source port step forced when behind a sequentially port "
+      "allocating NAT (conflicts with --chunk_loss_period). Default = "
+      "{}")(  //.format(Symsp_Peer.PORT_STEP)
+
+      "splitter_addr", boost::program_options::value<std::string>(),
+      "IP address or hostname of the splitter. Default = {}.")(  //.format(Peer_IMS.SPLITTER_ADDR)
+
+      "splitter_port", boost::program_options::value<uint16_t>(),
+      "Listening port of the splitter. Default = {}.")(  //.format(Peer_IMS.SPLITTER_PORT)
+      "port", boost::program_options::value<uint16_t>(),
+      "Port to communicate with the peers. Default {} (the OS will chose "
+      "it).")(  //.format(Peer_IMS.PORT)
+      "use_localhost",
+      boost::program_options::value<bool>()->implicit_value(true),
+      "Forces the peer to use localhost instead of the IP of the adapter "
+      "to connect to the splitter. Notice that in this case, peers that "
+      "run outside of the host will not be able to communicate with this "
+      "peer.")(
+      //"malicious",
+      // boost::program_options::value<bool>()->implicit_value(true),
+      //"Enables the malicious activity for peer.")(
+      "persistent", boost::program_options::value<std::string>(),
+      "Forces the peer to send poisoned chunks to other peers.")(
+      "on_off_ratio", boost::program_options::value<int>(),
+      "Enables on-off attack and sets ratio for on off (from 1 to 100)")(
+      "selective", boost::program_options::value<std::string>(),
+      "Enables selective attack for given set of peers.")(
+      "bad_mouth", boost::program_options::value<std::string>(),
+      "Enables Bad Mouth attack for given set of peers.")(
+      // "trusted", boost::program_options::value<bool>()->implicit_value(true),
+      // "Forces the peer to send hashes of chunks to splitter")(
+      "checkall", boost::program_options::value<bool>()->implicit_value(true),
+      "Forces the peer to send hashes of every chunks to splitter (works only "
+      "with trusted option)")(
+      // "strpeds", boost::program_options::value<bool>()->implicit_value(true),
+      // "Enables STrPe-DS")(
+      "strpe_log", boost::program_options::value<bool>()->implicit_value(true),
+      "Logging STrPe & STrPe-DS specific data to file.")(
+      "show_buffer",
+      boost::program_options::value<bool>()->implicit_value(true),
+      "Shows the status of the buffer of chunks.");
+
+  boost::program_options::variables_map vm;
+  boost::program_options::store(
+      boost::program_options::parse_command_line(argc, argv, desc), vm);
+  boost::program_options::notify(vm);
 
   p2psp::PeerStrpeDsMalicious peer;
   peer.Init();
+
+  if (vm.count("show_buffer")) {
+    peer.SetShowBuffer(true);
+  }
+
+  if (vm.count("max_chunk_debt")) {
+    peer.SetMaxChunkDebt(vm["max_chunk_debt"].as<int>());
+  }
+
+  if (vm.count("player_port")) {
+    peer.SetPlayerPort(vm["player_port"].as<uint16_t>());
+  }
+
+  if (vm.count("port_step")) {
+    // Symsp_Peer peer.SetPortStep(vm["port_step"].as<int>());
+  }
+
+  if (vm.count("splitter_addr")) {
+    peer.SetSplitterAddr(vm["splitter_addr"].as<std::string>());
+  }
+
+  if (vm.count("splitter_port")) {
+    peer.SetSplitterPort(vm["splitter_port"].as<uint16_t>());
+  }
+
+  if (vm.count("port")) {
+    peer.SetPort(vm["port"].as<uint16_t>());
+  }
+
+  if (vm.count("use_localhost")) {
+    peer.SetUseLocalhost(true);
+  }
+
+  if (vm.count("persistent")) {
+    peer.SetPersistentAttack(true);
+  }
+
+  if (vm.count("on_off_ratio")) {
+    peer.SetOnOffAttack(true, vm["on_off_ratio"].as<int>());
+  }
+
+  if (vm.count("selective")) {
+    peer.SetSelectiveAttack(true, vm["selective"].as<std::string>());
+  }
+
+  if (vm.count("bad_mouth")) {
+    peer.SetBadMouthAttack(true, vm["bad_mouth"].as<std::string>());
+  }
+
+  if (vm.count("checkall")) {
+    peer.SetCheckAll(true);
+  }
+
+  if (vm.count("strpe_log")) {
+    // TODO: Handle logging
+  }
 
   peer.WaitForThePlayer();
   peer.ConnectToTheSplitter();
@@ -24,10 +149,6 @@ int main(int argc, const char* argv[]) {
   peer.ReceiveTheHeader();
   peer.ReceiveTheBufferSize();
   LOG("Using IP Multicast address = " << peer.GetMcastAddr());
-
-  // TODO: if(args.show_buffer){
-  // peer.SetShowBuffer(true);
-  //}
 
   // A multicast address is always received, even for DBS peers.
   if (peer.GetMcastAddr() == "0.0.0.0") {
