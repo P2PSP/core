@@ -111,5 +111,5 @@ The protocol is organized into layers, each of them implementing a different set
 9. [DPS (Data Privacy Set of rules)](DPS/readme.md) 
 10. [MCS (Multi-Channel Set of rules)](MCS/readme.md)
 11. [RMS (Reliable Mode Set of rules)](RMS/readme.md)
-12. [Error (Resilience Set or rules)](ERS/readme.md)
+12. [ERS (Error Resilience Set or rules)](ERS/readme.md)
 13. [TCS (Team Clustering Set of rules)](TCS/readme.md)
