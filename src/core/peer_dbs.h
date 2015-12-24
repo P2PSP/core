@@ -40,6 +40,7 @@ class PeerDBS : public PeerIMS {
 
   int number_of_monitors_;
   int number_of_peers_;
+  int max_chunk_debt_;
 
   int receive_and_feed_counter_;
   std::vector<char> receive_and_feed_previous_;
@@ -71,6 +72,7 @@ class PeerDBS : public PeerIMS {
   virtual bool AmIAMonitor();
 
   virtual int GetNumberOfPeers();
+  virtual void SetMaxChunkDebt(int);
 };
 }
 

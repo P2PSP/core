@@ -436,7 +436,26 @@ int PeerIMS::GetRecvfromCounter() { return recvfrom_counter_; }
 std::vector<ip::udp::endpoint> *PeerIMS::GetPeerList() { return &peer_list_; }
 
 int PeerIMS::GetSendtoCounter() { return sendto_counter_; }
+
 void PeerIMS::SetSendtoCounter(int sendto_counter) {
   sendto_counter_ = sendto_counter;
+}
+
+void PeerIMS::SetPlayerPort(uint16_t player_port) {
+  player_port_ = player_port;
+}
+
+void PeerIMS::SetSplitterAddr(std::string splitter_addr) {
+  splitter_addr_ = ip::address::from_string(splitter_addr);
+}
+
+void PeerIMS::SetSplitterPort(uint16_t splitter_port) {
+  splitter_port_ = splitter_port;
+}
+
+void PeerIMS::SetPort(uint16_t port) { port_ = port; }
+
+void PeerIMS::SetUseLocalhost(bool use_localhost) {
+  use_localhost_ = use_localhost;
 }
 }

@@ -4,23 +4,24 @@
 namespace p2psp {
 void PeerStrpeDsMalicious::Init() { LOG("Initialized"); }
 
-void PeerStrpeDsMalicious::SetBadMouthAttack(
-    bool value, std::vector<ip::udp::endpoint> selected) {
+void PeerStrpeDsMalicious::SetBadMouthAttack(bool value, std::string selected) {
   bad_mouth_attack_ = value;
 
   if (value) {
-    bad_peers_.insert(bad_peers_.end(), selected.begin(), selected.end());
+    // TODO: Tokenize string input
+    // bad_peers_.insert(bad_peers_.end(), selected.begin(), selected.end());
   } else {
     bad_peers_.clear();
   }
 }
 
-void PeerStrpeDsMalicious::SetSelectiveAttack(
-    bool value, std::vector<ip::udp::endpoint> selected) {
+void PeerStrpeDsMalicious::SetSelectiveAttack(bool value,
+                                              std::string selected) {
   selective_attack_ = true;
 
-  selected_peers_for_attack_.insert(selected_peers_for_attack_.end(),
-                                    selected.begin(), selected.end());
+  // TODO: Tokenize string input
+  // selected_peers_for_attack_.insert(selected_peers_for_attack_.end(),selected.begin(),
+  // selected.end());
 }
 
 void PeerStrpeDsMalicious::SetOnOffAttack(bool value, int ratio) {

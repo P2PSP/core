@@ -169,6 +169,11 @@ class PeerIMS {
   virtual int GetRecvfromCounter();
   virtual void SetShowBuffer(bool);
   virtual void SetSendtoCounter(int);
+  virtual void SetPlayerPort(uint16_t);
+  virtual void SetSplitterAddr(std::string);
+  virtual void SetSplitterPort(uint16_t);
+  virtual void SetPort(uint16_t);
+  virtual void SetUseLocalhost(bool);
 };
 }
 

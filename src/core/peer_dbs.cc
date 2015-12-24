@@ -388,4 +388,8 @@ bool PeerDBS::AmIAMonitor() {
 }
 
 int PeerDBS::GetNumberOfPeers() { return number_of_peers_; }
+
+void PeerDBS::SetMaxChunkDebt(int max_chunk_debt) {
+  max_chunk_debt_ = max_chunk_debt;
+}
 }
