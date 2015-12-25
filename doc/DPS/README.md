@@ -21,6 +21,44 @@ The Olympics) key renewal can be performed on a batch manner,
 i.e. renewing the key at a given fixed frequency rather than on a per
 arrival/exit basis. Finally, key renewal messages should be
 authenticated by means of a digital signature or other alternative
-methods <cite>[][1]</cite>
+methods [SPINS](#SPINS)
 
-[1]:http://www.quotedb.com/quotes/2112
+Many secure multicast protocols protocols exist in the literature, for
+example \cite{Xu:2008,LinSKD,ZhouHuangEGK,Yoon2011620}. Here we
+suggest the implementation of a protocol by Naranjo et al
+\cite{NaranjoJISE}. On it, every authorized peer receives a large
+prime number from the Key Server at the beginning of its authorization
+period (this communication is done under a secure channel, for example
+SSL/TLS). For every renewal, the Key Server generates a message
+containing the new key to be used by means of algebraic operations:
+all the authorized primes are involved in this message generation
+process, and the key can only be extracted from the message by a peer
+with a valid prime. This protocol is efficient and suits P2PSP
+architecture in a natural way: every splitter can act as a Key Server
+for its own team. Hence, the stream would be first transmitted
+among splitters (possible encrypted by a different key, shared by the
+splitters). Within each team, its corresponding splitter would
+control the encryption and key renewal process.
+
+# References
+
+<a name="SPINS"></a>
+```
+@article{SPINS,
+ author = {Perrig, A. and Szewczyk, R. and Tygar, J. D. and Wen, V. and Culler, David E.},
+ title = {{SPINS}: security protocols for sensor networks},
+ journal = {Wirel. Netw.},
+ volume = {8},
+ issue = {5},
+ year = {2002},
+ issn = {1022-0038},
+ pages = {521--534},
+ numpages = {14},
+ url = {http://dx.doi.org/10.1023/A:1016598314198},
+ doi = {http://dx.doi.org/10.1023/A:1016598314198},
+ acmid = {582464},
+ publisher = {Kluwer Academic Publishers},
+ address = {Hingham, MA, USA},
+}
+```
+
