@@ -15,9 +15,8 @@ restricted-cone NATs and (3) symmetric NATs. Depending on the type of
 the NAT, the number of fields in the NAT entry and the NAT behaviour
 is different. A Full-Cone NAT Entry (FCNE) has three fields:
 
-```
-  FCNE = (public NAT port $\cal{X}$, private IP address $\cal{Y}$, private port $\cal{Z}$)
-```
+	FCNE = (public NAT port $\cal{X}$, private IP address $\cal{Y}$, private port $\cal{Z}$)
+
 
 and whatever the origin of the incoming packet (incomming
   packets go from the Internet towards the private network), if that
@@ -49,21 +48,18 @@ figures in the packet header) matches the local end-point. If these
 values are the same then the peer is public; otherwise, the peer is
 running in a private host. When this is true, it holds that
 
-```
-\begin{equation}
-X \neq (X),
-\end{equation}
-```
+	\begin{equation}
+		X \neq (X),
+	\end{equation}
+
 
 where $X$ denotes the local (private) end-point of peer $X$ and $(X)$
 the global (public) end-point of peer $X$ in $X$'s NAT. In general, we
 have also that
 
-```
-\begin{equation}
-{\cal N}(T)\subset T,
-\end{equation}
-```
+	\begin{equation}
+		{\cal N}(T)\subset T,
+	\end{equation}
 
 where $T$ represents all the elements of a team (including the
 splitter) and ${\cal N}(T)$ those peers that behind a NAT. In other
