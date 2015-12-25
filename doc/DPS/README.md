@@ -21,7 +21,7 @@ The Olympics) key renewal can be performed on a batch manner,
 i.e. renewing the key at a given fixed frequency rather than on a per
 arrival/exit basis. Finally, key renewal messages should be
 authenticated by means of a digital signature or other alternative
-methods [SPINS](#SPINS)
+methods [SPINS](#SPINS).
 
 Many secure multicast protocols protocols exist in the literature, for
 example \cite{Xu:2008,LinSKD,ZhouHuangEGK,Yoon2011620}. Here we
