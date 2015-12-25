@@ -21,12 +21,12 @@ The Olympics) key renewal can be performed on a batch manner,
 i.e. renewing the key at a given fixed frequency rather than on a per
 arrival/exit basis. Finally, key renewal messages should be
 authenticated by means of a digital signature or other alternative
-methods [[SPINS]](#SPINS).
+methods [[Perrig]](#Perrig).
 
 Many secure multicast protocols protocols exist in the literature, for
-example \cite{Xu:2008,LinSKD,ZhouHuangEGK,Yoon2011620}. Here we
+example [[Xu]](#Xu),[[Lin]](#Lin),[[Zhou]](#Zhou),[[Yoon]](#Yoon). Here we
 suggest the implementation of a protocol by Naranjo et al
-\cite{NaranjoJISE}. On it, every authorized peer receives a large
+[[Naranjo]](#Naranjo). On it, every authorized peer receives a large
 prime number from the Key Server at the beginning of its authorization
 period (this communication is done under a secure channel, for example
 SSL/TLS). For every renewal, the Key Server generates a message
@@ -42,9 +42,9 @@ control the encryption and key renewal process.
 
 # References
 
-<a name="SPINS"></a>
+<a name="Perrig"></a>
 ```
-@article{SPINS,
+@article{Perrig,
  author = {Perrig, A. and Szewczyk, R. and Tygar, J. D. and Wen, V. and Culler, David E.},
  title = {{SPINS}: security protocols for sensor networks},
  journal = {Wirel. Netw.},
@@ -59,6 +59,97 @@ control the encryption and key renewal process.
  acmid = {582464},
  publisher = {Kluwer Academic Publishers},
  address = {Hingham, MA, USA},
+}
+```
+
+<a name="Xu"></a>
+```
+@article{Xu,
+ author = {Xu, Lihao and Huang, Cheng},
+ title = {Computation-Efficient Multicast Key Distribution},
+ journal = {IEEE Trans. Parallel Distrib. Syst.},
+ issue_date = {May 2008},
+ volume = {19},
+ number = {5},
+ month = may,
+ year = {2008},
+ issn = {1045-9219},
+ pages = {577--587},
+ numpages = {11},
+ url = {http://dx.doi.org/10.1109/TPDS.2007.70759},
+ doi = {10.1109/TPDS.2007.70759},
+ acmid = {1399352},
+ publisher = {IEEE Press},
+ address = {Piscataway, NJ, USA},
+}
+```
+
+<a name="Lin"></a>
+```
+@article{Lin,
+title = "Secure and efficient group key management with shared key derivation",
+journal = "Comput. Stand. Inter.",
+volume = "31",
+number = "1",
+pages = "192 - 208",
+year = "2009",
+note = "",
+issn = "0920-5489",
+doi = "DOI: 10.1016/j.csi.2007.11.005",
+url = "http://www.sciencedirect.com/science/article/B6TYV-4R8H1TR-6/2/fb531f2c68f8b92beebf1608a5a82746",
+author = "J. Lin and K. Huang and F. Lai and H. Lee",
+keywords = "Secure group communication",
+keywords = "Group key management",
+keywords = "Key tree",
+keywords = "Shared key derivation"
+}
+```
+
+<a name="Zhou"></a>
+```
+@inproceedings{Zhou,
+ author = {Zhou, Z. and Huang, D.},
+ title = {An optimal key distribution scheme for secure multicast group communication},
+ booktitle = {INFOCOM'10},
+ year = {2010},
+ isbn = {978-1-4244-5836-3},
+ location = {San Diego, California, USA},
+ pages = {331--335},
+ numpages = {5},
+ url = {http://portal.acm.org/citation.cfm?id=1833515.1833582},
+ acmid = {1833582},
+ keywords = {group key management, multicast, security},
+} 
+```
+
+<a name="Yoon"></a>
+```
+@article{Yoon,
+title = "A secure broadcasting cryptosystem and its application to grid computing",
+journal = "Future Generation Computer Systems",
+volume = "27",
+number = "5",
+pages = "620 - 626",
+year = "2011",
+note = "",
+issn = "0167-739X",
+doi = "10.1016/j.future.2010.09.012",
+url = "http://www.sciencedirect.com/science/article/pii/S0167739X10001913",
+author = "Eun-Jun Yoon and Kee-Young Yoo",
+}
+```
+
+<a name="aranjo"></a>
+```
+@article{Naranjo,
+author = {Naranjo, J. A. M. and Casado, L. G. and L\'opez-Ramos, J. A.},
+title = {Group Oriented Renewal of Secrets and Its Application to Secure Multicast},
+journal = {\href{http://www.iis.sinica.edu.tw/page/jise/Introduction.html}{Journal of Information Science and Engineering}},
+volume = {27},
+number = {4},
+pages = {1303--1313},
+month = {july},
+year = {2011}
 }
 ```
 
