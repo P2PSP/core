@@ -139,7 +139,7 @@ author = "Eun-Jun Yoon and Kee-Young Yoo",
 }
 ```
 
-<a name="aranjo"></a>
+<a name="Naranjo"></a>
 ```
 @article{Naranjo,
 author = {Naranjo, J. A. M. and Casado, L. G. and L\'opez-Ramos, J. A.},
