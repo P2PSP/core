@@ -39,7 +39,7 @@ class Symsp_Peer(Peer_DBS):
         # {{{ Create "team_socket" (UDP)
 
         # Create a special socket to force source port increment on SYMSP NATs
-        self.team_socket = symsp_socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.team_socket = symsp_socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         # }}}
 
