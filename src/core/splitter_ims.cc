@@ -17,12 +17,12 @@ using namespace std;
 using namespace boost;
 
 SplitterIMS::SplitterIMS()
-    : mcast_channel_(boost::asio::ip::address::from_string(kMCastAddr), kPort),
-      io_service_(),
+    : io_service_(),
       peer_connection_socket_(io_service_),
-      source_socket_(io_service_),
+      acceptor_(io_service_),
       team_socket_(io_service_),
-      acceptor_(io_service_) {
+      source_socket_(io_service_),
+      mcast_channel_(boost::asio::ip::address::from_string(kMCastAddr), kPort) {
   buffer_size_ = kBufferSize;
   channel_ = kChannel;
   chunk_size_ = kChunkSize;
