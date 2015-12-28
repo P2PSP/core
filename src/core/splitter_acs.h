@@ -36,13 +36,14 @@ class SplitterACS : public SplitterDBS {
  public:
   SplitterACS();
   ~SplitterACS();
-  void InsertPeer(boost::asio::ip::udp::endpoint peer);
-  void IncrementUnsupportivityOfPeer(boost::asio::ip::udp::endpoint peer);
-  void RemovePeer(boost::asio::ip::udp::endpoint peer);
-  void ResetCounters();
+  void InsertPeer(boost::asio::ip::udp::endpoint peer) override;
+  void IncrementUnsupportivityOfPeer(
+      boost::asio::ip::udp::endpoint peer) override;
+  void RemovePeer(boost::asio::ip::udp::endpoint peer) override;
+  void ResetCounters() override;
   virtual void SendChunk(std::vector<char> &message,
-                         boost::asio::ip::udp::endpoint destination);
-  void ComputeNextPeerNumber(boost::asio::ip::udp::endpoint peer);
+                         boost::asio::ip::udp::endpoint destination) override;
+  void ComputeNextPeerNumber(boost::asio::ip::udp::endpoint peer) override;
 
   int GetPeriod(boost::asio::ip::udp::endpoint peer);
   int GetNumberOfSentChunksPerPeer(boost::asio::ip::udp::endpoint peer);

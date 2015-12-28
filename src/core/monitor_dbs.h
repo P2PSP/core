@@ -17,9 +17,9 @@ class MonitorDBS : public PeerDBS {
  public:
   MonitorDBS();
   ~MonitorDBS();
-  virtual void Init();
+  virtual void Init() override;
   virtual void Complain(uint16_t);
-  virtual int FindNextChunk();
+  virtual int FindNextChunk() override;
 };
 }
 

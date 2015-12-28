@@ -29,14 +29,15 @@ class TrustedPeer : public MaliciousPeer {
  public:
   TrustedPeer(){};
   ~TrustedPeer(){};
-  virtual void Init();
+  virtual void Init() override;
 
   virtual void SetCheckAll(bool);
   virtual int CalculateNextSampled();
   virtual void SendChunkHash(int);
-  virtual void ReceiveTheNextMessage(std::vector<char> *, ip::udp::endpoint *);
-  virtual float CalcBufferCorrectness();
-  virtual int ProcessNextMessage();
+  virtual void ReceiveTheNextMessage(std::vector<char> *,
+                                     ip::udp::endpoint *) override;
+  virtual float CalcBufferCorrectness() override;
+  virtual int ProcessNextMessage() override;
 };
 }
 

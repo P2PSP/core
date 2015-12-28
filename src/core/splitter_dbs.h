@@ -49,7 +49,7 @@ class SplitterDBS : public SplitterIMS {
   char magic_flags_;
 
   // Thread management
-  virtual void Run();
+  virtual void Run() override;
 
   // Hasher for unordered_maps
   static std::size_t GetHash(const boost::asio::ip::udp::endpoint &endpoint) {
@@ -70,10 +70,11 @@ class SplitterDBS : public SplitterIMS {
       std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   void SendThePeerEndpoint(
       std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-  void SendConfiguration(std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
+  void SendConfiguration(
+      std::shared_ptr<boost::asio::ip::tcp::socket> &sock) override;
   virtual void InsertPeer(boost::asio::ip::udp::endpoint peer);
   void HandleAPeerArrival(
-      std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);
+      std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) override;
   size_t ReceiveMessage(std::vector<char> &message,
                         boost::asio::ip::udp::endpoint &endpoint);
   uint16_t GetLostChunkNumber(std::vector<char> &message);
@@ -85,13 +86,13 @@ class SplitterDBS : public SplitterIMS {
                                 boost::asio::ip::udp::endpoint sender);
   void ProcessGoodbye(boost::asio::ip::udp::endpoint peer);
   virtual void ModerateTheTeam();
-  void SetupTeamSocket();
+  void SetupTeamSocket() override;
   virtual void ResetCounters();
   void ResetCountersThread();
   virtual void ComputeNextPeerNumber(boost::asio::ip::udp::endpoint peer);
 
   // Thread management
-  virtual void Start();
+  virtual void Start() override;
 
   // Getters
   std::vector<boost::asio::ip::udp::endpoint> GetPeerList();

@@ -23,15 +23,15 @@ class PeerStrpeDsMalicious : public PeerStrpeDs {
  public:
   PeerStrpeDsMalicious(){};
   ~PeerStrpeDsMalicious(){};
-  virtual void Init();
+  virtual void Init() override;
   virtual void SetBadMouthAttack(bool, std::string);
   virtual void SetSelectiveAttack(bool, std::string);
-  virtual void SetOnOffAttack(bool, int);
-  virtual void SetPersistentAttack(bool);
-  virtual void GetPoisonedChunk(std::vector<char>*);
-  virtual void SendChunk(ip::udp::endpoint);
+  virtual void SetOnOffAttack(bool, int) override;
+  virtual void SetPersistentAttack(bool) override;
+  virtual void GetPoisonedChunk(std::vector<char>*) override;
+  virtual void SendChunk(ip::udp::endpoint) override;
   virtual int DbsProcessMessage(std::vector<char>, ip::udp::endpoint);
-  virtual int ProcessMessage(std::vector<char>, ip::udp::endpoint);
+  virtual int ProcessMessage(std::vector<char>, ip::udp::endpoint) override;
 };
 }
 

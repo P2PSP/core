@@ -23,15 +23,16 @@ class PeerStrpeDs : public TrustedPeer {
  public:
   PeerStrpeDs(){};
   ~PeerStrpeDs(){};
-  virtual void Init();
+  virtual void Init() override;
   virtual bool IsCurrentMessageFromSplitter();
-  virtual void ReceiveTheNextMessage(std::vector<char> *, ip::udp::endpoint *);
+  virtual void ReceiveTheNextMessage(std::vector<char> *,
+                                     ip::udp::endpoint *) override;
   virtual void ReceiveDsaKey();
   virtual void ProcessBadMessage(std::vector<char>, ip::udp::endpoint);
   virtual bool IsControlMessage(std::vector<char>);
   virtual bool CheckMessage(std::vector<char>, ip::udp::endpoint);
   virtual int HandleBadPeersRequest();
-  virtual int ProcessMessage(std::vector<char>, ip::udp::endpoint);
+  virtual int ProcessMessage(std::vector<char>, ip::udp::endpoint) override;
 };
 }
 

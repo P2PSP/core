@@ -23,8 +23,8 @@ class MonitorLRS : public MonitorDBS {
  public:
   MonitorLRS(){};
   ~MonitorLRS(){};
-  virtual void Init();
-  virtual void ReceiveTheBufferSize();
+  virtual void Init() override;
+  virtual void ReceiveTheBufferSize() override;
 };
 }
 

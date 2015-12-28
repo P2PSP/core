@@ -33,9 +33,9 @@ class SplitterLRS : public SplitterACS {
   SplitterLRS();
   ~SplitterLRS();
   void ProcessLostChunk(int lost_chunk_number,
-                        boost::asio::ip::udp::endpoint sender);
+                        boost::asio::ip::udp::endpoint sender) override;
   void SendChunk(std::vector<char> &message,
-                 boost::asio::ip::udp::endpoint destination);
+                 boost::asio::ip::udp::endpoint destination) override;
 };
 }
 
