@@ -1,15 +1,17 @@
 # Minimum CMake version required
 cmake_minimum_required(VERSION 2.8)
 
-option(BUILD_REDUCED_LIB "Build a reduced version" ON)
+option(BUILD_REDUCED_LIB "Build a reduced version" OFF)
 
-option(BUILD_PEER "Build the peer" OFF)
-option(BUILD_SPLITTER "Build the splitter" OFF)
+option(BUILD_PEER "Build the peer" ON)
+option(BUILD_SPLITTER "Build the splitter" ON)
+
+option(BUILD_PYTHON_WRAPPER "Build the Python wrapper" ON)
 
 # Project name
 project(p2psp C CXX)
 
-find_package(Boost COMPONENTS 
+list(APPEND BOOST_REQUIRED_COMPONENTS
   system 
   filesystem 
   chrono 
@@ -17,12 +19,22 @@ find_package(Boost COMPONENTS
   timer
   thread
   program_options
-  python
+)
+
+if(BUILD_PYTHON_WRAPPER)
+  list(APPEND BOOST_REQUIRED_COMPONENTS python)
+endif()
+
+find_package(Boost COMPONENTS 
+  ${BOOST_REQUIRED_COMPONENTS}
 REQUIRED)
 
 find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
-find_package(PythonLibs REQUIRED)
+
+if(BUILD_PYTHON_WRAPPER)
+  find_package(PythonLibs REQUIRED)
+endif()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
@@ -58,21 +70,27 @@ endif ()
 
 # Sources
 if(NOT BUILD_REDUCED_LIB)
-  file(GLOB CORE_SOURCES "src/core/*.cc")
+  file(GLOB P2PSP_SOURCES 
+    "src/core/*.cc" 
+    "src/util/*.cc"
+  )
 else()
-  file(GLOB CORE_SOURCES 
+  file(GLOB P2PSP_SOURCES 
     "src/core/peer_ims.cc"
     "src/core/peer_dbs.cc"
     "src/core/python.cc"
+    "src/util/*.cc"
   )
 endif()
 
-file(GLOB UTIL_SOURCES "src/util/*.cc")
+if(NOT BUILD_PYTHON_WRAPPER)
+  list(REMOVE_ITEM P2PSP_SOURCES 
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/core/python.cc")
+endif()
 
 # Executables
 add_library(p2psp SHARED
-  ${CORE_SOURCES}
-  ${UTIL_SOURCES}
+  ${P2PSP_SOURCES}
 )
 
 # Libraries
@@ -84,11 +102,11 @@ target_link_libraries(p2psp
   ${PYTHON_LIBRARIES}
 )
 
-# The code below only works for CMake 3.1.0 or later for C++11 activation
+# Enable C++11 for CMake 3.1.0 or later
 set_property(TARGET p2psp PROPERTY CXX_STANDARD 11)
 set_property(TARGET p2psp PROPERTY CXX_STANDARD_REQUIRED ON)
 
-if(BUILD_PEER)
+if(BUILD_PEER AND NOT BUILD_REDUCED_LIB)
   # Executable
   add_executable(peer "src/peer.cc")
 
@@ -99,12 +117,12 @@ if(BUILD_PEER)
     ${Boost_LIBRARIES}
   )
   
-  # Enable C+11 for CMake 3.1.0 or later
+  # Enable C++11 for CMake 3.1.0 or later
   set_property(TARGET peer PROPERTY CXX_STANDARD 11)
   set_property(TARGET peer PROPERTY CXX_STANDARD_REQUIRED ON)
 endif()
 
-if(BUILD_SPLITTER)
+if(BUILD_SPLITTER AND NOT BUILD_REDUCED_LIB)
   # Executable
   add_executable(splitter "src/splitter.cc")
   
@@ -115,7 +133,7 @@ if(BUILD_SPLITTER)
     ${Boost_LIBRARIES}
   )
 
-  # Enable C+11 for CMake 3.1.0 or later
+  # Enable C++11 for CMake 3.1.0 or later
   set_property(TARGET splitter PROPERTY CXX_STANDARD 11)
   set_property(TARGET splitter PROPERTY CXX_STANDARD_REQUIRED ON)
 endif()
