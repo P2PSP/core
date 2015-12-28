@@ -261,11 +261,11 @@ void PeerIMS::BufferData() {
 
   // Now, fill up to the half of the buffer.
 
-  float BUFFER_STATUS = 0.0f;
+  // float BUFFER_STATUS = 0.0f;
   for (int x = 0; x < buffer_size_ / 2; x++) {
     // TODO Format string
     // LOG("{:.2%}\r".format((1.0*x)/(buffer_size_/2)), end='');
-    BUFFER_STATUS = (100 * x) / (buffer_size_ / 2.0f) + 1;
+    // BUFFER_STATUS = (100 * x) / (buffer_size_ / 2.0f) + 1;
 
     if (!Common::kConsoleMode) {
       // GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)

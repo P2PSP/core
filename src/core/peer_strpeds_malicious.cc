@@ -108,7 +108,7 @@ int PeerStrpeDsMalicious::DbsProcessMessage(std::vector<char> message,
                    << "(" << sender.address().to_string() << ","
                    << std::to_string(sender.port()) << ")");
 
-      while (receive_and_feed_counter_ < peer_list_.size() &&
+      while (receive_and_feed_counter_ < (int)peer_list_.size() &&
              receive_and_feed_counter_ > 0) {
         peer = peer_list_[receive_and_feed_counter_];
         SendChunk(peer);
@@ -171,7 +171,7 @@ int PeerStrpeDsMalicious::DbsProcessMessage(std::vector<char> message,
     std::vector<char> empty(1024);
     std::memset(empty.data(), 0, empty.size());
 
-    if (receive_and_feed_counter_ < peer_list_.size() &&
+    if (receive_and_feed_counter_ < (int)peer_list_.size() &&
         receive_and_feed_previous_ != empty) {
       // Send the previous chunk in congestion avoiding mode.
 

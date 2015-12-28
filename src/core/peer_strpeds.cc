@@ -45,14 +45,16 @@ bool PeerStrpeDs::CheckMessage(std::vector<char> message,
   }
 
   if (!IsControlMessage(message)) {
-    uint16_t chunk_number = ntohs(*(short *)message.data());
+    /*
+     TODO:
+     uint16_t chunk_number = ntohs(*(short *)message.data());
     std::string chunk(message.data() + 2, message.data() + 2 + 1024);
     int k1 = boost::lexical_cast<int>(
         "0x" +
         std::string(message.data() + 2 + 1024, message.data() + 2 + 1024 + 40));
     int k2 = boost::lexical_cast<int>(
         "0x" + std::string(message.data() + 2 + 1024 + 40,
-                           message.data() + 2 + 1024 + 40 + 40));
+                           message.data() + 2 + 1024 + 40 + 40));*/
 
     // TODO: DSA
     // sign = (self.convert_to_long(k1), self.convert_to_long(k2))

@@ -169,7 +169,7 @@ int PeerDBS::ProcessMessage(std::vector<char> message,
         LogMessage("buffer filling " + std::to_string(CalcBufferFilling()));
       }
 
-      while (receive_and_feed_counter_ < peer_list_.size() &&
+      while (receive_and_feed_counter_ < (int)peer_list_.size() &&
              receive_and_feed_counter_ > 0) {
         peer = peer_list_[receive_and_feed_counter_];
         team_socket_.send_to(::buffer(receive_and_feed_previous_), peer);
@@ -224,7 +224,7 @@ int PeerDBS::ProcessMessage(std::vector<char> message,
 
     std::vector<char> empty(1024, 0);
 
-    if (receive_and_feed_counter_ < peer_list_.size() &&
+    if (receive_and_feed_counter_ < (int)peer_list_.size() &&
         receive_and_feed_previous_ != empty) {
       // Send the previous chunk in congestion avoiding mode.
 
