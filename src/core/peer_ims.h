@@ -95,6 +95,9 @@ class PeerIMS {
   // Service for I/O operations
   io_service io_service_;
 
+  // Acceptor used to listen to incoming connections.
+  ip::tcp::acceptor acceptor_;
+
   // Used to listen to the player
   ip::tcp::socket player_socket_;
 
@@ -103,9 +106,6 @@ class PeerIMS {
 
   // Used to communicate with the rest of the team
   ip::udp::socket team_socket_;
-
-  // Acceptor used to listen to incoming connections.
-  ip::tcp::acceptor acceptor_;
 
   // Thread to start the peer
   std::unique_ptr<boost::thread> thread_;
