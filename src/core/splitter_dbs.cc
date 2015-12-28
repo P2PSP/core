@@ -17,7 +17,7 @@ using namespace std;
 using namespace boost;
 
 SplitterDBS::SplitterDBS()
-    : SplitterIMS(), magic_flags_(1), losses_(0, &SplitterDBS::GetHash) {
+    : SplitterIMS(), losses_(0, &SplitterDBS::GetHash) {
   // TODO: Check if there is a better way to replace kMcastAddr with 0.0.0.0
   mcast_addr_ = "0.0.0.0";
   max_chunk_loss_ = kMaxChunkLoss;
