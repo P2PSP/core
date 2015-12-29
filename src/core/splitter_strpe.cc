@@ -73,11 +73,11 @@ void SplitterSTRPE::ModerateTheTeam() {
   LOG("Exiting moderate the team");
 }
 
-void SplitterSTRPE::AddTrustedPeer(boost::asio::ip::udp::endpoint peer) {
+void SplitterSTRPE::AddTrustedPeer(const boost::asio::ip::udp::endpoint &peer) {
   trusted_peers_.push_back(peer);
 }
 
-void SplitterSTRPE::PunishMaliciousPeer(boost::asio::ip::udp::endpoint peer) {
+void SplitterSTRPE::PunishMaliciousPeer(const boost::asio::ip::udp::endpoint &peer) {
   if (logging_) {
     LogMessage("!!! malicious peer" + peer.address().to_string() + ":" +
                to_string(peer.port()));
@@ -88,7 +88,7 @@ void SplitterSTRPE::PunishMaliciousPeer(boost::asio::ip::udp::endpoint peer) {
   RemovePeer(peer);
 }
 
-void SplitterSTRPE::ProcessChunkHashMessage(std::vector<char> &message) {
+void SplitterSTRPE::ProcessChunkHashMessage(const std::vector<char> &message) {
   uint16_t chunk_number = *(uint16_t *)message.data();
   std::vector<char> hash(32);
 
@@ -113,18 +113,18 @@ void SplitterSTRPE::ProcessChunkHashMessage(std::vector<char> &message) {
   }
 }
 
-void SplitterSTRPE::SetLogFile(std::string filename) {
+void SplitterSTRPE::SetLogFile(const std::string &filename) {
   log_file_.open(filename);
 }
 
 void SplitterSTRPE::SetLogging(bool enabled) { logging_ = enabled; }
 
-void SplitterSTRPE::LogMessage(std::string message) {
+void SplitterSTRPE::LogMessage(const std::string &message) {
   log_file_ << BuildLogMessage(message);
   // TODO: Where to close the ofstream?
 }
 
-string SplitterSTRPE::BuildLogMessage(std::string message) {
+string SplitterSTRPE::BuildLogMessage(const std::string &message) {
   return to_string(time(NULL)) + "\t" + message;
 }
 

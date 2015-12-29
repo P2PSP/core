@@ -35,7 +35,7 @@ SplitterDBS::SplitterDBS()
 SplitterDBS::~SplitterDBS() {}
 
 void SplitterDBS::SendMagicFlags(
-    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   char message[1];
 
   message[0] = magic_flags_;
@@ -44,7 +44,7 @@ void SplitterDBS::SendMagicFlags(
 }
 
 void SplitterDBS::SendTheListSize(
-    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   char message[2];
 
   LOG("Sending the number of monitors " << monitor_number_);
@@ -57,7 +57,7 @@ void SplitterDBS::SendTheListSize(
 }
 
 void SplitterDBS::SendTheListOfPeers(
-    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   SendTheListSize(peer_serve_socket);
 
   // TODO: Find a __debug__ flag in c++
@@ -82,7 +82,7 @@ void SplitterDBS::SendTheListOfPeers(
 }
 
 void SplitterDBS::SendThePeerEndpoint(
-    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   asio::ip::tcp::endpoint peer_endpoint = peer_serve_socket->remote_endpoint();
 
   char message[6];
@@ -94,13 +94,13 @@ void SplitterDBS::SendThePeerEndpoint(
 }
 
 void SplitterDBS::SendConfiguration(
-    std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
   SplitterIMS::SendConfiguration(sock);
   SendThePeerEndpoint(sock);
   SendMagicFlags(sock);
 }
 
-void SplitterDBS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
+void SplitterDBS::InsertPeer(const boost::asio::ip::udp::endpoint &peer) {
   if (find(peer_list_.begin(), peer_list_.end(), peer) == peer_list_.end()) {
     peer_list_.push_back(peer);
   }
@@ -146,7 +146,7 @@ size_t SplitterDBS::ReceiveMessage(std::vector<char> &message,
 }
 
 void SplitterDBS::IncrementUnsupportivityOfPeer(
-    boost::asio::ip::udp::endpoint peer) {
+    const boost::asio::ip::udp::endpoint &peer) {
   bool peerExists = true;
 
   try {
@@ -171,7 +171,7 @@ void SplitterDBS::IncrementUnsupportivityOfPeer(
 }
 
 void SplitterDBS::ProcessLostChunk(int lost_chunk_number,
-                                   boost::asio::ip::udp::endpoint sender) {
+                                   const boost::asio::ip::udp::endpoint &sender) {
   asio::ip::udp::endpoint destination = GetLosser(lost_chunk_number);
 
   // TODO: Find a __debug__ flag in c++
@@ -187,7 +187,7 @@ void SplitterDBS::ProcessLostChunk(int lost_chunk_number,
   IncrementUnsupportivityOfPeer(destination);
 }
 
-uint16_t SplitterDBS::GetLostChunkNumber(std::vector<char> &message) {
+uint16_t SplitterDBS::GetLostChunkNumber(const std::vector<char> &message) {
   // TODO: Check if this is totally correct
   return ntohs(*(uint16_t *)message.data());
 }
@@ -196,7 +196,7 @@ asio::ip::udp::endpoint SplitterDBS::GetLosser(int lost_chunk_number) {
   return destination_of_chunk_[lost_chunk_number % buffer_size_];
 }
 
-void SplitterDBS::RemovePeer(asio::ip::udp::endpoint peer) {
+void SplitterDBS::RemovePeer(const asio::ip::udp::endpoint &peer) {
   // If peer_list_ contains the peer, remove it
   if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
     peer_list_.erase(remove(peer_list_.begin(), peer_list_.end(), peer),
@@ -215,7 +215,7 @@ void SplitterDBS::RemovePeer(asio::ip::udp::endpoint peer) {
   losses_.erase(peer);
 }
 
-void SplitterDBS::ProcessGoodbye(boost::asio::ip::udp::endpoint peer) {
+void SplitterDBS::ProcessGoodbye(const boost::asio::ip::udp::endpoint &peer) {
   LOG("Received 'goodbye' from " << peer);
 
   // TODO: stdout flush?
@@ -285,7 +285,7 @@ void SplitterDBS::ResetCountersThread() {
   }
 }
 
-void SplitterDBS::ComputeNextPeerNumber(asio::ip::udp::endpoint peer) {
+void SplitterDBS::ComputeNextPeerNumber(asio::ip::udp::endpoint &peer) {
   peer_number_ = (peer_number_ + 1) % peer_list_.size();
 }
 
@@ -344,7 +344,7 @@ std::vector<boost::asio::ip::udp::endpoint> SplitterDBS::GetPeerList() {
 
 int SplitterDBS::GetMaxChunkLoss() { return max_chunk_loss_; }
 
-int SplitterDBS::GetLoss(boost::asio::ip::udp::endpoint peer) {
+int SplitterDBS::GetLoss(const boost::asio::ip::udp::endpoint &peer) {
   return losses_[peer];
 }
 

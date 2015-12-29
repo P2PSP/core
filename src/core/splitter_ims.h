@@ -97,17 +97,17 @@ class SplitterIMS {
   SplitterIMS();
   ~SplitterIMS();
   void SendTheHeader(
-      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+      const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   void SendTheBufferSize(
-      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+      const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   void SendTheChunkSize(
-      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+      const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   void SendTheMcastChannel(
-      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+      const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   void SendTheHeaderSize(
-      std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+      const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   virtual void SendConfiguration(
-      std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
+      const std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
   virtual void HandleAPeerArrival(
       std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);
   void HandleArrivals();
@@ -118,8 +118,8 @@ class SplitterIMS {
   void LoadTheVideoHeader();
   size_t ReceiveNextChunk(boost::asio::streambuf &chunk);
   size_t ReceiveChunk(boost::asio::streambuf &chunk);
-  virtual void SendChunk(std::vector<char> &message,
-                         boost::asio::ip::udp::endpoint destination);
+  virtual void SendChunk(const std::vector<char> &message,
+                         const boost::asio::ip::udp::endpoint &destination);
   void ReceiveTheHeader();
 
   // TODO: SendChunk can be used instead if the increment of sendto_counter

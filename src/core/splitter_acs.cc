@@ -27,7 +27,7 @@ SplitterACS::SplitterACS()
 
 SplitterACS::~SplitterACS() {}
 
-void SplitterACS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
+void SplitterACS::InsertPeer(const boost::asio::ip::udp::endpoint &peer) {
   SplitterDBS::InsertPeer(peer);
   period_[peer] = 1;
   period_counter_[peer] = 1;
@@ -39,7 +39,7 @@ void SplitterACS::InsertPeer(boost::asio::ip::udp::endpoint peer) {
 }
 
 void SplitterACS::IncrementUnsupportivityOfPeer(
-    boost::asio::ip::udp::endpoint peer) {
+    const boost::asio::ip::udp::endpoint &peer) {
   SplitterDBS::IncrementUnsupportivityOfPeer(peer);
   try {
     if (peer != peer_list_[0]) {
@@ -51,7 +51,7 @@ void SplitterACS::IncrementUnsupportivityOfPeer(
   }
 }
 
-void SplitterACS::RemovePeer(boost::asio::ip::udp::endpoint peer) {
+void SplitterACS::RemovePeer(const boost::asio::ip::udp::endpoint &peer) {
   SplitterDBS::RemovePeer(peer);
   period_.erase(peer);
   period_counter_.erase(peer);
@@ -70,8 +70,8 @@ void SplitterACS::ResetCounters() {
   }
 }
 
-void SplitterACS::SendChunk(std::vector<char> &message,
-                            boost::asio::ip::udp::endpoint destination) {
+void SplitterACS::SendChunk(const std::vector<char> &message,
+                            const boost::asio::ip::udp::endpoint &destination) {
   SplitterDBS::SendChunk(message, destination);
 
   try {
@@ -81,7 +81,7 @@ void SplitterACS::SendChunk(std::vector<char> &message,
   }
 }
 
-void SplitterACS::ComputeNextPeerNumber(asio::ip::udp::endpoint peer) {
+void SplitterACS::ComputeNextPeerNumber(asio::ip::udp::endpoint &peer) {
   try {
     while (period_counter_[peer] != 0) {
       period_counter_[peer] -= 1;
@@ -94,17 +94,17 @@ void SplitterACS::ComputeNextPeerNumber(asio::ip::udp::endpoint peer) {
   }
 }
 
-int SplitterACS::GetPeriod(boost::asio::ip::udp::endpoint peer) {
+int SplitterACS::GetPeriod(const boost::asio::ip::udp::endpoint &peer) {
   return period_[peer];
 }
 
 int SplitterACS::GetNumberOfSentChunksPerPeer(
-    boost::asio::ip::udp::endpoint peer) {
+    const boost::asio::ip::udp::endpoint &peer) {
   return number_of_sent_chunks_per_peer_[peer];
 }
 
 void SplitterACS::SetNumberOfSentChunksPerPeer(
-    boost::asio::ip::udp::endpoint peer, int number_of_sent_chunks) {
+    const boost::asio::ip::udp::endpoint &peer, int number_of_sent_chunks) {
   number_of_sent_chunks_per_peer_[peer] = number_of_sent_chunks;
 }
 }

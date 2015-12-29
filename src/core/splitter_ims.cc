@@ -179,8 +179,8 @@ void SplitterIMS::ReceiveTheHeader() {
   LOG("Stream header received!");
 }
 
-void SplitterIMS::SendChunk(vector<char> &message,
-                            asio::ip::udp::endpoint destination) {
+void SplitterIMS::SendChunk(const vector<char> &message,
+                            const asio::ip::udp::endpoint &destination) {
   system::error_code ec;
 
   // LOG(std::to_string(ntohs(*(unsigned short *)message.data())));
@@ -198,7 +198,7 @@ void SplitterIMS::SendChunk(vector<char> &message,
 }
 
 void SplitterIMS::SendTheMcastChannel(
-    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   LOG("Communicating the multicast channel (" << mcast_addr_ << ", "
                                               << to_string(port_) << ")");
 
@@ -211,7 +211,7 @@ void SplitterIMS::SendTheMcastChannel(
 }
 
 void SplitterIMS::SendTheHeaderSize(
-    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   LOG("Communicating the header size " << to_string(header_size_));
 
   system::error_code ec;
@@ -225,7 +225,7 @@ void SplitterIMS::SendTheHeaderSize(
 }
 
 void SplitterIMS::SendTheChunkSize(
-    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   LOG("Sending a chunk_size of " << to_string(chunk_size_) << " bytes");
 
   system::error_code ec;
@@ -239,7 +239,7 @@ void SplitterIMS::SendTheChunkSize(
 }
 
 void SplitterIMS::SendTheHeader(
-    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   LOG("Sending a header of " << to_string(header_.size()) << " bytes");
 
   system::error_code ec;
@@ -251,7 +251,7 @@ void SplitterIMS::SendTheHeader(
 }
 
 void SplitterIMS::SendTheBufferSize(
-    std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   LOG("Sending a buffer_size of " << to_string(buffer_size_) << " bytes");
 
   system::error_code ec;
@@ -265,7 +265,7 @@ void SplitterIMS::SendTheBufferSize(
 }
 
 void SplitterIMS::SendConfiguration(
-    std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
   SendTheMcastChannel(sock);
   SendTheHeaderSize(sock);
   SendTheChunkSize(sock);

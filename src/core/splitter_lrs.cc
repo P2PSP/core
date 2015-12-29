@@ -24,7 +24,7 @@ SplitterLRS::SplitterLRS() : SplitterACS(), buffer_(buffer_size_) {
 SplitterLRS::~SplitterLRS() {}
 
 void SplitterLRS::ProcessLostChunk(int lost_chunk_number,
-                                   boost::asio::ip::udp::endpoint sender) {
+                                   const boost::asio::ip::udp::endpoint &sender) {
   SplitterDBS::ProcessLostChunk(lost_chunk_number, sender);
   std::vector<char> message = buffer_.at(lost_chunk_number % buffer_size_);
   asio::ip::udp::endpoint peer = peer_list_.at(0);
@@ -44,8 +44,8 @@ void SplitterLRS::ProcessLostChunk(int lost_chunk_number,
   // End TODO
 }
 
-void SplitterLRS::SendChunk(std::vector<char> &message,
-                            boost::asio::ip::udp::endpoint destination) {
+void SplitterLRS::SendChunk(const std::vector<char> &message,
+                            const boost::asio::ip::udp::endpoint &destination) {
   SplitterDBS::SendChunk(message, destination);
   buffer_[chunk_number_ % buffer_size_] = message;
 }

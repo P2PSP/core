@@ -39,12 +39,12 @@ class SplitterSTRPE : public SplitterLRS {
   ~SplitterSTRPE();
   void ModerateTheTeam();
   void SetLogging(bool enabled);
-  void SetLogFile(std::string filename);
-  void AddTrustedPeer(boost::asio::ip::udp::endpoint peer);
-  void PunishMaliciousPeer(boost::asio::ip::udp::endpoint peer);
-  void ProcessChunkHashMessage(std::vector<char> &message);
-  void LogMessage(std::string message);
-  std::string BuildLogMessage(std::string message);
+  void SetLogFile(const std::string &filename);
+  void AddTrustedPeer(const boost::asio::ip::udp::endpoint &peer);
+  void PunishMaliciousPeer(const boost::asio::ip::udp::endpoint &peer);
+  void ProcessChunkHashMessage(const std::vector<char> &message);
+  void LogMessage(const std::string &message);
+  std::string BuildLogMessage(const std::string &message);
 
   // Thread management
   void Start();
