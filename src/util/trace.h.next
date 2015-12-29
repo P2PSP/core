@@ -1,0 +1,96 @@
+#ifndef P2PSP_UTIL_TRACE_H
+#define P2PSP_UTIL_TRACE_H
+
+#define BOOST_LOG_DYN_LINK
+
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/sinks/sync_frontend.hpp>
+#include <boost/log/sinks/text_file_backend.hpp>
+
+
+namespace p2psp
+{
+
+  /**
+   * Wrapper used by the application to handle the log/trace
+   * messages by means of the log4cpp library.
+   */
+  class TraceSystem
+  {
+  private:
+    typedef boost::log::sources::severity_logger<
+      boost::log::trivial::severity_level> LoggerType;
+        
+    LoggerType logger_;
+    std::shared_ptr< boost::log::sinks::synchronous_sink<
+      boost::log::sinks::text_file_backend> > log_sink_;
+    
+    static TraceSystem trace_system_;
+    
+  public:
+    TraceSystem();
+    
+    static LoggerType& logger()
+    {
+      return trace_system_.logger_;
+    }
+    
+    static void Flush()
+    {
+      if(trace_system_.log_sink_)
+        trace_system_.log_sink_->flush();
+    }
+  };
+
+}
+
+
+#define _RED            "31m"
+#define _GREEN          "32m"
+#define _YELLOW         "33m"
+#define _BLUE           "34m"
+
+#ifndef TRACE_NO_COLORS
+
+#define _SET_COLOR(a)   "\033[" a
+#define _RESET_COLOR()  "\033[0m"
+
+#else
+
+#define _SET_COLOR(a)   ""
+#define _RESET_COLOR()  ""
+
+#endif // TRACE_NO_COLORS
+
+#ifndef TRACE_SILENT_MODE
+
+#define LOG(a)      \
+  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) \
+    << a; }
+
+#define LOGC(c, a)  \
+  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) \
+    << _SET_COLOR(c) << a << _RESET_COLOR(); }
+
+#define ERROR(a)    \
+  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::error)  \
+    << _SET_COLOR(_RED) << __FILE__ << ":" << __LINE__ << ": ERROR: " \
+    << a << _RESET_COLOR(); }
+
+#define TRACE(a)    \
+  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::trace)  \
+    << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " \
+    << a << _RESET_COLOR(); }
+    
+#else
+
+#define LOG(a)      {}
+#define LOGC(c, a)  {}
+#define ERROR(a)    {}
+#define TRACE(a)    {}
+
+#endif // TRACE_SILENT_MODE
+
+
+#endif // P2PSP_UTIL_TRACE_H
