@@ -28,10 +28,11 @@ class MaliciousPeer : public PeerDBS {
   MaliciousPeer();
   ~MaliciousPeer();
   virtual void Init() override;
-  virtual void SendChunk(ip::udp::endpoint);
-  virtual int ProcessMessage(std::vector<char>, ip::udp::endpoint) override;
+  virtual void SendChunk(const ip::udp::endpoint&);
+  virtual int ProcessMessage(const std::vector<char>&,
+                             const ip::udp::endpoint&) override;
 
-  virtual void GetPoisonedChunk(std::vector<char>*);
+  virtual void GetPoisonedChunk(std::vector<char>&);
   virtual void SetPersistentAttack(bool);
   virtual void SetOnOffAttack(bool, int);
   virtual void SetSelectiveAttack(bool, const std::vector<ip::udp::endpoint>);

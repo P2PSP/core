@@ -292,7 +292,7 @@ int PeerIMS::ProcessNextMessage() {
   ip::udp::endpoint sender;
 
   try {
-    ReceiveTheNextMessage(&message, &sender);
+    ReceiveTheNextMessage(message, sender);
   } catch (std::exception e) {
     return -2;
   }
@@ -300,28 +300,28 @@ int PeerIMS::ProcessNextMessage() {
   return ProcessMessage(message, sender);
 }
 
-void PeerIMS::ReceiveTheNextMessage(std::vector<char> *message,
-                                    ip::udp::endpoint *sender) {
+void PeerIMS::ReceiveTheNextMessage(std::vector<char> &message,
+                                    ip::udp::endpoint &sender) {
   LOG("Waiting for a chunk at ("
       << team_socket_.local_endpoint().address().to_string() << ","
       << std::to_string(team_socket_.local_endpoint().port()) << ")");
 
-  team_socket_.receive_from(buffer(*message), *sender);
+  team_socket_.receive_from(buffer(message), sender);
   recvfrom_counter_++;
 
   LOG("Received a message from ("
-      << sender->address().to_string() << "," << std::to_string(sender->port())
-      << ") of length " << std::to_string(message->size()));
+      << sender.address().to_string() << "," << std::to_string(sender.port())
+      << ") of length " << std::to_string(message.size()));
 
   // TODO: if(DEBUG){
-  if (message->size() < 10) {
-    LOG("Message content =" << std::string(message->data()));
+  if (message.size() < 10) {
+    LOG("Message content =" << std::string(message.data()));
   }
   //}
 }
 
-int PeerIMS::ProcessMessage(std::vector<char> message,
-                            ip::udp::endpoint sender) {
+int PeerIMS::ProcessMessage(const std::vector<char> &message,
+                            const ip::udp::endpoint &sender) {
   // Ojo, an attacker could send a packet smaller and pollute the buffer,
   // althought this is difficult in IP multicst. This method should be
   // inheritaged to solve this issue.

@@ -142,8 +142,9 @@ class PeerIMS {
    *  Create "team_socket" (UDP) for using the multicast channel
    */
   virtual void ListenToTheTeam();
-  virtual void ReceiveTheNextMessage(std::vector<char>*, ip::udp::endpoint*);
-  virtual int ProcessMessage(std::vector<char>, ip::udp::endpoint);
+  virtual void ReceiveTheNextMessage(std::vector<char>&, ip::udp::endpoint&);
+  virtual int ProcessMessage(const std::vector<char>&,
+                             const ip::udp::endpoint&);
   virtual int ProcessNextMessage();
 
   /**

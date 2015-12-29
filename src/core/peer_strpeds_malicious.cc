@@ -33,15 +33,15 @@ void PeerStrpeDsMalicious::SetPersistentAttack(bool value) {
   persistent_attack_ = value;
 }
 
-void PeerStrpeDsMalicious::GetPoisonedChunk(std::vector<char> *message) {
-  if (message->size() == (2 + 1024 + 40 + 40)) {
-    std::memset(message->data() + 2, 0, 1024);
+void PeerStrpeDsMalicious::GetPoisonedChunk(std::vector<char> &message) {
+  if (message.size() == (2 + 1024 + 40 + 40)) {
+    std::memset(message.data() + 2, 0, 1024);
   }
 }
 
-void PeerStrpeDsMalicious::SendChunk(ip::udp::endpoint peer) {
+void PeerStrpeDsMalicious::SendChunk(const ip::udp::endpoint &peer) {
   std::vector<char> chunk = receive_and_feed_previous_;
-  GetPoisonedChunk(&chunk);
+  GetPoisonedChunk(chunk);
   if (persistent_attack_) {
     team_socket_.send_to(buffer(chunk), peer);
     sendto_counter_++;
@@ -75,8 +75,8 @@ void PeerStrpeDsMalicious::SendChunk(ip::udp::endpoint peer) {
   sendto_counter_++;
 }
 
-int PeerStrpeDsMalicious::DbsProcessMessage(std::vector<char> message,
-                                            ip::udp::endpoint sender) {
+int PeerStrpeDsMalicious::DbsProcessMessage(const std::vector<char> &message,
+                                            const ip::udp::endpoint &sender) {
   // Now, receive and send.
 
   ip::udp::endpoint peer;
@@ -237,8 +237,8 @@ int PeerStrpeDsMalicious::DbsProcessMessage(std::vector<char> message,
   return -1;
 }
 
-int PeerStrpeDsMalicious::ProcessMessage(std::vector<char> message,
-                                         ip::udp::endpoint sender) {
+int PeerStrpeDsMalicious::ProcessMessage(const std::vector<char> &message,
+                                         const ip::udp::endpoint &sender) {
   if (std::find(bad_peers_.begin(), bad_peers_.end(), sender) ==
       bad_peers_.end()) {
     return -1;

@@ -12,7 +12,7 @@ void PeerDBS::Init() {
   LOG("Initialized");
 }
 
-void PeerDBS::SayHello(ip::udp::endpoint node) {
+void PeerDBS::SayHello(const ip::udp::endpoint &node) {
   std::vector<char> hello(1);
   hello[0] = 'H';
 
@@ -23,7 +23,7 @@ void PeerDBS::SayHello(ip::udp::endpoint node) {
       << ")");
 }
 
-void PeerDBS::SayGoodbye(ip::udp::endpoint node) {
+void PeerDBS::SayGoodbye(const ip::udp::endpoint &node) {
   std::vector<char> goodbye(1);
   goodbye[0] = 'G';
 
@@ -130,8 +130,8 @@ void PeerDBS::ListenToTheTeam() {
   team_socket_.set_option(socket_base::linger(true, 30));
 }
 
-int PeerDBS::ProcessMessage(std::vector<char> message,
-                            ip::udp::endpoint sender) {
+int PeerDBS::ProcessMessage(const std::vector<char> &message,
+                            const ip::udp::endpoint &sender) {
   // Now, receive and send.
 
   // TODO: remove hardcoded values
@@ -290,11 +290,11 @@ int PeerDBS::ProcessMessage(std::vector<char> message,
 
   return -1;
 }
-void PeerDBS::LogMessage(std::string message) {
+void PeerDBS::LogMessage(const std::string &message) {
   // TODO: self.LOG_FILE.write(self.build_log_message(message) + "\n")
   // print >>self.LOG_FILE, self.build_log_message(message)
 }
-void PeerDBS::BuildLogMessage(std::string message) {
+void PeerDBS::BuildLogMessage(const std::string &message) {
   // return "{0}\t{1}".format(repr(time.time()), message)
 }
 

@@ -32,10 +32,10 @@ void TrustedPeer::SendChunkHash(int chunk_number) {
   team_socket_.send_to(buffer(msg), splitter_);
 }
 
-void TrustedPeer::ReceiveTheNextMessage(std::vector<char> *message,
-                                        ip::udp::endpoint *sender) {
+void TrustedPeer::ReceiveTheNextMessage(std::vector<char> &message,
+                                        ip::udp::endpoint &sender) {
   PeerIMS::ReceiveTheNextMessage(message, sender);
-  current_sender_ = *sender;
+  current_sender_ = sender;
 }
 
 float TrustedPeer::CalcBufferCorrectness() {

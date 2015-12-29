@@ -34,8 +34,8 @@ class TrustedPeer : public MaliciousPeer {
   virtual void SetCheckAll(bool);
   virtual int CalculateNextSampled();
   virtual void SendChunkHash(int);
-  virtual void ReceiveTheNextMessage(std::vector<char> *,
-                                     ip::udp::endpoint *) override;
+  virtual void ReceiveTheNextMessage(std::vector<char> &,
+                                     ip::udp::endpoint &) override; 
   virtual float CalcBufferCorrectness() override;
   virtual int ProcessNextMessage() override;
 };

@@ -8,8 +8,8 @@ MaliciousPeer::~MaliciousPeer(){};
 
 void MaliciousPeer::Init() { LOG("Initialized"); }
 
-int MaliciousPeer::ProcessMessage(std::vector<char> message,
-                                  ip::udp::endpoint sender) {
+int MaliciousPeer::ProcessMessage(const std::vector<char> &message,
+                                  const ip::udp::endpoint &sender) {
   // Now, receive and send.
 
   ip::udp::endpoint peer;
@@ -170,9 +170,9 @@ int MaliciousPeer::ProcessMessage(std::vector<char> message,
   return -1;
 }
 
-void MaliciousPeer::SendChunk(ip::udp::endpoint peer) {
+void MaliciousPeer::SendChunk(const ip::udp::endpoint &peer) {
   std::vector<char> chunk = receive_and_feed_previous_;
-  GetPoisonedChunk(&chunk);
+  GetPoisonedChunk(chunk);
   if (persistent_attack_) {
     team_socket_.send_to(buffer(chunk), peer);
     sendto_counter_++;
@@ -206,9 +206,9 @@ void MaliciousPeer::SendChunk(ip::udp::endpoint peer) {
   sendto_counter_++;
 }
 
-void MaliciousPeer::GetPoisonedChunk(std::vector<char> *chunk) {
+void MaliciousPeer::GetPoisonedChunk(std::vector<char> &chunk) {
   int offset = sizeof(uint16_t);
-  memset(chunk->data() + offset, 0, chunk->size() - offset);
+  memset(chunk.data() + offset, 0, chunk.size() - offset);
 }
 
 void MaliciousPeer::SetPersistentAttack(bool value) {

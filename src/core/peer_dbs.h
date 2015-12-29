@@ -53,16 +53,17 @@ class PeerDBS : public PeerIMS {
   PeerDBS();
   ~PeerDBS();
   virtual void Init() override;
-  virtual void SayHello(ip::udp::endpoint);
-  virtual void SayGoodbye(ip::udp::endpoint);
+  virtual void SayHello(const ip::udp::endpoint&);
+  virtual void SayGoodbye(const ip::udp::endpoint&);
   virtual void ReceiveMagicFlags();
   virtual void ReceiveTheNumberOfPeers();
   virtual void ReceiveTheListOfPeers();
   virtual void ReceiveMyEndpoint();
   virtual void ListenToTheTeam() override;
-  virtual int ProcessMessage(std::vector<char>, ip::udp::endpoint) override;
-  virtual void LogMessage(std::string);
-  virtual void BuildLogMessage(std::string);
+  virtual int ProcessMessage(const std::vector<char>&,
+                             const ip::udp::endpoint&) override;
+  virtual void LogMessage(const std::string&);
+  virtual void BuildLogMessage(const std::string&);
   virtual float CalcBufferCorrectness();
   virtual float CalcBufferFilling();
   virtual void PoliteFarewell();
