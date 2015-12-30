@@ -82,7 +82,7 @@ int main(int argc, const char* argv[]) {
       boost::program_options::parse_command_line(argc, argv, desc), vm);
   boost::program_options::notify(vm);
 
-  p2psp::PeerStrpeDsMalicious peer;
+  p2psp::PeerDBS peer;
   peer.Init();
 
   if (vm.count("show_buffer")) {
