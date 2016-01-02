@@ -21,8 +21,8 @@ import socket
 import struct
 import time
 
-from . import common
-#from core.color import Color
+from core.common import Common
+from core.color import Color
 from core._print_ import _print_
 #from splitter_ims import Splitter_IMS
 from core.splitter_dbs import Splitter_DBS
@@ -32,9 +32,10 @@ from core.splitter_dbs import Splitter_DBS
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(common.ACS_COLOR)
-    _print_("ACS:", *args)
-    sys.stdout.write(Color.none)
+    if __debug__:
+        sys.stdout.write(Common.ACS_COLOR)
+        _print_("ACS:", *args)
+        sys.stdout.write(Color.none)
 
 class Splitter_ACS(Splitter_DBS):
     # {{{
@@ -51,7 +52,7 @@ class Splitter_ACS(Splitter_DBS):
         self.period_counter = {}                 # Indexed by a peer (IP address, port)
         self.number_of_sent_chunks_per_peer = {} # Indexed by a peer (IP address, port)
 
-        self.magic_flags |= common.ACS
+        self.magic_flags |= Common.ACS
         
         _p_("Initialized")
         
@@ -118,7 +119,7 @@ class Splitter_ACS(Splitter_DBS):
     def send_chunk(self, chunk, peer):
         # {{{
 
-        Splitter_IMS.send_chunk(self, chunk, peer)
+        Splitter_DBS.send_chunk(self, chunk, peer)
         try:
             self.number_of_sent_chunks_per_peer[peer] += 1
         except KeyError:

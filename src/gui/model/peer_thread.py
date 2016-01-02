@@ -18,7 +18,7 @@ import traceback
 
 try:
     from peer import Peer
-    from core import common
+    from core.common import Common
     from core.peer_ims_gui import Peer_IMS_GUI as Peer_IMS # Peer_IMS should use only the console :-/
     from gui.common.decorators import exc_handler
 except ImportError as msg:
@@ -41,7 +41,7 @@ def configure_peer(data=None):
 Peer_IMS.USE_LOCALHOST = True
 
 ## Peer is not running in console mode.
-common.CONSOLE_MODE = False
+Common.CONSOLE_MODE = False
 
 class Peer_Thread (threading.Thread):
     

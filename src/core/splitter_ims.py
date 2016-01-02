@@ -21,7 +21,7 @@ import threading
 import struct
 import time
 
-from . import common
+from core.common import Common
 from core._print_ import _print_
 from core.color import Color
 
@@ -30,7 +30,7 @@ from core.color import Color
 def _p_(*args, **kwargs):
     """Colorize the output."""
     if __debug__:
-        sys.stdout.write(common.IMS_COLOR)
+        sys.stdout.write(Common.IMS_COLOR)
         _print_("IMS:", *args)
         sys.stdout.write(Color.none)
 
@@ -40,15 +40,14 @@ class Splitter_IMS(threading.Thread):
     # {{{ Class "constants"
 
     BUFFER_SIZE = 256              # Buffer size in chunks
-    CHANNEL = "BBB-134.ogv"        # Default channel
+    CHANNEL = "test.ogg"           # Default channel
     #CHANNEL = ""
     CHUNK_SIZE = 1024              # Chunk size in bytes (larger than MTU)
     HEADER_SIZE = 10               # Chunks/header
     #SPLITTER_ADDR = "127.0.0.1"
-    PORT = 4552                    # Listening port
-    #SOURCE_ADDR = "127.0.0.1"
-    SOURCE_ADDR = "150.214.150.68" # Streaming server's host
-    SOURCE_PORT = 4551             # Streaming server's listening port
+    PORT = 8001                    # Listening port
+    SOURCE_ADDR = "127.0.0.1"      # Streaming server's host
+    SOURCE_PORT = 8000             # Streaming server's listening port
     MCAST_ADDR = "224.0.0.1"       # All Systems on this subnet
     #MCAST_ADDR = "224.0.0.2"      # Default IP multicast channel
     TTL = 1                        # Time To Live of multicast packets
@@ -422,7 +421,7 @@ class Splitter_IMS(threading.Thread):
             message = struct.pack(message_format, socket.htons(self.chunk_number), chunk)
             #self.send_chunk(self.receive_chunk(header_load_counter), self.mcast_channel)
             self.send_chunk(message, self.mcast_channel)
-            self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
+            self.chunk_number = (self.chunk_number + 1) % Common.MAX_CHUNK_NUMBER
 
         # }}}
 

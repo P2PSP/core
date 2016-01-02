@@ -10,6 +10,8 @@ p2psp_application_gui module
 # {{{ Imports
 
 import traceback
+from core.common import Common
+Common.CONSOLE_MODE = False
 try:
     from gi.repository import GObject
     from gi.repository import Gtk
@@ -21,6 +23,7 @@ except Exception as msg:
     traceback.print_exc()
 
 # }}}
+
 
 @exc_handler
 def main_app():

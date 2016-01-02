@@ -1,4 +1,6 @@
-#!/usr/bin/python -O
+##!/opt/local/bin/python3.4
+##!/usr/bin/python -O
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -28,12 +30,10 @@ try:
 except ImportError:
     pass
 
-from core import common
-#import common
+from core.common import Common
 from core.color import Color
 from core._print_ import _print_
-#from core.peer_ims import Peer_IMS
-from core.peer_ims_gui import Peer_IMS_GUI as Peer_IMS
+from core.peer_ims import Peer_IMS
 from core.peer_dbs import Peer_DBS
 from core.lossy_socket import lossy_socket
 from core.symsp_peer import Symsp_Peer
@@ -135,60 +135,57 @@ class Peer():
 
         if args.show_buffer:
             Peer_IMS.SHOW_BUFFER = True
-        
+
         # A multicast address is always received, even for DBS peers.
         if peer.mcast_addr == "0.0.0.0":
             # {{{ IP unicast mode.
 
             peer = Peer_DBS(peer)
+            _print_("Peer DBS enabled")
             peer.receive_my_endpoint()
+            peer.receive_magic_flags()
+            _print_("Magic flags =", bin(peer.magic_flags))
             peer.receive_the_number_of_peers()
             _print_("Number of peers in the team (excluding me) =", peer.number_of_peers)
             _print_("Am I a monitor peer? =", peer.am_i_a_monitor())
             peer.listen_to_the_team()
             peer.receive_the_list_of_peers()
             _print_("List of peers received")
-            peer.receive_magic_flags()
-            _print_("Magic flags =", peer.magic_flags)
 
             # After receiving the list of peers, the peer can check
             # whether is a monitor peer or not (only the first
             # arriving peers are monitors)
             if peer.am_i_a_monitor():
                 peer = Monitor_DBS(peer)
-                _print_("Monitor DBS")
+                _print_("Monitor DBS enabled")
 
                 # The peer is a monitor. Now it's time to know the sets of rules that control this team.
 
-                if (peer.magic_flags & common.LRS):
-                    peer = Monitor_LSR(peer)
-                    _print_("Monitor LRS")
-                if (peer.magic_flags & common.NTS):
+                if (peer.magic_flags & Common.LRS):
+                    peer = Peer_LRS(peer)
+                    _print_("Peer LRS enabled")
+                    peer = Monitor_LRS(peer)
+                    _print_("Monitor LRS enabled")
+                if (peer.magic_flags & Common.NTS):
+                    peer = Peer_NTS(peer)
+                    _print_("Peer NTS enabled")
                     peer = Monitor_NTS(peer)
-                    _print_("Monitor NTS")
+                    _print_("Monitor NTS enabled")
             else:
-                peer = Peer_DBS(peer)
-                _print_("Peer DBS")
-
                 # The peer is a normal peer. Let's know the sets of rules that control this team.
-                
-                if (peer.magic_flags & common.ACS):
-                    peer = Peer_ACR(peer)
-                    _print_("Peer ACS")
-                if (peer.magic_flags & common.LRS):
-                    peer = Peer_LSR(peer)
-                    _print_("Peer LRS")
-                if (peer.magic_flags & common.NTS):
-                    peer = Peeer_NTS(peer)
-                    _print_("Peer NTS")
+
+                if (peer.magic_flags & Common.NTS):
+                    peer = Peer_NTS(peer)
+                    _print_("Peer NTS enabled")
 
                 if args.enable_chunk_loss:
-                
+
                     if args.chunk_loss_period:
                         Lossy_Peer.CHUNK_LOSS_PERIOD = int(args.chunk_loss_period)
                         print('CHUNK_LOSS_PERIOD =', Lossy_Peer.CHUNK_LOSS_PERIOD)
                         if int(args.chunk_loss_period) != 0:
                             peer = Lossy_Peer(peer)
+                            _print_("Lost of chunks enabled")
 
             if args.port_step:
                 Symsp_Peer.PORT_STEP = int(args.port_step)
@@ -239,6 +236,7 @@ class Peer():
 
         # }}}
 
+        print("Created new peer of type %s\n" % peer.__class__.__name__)
 
         # {{{ Run!
 
@@ -252,8 +250,9 @@ class Peer():
         print("|       (Expected values are between parenthesis)     |")
         print("------------------------------------------------------+")
         print()
-        print("    Time |     Received (Expected) |          Sent (Expected) | Team description")
-        print("---------+-------------------------+--------------------------+-----------------...")
+        print("         |     Received (kbps) |          Sent (kbps) |")
+        print("    Time |      Real  Expected |       Real  Expected | Team description")
+        print("---------+---------------------+----------------------+-----------------------------------...")
 
         last_chunk_number = peer.played_chunk
         if hasattr(peer, 'sendto_counter'):
@@ -275,14 +274,14 @@ class Peer():
             kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
             last_sendto_counter = peer.sendto_counter
             try:
-                if common.CONSOLE_MODE == False :
+                if Common.CONSOLE_MODE == False :
                     from gi.repository import GObject
                     try:
                         from gui.adapter import speed_adapter
                     except ImportError as msg:
                         pass
-                    GObject.idle_add(speed_adapter.update_widget,str(kbps_recvfrom) + ' kbps'
-                                            ,str(kbps_sendto) + ' kbps'
+                    GObject.idle_add(speed_adapter.update_widget,str(int(kbps_recvfrom)) + ' kbps'
+                                            ,str(int(kbps_sendto)) + ' kbps'
                                             ,str(len(peer.peer_list)+1))
             except Exception as msg:
                 pass
@@ -295,16 +294,16 @@ class Peer():
                 sys.stdout.write(Color.red)
             elif kbps_expected_recv > kbps_recvfrom:
                 sys.stdout.write(Color.green)
-            print(repr(kbps_expected_recv).rjust(12), end=Color.none)
-            print(('(' + repr(kbps_recvfrom) + ')').rjust(12), end=' | ')
+            print(repr(int(kbps_expected_recv)).rjust(10), end=Color.none)
+            print(repr(int(kbps_recvfrom)).rjust(10), end=' | ')
             #print(("{:.1f}".format(nice)).rjust(6), end=' | ')
             #sys.stdout.write(Color.none)
             if kbps_expected_sent > kbps_sendto:
                 sys.stdout.write(Color.red)
             elif kbps_expected_sent < kbps_sendto:
                 sys.stdout.write(Color.green)
-            print(repr(kbps_sendto).rjust(12), end=Color.none)
-            print(('(' + repr(kbps_expected_sent) + ')').rjust(12), end=' | ')
+            print(repr(int(kbps_sendto)).rjust(10), end=Color.none)
+            print(repr(int(kbps_expected_sent)).rjust(10), end=' | ')
             #sys.stdout.write(Color.none)
             #print(repr(nice).ljust(1)[:6], end=' ')
             print(len(peer.peer_list), end=' ')
@@ -317,7 +316,7 @@ class Peer():
                     break
             print()
         try:
-            if common.CONSOLE_MODE == False :
+            if Common.CONSOLE_MODE == False :
                 GObject.idle_add(speed_adapter.update_widget,str(0)+' kbps',str(0)+' kbps',str(0))
         except  Exception as msg:
             pass

@@ -1,4 +1,8 @@
-#!/usr/bin/python -O
+"""
+@package core
+peer_strpeds module
+"""
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -14,12 +18,12 @@ import struct
 import time
 #import traceback
 
-from . import common
+from core.common import Common
 from core.color import Color
 from core._print_ import _print_
 #from peer_ims import Peer_IMS
 #from peer_dbs import Peer_DBS
-from core.peer_nts import Peer_NTS
+from core.peer_dbs import Peer_DBS
 try:
     from Crypto.PublicKey import DSA
     from Crypto.Hash import SHA256
@@ -34,21 +38,18 @@ PORT = 1
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(Color.green)
-    _print_("STRPEDS:", *args)
+    sys.stdout.write(Common.DIS)
+    _print_("DIS (STRPEDS):", *args)
     sys.stdout.write(Color.none)
 
-class Peer_StrpeDs(Peer_NTS):
+class Peer_StrpeDs(Peer_DBS):
 
     def __init__(self, peer):
-        sys.stdout.write(Color.yellow)
-        _print_("STrPe-DS Peer")
-        sys.stdout.write(Color.none)
-
-        threading.Thread.__init__(self)
 
         self.message_format += '40s40s'
         self.bad_peers = []
+
+        _p_("Initialized")
 
     def process_message(self, message, sender):
         if sender in self.bad_peers:

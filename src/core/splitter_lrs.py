@@ -1,6 +1,6 @@
 """
 @package core
-splitter_lrs splitter_nts
+splitter_lrs module
 """
 
 # -*- coding: iso-8859-15 -*-
@@ -21,7 +21,7 @@ import socket
 import struct
 import time
 
-import common
+from core.common import Common
 from core.color import Color
 from core._print_ import _print_
 #from splitter_ims import Splitter_IMS
@@ -33,9 +33,10 @@ from core.splitter_dbs import Splitter_DBS
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(common.LRS_COLOR)
-    _print_("LRS:", *args)
-    sys.stdout.write(Color.none)
+    if __debug__:
+        sys.stdout.write(Common.LRS_COLOR)
+        _print_("LRS:", *args)
+        sys.stdout.write(Color.none)
 
 class Splitter_LRS(Splitter_DBS):
     # {{{
@@ -53,6 +54,7 @@ class Splitter_LRS(Splitter_DBS):
         # circular array of messages (chunk_number, chunk) in network
         # endian format.
         self.buffer = [""]*self.BUFFER_SIZE
+        self.magic_flags |= Common.LRS
 
         _p_("Initialized")
         

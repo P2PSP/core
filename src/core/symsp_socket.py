@@ -30,7 +30,7 @@ class symsp_socket(object):
         if destination not in self.destinations:
             for _ in range(self.port_step):
                 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                sock.sendto('', destination)
+                sock.sendto(b'', destination)
                 sock.close()
             self.destinations.append(destination)
         return self._sock.sendto(message, destination)
