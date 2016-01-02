@@ -277,11 +277,11 @@ class Peer():
                 if Common.CONSOLE_MODE == False :
                     from gi.repository import GObject
                     try:
-                        from adapter import speed_adapter
+                        from gui.adapter import speed_adapter
                     except ImportError as msg:
                         pass
-                    GObject.idle_add(speed_adapter.update_widget,str(kbps_recvfrom) + ' kbps'
-                                            ,str(kbps_sendto) + ' kbps'
+                    GObject.idle_add(speed_adapter.update_widget,str(int(kbps_recvfrom)) + ' kbps'
+                                            ,str(int(kbps_sendto)) + ' kbps'
                                             ,str(len(peer.peer_list)+1))
             except Exception as msg:
                 pass

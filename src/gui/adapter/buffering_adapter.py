@@ -14,7 +14,7 @@ buffering_adapter module
 # {{{ Imports
 
 try:
-    from common.decorators import exc_handler
+    from gui.common.decorators import exc_handler
 except ImportError as msg:
     print(msg)
 

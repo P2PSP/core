@@ -14,7 +14,7 @@ channel_encoder module
 # {{{ Imports
 
 import json
-from channel import Channel
+from gui.model.channel import Channel
 
 # }}}
 

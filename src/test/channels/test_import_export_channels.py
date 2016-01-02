@@ -4,13 +4,13 @@ import sys,os
 module_path = os.path.join(os.path.dirname(__file__),"../..")
 sys.path.append(module_path)
 
-from src.model.category import Category
-from src.model.channel import Channel
-from src.common.json_importer import JSON_Importer
-from src.common.json_exporter import JSON_Exporter
-from src.model.channel_encoder import Channel_Encoder
-from src.core._print_ import _print_
-import src.common.file_util as file_util
+from gui.model.category import Category
+from gui.model.channel import Channel
+from gui.common.json_importer import JSON_Importer
+from gui.common.json_exporter import JSON_Exporter
+from gui.model.channel_encoder import Channel_Encoder
+from core._print_ import _print_
+import gui.common.file_util as file_util
 
 import unittest
 import json
@@ -27,7 +27,7 @@ def get_data():
    return data
    
 path = file_util.find_file(__file__,
-                                    "../../data/channels/sample_data.p2psp")
+                                    "../../gui/data/channels/sample_data.p2psp")
 
 #unittests are sorted according to their name and then run.
 #edit tearDown method to retain exported channels file  and vice-versa.

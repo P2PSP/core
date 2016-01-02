@@ -23,11 +23,12 @@ import time
 from gi.repository import GObject
 
 from core.common import Common
-#from color import Color
-from _print_ import _print_
+from core.color import Color
+from core._print_ import _print_
+from core.peer_ims import Peer_IMS
 
 try:
-    from adapter import buffering_adapter
+    from gui.adapter import buffering_adapter
 except ImportError as msg:
     pass
 
@@ -117,7 +118,7 @@ class Peer_IMS_GUI(Peer_IMS):
         # Now, fill up to the half of the buffer.
         for x in range(int(self.buffer_size/2)):
             _print_("{:.2%}\r".format((1.0*x)/(self.buffer_size/2)), end='')
-            BUFFER_STATUS = (100*x)/(self.buffer_size/2) +1
+            BUFFER_STATUS = int((100*x)/(self.buffer_size/2)+1)
             if Common.CONSOLE_MODE == False :
                 GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
             else:

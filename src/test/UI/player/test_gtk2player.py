@@ -5,8 +5,8 @@ import sys,os
 module_path = os.path.join(os.path.dirname(__file__),"../../..")
 sys.path.append(module_path)
 
-from src.common.decorators import exc_handler
-from src.lib import vlc
+from gui.common.decorators import exc_handler
+from gui.lib import vlc
 import gtk
 
 
@@ -16,7 +16,7 @@ def find_file(dire, fName):
         return path
         
 path = find_file(__file__,
-                                    "../../../data/images/p2psp.jpg")
+                                    "../../../gui/data/images/p2psp.jpg")
                                     
 @exc_handler
 def get_user_interface(dire, fName):
@@ -32,7 +32,7 @@ class Gtk3Player():
     """
     def __init__(self):
         self.interface = get_user_interface(__file__,
-                                        '../../../data/glade/test_player_surface.glade')
+                                        '../../../gui/data/glade/test_player_surface.glade')
         self.load_widgets()
         self.draw_area.set_size_request(300,300)
         self.draw_area.connect("realize",self._realized)

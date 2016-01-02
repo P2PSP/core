@@ -16,11 +16,11 @@ import socket
 import struct
 import time
 import threading
-from lossy_socket import lossy_socket
-import common
-from _print_ import _print_
+from core.lossy_socket import lossy_socket
+from . import common
+from core._print_ import _print_
 
-from color import Color
+from core.color import Color
 try:
     import colorama                       # Enable console color using ANSI codes in Windows
 except ImportError:

@@ -13,12 +13,12 @@ channel_import_controller module
 
 # {{{ Imports
 
-from view.import_box import Import_Box
-from common.json_importer import JSON_Importer
-from model.channel_store import Channel_Store
-from model.channel import Channel
-from common.decorators import exc_handler
-import common.graphics_util as graphics_util
+from gui.view.import_box import Import_Box
+from gui.common.json_importer import JSON_Importer
+from gui.model.channel_store import Channel_Store
+from gui.model.channel import Channel
+from gui.common.decorators import exc_handler
+from gui.common import  graphics_util
 import collections
 
 # }}}

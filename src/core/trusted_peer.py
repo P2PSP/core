@@ -13,6 +13,8 @@ malicious_peer module
 import struct
 import sys
 import socket
+from core.color import Color
+from core._print_ import _print_
 import threading
 import hashlib
 import random

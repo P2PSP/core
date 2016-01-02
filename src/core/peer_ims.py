@@ -27,7 +27,7 @@ from core.color import Color
 
 #from gi.repository import GObject
 try:
-    from adapter import buffering_adapter
+    from gui.adapter import buffering_adapter
 except ImportError as msg:
     pass
 

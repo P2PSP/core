@@ -13,12 +13,12 @@ channel_export_controller module
 
 # {{{ Imports
 
-from view.export_box import Export_Box
-from common.json_exporter import JSON_Exporter
-from model.channel_encoder import Channel_Encoder
-from model.channel_store import Channel_Store
-from model.channel import Channel
-from common.decorators import exc_handler
+from gui.view.export_box import Export_Box
+from gui.common.json_exporter import JSON_Exporter
+from gui.model.channel_encoder import Channel_Encoder
+from gui.model.channel_store import Channel_Store
+from gui.model.channel import Channel
+from gui.common.decorators import exc_handler
 from gi.repository import Gtk
 import collections
 
