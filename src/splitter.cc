@@ -58,7 +58,7 @@ int main(int argc, const char *argv[]) {
       "default, DBS (unicast transmissions) will be used");
 
   // TODO: strpe option should expect a list of arguments, not bool
-  desc.add_options()("help", "Produce help message")("splitter_addr",
+  desc.add_options()("help,h", "Produce help message")("splitter_addr",
                      boost::program_options::value<std::string>(),
                      "IP address to serve (TCP) the peers. (Default = '{}')")(
       "buffer_size", boost::program_options::value<int>(),
@@ -109,8 +109,7 @@ int main(int argc, const char *argv[]) {
 
   boost::program_options::variables_map vm;
   try {
-    boost::program_options::store(
-                                  boost::program_options::parse_command_line(argc, argv, desc), vm);
+    boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
   } catch (std::exception &e) {
     
     // If the argument passed is unknown, print the list of available arguments
