@@ -71,9 +71,7 @@ int main(int argc, const char* argv[]) {
       // "strpeds", boost::program_options::value<bool>()->implicit_value(true),
       // "Enables STrPe-DS")(
       "strpe_log", "Logging STrPe & STrPe-DS specific data to file.")(
-      "show_buffer",
-      boost::program_options::value<bool>()->implicit_value(true),
-      "Shows the status of the buffer of chunks.");
+      "show_buffer", "Shows the status of the buffer of chunks.");
 
   boost::program_options::variables_map vm;
   try {
