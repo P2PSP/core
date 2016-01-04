@@ -84,23 +84,14 @@ int main(int argc, const char *argv[]) {
       "IP address or hostname of the streaming server. Default = '{}'.")(
       "source_port", boost::program_options::value<int>(),
       "Port where the streaming server is listening. Default = '{}'.")(
-      "IMS", boost::program_options::value<bool>()->implicit_value(true),
-      "Uses the IP multicast infrastructure, if available. IMS mode is "
+      "IMS", "Uses the IP multicast infrastructure, if available. IMS mode is "
       "incompatible with ACS, LRS, DIS and NTS modes.")(
-      "NTS", boost::program_options::value<bool>()->implicit_value(true),
-      "Enables NAT traversal.")(
-      "ACS", boost::program_options::value<bool>()->implicit_value(true),
-      "Enables Adaptative Chunk-rate.")(
-      "LRS", boost::program_options::value<bool>()->implicit_value(true),
-      "Enables Lost chunk Recovery")(
-      "DIS", boost::program_options::value<bool>()->implicit_value(true),
-      "Enables Data Integrity check.")(
-      "strpe", boost::program_options::value<bool>()->implicit_value(true),
-      "Selects STrPe model for DIS.")("strpeds",
-                                      boost::program_options::value<bool>(),
-                                      "Selects STrPe-DS model for DIS.")(
+      "NTS", "Enables NAT traversal.")(
+      "ACS", "Enables Adaptative Chunk-rate.")(
+      "LRS", "Enables Lost chunk Recovery")(
+      "DIS", "Enables Data Integrity check.")(
+      "strpe", "Selects STrPe model for DIS.")("strpeds", "Selects STrPe-DS model for DIS.")(
       "strpeds_majority_decision",
-      boost::program_options::value<bool>()->implicit_value(true),
       "Sets majority decision ratio for STrPe-DS model.")(
       "strpe_log", boost::program_options::value<std::string>(),
       "Loggin STrPe & STrPe-DS specific data to file.")(
