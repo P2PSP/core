@@ -22,9 +22,9 @@ int main(int argc, const char* argv[]) {
       "This is the peer node of a P2PSP team.");
 
   // TODO: strpe option should expect a list of arguments, not bool
-  desc.add_options()("enable_chunk_loss",
-                     boost::program_options::value<std::string>(),
-                     "Forces a lost of chunks")(
+  desc.add_options()("help,h", "Produce help message")(
+      "enable_chunk_loss", boost::program_options::value<std::string>(),
+      "Forces a lost of chunks")(
       "max_chunk_debt", boost::program_options::value<int>(),
       "The maximun number of times that other peer "
       "can not send a chunk to "
@@ -48,7 +48,6 @@ int main(int argc, const char* argv[]) {
       "Port to communicate with the peers. Default {} (the OS will chose "
       "it).")(  //.format(Peer_IMS.PORT)
       "use_localhost",
-      boost::program_options::value<bool>()->implicit_value(true),
       "Forces the peer to use localhost instead of the IP of the adapter "
       "to connect to the splitter. Notice that in this case, peers that "
       "run outside of the host will not be able to communicate with this "
@@ -66,21 +65,29 @@ int main(int argc, const char* argv[]) {
       "Enables Bad Mouth attack for given set of peers.")(
       // "trusted", boost::program_options::value<bool>()->implicit_value(true),
       // "Forces the peer to send hashes of chunks to splitter")(
-      "checkall", boost::program_options::value<bool>()->implicit_value(true),
+      "checkall",
       "Forces the peer to send hashes of every chunks to splitter (works only "
       "with trusted option)")(
       // "strpeds", boost::program_options::value<bool>()->implicit_value(true),
       // "Enables STrPe-DS")(
-      "strpe_log", boost::program_options::value<bool>()->implicit_value(true),
-      "Logging STrPe & STrPe-DS specific data to file.")(
-      "show_buffer",
-      boost::program_options::value<bool>()->implicit_value(true),
-      "Shows the status of the buffer of chunks.");
+      "strpe_log", "Logging STrPe & STrPe-DS specific data to file.")(
+      "show_buffer", "Shows the status of the buffer of chunks.");
 
   boost::program_options::variables_map vm;
-  boost::program_options::store(
-      boost::program_options::parse_command_line(argc, argv, desc), vm);
+  try {
+    boost::program_options::store(
+        boost::program_options::parse_command_line(argc, argv, desc), vm);
+  } catch (std::exception& e) {
+    // If the argument passed is unknown, print the list of available arguments
+    std::cout << desc << "\n";
+    return 1;
+  }
   boost::program_options::notify(vm);
+
+  if (vm.count("help")) {
+    std::cout << desc << "\n";
+    return 1;
+  }
 
   p2psp::PeerDBS peer;
   peer.Init();
