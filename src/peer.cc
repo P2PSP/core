@@ -117,6 +117,8 @@ int main(int argc, const char* argv[]) {
     peer.SetUseLocalhost(true);
   }
 
+  // TODO: To the future
+  /*
   if (vm.count("persistent")) {
     peer.SetPersistentAttack(true);
   }
@@ -139,7 +141,7 @@ int main(int argc, const char* argv[]) {
 
   if (vm.count("strpe_log")) {
     // TODO: Handle logging
-  }
+  }*/
 
   peer.WaitForThePlayer();
   peer.ConnectToTheSplitter();
