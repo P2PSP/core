@@ -55,10 +55,10 @@ int main(int argc, const char *argv[]) {
   boost::program_options::options_description desc(
       "This is the splitter node of a P2PSP team.  The splitter is in charge "
       "of defining the Set or Rules (SoR) that will control the team. By "
-      "default, DBS (unicast transmissions) will be used.");
+      "default, DBS (unicast transmissions) will be used");
 
   // TODO: strpe option should expect a list of arguments, not bool
-  desc.add_options()("splitter_addr",
+  desc.add_options()("help", "produce help message")("splitter_addr",
                      boost::program_options::value<std::string>(),
                      "IP address to serve (TCP) the peers. (Default = '{}')")(
       "buffer_size", boost::program_options::value<int>(),
@@ -111,6 +111,11 @@ int main(int argc, const char *argv[]) {
   boost::program_options::store(
       boost::program_options::parse_command_line(argc, argv, desc), vm);
   boost::program_options::notify(vm);
+  
+  if (vm.count("help")) {
+    std::cout << desc << "\n";
+    return 1;
+  }
 
   p2psp::SplitterSTRPE splitter;
 
