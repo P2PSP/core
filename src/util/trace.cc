@@ -38,7 +38,7 @@ namespace p2psp
 
   TraceSystem::TraceSystem()
   {
-#ifndef TRACE_FILE_OUPUT
+#ifdef TRACE_FILE_OUPUT
 
     sink_ptr_.reset(new TraceSystem::Sink());
     
@@ -81,4 +81,3 @@ namespace p2psp
   }
   
 }
-/**/
