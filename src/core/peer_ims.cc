@@ -241,7 +241,7 @@ void PeerIMS::BufferData() {
   LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
           << std::to_string(team_socket_.local_endpoint().port()) << ")"
           << "\b: buffering = 000.00%");
-  TraceSystem::logStream().flush();
+  TraceSystem::Flush();
 
   // First chunk to be sent to the player.  The process_next_message() procedure
   // returns the chunk number if a packet has been received or -2 if a time-out
@@ -273,7 +273,7 @@ void PeerIMS::BufferData() {
       // pass
     }
     LOG("!");
-    TraceSystem::logStream().flush();
+    TraceSystem::Flush();
 
     while (ProcessNextMessage() < 0)
       ;
@@ -283,7 +283,7 @@ void PeerIMS::BufferData() {
   LOG("latency = " << std::to_string((clock() - start_time) /
                                      (float)CLOCKS_PER_SEC) << " seconds");
   LOG("buffering done.");
-  TraceSystem::logStream().flush();
+  TraceSystem::Flush();
 }
 
 int PeerIMS::ProcessNextMessage() {

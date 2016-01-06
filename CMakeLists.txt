@@ -1,7 +1,10 @@
 # Minimum CMake version required
 cmake_minimum_required(VERSION 2.8)
 
+option(BUILD_LIB "Build the library" ON)
 option(BUILD_REDUCED_LIB "Build a reduced version" OFF)
+
+option(BUILD_TEST "Build the test" ON)
 
 option(BUILD_PEER "Build the peer" ON)
 option(BUILD_SPLITTER "Build the splitter" ON)
@@ -18,6 +21,9 @@ list(APPEND BOOST_REQUIRED_COMPONENTS
   serialization
   timer
   thread
+  log
+  log_setup
+  date_time
   program_options
 )
 
@@ -88,23 +94,24 @@ if(NOT BUILD_PYTHON_WRAPPER)
     "${CMAKE_CURRENT_SOURCE_DIR}/src/core/python.cc")
 endif()
 
-# Executables
-add_library(p2psp SHARED
-  ${P2PSP_SOURCES}
-)
-
-# Libraries
-target_link_libraries(p2psp 
-  log4cpp 
-  ${OPENSSL_LIBRARIES}
-  ${CMAKE_THREAD_LIBS_INIT}
-  ${Boost_LIBRARIES}
-  ${PYTHON_LIBRARIES}
-)
-
-# Enable C++11 for CMake 3.1.0 or later
-set_property(TARGET p2psp PROPERTY CXX_STANDARD 11)
-set_property(TARGET p2psp PROPERTY CXX_STANDARD_REQUIRED ON)
+if(BUILD_LIB)
+  # Executables
+  add_library(p2psp SHARED
+    ${P2PSP_SOURCES}
+  )
+  
+  # Libraries
+  target_link_libraries(p2psp 
+    ${OPENSSL_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${Boost_LIBRARIES}
+    ${PYTHON_LIBRARIES}
+  )
+  
+  # Enable C++11 for CMake 3.1.0 or later
+  set_property(TARGET p2psp PROPERTY CXX_STANDARD 11)
+  set_property(TARGET p2psp PROPERTY CXX_STANDARD_REQUIRED ON)
+endif()
 
 if(BUILD_PEER AND NOT BUILD_REDUCED_LIB)
   # Executable
@@ -136,4 +143,22 @@ if(BUILD_SPLITTER AND NOT BUILD_REDUCED_LIB)
   # Enable C++11 for CMake 3.1.0 or later
   set_property(TARGET splitter PROPERTY CXX_STANDARD 11)
   set_property(TARGET splitter PROPERTY CXX_STANDARD_REQUIRED ON)
+endif()
+
+if(BUILD_TEST)
+  # Executable
+  add_executable(test 
+    "src/test.cc"
+    "src/util/trace.cc"
+  )
+
+  # Libraries
+  target_link_libraries(test 
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${Boost_LIBRARIES}
+  )
+  
+  # Enable C++11 for CMake 3.1.0 or later
+  set_property(TARGET test PROPERTY CXX_STANDARD 11)
+  set_property(TARGET test PROPERTY CXX_STANDARD_REQUIRED ON)
 endif()

@@ -1,67 +1,84 @@
 #include "trace.h"
 
+#include <boost/log/expressions.hpp>
+#include <boost/log/utility/setup/console.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/support/date_time.hpp>
+#include <boost/log/sinks/sync_frontend.hpp>
+#include <boost/log/sinks/text_file_backend.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
-using namespace std;
+
+#ifndef TRACE_THRESHOLD
+
+#define TRACE_THRESHOLD trace
+
+#endif // TRACE_THRESHOLD
 
 
-TraceSystem TraceSystem::traceSystem;
-
-
-TraceSystem::TraceSystem()
+namespace p2psp
 {
-#ifndef SILENT_MODE
-  layout = new log4cpp::PatternLayout();
-  layout->setConversionPattern("%d: %m %n");
+  
+  using namespace boost;
+  
+  
+  class TraceSystem::Sink
+  {
+  public:
+    shared_ptr< boost::log::sinks::synchronous_sink<
+      boost::log::sinks::text_file_backend> > log_sink_;
+  };
+  
+  
+  TraceSystem TraceSystem::trace_system_;
 
-  appender = new log4cpp::OstreamAppender("OstreamAppender", &cout);
-  appender->setLayout(layout);
 
-  category = &(log4cpp::Category::getInstance("Category"));
-  category->setPriority(log4cpp::Priority::DEBUG);
-  category->setAppender(appender);
+  TraceSystem::TraceSystem()
+  {
+#ifndef TRACE_FILE_OUPUT
 
-  file_appender = NULL;
-#endif
-}
+    sink_ptr_.reset(new TraceSystem::Sink());
+    
+    sink_ptr_->log_sink_ = log::add_file_log
+    (
+      log::keywords::file_name = "p2psp_%N.log",
+      log::keywords::rotation_size = 10 * 1024 * 1024, 
+      log::keywords::time_based_rotation = log::sinks::file::rotation_at_time_point(0, 0, 0), 
+      log::keywords::format = (
+        log::expressions::stream
+          << log::expressions::format_date_time<posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S.%f")
+          << " " << log::expressions::smessage
+      )
+    );
+    
+#endif // TRACE_FILE_OUTPUT
+  
+    log::add_console_log
+    (
+      std::cout, 
+      log::keywords::format = (
+        log::expressions::stream
+          << log::expressions::format_date_time<posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S.%f")
+          << " " << log::expressions::smessage
+      )
+    );
 
-bool TraceSystem::AppendToFile_(const char *name)
-{
-#ifdef SILENT_MODE
-  return true;
-#else
-  if(file_appender) return false;
-  else {
-    char tm_cad[20] = "";
-    char fn_cad[200] = "";
-
-    time_t t;
-    struct tm *tmp;
-
-    t = time(NULL);
-    tmp = localtime(&t);
-
-    if(tmp == NULL) return false;
-    else {
-      if(!strftime(tm_cad, sizeof(tm_cad), "%Y%m%d.%H%M%S", tmp)) return false;
-      else {
-        snprintf(fn_cad, sizeof(fn_cad), "%s.%s.log", name, tm_cad);
-
-        file_layout = new log4cpp::PatternLayout();
-        file_layout->setConversionPattern("%d: %m %n");
-
-        file_appender = new log4cpp::FileAppender("FileAppender", fn_cad);
-        file_appender->setLayout(file_layout);
-
-        category->setAppender(file_appender);
-
-        return true;
-      }
-    }
+    log::core::get()->set_filter
+    (
+        log::trivial::severity >= log::trivial::TRACE_THRESHOLD
+    );
+    
+    log::add_common_attributes();
   }
-#endif
+  
+  void TraceSystem::Flush()
+  {
+    if(trace_system_.sink_ptr_)
+      trace_system_.sink_ptr_->log_sink_->flush();
+  }
+  
 }
-
-TraceSystem::~TraceSystem()
-{
-  log4cpp::Category::shutdown();
-}
+/**/
