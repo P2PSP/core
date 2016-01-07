@@ -110,6 +110,9 @@ class PeerIMS {
   // Thread to start the peer
   std::unique_ptr<boost::thread> thread_;
 
+  // Thread group to join all threads
+  boost::thread_group thread_group_;
+
   // DBS variables
   std::vector<ip::udp::endpoint> peer_list_;
 
@@ -157,6 +160,7 @@ class PeerIMS {
   virtual void KeepTheBufferFull();
   virtual void Run();
   virtual void Start();
+  virtual void Join() { thread_group_.join_all(); };
 
   /**
    *  Getter/setters

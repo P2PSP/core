@@ -418,7 +418,10 @@ void PeerIMS::Run() {
 }
 
 void PeerIMS::Start() {
-  thread_.reset(new boost::thread(boost::bind(&PeerIMS::Run, this)));
+  thread_group_.remove_thread(thread_.release());
+  boost::thread *thread = new boost::thread(boost::bind(&PeerIMS::Run, this));
+  thread_group_.add_thread(thread);
+  thread_.reset(thread);
 }
 
 std::string PeerIMS::GetMcastAddr() { return mcast_addr_.to_string(); }

@@ -323,6 +323,8 @@ int main(int argc, const char* argv[]) {
       }
     }
   }
+  
+  peer.Join();
 
   return 0;
 }
