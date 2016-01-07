@@ -223,7 +223,7 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
     std::vector<char> empty(1024, 0);
 
     if (receive_and_feed_counter_ < (int)peer_list_.size() &&
-        receive_and_feed_previous_ != empty) {
+        !receive_and_feed_previous_.empty()) {
       // Send the previous chunk in congestion avoiding mode.
 
       peer = peer_list_[receive_and_feed_counter_];

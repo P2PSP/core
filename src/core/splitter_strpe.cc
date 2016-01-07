@@ -182,6 +182,7 @@ void SplitterSTRPE::Run() {
       }
     } catch (const std::out_of_range &oor) {
       LOG("The monitor peer has died!");
+      exit(-1);
     }
 
     chunk.consume(bytes_transferred);
