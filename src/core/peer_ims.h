@@ -158,6 +158,10 @@ class PeerIMS {
   virtual void PlayChunk(int);
   virtual void PlayNextChunk();
   virtual void KeepTheBufferFull();
+
+  /**
+   *  Thread management
+   */
   virtual void Run();
   virtual void Start();
   virtual void Join() { thread_group_.join_all(); };

@@ -3,6 +3,7 @@
 #include "core/peer_ims.h"
 #include "core/peer_dbs.h"
 #include "core/monitor_dbs.h"
+#include "core/monitor_lrs.h"
 #include "core/malicious_peer.h"
 #include "core/trusted_peer.h"
 #include "core/peer_strpeds.h"
@@ -71,6 +72,7 @@ int main(int argc, const char* argv[]) {
       // "strpeds", boost::program_options::value<bool>()->implicit_value(true),
       // "Enables STrPe-DS")(
       "strpe_log", "Logging STrPe & STrPe-DS specific data to file.")(
+      "monitor", "The peer is a monitor")(
       "show_buffer", "Shows the status of the buffer of chunks.");
 
   boost::program_options::variables_map vm;
@@ -89,96 +91,105 @@ int main(int argc, const char* argv[]) {
     return 1;
   }
 
-  p2psp::PeerDBS peer;
-  peer.Init();
+  std::unique_ptr<p2psp::PeerDBS> peer;
+
+  if (vm.count("monitor")) {
+    // Monitor enabled
+    LOG("Monitor enabled.");
+    peer.reset(new p2psp::MonitorLRS());
+  } else {
+    peer.reset(new p2psp::PeerDBS());
+  }
+
+  peer->Init();
 
   if (vm.count("show_buffer")) {
-    peer.SetShowBuffer(true);
+    peer->SetShowBuffer(true);
   }
 
   if (vm.count("max_chunk_debt")) {
-    peer.SetMaxChunkDebt(vm["max_chunk_debt"].as<int>());
+    peer->SetMaxChunkDebt(vm["max_chunk_debt"].as<int>());
   }
 
   if (vm.count("player_port")) {
-    peer.SetPlayerPort(vm["player_port"].as<uint16_t>());
+    peer->SetPlayerPort(vm["player_port"].as<uint16_t>());
   }
 
   if (vm.count("port_step")) {
-    // Symsp_Peer peer.SetPortStep(vm["port_step"].as<int>());
+    // Symsp_Peer peer->SetPortStep(vm["port_step"].as<int>());
   }
 
   if (vm.count("splitter_addr")) {
-    peer.SetSplitterAddr(vm["splitter_addr"].as<std::string>());
+    peer->SetSplitterAddr(vm["splitter_addr"].as<std::string>());
   }
 
   if (vm.count("splitter_port")) {
-    peer.SetSplitterPort(vm["splitter_port"].as<uint16_t>());
+    peer->SetSplitterPort(vm["splitter_port"].as<uint16_t>());
   }
 
   if (vm.count("port")) {
-    peer.SetPort(vm["port"].as<uint16_t>());
+    peer->SetPort(vm["port"].as<uint16_t>());
   }
 
   if (vm.count("use_localhost")) {
-    peer.SetUseLocalhost(true);
+    peer->SetUseLocalhost(true);
   }
 
   // TODO: To the future
   /*
   if (vm.count("persistent")) {
-    peer.SetPersistentAttack(true);
+    peer->SetPersistentAttack(true);
   }
 
   if (vm.count("on_off_ratio")) {
-    peer.SetOnOffAttack(true, vm["on_off_ratio"].as<int>());
+    peer->SetOnOffAttack(true, vm["on_off_ratio"].as<int>());
   }
 
   if (vm.count("selective")) {
-    peer.SetSelectiveAttack(true, vm["selective"].as<std::string>());
+    peer->SetSelectiveAttack(true, vm["selective"].as<std::string>());
   }
 
   if (vm.count("bad_mouth")) {
-    peer.SetBadMouthAttack(true, vm["bad_mouth"].as<std::string>());
+    peer->SetBadMouthAttack(true, vm["bad_mouth"].as<std::string>());
   }
 
   if (vm.count("checkall")) {
-    peer.SetCheckAll(true);
+    peer->SetCheckAll(true);
   }
 
   if (vm.count("strpe_log")) {
     // TODO: Handle logging
   }*/
 
-  peer.WaitForThePlayer();
-  peer.ConnectToTheSplitter();
-  peer.ReceiveTheMcasteEndpoint();
-  peer.ReceiveTheHeaderSize();
-  peer.ReceiveTheChunkSize();
-  peer.ReceiveTheHeader();
-  peer.ReceiveTheBufferSize();
-  LOG("Using IP Multicast address = " << peer.GetMcastAddr());
+  peer->WaitForThePlayer();
+  peer->ConnectToTheSplitter();
+  peer->ReceiveTheMcasteEndpoint();
+  peer->ReceiveTheHeaderSize();
+  peer->ReceiveTheChunkSize();
+  peer->ReceiveTheHeader();
+  peer->ReceiveTheBufferSize();
+  LOG("Using IP Multicast address = " << peer->GetMcastAddr());
 
   // A multicast address is always received, even for DBS peers.
-  if (peer.GetMcastAddr() == "0.0.0.0") {
+  if (peer->GetMcastAddr() == "0.0.0.0") {
     // TODO: IP multicast mode
     // TODO: DBS
 
-    peer.ReceiveMyEndpoint();
-    peer.ReceiveMagicFlags();
-    // LOG("Magic flags =" << std::bitset<8>(peer.magic_flags));
-    peer.ReceiveTheNumberOfPeers();
+    peer->ReceiveMyEndpoint();
+    peer->ReceiveMagicFlags();
+    // LOG("Magic flags =" << std::bitset<8>(peer->magic_flags));
+    peer->ReceiveTheNumberOfPeers();
     LOG("Number of peers in the team (excluding me) ="
-        << std::to_string(peer.GetNumberOfPeers()));
-    LOG("Am I a monitor peer? =" << (peer.AmIAMonitor() ? "True" : "False"));
-    peer.ListenToTheTeam();
-    peer.ReceiveTheListOfPeers();
+        << std::to_string(peer->GetNumberOfPeers()));
+    LOG("Am I a monitor peer? =" << (peer->AmIAMonitor() ? "True" : "False"));
+    peer->ListenToTheTeam();
+    peer->ReceiveTheListOfPeers();
     LOG("List of peers received");
 
     // After receiving the list of peers, the peer can check whether is a
     // monitor peer or not (only the first arriving peers are monitors)
 
-    if (peer.AmIAMonitor()) {
+    if (peer->AmIAMonitor()) {
       // TODO: peer = Monitor_DBS(peer)
       LOG("Monitor DBS enabled");
 
@@ -186,29 +197,29 @@ int main(int argc, const char* argv[]) {
       // control this team.
 
       // TODO: Delete this
-      // if (peer.magic_flags & Common.LRS):
+      // if (peer->magic_flags & Common.LRS):
       // peer = Monitor_LRS(peer)
       // _print_("Monitor LRS enabled")
-      // if (peer.magic_flags & Common.NTS):
+      // if (peer->magic_flags & Common.NTS):
       //  peer = Monitor_NTS(peer)
       //  _print_("Monitor NTS enabled")
     } else {
       // peer = Peer_DBS(peer)
       LOG("Peer DBS enabled");
 
-      // The peer is a normal peer. Let's know the sets of rules that control
+      // The peer is a normal peer-> Let's know the sets of rules that control
       // this team.
     }
 
     // TODO: Decide type of peer to work with
   } else {
     // IP multicast mode
-    peer.ListenToTheTeam();
+    peer->ListenToTheTeam();
   }
 
-  peer.DisconnectFromTheSplitter();
-  peer.BufferData();
-  peer.Start();
+  peer->DisconnectFromTheSplitter();
+  peer->BufferData();
+  peer->Start();
 
   LOG("+-----------------------------------------------------+");
   LOG("| Received = Received kbps, including retransmissions |");
@@ -222,16 +233,16 @@ int main(int argc, const char* argv[]) {
   LOG("---------+---------------------+----------------------+-----------------"
       "------------------...");
 
-  int last_chunk_number = peer.GetPlayedChunk();
+  int last_chunk_number = peer->GetPlayedChunk();
   int last_sendto_counter = -1;
-  if (peer.GetSendtoCounter() < 0) {
+  if (peer->GetSendtoCounter() < 0) {
     last_sendto_counter = 0;
   } else {
-    peer.SetSendtoCounter(0);
+    peer->SetSendtoCounter(0);
     last_sendto_counter = 0;
   }
 
-  int last_recvfrom_counter = peer.GetRecvfromCounter();
+  int last_recvfrom_counter = peer->GetRecvfromCounter();
   float kbps_expected_recv = 0.0f;
   float kbps_recvfrom = 0.0f;
   float team_ratio = 0.0f;
@@ -240,23 +251,23 @@ int main(int argc, const char* argv[]) {
   float nice = 0.0f;
   int counter = 0;
 
-  while (peer.IsPlayerAlive()) {
+  while (peer->IsPlayerAlive()) {
     boost::this_thread::sleep(boost::posix_time::seconds(1));
-    kbps_expected_recv = ((peer.GetPlayedChunk() - last_chunk_number) *
-                          peer.GetChunkSize() * 8) /
+    kbps_expected_recv = ((peer->GetPlayedChunk() - last_chunk_number) *
+                          peer->GetChunkSize() * 8) /
                          1000.0f;
-    last_chunk_number = peer.GetPlayedChunk();
-    kbps_recvfrom = ((peer.GetRecvfromCounter() - last_recvfrom_counter) *
-                     peer.GetChunkSize() * 8) /
+    last_chunk_number = peer->GetPlayedChunk();
+    kbps_recvfrom = ((peer->GetRecvfromCounter() - last_recvfrom_counter) *
+                     peer->GetChunkSize() * 8) /
                     1000.0f;
-    last_recvfrom_counter = peer.GetRecvfromCounter();
+    last_recvfrom_counter = peer->GetRecvfromCounter();
     team_ratio =
-        peer.GetPeerList()->size() / (peer.GetPeerList()->size() + 1.0f);
+        peer->GetPeerList()->size() / (peer->GetPeerList()->size() + 1.0f);
     kbps_expected_sent = (int)(kbps_expected_recv * team_ratio);
-    kbps_sendto = ((peer.GetSendtoCounter() - last_sendto_counter) *
-                   peer.GetChunkSize() * 8) /
+    kbps_sendto = ((peer->GetSendtoCounter() - last_sendto_counter) *
+                   peer->GetChunkSize() * 8) /
                   1000.0f;
-    last_sendto_counter = peer.GetSendtoCounter();
+    last_sendto_counter = peer->GetSendtoCounter();
 
     // try:
     if (p2psp::Common::kConsoleMode == false) {
@@ -267,14 +278,14 @@ int main(int argc, const char* argv[]) {
       pass
       GObject.idle_add(speed_adapter.update_widget,str(kbps_recvfrom) << ' kbps'
                        ,str(kbps_sendto) << ' kbps'
-                       ,str(len(peer.peer_list)+1))
+                       ,str(len(peer->peer_list)+1))
       except Exception as msg:
       pass*/
     }
 
     if (kbps_recvfrom > 0 and kbps_expected_recv > 0) {
       nice = 100.0 / (kbps_expected_recv / kbps_recvfrom) *
-             (peer.GetPeerList()->size() + 1.0f);
+             (peer->GetPeerList()->size() + 1.0f);
     } else {
       nice = 0.0f;
       LOG("|");
@@ -297,11 +308,11 @@ int main(int argc, const char* argv[]) {
       // print(repr(int(kbps_expected_sent)).rjust(10), end=' | ')
       // sys.stdout.write(Color.none)
       // print(repr(nice).ljust(1)[:6], end=' ')
-      LOG(peer.GetPeerList()->size());
+      LOG(peer->GetPeerList()->size());
       counter = 0;
       for (std::vector<boost::asio::ip::udp::endpoint>::iterator p =
-               peer.GetPeerList()->begin();
-           p != peer.GetPeerList()->end(); ++p) {
+               peer->GetPeerList()->begin();
+           p != peer->GetPeerList()->end(); ++p) {
         if (counter < 5) {
           LOG("(" << p->address().to_string() << ","
                   << std::to_string(p->port()) << ")");
@@ -323,8 +334,8 @@ int main(int argc, const char* argv[]) {
       }
     }
   }
-  
-  peer.Join();
+
+  peer->Join();
 
   return 0;
 }
