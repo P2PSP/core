@@ -13,8 +13,7 @@ void PeerDBS::Init() {
 }
 
 void PeerDBS::SayHello(const ip::udp::endpoint &node) {
-  std::vector<char> hello(1);
-  hello[0] = 'H';
+  std::string hello("H");
 
   team_socket_.send_to(buffer(hello), node);
 
@@ -24,8 +23,7 @@ void PeerDBS::SayHello(const ip::udp::endpoint &node) {
 }
 
 void PeerDBS::SayGoodbye(const ip::udp::endpoint &node) {
-  std::vector<char> goodbye(1);
-  goodbye[0] = 'G';
+  std::string goodbye("G");
 
   team_socket_.send_to(buffer(goodbye), node);
 
@@ -335,7 +333,7 @@ void PeerDBS::PoliteFarewell() {
   LOG("Goodbye!");
 
   for (int i = 0; i < 3; i++) {
-    ProcessNextMessage();
+    // ProcessNextMessage();
     SayGoodbye(splitter_);
   }
 
@@ -368,7 +366,8 @@ void PeerDBS::BufferData() {
 }
 
 void PeerDBS::Start() {
-  thread_.reset(new boost::thread(boost::bind(&PeerDBS::Run, this)));
+  thread_group_.interrupt_all();
+  thread_group_.add_thread(new boost::thread(&PeerDBS::Run, this));
 }
 
 void PeerDBS::Run() {

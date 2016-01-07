@@ -107,9 +107,6 @@ class PeerIMS {
   // Used to communicate with the rest of the team
   ip::udp::socket team_socket_;
 
-  // Thread to start the peer
-  std::unique_ptr<boost::thread> thread_;
-
   // Thread group to join all threads
   boost::thread_group thread_group_;
 
@@ -164,7 +161,6 @@ class PeerIMS {
    */
   virtual void Run();
   virtual void Start();
-  virtual void Join() { thread_group_.join_all(); };
 
   /**
    *  Getter/setters
