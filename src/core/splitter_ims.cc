@@ -143,6 +143,7 @@ size_t SplitterIMS::ReceiveNextChunk(asio::streambuf &chunk) {
 
   if (ec) {
     LOG("Error: " << ec.message());
+    exit(ec.value());
   }
 
   return bytes_transferred;

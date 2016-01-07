@@ -16,8 +16,7 @@ namespace p2psp {
 using namespace std;
 using namespace boost;
 
-SplitterDBS::SplitterDBS()
-    : SplitterIMS(), losses_(0, &SplitterDBS::GetHash) {
+SplitterDBS::SplitterDBS() : SplitterIMS(), losses_(0, &SplitterDBS::GetHash) {
   // TODO: Check if there is a better way to replace kMcastAddr with 0.0.0.0
   mcast_addr_ = "0.0.0.0";
   max_chunk_loss_ = kMaxChunkLoss;
@@ -157,26 +156,26 @@ void SplitterDBS::IncrementUnsupportivityOfPeer(
   }
 
   if (peerExists) {
-    LOG(peer << " has lost " << to_string(losses_[peer]) << " chunks");
+    LOG("" << peer << " has lost " << to_string(losses_[peer]) << " chunks");
 
     if (losses_[peer] > max_chunk_loss_) {
       // TODO: Check this condition in original code, is it correct?
       if (find(peer_list_.begin(), peer_list_.begin() + monitor_number_,
                peer) == peer_list_.end()) {
-        LOG(peer << " removed");
+        LOG("" << peer << " removed");
         RemovePeer(peer);
       }
     }
   }
 }
 
-void SplitterDBS::ProcessLostChunk(int lost_chunk_number,
-                                   const boost::asio::ip::udp::endpoint &sender) {
+void SplitterDBS::ProcessLostChunk(
+    int lost_chunk_number, const boost::asio::ip::udp::endpoint &sender) {
   asio::ip::udp::endpoint destination = GetLosser(lost_chunk_number);
 
   // TODO: Find a __debug__ flag in c++
-  LOG(sender << " complains about lost chunk " << to_string(lost_chunk_number)
-             << " sent to " << destination);
+  LOG("" << sender << " complains about lost chunk "
+         << to_string(lost_chunk_number) << " sent to " << destination);
 
   if (find(peer_list_.begin() + monitor_number_, peer_list_.end(),
            destination) != peer_list_.end()) {
