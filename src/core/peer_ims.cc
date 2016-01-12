@@ -50,8 +50,7 @@ void PeerIMS::Init(){};
 
 void PeerIMS::WaitForThePlayer() {
   std::string port = std::to_string(player_port_);
-  ip::tcp::resolver resolver(io_service_);
-  ip::tcp::endpoint endpoint = *resolver.resolve({"", port});
+  ip::tcp::endpoint endpoint(ip::tcp::v4(), player_port_);
 
   acceptor_.open(endpoint.protocol());
   acceptor_.set_option(ip::tcp::acceptor::reuse_address(true));

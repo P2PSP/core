@@ -189,7 +189,7 @@ void SplitterIMS::SendChunk(const vector<char> &message,
   size_t bytes_transferred =
       team_socket_.send_to(asio::buffer(message), destination, 0, ec);
 
-  LOG("Bytes transferred: " << to_string(bytes_transferred));
+  //LOG("Bytes transferred: " << to_string(bytes_transferred));
 
   if (ec) {
     LOG("Error sending chunk: " << ec.message());
