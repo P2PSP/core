@@ -210,16 +210,16 @@ int main(int argc, const char *argv[]) {
 
     std::vector<boost::asio::ip::udp::endpoint>::iterator it;
     for (it = peer_list.begin(); it != peer_list.end(); ++it) {
-      _SET_COLOR(_BLUE);
+      // _SET_COLOR(_BLUE);
       LOG("Peer: " << *it);
-      _SET_COLOR(_RED);
+      // _SET_COLOR(_RED);
 
       // TODO: GetLoss and GetMaxChunkLoss are only in DBS and derivated classes
       LOG(splitter_ptr->GetLoss(*it) << "/" << chunks_sendto << " "
                                      << splitter_ptr->GetMaxChunkLoss());
 
       // TODO: If is ACS
-      _SET_COLOR(_YELLOW);
+      // _SET_COLOR(_YELLOW);
       LOG(splitter_ptr->GetPeriod(*it));
       // _SET_COLOR(_PURPLE)
       LOG((splitter_ptr->GetNumberOfSentChunksPerPeer(*it) *

@@ -186,8 +186,8 @@ void SplitterIMS::SendChunk(const vector<char> &message,
 
   // LOG(std::to_string(ntohs(*(unsigned short *)message.data())));
 
-  size_t bytes_transferred =
-      team_socket_.send_to(asio::buffer(message), destination, 0, ec);
+  // size_t bytes_transferred =
+  team_socket_.send_to(asio::buffer(message), destination, 0, ec);
 
   //LOG("Bytes transferred: " << to_string(bytes_transferred));
 

@@ -248,7 +248,7 @@ int main(int argc, const char* argv[]) {
   float team_ratio = 0.0f;
   float kbps_sendto = 0.0f;
   float kbps_expected_sent = 0.0f;
-  float nice = 0.0f;
+  // float nice = 0.0f;
   int counter = 0;
 
   while (peer->IsPlayerAlive()) {
@@ -284,10 +284,9 @@ int main(int argc, const char* argv[]) {
     }
 
     if (kbps_recvfrom > 0 and kbps_expected_recv > 0) {
-      nice = 100.0 / (kbps_expected_recv / kbps_recvfrom) *
-             (peer->GetPeerList()->size() + 1.0f);
+      // nice = 100.0 / (kbps_expected_recv / kbps_recvfrom) * (peer->GetPeerList()->size() + 1.0f);
     } else {
-      nice = 0.0f;
+      // nice = 0.0f;
       LOG("|");
       if (kbps_expected_recv < kbps_recvfrom) {
         LOG(_SET_COLOR(_RED));
