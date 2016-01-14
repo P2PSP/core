@@ -376,7 +376,7 @@ void PeerIMS::KeepTheBufferFull() {
 void PeerIMS::PlayNextChunk() {
   played_chunk_ = FindNextChunk();
   PlayChunk(played_chunk_);
-  chunks_[played_chunk_].received = false;
+  chunks_[played_chunk_ % buffer_size_].received = false;
   received_counter_--;
 }
 
