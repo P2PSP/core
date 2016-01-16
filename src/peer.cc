@@ -1,18 +1,18 @@
 
 // TODO: include all needed libraries
-#include "core/peer_ims.h"
-#include "core/peer_dbs.h"
-#include "core/monitor_dbs.h"
-#include "core/monitor_lrs.h"
-#include "core/malicious_peer.h"
-#include "core/trusted_peer.h"
-#include "core/peer_strpeds.h"
-#include "core/peer_strpeds_malicious.h"
-#include "core/common.h"
-#include "util/trace.h"
+#include <boost/format.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/format.hpp>
+#include "core/common.h"
+#include "core/malicious_peer.h"
+#include "core/monitor_dbs.h"
+#include "core/monitor_lrs.h"
+#include "core/peer_dbs.h"
+#include "core/peer_ims.h"
+#include "core/peer_strpeds.h"
+#include "core/peer_strpeds_malicious.h"
+#include "core/trusted_peer.h"
+#include "util/trace.h"
 
 int main(int argc, const char* argv[]) {
   // TODO: Format default options
@@ -228,9 +228,11 @@ int main(int argc, const char* argv[]) {
   LOG("------------------------------------------------------+");
   LOG("");
   LOG("         |     Received (kbps) |          Sent (kbps) |");
-  LOG("    Time |      Real  Expected |       Real  Expected | Team "
+  LOG(
+      "    Time |      Real  Expected |       Real  Expected | Team "
       "description");
-  LOG("---------+---------------------+----------------------+-----------------"
+  LOG(
+      "---------+---------------------+----------------------+-----------------"
       "------------------...");
 
   int last_chunk_number = peer->GetPlayedChunk();
@@ -284,53 +286,59 @@ int main(int argc, const char* argv[]) {
     }
 
     if (kbps_recvfrom > 0 and kbps_expected_recv > 0) {
-      // nice = 100.0 / (kbps_expected_recv / kbps_recvfrom) * (peer->GetPeerList()->size() + 1.0f);
+      // nice = 100.0 / (kbps_expected_recv / kbps_recvfrom) *
+      // (peer->GetPeerList()->size() + 1.0f);
     } else {
       // nice = 0.0f;
-      LOG("|");
-      if (kbps_expected_recv < kbps_recvfrom) {
-        LOG(_SET_COLOR(_RED));
-      } else if (kbps_expected_recv > kbps_recvfrom) {
-        LOG(_SET_COLOR(_GREEN));
-        // TODO: format
-        // print(repr(int(kbps_expected_recv)).rjust(10), end=Color.none)
-        // print(repr(int(kbps_recvfrom)).rjust(10), end=' | ')
-      }
     }
+
+    LOG("|");
+
+    if (kbps_expected_recv < kbps_recvfrom) {
+      LOG(_SET_COLOR(_RED));
+    } else if (kbps_expected_recv > kbps_recvfrom) {
+      LOG(_SET_COLOR(_GREEN));
+    }
+
+    // TODO: format
+    LOG(kbps_expected_recv);
+    LOG(kbps_recvfrom);
+    //#print(("{:.1f}".format(nice)).rjust(6), end=' | ')
+    //#sys.stdout.write(Color.none)
 
     if (kbps_expected_sent > kbps_sendto) {
       LOG(_SET_COLOR(_RED));
     } else if (kbps_expected_sent < kbps_sendto) {
       LOG(_SET_COLOR(_GREEN));
-      // TODO: format
-      // print(repr(int(kbps_sendto)).rjust(10), end=Color.none)
-      // print(repr(int(kbps_expected_sent)).rjust(10), end=' | ')
-      // sys.stdout.write(Color.none)
-      // print(repr(nice).ljust(1)[:6], end=' ')
-      LOG(peer->GetPeerList()->size());
-      counter = 0;
-      for (std::vector<boost::asio::ip::udp::endpoint>::iterator p =
-               peer->GetPeerList()->begin();
-           p != peer->GetPeerList()->end(); ++p) {
-        if (counter < 5) {
-          LOG("(" << p->address().to_string() << ","
-                  << std::to_string(p->port()) << ")");
-          counter++;
-        } else {
-          break;
-          LOG("");
-
-          // try:
-          if (p2psp::Common::kConsoleMode == false) {
-            /*GObject.idle_add(speed_adapter.update_widget,str(0)+'
-          kbps',str(0)+' kbps',str(0))
-            except  Exception as msg:
-            pass
-            }
-         */
-          }
-        }
+    }
+    // TODO: format
+    LOG(kbps_sendto);
+    LOG(kbps_expected_sent);
+    // sys.stdout.write(Color.none)
+    // print(repr(nice).ljust(1)[:6], end=' ')
+    LOG(peer->GetPeerList()->size());
+    counter = 0;
+    for (std::vector<boost::asio::ip::udp::endpoint>::iterator p =
+             peer->GetPeerList()->begin();
+         p != peer->GetPeerList()->end(); ++p) {
+      if (counter < 5) {
+        LOG("(" << p->address().to_string() << "," << std::to_string(p->port())
+                << ")");
+        counter++;
+      } else {
+        break;
+        LOG("");
       }
+    }
+
+    // try:
+    if (p2psp::Common::kConsoleMode == false) {
+      /*GObject.idle_add(speed_adapter.update_widget,str(0)+'
+       kbps',str(0)+' kbps',str(0))
+       except  Exception as msg:
+       pass
+       }
+       */
     }
   }
 
