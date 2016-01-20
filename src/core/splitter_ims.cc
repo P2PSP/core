@@ -113,8 +113,10 @@ void SplitterIMS::RequestTheVideoFromTheSource() {
   asio::ip::tcp::endpoint endpoint(asio::ip::address::from_string(source_addr_),
                                    source_port_);
 
-  source_socket_.connect(endpoint, ec);
+  
 
+  source_socket_.connect(endpoint, ec);
+  
   if (ec) {
     LOG("Error: " << ec.message());
     LOG(source_socket_.local_endpoint().address().to_string()
@@ -137,13 +139,20 @@ void SplitterIMS::RequestTheVideoFromTheSource() {
 
 size_t SplitterIMS::ReceiveNextChunk(asio::streambuf &chunk) {
   system::error_code ec;
-
+  
   size_t bytes_transferred = asio::read(
       source_socket_, chunk, asio::transfer_exactly(chunk_size_), ec);
+  
+  // LOG("Success! Bytes transferred: " << bytes_transferred);
 
   if (ec) {
-    LOG("Error: " << ec.message());
-    exit(ec.value());
+    LOG("Error receiving next chunk: " << ec.message() << " bytes transferred: " << bytes_transferred);
+    LOG("No data in the server!");
+    source_socket_.close();
+    this_thread::sleep(posix_time::seconds(1));
+    source_socket_.connect(asio::ip::tcp::endpoint(asio::ip::address::from_string(source_addr_),
+                                                            source_port_), ec);
+    source_socket_.send(asio::buffer(GET_message_));
   }
 
   return bytes_transferred;
@@ -188,8 +197,10 @@ void SplitterIMS::SendChunk(const vector<char> &message,
 
   // size_t bytes_transferred =
   team_socket_.send_to(asio::buffer(message), destination, 0, ec);
+  
+  LOG(chunk_number_ << " -> " << destination);
 
-  //LOG("Bytes transferred: " << to_string(bytes_transferred));
+  // LOG("Bytes transferred: " << to_string(bytes_transferred));
 
   if (ec) {
     LOG("Error sending chunk: " << ec.message());
