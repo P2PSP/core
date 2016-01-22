@@ -1,17 +1,25 @@
+//
+//  peer.cc
+//  P2PSP
+//
+//  This code is distributed under the GNU General Public License (see
+//  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+//  Copyright (C) 2016, the P2PSP team.
+//  http://www.p2psp.org
+//
 
-// TODO: include all needed libraries
 #include <boost/format.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include "core/common.h"
-#include "core/malicious_peer.h"
 #include "core/monitor_dbs.h"
 #include "core/monitor_lrs.h"
 #include "core/peer_dbs.h"
 #include "core/peer_ims.h"
-#include "core/peer_strpeds.h"
-#include "core/peer_strpeds_malicious.h"
-#include "core/trusted_peer.h"
+//#include "core/peer_strpeds.h"
+//#include "core/peer_strpeds_malicious.h"
+//#include "core/trusted_peer.h"
+//#include "core/malicious_peer.h"
 #include "util/trace.h"
 
 int main(int argc, const char* argv[]) {
@@ -172,9 +180,6 @@ int main(int argc, const char* argv[]) {
 
   // A multicast address is always received, even for DBS peers.
   if (peer->GetMcastAddr() == "0.0.0.0") {
-    // TODO: IP multicast mode
-    // TODO: DBS
-
     peer->ReceiveMyEndpoint();
     peer->ReceiveMagicFlags();
     // LOG("Magic flags =" << std::bitset<8>(peer->magic_flags));
@@ -190,28 +195,17 @@ int main(int argc, const char* argv[]) {
     // monitor peer or not (only the first arriving peers are monitors)
 
     if (peer->AmIAMonitor()) {
-      // TODO: peer = Monitor_DBS(peer)
       LOG("Monitor DBS enabled");
 
       // The peer is a monitor. Now it's time to know the sets of rules that
       // control this team.
-
-      // TODO: Delete this
-      // if (peer->magic_flags & Common.LRS):
-      // peer = Monitor_LRS(peer)
-      // _print_("Monitor LRS enabled")
-      // if (peer->magic_flags & Common.NTS):
-      //  peer = Monitor_NTS(peer)
-      //  _print_("Monitor NTS enabled")
     } else {
-      // peer = Peer_DBS(peer)
       LOG("Peer DBS enabled");
 
       // The peer is a normal peer-> Let's know the sets of rules that control
       // this team.
     }
 
-    // TODO: Decide type of peer to work with
   } else {
     // IP multicast mode
     peer->ListenToTheTeam();

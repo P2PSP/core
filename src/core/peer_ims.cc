@@ -1,3 +1,14 @@
+//
+//  peer_ims.cc
+//  P2PSP
+//
+//  This code is distributed under the GNU General Public License (see
+//  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+//  Copyright (C) 2016, the P2PSP team.
+//  http://www.p2psp.org
+//
+//  IMS: Ip Multicasting Set of rules
+//
 
 #include "peer_ims.h"
 
@@ -198,7 +209,6 @@ void PeerIMS::ListenToTheTeam() {
 
   team_socket_.set_option(ip::multicast::join_group(mcast_addr_));
 
-  // TODO: handle timeout
   LOG("Listening to the mcast_channel = ("
       << mcast_addr_.to_string() << "," << std::to_string(mcast_port_) << ")");
 }
@@ -280,7 +290,8 @@ void PeerIMS::BufferData() {
 
   LOG("");
   LOG("latency = " << std::to_string((clock() - start_time) /
-                                     (float)CLOCKS_PER_SEC) << " seconds");
+                                     (float)CLOCKS_PER_SEC)
+                   << " seconds");
   LOG("buffering done.");
   TraceSystem::Flush();
 }
