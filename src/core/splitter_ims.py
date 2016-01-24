@@ -40,15 +40,14 @@ class Splitter_IMS(threading.Thread):
     # {{{ Class "constants"
 
     BUFFER_SIZE = 256              # Buffer size in chunks
-    CHANNEL = "BBB-134.ogv"        # Default channel
+    CHANNEL = "test.ogg"           # Default channel
     #CHANNEL = ""
     CHUNK_SIZE = 1024              # Chunk size in bytes (larger than MTU)
     HEADER_SIZE = 10               # Chunks/header
     #SPLITTER_ADDR = "127.0.0.1"
-    PORT = 4552                    # Listening port
-    #SOURCE_ADDR = "127.0.0.1"
-    SOURCE_ADDR = "150.214.150.68" # Streaming server's host
-    SOURCE_PORT = 4551             # Streaming server's listening port
+    PORT = 8001                    # Listening port
+    SOURCE_ADDR = "127.0.0.1"      # Streaming server's host
+    SOURCE_PORT = 8000             # Streaming server's listening port
     MCAST_ADDR = "224.0.0.1"       # All Systems on this subnet
     #MCAST_ADDR = "224.0.0.2"      # Default IP multicast channel
     TTL = 1                        # Time To Live of multicast packets

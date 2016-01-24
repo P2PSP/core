@@ -69,6 +69,8 @@ class Peer_NTS(Peer_DBS):
         # {{{ Parameter: message_data = (message, destination)
         # Send a general message continuously until acknowledge is received
 
+        if message_data[0].__class__ == str:
+            raise RuntimeError("Message must be of type bytes, not str.")
         with self.hello_messages_lock:
             if message_data not in self.hello_messages:
                 self.hello_messages.append(message_data)
@@ -284,7 +286,7 @@ class Peer_NTS(Peer_DBS):
                 self.send_message((self.peer_id.encode() + b'N', self.splitter))
                 # Say hello to monitors again, to keep the NAT entry alive
                 for peer in self.peer_list[:self.number_of_monitors]:
-                    self.send_message((self.peer_id + 'N', peer))
+                    self.send_message((self.peer_id.encode() + b'N', peer))
                 # Receive all peer endpoints and send hello messages
                 self.receive_the_list_of_peers_2()
 
@@ -338,7 +340,7 @@ class Peer_NTS(Peer_DBS):
         num_combinations = self.count_combinations(factors)
         count_factor = Common.MAX_PREDICTED_PORTS/float(num_combinations)
 
-        port_diffs = functools.sorted(set(reduce(list.__add__, (list(
+        port_diffs = sorted(set(functools.reduce(list.__add__, (list(
             # For each previous peer and skip, the source port is incremented
             port_step * (peer_number + skips)
             # For each assumed port_step, "port_diff/port_step" different skips
@@ -461,8 +463,8 @@ class Peer_NTS(Peer_DBS):
             # receive_the_list_of_peers() before a Peer_NTS instance is created
             pass
         elif sender != self.splitter and sender not in self.peer_list:
-            _p_("Ignoring message \"%s\" of length %d from unknown %s" \
-                  % (message, len(message), sender))
+            _p_("Ignoring message of length %d from unknown %s" \
+                  % (len(message), sender))
         elif len(self.initial_peer_list) == 0:
             # Start receiving chunks when fully incorporated
             return Peer_DBS.process_message(self, message, sender)

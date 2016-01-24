@@ -292,7 +292,7 @@ class Splitter_NTS(Splitter_DBS):
                 peer_id = message.decode()
 
                 peer = None
-                for peer_data in self.ids.iteritems():
+                for peer_data in self.ids.items():
                     if peer_id == peer_data[1]:
                         peer = peer_data[0]
                         break
