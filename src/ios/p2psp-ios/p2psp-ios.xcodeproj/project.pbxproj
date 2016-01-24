@@ -16,7 +16,6 @@
 		A97D88B01C5557D600428FC7 /* p2psp_iosTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A97D88AF1C5557D600428FC7 /* p2psp_iosTests.m */; };
 		A97D88BB1C5557D600428FC7 /* p2psp_iosUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = A97D88BA1C5557D600428FC7 /* p2psp_iosUITests.m */; };
 		A97D88C91C555A4600428FC7 /* MobileVLCKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88C81C555A4600428FC7 /* MobileVLCKit.framework */; };
-		A97D88CB1C555A8000428FC7 /* libboost.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88CA1C555A8000428FC7 /* libboost.a */; };
 		A97D88D51C555CD600428FC7 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88CC1C555CD600428FC7 /* AVFoundation.framework */; };
 		A97D88D61C555CD600428FC7 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88CD1C555CD600428FC7 /* Security.framework */; };
 		A97D88D71C555CD600428FC7 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88CE1C555CD600428FC7 /* CoreText.framework */; };
@@ -26,6 +25,7 @@
 		A97D88DB1C555CD600428FC7 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88D21C555CD600428FC7 /* CoreMedia.framework */; };
 		A97D88DC1C555CD600428FC7 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88D31C555CD600428FC7 /* AudioToolbox.framework */; };
 		A97D88DD1C555CD600428FC7 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88D41C555CD600428FC7 /* CoreAudio.framework */; };
+		A9FE90191C55668F00C7C91C /* libboost.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9FE90181C55668F00C7C91C /* libboost.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,7 +63,6 @@
 		A97D88BA1C5557D600428FC7 /* p2psp_iosUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = p2psp_iosUITests.m; sourceTree = "<group>"; };
 		A97D88BC1C5557D600428FC7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A97D88C81C555A4600428FC7 /* MobileVLCKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileVLCKit.framework; path = ../lib/MobileVLCKit.framework; sourceTree = "<group>"; };
-		A97D88CA1C555A8000428FC7 /* libboost.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost.a; path = ../../../../addons/ofxiOSBoost/libs/boost/ios/libboost.a; sourceTree = "<group>"; };
 		A97D88CC1C555CD600428FC7 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A97D88CD1C555CD600428FC7 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		A97D88CE1C555CD600428FC7 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
@@ -73,6 +72,7 @@
 		A97D88D21C555CD600428FC7 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		A97D88D31C555CD600428FC7 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A97D88D41C555CD600428FC7 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		A9FE90181C55668F00C7C91C /* libboost.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost.a; path = ../lib/boost/ios/libboost.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,9 +80,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A9FE90191C55668F00C7C91C /* libboost.a in Frameworks */,
 				A97D88D81C555CD600428FC7 /* CoreGraphics.framework in Frameworks */,
 				A97D88D91C555CD600428FC7 /* VideoToolbox.framework in Frameworks */,
-				A97D88CB1C555A8000428FC7 /* libboost.a in Frameworks */,
 				A97D88DB1C555CD600428FC7 /* CoreMedia.framework in Frameworks */,
 				A97D88C91C555A4600428FC7 /* MobileVLCKit.framework in Frameworks */,
 				A97D88D71C555CD600428FC7 /* CoreText.framework in Frameworks */,
@@ -114,7 +114,7 @@
 		A97D88891C5557D500428FC7 = {
 			isa = PBXGroup;
 			children = (
-				A97D88CA1C555A8000428FC7 /* libboost.a */,
+				A9FE90181C55668F00C7C91C /* libboost.a */,
 				A97D88CC1C555CD600428FC7 /* AVFoundation.framework */,
 				A97D88CD1C555CD600428FC7 /* Security.framework */,
 				A97D88CE1C555CD600428FC7 /* CoreText.framework */,
@@ -552,6 +552,7 @@
 				A97D88C11C5557D600428FC7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		A97D88C21C5557D600428FC7 /* Build configuration list for PBXNativeTarget "p2psp-iosTests" */ = {
 			isa = XCConfigurationList;
@@ -560,6 +561,7 @@
 				A97D88C41C5557D600428FC7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		A97D88C51C5557D600428FC7 /* Build configuration list for PBXNativeTarget "p2psp-iosUITests" */ = {
 			isa = XCConfigurationList;
@@ -568,6 +570,7 @@
 				A97D88C71C5557D600428FC7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
