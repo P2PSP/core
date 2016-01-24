@@ -35,6 +35,8 @@ find_package(Boost COMPONENTS
   ${BOOST_REQUIRED_COMPONENTS}
 REQUIRED)
 
+ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
+
 find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
 

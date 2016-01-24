@@ -11,8 +11,6 @@
 #ifndef P2PSP_UTIL_TRACE_H
 #define P2PSP_UTIL_TRACE_H
 
-#define BOOST_LOG_DYN_LINK
-
 #include <memory>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
