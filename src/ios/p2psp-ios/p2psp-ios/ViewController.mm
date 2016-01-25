@@ -7,8 +7,12 @@
 //
 
 #import "ViewController.h"
+#import "../../../core/peer_core.h"
 
 @interface ViewController ()
+@property (weak, nonatomic) IBOutlet UITextField *tvSplitterAddr;
+@property (weak, nonatomic) IBOutlet UITextField *tfSpliiterPort;
+@property (weak, nonatomic) IBOutlet UIButton *bPlay;
 
 @end
 
@@ -22,6 +26,8 @@
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];
   // Dispose of any resources that can be recreated.
+}
+- (IBAction)onPlay:(id)sender {
 }
 
 @end
