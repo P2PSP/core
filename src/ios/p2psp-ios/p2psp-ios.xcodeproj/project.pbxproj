@@ -471,6 +471,7 @@
 					"$(PROJECT_DIR)/../lib/boost/ios",
 					"$(PROJECT_DIR)/../lib/openssl/lib",
 				);
+				OTHER_LDFLAGS = "-liconv";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.luxunda.p2psp-ios";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -492,6 +493,7 @@
 					"$(PROJECT_DIR)/../lib/boost/ios",
 					"$(PROJECT_DIR)/../lib/openssl/lib",
 				);
+				OTHER_LDFLAGS = "-liconv";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.luxunda.p2psp-ios";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

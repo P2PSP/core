@@ -46,18 +46,23 @@
                                     <action selector="onPlay:" destination="BYZ-38-t0r" eventType="touchDown" id="NNq-HV-KHX"/>
                                 </connections>
                             </button>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gAm-od-oPW">
+                                <rect key="frame" x="78" y="236" width="240" height="128"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
                     <connections>
                         <outlet property="bPlay" destination="gbl-o0-O1l" id="hSa-Ap-4yG"/>
+                        <outlet property="subView" destination="gAm-od-oPW" id="csK-Eg-EFL"/>
                         <outlet property="tfSpliiterPort" destination="cao-l7-ob1" id="wVE-NQ-6so"/>
                         <outlet property="tvSplitterAddr" destination="YYQ-4l-l09" id="HtG-9l-WUa"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="245" y="337"/>
+            <point key="canvasLocation" x="209" y="341"/>
         </scene>
     </scenes>
 </document>

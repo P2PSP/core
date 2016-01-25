@@ -8,19 +8,27 @@
 
 #import "ViewController.h"
 #import "../../../core/peer_core.h"
+#import <MobileVLCKit/VLCMediaPlayer.h>
 
-@interface ViewController ()
+@interface ViewController () <VLCMediaPlayerDelegate>
 @property (weak, nonatomic) IBOutlet UITextField *tvSplitterAddr;
 @property (weak, nonatomic) IBOutlet UITextField *tfSpliiterPort;
 @property (weak, nonatomic) IBOutlet UIButton *bPlay;
+@property (weak, nonatomic) IBOutlet UIView *subView;
 
 @end
 
 @implementation ViewController
 
+VLCMediaPlayer *mediaPlayer;
+
 - (void)viewDidLoad {
   [super viewDidLoad];
   // Do any additional setup after loading the view, typically from a nib.
+  
+  mediaPlayer = [[VLCMediaPlayer alloc] init];
+  mediaPlayer.delegate = self;
+  mediaPlayer.drawable = self.subView;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -28,6 +36,12 @@
   // Dispose of any resources that can be recreated.
 }
 - (IBAction)onPlay:(id)sender {
+  NSString *url = self.tvSplitterAddr.text;
+  NSString *port = self.tfSpliiterPort.text;
+  
+  mediaPlayer.media = [VLCMedia mediaWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@:%@", url, port]]];
+  
+  [mediaPlayer play];
 }
 
 @end
