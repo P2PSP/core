@@ -26,6 +26,12 @@
 		A97D88DC1C555CD600428FC7 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88D31C555CD600428FC7 /* AudioToolbox.framework */; };
 		A97D88DD1C555CD600428FC7 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88D41C555CD600428FC7 /* CoreAudio.framework */; };
 		A9FE90191C55668F00C7C91C /* libboost.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9FE90181C55668F00C7C91C /* libboost.a */; };
+		A9FE901B1C56A32C00C7C91C /* peer_core.cc in Sources */ = {isa = PBXBuildFile; fileRef = A9FE901A1C56A32C00C7C91C /* peer_core.cc */; };
+		A9FE90201C56A38900C7C91C /* monitor_dbs.cc in Sources */ = {isa = PBXBuildFile; fileRef = A9FE901C1C56A38900C7C91C /* monitor_dbs.cc */; };
+		A9FE90211C56A38900C7C91C /* monitor_lrs.cc in Sources */ = {isa = PBXBuildFile; fileRef = A9FE901D1C56A38900C7C91C /* monitor_lrs.cc */; };
+		A9FE90221C56A38900C7C91C /* peer_dbs.cc in Sources */ = {isa = PBXBuildFile; fileRef = A9FE901E1C56A38900C7C91C /* peer_dbs.cc */; };
+		A9FE90231C56A38900C7C91C /* peer_ims.cc in Sources */ = {isa = PBXBuildFile; fileRef = A9FE901F1C56A38900C7C91C /* peer_ims.cc */; };
+		A9FE90251C56A39E00C7C91C /* trace.cc in Sources */ = {isa = PBXBuildFile; fileRef = A9FE90241C56A39E00C7C91C /* trace.cc */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,6 +79,12 @@
 		A97D88D31C555CD600428FC7 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A97D88D41C555CD600428FC7 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		A9FE90181C55668F00C7C91C /* libboost.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost.a; path = ../lib/boost/ios/libboost.a; sourceTree = "<group>"; };
+		A9FE901A1C56A32C00C7C91C /* peer_core.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = peer_core.cc; path = ../../core/peer_core.cc; sourceTree = "<group>"; };
+		A9FE901C1C56A38900C7C91C /* monitor_dbs.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = monitor_dbs.cc; path = ../../core/monitor_dbs.cc; sourceTree = "<group>"; };
+		A9FE901D1C56A38900C7C91C /* monitor_lrs.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = monitor_lrs.cc; path = ../../core/monitor_lrs.cc; sourceTree = "<group>"; };
+		A9FE901E1C56A38900C7C91C /* peer_dbs.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = peer_dbs.cc; path = ../../core/peer_dbs.cc; sourceTree = "<group>"; };
+		A9FE901F1C56A38900C7C91C /* peer_ims.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = peer_ims.cc; path = ../../core/peer_ims.cc; sourceTree = "<group>"; };
+		A9FE90241C56A39E00C7C91C /* trace.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = trace.cc; path = ../../util/trace.cc; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,7 +126,6 @@
 		A97D88891C5557D500428FC7 = {
 			isa = PBXGroup;
 			children = (
-				A9FE90181C55668F00C7C91C /* libboost.a */,
 				A97D88CC1C555CD600428FC7 /* AVFoundation.framework */,
 				A97D88CD1C555CD600428FC7 /* Security.framework */,
 				A97D88CE1C555CD600428FC7 /* CoreText.framework */,
@@ -153,6 +164,9 @@
 				A97D88A11C5557D500428FC7 /* Assets.xcassets */,
 				A97D88A31C5557D500428FC7 /* LaunchScreen.storyboard */,
 				A97D88A61C5557D500428FC7 /* Info.plist */,
+				A9FE90271C56A3C300C7C91C /* util */,
+				A9FE90281C56A3CD00C7C91C /* lib */,
+				A9FE90261C56A3A900C7C91C /* core */,
 				A97D88951C5557D500428FC7 /* Supporting Files */,
 			);
 			path = "p2psp-ios";
@@ -182,6 +196,37 @@
 				A97D88BC1C5557D600428FC7 /* Info.plist */,
 			);
 			path = "p2psp-iosUITests";
+			sourceTree = "<group>";
+		};
+		A9FE90261C56A3A900C7C91C /* core */ = {
+			isa = PBXGroup;
+			children = (
+				A9FE901C1C56A38900C7C91C /* monitor_dbs.cc */,
+				A9FE901D1C56A38900C7C91C /* monitor_lrs.cc */,
+				A9FE901E1C56A38900C7C91C /* peer_dbs.cc */,
+				A9FE901F1C56A38900C7C91C /* peer_ims.cc */,
+				A9FE901A1C56A32C00C7C91C /* peer_core.cc */,
+			);
+			name = core;
+			path = ..;
+			sourceTree = "<group>";
+		};
+		A9FE90271C56A3C300C7C91C /* util */ = {
+			isa = PBXGroup;
+			children = (
+				A9FE90241C56A39E00C7C91C /* trace.cc */,
+			);
+			name = util;
+			path = ..;
+			sourceTree = "<group>";
+		};
+		A9FE90281C56A3CD00C7C91C /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				A9FE90181C55668F00C7C91C /* libboost.a */,
+			);
+			name = lib;
+			path = ..;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -314,9 +359,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A9FE901B1C56A32C00C7C91C /* peer_core.cc in Sources */,
 				A97D889D1C5557D500428FC7 /* ViewController.mm in Sources */,
+				A9FE90251C56A39E00C7C91C /* trace.cc in Sources */,
 				A97D889A1C5557D500428FC7 /* AppDelegate.m in Sources */,
+				A9FE90231C56A38900C7C91C /* peer_ims.cc in Sources */,
+				A9FE90201C56A38900C7C91C /* monitor_dbs.cc in Sources */,
+				A9FE90211C56A38900C7C91C /* monitor_lrs.cc in Sources */,
 				A97D88971C5557D500428FC7 /* main.mm in Sources */,
+				A9FE90221C56A38900C7C91C /* peer_dbs.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
