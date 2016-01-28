@@ -40,6 +40,11 @@ const NSString *splitterPort;
   // Dispose of any resources that can be recreated.
 }
 
+/**
+ *  Callback function that listens to bPlay button
+ *
+ *  @param sender The pressed button
+ */
 - (IBAction)onPlay:(id)sender {
   if (self.playing) {
     return;
@@ -49,6 +54,7 @@ const NSString *splitterPort;
   splitterAddr = [self.tfSplitterAddr text];
   splitterPort = [self.tfSplitterPort text];
 
+  // Runs into a different asyncrhonous thread to avoid UI blocking.
   dispatch_async(
       dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         const char *kSplitterAddr = splitterAddr.UTF8String;
@@ -59,17 +65,25 @@ const NSString *splitterPort;
         p2psp::run(5, argv);
       });
 
+  // Launch the viewer
   mediaPlayer.media =
       [VLCMedia mediaWithURL:[NSURL URLWithString:@"http://localhost:9999"]];
 
   [mediaPlayer play];
 }
+
+/**
+ *  Callback function that listens to bStop button
+ *
+ *  @param sender The pressed button
+ */
 - (IBAction)onStop:(id)sender {
   if (!self.playing) {
     return;
   }
   self.playing = false;
 
+  // The peer_core thread finishes when the viewer disconnects from it
   [mediaPlayer stop];
 }
 
