@@ -70,6 +70,10 @@ const NSString *splitterPort;
       [VLCMedia mediaWithURL:[NSURL URLWithString:@"http://localhost:9999"]];
 
   [mediaPlayer play];
+
+  // Release focus from textfields
+  [self.tfSplitterAddr resignFirstResponder];
+  [self.tfSplitterPort resignFirstResponder];
 }
 
 /**
@@ -85,6 +89,23 @@ const NSString *splitterPort;
 
   // The peer_core thread finishes when the viewer disconnects from it
   [mediaPlayer stop];
+
+  // Release focus from textfields
+  [self.tfSplitterAddr resignFirstResponder];
+  [self.tfSplitterPort resignFirstResponder];
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+  UITouch *touch = [[event allTouches] anyObject];
+  if ([self.tfSplitterAddr isFirstResponder] &&
+      [touch view] != self.tfSplitterAddr) {
+    [self.tfSplitterAddr resignFirstResponder];
+  } else if ([self.tfSplitterPort isFirstResponder] &&
+             [touch view] != self.tfSplitterPort) {
+    [self.tfSplitterPort resignFirstResponder];
+  }
+
+  [super touchesBegan:touches withEvent:event];
 }
 
 @end
