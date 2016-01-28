@@ -14,7 +14,9 @@
 @property(weak, nonatomic) IBOutlet UITextField *tfSplitterAddr;
 @property(weak, nonatomic) IBOutlet UITextField *tfSplitterPort;
 @property(weak, nonatomic) IBOutlet UIButton *bPlay;
+@property(weak, nonatomic) IBOutlet UIButton *bStop;
 @property(weak, nonatomic) IBOutlet UIView *subView;
+@property(nonatomic) BOOL playing;
 
 @end
 
@@ -39,6 +41,11 @@ const NSString *splitterPort;
 }
 
 - (IBAction)onPlay:(id)sender {
+  if (self.playing) {
+    return;
+  }
+  self.playing = true;
+
   splitterAddr = [self.tfSplitterAddr text];
   splitterPort = [self.tfSplitterPort text];
 
@@ -56,6 +63,14 @@ const NSString *splitterPort;
       [VLCMedia mediaWithURL:[NSURL URLWithString:@"http://localhost:9999"]];
 
   [mediaPlayer play];
+}
+- (IBAction)onStop:(id)sender {
+  if (!self.playing) {
+    return;
+  }
+  self.playing = false;
+
+  [mediaPlayer stop];
 }
 
 @end

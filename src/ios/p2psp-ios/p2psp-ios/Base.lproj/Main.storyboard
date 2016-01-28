@@ -50,11 +50,19 @@
                                 <rect key="frame" x="78" y="236" width="240" height="128"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GNy-V5-KOO" userLabel="BStop">
+                                <rect key="frame" x="40" y="169" width="250" height="30"/>
+                                <state key="normal" title="Stop"/>
+                                <connections>
+                                    <action selector="onStop:" destination="BYZ-38-t0r" eventType="touchDown" id="LNn-7R-yue"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
                     <connections>
                         <outlet property="bPlay" destination="gbl-o0-O1l" id="hSa-Ap-4yG"/>
+                        <outlet property="bStop" destination="GNy-V5-KOO" id="jvO-ll-rms"/>
                         <outlet property="subView" destination="gAm-od-oPW" id="csK-Eg-EFL"/>
                         <outlet property="tfSplitterAddr" destination="YYQ-4l-l09" id="NHB-i6-ik0"/>
                         <outlet property="tfSplitterPort" destination="cao-l7-ob1" id="FES-fz-sYf"/>
