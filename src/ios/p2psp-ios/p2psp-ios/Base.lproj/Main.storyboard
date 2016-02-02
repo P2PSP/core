@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9531" systemVersion="15C50" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9531" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -35,29 +36,25 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="4552" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="cao-l7-ob1">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="4552" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="cao-l7-ob1">
                                 <rect key="frame" x="292" y="72" width="128" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gbl-o0-O1l">
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gbl-o0-O1l">
                                 <rect key="frame" x="175" y="125" width="250" height="30"/>
                                 <state key="normal" title="Play"/>
                                 <connections>
                                     <action selector="onPlay:" destination="BYZ-38-t0r" eventType="touchDown" id="NNq-HV-KHX"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GNy-V5-KOO" userLabel="BStop">
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GNy-V5-KOO" userLabel="BStop">
                                 <rect key="frame" x="175" y="169" width="250" height="30"/>
                                 <state key="normal" title="Stop"/>
                                 <connections>
                                     <action selector="onStop:" destination="BYZ-38-t0r" eventType="touchDown" id="LNn-7R-yue"/>
                                 </connections>
                             </button>
-                            <view contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gAm-od-oPW">
-                                <rect key="frame" x="180" y="285" width="240" height="128"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                            </view>
                             <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5Zg-pm-xLE">
                                 <rect key="frame" x="175" y="207" width="250" height="30"/>
                                 <state key="normal" title="Fullscreen"/>
@@ -65,6 +62,10 @@
                                     <action selector="onFullscreen:" destination="BYZ-38-t0r" eventType="touchDown" id="N0P-6n-9lm"/>
                                 </connections>
                             </button>
+                            <view contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gAm-od-oPW">
+                                <rect key="frame" x="180" y="285" width="240" height="128"/>
+                                <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
@@ -72,13 +73,18 @@
                             <constraint firstAttribute="trailingMargin" secondItem="cao-l7-ob1" secondAttribute="trailing" id="AmR-ky-Uqp"/>
                             <constraint firstItem="1b3-U3-kks" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="IUN-Rz-r1B"/>
                             <constraint firstItem="mTv-AD-3VN" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="JBj-YJ-SBP"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="gAm-od-oPW" secondAttribute="bottomMargin" id="KMm-61-XLK"/>
                             <constraint firstItem="5Zg-pm-xLE" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="MpP-xw-kGV"/>
                             <constraint firstItem="gbl-o0-O1l" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="Qrl-8n-l8l"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="gAm-od-oPW" secondAttribute="trailing" id="SkP-hR-GvT"/>
-                            <constraint firstItem="gAm-od-oPW" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="UCT-so-rGH"/>
+                            <constraint firstAttribute="trailing" secondItem="gAm-od-oPW" secondAttribute="trailing" id="SkP-hR-GvT"/>
+                            <constraint firstItem="gAm-od-oPW" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="UCT-so-rGH"/>
                             <constraint firstItem="GNy-V5-KOO" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="X42-fG-7Yr"/>
+                            <constraint firstItem="gbl-o0-O1l" firstAttribute="top" secondItem="cao-l7-ob1" secondAttribute="bottom" constant="23" id="YDF-eD-ckG"/>
                             <constraint firstAttribute="trailingMargin" secondItem="YYQ-4l-l09" secondAttribute="trailing" id="YMI-mQ-jmx"/>
+                            <constraint firstItem="GNy-V5-KOO" firstAttribute="top" secondItem="gbl-o0-O1l" secondAttribute="bottom" constant="14" id="hq4-on-2eV"/>
                             <constraint firstAttribute="trailingMargin" secondItem="gbl-o0-O1l" secondAttribute="trailing" id="lLw-rb-ud7"/>
+                            <constraint firstItem="gbl-o0-O1l" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="125" id="o9i-Mj-Ha9"/>
+                            <constraint firstItem="gAm-od-oPW" firstAttribute="top" secondItem="5Zg-pm-xLE" secondAttribute="bottom" id="vzx-JW-Lg1"/>
                             <constraint firstAttribute="trailingMargin" secondItem="GNy-V5-KOO" secondAttribute="trailing" id="xAK-fN-Iep"/>
                         </constraints>
                     </view>
@@ -96,4 +102,5 @@
             <point key="canvasLocation" x="209" y="341"/>
         </scene>
     </scenes>
+    <color key="tintColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
 </document>
