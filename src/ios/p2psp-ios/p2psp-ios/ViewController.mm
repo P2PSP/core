@@ -17,6 +17,7 @@
 @property(weak, nonatomic) IBOutlet UIButton *bStop;
 @property(weak, nonatomic) IBOutlet UIView *subView;
 @property(nonatomic) BOOL playing;
+@property(weak, nonatomic) IBOutlet UIButton *bFullscreen;
 
 @end
 
@@ -107,6 +108,11 @@ NSString *const kPlayerEndpoint = @"http://localhost:9999";
   }
 
   [super touchesBegan:touches withEvent:event];
+}
+
+- (IBAction)onFullscreen:(id)sender {
+  self.subView.frame = [UIApplication sharedApplication].keyWindow.bounds;
+  // self.subView.view.frame = window.bounds;
 }
 
 @end
