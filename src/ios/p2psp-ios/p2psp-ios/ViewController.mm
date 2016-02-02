@@ -25,6 +25,7 @@
 VLCMediaPlayer *mediaPlayer;
 const NSString *splitterAddr;
 const NSString *splitterPort;
+NSString *const kPlayerEndpoint = @"http://localhost:9999";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
@@ -67,7 +68,7 @@ const NSString *splitterPort;
 
   // Launch the viewer
   mediaPlayer.media =
-      [VLCMedia mediaWithURL:[NSURL URLWithString:@"http://localhost:9999"]];
+      [VLCMedia mediaWithURL:[NSURL URLWithString:kPlayerEndpoint]];
 
   [mediaPlayer play];
 
