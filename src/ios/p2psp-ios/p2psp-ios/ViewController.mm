@@ -115,4 +115,9 @@ NSString *const kPlayerEndpoint = @"http://localhost:9999";
   // self.subView.view.frame = window.bounds;
 }
 
+- (UIStatusBarStyle)preferredStatusBarStyle
+{
+  return UIStatusBarStyleLightContent;
+}
+
 @end
