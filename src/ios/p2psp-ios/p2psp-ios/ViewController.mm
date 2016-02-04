@@ -18,6 +18,8 @@
 @property(weak, nonatomic) IBOutlet UIView *subView;
 @property(nonatomic) BOOL playing;
 @property(weak, nonatomic) IBOutlet UIButton *bFullscreen;
+@property(weak, nonatomic) IBOutlet UIView *controlsSubView;
+@property(weak, nonatomic) IBOutlet UIView *videoSubView;
 
 @end
 
@@ -32,9 +34,11 @@ NSString *const kPlayerEndpoint = @"http://localhost:9999";
   [super viewDidLoad];
   // Do any additional setup after loading the view, typically from a nib.
 
+  self.controlsSubView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+
   mediaPlayer = [[VLCMediaPlayer alloc] init];
   mediaPlayer.delegate = self;
-  mediaPlayer.drawable = self.subView;
+  mediaPlayer.drawable = self.videoSubView;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -111,12 +115,23 @@ NSString *const kPlayerEndpoint = @"http://localhost:9999";
 }
 
 - (IBAction)onFullscreen:(id)sender {
-  self.subView.frame = [UIApplication sharedApplication].keyWindow.bounds;
-  // self.subView.view.frame = window.bounds;
+  UIDeviceOrientation currentOrientation =
+      [[UIDevice currentDevice] orientation];
+
+  // Portrait as default
+  NSNumber *orientation =
+      [NSNumber numberWithInt:UIInterfaceOrientationPortrait];
+  ;
+
+  // If portrait, change to landscape
+  if (UIDeviceOrientationIsPortrait(currentOrientation)) {
+    orientation = [NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft];
+  }
+
+  [[UIDevice currentDevice] setValue:orientation forKey:@"orientation"];
 }
 
-- (UIStatusBarStyle)preferredStatusBarStyle
-{
+- (UIStatusBarStyle)preferredStatusBarStyle {
   return UIStatusBarStyleLightContent;
 }
 
