@@ -99,6 +99,13 @@ NSString *const kPlayerEndpoint = @"http://localhost:9999";
   // Release focus from textfields
   [self.tfSplitterAddr resignFirstResponder];
   [self.tfSplitterPort resignFirstResponder];
+
+  // If orientation is lanscape when the video stops, set orientation to
+  // portrait
+  if (UIDeviceOrientationIsLandscape([[UIDevice currentDevice] orientation])) {
+    [self
+        setOrientation:[NSNumber numberWithInt:UIInterfaceOrientationPortrait]];
+  }
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -121,18 +128,22 @@ NSString *const kPlayerEndpoint = @"http://localhost:9999";
   // Portrait as default
   NSNumber *orientation =
       [NSNumber numberWithInt:UIInterfaceOrientationPortrait];
-  ;
 
   // If portrait, change to landscape
   if (UIDeviceOrientationIsPortrait(currentOrientation)) {
     orientation = [NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft];
   }
 
-  [[UIDevice currentDevice] setValue:orientation forKey:@"orientation"];
+  [self setOrientation:orientation];
+  // [[UIDevice currentDevice] setValue:orientation forKey:@"orientation"];
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
   return UIStatusBarStyleLightContent;
+}
+
+- (void)setOrientation:(NSNumber *)orientation {
+  [[UIDevice currentDevice] setValue:orientation forKey:@"orientation"];
 }
 
 @end
