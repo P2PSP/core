@@ -15,7 +15,7 @@
 @property(weak, nonatomic) IBOutlet UITextField *tfSplitterPort;
 @property(weak, nonatomic) IBOutlet UIButton *bPlay;
 @property(weak, nonatomic) IBOutlet UIButton *bStop;
-@property(weak, nonatomic) IBOutlet UIView *subView;
+@property(weak, nonatomic) IBOutlet UIView *playerContainer;
 @property(nonatomic) BOOL playing;
 @property(weak, nonatomic) IBOutlet UIButton *bFullscreen;
 @property(weak, nonatomic) IBOutlet UIView *controlsSubView;
@@ -134,8 +134,12 @@ NSString *const kPlayerEndpoint = @"http://localhost:9999";
     orientation = [NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft];
   }
 
+  // FIX: It doesn't work in physical devices
   [self setOrientation:orientation];
-  self.videoSubView.frame = [UIApplication sharedApplication].keyWindow.bounds;
+
+  // FIX: Full screen overlaping with the rest of the views
+  self.playerContainer.frame =
+      [UIApplication sharedApplication].keyWindow.bounds;
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
