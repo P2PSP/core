@@ -135,7 +135,7 @@ NSString *const kPlayerEndpoint = @"http://localhost:9999";
   }
 
   [self setOrientation:orientation];
-  // [[UIDevice currentDevice] setValue:orientation forKey:@"orientation"];
+  self.videoSubView.frame = [UIApplication sharedApplication].keyWindow.bounds;
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
