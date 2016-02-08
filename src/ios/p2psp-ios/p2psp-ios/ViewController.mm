@@ -11,6 +11,7 @@
 #import "ViewController.h"
 
 @interface ViewController ()<VLCMediaPlayerDelegate>
+@property(strong, nonatomic) IBOutlet UIView *mainView;
 @property(weak, nonatomic) IBOutlet UITextField *tfSplitterAddr;
 @property(weak, nonatomic) IBOutlet UITextField *tfSplitterPort;
 @property(weak, nonatomic) IBOutlet UIButton *bPlay;
@@ -29,12 +30,14 @@ VLCMediaPlayer *mediaPlayer;
 const NSString *splitterAddr;
 const NSString *splitterPort;
 NSString *const kPlayerEndpoint = @"http://localhost:9999";
+CGRect playerContainerFrame;
+BOOL isFullScreen = NO;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
   // Do any additional setup after loading the view, typically from a nib.
 
-  self.controlsSubView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+  [self.mainView addSubview:self.playerContainer];
 
   mediaPlayer = [[VLCMediaPlayer alloc] init];
   mediaPlayer.delegate = self;
@@ -122,7 +125,7 @@ NSString *const kPlayerEndpoint = @"http://localhost:9999";
 }
 
 - (IBAction)onFullscreen:(id)sender {
-  UIDeviceOrientation currentOrientation =
+  /*UIDeviceOrientation currentOrientation =
       [[UIDevice currentDevice] orientation];
 
   // Portrait as default
@@ -135,7 +138,7 @@ NSString *const kPlayerEndpoint = @"http://localhost:9999";
   }
 
   // FIX: It doesn't work in physical devices
-  [self setOrientation:orientation];
+  [self setOrientation:orientation];*/
 
   // FIX: Full screen overlaping with the rest of the views
   self.playerContainer.frame =

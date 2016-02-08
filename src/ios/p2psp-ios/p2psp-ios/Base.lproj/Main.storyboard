@@ -166,6 +166,7 @@
                         <outlet property="bPlay" destination="cqe-5P-6z9" id="MCc-iq-xZV"/>
                         <outlet property="bStop" destination="lBz-zM-wzf" id="lGD-0b-ZFZ"/>
                         <outlet property="controlsSubView" destination="Imb-Hx-2xy" id="sRz-kJ-V4M"/>
+                        <outlet property="mainView" destination="8bC-Xf-vdC" id="WPN-oo-MgR"/>
                         <outlet property="playerContainer" destination="gAm-od-oPW" id="4Wf-WB-Khq"/>
                         <outlet property="tfSplitterAddr" destination="YYQ-4l-l09" id="NHB-i6-ik0"/>
                         <outlet property="tfSplitterPort" destination="cao-l7-ob1" id="FES-fz-sYf"/>
