@@ -13,29 +13,29 @@
 #ifndef P2PSP_CORE_SPLITTER_IMS_H_
 #define P2PSP_CORE_SPLITTER_IMS_H_
 
+#include <arpa/inet.h>
 #include <stdio.h>
-#include <string>
-#include <tuple>
-#include <sstream>
-#include <boost/asio.hpp>
 #include <boost/array.hpp>
+#include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <tuple>
 #include "../util/trace.h"
-#include <arpa/inet.h>
 #include "common.h"
 
 namespace p2psp {
 
 class SplitterIMS {
  protected:
-  const int kBufferSize = 256;                 // Buffer size in chunks
-  const std::string kChannel = "BBB-134.ogv";  // Default channel
+  const int kBufferSize = 256;              // Buffer size in chunks
+  const std::string kChannel = "test.ogg";  // Default channel
   const int kChunkSize = 1024;        // Chunk size in bytes (larger than MTU)
   const int kHeaderSize = 10;         // Chunks/header
-  const unsigned short kPort = 4552;  // Listening port
-  const std::string kSourceAddr = "150.214.150.68";  // Streaming server's host
-  const int kSourcePort = 4551;  // Streaming server's listening port
+  const unsigned short kPort = 8001;  // Listening port
+  const std::string kSourceAddr = "127.0.0.1";  // Streaming server's host
+  const int kSourcePort = 8000;  // Streaming server's listening port
   const std::string kMCastAddr = "224.0.0.1";  // All Systems on this subnet
   const int kTTL = 1;  // Time To Live of multicast packets
 
@@ -145,6 +145,7 @@ class SplitterIMS {
   void SetPort(int port);
   void SetSourceAddr(std::string source_addr);
   void SetSourcePort(int source_port);
+  void SetGETMessage(std::string channel);
 };
 }
 

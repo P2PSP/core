@@ -36,19 +36,7 @@ SplitterIMS::SplitterIMS()
   alive_ = true;
   chunk_number_ = 0;
 
-  // Auxiliar stringstream
-  std::stringstream ss;
-
-  // Initialize source_
-  ss << kSourceAddr;
-  // source_ = {ss.str(), kSourcePort};
-  ss.str("");
-
-  // Initialize GET_message_
-  ss << "GET /" << kChannel << " HTTP/1.1\r\n"
-     << "\r\n";
-  GET_message_ = ss.str();
-  ss.str("");
+  SetGETMessage(channel_);
 
   // Initialize chunk_number_format_
   chunk_number_format_ = "H";
@@ -113,10 +101,8 @@ void SplitterIMS::RequestTheVideoFromTheSource() {
   asio::ip::tcp::endpoint endpoint(asio::ip::address::from_string(source_addr_),
                                    source_port_);
 
-  
-
   source_socket_.connect(endpoint, ec);
-  
+
   if (ec) {
     LOG("Error: " << ec.message());
     LOG(source_socket_.local_endpoint().address().to_string()
@@ -139,19 +125,22 @@ void SplitterIMS::RequestTheVideoFromTheSource() {
 
 size_t SplitterIMS::ReceiveNextChunk(asio::streambuf &chunk) {
   system::error_code ec;
-  
+
   size_t bytes_transferred = asio::read(
       source_socket_, chunk, asio::transfer_exactly(chunk_size_), ec);
-  
+
   // LOG("Success! Bytes transferred: " << bytes_transferred);
 
   if (ec) {
-    LOG("Error receiving next chunk: " << ec.message() << " bytes transferred: " << bytes_transferred);
+    LOG("Error receiving next chunk: " << ec.message() << " bytes transferred: "
+                                       << bytes_transferred);
     LOG("No data in the server!");
     source_socket_.close();
     this_thread::sleep(posix_time::seconds(1));
-    source_socket_.connect(asio::ip::tcp::endpoint(asio::ip::address::from_string(source_addr_),
-                                                            source_port_), ec);
+    source_socket_.connect(
+        asio::ip::tcp::endpoint(asio::ip::address::from_string(source_addr_),
+                                source_port_),
+        ec);
     source_socket_.send(asio::buffer(GET_message_));
   }
 
@@ -197,7 +186,7 @@ void SplitterIMS::SendChunk(const vector<char> &message,
 
   // size_t bytes_transferred =
   team_socket_.send_to(asio::buffer(message), destination, 0, ec);
-  
+
   LOG(chunk_number_ << " -> " << destination);
 
   // LOG("Bytes transferred: " << to_string(bytes_transferred));
@@ -380,7 +369,18 @@ int SplitterIMS::GetPort() { return port_; };
 
 void SplitterIMS::SetBufferSize(int buffer_size) { buffer_size_ = buffer_size; }
 
-void SplitterIMS::SetChannel(std::string channel) { channel_ = channel; }
+void SplitterIMS::SetChannel(std::string channel) {
+  channel_ = channel;
+  SetGETMessage(channel_);
+}
+
+void SplitterIMS::SetGETMessage(std::string channel) {
+  std::stringstream ss;
+  ss << "GET /" << channel << " HTTP/1.1\r\n"
+     << "\r\n";
+  GET_message_ = ss.str();
+  ss.str("");
+}
 
 void SplitterIMS::SetChunkSize(int chunk_size) { chunk_size_ = chunk_size; }
 
