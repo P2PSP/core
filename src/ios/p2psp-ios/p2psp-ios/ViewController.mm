@@ -143,6 +143,8 @@ BOOL isFullScreen = NO;
   // FIX: Full screen overlaping with the rest of the views
   self.playerContainer.frame =
       [UIApplication sharedApplication].keyWindow.bounds;
+
+  // [self.playerContainer setNeedsUpdateConstraints];
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
