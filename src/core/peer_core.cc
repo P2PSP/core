@@ -12,7 +12,7 @@
 
 namespace p2psp {
 
-int run(int argc, const char* argv[]) {
+int run(int argc, const char* argv[]) throw(boost::system::system_error) {
   // TODO: Format default options
   boost::format format("Defaut = %5i");
 

@@ -77,7 +77,7 @@ void PeerIMS::WaitForThePlayer() {
       << std::to_string(player_socket_.remote_endpoint().port()) << ")");
 }
 
-void PeerIMS::ConnectToTheSplitter() {
+void PeerIMS::ConnectToTheSplitter() throw(boost::system::system_error) {
   std::string my_ip;
 
   // TCP endpoint object to connect to splitter
@@ -117,16 +117,8 @@ void PeerIMS::ConnectToTheSplitter() {
 
   splitter_socket_.bind(tcp_endpoint);
 
-  try {
-    splitter_socket_.connect(splitter_tcp_endpoint);
-  } catch (boost::system::system_error e) {
-    if (IFF_DEBUG) {
-      LOG(e.what());
-    } else {
-      LOG(e.what());
-    }
-    exit(-1);
-  }
+  // Should throw an exception
+  splitter_socket_.connect(splitter_tcp_endpoint);
 
   LOG("Connected to the splitter at ("
       << splitter_tcp_endpoint.address().to_string() << ","
