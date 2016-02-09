@@ -155,19 +155,25 @@ BOOL isFullScreen = NO;
   NSInteger playerHeight = self.playerContainer.frame.size.height;
   NSInteger screenHeight = screenBounds.size.height;
 
-  NSLog(@"Container before constraint: %d", playerHeight);
-  NSLog(@"Constraint before: %f",
-        self.playerContainterHeightConstraint.constant);
-
   // The constraint value is the diference between the screen's height and
   // view's height
   self.playerContainterHeightConstraint.constant = screenHeight - playerHeight;
-  NSLog(@"Container after constraint: %d", playerHeight);
-  NSLog(@"Constraint before: %f",
-        self.playerContainterHeightConstraint.constant);
-  NSLog(@"Fullscreen: %d", screenHeight - playerHeight);
 
   isFullScreen = !isFullScreen;
+
+  [self.playerContainer layoutIfNeeded];
+
+  // The constraint value is the diference between the screen's height and
+  // view's height
+
+  [self.view layoutIfNeeded];
+
+  [UIView animateWithDuration:0.2
+                   animations:^{
+                     self.playerContainterHeightConstraint.constant =
+                         screenHeight - playerHeight;
+                     [self.view layoutIfNeeded];
+                   }];
 }
 
 - (void)displayAlertView:(NSString *)message {
@@ -195,7 +201,7 @@ BOOL isFullScreen = NO;
   NSInteger screenHeight = screenBounds.size.height;
 
   // The constraint value is the diference between the screen's height and
-  // view's height
+  // view's height minus the previous height constraint
   switch (orientation) {
     case UIDeviceOrientationPortrait:
       self.playerContainterHeightConstraint.constant =
