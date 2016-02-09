@@ -226,7 +226,7 @@ BOOL isFullScreen = NO;
         [self adjustVideo:UIDeviceOrientationPortrait];
       }
       break;
-
+    case UIDeviceOrientationLandscapeRight:
     case UIDeviceOrientationLandscapeLeft:
       if (isFullScreen) {
         [self adjustVideo:UIDeviceOrientationLandscapeLeft];
