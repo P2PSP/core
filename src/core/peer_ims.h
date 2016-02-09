@@ -13,15 +13,15 @@
 #ifndef P2PSP_CORE_PEER_IMS_H
 #define P2PSP_CORE_PEER_IMS_H
 
-#include <vector>
-#include <string>
-#include <tuple>
-#include <boost/asio.hpp>
+#include <arpa/inet.h>
 #include <boost/array.hpp>
+#include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/thread.hpp>
-#include <arpa/inet.h>
 #include <ctime>
+#include <string>
+#include <tuple>
+#include <vector>
 #include "../util/trace.h"
 #include "common.h"
 
@@ -134,7 +134,7 @@ class PeerIMS {
   /**
    *  Setup "splitter" and "splitter_socket"
    */
-  virtual void ConnectToTheSplitter();
+  virtual void ConnectToTheSplitter() throw(boost::system::system_error);
   virtual void DisconnectFromTheSplitter();
   virtual void ReceiveTheMcasteEndpoint();
   virtual void ReceiveTheHeader();

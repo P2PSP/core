@@ -10,4 +10,14 @@
 
 #include "core/peer_core.h"
 
-int main(int argc, const char* argv[]) { return p2psp::run(argc, argv); }
+int main(int argc, const char* argv[]) {
+  try {
+    return p2psp::run(argc, argv);
+  } catch (boost::system::system_error e) {
+    if (IFF_DEBUG) {
+      LOG(e.what());
+    }
+  }
+
+  return -1;
+}
