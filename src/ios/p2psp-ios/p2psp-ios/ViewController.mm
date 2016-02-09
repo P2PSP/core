@@ -71,7 +71,14 @@ BOOL isFullScreen = NO;
 
         const char *argv[] = {"p2psp", "--splitter_addr", kSplitterAddr,
                               "--splitter_port", kSplitterPort};
-        p2psp::run(5, argv);
+
+        try {
+          p2psp::run(5, argv);
+        } catch (boost::system::system_error e) {
+          self.playing = false;
+          LOG(e.what());
+        }
+
       });
 
   // Launch the viewer
