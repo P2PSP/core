@@ -39,7 +39,7 @@ BOOL isFullScreen = NO;
 
   [self.mainView addSubview:self.playerContainer];
 
-  mediaPlayer = [[VLCMediaPlayer alloc] init];
+  mediaPlayer = [[VLCMediaPlayer alloc] initWithOptions:@[ @"--extraintf=" ]];
   mediaPlayer.delegate = self;
   mediaPlayer.drawable = self.videoSubView;
 }
