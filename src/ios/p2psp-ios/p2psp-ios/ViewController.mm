@@ -21,6 +21,8 @@
 @property(weak, nonatomic) IBOutlet UIButton *bFullscreen;
 @property(weak, nonatomic) IBOutlet UIView *controlsSubView;
 @property(weak, nonatomic) IBOutlet UIView *videoSubView;
+@property(weak, nonatomic)
+    IBOutlet NSLayoutConstraint *playerContainterHeightConstraint;
 
 @end
 
@@ -135,27 +137,20 @@ BOOL isFullScreen = NO;
   [super touchesBegan:touches withEvent:event];
 }
 
+/**
+ *  Sets the player view to fullscreen
+ *
+ *  @param sender The button
+ */
 - (IBAction)onFullscreen:(id)sender {
-  /*UIDeviceOrientation currentOrientation =
-      [[UIDevice currentDevice] orientation];
+  CGRect screenBounds = [UIApplication sharedApplication].keyWindow.bounds;
 
-  // Portrait as default
-  NSNumber *orientation =
-      [NSNumber numberWithInt:UIInterfaceOrientationPortrait];
+  NSInteger playerHeight = self.playerContainer.frame.size.height;
+  NSInteger screenHeight = screenBounds.size.height;
 
-  // If portrait, change to landscape
-  if (UIDeviceOrientationIsPortrait(currentOrientation)) {
-    orientation = [NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft];
-  }
-
-  // FIX: It doesn't work in physical devices
-  [self setOrientation:orientation];*/
-
-  // FIX: Full screen overlaping with the rest of the views
-  self.playerContainer.frame =
-      [UIApplication sharedApplication].keyWindow.bounds;
-
-  // [self.playerContainer setNeedsUpdateConstraints];
+  // The constraint value is the diference between the screen's height and
+  // view's height
+  self.playerContainterHeightConstraint.constant = screenHeight - playerHeight;
 }
 
 - (void)displayAlertView:(NSString *)message {

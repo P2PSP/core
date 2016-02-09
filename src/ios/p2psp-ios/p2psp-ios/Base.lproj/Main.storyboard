@@ -25,6 +25,9 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VtA-CU-F42">
                                         <rect key="frame" x="0.0" y="0.0" width="600" height="338"/>
                                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" secondItem="VtA-CU-F42" secondAttribute="height" multiplier="16:9" id="t6Q-Fz-yfZ"/>
+                                        </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Imb-Hx-2xy">
                                         <rect key="frame" x="0.0" y="313" width="600" height="25"/>
@@ -92,19 +95,24 @@
                                     <constraint firstItem="Imb-Hx-2xy" firstAttribute="leading" secondItem="gAm-od-oPW" secondAttribute="leading" id="1Lh-VM-e7v"/>
                                     <constraint firstItem="VtA-CU-F42" firstAttribute="leading" secondItem="gAm-od-oPW" secondAttribute="leading" id="1hh-lx-8z3"/>
                                     <constraint firstItem="Imb-Hx-2xy" firstAttribute="top" secondItem="gAm-od-oPW" secondAttribute="top" constant="103" id="5PZ-Jf-ves"/>
-                                    <constraint firstAttribute="width" secondItem="gAm-od-oPW" secondAttribute="height" multiplier="16:9" id="78E-Wo-40q"/>
+                                    <constraint firstItem="VtA-CU-F42" firstAttribute="centerY" secondItem="gAm-od-oPW" secondAttribute="centerY" id="Cmc-tQ-Qkr"/>
                                     <constraint firstItem="VtA-CU-F42" firstAttribute="top" secondItem="gAm-od-oPW" secondAttribute="top" id="JiY-07-XLQ"/>
                                     <constraint firstAttribute="trailing" secondItem="VtA-CU-F42" secondAttribute="trailing" id="L7g-UD-Ebb"/>
+                                    <constraint firstItem="Imb-Hx-2xy" firstAttribute="bottom" secondItem="VtA-CU-F42" secondAttribute="bottom" id="UmG-Rf-Yoc"/>
                                     <constraint firstAttribute="trailing" secondItem="Imb-Hx-2xy" secondAttribute="trailing" id="XWN-iH-bEh"/>
                                     <constraint firstAttribute="bottom" secondItem="Imb-Hx-2xy" secondAttribute="bottom" id="cnH-Mr-mvO"/>
+                                    <constraint firstAttribute="height" secondItem="VtA-CU-F42" secondAttribute="height" id="mB5-43-TrT"/>
                                     <constraint firstItem="Imb-Hx-2xy" firstAttribute="leading" secondItem="gAm-od-oPW" secondAttribute="leading" id="v13-cc-bxi"/>
                                     <constraint firstAttribute="bottom" secondItem="VtA-CU-F42" secondAttribute="bottom" id="zNr-KB-WrQ"/>
                                 </constraints>
                                 <variation key="default">
                                     <mask key="constraints">
+                                        <exclude reference="JiY-07-XLQ"/>
+                                        <exclude reference="zNr-KB-WrQ"/>
                                         <exclude reference="18r-Ta-Anu"/>
                                         <exclude reference="1Lh-VM-e7v"/>
                                         <exclude reference="5PZ-Jf-ves"/>
+                                        <exclude reference="cnH-Mr-mvO"/>
                                     </mask>
                                 </variation>
                             </view>
@@ -197,6 +205,7 @@
                         <outlet property="controlsSubView" destination="Imb-Hx-2xy" id="sRz-kJ-V4M"/>
                         <outlet property="mainView" destination="8bC-Xf-vdC" id="WPN-oo-MgR"/>
                         <outlet property="playerContainer" destination="gAm-od-oPW" id="4Wf-WB-Khq"/>
+                        <outlet property="playerContainterHeightConstraint" destination="mB5-43-TrT" id="JVw-Xs-3wu"/>
                         <outlet property="tfSplitterAddr" destination="YYQ-4l-l09" id="NHB-i6-ik0"/>
                         <outlet property="tfSplitterPort" destination="cao-l7-ob1" id="FES-fz-sYf"/>
                         <outlet property="videoSubView" destination="VtA-CU-F42" id="kP1-c4-5LE"/>
