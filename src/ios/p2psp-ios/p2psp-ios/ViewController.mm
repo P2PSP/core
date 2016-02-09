@@ -76,7 +76,11 @@ BOOL isFullScreen = NO;
           p2psp::run(5, argv);
         } catch (boost::system::system_error e) {
           self.playing = false;
-          LOG(e.what());
+          if (IFF_DEBUG) {
+            LOG(e.what());
+          }
+          [self
+              displayAlertView:[[NSString alloc] initWithUTF8String:e.what()]];
         }
 
       });
@@ -152,6 +156,17 @@ BOOL isFullScreen = NO;
       [UIApplication sharedApplication].keyWindow.bounds;
 
   // [self.playerContainer setNeedsUpdateConstraints];
+}
+
+- (void)displayAlertView:(NSString *)message {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                    message:message
+                                                   delegate:self
+                                          cancelButtonTitle:@"OK"
+                                          otherButtonTitles:nil];
+    [alert show];
+  });
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
