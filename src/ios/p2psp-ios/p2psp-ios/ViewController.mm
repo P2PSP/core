@@ -44,6 +44,13 @@ BOOL isFullScreen = NO;
   mediaPlayer = [[VLCMediaPlayer alloc] initWithOptions:@[ @"--extraintf=" ]];
   mediaPlayer.delegate = self;
   mediaPlayer.drawable = self.videoSubView;
+
+  [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+  [[NSNotificationCenter defaultCenter]
+      addObserver:self
+         selector:@selector(orientationChanged:)
+             name:UIDeviceOrientationDidChangeNotification
+           object:[UIDevice currentDevice]];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -148,9 +155,19 @@ BOOL isFullScreen = NO;
   NSInteger playerHeight = self.playerContainer.frame.size.height;
   NSInteger screenHeight = screenBounds.size.height;
 
+  NSLog(@"Container before constraint: %d", playerHeight);
+  NSLog(@"Constraint before: %f",
+        self.playerContainterHeightConstraint.constant);
+
   // The constraint value is the diference between the screen's height and
   // view's height
   self.playerContainterHeightConstraint.constant = screenHeight - playerHeight;
+  NSLog(@"Container after constraint: %d", playerHeight);
+  NSLog(@"Constraint before: %f",
+        self.playerContainterHeightConstraint.constant);
+  NSLog(@"Fullscreen: %d", screenHeight - playerHeight);
+
+  isFullScreen = !isFullScreen;
 }
 
 - (void)displayAlertView:(NSString *)message {
@@ -170,6 +187,48 @@ BOOL isFullScreen = NO;
 
 - (void)setOrientation:(NSNumber *)orientation {
   [[UIDevice currentDevice] setValue:orientation forKey:@"orientation"];
+}
+
+- (void)adjustVideo:(UIDeviceOrientation)orientation {
+  CGRect screenBounds = [UIApplication sharedApplication].keyWindow.bounds;
+  NSInteger playerHeight = self.playerContainer.frame.size.height;
+  NSInteger screenHeight = screenBounds.size.height;
+
+  // The constraint value is the diference between the screen's height and
+  // view's height
+  switch (orientation) {
+    case UIDeviceOrientationPortrait:
+      self.playerContainterHeightConstraint.constant =
+          screenHeight -
+          (playerHeight - self.playerContainterHeightConstraint.constant);
+      break;
+    case UIDeviceOrientationLandscapeLeft:
+      self.playerContainterHeightConstraint.constant =
+          screenHeight -
+          (playerHeight - self.playerContainterHeightConstraint.constant);
+      break;
+    default:
+      break;
+  }
+}
+
+- (void)orientationChanged:(NSNotification *)note {
+  UIDevice *device = note.object;
+  switch (device.orientation) {
+    case UIDeviceOrientationPortrait:
+      if (isFullScreen) {
+        [self adjustVideo:UIDeviceOrientationPortrait];
+      }
+      break;
+
+    case UIDeviceOrientationLandscapeLeft:
+      if (isFullScreen) {
+        [self adjustVideo:UIDeviceOrientationLandscapeLeft];
+      }
+      break;
+    default:
+      break;
+  };
 }
 
 @end
