@@ -148,9 +148,19 @@ BOOL isFullScreen = NO;
   NSInteger playerHeight = self.playerContainer.frame.size.height;
   NSInteger screenHeight = screenBounds.size.height;
 
+  [self.playerContainer layoutIfNeeded];
+
   // The constraint value is the diference between the screen's height and
   // view's height
-  self.playerContainterHeightConstraint.constant = screenHeight - playerHeight;
+
+  [self.view layoutIfNeeded];
+
+  [UIView animateWithDuration:0.2
+                   animations:^{
+                     self.playerContainterHeightConstraint.constant =
+                         screenHeight - playerHeight;
+                     [self.view layoutIfNeeded];
+                   }];
 }
 
 - (void)displayAlertView:(NSString *)message {
