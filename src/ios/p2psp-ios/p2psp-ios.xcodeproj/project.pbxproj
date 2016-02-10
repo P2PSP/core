@@ -126,16 +126,6 @@
 		A97D88891C5557D500428FC7 = {
 			isa = PBXGroup;
 			children = (
-				A97D88CC1C555CD600428FC7 /* AVFoundation.framework */,
-				A97D88CD1C555CD600428FC7 /* Security.framework */,
-				A97D88CE1C555CD600428FC7 /* CoreText.framework */,
-				A97D88CF1C555CD600428FC7 /* CoreGraphics.framework */,
-				A97D88D01C555CD600428FC7 /* VideoToolbox.framework */,
-				A97D88D11C555CD600428FC7 /* CoreVideo.framework */,
-				A97D88D21C555CD600428FC7 /* CoreMedia.framework */,
-				A97D88D31C555CD600428FC7 /* AudioToolbox.framework */,
-				A97D88D41C555CD600428FC7 /* CoreAudio.framework */,
-				A97D88C81C555A4600428FC7 /* MobileVLCKit.framework */,
 				A97D88941C5557D500428FC7 /* p2psp-ios */,
 				A97D88AE1C5557D600428FC7 /* p2psp-iosTests */,
 				A97D88B91C5557D600428FC7 /* p2psp-iosUITests */,
@@ -223,6 +213,16 @@
 		A9FE90281C56A3CD00C7C91C /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				A97D88CC1C555CD600428FC7 /* AVFoundation.framework */,
+				A97D88CD1C555CD600428FC7 /* Security.framework */,
+				A97D88CE1C555CD600428FC7 /* CoreText.framework */,
+				A97D88CF1C555CD600428FC7 /* CoreGraphics.framework */,
+				A97D88D01C555CD600428FC7 /* VideoToolbox.framework */,
+				A97D88D11C555CD600428FC7 /* CoreVideo.framework */,
+				A97D88D21C555CD600428FC7 /* CoreMedia.framework */,
+				A97D88D31C555CD600428FC7 /* AudioToolbox.framework */,
+				A97D88D41C555CD600428FC7 /* CoreAudio.framework */,
+				A97D88C81C555A4600428FC7 /* MobileVLCKit.framework */,
 				A9FE90181C55668F00C7C91C /* libboost.a */,
 			);
 			name = lib;
