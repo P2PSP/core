@@ -18,6 +18,7 @@
 @property(weak, nonatomic) IBOutlet UIButton *bStop;
 @property(weak, nonatomic) IBOutlet UIView *playerContainer;
 @property(nonatomic) BOOL playing;
+@property(nonatomic) BOOL shouldHideStatusBar;
 @property(weak, nonatomic) IBOutlet UIButton *bFullscreen;
 @property(weak, nonatomic) IBOutlet UIView *controlsSubView;
 @property(weak, nonatomic) IBOutlet UIView *videoSubView;
@@ -134,6 +135,25 @@ BOOL isFullScreen = NO;
   }
 }
 
+/**
+ *  System override function to specify when should the status bar be hidden
+ *
+ *  @return Whether it should be hidden or not
+ */
+- (BOOL)prefersStatusBarHidden {
+  return self.shouldHideStatusBar;
+}
+
+/**
+ *  Updates the visibility of the status bar
+ *
+ *  @param hidden Whether it should be hidden or not
+ */
+- (void)updateStatusBarVisibility:(BOOL)hidden {
+  self.shouldHideStatusBar = hidden;
+  [self setNeedsStatusBarAppearanceUpdate];
+}
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
   UITouch *touch = [[event allTouches] anyObject];
   if ([self.tfSplitterAddr isFirstResponder] &&
@@ -158,7 +178,8 @@ BOOL isFullScreen = NO;
   NSInteger playerHeight = self.playerContainer.frame.size.height;
   NSInteger screenHeight = screenBounds.size.height;
 
-  isFullScreen = !isFullScreen;
+  // Update the status bar visibility
+  [self updateStatusBarVisibility:(isFullScreen = !isFullScreen)];
 
   // The constraint value is the diference between the screen's height and
   // view's height
