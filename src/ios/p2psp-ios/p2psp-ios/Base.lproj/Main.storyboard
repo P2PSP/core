@@ -121,7 +121,7 @@
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Splitter addr:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mTv-AD-3VN">
-                                <rect key="frame" x="20" y="508" width="105" height="20.5"/>
+                                <rect key="frame" x="20" y="508" width="105" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="105" id="0QE-z6-LSI"/>
                                 </constraints>

@@ -35,12 +35,15 @@ NSString *const kPlayerEndpoint = @"http://localhost:9999";
 CGRect playerContainerFrame;
 BOOL isFullScreen = NO;
 
+/**
+ *  Initial function to the view controller
+ */
 - (void)viewDidLoad {
   [super viewDidLoad];
-  // Do any additional setup after loading the view, typically from a nib.
 
   [self.mainView addSubview:self.playerContainer];
 
+  // The argument passed to the VLCMediaPlayer object avoids error alerts
   mediaPlayer = [[VLCMediaPlayer alloc] initWithOptions:@[ @"--extraintf=" ]];
   mediaPlayer.delegate = self;
   mediaPlayer.drawable = self.videoSubView;
@@ -176,6 +179,11 @@ BOOL isFullScreen = NO;
                    }];
 }
 
+/**
+ *  Displays an UIAlertView with the message specified by argument
+ *
+ *  @param message The message of the
+ */
 - (void)displayAlertView:(NSString *)message {
   dispatch_async(dispatch_get_main_queue(), ^{
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
@@ -187,14 +195,29 @@ BOOL isFullScreen = NO;
   });
 }
 
+/**
+ *  Returns the default color of the status bar
+ *
+ *  @return The default status bar's style
+ */
 - (UIStatusBarStyle)preferredStatusBarStyle {
   return UIStatusBarStyleLightContent;
 }
 
+/**
+ *  Update the layout's orientation
+ *
+ *  @param orientation The orientation value
+ */
 - (void)setOrientation:(NSNumber *)orientation {
   [[UIDevice currentDevice] setValue:orientation forKey:@"orientation"];
 }
 
+/**
+ *  Updates the video view's constraint depending on device orientation
+ *
+ *  @param orientation The orientation of the device
+ */
 - (void)adjustVideo:(UIDeviceOrientation)orientation {
   CGRect screenBounds = [UIApplication sharedApplication].keyWindow.bounds;
   NSInteger playerHeight = self.playerContainer.frame.size.height;
@@ -218,6 +241,11 @@ BOOL isFullScreen = NO;
   }
 }
 
+/**
+ *  The event to device's orientation change
+ *
+ *  @param note The notification object
+ */
 - (void)orientationChanged:(NSNotification *)note {
   UIDevice *device = note.object;
   switch (device.orientation) {
