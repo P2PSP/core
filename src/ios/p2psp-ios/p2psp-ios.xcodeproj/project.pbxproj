@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A979A5CC1C6B4AA4003DD37C /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A979A5CB1C6B4AA4003DD37C /* Default-568h@2x.png */; };
 		A97D88971C5557D500428FC7 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = A97D88961C5557D500428FC7 /* main.mm */; };
 		A97D889A1C5557D500428FC7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A97D88991C5557D500428FC7 /* AppDelegate.m */; };
 		A97D889D1C5557D500428FC7 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = A97D889C1C5557D500428FC7 /* ViewController.mm */; };
@@ -52,6 +53,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A979A5CB1C6B4AA4003DD37C /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		A97D88921C5557D500428FC7 /* p2psp-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "p2psp-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A97D88961C5557D500428FC7 /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
 		A97D88981C5557D500428FC7 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 		A97D88891C5557D500428FC7 = {
 			isa = PBXGroup;
 			children = (
+				A979A5CB1C6B4AA4003DD37C /* Default-568h@2x.png */,
 				A97D88941C5557D500428FC7 /* p2psp-ios */,
 				A97D88AE1C5557D600428FC7 /* p2psp-iosTests */,
 				A97D88B91C5557D600428FC7 /* p2psp-iosUITests */,
@@ -333,6 +336,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A97D88A51C5557D500428FC7 /* LaunchScreen.storyboard in Resources */,
+				A979A5CC1C6B4AA4003DD37C /* Default-568h@2x.png in Resources */,
 				A97D88A21C5557D500428FC7 /* Assets.xcassets in Resources */,
 				A97D88A01C5557D500428FC7 /* Main.storyboard in Resources */,
 			);
