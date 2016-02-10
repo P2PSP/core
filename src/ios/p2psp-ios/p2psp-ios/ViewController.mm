@@ -158,23 +158,25 @@ BOOL isFullScreen = NO;
   NSInteger playerHeight = self.playerContainer.frame.size.height;
   NSInteger screenHeight = screenBounds.size.height;
 
-  // The constraint value is the diference between the screen's height and
-  // view's height
-  self.playerContainterHeightConstraint.constant = screenHeight - playerHeight;
-
   isFullScreen = !isFullScreen;
 
-  [self.playerContainer layoutIfNeeded];
-
   // The constraint value is the diference between the screen's height and
   // view's height
+  [self updateplayerContainterHeightConstraint:screenHeight - playerHeight];
+}
 
+/**
+ *  Updates the player container height constraint within an animation
+ *
+ *  @param newValue The updated value
+ */
+- (void)updateplayerContainterHeightConstraint:(CGFloat)newValue {
   [self.view layoutIfNeeded];
+
+  self.playerContainterHeightConstraint.constant = newValue;
 
   [UIView animateWithDuration:0.2
                    animations:^{
-                     self.playerContainterHeightConstraint.constant =
-                         screenHeight - playerHeight;
                      [self.view layoutIfNeeded];
                    }];
 }
@@ -225,20 +227,9 @@ BOOL isFullScreen = NO;
 
   // The constraint value is the diference between the screen's height and
   // view's height minus the previous height constraint
-  switch (orientation) {
-    case UIDeviceOrientationPortrait:
-      self.playerContainterHeightConstraint.constant =
-          screenHeight -
-          (playerHeight - self.playerContainterHeightConstraint.constant);
-      break;
-    case UIDeviceOrientationLandscapeLeft:
-      self.playerContainterHeightConstraint.constant =
-          screenHeight -
-          (playerHeight - self.playerContainterHeightConstraint.constant);
-      break;
-    default:
-      break;
-  }
+  [self updateplayerContainterHeightConstraint:
+            screenHeight -
+            (playerHeight - self.playerContainterHeightConstraint.constant)];
 }
 
 /**
@@ -247,22 +238,9 @@ BOOL isFullScreen = NO;
  *  @param note The notification object
  */
 - (void)orientationChanged:(NSNotification *)note {
-  UIDevice *device = note.object;
-  switch (device.orientation) {
-    case UIDeviceOrientationPortrait:
-      if (isFullScreen) {
-        [self adjustVideo:UIDeviceOrientationPortrait];
-      }
-      break;
-    case UIDeviceOrientationLandscapeRight:
-    case UIDeviceOrientationLandscapeLeft:
-      if (isFullScreen) {
-        [self adjustVideo:UIDeviceOrientationLandscapeLeft];
-      }
-      break;
-    default:
-      break;
-  };
+  if (isFullScreen) {
+    [self adjustVideo:UIDeviceOrientationPortrait];
+  }
 }
 
 @end
