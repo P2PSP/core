@@ -24,6 +24,8 @@
 @property(weak, nonatomic) IBOutlet UIView *videoSubView;
 @property(weak, nonatomic)
     IBOutlet NSLayoutConstraint *playerContainterHeightConstraint;
+@property(weak, nonatomic)
+    IBOutlet NSLayoutConstraint *playerContainerBottomConstraint;
 
 @end
 
@@ -55,6 +57,15 @@ BOOL isFullScreen = NO;
          selector:@selector(orientationChanged:)
              name:UIDeviceOrientationDidChangeNotification
            object:[UIDevice currentDevice]];
+
+  /*  self.playerContainerBottomConstraint =
+        [NSLayoutConstraint constraintWithItem:self.mainView
+                                     attribute:NSLayoutAttributeBottom
+                                     relatedBy:NSLayoutRelationEqual
+                                        toItem:self.playerContainer
+                                     attribute:NSLayoutAttributeBottom
+                                    multiplier:1
+                                      constant:0];*/
 }
 
 - (void)didReceiveMemoryWarning {
@@ -183,7 +194,16 @@ BOOL isFullScreen = NO;
 
   // The constraint value is the diference between the screen's height and
   // view's height
-  [self updateplayerContainterHeightConstraint:screenHeight - playerHeight];
+  // [self updateplayerContainterHeightConstraint:screenHeight - playerHeight];
+
+  if (isFullScreen) {
+    [self.playerContainer
+        removeConstraint:self.playerContainterHeightConstraint];
+    [self.mainView addConstraint:self.playerContainerBottomConstraint];
+  } else {
+    [self.mainView removeConstraint:self.playerContainerBottomConstraint];
+    [self.playerContainer addConstraint:self.playerContainterHeightConstraint];
+  }
 }
 
 /**
@@ -253,6 +273,15 @@ BOOL isFullScreen = NO;
             (playerHeight - self.playerContainterHeightConstraint.constant)];
 }
 
+- (void)didRotateFromInterfaceOrientation:
+    (UIInterfaceOrientation)fromInterfaceOrientation {
+  if (isFullScreen) {
+    [self.playerContainer
+        removeConstraint:self.playerContainterHeightConstraint];
+    [self.mainView addConstraint:self.playerContainerBottomConstraint];
+  }
+}
+
 /**
  *  The event to device's orientation change
  *
@@ -260,7 +289,9 @@ BOOL isFullScreen = NO;
  */
 - (void)orientationChanged:(NSNotification *)note {
   if (isFullScreen) {
-    [self adjustVideo:UIDeviceOrientationPortrait];
+    [self.playerContainer
+        removeConstraint:self.playerContainterHeightConstraint];
+    [self.mainView addConstraint:self.playerContainerBottomConstraint];
   }
 }
 

@@ -165,12 +165,12 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="127.0.0.1" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="YYQ-4l-l09">
-                                <rect key="frame" x="127" y="503" width="75" height="30"/>
+                                <rect key="frame" x="127" y="504" width="75" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="4552" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="cao-l7-ob1">
-                                <rect key="frame" x="127" y="541" width="56" height="30"/>
+                                <rect key="frame" x="127" y="542" width="56" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
@@ -190,6 +190,7 @@
                             <constraint firstItem="gAm-od-oPW" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="UCT-so-rGH"/>
                             <constraint firstItem="E3h-cv-QQv" firstAttribute="bottom" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="XZ6-8i-oXx"/>
                             <constraint firstItem="E3h-cv-QQv" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="cj9-PK-B4s"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="gAm-od-oPW" secondAttribute="bottom" id="e5g-wQ-31b"/>
                             <constraint firstItem="1b3-U3-kks" firstAttribute="trailing" secondItem="mTv-AD-3VN" secondAttribute="trailing" id="iCs-P0-sQL"/>
                             <constraint firstItem="YYQ-4l-l09" firstAttribute="centerY" secondItem="mTv-AD-3VN" secondAttribute="centerY" id="lY4-Bg-cWH"/>
                             <constraint firstItem="LRQ-IJ-H9f" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="nY5-P4-4lI"/>
@@ -197,6 +198,11 @@
                             <constraint firstItem="gAm-od-oPW" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="xbA-e7-E9B"/>
                             <constraint firstItem="E3h-cv-QQv" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="zNh-4I-zaz"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="e5g-wQ-31b"/>
+                            </mask>
+                        </variation>
                     </view>
                     <connections>
                         <outlet property="bFullscreen" destination="5zV-fR-cUK" id="v5Q-cA-fbo"/>
@@ -205,6 +211,7 @@
                         <outlet property="controlsSubView" destination="Imb-Hx-2xy" id="sRz-kJ-V4M"/>
                         <outlet property="mainView" destination="8bC-Xf-vdC" id="WPN-oo-MgR"/>
                         <outlet property="playerContainer" destination="gAm-od-oPW" id="4Wf-WB-Khq"/>
+                        <outlet property="playerContainerBottomConstraint" destination="e5g-wQ-31b" id="7JW-fx-Vzu"/>
                         <outlet property="playerContainterHeightConstraint" destination="mB5-43-TrT" id="JVw-Xs-3wu"/>
                         <outlet property="tfSplitterAddr" destination="YYQ-4l-l09" id="NHB-i6-ik0"/>
                         <outlet property="tfSplitterPort" destination="cao-l7-ob1" id="FES-fz-sYf"/>
