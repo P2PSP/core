@@ -194,16 +194,7 @@ BOOL isFullScreen = NO;
 
   // The constraint value is the diference between the screen's height and
   // view's height
-  // [self updateplayerContainterHeightConstraint:screenHeight - playerHeight];
-
-  if (isFullScreen) {
-    [self.playerContainer
-        removeConstraint:self.playerContainterHeightConstraint];
-    [self.mainView addConstraint:self.playerContainerBottomConstraint];
-  } else {
-    [self.mainView removeConstraint:self.playerContainerBottomConstraint];
-    [self.playerContainer addConstraint:self.playerContainterHeightConstraint];
-  }
+  [self updateplayerContainterHeightConstraint:screenHeight - playerHeight];
 }
 
 /**
@@ -214,7 +205,16 @@ BOOL isFullScreen = NO;
 - (void)updateplayerContainterHeightConstraint:(CGFloat)newValue {
   [self.view layoutIfNeeded];
 
-  self.playerContainterHeightConstraint.constant = newValue;
+  // self.playerContainterHeightConstraint.constant = newValue;
+
+  if (isFullScreen) {
+    [self.playerContainer
+        removeConstraint:self.playerContainterHeightConstraint];
+    [self.mainView addConstraint:self.playerContainerBottomConstraint];
+  } else {
+    [self.mainView removeConstraint:self.playerContainerBottomConstraint];
+    [self.playerContainer addConstraint:self.playerContainterHeightConstraint];
+  }
 
   [UIView animateWithDuration:0.2
                    animations:^{
