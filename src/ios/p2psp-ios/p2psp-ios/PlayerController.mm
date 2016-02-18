@@ -8,9 +8,9 @@
 
 #import <MobileVLCKit/VLCMediaPlayer.h>
 #import "../../../core/peer_core.h"
-#import "ViewController.h"
+#import "PlayerController.h"
 
-@interface ViewController ()<VLCMediaPlayerDelegate>
+@interface PlayerController ()<VLCMediaPlayerDelegate>
 @property(strong, nonatomic) IBOutlet UIView *mainView;
 @property(weak, nonatomic) IBOutlet UITextField *tfSplitterAddr;
 @property(weak, nonatomic) IBOutlet UITextField *tfSplitterPort;
@@ -29,7 +29,7 @@
 
 @end
 
-@implementation ViewController
+@implementation PlayerController
 
 VLCMediaPlayer *mediaPlayer;
 const NSString *splitterAddr;
