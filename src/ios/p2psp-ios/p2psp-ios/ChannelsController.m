@@ -25,9 +25,11 @@
 - (void)viewDidLoad {
   self.channelsList = [[NSMutableArray alloc] init];
 
-  [self.channelsList addObject:[[Channel alloc] init:@"Big Buck Bunny"
-                                              withIP:@"127.0.0.1"
-                                            withPort:@"4552"]];
+  [self.channelsList
+      addObject:[[Channel alloc] init:@"Big Buck Bunny"
+                      withDescription:@"Big Buck Bunny short film."
+                               withIP:@"127.0.0.1"
+                             withPort:@"4552"]];
 }
 
 /**
@@ -83,12 +85,14 @@
 - (IBAction)onGetChannels:(id)sender {
   [self.channelsList
       addObject:[[Channel alloc]
-                        init:[NSString
-                                 stringWithFormat:@"%@%lu", @"Example",
-                                                  (unsigned long)
-                                                      [self.channelsList count]]
-                      withIP:@"127.0.0.2"
-                    withPort:@"4553"]];
+                               init:[NSString
+                                        stringWithFormat:@"%@%lu", @"Example",
+                                                         (unsigned long)
+                                                             [self.channelsList
+                                                                     count]]
+                    withDescription:@"Example channel."
+                             withIP:@"127.0.0.2"
+                           withPort:@"4553"]];
 
   [self.tvChannelsList reloadData];
 }
@@ -100,17 +104,25 @@
  *  @param sender The UIView sender
  */
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-  if ([segue.identifier isEqual:@"watchPlayerController"]) {
+  PlayerController *vcPlayerController =
+      (PlayerController *)segue.destinationViewController;
+
+  if ([segue.identifier isEqual:@"watchDefaultPlayerController"]) {
+    self.selectedChannel = [[Channel alloc] init:@"Splitter"
+                                 withDescription:@"Default splitter address."
+                                          withIP:@"127.0.0.1"
+                                        withPort:@"4552"];
+  } else if ([segue.identifier isEqual:@"watchPlayerController"]) {
     UITableViewCell *cell = (UITableViewCell *)sender;
     NSIndexPath *indexPath = [self.tvChannelsList indexPathForCell:cell];
     int index = indexPath.row;
     self.selectedChannel = self.channelsList[index];
-
-    PlayerController *vcPlayerController =
-        (PlayerController *)segue.destinationViewController;
-
-    [vcPlayerController setChannel:self.selectedChannel];
   }
+
+  [vcPlayerController setChannel:self.selectedChannel];
+}
+
+- (IBAction)unwindToChannels:(UIStoryboardSegue *)unwindSegue {
 }
 
 @end

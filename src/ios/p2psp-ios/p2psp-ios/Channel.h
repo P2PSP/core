@@ -11,9 +11,13 @@
 @interface Channel : NSObject
 
 @property(nonatomic) NSString* title;
+@property(nonatomic) NSString* desc;
 @property(nonatomic) NSString* ip;
 @property(nonatomic) NSString* port;
 
-- (instancetype)init:(NSString*) title withIP:(NSString*) ip withPort: (NSString*) port;
+- (instancetype)init:(NSString*)title
+     withDescription:(NSString*)description
+              withIP:(NSString*)ip
+            withPort:(NSString*)port;
 
 @end

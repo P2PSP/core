@@ -20,6 +20,7 @@
  *  @return The initialized object
  */
 - (instancetype)init:(NSString*)title
+     withDescription:(NSString*)description
               withIP:(NSString*)ip
             withPort:(NSString*)port {
   self = [super init];
@@ -27,6 +28,7 @@
     self.title = title;
     self.ip = ip;
     self.port = port;
+    self.desc = description;
   }
   return self;
 }

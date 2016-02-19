@@ -56,7 +56,7 @@
                                         <inset key="contentEdgeInsets" minX="8" minY="8" maxX="8" maxY="8"/>
                                         <state key="normal" title="Player"/>
                                         <connections>
-                                            <segue destination="BYZ-38-t0r" kind="show" id="rH4-vC-tkG"/>
+                                            <segue destination="BYZ-38-t0r" kind="show" identifier="watchDefaultPlayerController" id="rH4-vC-tkG"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -164,7 +164,7 @@
                                                 </state>
                                                 <connections>
                                                     <action selector="onStop:" destination="BYZ-38-t0r" eventType="touchDown" id="FdU-Ui-df2"/>
-                                                    <segue destination="T1A-qP-LVW" kind="show" id="r8S-ZI-5vY"/>
+                                                    <segue destination="IMZ-M7-tYk" kind="unwind" unwindAction="unwindToChannels:" id="JnV-Pp-Bkg"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -368,6 +368,7 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <exit id="IMZ-M7-tYk" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="1082" y="344"/>
         </scene>
@@ -391,7 +392,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="7fh-mE-B9H"/>
+        <segue reference="rH4-vC-tkG"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
 </document>

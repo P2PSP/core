@@ -13,5 +13,6 @@
 @interface ChannelsController : UIViewController
 
 - (IBAction)onGetChannels:(id)sender;
+- (IBAction)unwindToChannels:(UIStoryboardSegue *)unwindSegue;
 
 @end

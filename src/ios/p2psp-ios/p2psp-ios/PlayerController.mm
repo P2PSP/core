@@ -56,6 +56,7 @@ BOOL isFullScreen = NO;
   self.tfSplitterAddr.text = [self.currentChannel ip];
   self.tfSplitterPort.text = [self.currentChannel port];
   self.lbChannelTitle.text = [self.currentChannel title];
+  self.lbChannelDescription.text = [self.currentChannel desc];
 
   [self.mainView addSubview:self.playerContainer];
 
@@ -70,15 +71,6 @@ BOOL isFullScreen = NO;
          selector:@selector(orientationChanged:)
              name:UIDeviceOrientationDidChangeNotification
            object:[UIDevice currentDevice]];
-
-  /*  self.playerContainerBottomConstraint =
-        [NSLayoutConstraint constraintWithItem:self.mainView
-                                     attribute:NSLayoutAttributeBottom
-                                     relatedBy:NSLayoutRelationEqual
-                                        toItem:self.playerContainer
-                                     attribute:NSLayoutAttributeBottom
-                                    multiplier:1
-                                      constant:0];*/
 }
 
 - (void)didReceiveMemoryWarning {
