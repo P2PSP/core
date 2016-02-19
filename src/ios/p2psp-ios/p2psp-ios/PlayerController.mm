@@ -20,7 +20,7 @@
 @property(weak, nonatomic) IBOutlet UIView *playerContainer;
 @property(nonatomic) BOOL playing;
 @property(nonatomic) BOOL shouldHideStatusBar;
-@property(weak, nonatomic) IBOutlet UIButton *bFullscreen;
+@property(weak, nonatomic) IBOutlet UIBarButtonItem *bFullscreen;
 @property(weak, nonatomic) IBOutlet UIView *controlsSubView;
 @property(weak, nonatomic) IBOutlet UIView *videoSubView;
 @property(weak, nonatomic)
@@ -29,6 +29,10 @@
     IBOutlet NSLayoutConstraint *playerContainerBottomConstraint;
 @property(weak, nonatomic) IBOutlet UILabel *lbChannelTitle;
 @property(weak, nonatomic) IBOutlet UILabel *lbChannelDescription;
+@property(weak, nonatomic) IBOutlet UIToolbar *tbTopControllers;
+@property(weak, nonatomic) IBOutlet UIToolbar *tbBottomControllers;
+@property(nonatomic) IBOutlet UIBarButtonItem *bbiPlay;
+@property(nonatomic) IBOutlet UIBarButtonItem *bbiStop;
 
 @property(nonatomic) Channel *currentChannel;
 
@@ -49,8 +53,40 @@ BOOL isFullScreen = NO;
 - (void)viewDidLoad {
   [super viewDidLoad];
 
+  // Toolbar play/stop buttons
+  self.bbiStop = [[UIBarButtonItem alloc]
+      initWithBarButtonSystemItem:UIBarButtonSystemItemPause
+                           target:self
+                           action:@selector(onStop:)];
+
+  [self.bbiStop setTintColor:[UIColor whiteColor]];
+
+  self.bbiPlay = [[UIBarButtonItem alloc]
+      initWithBarButtonSystemItem:UIBarButtonSystemItemPlay
+                           target:self
+                           action:@selector(onPlay:)];
+
+  [self.bbiPlay setTintColor:[UIColor whiteColor]];
+
+  [self updateBarButtonItem:self.bbiPlay];
+
   // Hide navigation bar
   [self.navigationController setNavigationBarHidden:YES];
+
+  // Transparent UIToolbar
+  [self.tbBottomControllers setBackgroundImage:[UIImage new]
+                            forToolbarPosition:UIBarPositionAny
+                                    barMetrics:UIBarMetricsDefault];
+  [self.tbBottomControllers setShadowImage:[UIImage new]
+                        forToolbarPosition:UIToolbarPositionAny];
+
+  // Transparent UIToolbar
+  [self.tbTopControllers setBackgroundImage:[UIImage new]
+                         forToolbarPosition:UIBarPositionAny
+                                 barMetrics:UIBarMetricsDefault];
+
+  [self.tbTopControllers setShadowImage:[UIImage new]
+                     forToolbarPosition:UIToolbarPositionAny];
 
   // Load data
   self.tfSplitterAddr.text = [self.currentChannel ip];
@@ -89,6 +125,8 @@ BOOL isFullScreen = NO;
   }
   self.playing = true;
 
+  [self updateBarButtonItem:self.bbiStop];
+
   splitterAddr = [self.tfSplitterAddr text];
   splitterPort = [self.tfSplitterPort text];
 
@@ -105,6 +143,7 @@ BOOL isFullScreen = NO;
           p2psp::run(5, argv);
         } catch (boost::system::system_error e) {
           self.playing = false;
+          [self updateBarButtonItem:self.bbiPlay];
           if (IFF_DEBUG) {
             LOG(e.what());
           }
@@ -135,6 +174,8 @@ BOOL isFullScreen = NO;
     return;
   }
   self.playing = false;
+
+  [self updateBarButtonItem:self.bbiPlay];
 
   // The peer_core thread finishes when the viewer disconnects from it
   [mediaPlayer stop];
@@ -302,6 +343,23 @@ BOOL isFullScreen = NO;
 
 - (void)setChannel:(Channel *)channel {
   self.currentChannel = channel;
+}
+
+- (void)updateBarButtonItem:(UIBarButtonItem *)bbi {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    NSMutableArray *tbItems =
+        [[NSMutableArray alloc] initWithArray:[self.tbBottomControllers items]];
+    [tbItems replaceObjectAtIndex:0 withObject:bbi];
+
+    [self.tbBottomControllers setItems:tbItems];
+
+  });
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+  if ([segue.identifier isEqual:@"backToChannelController"]) {
+    [self onStop:sender];
+  }
 }
 
 @end

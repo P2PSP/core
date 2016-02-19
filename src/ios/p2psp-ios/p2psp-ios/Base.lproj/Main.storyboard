@@ -50,25 +50,14 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="med-nC-BEq">
-                                        <rect key="frame" x="501" y="9" width="59" height="34"/>
-                                        <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
-                                        <inset key="contentEdgeInsets" minX="8" minY="8" maxX="8" maxY="8"/>
-                                        <state key="normal" title="Player"/>
-                                        <connections>
-                                            <segue destination="BYZ-38-t0r" kind="show" identifier="watchDefaultPlayerController" id="rH4-vC-tkG"/>
-                                        </connections>
-                                    </button>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstItem="LQd-uk-ddH" firstAttribute="leading" secondItem="kwp-Rs-Wn6" secondAttribute="leading" id="0TH-qq-MXr"/>
                                     <constraint firstItem="LQd-uk-ddH" firstAttribute="centerY" secondItem="kwp-Rs-Wn6" secondAttribute="centerY" id="1Pp-wC-3FL"/>
-                                    <constraint firstAttribute="trailing" secondItem="med-nC-BEq" secondAttribute="trailing" id="6Kn-Jp-QKF"/>
                                     <constraint firstItem="ctv-Ec-1fU" firstAttribute="leading" secondItem="LQd-uk-ddH" secondAttribute="trailing" constant="8" id="AO1-xE-DNx"/>
                                     <constraint firstAttribute="height" constant="50" id="KFq-Sr-oVw"/>
                                     <constraint firstItem="NEJ-z0-8G3" firstAttribute="leading" secondItem="ctv-Ec-1fU" secondAttribute="trailing" constant="8" id="POn-oi-DtH"/>
-                                    <constraint firstItem="med-nC-BEq" firstAttribute="baseline" secondItem="NEJ-z0-8G3" secondAttribute="baseline" id="V2w-nG-dd3"/>
                                     <constraint firstItem="ctv-Ec-1fU" firstAttribute="baseline" secondItem="LQd-uk-ddH" secondAttribute="baseline" id="fBi-8g-quN"/>
                                     <constraint firstItem="NEJ-z0-8G3" firstAttribute="baseline" secondItem="ctv-Ec-1fU" secondAttribute="baseline" id="hcv-pK-fNC"/>
                                     <constraint firstItem="LQd-uk-ddH" firstAttribute="top" secondItem="kwp-Rs-Wn6" secondAttribute="top" constant="8" id="yPt-dc-pfG"/>
@@ -130,7 +119,13 @@
                             <constraint firstItem="kwp-Rs-Wn6" firstAttribute="leading" secondItem="czq-8W-pys" secondAttribute="leadingMargin" id="yfG-eh-sy0"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Channels" id="X7P-xw-XJg"/>
+                    <navigationItem key="navigationItem" title="Channels" id="X7P-xw-XJg">
+                        <barButtonItem key="rightBarButtonItem" title="Player" id="9R2-hW-5zh">
+                            <connections>
+                                <segue destination="BYZ-38-t0r" kind="show" identifier="watchDefaultPlayerController" id="98g-44-O5V"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="tvChannelsList" destination="i8L-A3-MlV" id="Xso-H4-Z8X"/>
                     </connections>
@@ -156,109 +151,59 @@
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VtA-CU-F42">
                                         <rect key="frame" x="0.0" y="0.0" width="600" height="338"/>
-                                        <subviews>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qXt-Xw-2B0" userLabel="BBack">
-                                                <rect key="frame" x="556" y="10" width="34" height="30"/>
-                                                <state key="normal" title="Back">
-                                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                </state>
-                                                <connections>
-                                                    <action selector="onStop:" destination="BYZ-38-t0r" eventType="touchDown" id="FdU-Ui-df2"/>
-                                                    <segue destination="IMZ-M7-tYk" kind="unwind" unwindAction="unwindToChannels:" id="JnV-Pp-Bkg"/>
-                                                </connections>
-                                            </button>
-                                        </subviews>
-                                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                         <constraints>
-                                            <constraint firstItem="qXt-Xw-2B0" firstAttribute="top" secondItem="VtA-CU-F42" secondAttribute="topMargin" constant="2" id="abA-jB-Qse"/>
-                                            <constraint firstAttribute="trailingMargin" secondItem="qXt-Xw-2B0" secondAttribute="trailing" constant="2" id="nUK-a9-U06"/>
                                             <constraint firstAttribute="width" secondItem="VtA-CU-F42" secondAttribute="height" multiplier="16:9" id="t6Q-Fz-yfZ"/>
                                         </constraints>
                                     </view>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Imb-Hx-2xy">
-                                        <rect key="frame" x="0.0" y="313" width="600" height="25"/>
-                                        <subviews>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cqe-5P-6z9">
-                                                <rect key="frame" x="8" y="-2" width="30" height="30"/>
-                                                <state key="normal" title="Play">
-                                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                </state>
+                                    <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" barStyle="black" translatesAutoresizingMaskIntoConstraints="NO" id="gEc-0e-1eF">
+                                        <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
+                                        <items>
+                                            <barButtonItem systemItem="stop" id="WUo-Ch-wPd">
+                                                <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 <connections>
-                                                    <action selector="onPlay:" destination="BYZ-38-t0r" eventType="touchDown" id="WKc-0w-0fO"/>
+                                                    <segue destination="IMZ-M7-tYk" kind="unwind" identifier="backToChannelController" unwindAction="unwindToChannels:" id="5k2-q9-Mo9"/>
                                                 </connections>
-                                            </button>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lBz-zM-wzf">
-                                                <rect key="frame" x="46" y="-2" width="32" height="30"/>
-                                                <state key="normal" title="Stop">
-                                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                </state>
+                                            </barButtonItem>
+                                        </items>
+                                    </toolbar>
+                                    <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" barStyle="black" translatesAutoresizingMaskIntoConstraints="NO" id="QNJ-ye-9RI">
+                                        <rect key="frame" x="0.0" y="294" width="600" height="44"/>
+                                        <items>
+                                            <barButtonItem systemItem="play" id="AlD-wy-eDR">
+                                                <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                            </barButtonItem>
+                                            <barButtonItem systemItem="flexibleSpace" id="Anq-iK-eKw">
+                                                <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                            </barButtonItem>
+                                            <barButtonItem systemItem="action" id="11h-MV-eUM">
+                                                <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 <connections>
-                                                    <action selector="onStop:" destination="BYZ-38-t0r" eventType="touchDown" id="POS-ob-Xo1"/>
+                                                    <action selector="onFullscreen:" destination="BYZ-38-t0r" id="Aht-q1-iTd"/>
                                                 </connections>
-                                            </button>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5zV-fR-cUK">
-                                                <rect key="frame" x="523" y="-2" width="77" height="30"/>
-                                                <constraints>
-                                                    <constraint firstAttribute="width" constant="77" id="J50-c7-rpF"/>
-                                                </constraints>
-                                                <state key="normal" title="Fullscreen">
-                                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                </state>
-                                                <connections>
-                                                    <action selector="onFullscreen:" destination="BYZ-38-t0r" eventType="touchDown" id="hiJ-yu-qmK"/>
-                                                </connections>
-                                            </button>
-                                        </subviews>
-                                        <color key="backgroundColor" white="1" alpha="0.0" colorSpace="calibratedWhite"/>
-                                        <constraints>
-                                            <constraint firstItem="5zV-fR-cUK" firstAttribute="leading" secondItem="lBz-zM-wzf" secondAttribute="trailing" constant="73" id="EdT-sf-hCQ"/>
-                                            <constraint firstItem="5zV-fR-cUK" firstAttribute="centerY" secondItem="Imb-Hx-2xy" secondAttribute="centerY" id="NKt-fh-3JU"/>
-                                            <constraint firstItem="lBz-zM-wzf" firstAttribute="leading" secondItem="cqe-5P-6z9" secondAttribute="trailing" constant="8" id="RI3-pe-ZHe"/>
-                                            <constraint firstItem="lBz-zM-wzf" firstAttribute="top" secondItem="Imb-Hx-2xy" secondAttribute="top" id="RwN-f4-C1I"/>
-                                            <constraint firstItem="cqe-5P-6z9" firstAttribute="leading" secondItem="Imb-Hx-2xy" secondAttribute="leadingMargin" id="Tph-HE-s5e"/>
-                                            <constraint firstItem="5zV-fR-cUK" firstAttribute="baseline" secondItem="lBz-zM-wzf" secondAttribute="baseline" id="aN2-bF-ah5"/>
-                                            <constraint firstItem="lBz-zM-wzf" firstAttribute="baseline" secondItem="5zV-fR-cUK" secondAttribute="baseline" id="qaQ-g0-b5N"/>
-                                            <constraint firstItem="lBz-zM-wzf" firstAttribute="top" secondItem="Imb-Hx-2xy" secondAttribute="top" id="rCb-EY-oEm"/>
-                                            <constraint firstAttribute="trailing" secondItem="5zV-fR-cUK" secondAttribute="trailing" id="udb-SB-yvR"/>
-                                            <constraint firstItem="5zV-fR-cUK" firstAttribute="baseline" secondItem="cqe-5P-6z9" secondAttribute="baseline" id="v3Z-MQ-91q"/>
-                                            <constraint firstAttribute="height" constant="25" id="vBX-aN-bUu"/>
-                                            <constraint firstItem="lBz-zM-wzf" firstAttribute="leading" secondItem="Imb-Hx-2xy" secondAttribute="leading" constant="44" id="xjG-IO-HIj"/>
-                                        </constraints>
-                                        <variation key="default">
-                                            <mask key="constraints">
-                                                <exclude reference="RwN-f4-C1I"/>
-                                                <exclude reference="rCb-EY-oEm"/>
-                                                <exclude reference="xjG-IO-HIj"/>
-                                                <exclude reference="EdT-sf-hCQ"/>
-                                                <exclude reference="aN2-bF-ah5"/>
-                                            </mask>
-                                        </variation>
-                                    </view>
+                                            </barButtonItem>
+                                        </items>
+                                    </toolbar>
                                 </subviews>
                                 <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="bottom" secondItem="Imb-Hx-2xy" secondAttribute="bottom" constant="210" id="18r-Ta-Anu"/>
-                                    <constraint firstItem="Imb-Hx-2xy" firstAttribute="leading" secondItem="gAm-od-oPW" secondAttribute="leading" id="1Lh-VM-e7v"/>
                                     <constraint firstItem="VtA-CU-F42" firstAttribute="leading" secondItem="gAm-od-oPW" secondAttribute="leading" id="1hh-lx-8z3"/>
-                                    <constraint firstItem="Imb-Hx-2xy" firstAttribute="top" secondItem="gAm-od-oPW" secondAttribute="top" constant="103" id="5PZ-Jf-ves"/>
                                     <constraint firstItem="VtA-CU-F42" firstAttribute="centerY" secondItem="gAm-od-oPW" secondAttribute="centerY" id="Cmc-tQ-Qkr"/>
                                     <constraint firstItem="VtA-CU-F42" firstAttribute="top" secondItem="gAm-od-oPW" secondAttribute="top" id="JiY-07-XLQ"/>
+                                    <constraint firstAttribute="trailing" secondItem="gEc-0e-1eF" secondAttribute="trailing" id="Jpf-sm-OTS"/>
                                     <constraint firstAttribute="trailing" secondItem="VtA-CU-F42" secondAttribute="trailing" id="L7g-UD-Ebb"/>
-                                    <constraint firstItem="Imb-Hx-2xy" firstAttribute="bottom" secondItem="VtA-CU-F42" secondAttribute="bottom" id="UmG-Rf-Yoc"/>
-                                    <constraint firstAttribute="trailing" secondItem="Imb-Hx-2xy" secondAttribute="trailing" id="XWN-iH-bEh"/>
-                                    <constraint firstAttribute="bottom" secondItem="Imb-Hx-2xy" secondAttribute="bottom" id="cnH-Mr-mvO"/>
+                                    <constraint firstItem="QNJ-ye-9RI" firstAttribute="leading" secondItem="gAm-od-oPW" secondAttribute="leading" id="L9J-rr-aiM"/>
+                                    <constraint firstItem="gEc-0e-1eF" firstAttribute="top" secondItem="VtA-CU-F42" secondAttribute="top" id="ZPs-Ai-MtU"/>
+                                    <constraint firstAttribute="trailing" secondItem="QNJ-ye-9RI" secondAttribute="trailing" id="bff-Ie-IWt"/>
+                                    <constraint firstItem="gEc-0e-1eF" firstAttribute="leading" secondItem="gAm-od-oPW" secondAttribute="leading" id="ixR-qd-7Ec"/>
                                     <constraint firstAttribute="height" secondItem="VtA-CU-F42" secondAttribute="height" id="mB5-43-TrT"/>
-                                    <constraint firstItem="Imb-Hx-2xy" firstAttribute="leading" secondItem="gAm-od-oPW" secondAttribute="leading" id="v13-cc-bxi"/>
+                                    <constraint firstItem="QNJ-ye-9RI" firstAttribute="bottom" secondItem="VtA-CU-F42" secondAttribute="bottom" id="skN-Pr-Ivv"/>
                                     <constraint firstAttribute="bottom" secondItem="VtA-CU-F42" secondAttribute="bottom" id="zNr-KB-WrQ"/>
                                 </constraints>
                                 <variation key="default">
                                     <mask key="constraints">
                                         <exclude reference="JiY-07-XLQ"/>
                                         <exclude reference="zNr-KB-WrQ"/>
-                                        <exclude reference="18r-Ta-Anu"/>
-                                        <exclude reference="1Lh-VM-e7v"/>
-                                        <exclude reference="5PZ-Jf-ves"/>
-                                        <exclude reference="cnH-Mr-mvO"/>
                                     </mask>
                                 </variation>
                             </view>
@@ -352,16 +297,15 @@
                     </view>
                     <navigationItem key="navigationItem" title="Player" id="clh-h7-oV6"/>
                     <connections>
-                        <outlet property="bFullscreen" destination="5zV-fR-cUK" id="v5Q-cA-fbo"/>
-                        <outlet property="bPlay" destination="cqe-5P-6z9" id="MCc-iq-xZV"/>
-                        <outlet property="bStop" destination="lBz-zM-wzf" id="lGD-0b-ZFZ"/>
-                        <outlet property="controlsSubView" destination="Imb-Hx-2xy" id="sRz-kJ-V4M"/>
+                        <outlet property="bFullscreen" destination="11h-MV-eUM" id="gDQ-P1-fld"/>
                         <outlet property="lbChannelDescription" destination="UqM-3R-sxa" id="qqm-ux-IuD"/>
                         <outlet property="lbChannelTitle" destination="IzV-Bc-JAp" id="rjL-af-HFL"/>
                         <outlet property="mainView" destination="8bC-Xf-vdC" id="WPN-oo-MgR"/>
                         <outlet property="playerContainer" destination="gAm-od-oPW" id="4Wf-WB-Khq"/>
                         <outlet property="playerContainerBottomConstraint" destination="e5g-wQ-31b" id="7JW-fx-Vzu"/>
                         <outlet property="playerContainterHeightConstraint" destination="mB5-43-TrT" id="JVw-Xs-3wu"/>
+                        <outlet property="tbBottomControllers" destination="QNJ-ye-9RI" id="Myn-7P-kHb"/>
+                        <outlet property="tbTopControllers" destination="gEc-0e-1eF" id="phC-vy-sFV"/>
                         <outlet property="tfSplitterAddr" destination="YYQ-4l-l09" id="NHB-i6-ik0"/>
                         <outlet property="tfSplitterPort" destination="cao-l7-ob1" id="FES-fz-sYf"/>
                         <outlet property="videoSubView" destination="VtA-CU-F42" id="kP1-c4-5LE"/>
@@ -392,7 +336,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="rH4-vC-tkG"/>
+        <segue reference="98g-44-O5V"/>
     </inferredMetricsTieBreakers>
-    <color key="tintColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+    <color key="tintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
 </document>

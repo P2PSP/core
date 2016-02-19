@@ -23,13 +23,20 @@
  *  Callback called when the assocciated view is loaded
  */
 - (void)viewDidLoad {
+  // Data model
   self.channelsList = [[NSMutableArray alloc] init];
 
+  // TODO: Remove example data
   [self.channelsList
       addObject:[[Channel alloc] init:@"Big Buck Bunny"
                       withDescription:@"Big Buck Bunny short film."
                                withIP:@"127.0.0.1"
                              withPort:@"4552"]];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+  // Show navigation bar
+  [self.navigationController setNavigationBarHidden:NO];
 }
 
 /**
@@ -115,13 +122,19 @@
   } else if ([segue.identifier isEqual:@"watchPlayerController"]) {
     UITableViewCell *cell = (UITableViewCell *)sender;
     NSIndexPath *indexPath = [self.tvChannelsList indexPathForCell:cell];
-    int index = indexPath.row;
+    long index = indexPath.row;
     self.selectedChannel = self.channelsList[index];
   }
 
   [vcPlayerController setChannel:self.selectedChannel];
 }
 
+/**
+ *  This method is called when the stacked scene pops out the stack to this
+ * scene
+ *
+ *  @param unwindSegue The storyboard segue
+ */
 - (IBAction)unwindToChannels:(UIStoryboardSegue *)unwindSegue {
 }
 
