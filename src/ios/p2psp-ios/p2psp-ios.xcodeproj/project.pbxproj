@@ -26,6 +26,8 @@
 		A97D88DB1C555CD600428FC7 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88D21C555CD600428FC7 /* CoreMedia.framework */; };
 		A97D88DC1C555CD600428FC7 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88D31C555CD600428FC7 /* AudioToolbox.framework */; };
 		A97D88DD1C555CD600428FC7 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88D41C555CD600428FC7 /* CoreAudio.framework */; };
+		A994296B1C768ADF00CAD774 /* ChannelsController.m in Sources */ = {isa = PBXBuildFile; fileRef = A994296A1C768ADF00CAD774 /* ChannelsController.m */; };
+		A994296E1C768C3200CAD774 /* Channel.m in Sources */ = {isa = PBXBuildFile; fileRef = A994296D1C768C3200CAD774 /* Channel.m */; };
 		A9FE90191C55668F00C7C91C /* libboost.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9FE90181C55668F00C7C91C /* libboost.a */; };
 		A9FE901B1C56A32C00C7C91C /* peer_core.cc in Sources */ = {isa = PBXBuildFile; fileRef = A9FE901A1C56A32C00C7C91C /* peer_core.cc */; };
 		A9FE90201C56A38900C7C91C /* monitor_dbs.cc in Sources */ = {isa = PBXBuildFile; fileRef = A9FE901C1C56A38900C7C91C /* monitor_dbs.cc */; };
@@ -80,6 +82,10 @@
 		A97D88D21C555CD600428FC7 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		A97D88D31C555CD600428FC7 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A97D88D41C555CD600428FC7 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		A99429691C768ADF00CAD774 /* ChannelsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChannelsController.h; sourceTree = "<group>"; };
+		A994296A1C768ADF00CAD774 /* ChannelsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChannelsController.m; sourceTree = "<group>"; };
+		A994296C1C768C3200CAD774 /* Channel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Channel.h; sourceTree = "<group>"; };
+		A994296D1C768C3200CAD774 /* Channel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Channel.m; sourceTree = "<group>"; };
 		A9FE90181C55668F00C7C91C /* libboost.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost.a; path = ../lib/boost/ios/libboost.a; sourceTree = "<group>"; };
 		A9FE901A1C56A32C00C7C91C /* peer_core.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = peer_core.cc; path = ../../core/peer_core.cc; sourceTree = "<group>"; };
 		A9FE901C1C56A38900C7C91C /* monitor_dbs.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = monitor_dbs.cc; path = ../../core/monitor_dbs.cc; sourceTree = "<group>"; };
@@ -151,8 +157,8 @@
 			children = (
 				A97D88981C5557D500428FC7 /* AppDelegate.h */,
 				A97D88991C5557D500428FC7 /* AppDelegate.m */,
-				A97D889B1C5557D500428FC7 /* PlayerController.h */,
-				A97D889C1C5557D500428FC7 /* PlayerController.mm */,
+				A99429701C76903500CAD774 /* model */,
+				A994296F1C76902100CAD774 /* controller */,
 				A97D889E1C5557D500428FC7 /* Main.storyboard */,
 				A97D88A11C5557D500428FC7 /* Assets.xcassets */,
 				A97D88A31C5557D500428FC7 /* LaunchScreen.storyboard */,
@@ -189,6 +195,26 @@
 				A97D88BC1C5557D600428FC7 /* Info.plist */,
 			);
 			path = "p2psp-iosUITests";
+			sourceTree = "<group>";
+		};
+		A994296F1C76902100CAD774 /* controller */ = {
+			isa = PBXGroup;
+			children = (
+				A99429691C768ADF00CAD774 /* ChannelsController.h */,
+				A994296A1C768ADF00CAD774 /* ChannelsController.m */,
+				A97D889B1C5557D500428FC7 /* PlayerController.h */,
+				A97D889C1C5557D500428FC7 /* PlayerController.mm */,
+			);
+			name = controller;
+			sourceTree = "<group>";
+		};
+		A99429701C76903500CAD774 /* model */ = {
+			isa = PBXGroup;
+			children = (
+				A994296C1C768C3200CAD774 /* Channel.h */,
+				A994296D1C768C3200CAD774 /* Channel.m */,
+			);
+			name = model;
 			sourceTree = "<group>";
 		};
 		A9FE90261C56A3A900C7C91C /* core */ = {
@@ -365,7 +391,9 @@
 			files = (
 				A9FE901B1C56A32C00C7C91C /* peer_core.cc in Sources */,
 				A97D889D1C5557D500428FC7 /* PlayerController.mm in Sources */,
+				A994296E1C768C3200CAD774 /* Channel.m in Sources */,
 				A9FE90251C56A39E00C7C91C /* trace.cc in Sources */,
+				A994296B1C768ADF00CAD774 /* ChannelsController.m in Sources */,
 				A97D889A1C5557D500428FC7 /* AppDelegate.m in Sources */,
 				A9FE90231C56A38900C7C91C /* peer_ims.cc in Sources */,
 				A9FE90201C56A38900C7C91C /* monitor_dbs.cc in Sources */,

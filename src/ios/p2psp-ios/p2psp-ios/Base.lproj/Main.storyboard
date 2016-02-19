@@ -10,7 +10,7 @@
         <!--Channel List-->
         <scene sceneID="TMP-TB-WZ7">
             <objects>
-                <viewController id="n6Z-7W-5so" userLabel="Channel List" sceneMemberID="viewController">
+                <viewController id="n6Z-7W-5so" userLabel="Channel List" customClass="ChannelsController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="2UJ-aQ-UIh"/>
                         <viewControllerLayoutGuide type="bottom" id="bjV-yg-au4"/>
@@ -23,22 +23,30 @@
                                 <rect key="frame" x="20" y="20" width="560" height="50"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NEJ-z0-8G3">
-                                        <rect key="frame" x="234" y="9" width="106" height="34"/>
+                                        <rect key="frame" x="154" y="9" width="106" height="34"/>
                                         <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
                                         <inset key="contentEdgeInsets" minX="8" minY="8" maxX="8" maxY="8"/>
-                                        <state key="normal" title="List channels"/>
+                                        <state key="normal" title="Get channels"/>
+                                        <connections>
+                                            <action selector="onGetChannels:" destination="n6Z-7W-5so" eventType="touchDown" id="v5a-Eh-Odo"/>
+                                        </connections>
                                     </button>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tracker address:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LQd-uk-ddH">
-                                        <rect key="frame" x="15" y="15" width="128" height="21"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tracker:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LQd-uk-ddH">
+                                        <rect key="frame" x="0.0" y="15" width="63" height="21"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="128" id="Wo7-GD-p08"/>
                                         </constraints>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
+                                        <variation key="default">
+                                            <mask key="constraints">
+                                                <exclude reference="Wo7-GD-p08"/>
+                                            </mask>
+                                        </variation>
                                     </label>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="127.0.0.1" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ctv-Ec-1fU">
-                                        <rect key="frame" x="151" y="12" width="75" height="30"/>
+                                        <rect key="frame" x="71" y="12" width="75" height="30"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
@@ -54,7 +62,7 @@
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstItem="LQd-uk-ddH" firstAttribute="leading" secondItem="kwp-Rs-Wn6" secondAttribute="leading" constant="15" id="0TH-qq-MXr"/>
+                                    <constraint firstItem="LQd-uk-ddH" firstAttribute="leading" secondItem="kwp-Rs-Wn6" secondAttribute="leading" id="0TH-qq-MXr"/>
                                     <constraint firstItem="LQd-uk-ddH" firstAttribute="centerY" secondItem="kwp-Rs-Wn6" secondAttribute="centerY" id="1Pp-wC-3FL"/>
                                     <constraint firstAttribute="trailing" secondItem="med-nC-BEq" secondAttribute="trailing" id="6Kn-Jp-QKF"/>
                                     <constraint firstItem="ctv-Ec-1fU" firstAttribute="leading" secondItem="LQd-uk-ddH" secondAttribute="trailing" constant="8" id="AO1-xE-DNx"/>
@@ -82,11 +90,11 @@
                                 <rect key="frame" x="20" y="70" width="560" height="530"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" textLabel="Mp6-kM-Fd8" detailTextLabel="lOz-Wv-XPZ" style="IBUITableViewCellStyleSubtitle" id="qQe-km-D60">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="ChannelCell" textLabel="Mp6-kM-Fd8" detailTextLabel="lOz-Wv-XPZ" style="IBUITableViewCellStyleSubtitle" id="qQe-km-D60">
                                         <rect key="frame" x="0.0" y="28" width="560" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="qQe-km-D60" id="QN7-UE-sYQ">
-                                            <rect key="frame" x="0.0" y="0.0" width="560" height="43"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="527" height="43"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Mp6-kM-Fd8">
@@ -108,6 +116,10 @@
                                     </tableViewCell>
                                 </prototypes>
                                 <sections/>
+                                <connections>
+                                    <outlet property="dataSource" destination="n6Z-7W-5so" id="1ZD-nZ-JYR"/>
+                                    <outlet property="delegate" destination="n6Z-7W-5so" id="Zxx-BO-fC1"/>
+                                </connections>
                             </tableView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -124,6 +136,9 @@
                             <constraint firstItem="kwp-Rs-Wn6" firstAttribute="leading" secondItem="czq-8W-pys" secondAttribute="leadingMargin" id="yfG-eh-sy0"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="tvChannelsList" destination="i8L-A3-MlV" id="Xso-H4-Z8X"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="JEk-Xu-g1I" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
