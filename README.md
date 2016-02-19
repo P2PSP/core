@@ -8,7 +8,7 @@ find an implementation of the P2PSP.
 
 ### This is a description of the files/directories:
 
-* doc: information about the use of the implementation.
+* doc: information about compiling, using, etc. P2PSP.
 
 * README.md: this file.
 
