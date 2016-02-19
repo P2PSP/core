@@ -99,7 +99,8 @@ A P2PSP overlay network is composed the entities (in general, nodes of the overl
 Sets or Rules
 -------------
 
-The protocol is organized into layers, each of them implementing a different set of rules (SoR). Each SoR solves a specific problem. Some are compulsory and others are optional.
+The protocol is organized into layers, each of them implementing a different set of rules (SoR). Each
+layer solves a specific problem.
 
 1. [IMS (Ip Multicast Set of rules)](IMS/README.md)
 2. [DBS (Data Broadcasting Set of rules)](DBS/README.md)
