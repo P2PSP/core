@@ -8,6 +8,15 @@
 
 #import "ChannelsController.h"
 
+@interface ChannelsController ()<UITableViewDataSource, UITableViewDelegate>
+
+@property(nonatomic) NSMutableArray<Channel *> *channelsList;
+@property(nonatomic) Channel *selectedChannel;
+
+@property(weak, nonatomic) IBOutlet UITableView *tvChannelsList;
+
+@end
+
 @implementation ChannelsController
 
 /**
@@ -66,15 +75,42 @@
   return cell;
 };
 
+/**
+ *  Callback for getChannels button
+ *
+ *  @param sender The UIButton
+ */
 - (IBAction)onGetChannels:(id)sender {
   [self.channelsList
       addObject:[[Channel alloc]
                         init:[NSString
                                  stringWithFormat:@"%@%lu", @"Example",
-                                                  [self.channelsList count]]
-                      withIP:@"127.0.0.1"
-                    withPort:@"4552"]];
+                                                  (unsigned long)
+                                                      [self.channelsList count]]
+                      withIP:@"127.0.0.2"
+                    withPort:@"4553"]];
 
   [self.tvChannelsList reloadData];
 }
+
+/**
+ *  Prepare the data to pass to the next viewcontroller
+ *
+ *  @param segue  The segue reference
+ *  @param sender The UIView sender
+ */
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+  if ([segue.identifier isEqual:@"watchPlayerController"]) {
+    UITableViewCell *cell = (UITableViewCell *)sender;
+    NSIndexPath *indexPath = [self.tvChannelsList indexPathForCell:cell];
+    int index = indexPath.row;
+    self.selectedChannel = self.channelsList[index];
+
+    PlayerController *vcPlayerController =
+        (PlayerController *)segue.destinationViewController;
+
+    [vcPlayerController setChannel:self.selectedChannel];
+  }
+}
+
 @end

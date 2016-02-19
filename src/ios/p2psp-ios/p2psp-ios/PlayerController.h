@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Channel.h"
 
 @interface PlayerController : UIViewController
+
+- (void)setChannel:(Channel*)channel;
 
 @end

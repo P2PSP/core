@@ -11,6 +11,7 @@
 #import "PlayerController.h"
 
 @interface PlayerController ()<VLCMediaPlayerDelegate>
+
 @property(strong, nonatomic) IBOutlet UIView *mainView;
 @property(weak, nonatomic) IBOutlet UITextField *tfSplitterAddr;
 @property(weak, nonatomic) IBOutlet UITextField *tfSplitterPort;
@@ -26,6 +27,10 @@
     IBOutlet NSLayoutConstraint *playerContainterHeightConstraint;
 @property(weak, nonatomic)
     IBOutlet NSLayoutConstraint *playerContainerBottomConstraint;
+@property(weak, nonatomic) IBOutlet UILabel *lbChannelTitle;
+@property(weak, nonatomic) IBOutlet UILabel *lbChannelDescription;
+
+@property(nonatomic) Channel *currentChannel;
 
 @end
 
@@ -43,6 +48,14 @@ BOOL isFullScreen = NO;
  */
 - (void)viewDidLoad {
   [super viewDidLoad];
+
+  // Hide navigation bar
+  [self.navigationController setNavigationBarHidden:YES];
+
+  // Load data
+  self.tfSplitterAddr.text = [self.currentChannel ip];
+  self.tfSplitterPort.text = [self.currentChannel port];
+  self.lbChannelTitle.text = [self.currentChannel title];
 
   [self.mainView addSubview:self.playerContainer];
 
@@ -293,6 +306,10 @@ BOOL isFullScreen = NO;
         removeConstraint:self.playerContainterHeightConstraint];
     [self.mainView addConstraint:self.playerContainerBottomConstraint];
   }
+}
+
+- (void)setChannel:(Channel *)channel {
+  self.currentChannel = channel;
 }
 
 @end

@@ -8,13 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import "Channel.h"
+#import "PlayerController.h"
 
-@interface ChannelsController
-    : UIViewController<UITableViewDataSource, UITableViewDelegate>
-
-@property(nonatomic) NSMutableArray<Channel *> *channelsList;
-
-@property(weak, nonatomic) IBOutlet UITableView *tvChannelsList;
+@interface ChannelsController : UIViewController
 
 - (IBAction)onGetChannels:(id)sender;
 
