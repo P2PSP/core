@@ -56,7 +56,7 @@
 
 /* Begin PBXFileReference section */
 		A979A5CB1C6B4AA4003DD37C /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		A97D88921C5557D500428FC7 /* p2psp-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "p2psp-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A97D88921C5557D500428FC7 /* P2PSP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = P2PSP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A97D88961C5557D500428FC7 /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
 		A97D88981C5557D500428FC7 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		A97D88991C5557D500428FC7 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -145,7 +145,7 @@
 		A97D88931C5557D500428FC7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A97D88921C5557D500428FC7 /* p2psp-ios.app */,
+				A97D88921C5557D500428FC7 /* P2PSP.app */,
 				A97D88AB1C5557D600428FC7 /* p2psp-iosTests.xctest */,
 				A97D88B61C5557D600428FC7 /* p2psp-iosUITests.xctest */,
 			);
@@ -261,9 +261,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A97D88911C5557D500428FC7 /* p2psp-ios */ = {
+		A97D88911C5557D500428FC7 /* P2PSP */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A97D88BF1C5557D600428FC7 /* Build configuration list for PBXNativeTarget "p2psp-ios" */;
+			buildConfigurationList = A97D88BF1C5557D600428FC7 /* Build configuration list for PBXNativeTarget "P2PSP" */;
 			buildPhases = (
 				A97D888E1C5557D500428FC7 /* Sources */,
 				A97D888F1C5557D500428FC7 /* Frameworks */,
@@ -273,9 +273,9 @@
 			);
 			dependencies = (
 			);
-			name = "p2psp-ios";
+			name = P2PSP;
 			productName = "p2psp-ios";
-			productReference = A97D88921C5557D500428FC7 /* p2psp-ios.app */;
+			productReference = A97D88921C5557D500428FC7 /* P2PSP.app */;
 			productType = "com.apple.product-type.application";
 		};
 		A97D88AA1C5557D600428FC7 /* p2psp-iosTests */ = {
@@ -349,7 +349,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A97D88911C5557D500428FC7 /* p2psp-ios */,
+				A97D88911C5557D500428FC7 /* P2PSP */,
 				A97D88AA1C5557D600428FC7 /* p2psp-iosTests */,
 				A97D88B51C5557D600428FC7 /* p2psp-iosUITests */,
 			);
@@ -424,12 +424,12 @@
 /* Begin PBXTargetDependency section */
 		A97D88AD1C5557D600428FC7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = A97D88911C5557D500428FC7 /* p2psp-ios */;
+			target = A97D88911C5557D500428FC7 /* P2PSP */;
 			targetProxy = A97D88AC1C5557D600428FC7 /* PBXContainerItemProxy */;
 		};
 		A97D88B81C5557D600428FC7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = A97D88911C5557D500428FC7 /* p2psp-ios */;
+			target = A97D88911C5557D500428FC7 /* P2PSP */;
 			targetProxy = A97D88B71C5557D600428FC7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -549,14 +549,14 @@
 					"$(PROJECT_DIR)/../lib/openssl/include",
 				);
 				INFOPLIST_FILE = "p2psp-ios/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../lib/boost/ios",
 					"$(PROJECT_DIR)/../lib/openssl/lib",
 				);
 				OTHER_LDFLAGS = "-liconv";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.luxunda.p2psp-ios";
+				PRODUCT_BUNDLE_IDENTIFIER = org.luxunda.p2psp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -572,14 +572,14 @@
 					"$(PROJECT_DIR)/../lib/openssl/include",
 				);
 				INFOPLIST_FILE = "p2psp-ios/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../lib/boost/ios",
 					"$(PROJECT_DIR)/../lib/openssl/lib",
 				);
 				OTHER_LDFLAGS = "-liconv";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.luxunda.p2psp-ios";
+				PRODUCT_BUNDLE_IDENTIFIER = org.luxunda.p2psp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -644,7 +644,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A97D88BF1C5557D600428FC7 /* Build configuration list for PBXNativeTarget "p2psp-ios" */ = {
+		A97D88BF1C5557D600428FC7 /* Build configuration list for PBXNativeTarget "P2PSP" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A97D88C01C5557D600428FC7 /* Debug */,
