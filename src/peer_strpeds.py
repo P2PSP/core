@@ -85,6 +85,7 @@ class Peer_StrpeDs(Peer_DBS):
         _print_("bad peer: " + str(sender))
         self.bad_peers.append(sender)
         self.peer_list.remove(sender)
+        self.send_bad_peer_message(sender)
 
     def unpack_message(self, message):
         # {{{
@@ -113,3 +114,8 @@ class Peer_StrpeDs(Peer_DBS):
 
     def is_current_message_from_splitter(self):
         return self.current_sender == self.splitter
+
+    def send_bad_peer_message(self, sender):
+        ip = struct.unpack("!L", socket.inet_aton(sender[0]))[0]
+        msg = struct.pack('3sii', 'MAL', ip, sender[1])
+        self.team_socket.sendto(msg, self.splitter)

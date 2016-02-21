@@ -155,7 +155,7 @@ class StrpeDsSplitter(Splitter_LRS):
 
     def receive_message(self):
         try:
-            return self.team_socket.recvfrom(struct.calcsize("3sH"))
+            return self.team_socket.recvfrom(struct.calcsize("3sii"))
         except:
             if __debug__:
                 print("DBS: Unexpected error:", sys.exc_info()[0])
@@ -174,6 +174,8 @@ class StrpeDsSplitter(Splitter_LRS):
                 self.process_lost_chunk(lost_chunk_number, sender)
             elif len(message) == 6:
                 self.process_bad_peers_message(message, sender)
+            elif len(message) == 12:
+                self.process_bad_peer_message(message, sender)
             else:
                 # {{{ The peer wants to leave the team.
 
@@ -200,7 +202,6 @@ class StrpeDsSplitter(Splitter_LRS):
     def handle_bad_peer_from_trusted(self, bad_peer, sender):
         self.add_complain(bad_peer, sender)
         self.punish_peer(bad_peer, "by trusted")
-        return
 
     def handle_bad_peer_from_regular(self, bad_peer, sender):
         self.add_complain(bad_peer, sender)
@@ -229,3 +230,9 @@ class StrpeDsSplitter(Splitter_LRS):
 
     def build_log_message(self, message):
         return "{0}\t{1}".format(repr(time.time()), message)
+
+    def process_bad_peer_message(self, message, sender):
+        if sender in self.trusted_peers:
+            x = struct.unpack("3sii", message)
+            bad_peer = (socket.inet_ntoa(struct.pack('!L', x[1])), x[2])
+            self.handle_bad_peer_from_trusted(bad_peer, message)
