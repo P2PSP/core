@@ -10,10 +10,12 @@
 
 @interface ChannelsController ()<UITableViewDataSource, UITableViewDelegate>
 
-@property(nonatomic) NSMutableArray<Channel *> *channelsList;
+@property(nonatomic) NSArray<Channel *> *channelsList;
 @property(nonatomic) Channel *selectedChannel;
+@property(nonatomic) BocastClient *bocastClient;
 
 @property(weak, nonatomic) IBOutlet UITableView *tvChannelsList;
+@property(weak, nonatomic) IBOutlet UITextField *tfServerAddress;
 
 @end
 
@@ -23,15 +25,10 @@
  *  Callback called when the assocciated view is loaded
  */
 - (void)viewDidLoad {
+  self.bocastClient = [[BocastClient alloc] initWithBocastClientDelegate:self];
+
   // Data model
   self.channelsList = [[NSMutableArray alloc] init];
-
-  // TODO: Remove example data
-  [self.channelsList
-      addObject:[[Channel alloc] init:@"Big Buck Bunny"
-                      withDescription:@"Big Buck Bunny short film."
-                               withIP:@"127.0.0.1"
-                             withPort:@"4552"]];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -77,7 +74,6 @@
   NSString *ip = [[self.channelsList objectAtIndex:indexPath.row] ip];
   NSString *port = [[self.channelsList objectAtIndex:indexPath.row] port];
   NSString *address = [NSString stringWithFormat:@"%@%@%@", ip, @":", port];
-  ;
 
   cell.detailTextLabel.text = address;
 
@@ -90,18 +86,13 @@
  *  @param sender The UIButton
  */
 - (IBAction)onGetChannels:(id)sender {
-  [self.channelsList
-      addObject:[[Channel alloc]
-                               init:[NSString
-                                        stringWithFormat:@"%@%lu", @"Example",
-                                                         (unsigned long)
-                                                             [self.channelsList
-                                                                     count]]
-                    withDescription:@"Example channel."
-                             withIP:@"127.0.0.2"
-                           withPort:@"4553"]];
+  // TODO: Display loading icon
+  NSString *address = self.tfServerAddress.text;
+  NSString *url = [NSString
+      stringWithFormat:@"%@%@%@", @"http://", address, @"/api/channels"];
 
-  [self.tvChannelsList reloadData];
+  self.bocastClient.bocastURL = [NSURL URLWithString:url];
+  [self.bocastClient requestChannelsList];
 }
 
 /**
@@ -136,6 +127,40 @@
  *  @param unwindSegue The storyboard segue
  */
 - (IBAction)unwindToChannels:(UIStoryboardSegue *)unwindSegue {
+}
+
+/**
+ *  BocastClientDelegate - Shows an UIAlertView to display errors
+ *
+ *  @param error The error object
+ */
+- (void)onError:(NSError *)error {
+  // TODO: Hide loading icon
+  dispatch_async(dispatch_get_main_queue(), ^{
+    UIAlertView *alert =
+        [[UIAlertView alloc] initWithTitle:@"Error"
+                                   message:[error localizedDescription]
+                                  delegate:self
+                         cancelButtonTitle:@"OK"
+                         otherButtonTitles:nil];
+    [alert show];
+  });
+}
+
+/**
+ *  BocastClientDelegate - Get the values of the channels obtained from the
+ * server
+ *
+ *  @param channelsList The array of the channels
+ */
+- (void)onChannelsListSuccess:(NSArray<Channel *> *)channelsList {
+  // TODO: Hide loading icon
+  self.channelsList = channelsList;
+
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [self.tvChannelsList reloadData];
+    [self.tvChannelsList setNeedsDisplay];
+  });
 }
 
 @end

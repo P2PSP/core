@@ -10,10 +10,11 @@
 
 @implementation BocastClient
 
-- (instancetype)initWithString:(NSString *)urlString {
+- (instancetype)initWithBocastClientDelegate:
+    (id<BocastClientDelegate>)bocastClientDelegate {
   self = [super init];
   if (self) {
-    self.bocastURL = [[NSURL alloc] initWithString:urlString];
+    self.bocastClientDelegate = bocastClientDelegate;
   }
   return self;
 }
@@ -77,7 +78,9 @@
     [channelsList addObject:channel];
   }
 
-  // TODO: Call delegate
+  [self.bocastClientDelegate
+      onChannelsListSuccess:[[NSArray<Channel *> alloc]
+                                initWithArray:channelsList]];
 }
 
 /**
@@ -86,7 +89,7 @@
  *  @param error The error object
  */
 - (void)hanldeError:(NSError *)error {
-  // TODO: Call delegate
+  [self.bocastClientDelegate onError:error];
 }
 
 @end

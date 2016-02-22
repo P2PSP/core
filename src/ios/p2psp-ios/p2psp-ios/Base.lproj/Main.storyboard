@@ -22,8 +22,8 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kwp-Rs-Wn6" userLabel="Server connection">
                                 <rect key="frame" x="20" y="0.0" width="560" height="50"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NEJ-z0-8G3">
-                                        <rect key="frame" x="146" y="9" width="106" height="34"/>
+                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NEJ-z0-8G3">
+                                        <rect key="frame" x="454" y="9" width="106" height="34"/>
                                         <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
                                         <inset key="contentEdgeInsets" minX="8" minY="8" maxX="8" maxY="8"/>
                                         <state key="normal" title="Get channels"/>
@@ -45,8 +45,8 @@
                                             </mask>
                                         </variation>
                                     </label>
-                                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="127.0.0.1" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ctv-Ec-1fU">
-                                        <rect key="frame" x="63" y="12" width="75" height="30"/>
+                                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="localhost:8080" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ctv-Ec-1fU">
+                                        <rect key="frame" x="63" y="12" width="383" height="30"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
@@ -56,15 +56,18 @@
                                     <constraint firstItem="LQd-uk-ddH" firstAttribute="leading" secondItem="kwp-Rs-Wn6" secondAttribute="leading" id="0TH-qq-MXr"/>
                                     <constraint firstItem="LQd-uk-ddH" firstAttribute="centerY" secondItem="kwp-Rs-Wn6" secondAttribute="centerY" id="1Pp-wC-3FL"/>
                                     <constraint firstItem="ctv-Ec-1fU" firstAttribute="leading" secondItem="LQd-uk-ddH" secondAttribute="trailing" constant="8" id="AO1-xE-DNx"/>
+                                    <constraint firstAttribute="trailing" secondItem="NEJ-z0-8G3" secondAttribute="trailing" id="G8k-ti-uPi"/>
                                     <constraint firstAttribute="height" constant="50" id="KFq-Sr-oVw"/>
                                     <constraint firstItem="NEJ-z0-8G3" firstAttribute="leading" secondItem="ctv-Ec-1fU" secondAttribute="trailing" constant="8" id="POn-oi-DtH"/>
                                     <constraint firstItem="ctv-Ec-1fU" firstAttribute="baseline" secondItem="LQd-uk-ddH" secondAttribute="baseline" id="fBi-8g-quN"/>
                                     <constraint firstItem="NEJ-z0-8G3" firstAttribute="baseline" secondItem="ctv-Ec-1fU" secondAttribute="baseline" id="hcv-pK-fNC"/>
                                     <constraint firstItem="LQd-uk-ddH" firstAttribute="top" secondItem="kwp-Rs-Wn6" secondAttribute="top" constant="8" id="yPt-dc-pfG"/>
+                                    <constraint firstItem="ctv-Ec-1fU" firstAttribute="trailing" secondItem="NEJ-z0-8G3" secondAttribute="leading" constant="-8" id="yry-Qy-yv9"/>
                                 </constraints>
                                 <variation key="default">
                                     <mask key="constraints">
                                         <exclude reference="yPt-dc-pfG"/>
+                                        <exclude reference="POn-oi-DtH"/>
                                     </mask>
                                 </variation>
                             </view>
@@ -128,6 +131,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="tfServerAddress" destination="ctv-Ec-1fU" id="upd-Ku-Ict"/>
                         <outlet property="tvChannelsList" destination="i8L-A3-MlV" id="Xso-H4-Z8X"/>
                     </connections>
                 </viewController>

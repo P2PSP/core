@@ -7,10 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BocastClient.h"
 #import "Channel.h"
 #import "PlayerController.h"
 
-@interface ChannelsController : UIViewController
+@interface ChannelsController : UIViewController<BocastClientDelegate>
 
 - (IBAction)onGetChannels:(id)sender;
 - (IBAction)unwindToChannels:(UIStoryboardSegue *)unwindSegue;
