@@ -15,5 +15,6 @@
 
 - (IBAction)onGetChannels:(id)sender;
 - (IBAction)unwindToChannels:(UIStoryboardSegue *)unwindSegue;
+- (IBAction)onKeyboardDismiss:(id)sender;
 
 @end

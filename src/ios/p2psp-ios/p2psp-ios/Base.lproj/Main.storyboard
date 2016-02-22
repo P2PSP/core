@@ -112,6 +112,7 @@
                             </tableView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <gestureRecognizers/>
                         <constraints>
                             <constraint firstAttribute="trailingMargin" secondItem="i8L-A3-MlV" secondAttribute="trailing" id="Ae9-z2-MwU"/>
                             <constraint firstItem="kwp-Rs-Wn6" firstAttribute="top" secondItem="2UJ-aQ-UIh" secondAttribute="bottom" id="Ivq-SB-yIs"/>
@@ -121,6 +122,9 @@
                             <constraint firstItem="i8L-A3-MlV" firstAttribute="leading" secondItem="czq-8W-pys" secondAttribute="leadingMargin" id="tDT-Zv-ncN"/>
                             <constraint firstItem="kwp-Rs-Wn6" firstAttribute="leading" secondItem="czq-8W-pys" secondAttribute="leadingMargin" id="yfG-eh-sy0"/>
                         </constraints>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="HVU-AS-Pcb" appends="YES" id="nGI-vw-GrR"/>
+                        </connections>
                     </view>
                     <navigationItem key="navigationItem" title="Channels" id="X7P-xw-XJg">
                         <barButtonItem key="rightBarButtonItem" title="Player" id="9R2-hW-5zh">
@@ -136,6 +140,11 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="JEk-Xu-g1I" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="HVU-AS-Pcb">
+                    <connections>
+                        <action selector="onKeyboardDismiss:" destination="n6Z-7W-5so" id="Ggl-ME-E9m"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="381" y="344"/>
         </scene>

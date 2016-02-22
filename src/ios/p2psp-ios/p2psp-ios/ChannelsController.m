@@ -130,6 +130,16 @@
 }
 
 /**
+ *  Dissmiss keyboard
+ *
+ *  @param sender The sender of the IBAction
+ */
+- (IBAction)onKeyboardDismiss:(id)sender {
+  [sender setCancelsTouchesInView:NO];
+  [self.view endEditing:YES];
+}
+
+/**
  *  BocastClientDelegate - Shows an UIAlertView to display errors
  *
  *  @param error The error object
