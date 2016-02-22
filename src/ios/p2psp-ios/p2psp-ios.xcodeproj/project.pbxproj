@@ -28,6 +28,7 @@
 		A97D88DD1C555CD600428FC7 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A97D88D41C555CD600428FC7 /* CoreAudio.framework */; };
 		A994296B1C768ADF00CAD774 /* ChannelsController.m in Sources */ = {isa = PBXBuildFile; fileRef = A994296A1C768ADF00CAD774 /* ChannelsController.m */; };
 		A994296E1C768C3200CAD774 /* Channel.m in Sources */ = {isa = PBXBuildFile; fileRef = A994296D1C768C3200CAD774 /* Channel.m */; };
+		A9DC89681C7B2FD300151F87 /* BocastClient.m in Sources */ = {isa = PBXBuildFile; fileRef = A9DC89671C7B2FD300151F87 /* BocastClient.m */; };
 		A9FE90191C55668F00C7C91C /* libboost.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9FE90181C55668F00C7C91C /* libboost.a */; };
 		A9FE901B1C56A32C00C7C91C /* peer_core.cc in Sources */ = {isa = PBXBuildFile; fileRef = A9FE901A1C56A32C00C7C91C /* peer_core.cc */; };
 		A9FE90201C56A38900C7C91C /* monitor_dbs.cc in Sources */ = {isa = PBXBuildFile; fileRef = A9FE901C1C56A38900C7C91C /* monitor_dbs.cc */; };
@@ -86,6 +87,8 @@
 		A994296A1C768ADF00CAD774 /* ChannelsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChannelsController.m; sourceTree = "<group>"; };
 		A994296C1C768C3200CAD774 /* Channel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Channel.h; sourceTree = "<group>"; };
 		A994296D1C768C3200CAD774 /* Channel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Channel.m; sourceTree = "<group>"; };
+		A9DC89661C7B2FD300151F87 /* BocastClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BocastClient.h; sourceTree = "<group>"; };
+		A9DC89671C7B2FD300151F87 /* BocastClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BocastClient.m; sourceTree = "<group>"; };
 		A9FE90181C55668F00C7C91C /* libboost.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost.a; path = ../lib/boost/ios/libboost.a; sourceTree = "<group>"; };
 		A9FE901A1C56A32C00C7C91C /* peer_core.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = peer_core.cc; path = ../../core/peer_core.cc; sourceTree = "<group>"; };
 		A9FE901C1C56A38900C7C91C /* monitor_dbs.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = monitor_dbs.cc; path = ../../core/monitor_dbs.cc; sourceTree = "<group>"; };
@@ -157,6 +160,7 @@
 			children = (
 				A97D88981C5557D500428FC7 /* AppDelegate.h */,
 				A97D88991C5557D500428FC7 /* AppDelegate.m */,
+				A9DC89691C7B2FDA00151F87 /* network */,
 				A99429701C76903500CAD774 /* model */,
 				A994296F1C76902100CAD774 /* controller */,
 				A97D889E1C5557D500428FC7 /* Main.storyboard */,
@@ -215,6 +219,15 @@
 				A994296D1C768C3200CAD774 /* Channel.m */,
 			);
 			name = model;
+			sourceTree = "<group>";
+		};
+		A9DC89691C7B2FDA00151F87 /* network */ = {
+			isa = PBXGroup;
+			children = (
+				A9DC89661C7B2FD300151F87 /* BocastClient.h */,
+				A9DC89671C7B2FD300151F87 /* BocastClient.m */,
+			);
+			name = network;
 			sourceTree = "<group>";
 		};
 		A9FE90261C56A3A900C7C91C /* core */ = {
@@ -390,6 +403,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A9FE901B1C56A32C00C7C91C /* peer_core.cc in Sources */,
+				A9DC89681C7B2FD300151F87 /* BocastClient.m in Sources */,
 				A97D889D1C5557D500428FC7 /* PlayerController.mm in Sources */,
 				A994296E1C768C3200CAD774 /* Channel.m in Sources */,
 				A9FE90251C56A39E00C7C91C /* trace.cc in Sources */,
