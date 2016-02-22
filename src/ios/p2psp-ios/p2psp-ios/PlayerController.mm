@@ -34,6 +34,12 @@
 @property(nonatomic) IBOutlet UIBarButtonItem *bbiPlay;
 @property(nonatomic) IBOutlet UIBarButtonItem *bbiStop;
 
+/**
+ *  This properties define the splitter debug / channel info
+ */
+@property(weak, nonatomic) IBOutlet UIView *vDebugSplitter;
+@property(weak, nonatomic) IBOutlet UIView *vDescriptionBox;
+
 @property(nonatomic) Channel *currentChannel;
 
 @end
@@ -88,7 +94,7 @@ BOOL isFullScreen = NO;
   [self.tbTopControllers setShadowImage:[UIImage new]
                      forToolbarPosition:UIToolbarPositionAny];
 
-  // Load data
+  // Load channel data
   self.tfSplitterAddr.text = [self.currentChannel ip];
   self.tfSplitterPort.text = [self.currentChannel port];
   self.lbChannelTitle.text = [self.currentChannel title];
@@ -107,6 +113,17 @@ BOOL isFullScreen = NO;
          selector:@selector(orientationChanged:)
              name:UIDeviceOrientationDidChangeNotification
            object:[UIDevice currentDevice]];
+
+  if ([self.currentChannel.title isEqualToString:@""]) {
+    // Hide description box and show debug pannel
+    self.vDescriptionBox.hidden = YES;
+    self.vDebugSplitter.hidden = NO;
+  } else {
+    // Display channel info and autoplay
+    self.vDescriptionBox.hidden = NO;
+    self.vDebugSplitter.hidden = YES;
+    [self play];
+  }
 }
 
 - (void)didReceiveMemoryWarning {
@@ -120,6 +137,13 @@ BOOL isFullScreen = NO;
  *  @param sender The pressed button
  */
 - (IBAction)onPlay:(id)sender {
+  [self play];
+}
+
+/**
+ *  Starts playing the stream
+ */
+- (void)play {
   if (self.playing) {
     return;
   }
@@ -170,6 +194,10 @@ BOOL isFullScreen = NO;
  *  @param sender The pressed button
  */
 - (IBAction)onStop:(id)sender {
+  [self stop];
+}
+
+- (void)stop {
   if (!self.playing) {
     return;
   }
@@ -358,7 +386,7 @@ BOOL isFullScreen = NO;
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
   if ([segue.identifier isEqual:@"backToChannelController"]) {
-    [self onStop:sender];
+    [self stop];
   }
 }
 

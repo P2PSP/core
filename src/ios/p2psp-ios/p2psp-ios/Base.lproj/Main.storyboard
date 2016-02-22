@@ -127,10 +127,10 @@
                         </connections>
                     </view>
                     <navigationItem key="navigationItem" title="Channels" id="X7P-xw-XJg">
-                        <barButtonItem key="rightBarButtonItem" title="Player" id="9R2-hW-5zh">
+                        <barButtonItem key="rightBarButtonItem" title="Debug" id="9R2-hW-5zh">
                             <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <connections>
-                                <segue destination="BYZ-38-t0r" kind="show" identifier="watchDefaultPlayerController" id="98g-44-O5V"/>
+                                <segue destination="BYZ-38-t0r" kind="show" identifier="debugSplitter" id="98g-44-O5V"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -253,8 +253,8 @@
                                     <constraint firstAttribute="trailing" secondItem="UqM-3R-sxa" secondAttribute="trailing" id="xhp-a7-R3u"/>
                                 </constraints>
                             </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gUL-nG-44W" userLabel="Debug splitter">
-                                <rect key="frame" x="20" y="462" width="560" height="74"/>
+                            <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gUL-nG-44W" userLabel="Debug splitter">
+                                <rect key="frame" x="20" y="354" width="560" height="182"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Splitter addr:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mTv-AD-3VN">
                                         <rect key="frame" x="0.0" y="3" width="105" height="21"/>
@@ -318,8 +318,8 @@
                             <constraint firstAttribute="trailing" secondItem="gAm-od-oPW" secondAttribute="trailing" id="SkP-hR-GvT"/>
                             <constraint firstItem="gAm-od-oPW" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="UCT-so-rGH"/>
                             <constraint firstItem="E3h-cv-QQv" firstAttribute="bottom" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="XZ6-8i-oXx"/>
-                            <constraint firstItem="gUL-nG-44W" firstAttribute="top" secondItem="LRQ-IJ-H9f" secondAttribute="bottom" constant="8" id="ZUy-w9-ZmQ"/>
                             <constraint firstItem="E3h-cv-QQv" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="cj9-PK-B4s"/>
+                            <constraint firstItem="gUL-nG-44W" firstAttribute="top" secondItem="gAm-od-oPW" secondAttribute="bottom" constant="16" id="dc6-qv-WKt"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="gAm-od-oPW" secondAttribute="bottom" id="e5g-wQ-31b"/>
                             <constraint firstItem="LRQ-IJ-H9f" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="nY5-P4-4lI"/>
                             <constraint firstAttribute="bottomMargin" secondItem="gUL-nG-44W" secondAttribute="bottom" id="ozg-0L-pCs"/>
@@ -346,6 +346,8 @@
                         <outlet property="tbTopControllers" destination="gEc-0e-1eF" id="phC-vy-sFV"/>
                         <outlet property="tfSplitterAddr" destination="YYQ-4l-l09" id="NHB-i6-ik0"/>
                         <outlet property="tfSplitterPort" destination="cao-l7-ob1" id="FES-fz-sYf"/>
+                        <outlet property="vDebugSplitter" destination="gUL-nG-44W" id="irP-Yn-SBa"/>
+                        <outlet property="vDescriptionBox" destination="LRQ-IJ-H9f" id="WH4-eE-Fjp"/>
                         <outlet property="videoSubView" destination="VtA-CU-F42" id="kP1-c4-5LE"/>
                     </connections>
                 </viewController>

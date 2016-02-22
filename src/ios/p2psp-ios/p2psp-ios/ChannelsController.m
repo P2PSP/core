@@ -105,11 +105,14 @@
   PlayerController *vcPlayerController =
       (PlayerController *)segue.destinationViewController;
 
-  if ([segue.identifier isEqual:@"watchDefaultPlayerController"]) {
-    self.selectedChannel = [[Channel alloc] init:@"Splitter"
-                                 withDescription:@"Default splitter address."
+  // Debug splitter segue
+  if ([segue.identifier isEqual:@"debugSplitter"]) {
+    self.selectedChannel = [[Channel alloc] init:@""
+                                 withDescription:@""
                                           withIP:@"127.0.0.1"
                                         withPort:@"4552"];
+
+    // Channel selected segue
   } else if ([segue.identifier isEqual:@"watchPlayerController"]) {
     UITableViewCell *cell = (UITableViewCell *)sender;
     NSIndexPath *indexPath = [self.tvChannelsList indexPathForCell:cell];
