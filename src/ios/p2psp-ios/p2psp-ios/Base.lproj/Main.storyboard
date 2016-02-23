@@ -23,10 +23,10 @@
                                 <rect key="frame" x="20" y="0.0" width="560" height="50"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NEJ-z0-8G3">
-                                        <rect key="frame" x="454" y="9" width="106" height="34"/>
+                                        <rect key="frame" x="519" y="9" width="41" height="34"/>
                                         <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
                                         <inset key="contentEdgeInsets" minX="8" minY="8" maxX="8" maxY="8"/>
-                                        <state key="normal" title="Get channels"/>
+                                        <state key="normal" title="Get"/>
                                         <connections>
                                             <action selector="onGetChannels:" destination="n6Z-7W-5so" eventType="touchDown" id="v5a-Eh-Odo"/>
                                         </connections>
@@ -46,7 +46,7 @@
                                         </variation>
                                     </label>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="localhost:8080" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ctv-Ec-1fU">
-                                        <rect key="frame" x="63" y="12" width="383" height="30"/>
+                                        <rect key="frame" x="63" y="12" width="448" height="30"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
@@ -225,34 +225,6 @@
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="0.0"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LRQ-IJ-H9f" userLabel="Description box">
-                                <rect key="frame" x="20" y="354" width="560" height="100"/>
-                                <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" text="Title of the channel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IzV-Bc-JAp" userLabel="Video Title">
-                                        <rect key="frame" x="0.0" y="0.0" width="560" height="36"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="30"/>
-                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="wordWrap" numberOfLines="5" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UqM-3R-sxa" userLabel="Video Description">
-                                        <rect key="frame" x="0.0" y="44" width="560" height="41"/>
-                                        <string key="text">Description of the channel. Description of the channel. Description of the channel. Description of the channel. Description of the channel. </string>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                </subviews>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <constraints>
-                                    <constraint firstItem="UqM-3R-sxa" firstAttribute="top" secondItem="IzV-Bc-JAp" secondAttribute="bottom" constant="8" id="T5I-bD-fio"/>
-                                    <constraint firstItem="IzV-Bc-JAp" firstAttribute="top" secondItem="LRQ-IJ-H9f" secondAttribute="top" id="YoS-We-sZn"/>
-                                    <constraint firstAttribute="height" constant="100" id="fJJ-Dc-Kki"/>
-                                    <constraint firstAttribute="trailing" secondItem="IzV-Bc-JAp" secondAttribute="trailing" id="iMO-FB-KGQ"/>
-                                    <constraint firstItem="IzV-Bc-JAp" firstAttribute="leading" secondItem="LRQ-IJ-H9f" secondAttribute="leading" id="nr9-18-dNp"/>
-                                    <constraint firstItem="UqM-3R-sxa" firstAttribute="leading" secondItem="LRQ-IJ-H9f" secondAttribute="leading" id="t34-NY-fZ6"/>
-                                    <constraint firstAttribute="trailing" secondItem="UqM-3R-sxa" secondAttribute="trailing" id="xhp-a7-R3u"/>
-                                </constraints>
-                            </view>
                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gUL-nG-44W" userLabel="Debug splitter">
                                 <rect key="frame" x="20" y="354" width="560" height="182"/>
                                 <subviews>
@@ -305,6 +277,41 @@
                                     <mask key="constraints">
                                         <exclude reference="Rej-cS-5xd"/>
                                         <exclude reference="5q9-zi-Zp7"/>
+                                    </mask>
+                                </variation>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LRQ-IJ-H9f" userLabel="Description box">
+                                <rect key="frame" x="20" y="354" width="560" height="81"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" text="Title of the channel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IzV-Bc-JAp" userLabel="Video Title">
+                                        <rect key="frame" x="0.0" y="0.0" width="560" height="36"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="30"/>
+                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Test" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UqM-3R-sxa" userLabel="Video Description">
+                                        <rect key="frame" x="0.0" y="44" width="560" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="bottom" secondItem="UqM-3R-sxa" secondAttribute="bottom" constant="16" id="GYJ-Ya-RhZ"/>
+                                    <constraint firstItem="UqM-3R-sxa" firstAttribute="top" secondItem="IzV-Bc-JAp" secondAttribute="bottom" constant="8" id="T5I-bD-fio"/>
+                                    <constraint firstItem="IzV-Bc-JAp" firstAttribute="top" secondItem="LRQ-IJ-H9f" secondAttribute="top" id="YoS-We-sZn"/>
+                                    <constraint firstAttribute="height" constant="100" id="fJJ-Dc-Kki"/>
+                                    <constraint firstAttribute="trailing" secondItem="IzV-Bc-JAp" secondAttribute="trailing" id="iMO-FB-KGQ"/>
+                                    <constraint firstAttribute="bottom" secondItem="UqM-3R-sxa" secondAttribute="bottom" constant="16" id="jJF-bw-HmO"/>
+                                    <constraint firstItem="IzV-Bc-JAp" firstAttribute="leading" secondItem="LRQ-IJ-H9f" secondAttribute="leading" id="nr9-18-dNp"/>
+                                    <constraint firstItem="UqM-3R-sxa" firstAttribute="leading" secondItem="LRQ-IJ-H9f" secondAttribute="leading" id="t34-NY-fZ6"/>
+                                    <constraint firstAttribute="trailing" secondItem="UqM-3R-sxa" secondAttribute="trailing" id="xhp-a7-R3u"/>
+                                </constraints>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="fJJ-Dc-Kki"/>
+                                        <exclude reference="GYJ-Ya-RhZ"/>
                                     </mask>
                                 </variation>
                             </view>
