@@ -34,13 +34,6 @@ themselves depends on the local capacity of the network. Some 0-level
 splitters could receive the signal directly from the 0-level source
 while a 1-level splitter will be attached to 0-level peer.
 
-In the first case, the latency of each peer in the super-team (a team
-of teams) will be the same, and therefore, this the latency is smaller
-than when all peers of the super-team are in one big team. However, if
-for example a 1-level splitter receives the signal from 0-level peer,
-the latency of the 1-level team will be the sum of the latency of the
-(father) team plus the latency of the (descendant) team.
-
 The latency of a team is proportional to the team size (the number of
 peers in the team). Therefore, we can say that the latency is $|T|$
 units of time, where $T$ is the set of peers of the team and $|\cdot|$
