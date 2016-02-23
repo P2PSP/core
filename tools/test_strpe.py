@@ -50,11 +50,11 @@ def runPeer(port, playerPort, trusted = False, malicious = False, ds = False):
     if trusted and not ds:
         runStr += " --trusted --checkall"
     if malicious:
-        runStr += " --malicious --persistent"
+        runStr += " --malicious --on_off_ratio 25"
     if not malicious:
          runStr += " --strpe_log ./strpe-testing/peer{0}.log".format(port)
     run(runStr, open("strpe-testing/peer{0}.out".format(port), "w"))
-    time.sleep(1)
+    time.sleep(2)
     #run netcat
     run("nc 127.0.0.1 {0}".format(playerPort))
 
@@ -86,13 +86,14 @@ def main(args):
         elif opt == "-s":
             ds = True
 
-
+    print 'running with {0} peers ({1} trusted and {2} mal)'.format(nPeers, nTrusted, nMalicious)
+    print 'strpeds=', ds
     nPeers = nPeers - nTrusted - nMalicious # for more friendly user input
 
     checkdir()
 
-    port = 56000
-    playerPort = 9999
+    port = 60000
+    playerPort = 60200
     trustedPorts = []
     for _ in range(nTrusted):
         trustedPorts.append(random.randint(port, port + nPeers))
@@ -112,6 +113,7 @@ def main(args):
 
         port, playerPort = port + 1, playerPort + 1
 
+    time.sleep(10)
     for _ in range(nMalicious):
         print "malicious peer with port {0}".format(port)
         runPeer(port, playerPort, False, True, ds)
