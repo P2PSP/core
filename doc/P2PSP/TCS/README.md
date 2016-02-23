@@ -13,7 +13,7 @@ tracker to decide which team will be assigned should fulfill the
 maximun buffer size constraint. Other factors such as the physical
 network topology or the packet loss ratio of the incomming peer in the
 pass could be also considered. For example, if a peer was rejected
-from a team because if selfish, a less demanding team could be
+from a team because is selfish, a less demanding team could be
 assigned. A time-line describing the attaching process is presented next:
 
 ```
