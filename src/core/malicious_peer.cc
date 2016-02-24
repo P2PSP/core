@@ -43,27 +43,28 @@ int MaliciousPeer::ProcessMessage(const std::vector<char> &message,
 
       // debug
 
-      LOG("DBS: (" << team_socket_.local_endpoint().address().to_string() << ","
-                   << std::to_string(team_socket_.local_endpoint().port())
-                   << ")"
-                   << "<-" << std::to_string(chunk_number) << "-"
-                   << "(" << sender.address().to_string() << ","
-                   << std::to_string(sender.port()) << ")");
+      TRACE("DBS: (" << team_socket_.local_endpoint().address().to_string()
+                     << ","
+                     << std::to_string(team_socket_.local_endpoint().port())
+                     << ")"
+                     << "<-" << std::to_string(chunk_number) << "-"
+                     << "(" << sender.address().to_string() << ","
+                     << std::to_string(sender.port()) << ")");
 
       while (receive_and_feed_counter_ < (int)peer_list_.size() &&
              receive_and_feed_counter_ > 0) {
         peer = peer_list_[receive_and_feed_counter_];
         SendChunk(peer);
 
-        LOG("DBS: (" << team_socket_.local_endpoint().address().to_string()
-                     << ","
-                     << std::to_string(team_socket_.local_endpoint().port())
-                     << ")"
-                     << "-"
-                     << std::to_string(ntohs(receive_and_feed_previous_[0]))
-                     << "->"
-                     << "(" << peer.address().to_string() << ","
-                     << std::to_string(peer.port()) << ")");
+        TRACE("DBS: (" << team_socket_.local_endpoint().address().to_string()
+                       << ","
+                       << std::to_string(team_socket_.local_endpoint().port())
+                       << ")"
+                       << "-"
+                       << std::to_string(ntohs(receive_and_feed_previous_[0]))
+                       << "->"
+                       << "(" << peer.address().to_string() << ","
+                       << std::to_string(peer.port()) << ")");
 
         debt_[peer]++;
 
@@ -87,12 +88,13 @@ int MaliciousPeer::ProcessMessage(const std::vector<char> &message,
 
       // debug
 
-      LOG("DBS: (" << team_socket_.local_endpoint().address().to_string() << ","
-                   << std::to_string(team_socket_.local_endpoint().port())
-                   << ")"
-                   << "<-" << std::to_string(chunk_number) << "-"
-                   << "(" << sender.address().to_string() << ","
-                   << std::to_string(sender.port()) << ")");
+      TRACE("DBS: (" << team_socket_.local_endpoint().address().to_string()
+                     << ","
+                     << std::to_string(team_socket_.local_endpoint().port())
+                     << ")"
+                     << "<-" << std::to_string(chunk_number) << "-"
+                     << "(" << sender.address().to_string() << ","
+                     << std::to_string(sender.port()) << ")");
 
       if (peer_list_.end() ==
           std::find(peer_list_.begin(), peer_list_.end(), sender)) {
@@ -122,20 +124,21 @@ int MaliciousPeer::ProcessMessage(const std::vector<char> &message,
       debt_[peer]++;
 
       if (debt_[peer] > kMaxChunkDebt) {
-        LOG("(" << peer.address().to_string() << ","
-                << std::to_string(peer.port()) << ")"
-                << " removed by unsupportive (" + std::to_string(debt_[peer]) +
-                       " lossess)");
+        LOG("DBS:(" << peer.address().to_string() << ","
+                    << std::to_string(peer.port()) << ")"
+                    << " removed by unsupportive (" +
+                           std::to_string(debt_[peer]) + " lossess)");
         debt_.erase(peer);
         peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), peer));
       }
 
-      LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
-              << std::to_string(team_socket_.local_endpoint().port()) << ")"
-              << "-" << std::to_string(ntohs(receive_and_feed_previous_[0]))
-              << "->"
-              << "(" << peer.address().to_string() << ","
-              << std::to_string(peer.port()) << ")");
+      TRACE(
+          "DBS:(" << team_socket_.local_endpoint().address().to_string() << ","
+                  << std::to_string(team_socket_.local_endpoint().port()) << ")"
+                  << "-" << std::to_string(ntohs(receive_and_feed_previous_[0]))
+                  << "->"
+                  << "(" << peer.address().to_string() << ","
+                  << std::to_string(peer.port()) << ")");
 
       receive_and_feed_counter_++;
     }
