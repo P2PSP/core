@@ -171,8 +171,8 @@
   self.channelsList = channelsList;
 
   dispatch_async(dispatch_get_main_queue(), ^{
-    [self.tvChannelsList reloadData];
-    [self.tvChannelsList setNeedsDisplay];
+    [self.tvChannelsList reloadSections:[NSIndexSet indexSetWithIndex:0]
+                       withRowAnimation:UITableViewRowAnimationFade];
   });
 }
 
