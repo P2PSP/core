@@ -19,8 +19,8 @@ PeerDBS::PeerDBS() {}
 PeerDBS::~PeerDBS() {}
 
 void PeerDBS::Init() {
-  LOG("max_chunk_debt =" << std::to_string(kMaxChunkDebt));
-  LOG("Initialized");
+  TRACE("max_chunk_debt =" << std::to_string(kMaxChunkDebt));
+  TRACE("Initialized");
 }
 
 void PeerDBS::SayHello(const ip::udp::endpoint &node) {
@@ -28,9 +28,9 @@ void PeerDBS::SayHello(const ip::udp::endpoint &node) {
 
   team_socket_.send_to(buffer(hello), node);
 
-  LOG("[Hello] sent to "
-      << "(" << node.address().to_string() << "," << std::to_string(node.port())
-      << ")");
+  TRACE("[Hello] sent to "
+        << "(" << node.address().to_string() << ","
+        << std::to_string(node.port()) << ")");
 }
 
 void PeerDBS::SayGoodbye(const ip::udp::endpoint &node) {
@@ -38,30 +38,30 @@ void PeerDBS::SayGoodbye(const ip::udp::endpoint &node) {
 
   team_socket_.send_to(buffer(goodbye), node);
 
-  LOG("[Goodbye] sent to "
-      << "(" << node.address().to_string() << "," << std::to_string(node.port())
-      << ")");
+  TRACE("[Goodbye] sent to "
+        << "(" << node.address().to_string() << ","
+        << std::to_string(node.port()) << ")");
 }
 
 void PeerDBS::ReceiveMagicFlags() {
   std::vector<char> magic_flags(1);
   read(splitter_socket_, ::buffer(magic_flags));
-  LOG("Magic flags =" << std::bitset<8>(magic_flags[0]));
+  TRACE("Magic flags =" << std::bitset<8>(magic_flags[0]));
 }
 
 void PeerDBS::ReceiveTheNumberOfPeers() {
   boost::array<char, 2> buffer;
 
   // sys.stdout.write(Color.green)
-  LOG("Requesting the number of monitors and peers to ("
-      << splitter_socket_.remote_endpoint().address().to_string() << ","
-      << std::to_string(splitter_socket_.remote_endpoint().port()) << ")");
+  TRACE("Requesting the number of monitors and peers to ("
+        << splitter_socket_.remote_endpoint().address().to_string() << ","
+        << std::to_string(splitter_socket_.remote_endpoint().port()) << ")");
   read(splitter_socket_, ::buffer(buffer));
   number_of_monitors_ = ntohs(*(short *)(buffer.c_array()));
-  LOG("The number of monitors is " << number_of_monitors_);
+  TRACE("The number of monitors is " << number_of_monitors_);
   read(splitter_socket_, ::buffer(buffer));
   number_of_peers_ = ntohs(*(short *)(buffer.c_array()));
-  LOG("The size of the team is " << number_of_peers_ << " (apart from me)");
+  TRACE("The size of the team is " << number_of_peers_ << " (apart from me)");
 }
 
 void PeerDBS::ReceiveTheListOfPeers() {
@@ -72,11 +72,11 @@ void PeerDBS::ReceiveTheListOfPeers() {
   int port;
 
   // sys.stdout.write(Color.green)
-  LOG("Requesting" << number_of_peers_ << " peers to ("
-                   << splitter_socket_.remote_endpoint().address().to_string()
-                   << ","
-                   << std::to_string(splitter_socket_.remote_endpoint().port())
-                   << ")");
+  TRACE("Requesting" << number_of_peers_ << " peers to ("
+                     << splitter_socket_.remote_endpoint().address().to_string()
+                     << "," << std::to_string(
+                                   splitter_socket_.remote_endpoint().port())
+                     << ")");
   // number_of_peers =
   // socket.ntohs(struct.unpack("H",self.splitter_socket.recv(struct.calcsize("H")))[0])
   //_print_("The size of the team is", number_of_peers, "(apart from me)")
@@ -89,15 +89,11 @@ void PeerDBS::ReceiveTheListOfPeers() {
     port = ntohs(*(short *)(raw_data + 4));
 
     peer = ip::udp::endpoint(ip_addr, port);
-    LOG("[hello] sent to (" << peer.address().to_string() << ","
-                            << std::to_string(peer.port()) << ")");
+    TRACE("[hello] sent to (" << peer.address().to_string() << ","
+                              << std::to_string(peer.port()) << ")");
     SayHello(peer);
 
-    // TODO: Find a __debug__ flag in c++
-    /*if(true){
-      LOG("[%5d]" % tmp, peer);
-    }else{*/
-    LOG(std::to_string((number_of_peers_ - tmp) / number_of_peers_));
+    TRACE(std::to_string((number_of_peers_ - tmp) / number_of_peers_));
 
     peer_list_.push_back(peer);
     debt_[peer] = 0;
@@ -105,7 +101,7 @@ void PeerDBS::ReceiveTheListOfPeers() {
     //}
   }
 
-  LOG("List of peers received");
+  TRACE("List of peers received");
 }
 
 void PeerDBS::ReceiveMyEndpoint() {
@@ -122,8 +118,8 @@ void PeerDBS::ReceiveMyEndpoint() {
 
   me_ = ip::udp::endpoint(ip_addr, port);
 
-  LOG("me = (" << me_.address().to_string() << "," << std::to_string(me_.port())
-               << ")");
+  TRACE("me = (" << me_.address().to_string() << ","
+                 << std::to_string(me_.port()) << ")");
 }
 
 void PeerDBS::ListenToTheTeam() {
@@ -165,11 +161,11 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
 
       // debug
 
-      LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
-              << std::to_string(team_socket_.local_endpoint().port()) << ")"
-              << "<-" << std::to_string(chunk_number) << "-"
-              << "(" << sender.address().to_string() << ","
-              << std::to_string(sender.port()) << ")");
+      TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
+                << std::to_string(team_socket_.local_endpoint().port()) << ")"
+                << "<-" << std::to_string(chunk_number) << "-"
+                << "(" << sender.address().to_string() << ","
+                << std::to_string(sender.port()) << ")");
       // TODO: if __debug__: # No aqui. Tal vez, DIS
 
       if (kLogging) {
@@ -184,20 +180,20 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
         team_socket_.send_to(::buffer(receive_and_feed_previous_), peer);
         sendto_counter_++;
 
-        LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
-                << std::to_string(team_socket_.local_endpoint().port()) << ")"
-                << "-" << std::to_string(ntohs(receive_and_feed_previous_[0]))
-                << "->"
-                << "(" << peer.address().to_string() << ","
-                << std::to_string(peer.port()) << ")");
+        TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
+                  << std::to_string(team_socket_.local_endpoint().port()) << ")"
+                  << "-" << std::to_string(ntohs(receive_and_feed_previous_[0]))
+                  << "->"
+                  << "(" << peer.address().to_string() << ","
+                  << std::to_string(peer.port()) << ")");
 
         debt_[peer]++;
 
         if (debt_[peer] > kMaxChunkDebt) {
-          LOG("(" << peer.address().to_string() << ","
-                  << std::to_string(peer.port()) << ")"
-                  << " removed by unsupportive (" +
-                         std::to_string(debt_[peer]) + " lossess)");
+          TRACE("(" << peer.address().to_string() << ","
+                    << std::to_string(peer.port()) << ")"
+                    << " removed by unsupportive (" +
+                           std::to_string(debt_[peer]) + " lossess)");
           debt_.erase(peer);
           peer_list_.erase(
               std::find(peer_list_.begin(), peer_list_.end(), peer));
@@ -209,19 +205,19 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
       receive_and_feed_counter_ = 0;
       receive_and_feed_previous_ = message;
     } else {
-      LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
-              << std::to_string(team_socket_.local_endpoint().port()) << ")"
-              << "<-" << std::to_string(chunk_number) << "-"
-              << "(" << sender.address().to_string() << ","
-              << std::to_string(sender.port()) << ")");
+      TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
+                << std::to_string(team_socket_.local_endpoint().port()) << ")"
+                << "<-" << std::to_string(chunk_number) << "-"
+                << "(" << sender.address().to_string() << ","
+                << std::to_string(sender.port()) << ")");
 
       if (peer_list_.end() ==
           std::find(peer_list_.begin(), peer_list_.end(), sender)) {
         peer_list_.push_back(sender);
         debt_[sender] = 0;
-        LOG("(" << sender.address().to_string() << ","
-                << std::to_string(sender.port()) << ")"
-                << " added by chunk " << std::to_string(chunk_number));
+        TRACE("(" << sender.address().to_string() << ","
+                  << std::to_string(sender.port()) << ")"
+                  << " added by chunk " << std::to_string(chunk_number));
       } else {
         debt_[sender]--;
       }
@@ -244,20 +240,20 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
       debt_[peer]++;
 
       if (debt_[peer] > kMaxChunkDebt) {
-        LOG("(" << peer.address().to_string() << ","
-                << std::to_string(peer.port()) << ")"
-                << " removed by unsupportive (" + std::to_string(debt_[peer]) +
-                       " lossess)");
+        TRACE("(" << peer.address().to_string() << ","
+                  << std::to_string(peer.port()) << ")"
+                  << " removed by unsupportive (" +
+                         std::to_string(debt_[peer]) + " lossess)");
         debt_.erase(peer);
         peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), peer));
       }
 
-      LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
-              << std::to_string(team_socket_.local_endpoint().port()) << ")"
-              << "-" << std::to_string(ntohs(receive_and_feed_previous_[0]))
-              << "->"
-              << "(" << peer.address().to_string() << ","
-              << std::to_string(peer.port()) << ")");
+      TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
+                << std::to_string(team_socket_.local_endpoint().port()) << ")"
+                << "-" << std::to_string(ntohs(receive_and_feed_previous_[0]))
+                << "->"
+                << "(" << peer.address().to_string() << ","
+                << std::to_string(peer.port()) << ")");
 
       receive_and_feed_counter_++;
     }
@@ -266,7 +262,7 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
   } else {
     // A control chunk has been received
 
-    LOG("Control message received");
+    TRACE("Control message received");
 
     if (message[0] == 'H') {
       if (peer_list_.end() ==
@@ -274,18 +270,19 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
         // The peer is new
         peer_list_.push_back(sender);
         debt_[sender] = 0;
-        LOG("(" << sender.address().to_string() << ","
-                << std::to_string(sender.port()) << ")"
-                << " added by [hello] ");
+        TRACE("(" << sender.address().to_string() << ","
+                  << std::to_string(sender.port()) << ")"
+                  << " added by [hello] ");
       } else {
         if (peer_list_.end() !=
             std::find(peer_list_.begin(), peer_list_.end(), sender)) {
           // sys.stdout.write(Color.red)
-          LOG("(" << team_socket_.local_endpoint().address().to_string() << ","
-                  << std::to_string(team_socket_.local_endpoint().port())
-                  << ") \b: received \"goodbye\" from ("
-                  << sender.address().to_string() << ","
-                  << std::to_string(sender.port()) << ")");
+          TRACE("(" << team_socket_.local_endpoint().address().to_string()
+                    << ","
+                    << std::to_string(team_socket_.local_endpoint().port())
+                    << ") \b: received \"goodbye\" from ("
+                    << sender.address().to_string() << ","
+                    << std::to_string(sender.port()) << ")");
           // sys.stdout.write(Color.none)
           peer_list_.erase(
               std::find(peer_list_.begin(), peer_list_.end(), sender));
@@ -341,7 +338,7 @@ float PeerDBS::CalcBufferFilling() {
 }
 
 void PeerDBS::PoliteFarewell() {
-  LOG("Goodbye!");
+  TRACE("Goodbye!");
 
   for (int i = 0; i < 3; i++) {
     // ProcessNextMessage();
