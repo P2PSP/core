@@ -84,9 +84,9 @@ class Splitter():
 
         parser.add_argument('--source_port', help='Port where the streaming server is listening. Default = {}.'.format(Splitter_IMS.SOURCE_PORT))
 
-        parser.add_argument('--strpe', nargs='+', type=str, help='Enables STrPe')
+        parser.add_argument('--strpe', action="store_true", help='Enables STrPe')
 
-        parser.add_argument('--strpeds', nargs='+', type=str, help='Enables STrPe-DS')
+        parser.add_argument('--strpeds', action="store_true", help='Enables STrPe-DS')
 
         parser.add_argument('--strpe_log', help='Logging STrPe & STrPe-DS specific data to file.')
 
@@ -140,9 +140,9 @@ class Splitter():
             #splitter = Splitter_FNS()
             #splitter = Splitter_ACS()
             if (args.strpe):
-                splitter = self.init_strpe_splitter('strpe', args.strpe, args.strpe_log)
+                splitter = self.init_strpe_splitter('strpe', args.strpe_log)
             elif (args.strpeds):
-                splitter = self.init_strpe_splitter('strpeds', args.strpeds, args.strpe_log)
+                splitter = self.init_strpe_splitter('strpeds', args.strpe_log)
                 if args.strpeds_majority_decision:
                     splitter.setMajorityRatio(float(args.strpeds_majority_decision))
             else:
@@ -240,13 +240,11 @@ class Splitter():
 
         # }}}
 
-    def init_strpe_splitter(self, type, trusted_peers, log_file = None):
+    def init_strpe_splitter(self, type, log_file = None):
         if type == 'strpe':
             re = StrpeSplitter()
         if type == 'strpeds':
             re = StrpeDsSplitter()
-        for peer in trusted_peers:
-            re.add_trusted_peer(peer)
         if log_file != None:
             re.LOGGING = True
             re.LOG_FILE = open(log_file, 'w', 0)

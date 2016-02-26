@@ -39,15 +39,10 @@ def runStream():
     run("/Applications/VLC.app/Contents/MacOS/VLC ../src/Big_Buck_Bunny_small.ogv --sout \"#duplicate{dst=standard{mux=ogg,dst=,access=http}}\"")
     time.sleep(1)
 
-def runSplitter(trustedPeers, ds = False):
-    if len(trustedPeers) == 0:
-        trustedPeers.append("127.0.0.1:1234")
-    tps = ""
-    for p in trustedPeers:
-        tps += "\"{0}\" ".format(p)
+def runSplitter(ds = False):
     prefix = ""
     if ds: prefix = "ds"
-    run("../src/splitter.py --buffer_size 1024 --source_port 8080 --strpe{0} {1} --strpe_log strpe-testing/splitter.log".format(prefix, tps))
+    run("../src/splitter.py --buffer_size 1024 --source_port 8080 --strpe{0} --strpe_log strpe-testing/splitter.log".format(prefix))
     time.sleep(1)
 
 def runPeer(trusted = False, malicious = False, ds = False):
@@ -83,12 +78,19 @@ def initializeTeam(nPeers, nTrusted):
     runStream()
 
     print "running splitter"
-    runSplitter([], True)
+    runSplitter(True)
+
+    # clear the trusted.txt file
+    with open("./../src/trusted.txt", "w"):
+        pass
 
     print "running peers"
 
     for _ in range(nTrusted):
         print "trusted peer 127.0.0.1:{0}".format(port)
+        with open("./../src/trusted.txt", "a") as fh:
+            fh.write('127.0.0.1:{0}\n'.format(port))
+            fh.close()
         runPeer(True, False, True)
 
     for _ in range(nPeers):
@@ -149,7 +151,7 @@ def main(args):
             ds = True
 
     print 'running with {0} peers ({1} trusted and {2} mal)'.format(nPeers, nTrusted, nMalicious)
-    print 'strpeds=', ds
+
     nPeers = nPeers - nTrusted - nMalicious # for more friendly user input
 
     checkdir()

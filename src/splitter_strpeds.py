@@ -88,6 +88,9 @@ class StrpeDsSplitter(Splitter_LRS):
         return peer
 
     def get_trusted_peer_for_gathering(self):
+        if len(self.trusted_peers) == 0:
+            return None
+
         self.trusted_gathering_counter = (self.trusted_gathering_counter + 1) % len(self.trusted_peers)
         if self.trusted_peers[self.trusted_gathering_counter] in self.peer_list:
             return self.trusted_peers[self.trusted_gathering_counter]
@@ -125,6 +128,9 @@ class StrpeDsSplitter(Splitter_LRS):
                 self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
                 self.compute_next_peer_number(peer)
 
+                if self.peer_number == 0:
+                    self.on_round_beginning()
+
                 if self.LOGGING:
                     if self.peer_number == 0:
                         self.CURRENT_ROUND += 1
@@ -134,6 +140,15 @@ class StrpeDsSplitter(Splitter_LRS):
             except IndexError:
                 if __debug__:
                     _print_("DBS: The monitor peer has died!")
+
+    def on_round_beginning(self):
+        self.refresh_tps_set()
+
+    def refresh_tps_set(self):
+        del self.trusted_peers[:]
+        with open("./trusted.txt") as fh:
+            for line in fh:
+                self.add_trusted_peer(line)
 
     def init_key(self):
         self.dsa_key = DSA.generate(1024)
