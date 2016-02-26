@@ -10,7 +10,15 @@ import re
 processes = []
 DEVNULL = open(os.devnull, 'wb')
 
+SEED = 12345678
+
 nPeers = nTrusted = nMalicious = 0
+
+port = 60000
+playerPort = 61000
+
+LAST_ROUND_NUMBER = 0
+Q = 100
 
 def checkdir():
     if not os.path.exists("./strpe-testing"):
@@ -42,7 +50,9 @@ def runSplitter(trustedPeers, ds = False):
     run("../src/splitter.py --buffer_size 1024 --source_port 8080 --strpe{0} {1} --strpe_log strpe-testing/splitter.log".format(prefix, tps))
     time.sleep(1)
 
-def runPeer(port, playerPort, trusted = False, malicious = False, ds = False):
+def runPeer(trusted = False, malicious = False, ds = False):
+    global port
+    global playerPort
     #run peer
     strpeds = ""
     if ds: strpeds = "--strpeds"
@@ -57,6 +67,7 @@ def runPeer(port, playerPort, trusted = False, malicious = False, ds = False):
     time.sleep(2)
     #run netcat
     run("nc 127.0.0.1 {0}".format(playerPort))
+    port, playerPort = port + 1, playerPort + 1
 
 def check(x):
     with open("./strpe-testing/splitter.log") as fh:
@@ -67,15 +78,66 @@ def check(x):
             return True
     return False
 
+def initializeTeam(nPeers, nTrusted):
+    print "running stream"
+    runStream()
+
+    print "running splitter"
+    runSplitter([], True)
+
+    print "running peers"
+
+    for _ in range(nTrusted):
+        print "trusted peer 127.0.0.1:{0}".format(port)
+        runPeer(True, False, True)
+
+    for _ in range(nPeers):
+        print "well-intended peer 127.0.0.1:{0}".format(port)
+        runPeer(False, False, True)
+
+def churn():
+    while checkForRounds():
+        r = random.randint(1,100)
+        if r <= 50:
+            if r <= 25:
+                print "malicious peer 127.0.0.1:{0}".format(port)
+                runPeer(False, True, True)
+            else:
+                print "well-intended peer 127.0.0.1:{0}".format(port)
+                runPeer(False, False, True)
+        time.sleep(2)
+
+def saveLastRound():
+    global LAST_ROUND_NUMBER
+    LAST_ROUND_NUMBER = findLastRound()
+
+def findLastRound():
+    with open("./strpe-testing/splitter.log") as fh:
+        for line in fh:
+            pass
+        result = re.match("(\d*.\d*)\t(\d*)\s(\d*).*", line)
+        if result != None:
+             return int(result.group(2))
+
+    return -1
+
+def checkForRounds():
+    currentRound = findLastRound()
+    return currentRound - LAST_ROUND_NUMBER < Q
+
 def main(args):
+    random.seed(SEED)
+
     try:
-        opts, args = getopt.getopt(args, "n:t:m:s")
+        opts, args = getopt.getopt(args, "n:t:m:sq:")
     except getopt.GetoptError:
         usage()
         sys.exit(2)
 
     ds = False
-
+    nPeers = 10
+    nTrusted = 1
+    nMalicious = 0
     for opt, arg in opts:
         if opt == "-n":
             nPeers = int(arg)
@@ -92,36 +154,13 @@ def main(args):
 
     checkdir()
 
-    port = 60000
-    playerPort = 60200
-    trustedPorts = []
-    for _ in range(nTrusted):
-        trustedPorts.append(random.randint(port, port + nPeers))
+    initializeTeam(nPeers, nTrusted)
 
-    print "running stream"
-    runStream()
-    print "running splitter"
-    runSplitter(map(lambda x: "127.0.0.1:{0}".format(x), trustedPorts), ds)
-    print "running peers"
-    for _ in range(nPeers + nTrusted):
-        if port in trustedPorts:
-            print "trusted peer with port {0}".format(port)
-            runPeer(port, playerPort, True, False, ds)
-        else:
-            print "regular peer with port {0}".format(port)
-            runPeer(port, playerPort, False, False, ds)
+    time.sleep(10) # time for all peers buffering
+    saveLastRound()
 
-        port, playerPort = port + 1, playerPort + 1
-
-    time.sleep(10)
-    for _ in range(nMalicious):
-        print "malicious peer with port {0}".format(port)
-        runPeer(port, playerPort, False, True, ds)
-        port, playerPort = port + 1, playerPort + 1
-
-    time.sleep(2)
-    while not check(nPeers + nTrusted):
-        time.sleep(2)
+    print "simulating churn"
+    churn()
 
     print "finish!"
 
