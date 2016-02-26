@@ -6,6 +6,7 @@ import time
 import random
 import shlex, subprocess
 import re
+import platform
 
 processes = []
 DEVNULL = open(os.devnull, 'wb')
@@ -36,7 +37,10 @@ def killall():
         proc.kill()
 
 def runStream():
-    run("/Applications/VLC.app/Contents/MacOS/VLC ../src/Big_Buck_Bunny_small.ogv --sout \"#duplicate{dst=standard{mux=ogg,dst=,access=http}}\"")
+    if platform.system() == "Linux":
+        run("vlc ../src/Big_Buck_Bunny_small.ogv --sout \"#duplicate{dst=standard{mux=ogg,dst=,access=http}}\"")
+    else:
+        run("/Applications/VLC.app/Contents/MacOS/VLC ../src/Big_Buck_Bunny_small.ogv --sout \"#duplicate{dst=standard{mux=ogg,dst=,access=http}}\"")
     time.sleep(1)
 
 def runSplitter(ds = False):
