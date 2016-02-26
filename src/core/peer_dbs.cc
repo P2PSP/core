@@ -159,14 +159,12 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
       // mode if the chunk has not been sent to all
       // the peers of the list of peers.
 
-      // debug
-
       TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
                 << std::to_string(team_socket_.local_endpoint().port()) << ")"
                 << "<-" << std::to_string(chunk_number) << "-"
                 << "(" << sender.address().to_string() << ","
                 << std::to_string(sender.port()) << ")");
-      // TODO: if __debug__: # No aqui. Tal vez, DIS
+      // No aqui. Tal vez, DIS
 
       if (kLogging) {
         LogMessage("buffer correctnes " +

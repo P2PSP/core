@@ -318,11 +318,9 @@ void PeerIMS::ReceiveTheNextMessage(std::vector<char> &message,
         << sender.address().to_string() << "," << std::to_string(sender.port())
         << ") of length " << std::to_string(message.size()));
 
-  // TODO: if(DEBUG){
   if (message.size() < 10) {
     TRACE("Message content =" << std::string(message.data()));
   }
-  //}
 }
 
 int PeerIMS::ProcessMessage(const std::vector<char> &message,

@@ -33,9 +33,7 @@ void SplitterACS::InsertPeer(const boost::asio::ip::udp::endpoint &peer) {
   period_counter_[peer] = 1;
   number_of_sent_chunks_per_peer_[peer] = 0;
 
-  // TODO: Find a __debug__ flag in c++
   TRACE("Inserted " << peer);
-  // End TODO
 }
 
 void SplitterACS::IncrementUnsupportivityOfPeer(

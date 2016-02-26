@@ -59,9 +59,7 @@ void SplitterDBS::SendTheListOfPeers(
     const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   SendTheListSize(peer_serve_socket);
 
-  // TODO: Find a __debug__ flag in c++
   int counter = 0;
-  // End TODO
 
   char message[6];
   in_addr addr;
@@ -73,10 +71,8 @@ void SplitterDBS::SendTheListOfPeers(
     (*(uint16_t *)(message + 4)) = htons(it->port());
     peer_serve_socket->send(asio::buffer(message));
 
-    // TODO: Find a __debug__ flag in c++
     TRACE(to_string(counter) << ", " << *it);
     counter++;
-    // End TODO
   }
 }
 
@@ -173,7 +169,6 @@ void SplitterDBS::ProcessLostChunk(
     int lost_chunk_number, const boost::asio::ip::udp::endpoint &sender) {
   asio::ip::udp::endpoint destination = GetLosser(lost_chunk_number);
 
-  // TODO: Find a __debug__ flag in c++
   TRACE("" << sender << " complains about lost chunk "
            << to_string(lost_chunk_number) << " sent to " << destination);
 
@@ -181,7 +176,6 @@ void SplitterDBS::ProcessLostChunk(
            destination) != peer_list_.end()) {
     TRACE("Lost chunk index = " << lost_chunk_number);
   }
-  // End TODO
 
   IncrementUnsupportivityOfPeer(destination);
 }

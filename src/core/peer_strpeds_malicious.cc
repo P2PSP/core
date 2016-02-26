@@ -108,8 +108,6 @@ int PeerStrpeDsMalicious::DbsProcessMessage(const std::vector<char> &message,
       // mode if the chunk has not been sent to all
       // the peers of the list of peers.
 
-      // debug
-
       TRACE("DBS: (" << team_socket_.local_endpoint().address().to_string()
                      << ","
                      << std::to_string(team_socket_.local_endpoint().port())
@@ -152,8 +150,6 @@ int PeerStrpeDsMalicious::DbsProcessMessage(const std::vector<char> &message,
       receive_and_feed_previous_ = message;
     } else {
       // The sender is a peer
-
-      // debug
 
       TRACE("DBS: (" << team_socket_.local_endpoint().address().to_string()
                      << ","

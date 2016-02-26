@@ -38,9 +38,7 @@ void SplitterLRS::ProcessLostChunk(
     TRACE("LRS - Error sending chunk: " << ec.message());
   }
 
-  // TODO: Find a __debug__ flag in c++
   TRACE("Re-sending " << to_string(lost_chunk_number) << " to " << peer);
-  // End TODO
 }
 
 void SplitterLRS::SendChunk(const std::vector<char> &message,
