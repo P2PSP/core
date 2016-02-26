@@ -20,8 +20,6 @@ Rules
 	  (i+n) \bmod |T| = 0, \label{eq:bdist}
     \end{equation}
 
-    ![](https://latex.codecogs.com/gif.latex?(i+n)\bmod|T|%20=%200)
-
     where $|T|$ is the number of peers in the team. Next, P$_i$ must
     forward this chunk to the rest of peers of the team. Chunks
     received from other peers are not retransmitted.
