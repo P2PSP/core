@@ -14,10 +14,7 @@
 
 namespace p2psp {
 
-void MonitorLRS::Init() {
-  // TODO: if __debug__:
-  LOG("Initialized");
-}
+void MonitorLRS::Init() { TRACE("Initialized"); }
 
 void MonitorLRS::ReceiveTheBufferSize() {
   boost::array<char, 2> buffer;

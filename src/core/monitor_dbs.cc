@@ -18,7 +18,7 @@ MonitorDBS::MonitorDBS(){};
 
 MonitorDBS::~MonitorDBS(){};
 
-void MonitorDBS::Init() { LOG("Initialized"); }
+void MonitorDBS::Init() { TRACE("Initialized"); }
 
 // def print_the_module_name(self):
 // {{{
@@ -35,7 +35,7 @@ void MonitorDBS::Complain(uint16_t chunk_number) {
 
   team_socket_.send_to(buffer(message), splitter_);
 
-  LOG("lost chunk:" << std::to_string(chunk_number));
+  TRACE("lost chunk:" << std::to_string(chunk_number));
 };
 
 int MonitorDBS::FindNextChunk() {
