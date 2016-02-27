@@ -248,6 +248,7 @@ class Splitter():
         if log_file != None:
             re.LOGGING = True
             re.LOG_FILE = open(log_file, 'w', 0)
+
         return re
 
 

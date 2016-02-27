@@ -21,6 +21,8 @@ playerPort = 61000
 LAST_ROUND_NUMBER = 0
 Q = 100
 
+trusted_peers = []
+
 def checkdir():
     if not os.path.exists("./strpe-testing"):
         os.mkdir("./strpe-testing")
@@ -46,7 +48,7 @@ def runStream():
 def runSplitter(ds = False):
     prefix = ""
     if ds: prefix = "ds"
-    run("../src/splitter.py --buffer_size 1024 --source_port 8080 --strpe{0} --strpe_log strpe-testing/splitter.log".format(prefix))
+    run("../src/splitter.py --buffer_size 1024 --source_port 8080 --strpe{0} --strpe_log strpe-testing/splitter.log".format(prefix), open("strpe-testing/splitter.out", "w"))
     time.sleep(1)
 
 def runPeer(trusted = False, malicious = False, ds = False):
@@ -56,8 +58,8 @@ def runPeer(trusted = False, malicious = False, ds = False):
     strpeds = ""
     if ds: strpeds = "--strpeds"
     runStr = "../src/peer.py --use_localhost --port {0} --player_port {1} {2}".format(port, playerPort, strpeds)
-    if trusted and not ds:
-        runStr += " --trusted --checkall"
+    if trusted:
+        runStr += " --trusted"
     if malicious:
         runStr += " --malicious --persistent"
     if not malicious:
@@ -78,6 +80,8 @@ def check(x):
     return False
 
 def initializeTeam(nPeers, nTrusted):
+    global trusted_peers
+
     print "running stream"
     runStream()
 
@@ -95,23 +99,55 @@ def initializeTeam(nPeers, nTrusted):
         with open("./../src/trusted.txt", "a") as fh:
             fh.write('127.0.0.1:{0}\n'.format(port))
             fh.close()
+        trusted_peers.append('127.0.0.1:{0}'.format(port))
         runPeer(True, False, True)
+
 
     for _ in range(nPeers):
         print "well-intended peer 127.0.0.1:{0}".format(port)
         runPeer(False, False, True)
 
 def churn():
+    global trusted_peers
+
     while checkForRounds():
-        r = random.randint(1,100)
-        if r <= 50:
-            if r <= 25:
-                print "malicious peer 127.0.0.1:{0}".format(port)
-                runPeer(False, True, True)
-            else:
-                print "well-intended peer 127.0.0.1:{0}".format(port)
-                runPeer(False, False, True)
+        addRegularOrMaliciousPeer()
+        if not checkForTrusted():
+            print "trusted peer 127.0.0.1:{0}".format(port)
+            with open("./../src/trusted.txt", "a") as fh:
+                fh.write('127.0.0.1:{0}\n'.format(port))
+                fh.close()
+            trusted_peers.append('127.0.0.1:{0}'.format(port))
+            runPeer(True, False, True)
         time.sleep(2)
+
+def addRegularOrMaliciousPeer():
+    r = random.randint(1,100)
+    if r <= 50:
+        if r <= 25:
+            print "malicious peer 127.0.0.1:{0}".format(port)
+            runPeer(False, True, True)
+        else:
+            print "well-intended peer 127.0.0.1:{0}".format(port)
+            runPeer(False, False, True)
+
+def checkForTrusted():
+    with open("./strpe-testing/splitter.log") as fh:
+        for line in fh:
+            pass
+        result = re.match("(\d*.\d*)\t(\d*)\s(\d*)\s(.*)", line)
+
+        if result != None:
+            peers = result.group(4)
+            tCnt = 0
+            for peer in peers.split(' '):
+                if peer in trusted_peers:
+                    tCnt += 1
+
+            return tCnt == nTrusted
+
+    return True
+
 
 def saveLastRound():
     global LAST_ROUND_NUMBER
@@ -141,6 +177,7 @@ def main(args):
         sys.exit(2)
 
     ds = False
+    global nPeers, nTrusted, nMalicious
     nPeers = 10
     nTrusted = 1
     nMalicious = 0
