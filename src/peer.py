@@ -175,6 +175,8 @@ class Peer():
         if args.strpeds:
             peer = Peer_StrpeDs(peer)
             peer.receive_dsa_key()
+            if args.trusted:
+                peer.setTrusted(True)
 
         if args.malicious and not args.strpeds: # workaround for malicous strpeds peer
             peer = MaliciousPeer(peer)
@@ -196,7 +198,7 @@ class Peer():
             if args.bad_mouth:
                 peer.setBadMouthAttack(True, args.bad_mouth)
 
-        if args.trusted:
+        if args.trusted and not args.strpeds:
             peer = TrustedPeer(peer)
             if args.checkall:
                 peer.setCheckAll(True)

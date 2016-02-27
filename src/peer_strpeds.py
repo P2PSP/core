@@ -19,12 +19,17 @@ from peer_ims import Peer_IMS
 from peer_dbs import Peer_DBS
 from Crypto.PublicKey import DSA
 from Crypto.Hash import SHA256
+import random
 
 # Some useful definitions.
 ADDR = 0
 PORT = 1
 
 class Peer_StrpeDs(Peer_DBS):
+
+    trusted = False
+    timeToLeave = False
+    P_tpl = 50
 
     def __init__(self, peer):
         sys.stdout.write(Color.yellow)
@@ -53,6 +58,11 @@ class Peer_StrpeDs(Peer_DBS):
             if self.is_control_message(message) and message == 'B':
                 return self.handle_bad_peers_request()
             else:
+                if self.is_current_message_from_splitter() and self.timeToLeave:
+                    r = random.randint(1,100)
+                    if r < self.P_tpl:
+                        self.player_alive = False
+
                 return Peer_DBS.process_message(self, message, sender)
         else:
             self.process_bad_message(message, sender)
@@ -85,7 +95,9 @@ class Peer_StrpeDs(Peer_DBS):
         _print_("bad peer: " + str(sender))
         self.bad_peers.append(sender)
         self.peer_list.remove(sender)
-        self.send_bad_peer_message(sender)
+        if self.trusted:
+            self.send_bad_peer_message(sender)
+        self.timeToLeave = True
 
     def unpack_message(self, message):
         # {{{
@@ -119,3 +131,6 @@ class Peer_StrpeDs(Peer_DBS):
         ip = struct.unpack("!L", socket.inet_aton(sender[0]))[0]
         msg = struct.pack('3sii', 'MAL', ip, sender[1])
         self.team_socket.sendto(msg, self.splitter)
+
+    def setTrusted(self, value):
+        self.trusted = value
