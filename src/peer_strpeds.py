@@ -31,6 +31,8 @@ class Peer_StrpeDs(Peer_DBS):
     timeToLeave = False
     P_tpl = 50
 
+    lastMessageFromSplitter = True
+
     def __init__(self, peer):
         sys.stdout.write(Color.yellow)
         _print_("STrPe-DS Peer")
@@ -125,7 +127,10 @@ class Peer_StrpeDs(Peer_DBS):
         return message, sender
 
     def is_current_message_from_splitter(self):
-        return self.current_sender == self.splitter
+        if self.current_sender == self.splitter:
+            self.lastMessageFromSplitter = True
+            return True
+        return False
 
     def send_bad_peer_message(self, sender):
         ip = struct.unpack("!L", socket.inet_aton(sender[0]))[0]

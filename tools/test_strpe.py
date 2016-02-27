@@ -91,6 +91,9 @@ def initializeTeam(nPeers, nTrusted):
     # clear the trusted.txt file
     with open("./../src/trusted.txt", "w"):
         pass
+    # clear the attacked.txt file
+    with open("./../src/attacked.txt", "w"):
+        pass
 
     print "running peers"
 

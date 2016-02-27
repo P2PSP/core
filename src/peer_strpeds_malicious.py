@@ -25,6 +25,10 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
     selectiveAttack = False
     selectedPeersForSelectiveAttack = []
     badMouthAttack = False
+    mainTarget = None
+    numberChunksSendToMainTarget = 0
+    allAttack = False
+    regularPeers = []
 
     def __init__(self, peer):
         sys.stdout.write(Color.yellow)
@@ -44,6 +48,37 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
         self.team_socket = peer.team_socket
         self.bad_peers = peer.bad_peers
         self.dsa_key = peer.dsa_key
+        self.mainTarget = self.chooseMainTarget()
+
+        threading.Thread(target=self.checkForExpelled).start()
+
+    def checkForExpelled(self):
+        if self.lastMessageFromSplitter:
+            self.lastMessageFromSplitter = False
+        else:
+            self.player_alive = False
+        print 132
+        time.sleep(6)
+
+    def chooseMainTarget(self):
+        attackedPeers = []
+        with open('../src/attacked.txt', 'r') as fh:
+            for line in fh:
+                attackedPeers.append(line)
+            fh.close()
+
+        re = None
+        while re == None:
+            r = random.randint(0, len(self.peer_list) - 1)
+            peerEndpoint = '{0}:{1}'.format(self.peer_list[r][0], self.peer_list[r][1])
+            if not (peerEndpoint in attackedPeers):
+                re = self.peer_list[r]
+
+        with open('../src/attacked.txt', 'a') as fh:
+            fh.write('{0}:{1}\n'.format(re[0], re[1]))
+            fh.close()
+
+        return re
 
     def process_message(self, message, sender):
         if sender in self.bad_peers:
@@ -183,12 +218,41 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
             # }}}
 
         # }}}
+    def allAttack(self):
+        self.allAttack = True
+        del self.regularPeers[:]
+        with open('regular.txt') as fh:
+            for line in fh:
+                t = (line.split(':')[0], int(line.split(':')[1]))
+                if t in self.peer_list:
+                    self.regularPeers.append(t)
+                if len(self.regularPeers) * 2 > len(self.peer_list):
+                    break
+
+            fh.close()
 
     def send_chunk(self, peer):
+        # im sorry for this part of code =(
         if self.persistentAttack:
-            self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
-            self.sendto_counter += 1
+            if peer == self.mainTarget and self.numberChunksSendToMainTarget < 5:
+                self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
+                self.numberChunksSendToMainTarget += 1
+            elif self.allAttack:
+                if peer in self.regularPeers or peer == self.mainTarget:
+                    self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
+                else:
+                    self.team_socket.sendto(self.receive_and_feed_previous, peer)
+            elif peer == self.mainTarget and self.numberChunksSendToMainTarget >= 5:
+                self.allAttack()
+                self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
+            else:
+                self.team_socket.sendto(self.receive_and_feed_previous, peer)
+
             return
+
+            # self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
+            # self.sendto_counter += 1
+            # return
 
         if self.onOffAttack:
             x = random.randint(1, 100)
