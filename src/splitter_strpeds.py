@@ -28,7 +28,7 @@ class StrpeDsSplitter(Splitter_LRS):
 
     LOGGING = False
     LOG_FILE = ""
-    TRUSTED_FILE = ""
+    TRUSTED_FILE = "./../src/trusted.txt"
     CURRENT_ROUND = 0
 
     P_MPL = 50
@@ -47,7 +47,6 @@ class StrpeDsSplitter(Splitter_LRS):
         self.trusted_gathering_counter = 0
         self.gethered_bad_peers = []
         self.complains = {}
-        self.TRUSTED_FILE = open('./../src/trusted.txt', 'r')
 
     def setMajorityRatio(self, value):
         self.majorityRatio = value
@@ -154,11 +153,10 @@ class StrpeDsSplitter(Splitter_LRS):
 
     def refresh_tps_set(self):
         del self.trusted_peers[:]
-        try:
-            for line in self.TRUSTED_FILE:
+        with open(self.TRUSTED_FILE, 'r') as fh:
+            for line in fh:
                 self.add_trusted_peer(line)
-        except:
-            pass
+            fh.close()
 
     def punish_peers(self):
         for peer in self.bad_peers:

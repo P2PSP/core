@@ -99,6 +99,7 @@ class Peer_StrpeDs(Peer_DBS):
         self.peer_list.remove(sender)
         if self.trusted:
             self.send_bad_peer_message(sender)
+            _print_("sended bad peer message")
             self.timeToLeave = True
 
     def unpack_message(self, message):
