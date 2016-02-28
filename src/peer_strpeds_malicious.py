@@ -27,8 +27,9 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
     badMouthAttack = False
     mainTarget = None
     numberChunksSendToMainTarget = 0
-    allAttack = False
+    allAttackC = False
     regularPeers = []
+    MPTR = 5
 
     def __init__(self, peer):
         sys.stdout.write(Color.yellow)
@@ -209,9 +210,13 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
 
         # }}}
     def allAttack(self):
-        self.allAttack = True
+        _print_("ALL_ATTACK MODE")
+        self.allAttackC = True
         del self.regularPeers[:]
-        with open('regular.txt') as fh:
+        with open('../src/regular.txt', 'a') as fh:
+            fh.write('{0}:{1}\n'.format(self.mainTarget[0], self.mainTarget[1]))
+            fh.close()
+        with open('../src/regular.txt', 'r') as fh:
             for line in fh:
                 t = (line.split(':')[0], int(line.split(':')[1]))
                 if t in self.peer_list:
@@ -224,15 +229,15 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
     def send_chunk(self, peer):
         # im sorry for this part of code =(
         if self.persistentAttack:
-            if peer == self.mainTarget and self.numberChunksSendToMainTarget < 5:
+            if peer == self.mainTarget and self.numberChunksSendToMainTarget < self.MPTR:
                 self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
                 self.numberChunksSendToMainTarget += 1
-            elif self.allAttack:
+            elif self.allAttackC:
                 if peer in self.regularPeers or peer == self.mainTarget:
                     self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
                 else:
                     self.team_socket.sendto(self.receive_and_feed_previous, peer)
-            elif peer == self.mainTarget and self.numberChunksSendToMainTarget >= 5:
+            elif peer == self.mainTarget and self.numberChunksSendToMainTarget >= self.MPTR:
                 self.allAttack()
                 self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
             else:

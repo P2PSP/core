@@ -101,6 +101,9 @@ def initializeTeam(nPeers, nTrusted):
     with open("./../src/malicious.txt", "w"):
         pass
 
+    with open("./../src/regular.txt", "w"):
+        pass
+
     print "running peers"
 
     for _ in range(nTrusted):
