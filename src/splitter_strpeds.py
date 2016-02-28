@@ -31,7 +31,11 @@ class StrpeDsSplitter(Splitter_LRS):
     TRUSTED_FILE = ""
     CURRENT_ROUND = 0
 
+    P_MPL = 50
+
     majorityRatio = 0.5
+
+    bad_peers = []
 
     def __init__(self):
         sys.stdout.write(Color.yellow)
@@ -145,6 +149,7 @@ class StrpeDsSplitter(Splitter_LRS):
 
     def on_round_beginning(self):
         self.refresh_tps_set()
+        self.punish_peers()
         return
 
     def refresh_tps_set(self):
@@ -154,6 +159,13 @@ class StrpeDsSplitter(Splitter_LRS):
                 self.add_trusted_peer(line)
         except:
             pass
+
+    def punish_peers(self):
+        for peer in self.bad_peers:
+            r = random.randint(1,100)
+            if r <= self.P_MPL:
+                self.punish_peer(peer)
+                self.bad_peers.remove(peer)
 
     def init_key(self):
         self.dsa_key = DSA.generate(1024)
@@ -221,13 +233,13 @@ class StrpeDsSplitter(Splitter_LRS):
 
     def handle_bad_peer_from_trusted(self, bad_peer, sender):
         self.add_complain(bad_peer, sender)
-        self.punish_peer(bad_peer, "by trusted")
+        self.add_punish_peer(bad_peer, "by trusted")
 
     def handle_bad_peer_from_regular(self, bad_peer, sender):
         self.add_complain(bad_peer, sender)
         x = len(self.complains[bad_peer]) / float(max(1, len(self.peer_list) - 1))
         if x >= self.majorityRatio:
-            self.punish_peer(bad_peer, "by majority decision")
+            self.add_punish_peer(bad_peer, "by majority decision")
 
     def add_complain(self, bad_peer, sender):
         if bad_peer in self.complains:
@@ -236,10 +248,16 @@ class StrpeDsSplitter(Splitter_LRS):
         else:
             self.complains[bad_peer] = [sender]
 
+    def add_punish_peer(self, bad_peer, reason):
+        print "bad peer added to exclude list {0} ({1})".format(bad_peer, reason)
+        if self.LOGGING:
+            self.log_message("bad peer added to exclude list {0} ({1})".format(bad_peer, reason))
+        self.bad_peers.append(bad_peer)
+
     def punish_peer(self, bad_peer, message = ""):
         if self.LOGGING:
-            self.log_message("bad peer {0}".format(bad_peer))
-        _print_("bad peer: " + str(bad_peer) + "(" + message + ")")
+            self.log_message("bad peer excluded {0}".format(bad_peer))
+        _print_("bad peer excluded: " + str(bad_peer) + "(" + message + ")")
         self.remove_peer(bad_peer)
 
     def receive_bad_peer_message(self):

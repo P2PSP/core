@@ -50,16 +50,6 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
         self.dsa_key = peer.dsa_key
         self.mainTarget = self.chooseMainTarget()
 
-        threading.Thread(target=self.checkForExpelled).start()
-
-    def checkForExpelled(self):
-        if self.lastMessageFromSplitter:
-            self.lastMessageFromSplitter = False
-        else:
-            self.player_alive = False
-        print 132
-        time.sleep(6)
-
     def chooseMainTarget(self):
         attackedPeers = []
         with open('../src/attacked.txt', 'r') as fh:
@@ -305,3 +295,12 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
                 self.bad_peers.append(peer_obj)
         else:
             self.bad_peers = []
+
+    def handle_bad_peers_request(self):
+        msg = struct.pack("3sH", "bad", len(self.regularPeers))
+        self.team_socket.sendto(msg, self.splitter)
+        for peer in self.regularPeers:
+            ip = struct.unpack("!L", socket.inet_aton(peer[0]))[0]
+            msg = struct.pack('ii', ip, peer[1])
+            self.team_socket.sendto(msg, self.splitter)
+        return -1

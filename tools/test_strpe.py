@@ -23,6 +23,9 @@ Q = 100
 
 trusted_peers = []
 
+P_MP = 25
+P_WIP = 50
+
 def checkdir():
     if not os.path.exists("./strpe-testing"):
         os.mkdir("./strpe-testing")
@@ -95,6 +98,9 @@ def initializeTeam(nPeers, nTrusted):
     with open("./../src/attacked.txt", "w"):
         pass
 
+    with open("./../src/malicious.txt", "w"):
+        pass
+
     print "running peers"
 
     for _ in range(nTrusted):
@@ -126,8 +132,11 @@ def churn():
 
 def addRegularOrMaliciousPeer():
     r = random.randint(1,100)
-    if r <= 50:
-        if r <= 25:
+    if r <= P_WIP:
+        if r <= P_MP:
+            with open("./../src/malicious.txt", "a") as fh:
+                fh.write('127.0.0.1:{0}\n'.format(port))
+                fh.close()
             print "malicious peer 127.0.0.1:{0}".format(port)
             runPeer(False, True, True)
         else:
@@ -204,6 +213,7 @@ def main(args):
 
     time.sleep(10) # time for all peers buffering
     saveLastRound()
+    print "LAST_ROUND_NUMBER", LAST_ROUND_NUMBER
 
     print "simulating churn"
     churn()

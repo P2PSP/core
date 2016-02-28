@@ -47,22 +47,20 @@ def calcAverageInFile(inFile, roundTime):
 
 def main(args):
     inFile = ""
-    nPeers = nMalicious = 0
+    nPeers = nMalicious = lastRound = 0
     try:
-        opts, args = getopt.getopt(args, "n:m:")
+        opts, args = getopt.getopt(args, "r:")
     except getopt.GetoptError:
         usage()
         sys.exit(2)
     for opt, arg in opts:
-        if opt == "-n":
-            nPeers = int(arg)
-        elif opt == "-m":
-            nMalicious = int(arg)
+        if opt == "-r":
+            lastRound = int(arg)
 
-    regex = re.compile("(\d*.\d*)\t(\d*)\s(\d*).*")
+    regex = re.compile("(\d*.\d*)\t(\d*)\s(\d*)\s(.*)")
     startParse = False
     roundOffset = 0
-    print "round\t#malicious\tteamsize\tcorrectness\tfilling"
+    print "round\t#well-intended\t#malicious\t#trusted\tteamsize\tcorrectness\tfilling"
     with open("./strpe-testing/splitter.log") as f:
         for line in f:
             result = regex.match(line)
@@ -70,13 +68,25 @@ def main(args):
                 ts = float(result.group(1))
                 currentRound = int(result.group(2))
                 currentTeamSize = int(result.group(3))
-                if currentTeamSize >= nPeers - nMalicious and not startParse:
+                peers = result.group(4).split(' ')
+                trusted = 0
+                malicious = 0
+
+                with open("./../src/trusted.txt", "r") as fh:
+                    for line in fh:
+                        if line[:-1] in peers:
+                            trusted += 1
+                with open("./../src/malicious.txt", "r") as fh:
+                    for line in fh:
+                        if line[:-1] in peers:
+                            malicious += 1
+
+                if currentRound >= lastRound and not startParse:
                     startParse = True
                     roundOffset = currentRound
                 if startParse:
-                    malicious = nMalicious - (nPeers - currentTeamSize)
                     info = calcAverageBufferCorrectnes(ts)
-                    print "{0}\t{1}\t{2}\t{3}\t{4}".format(currentRound - roundOffset + 1, malicious, currentTeamSize, info[0], info[1])
+                    print "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}".format(currentRound - roundOffset + 1, len(peers) - malicious - trusted, malicious, trusted, currentTeamSize, info[0], info[1])
     return 0
 
 if __name__ == "__main__":
