@@ -50,6 +50,7 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
         self.bad_peers = peer.bad_peers
         self.dsa_key = peer.dsa_key
         self.mainTarget = self.chooseMainTarget()
+        _print_("mainTarget = {0}".format(self.mainTarget))
 
     def chooseMainTarget(self):
         attackedPeers = []
@@ -232,6 +233,7 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
             if peer == self.mainTarget and self.numberChunksSendToMainTarget < self.MPTR:
                 self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
                 self.numberChunksSendToMainTarget += 1
+                _print_("mainTarget+=1 ({0})".format(self.numberChunksSendToMainTarget))
             elif self.allAttackC:
                 if peer in self.regularPeers or peer == self.mainTarget:
                     self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
