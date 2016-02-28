@@ -107,7 +107,7 @@ def initializeTeam(nPeers, nTrusted):
     print "running peers"
 
     for _ in range(nTrusted):
-        print "trusted peer 127.0.0.1:{0}".format(port)
+        print "TP 127.0.0.1:{0}".format(port)
         with open("./../src/trusted.txt", "a") as fh:
             fh.write('127.0.0.1:{0}\n'.format(port))
             fh.close()
@@ -116,7 +116,7 @@ def initializeTeam(nPeers, nTrusted):
 
 
     for _ in range(nPeers):
-        print "well-intended peer 127.0.0.1:{0}".format(port)
+        print "WIP 127.0.0.1:{0}".format(port)
         runPeer(False, False, True)
 
 def churn():
@@ -125,7 +125,7 @@ def churn():
     while checkForRounds():
         addRegularOrMaliciousPeer()
         if not checkForTrusted():
-            print "trusted peer 127.0.0.1:{0}".format(port)
+            print "TP 127.0.0.1:{0}".format(port)
             with open("./../src/trusted.txt", "a") as fh:
                 fh.write('127.0.0.1:{0}\n'.format(port))
                 fh.close()
@@ -140,10 +140,10 @@ def addRegularOrMaliciousPeer():
             with open("./../src/malicious.txt", "a") as fh:
                 fh.write('127.0.0.1:{0}\n'.format(port))
                 fh.close()
-            print "malicious peer 127.0.0.1:{0}".format(port)
+            print "MP 127.0.0.1:{0}".format(port)
             runPeer(False, True, True)
         else:
-            print "well-intended peer 127.0.0.1:{0}".format(port)
+            print "WIP 127.0.0.1:{0}".format(port)
             runPeer(False, False, True)
 
 def checkForTrusted():

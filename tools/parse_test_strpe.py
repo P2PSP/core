@@ -60,7 +60,7 @@ def main(args):
     regex = re.compile("(\d*.\d*)\t(\d*)\s(\d*)\s(.*)")
     startParse = False
     roundOffset = 0
-    print "round\t#well-intended\t#malicious\t#trusted\tteamsize\tcorrectness\tfilling"
+    print "round\t#WIPs\t#MPs\t#TPs\tteamsize\tcorrectness\tfilling"
     with open("./strpe-testing/splitter.log") as f:
         for line in f:
             result = regex.match(line)
