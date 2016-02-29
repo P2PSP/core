@@ -19,7 +19,7 @@ port = 60000
 playerPort = 61000
 
 LAST_ROUND_NUMBER = 0
-Q = 1000
+Q = 100
 
 trusted_peers = []
 
@@ -142,7 +142,6 @@ def addRegularOrMaliciousPeer():
                 fh.close()
             print "MP 127.0.0.1:{0}".format(port)
             runPeer(False, True, True)
-            time.sleep(100)
         else:
             print "WIP 127.0.0.1:{0}".format(port)
             runPeer(False, False, True)
