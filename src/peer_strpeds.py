@@ -54,6 +54,11 @@ class Peer_StrpeDs(Peer_DBS):
 
     def process_message(self, message, sender):
         if sender in self.bad_peers:
+            if len(message) == struct.calcsize(self.message_format):
+                chunk_number, chunk = self.unpack_message(message)
+                self.chunks[chunk_number % self.buffer_size] = None
+                self.received_flag[chunk_number % self.buffer_size] = False
+                _print_("im here")
             return -1
 
         if self.is_current_message_from_splitter() or self.check_message(message, sender):
