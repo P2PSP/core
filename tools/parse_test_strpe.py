@@ -17,11 +17,14 @@ def usage():
 def calcAverageBufferCorrectnes(roundTime):
     fileList = glob.glob("./strpe-testing/peer*.log")
     correctnesSum = fillingSum = 0.0
+    NN = 0
     for f in fileList:
         info = calcAverageInFile(f, roundTime)
-        correctnesSum += info[0]
-        fillingSum += info[1]
-    return (correctnesSum / len(fileList), fillingSum / len(fileList))
+        if (info[0] != None):
+            correctnesSum += info[0]
+            fillingSum += info[1]
+            NN += 1
+    return (correctnesSum / NN, fillingSum / NN)
 
 def calcAverageInFile(inFile, roundTime):
     regex_correctness = re.compile("(\d*.\d*)\tbuffer\scorrectnes\s(\d*.\d*)")
@@ -43,7 +46,7 @@ def calcAverageInFile(inFile, roundTime):
             if correctness != -1.0 and filling != -1.0:
                 return (correctness, filling)
 
-    return (1.0, 1.0)
+    return (None, None)
 
 def main(args):
     inFile = ""
