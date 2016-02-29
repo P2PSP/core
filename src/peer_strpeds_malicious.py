@@ -59,11 +59,17 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
                 attackedPeers.append(line)
             fh.close()
 
+        maliciousPeers = []
+        with open('../src/malicious.txt', 'r') as fh:
+            for line in fh:
+                maliciousPeers.append(line)
+            fh.close()
+
         re = None
         while re == None:
             r = random.randint(0, len(self.peer_list) - 1)
             peerEndpoint = '{0}:{1}'.format(self.peer_list[r][0], self.peer_list[r][1])
-            if not (peerEndpoint in attackedPeers):
+            if not (peerEndpoint in attackedPeers) and not (peerEndpoint in maliciousPeers):
                 re = self.peer_list[r]
 
         with open('../src/attacked.txt', 'a') as fh:
