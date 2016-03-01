@@ -241,18 +241,22 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
             if peer == self.mainTarget and self.numberChunksSendToMainTarget < self.MPTR:
 		if self.numberChunksSendToMainTarget<1:
                     self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
-                    print "Searching mainTarget:", peer
+                    print "mainTarget attack:", peer
                 self.numberChunksSendToMainTarget += 1
+		
                 _print_("mainTarget+=1 ({0})".format(self.numberChunksSendToMainTarget))
             elif self.allAttackC:
                 if peer in self.regularPeers or peer == self.mainTarget:
                     self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
-                    print "allAttackC mode:", peer
+                    print "allAttackC attack:", peer
+		    self.peer_list.remove(peer)
                 else:
                     self.team_socket.sendto(self.receive_and_feed_previous, peer)
+		    print "No poisoned 1", peer	
             elif peer == self.mainTarget and self.numberChunksSendToMainTarget >= self.MPTR:
                 self.allAttack()
-                self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
+                #self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
+		self.peer_list.remove(peer)
 		self.mainTarget = self.chooseMainTarget() # To select
                                                           # a new
                                                           # mainTarget
@@ -264,6 +268,7 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
                                                           # list
             else:
                 self.team_socket.sendto(self.receive_and_feed_previous, peer)
+		print "No poisoned 2", peer	
 
             return
 

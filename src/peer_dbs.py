@@ -375,11 +375,15 @@ class Peer_DBS(Peer_IMS):
 
     def calc_buffer_filling(self):
         chunks = 0
+	junk = 0
+	print ("Buffer_size "+str(self.buffer_size))
         for i in range(self.buffer_size):
             if self.received_flag[i]:
                 chunks += 1
-            #else:
-                #print self.received_flag[i]
+            else:
+		junk +=1
+		#print self.received_flag[i]
+	print ("noJunk "+str(chunks)+"Junk "+str(junk))
         return chunks / float(self.buffer_size)
 
     def log_message(self, message):

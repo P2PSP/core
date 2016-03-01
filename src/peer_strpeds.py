@@ -54,6 +54,7 @@ class Peer_StrpeDs(Peer_DBS):
 
     def process_message(self, message, sender):
         if sender in self.bad_peers:
+	    _print_("Sender= "+str(sender)+" Bad Peers= "+str(self.bad_peers))
             if len(message) == struct.calcsize(self.message_format):
                 chunk_number, chunk = self.unpack_message(message)
                 self.chunks[chunk_number % self.buffer_size] = None
