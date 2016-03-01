@@ -364,7 +364,7 @@ class Peer_DBS(Peer_IMS):
 
     def calc_buffer_correctnes(self):
         zerochunk = struct.pack("1024s", "0")
-        goodchunks = badchunks = 0
+        goodchunks = badchunks = 1
         for i in range(self.buffer_size):
             if self.received_flag[i]:
                 if self.chunks[i] == zerochunk:
@@ -378,6 +378,8 @@ class Peer_DBS(Peer_IMS):
         for i in range(self.buffer_size):
             if self.received_flag[i]:
                 chunks += 1
+            #else:
+                #print self.received_flag[i]
         return chunks / float(self.buffer_size)
 
     def log_message(self, message):

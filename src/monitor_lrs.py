@@ -42,7 +42,7 @@ class Monitor_LRS(Monitor_FNS):
         # in order to complains before the rest of peers reach them in
         # their buffers.
         self.buffer_size /= 2
-        print ("buffer_size =", self.buffer_size)
+        print (" (probando) buffer_size =", self.buffer_size)
 
         # }}}
 

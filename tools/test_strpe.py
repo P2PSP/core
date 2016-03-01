@@ -19,7 +19,7 @@ port = 60000
 playerPort = 61000
 
 LAST_ROUND_NUMBER = 0
-Q = 100
+Q = 500
 
 trusted_peers = []
 
@@ -51,7 +51,7 @@ def runStream():
 def runSplitter(ds = False):
     prefix = ""
     if ds: prefix = "ds"
-    run("python -O ../src/splitter.py --buffer_size 1024 --source_port 8080 --strpe{0} --strpe_log strpe-testing/splitter.log".format(prefix), open("strpe-testing/splitter.out", "w"))
+    run("python ../src/splitter.py --monitor_number 1 --buffer_size 64 --source_port 8080 --strpe{0} --strpe_log strpe-testing/splitter.log".format(prefix), open("strpe-testing/splitter.out", "w"))
     time.sleep(1)
 
 def runPeer(trusted = False, malicious = False, ds = False):
@@ -60,7 +60,7 @@ def runPeer(trusted = False, malicious = False, ds = False):
     #run peer
     strpeds = ""
     if ds: strpeds = "--strpeds"
-    runStr = "python -O ../src/peer.py --use_localhost --port {0} --player_port {1} {2}".format(port, playerPort, strpeds)
+    runStr = "python ../src/peer.py --use_localhost --port {0} --player_port {1} {2}".format(port, playerPort, strpeds)
     if trusted:
         runStr += " --trusted"
     if malicious:

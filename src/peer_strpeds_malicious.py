@@ -29,7 +29,7 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
     numberChunksSendToMainTarget = 0
     allAttackC = False
     regularPeers = []
-    MPTR = 5
+    MPTR = 0
 
     def __init__(self, peer):
         sys.stdout.write(Color.yellow)
