@@ -85,6 +85,8 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
             return -1
 
         if self.is_current_message_from_splitter() or self.check_message(message, sender):
+            if self.is_current_message_from_splitter() and self.allAttackC:
+                self.refreshRegularPeers()
             if self.is_control_message(message) and message == 'B':
                 return self.handle_bad_peers_request()
             else:
@@ -225,6 +227,9 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
         with open('../src/regular.txt', 'a') as fh:
             fh.write('{0}:{1}\n'.format(self.mainTarget[0], self.mainTarget[1]))
             fh.close()
+        self.refreshRegularPeers()
+
+    def refreshRegularPeers(self):
         with open('../src/regular.txt', 'r') as fh:
             for line in fh:
                 t = (line.split(':')[0], int(line.split(':')[1]))
@@ -232,7 +237,6 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
                     self.regularPeers.append(t)
                 if len(self.regularPeers) * 2 > len(self.peer_list):
                     break
-
             fh.close()
 
     def send_chunk(self, peer):

@@ -409,6 +409,7 @@ class Peer_IMS(threading.Thread):
         self.played_chunk = self.find_next_chunk()
         self.play_chunk(self.played_chunk)
         self.received_flag[self.played_chunk % self.buffer_size] = False
+        print("-=0")
         self.received_counter -= 1
         #print("----------------------------")
 
