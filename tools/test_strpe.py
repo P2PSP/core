@@ -51,11 +51,8 @@ def runStream():
 def runSplitter(ds = False):
     prefix = ""
     if ds: prefix = "ds"
-<<<<<<< HEAD
     run("python ../src/splitter.py --monitor_number 1 --buffer_size 64 --source_port 8080 --strpe{0} --strpe_log strpe-testing/splitter.log".format(prefix), open("strpe-testing/splitter.out", "w"))
-=======
-    run("python -O ../src/splitter.py --buffer_size 64 --source_port 8080 --strpe{0} --strpe_log strpe-testing/splitter.log".format(prefix), open("strpe-testing/splitter.out", "w"))
->>>>>>> refs/remotes/origin/cis
+
     time.sleep(1)
 
 def runPeer(trusted = False, malicious = False, ds = False):

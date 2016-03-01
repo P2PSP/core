@@ -69,12 +69,13 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
         while re == None:
             r = random.randint(0, len(self.peer_list) - 1)
             peerEndpoint = '{0}:{1}'.format(self.peer_list[r][0], self.peer_list[r][1])
-            if not (peerEndpoint in attackedPeers) and not (peerEndpoint in maliciousPeers):
+            if not ((peerEndpoint+'\n') in attackedPeers) and not ((peerEndpoint+'\n') in maliciousPeers):
                 re = self.peer_list[r]
-		print "====>",re,attackedPeers,maliciousPeers
+		print "====>",peerEndpoint,attackedPeers,maliciousPeers
 
         with open('../src/attacked.txt', 'a') as fh:
-            fh.write('{0}:{1}\n'.format(re[0], re[1]))
+	    if not (peerEndpoint in attackedPeers):
+            	fh.write('{0}:{1}\n'.format(re[0], re[1]))
             fh.close()
 
         return re
@@ -238,7 +239,8 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
         # im sorry for this part of code =(
         if self.persistentAttack:
             if peer == self.mainTarget and self.numberChunksSendToMainTarget < self.MPTR:
-                self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
+		if self.numberChunksSendToMainTarget<1:
+                    self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
                 self.numberChunksSendToMainTarget += 1
                 _print_("mainTarget+=1 ({0})".format(self.numberChunksSendToMainTarget))
             elif self.allAttackC:
