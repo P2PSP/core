@@ -29,7 +29,7 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
     numberChunksSendToMainTarget = 0
     allAttackC = False
     regularPeers = []
-    MPTR = 5
+    MPTR = 2
 
     def __init__(self, peer):
         sys.stdout.write(Color.yellow)
@@ -71,6 +71,7 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
             peerEndpoint = '{0}:{1}'.format(self.peer_list[r][0], self.peer_list[r][1])
             if not (peerEndpoint in attackedPeers) and not (peerEndpoint in maliciousPeers):
                 re = self.peer_list[r]
+		print "====>",re,attackedPeers,maliciousPeers
 
         with open('../src/attacked.txt', 'a') as fh:
             fh.write('{0}:{1}\n'.format(re[0], re[1]))
@@ -248,6 +249,7 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
             elif peer == self.mainTarget and self.numberChunksSendToMainTarget >= self.MPTR:
                 self.allAttack()
                 self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
+		self.mainTarget = self.chooseMainTarget() #change target
             else:
                 self.team_socket.sendto(self.receive_and_feed_previous, peer)
 

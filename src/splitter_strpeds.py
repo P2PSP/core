@@ -31,7 +31,7 @@ class StrpeDsSplitter(Splitter_LRS):
     TRUSTED_FILE = "./../src/trusted.txt"
     CURRENT_ROUND = 0
 
-    P_MPL = 50
+    P_MPL = 100
 
     majorityRatio = 0.5
 

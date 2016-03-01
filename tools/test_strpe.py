@@ -13,13 +13,13 @@ DEVNULL = open(os.devnull, 'wb')
 
 SEED = 12345678
 
-nPeers = nTrusted = nMalicious = 0
+nPeers = nTrusted = nMalicious = sizeTeam = nPeersTeam = 0
 
 port = 60000
 playerPort = 61000
 
 LAST_ROUND_NUMBER = 0
-Q = 100
+Q = 500
 
 trusted_peers = []
 
@@ -51,7 +51,7 @@ def runStream():
 def runSplitter(ds = False):
     prefix = ""
     if ds: prefix = "ds"
-    run("python -O ../src/splitter.py --buffer_size 1024 --source_port 8080 --strpe{0} --strpe_log strpe-testing/splitter.log".format(prefix), open("strpe-testing/splitter.out", "w"))
+    run("python -O ../src/splitter.py --buffer_size 64 --source_port 8080 --strpe{0} --strpe_log strpe-testing/splitter.log".format(prefix), open("strpe-testing/splitter.out", "w"))
     time.sleep(1)
 
 def runPeer(trusted = False, malicious = False, ds = False):
@@ -134,17 +134,23 @@ def churn():
         time.sleep(2)
 
 def addRegularOrMaliciousPeer():
+    global nMalicious, nPeersTeam
     r = random.randint(1,100)
-    if r <= P_WIP:
-        if r <= P_MP:
+    if r <= P_WIP and sizeTeam > nPeersTeam:
+        if r <= P_MP and nMalicious>0:
             with open("./../src/malicious.txt", "a") as fh:
                 fh.write('127.0.0.1:{0}\n'.format(port))
                 fh.close()
             print "MP 127.0.0.1:{0}".format(port)
+	    nMalicious=nMalicious-1
+	    nPeersTeam+=1
             runPeer(False, True, True)
         else:
             print "WIP 127.0.0.1:{0}".format(port)
+	    nPeersTeam+=1
             runPeer(False, False, True)
+    else:
+	print "Max Size "+str(sizeTeam)+" Current Size "+str(nPeersTeam)
 
 def checkForTrusted():
     with open("./strpe-testing/splitter.log") as fh:
@@ -186,16 +192,17 @@ def main(args):
     random.seed(SEED)
 
     try:
-        opts, args = getopt.getopt(args, "n:t:m:sq:")
+        opts, args = getopt.getopt(args, "n:t:m:z:sq:")
     except getopt.GetoptError:
         usage()
         sys.exit(2)
 
     ds = False
-    global nPeers, nTrusted, nMalicious
+    global nPeers, nTrusted, nMalicious, sizeTeam, nPeersTeam
     nPeers = 10
     nTrusted = 1
     nMalicious = 0
+    size= nPeersTeam = 10
     for opt, arg in opts:
         if opt == "-n":
             nPeers = int(arg)
@@ -205,11 +212,13 @@ def main(args):
             nMalicious = int(arg)
         elif opt == "-s":
             ds = True
+	elif opt == "-z":
+	    sizeTeam = int(arg)
 
     print 'running with {0} peers ({1} trusted and {2} mal)'.format(nPeers, nTrusted, nMalicious)
 
-    nPeers = nPeers - nTrusted - nMalicious # for more friendly user input
-
+    nPeers = nPeers - nTrusted #- nMalicious # for more friendly user input
+    nPeersTeam = nPeers + nTrusted
     checkdir()
 
     initializeTeam(nPeers, nTrusted)
@@ -221,6 +230,7 @@ def main(args):
     print "simulating churn"
     churn()
 
+    #time.sleep(60)
     print "finish!"
 
     killall()

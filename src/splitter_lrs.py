@@ -48,7 +48,9 @@ class Splitter_LRS(Splitter_ACS):
     def process_lost_chunk(self, lost_chunk_number, sender):
         # {{{
 
-        Splitter_ACS.process_lost_chunk(self, lost_chunk_number, sender)
+	print ("pasando...")
+	'''        
+	Splitter_ACS.process_lost_chunk(self, lost_chunk_number, sender)
         message = self.buffer[lost_chunk_number % self.BUFFER_SIZE]
         peer = self.peer_list[0]
         self.team_socket.sendto(message, peer)
@@ -56,7 +58,7 @@ class Splitter_LRS(Splitter_ACS):
             sys.stdout.write(Color.cyan)
             print ("LRS: Re-sending", lost_chunk_number, "to", peer)
             sys.stdout.write(Color.none)
-
+	'''
         # }}}
 
     def send_chunk(self, message, peer):
