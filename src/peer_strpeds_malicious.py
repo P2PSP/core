@@ -241,17 +241,27 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
             if peer == self.mainTarget and self.numberChunksSendToMainTarget < self.MPTR:
 		if self.numberChunksSendToMainTarget<1:
                     self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
+                    print "Searching mainTarget:", peer
                 self.numberChunksSendToMainTarget += 1
                 _print_("mainTarget+=1 ({0})".format(self.numberChunksSendToMainTarget))
             elif self.allAttackC:
                 if peer in self.regularPeers or peer == self.mainTarget:
                     self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
+                    print "allAttackC mode:", peer
                 else:
                     self.team_socket.sendto(self.receive_and_feed_previous, peer)
             elif peer == self.mainTarget and self.numberChunksSendToMainTarget >= self.MPTR:
                 self.allAttack()
                 self.team_socket.sendto(self.get_poisoned_chunk(self.receive_and_feed_previous), peer)
-		self.mainTarget = self.chooseMainTarget() #change target
+		self.mainTarget = self.chooseMainTarget() # To select
+                                                          # a new
+                                                          # mainTarget
+                                                          # after
+                                                          # incorporating
+                                                          # a new peer
+                                                          # to the
+                                                          # regular
+                                                          # list
             else:
                 self.team_socket.sendto(self.receive_and_feed_previous, peer)
 
