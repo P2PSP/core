@@ -29,7 +29,7 @@ class Peer_StrpeDs(Peer_DBS):
 
     trusted = False
     timeToLeave = False
-    P_tpl = 50
+    P_tpl = 100
 
     lastMessageFromSplitter = True
 
