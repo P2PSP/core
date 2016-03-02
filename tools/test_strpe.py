@@ -23,8 +23,8 @@ Q = 500
 
 trusted_peers = []
 
-P_MP = 25
-P_WIP = 50
+P_MP = 50
+P_WIP = 100
 
 def checkdir():
     if not os.path.exists("./strpe-testing"):
@@ -46,14 +46,14 @@ def runStream():
         run("vlc ../src/Big_Buck_Bunny_small.ogv --sout \"#duplicate{dst=standard{mux=ogg,dst=,access=http}}\"")
     else:
         run("/Applications/VLC.app/Contents/MacOS/VLC ../src/Big_Buck_Bunny_small.ogv --sout \"#duplicate{dst=standard{mux=ogg,dst=,access=http}}\"")
-    time.sleep(1)
+    time.sleep(0.25)
 
 def runSplitter(ds = False):
     prefix = ""
     if ds: prefix = "ds"
-    run("python ../src/splitter.py --monitor_number 1 --buffer_size 64 --source_port 8080 --strpe{0} --strpe_log strpe-testing/splitter.log".format(prefix), open("strpe-testing/splitter.out", "w"))
+    run("python ../src/splitter.py --monitor_number 0 --buffer_size 64 --source_port 8080 --strpe{0} --strpe_log strpe-testing/splitter.log".format(prefix), open("strpe-testing/splitter.out", "w"))
 
-    time.sleep(1)
+    time.sleep(0.25)
 
 def runPeer(trusted = False, malicious = False, ds = False):
     global port
@@ -69,7 +69,7 @@ def runPeer(trusted = False, malicious = False, ds = False):
     if not malicious:
          runStr += " --strpe_log ./strpe-testing/peer{0}.log".format(port)
     run(runStr, open("strpe-testing/peer{0}.out".format(port), "w"))
-    time.sleep(2)
+    time.sleep(0.5)
     #run netcat
     run("nc 127.0.0.1 {0}".format(playerPort))
     port, playerPort = port + 1, playerPort + 1
@@ -132,7 +132,7 @@ def churn():
                 fh.close()
             trusted_peers.append('127.0.0.1:{0}'.format(port))
             runPeer(True, False, True)
-        time.sleep(2)
+        time.sleep(0.5)
 
 def addRegularOrMaliciousPeer():
     global nMalicious, nPeersTeam

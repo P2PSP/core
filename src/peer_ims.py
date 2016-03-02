@@ -411,6 +411,9 @@ class Peer_IMS(threading.Thread):
         self.received_flag[self.played_chunk % self.buffer_size] = False
         print("-=0")
         self.received_counter -= 1
+        x = str(self.buffer_size)+'s'
+        zerochunk = struct.pack(x, "0")
+        self.chunks[self.played_chunk % self.buffer_size] = zerochunk
         #print("----------------------------")
 
         # }}}

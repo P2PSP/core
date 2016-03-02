@@ -363,7 +363,8 @@ class Peer_DBS(Peer_IMS):
     # }}}
 
     def calc_buffer_correctnes(self):
-        zerochunk = struct.pack("1024s", "0")
+	x = str(self.buffer_size)+'s'
+        zerochunk = struct.pack(x, "0")
         goodchunks = badchunks = 1
         for i in range(self.buffer_size):
             if self.received_flag[i]:
