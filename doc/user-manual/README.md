@@ -23,9 +23,9 @@ P2PSP user's manual
    Environment variables, search the PATH variable and add the
    Python's directory):
 
-  ```
-  python setup.py install
-  ```
+```
+python setup.py install
+```
 
 <!-- }}} -->
 
@@ -43,10 +43,10 @@ Install [Python 3](https://www.python.org/downloads/mac-osx/).
 
 Run:
 
-   '''
+```
    sudo apt-get update
    sudo apt-get install python3
-   '''
+```
 
 <!-- }}} -->
 
@@ -56,10 +56,10 @@ Run:
 
 Run:
 
-   '''
+```
    sudo pacman -Sy
    sudo pacman -S python3
-   '''
+```
 
 <!-- }}} -->
 
@@ -90,9 +90,9 @@ Install [VLC](http://www.videolan.org/vlc/download-macosx.html).
 
 Run:
 
-   '''
+```
    sudo apt-get install vlc
-   '''
+```
 
 <!-- }}} -->
 
@@ -102,9 +102,9 @@ Run:
 
 Run:
 
-   '''
+```
    sudo pacman -S vlc
-   '''
+```
 
 <!-- }}} -->
 
@@ -124,12 +124,11 @@ Run:
 <!-- {{{  -->
 
 Run:
-    ```
+```
     cd tools
     ./play.sh &
-    ```
+```
 
 <!-- }}} -->
 
 <!-- }}} -->
-
