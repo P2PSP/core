@@ -125,6 +125,7 @@ Run:
 
 Run:
     ```
+    cd tools
     ./play.sh &
     ```
 
