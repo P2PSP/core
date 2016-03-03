@@ -9,6 +9,7 @@
 //
 
 #include <iostream>
+#include <memory>
 #include "core/splitter_ims.h"
 #include "core/splitter_dbs.h"
 #include "core/splitter_acs.h"
@@ -21,7 +22,7 @@
 
 // TODO: LOG fails if splitter is defined outside the main
 // p2psp::SplitterSTRPE splitter;
-p2psp::SplitterSTRPE *splitter_ptr;
+std::unique_ptr<p2psp::SplitterSTRPE> splitter_ptr;
 
 void HandlerCtrlC(int s) {
   LOG("Keyboard interrupt detected ... Exiting!");
@@ -102,22 +103,20 @@ int main(int argc, const char *argv[]) {
   try {
     boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
   } catch (std::exception &e) {
-    
+
     // If the argument passed is unknown, print the list of available arguments
     std::cout << desc << "\n";
     return 1;
   }
 
   boost::program_options::notify(vm);
-  
+
   if (vm.count("help")) {
     std::cout << desc << "\n";
     return 1;
   }
 
-  p2psp::SplitterSTRPE splitter;
-
-  splitter_ptr = &splitter;
+  splitter_ptr.reset(new p2psp::SplitterSTRPE());
 
   if (vm.count("buffer_size")) {
     splitter_ptr->SetBufferSize(vm["buffer_size"].as<int>());
