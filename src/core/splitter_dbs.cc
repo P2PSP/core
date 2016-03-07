@@ -155,12 +155,8 @@ void SplitterDBS::IncrementUnsupportivityOfPeer(
     TRACE("" << peer << " has lost " << to_string(losses_[peer]) << " chunks");
 
     if (losses_[peer] > max_chunk_loss_) {
-      // TODO: Check this condition in original code, is it correct?
-      if (find(peer_list_.begin(), peer_list_.begin() + monitor_number_,
-               peer) == peer_list_.end()) {
         TRACE("" << peer << " removed");
         RemovePeer(peer);
-      }
     }
   }
 }
