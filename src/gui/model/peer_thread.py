@@ -33,9 +33,9 @@ def configure_peer(data=None):
     
     @param data : List containing Splitter address and port.
     """
-    
-    Peer_IMS.SPLITTER_ADDR = data[0]
-    Peer_IMS.SPLITTER_PORT = data[1]
+    from core.peer_ims import Peer_IMS as peer_ims
+    peer_ims.SPLITTER_ADDR = data[0]
+    peer_ims.SPLITTER_PORT = data[1]
 
 ## Use localhost instead the IP of the addapter
 Peer_IMS.USE_LOCALHOST = True
