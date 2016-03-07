@@ -7,24 +7,23 @@ p2psp_application_gui module
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
-# The P2PSP.org project has been supported by the Junta de Andalucia
-# through the Proyecto Motriz "Codificacion de Video Escalable y su
-# Streaming sobre Internet" (P10-TIC-6548).
-
 # {{{ Imports
 
 import traceback
+from core.common import Common
+Common.CONSOLE_MODE = False
 try:
     from gi.repository import GObject
     from gi.repository import Gtk
-    from controller.main_window_controller import Main_Controller
-    from view.main_window import Main_Window
-    from model.model import Model
-    from common.decorators import exc_handler
+    from gui.controller.main_window_controller import Main_Controller
+    from gui.view.main_window import Main_Window
+    from gui.model.model import Model
+    from gui.common.decorators import exc_handler
 except Exception as msg:
     traceback.print_exc()
 
 # }}}
+
 
 @exc_handler
 def main_app():

@@ -1,7 +1,16 @@
+"""
+@package core
+splitter_ace module
+"""
+
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
+
+# ACS: Adaptive Chunk-rate Set of rules
 
 # {{{ Imports
 
@@ -11,32 +20,42 @@ import sys
 import socket
 import struct
 import time
-from color import Color
-import common
-from _print_ import _print_
-from splitter_ims import Splitter_IMS
-from splitter_dbs import Splitter_DBS
-from splitter_fns import Splitter_FNS
+
+from core.common import Common
+from core.color import Color
+from core._print_ import _print_
+#from splitter_ims import Splitter_IMS
+from core.splitter_dbs import Splitter_DBS
+#from splitter_fns import Splitter_FNS
 
 # }}}
 
-# ACS: Adaptive Chunk-rate Set of rules
-class Splitter_ACS(Splitter_FNS):
-    # {{{
-
-    def __init__(self):
-        # {{{
-
-        Splitter_FNS.__init__(self)
-        sys.stdout.write(Color.yellow)
-        print("Using ACS")
+def _p_(*args, **kwargs):
+    """Colorize the output."""
+    if __debug__:
+        sys.stdout.write(Common.ACS_COLOR)
+        _print_("ACS:", *args)
         sys.stdout.write(Color.none)
 
+class Splitter_ACS(Splitter_DBS):
+    # {{{
+    
+    def __init__(self, splitter):
+        # {{{
+
+        #Splitter_FNS.__init__(self)
+        #sys.stdout.write(Color.yellow)
+        #print("Using ACS")
+        #sys.stdout.write(Color.none)
 
         self.period = {}                         # Indexed by a peer (IP address, port)
         self.period_counter = {}                 # Indexed by a peer (IP address, port)
         self.number_of_sent_chunks_per_peer = {} # Indexed by a peer (IP address, port)
 
+        self.magic_flags |= Common.ACS
+        
+        _p_("Initialized")
+        
         # }}}
 
     def insert_peer(self, peer):
@@ -46,7 +65,7 @@ class Splitter_ACS(Splitter_FNS):
         self.period[peer] = self.period_counter[peer] = 1
         self.number_of_sent_chunks_per_peer[peer] = 0
         #if __debug__:
-        _print_("ACS: inserted", peer)
+        _p_("inserted", peer)
 
         # }}}
 
@@ -100,14 +119,14 @@ class Splitter_ACS(Splitter_FNS):
     def send_chunk(self, chunk, peer):
         # {{{
 
-        Splitter_IMS.send_chunk(self, chunk, peer)
+        Splitter_DBS.send_chunk(self, chunk, peer)
         try:
             self.number_of_sent_chunks_per_peer[peer] += 1
         except KeyError:
             pass
 
         # }}}
-            
+
     def compute_next_peer_number(self, peer):
         # {{{
 

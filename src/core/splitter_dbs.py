@@ -1,20 +1,30 @@
+"""
+@package core
+splitter_dbs module
+"""
+
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
+# DBS: Data Broadcasting Set of rules
+
 # {{{ Imports
 
-from __future__ import print_function
+#from __future__ import print_function
 import threading
 import sys
 import socket
 import struct
 import time
-from color import Color
-import common
-from _print_ import _print_
-from splitter_ims import Splitter_IMS
+
+from core.common import Common
+from core._print_ import _print_
+from core.splitter_ims import Splitter_IMS
+from core.color import Color
 
 # }}}
 
@@ -22,26 +32,31 @@ from splitter_ims import Splitter_IMS
 ADDR = 0
 PORT = 1
 
-# DBS: Data Broadcasting Set of rules
+def _p_(*args, **kwargs):
+    """Colorize the output."""
+    if __debug__:
+        sys.stdout.write(Common.DBS_COLOR)
+        _print_("DBS:", *args)
+        sys.stdout.write(Color.none)
+    
 class Splitter_DBS(Splitter_IMS):
     # {{{
 
     # {{{ Class "constants"
 
-    # {{{ Threshold of chunk losses to reject a peer from the team.
-    # }}}
-    MAX_CHUNK_LOSS = 32
+    MAX_CHUNK_LOSS = 32     # Chunk losses threshold to reject a peer from the team.
     MCAST_ADDR = "0.0.0.0"
-
+    MONITOR_NUMBER = 1
+    
     # }}}
 
     def __init__(self):
         # {{{
 
-        Splitter_IMS.__init__(self)
-        sys.stdout.write(Color.yellow)
-        print("Using DBS")
-        sys.stdout.write(Color.none)
+        Splitter_IMS.__init__(self) #???
+        #sys.stdout.write(Color.yellow)
+        #print("Using DBS")
+        #sys.stdout.write(Color.none)
 
         #self.number_of_monitors = 0
         self.peer_number = 0
@@ -51,7 +66,7 @@ class Splitter_DBS(Splitter_IMS):
         self.peer_list = []
 
         # }}}
-        
+
         # {{{ Destination peers of the chunk, indexed by a chunk
         # number. Used to find the peer to which a chunk has been
         # sent.
@@ -61,24 +76,34 @@ class Splitter_DBS(Splitter_IMS):
         #    self.destination_of_chunk.append(('0.0.0.0',0))
 
         self.losses = {}
-
-        print("DBS: max_chunk_loss =", self.MAX_CHUNK_LOSS)
-        print("DBS: mcast_addr =", self.MCAST_ADDR)
+        self.magic_flags = Common.DBS
+        
+        _p_("max_chunk_loss =", self.MAX_CHUNK_LOSS)
+        _p_("mcast_addr =", self.MCAST_ADDR)
+        _p_("Initialized")
 
         # }}}
 
-    def say_goodbye(self, node, sock):
+        #def say_goodbye(self, node, sock):
         # {{{
 
-        sock.sendto(b'', node)
+        #sock.sendto(b'', node)
 
         # }}}
 
+    def send_magic_flags(self, peer_serve_socket):
+
+        message = struct.pack("B", self.magic_flags)
+        peer_serve_socket.sendall(message)
+        _print_("Magic flags =",bin(self.magic_flags))
+            
     def send_the_list_size(self, peer_serve_socket):
         # {{{
 
-        if __debug__:
-            print("DBS: Sending a list of peers of size", len(self.peer_list))
+        _p_("Sending the number of monitors", self.MONITOR_NUMBER)
+        message = struct.pack("H", socket.htons(self.MONITOR_NUMBER))
+        peer_serve_socket.sendall(message)
+        _p_("Sending a list of peers of size", len(self.peer_list))
         message = struct.pack("H", socket.htons(len(self.peer_list)))
         peer_serve_socket.sendall(message)
 
@@ -94,7 +119,7 @@ class Splitter_DBS(Splitter_IMS):
         self.send_the_list_size(peer_serve_socket)
 
         #peer_serve_socket.sendall(self.message)
-        
+
         if __debug__:
             counter = 0
         for p in self.peer_list:
@@ -102,7 +127,7 @@ class Splitter_DBS(Splitter_IMS):
                                   socket.htons(p[PORT]))
             peer_serve_socket.sendall(message)
             if __debug__:
-                print("DBS: [%5d]" % counter, p)
+                _p_("[%5d]" % counter, p)
                 counter += 1
 
         # }}}
@@ -134,15 +159,17 @@ class Splitter_DBS(Splitter_IMS):
     def send_configuration(self, sock):
         Splitter_IMS.send_configuration(self, sock)
         self.send_the_peer_endpoint(sock)
-        
+        self.send_magic_flags(sock)
+
     def insert_peer(self, peer):
         # {{{
+
         if peer not in self.peer_list: # Probar a quitar -----------------------------------------------------
             #self.peer_list.insert(self.peer_number, peer)
             self.peer_list.append(peer)
         self.losses[peer] = 0
 
-        _print_("DBS: inserted peer", peer)
+        _p_("inserted peer", peer)
 
         # }}}
 
@@ -158,26 +185,26 @@ class Splitter_DBS(Splitter_IMS):
 
         serve_socket = connection[0]
         incomming_peer = connection[1]
-        sys.stdout.write(Color.green)
-        print(serve_socket.getsockname(), '\b: DBS: accepted connection from peer', \
-              incomming_peer)
-        sys.stdout.write(Color.none)
+        #sys.stdout.write(Color.green)
+        #print(serve_socket.getsockname(), '\b: DBS: accepted connection from peer', \
+        #      incomming_peer)
+        _p_('accepted connection from peer', incomming_peer)
+        #sys.stdout.write(Color.none)
         self.send_configuration(serve_socket)
         self.send_the_list_of_peers(serve_socket)
-        self.insert_peer(incomming_peer)
         serve_socket.close()
+        self.insert_peer(incomming_peer)
         return incomming_peer
-                
+
         # }}}
-        
+
     def receive_message(self):
         # {{{
 
         try:
             return self.team_socket.recvfrom(struct.calcsize("H"))
         except:
-            if __debug__:
-                print("DBS: Unexpected error:", sys.exc_info()[0])
+            _p_("Unexpected error:", sys.exc_info()[0])
             pass
 
         # }}}
@@ -191,7 +218,7 @@ class Splitter_DBS(Splitter_IMS):
 
     def get_losser(self, lost_chunk_number):
         # {{{
-        
+
         return self.destination_of_chunk[lost_chunk_number % self.BUFFER_SIZE]
 
         # }}}
@@ -219,19 +246,17 @@ class Splitter_DBS(Splitter_IMS):
         try:
             self.losses[peer] += 1
         except KeyError:
-            if __debug__:
-                print("DBS: the unsupportive peer", peer, "does not exist!")
+            _p_("the unsupportive peer", peer, "does not exist!")
         else:
-            if __debug__:
-                sys.stdout.write(Color.blue)
-                print("DBS: ", peer, "has loss", self.losses[peer], "chunks")
-                sys.stdout.write(Color.none)
+            #sys.stdout.write(Color.blue)
+            _p_(peer, "has loss", self.losses[peer], "chunks")
+            #sys.stdout.write(Color.none)
             if self.losses[peer] > self.MAX_CHUNK_LOSS:
-                if peer != self.peer_list[0]:
-                    sys.stdout.write(Color.red)
-                    print("DBS: ", peer, 'removed')
+                if peer not in self.peer_list[:self.MONITOR_NUMBER]:
+                    #sys.stdout.write(Color.red)
+                    _p_(peer, 'removed')
                     self.remove_peer(peer)
-                    sys.stdout.write(Color.none)
+                    #sys.stdout.write(Color.none)
         finally:
            pass
 
@@ -243,13 +268,13 @@ class Splitter_DBS(Splitter_IMS):
         destination = self.get_losser(lost_chunk_number)
 
         if __debug__:
-            
-            sys.stdout.write(Color.cyan)
-            print("DBS: ", sender, "complains about lost chunk", lost_chunk_number, "sent to", destination)
-            sys.stdout.write(Color.none)
 
-            if destination == self.peer_list[0]:
-                print ("DBS: lost chunk index =", lost_chunk_number)
+            #sys.stdout.write(Color.cyan)
+            _p_(sender, "complains about lost chunk", lost_chunk_number, "sent to", destination)
+            #sys.stdout.write(Color.none)
+
+            if destination in self.peer_list[:self.MONITOR_NUMBER]:
+                _p_("lost chunk index =", lost_chunk_number)
 
         self.increment_unsupportivity_of_peer(destination)
 
@@ -258,12 +283,12 @@ class Splitter_DBS(Splitter_IMS):
     def process_goodbye(self, peer):
         # {{{
 
-        sys.stdout.write(Color.green)
-        print('DBS: Received "goodbye" from', peer)
-        sys.stdout.write(Color.none)
+        #sys.stdout.write(Color.green)
+        _p_('Received "goodbye" from', peer)
+        #sys.stdout.write(Color.none)
         sys.stdout.flush()
 
-        #if peer != self.peer_list[0]:
+        #if peer not in self.peer_list[:self.MONITOR_NUMBER]:
         self.remove_peer(peer)
 
         # }}}
@@ -291,7 +316,7 @@ class Splitter_DBS(Splitter_IMS):
                 # }}}
 
             else:
-                
+
                 # {{{ The peer wants to leave the team.
 
                 # A !2-length payload means that the peer wants to go
@@ -332,12 +357,16 @@ class Splitter_DBS(Splitter_IMS):
 
         while self.alive:
             self.reset_counters()
-            time.sleep(common.COUNTERS_TIMING)
+            time.sleep(Common.COUNTERS_TIMING)
 
         # }}}
 
     def compute_next_peer_number(self, peer):
+        # {{{ 
+
         self.peer_number = (self.peer_number + 1) % len(self.peer_list)
+
+        # }}}
 
     def run(self):
         # {{{
@@ -350,7 +379,7 @@ class Splitter_DBS(Splitter_IMS):
         # "reset_counters_thread" are new.
         # }}}
 
-        print(self.peer_connection_socket.getsockname(), "\b: DBS: waiting for the monitor peer ...")
+        _p_(self.peer_connection_socket.getsockname(), "\b: waiting for the monitor peers ...")
         def _():
             connection  = self.peer_connection_socket.accept()
             incomming_peer = self.handle_a_peer_arrival(connection)
@@ -367,7 +396,7 @@ class Splitter_DBS(Splitter_IMS):
 
         message_format = self.chunk_number_format \
                         + str(self.CHUNK_SIZE) + "s"
-                        
+
         #header_load_counter = 0
         while self.alive:
 
@@ -378,14 +407,12 @@ class Splitter_DBS(Splitter_IMS):
                 self.send_chunk(message, peer)
 
                 self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
-                self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
+                self.chunk_number = (self.chunk_number + 1) % Common.MAX_CHUNK_NUMBER
                 self.compute_next_peer_number(peer)
             except IndexError:
-                if __debug__:
-                    _print_("DBS: The monitor peer has died!")
+                _p_("The monitor peer has died!")
 
 
         # }}}
 
     # }}}
-

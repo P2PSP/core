@@ -50,3 +50,7 @@ Directory contents:
   yoy are going to use this code.
 
 * tools: some tools.
+
+# The P2PSP.org project has been supported by the Junta de Andalucía
+# through the Proyecto Motriz "Codificación de Vídeo Escalable y su
+# Streaming sobre Internet" (P10-TIC-6548).

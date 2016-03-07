@@ -1,23 +1,41 @@
+"""
+@package core
+lossy_peer module
+"""
+
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
 # {{{ Imports
+
 import threading
 import sys
 import socket
-from peer_fns import Peer_FNS
-from color import Color
-from _print_ import _print_
-from lossy_socket import lossy_socket
+
+from core.common import Common
+from core.color import Color
+from core._print_ import _print_
+from core.lossy_socket import lossy_socket
+from core.peer_dbs import Peer_DBS
+
 # }}}
 
 # Some useful definitions.
 ADDR = 0
 PORT = 1
 
-class Lossy_Peer(Peer_FNS):
+def _p_(*args, **kwargs):
+    if __debug__:
+        """Colorize the output."""
+        sys.stdout.write(Common.DBS_COLOR)
+        _print_("DBS:", *args)
+        sys.stdout.write(Color.none)
+
+class Lossy_Peer(Peer_DBS):
     # {{{
 
     CHUNK_LOSS_PERIOD = 10
@@ -25,22 +43,7 @@ class Lossy_Peer(Peer_FNS):
     def __init__(self, peer):
         # {{{
 
-        #Peer_FNS.__init__(self, peer)
-
-        sys.stdout.write(Color.yellow)
-        _print_("Lossy Peer")
-        sys.stdout.write(Color.none)
-
-        threading.Thread.__init__(self)
-
-        self.splitter_socket = peer.splitter_socket
-        self.player_socket = peer.player_socket
-        self.buffer_size = peer.buffer_size
-        self.chunk_format_string = peer.chunk_format_string
-        self.splitter = peer.splitter
-        self.chunk_size = peer.chunk_size
-        self.peer_list = peer.peer_list
-        self.debt = peer.debt
+        _p_("Initialized")
 
         # }}}
 

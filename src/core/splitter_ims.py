@@ -1,7 +1,16 @@
+"""
+@package core
+splitter_ims module
+"""
+
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
+
+# IMS: IP Multicast Set of rules.
 
 # {{{ Imports
 
@@ -10,80 +19,72 @@ import sys,os
 import socket
 import threading
 import struct
-from color import Color
-import common
 import time
-from _print_ import _print_
+
+from core.common import Common
+from core._print_ import _print_
+from core.color import Color
 
 # }}}
 
-# IMS: IP Multicast Set of rules.
+def _p_(*args, **kwargs):
+    """Colorize the output."""
+    if __debug__:
+        sys.stdout.write(Common.IMS_COLOR)
+        _print_("IMS:", *args)
+        sys.stdout.write(Color.none)
+
 class Splitter_IMS(threading.Thread):
     # {{{
 
     # {{{ Class "constants"
 
-    # {{{ The buffer_size (in chunks). The buffer_size should be
-    # proportional to the bit-rate (remember that the latency is also
-    # proportional to the buffer_size).
-    # }}}
-    BUFFER_SIZE = 256
-
-    # {{{ Channel served by the streaming source.
-    # }}}
-    #CHANNEL = "BBB-134.ogv"
-    CHANNEL = ""
-
-    # {{{ The chunk_size (in bytes) depends mainly on the network
-    # technology and should be selected as big as possible, depending
-    # on the MTU and the bit-error rate.
-    # }}}
-    CHUNK_SIZE = 1024
-
-    # {{{ Number of chunks of the header.
-    # }}}
-    HEADER_SIZE = 10
-
-    # {{{ The unicast IP address of the splitter server.
-    # }}}
-    #SPLITTER_ADDR = "127.0.0.1" # No por ahora
+    BUFFER_SIZE = 256              # Buffer size in chunks
+    CHANNEL = "test.ogg"           # Default channel
+    #CHANNEL = ""
+    CHUNK_SIZE = 1024              # Chunk size in bytes (larger than MTU)
+    HEADER_SIZE = 10               # Chunks/header
+    #SPLITTER_ADDR = "127.0.0.1"
+    PORT = 8001                    # Listening port
+    SOURCE_ADDR = "127.0.0.1"      # Streaming server's host
+    SOURCE_PORT = 8000             # Streaming server's listening port
+    MCAST_ADDR = "224.0.0.1"       # All Systems on this subnet
+    #MCAST_ADDR = "224.0.0.2"      # Default IP multicast channel
+    TTL = 1                        # Time To Live of multicast packets
     
-    # {{{ Port used to serve the peers (listening port).
     # }}}
-    PORT = 4552
 
-    # {{{ The host where the streaming server is running.
-    # }}}
-    SOURCE_ADDR = "127.0.0.1"
+    def __new__(typ, *args, **kwargs):
+        # {{{
 
-    # {{{ Port where the streaming server is listening.
-    # }}}
-    SOURCE_PORT = 8000
+        if len(args) == 1 and isinstance(args[0], Splitter_IMS):
+            # Parameter is a peer instance; extending its class instead of nesting:
+            instance = args[0]
+            instance.__class__ = typ
+            return instance
+        else:
+            # Use default object creation
+            return object.__new__(typ, *args, **kwargs)
 
-    # {{{ The multicast IP address of the team, used to send the chunks.
-    # }}}
-    MCAST_ADDR = "224.0.0.1" # All Systems on this subnet
-    #MCAST_ADDR = "224.0.0.2"
-
-    # }}}
+        # }}}
 
     def __init__(self):
         # {{{
 
         threading.Thread.__init__(self)
-        sys.stdout.write(Color.yellow)
-        print("Using IMS")
-        sys.stdout.write(Color.none)
+        #sys.stdout.write(Color.yellow)
+        #print("Using IMS")
+        #sys.stdout.write(Color.none)
 
-        print("IMS: Buffer size (in chunks) =", self.BUFFER_SIZE)
-        print("IMS: Chunk size (in bytes) =", self.CHUNK_SIZE)
-        print('IMS: Channel ="', self.CHANNEL, '"')
-        print("IMS: Header size (in chunks) =", self.HEADER_SIZE)
+        _p_("Buffer size (in chunks) =", self.BUFFER_SIZE)
+        _p_("Chunk size (in bytes) =", self.CHUNK_SIZE)
+        _p_('Channel ="', self.CHANNEL, '"')
+        _p_("Header size (in chunks) =", self.HEADER_SIZE)
         #print("IMS: Splitter address =", self.SPLITTER_ADDR) # No ahora
-        print("IMS: Listening (and multicast) port =", self.PORT)
-        print("IMS: Source IP address =", self.SOURCE_ADDR)
-        print("IMS: Source port =", self.SOURCE_PORT)
-        print("IMS: Multicast address =", self.MCAST_ADDR)
+        _p_("Listening (and multicast) port =", self.PORT)
+        _p_("Source IP address =", self.SOURCE_ADDR)
+        _p_("Source port =", self.SOURCE_PORT)
+        _p_("Multicast address =", self.MCAST_ADDR)
 
         # {{{ An IMS splitter runs 2 threads. The main one serves the
         # chunks to the team. The other controls peer arrivals. This
@@ -106,7 +107,7 @@ class Splitter_IMS(threading.Thread):
         # {{{ Used to talk to the source
         # }}}
         self.source_socket = ""
-        
+
         # {{{ The video header.
         # }}}
         #self.header = buffer('')
@@ -123,67 +124,65 @@ class Splitter_IMS(threading.Thread):
         self.sendto_counter = 0
 
         self.header_load_counter = 0
-        
+
+        _p_("Initialized")
+
         # }}}
 
     def send_the_header(self, peer_serve_socket):
         # {{{
 
-        _print_("IMS: Sending a header of", len(self.header), "bytes")
+        _p_("Sending a header of", len(self.header), "bytes")
         try:
             peer_serve_socket.sendall(self.header)
         except:
             pass
-        
+
         # }}}
 
     def send_the_buffer_size(self, peer_serve_socket):
         # {{{
 
-        if __debug__:
-            print("IMS: Sending a buffer_size of", self.BUFFER_SIZE, "bytes")
+        _p_("Sending a buffer_size of", self.BUFFER_SIZE, "bytes")
         message = struct.pack("H", socket.htons(self.BUFFER_SIZE))
         try:
             peer_serve_socket.sendall(message)
         except:
             pass
-        
+
         # }}}
 
     def send_the_chunk_size(self, peer_serve_socket):
         # {{{
 
-        if __debug__:
-            print("IMS: Sending a chunk_size of", self.CHUNK_SIZE, "bytes")
+        _p_("Sending a chunk_size of", self.CHUNK_SIZE, "bytes")
         message = struct.pack("H", socket.htons(self.CHUNK_SIZE))
         try:
             peer_serve_socket.sendall(message)
         except:
             pass
-        
+
         # }}}
 
     def send_the_mcast_channel(self, peer_serve_socket):
         # {{{
 
-        if __debug__:
-            print("IMS: Communicating the multicast channel", (self.MCAST_ADDR, self.PORT))
+        _p_("Communicating the multicast channel", (self.MCAST_ADDR, self.PORT))
         message = struct.pack("4sH", socket.inet_aton(self.MCAST_ADDR), socket.htons(self.PORT))
         peer_serve_socket.sendall(message)
-        
+
         # }}}
 
     def send_the_header_size(self, peer_serve_socket):
         # {{{
 
-        if __debug__:
-            print("IMS: Communicating the header size", self.HEADER_SIZE)
+        _p_("Communicating the header size", self.HEADER_SIZE)
         message = struct.pack("H", socket.htons(self.HEADER_SIZE))
         try:
             peer_serve_socket.sendall(message)
         except:
             pass
-        
+
         # }}}
 
     def send_configuration(self, sock):
@@ -201,19 +200,19 @@ class Splitter_IMS(threading.Thread):
         # {{{ Handle the arrival of a peer. When a peer want to join a
         # team, first it must establish a TCP connection with the
         # splitter.
-        
+
         serve_socket = connection[0]
-        sys.stdout.write(Color.green)
-        print(serve_socket.getsockname(), '\b: IMS: accepted connection from peer', \
+        #sys.stdout.write(Color.green)
+        _p_(serve_socket.getsockname(), '\b: IMS: accepted connection from peer', \
               connection[1])
-        sys.stdout.write(Color.none)
+        #sys.stdout.write(Color.none)
         self.send_configuration(serve_socket)
         serve_socket.close()
 
         # }}}
 
     def handle_arrivals(self):
-        # {{{ 
+        # {{{
 
         while self.alive:
             peer_serve_socket, peer = self.peer_connection_socket.accept()
@@ -239,28 +238,28 @@ class Splitter_IMS(threading.Thread):
 
         # {{{ Set the connection queue to the max!
         # }}}
-        self.peer_connection_socket.listen(socket.SOMAXCONN) 
+        self.peer_connection_socket.listen(socket.SOMAXCONN)
 
         # }}}
 
     def setup_team_socket(self):
         # {{{ Used to talk with the peers of the team. In this case,
         # it corresponds to a multicast channel.
-        
+
         self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 0)
+        self.team_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, self.TTL)
 
         try:
             # This does not work in Windows systems !!
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         except Exception as e:
-            print ("IMS: ", e)
+            _p_(e)
             pass
 
         try:
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         except Exception as e:
-            print ("IMS: ", e)
+            _p_(e)
             pass
 
         #try:
@@ -275,14 +274,13 @@ class Splitter_IMS(threading.Thread):
         # {{{ Request the video using HTTP from the source node (Icecast).
 
         self.source_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        if __debug__:
-            try:
-                print(self.source_socket.getsockname(), 'IMS: connecting to the source', self.source, '...')
-            except Exception as e:
-                pass
-            # The behavior and return value for calling socket.socket.getsockname() on 
+        try:
+            _p_(self.source_socket.getsockname(), 'connecting to the source', self.source, '...')
+        except Exception as e:
+            pass
+            # The behavior and return value for calling socket.socket.getsockname() on
             # an unconnected unbound socket is unspecified.
-            # On UNIX, it returns an address ('0.0.0.0', 0), while on Windows it raises an obscure exception 
+            # On UNIX, it returns an address ('0.0.0.0', 0), while on Windows it raises an obscure exception
             # "error: (10022, 'Invalid argument')"
 
             # I think we can avoid printing before connecting to the source to prevent errors in windows
@@ -290,16 +288,15 @@ class Splitter_IMS(threading.Thread):
         try:
             self.source_socket.connect(self.source)
         except socket.error as e:
-            print("IMS: ", e)
-            print(Color.red)
-            print(self.source_socket.getsockname(), "\b: IMS: unable to connect to the source ", self.source)
-            print(Color.none)
+            _p_(e)
+            #print(Color.red)
+            _p_(self.source_socket.getsockname(), "\b: unable to connect to the source ", self.source)
+            #print(Color.none)
             self.source_socket.close()
             os._exit(1)
-        if __debug__:
-            print(self.source_socket.getsockname(), 'IMS: connected to', self.source)
+        _p_(self.source_socket.getsockname(), 'connected to', self.source)
         self.source_socket.sendall(self.GET_message.encode())
-        _print_(self.source_socket.getsockname(), 'IMS: GET_message =', self.GET_message)
+        _p_(self.source_socket.getsockname(), 'IMS: GET_message =', self.GET_message)
 
         # }}}
 
@@ -309,10 +306,10 @@ class Splitter_IMS(threading.Thread):
         try:
             self.setup_peer_connection_socket()
         except Exception as e:
-            print("IMS: ", e)
-            print(Color.red)
-            print(self.peer_connection_socket.getsockname(), "\b: IMS: unable to bind the port ", self.PORT)
-            print(Color.none)
+            _p_(e)
+            #print(Color.red)
+            _p_(self.peer_connection_socket.getsockname(), "\b: unable to bind the port ", self.PORT)
+            #print(Color.none)
             sys.exit('')
 
         # }}}
@@ -322,8 +319,8 @@ class Splitter_IMS(threading.Thread):
         try:
             self.setup_team_socket()
         except Exception as e:
-            print("IMS: ", e)
-            print(self.team_socket.getsockname(), "\b: IMS: unable to bind", (socket.gethostname(), self.PORT))
+            _p_(e)
+            _p_(self.team_socket.getsockname(), "\b: unable to bind", (socket.gethostname(), self.PORT))
             sys.exit('')
 
         # }}}
@@ -347,7 +344,7 @@ class Splitter_IMS(threading.Thread):
                 # This section of code is reached when the streaming
                 # server (Icecast) finishes a stream and starts with
                 # the following one.
-                print("IMS: No data in the server!")
+                _p_("No data in the server!")
                 sys.stdout.flush()
                 self.source_socket.close()
                 time.sleep(1)
@@ -363,7 +360,7 @@ class Splitter_IMS(threading.Thread):
         return chunk
 
         # }}}
-        
+
     def receive_chunk(self):
         # {{{
 
@@ -372,40 +369,37 @@ class Splitter_IMS(threading.Thread):
         if self.header_load_counter > 0:
             self.header += chunk
             self.header_load_counter -= 1
-            print("IMS: Loaded", len(self.header), "bytes of header")
+            _p_("Loaded", len(self.header), "bytes of header")
             #_print_("3: header_load_counter =", self.header_load_counter)
 
         self.recvfrom_counter += 1
-            
+
         return chunk
 
         # }}}
 
-    def send_chunk(self, message, destine):
+    def send_chunk(self, message, destination):
         # {{{
 
-        self.team_socket.sendto(message, destine)
+        self.team_socket.sendto(message, destination)
 
-        if __debug__:
-            print('IMS: %5d' % self.chunk_number, Color.red, '->', Color.none, destine)
-            sys.stdout.flush()
+        _p_('%5d' % self.chunk_number, '->', destination)
+        sys.stdout.flush()
 
         self.sendto_counter += 1
-        
+
         # }}}
 
     def receive_the_header(self):
         # {{{
 
-        if __debug__:
-            print("IMS: Requesting the stream header ...")
+        _p_("Requesting the stream header ...")
 
         self.configure_sockets()
         self.request_the_video_from_the_source()
         self.load_the_video_header()
 
-        if __debug__:
-            print("IMS: Stream header received!")
+        _p_("Stream header received!")
 
         # }}}
 
@@ -413,13 +407,13 @@ class Splitter_IMS(threading.Thread):
         # {{{
 
         self.receive_the_header()
-        
-        print(self.peer_connection_socket.getsockname(), "\b: IMS: waiting for a peer ...")
+
+        _p_(self.peer_connection_socket.getsockname(), "\b: waiting for a peer ...")
         self.handle_a_peer_arrival(self.peer_connection_socket.accept())
         threading.Thread(target=self.handle_arrivals).start()
 
         message_format = self.chunk_number_format + str(self.CHUNK_SIZE) + "s"
-        
+
         #_print_("4: header_load_counter =", self.header_load_counter)
         while self.alive:
             #self.receive_and_send_a_chunk(header_load_counter)
@@ -427,9 +421,8 @@ class Splitter_IMS(threading.Thread):
             message = struct.pack(message_format, socket.htons(self.chunk_number), chunk)
             #self.send_chunk(self.receive_chunk(header_load_counter), self.mcast_channel)
             self.send_chunk(message, self.mcast_channel)
-            self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
+            self.chunk_number = (self.chunk_number + 1) % Common.MAX_CHUNK_NUMBER
 
         # }}}
 
     # }}}
-

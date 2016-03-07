@@ -1,16 +1,21 @@
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
+# The P2PSP.org project has been supported by the Junta de Andalucia
+# through the Proyecto Motriz "Codificacion de Video Escalable y su
+# Streaming sobre Internet" (P10-TIC-6548).
+
 # {{{ Imports
 
 import threading
 import sys
-from peer_ims import Peer_IMS
-from peer_dbs import Peer_DBS
-from _print_ import _print_
-from color import Color
+from core.peer_dbs import Peer_DBS
+from core._print_ import _print_
+from core.color import Color
 
 # }}}
 
@@ -24,18 +29,6 @@ class Peer_FNS(Peer_DBS):
         sys.stdout.write(Color.yellow)
         _print_("Peer FNS")
         sys.stdout.write(Color.none)
-
-        threading.Thread.__init__(self)
-
-        self.splitter_socket = peer.splitter_socket
-        self.player_socket = peer.player_socket
-        self.buffer_size = peer.buffer_size
-        self.splitter = peer.splitter
-        self.chunk_size = peer.chunk_size
-        self.peer_list = peer.peer_list
-        self.debt = peer.debt
-        self.message_format = peer.message_format
-        self.team_socket = peer.team_socket
 
         # }}}
 
@@ -57,7 +50,7 @@ class Peer_FNS(Peer_DBS):
         # {{{
 
         # Close the TCP socket
-        Peer_IMS.disconnect_from_the_splitter(self)
+        Peer_DBS.disconnect_from_the_splitter(self)
 
         # Use UDP to create a working NAT entry
         self.say_hello(self.splitter)
@@ -65,5 +58,5 @@ class Peer_FNS(Peer_DBS):
         self.say_hello(self.splitter)
 
         # }}}
-        
+
     # }}}

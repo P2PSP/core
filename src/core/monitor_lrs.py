@@ -1,41 +1,42 @@
+"""
+@package core
+monitor_lrs module
+"""
+
+# -*- coding: iso-8859-15 -*-
+
 # This code is distributed under the GNU General Public License (see
 # THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 
+# LRS: Lost chunks Recovery Set of rules
+
 # {{{ Imports
 
 import sys
 import threading
-from _print_ import _print_
-from monitor_fns import Monitor_FNS
-from color import Color
+
+from core._print_ import _print_
+from core.monitor_dbs import Monitor_DBS
+from core.color import Color
 
 # }}}
 
-# LRS: Lost chunks Recovery Set of rules
-class Monitor_LRS(Monitor_FNS):
+def _p_(*args, **kwargs):
+    """Colorize the output."""
+    sys.stdout.write(common.FLS_COLOR)
+    _print_("ACS:", *args)
+    sys.stdout.write(Color.none)
+
+class Monitor_LRS(Monitor_DBS):
     # {{{
 
     def __init__(self, peer):
         # {{{
 
-        sys.stdout.write(Color.yellow)
-        _print_("Monitor LRS")
-        sys.stdout.write(Color.none)
-
-        threading.Thread.__init__(self)
-        
-        self.splitter_socket = peer.splitter_socket
-        self.splitter = peer.splitter
-        self.buffer_size = peer.buffer_size
-        #self.chunk_format_string = peer.chunk_format_string
-        self.peer_list = peer.peer_list
-        self.player_socket = peer.player_socket
-        self.chunk_size = peer.chunk_size
-        self.debt = peer.debt
-        self.team_socket = peer.team_socket
-        self.message_format = peer.message_format
+        if __debug__:
+            _p_("Initialized")
 
         # }}}
 
@@ -49,7 +50,7 @@ class Monitor_LRS(Monitor_FNS):
         # in order to complains before the rest of peers reach them in
         # their buffers.
         self.buffer_size /= 2
-        print ("buffer_size =", self.buffer_size)
+        _p_("buffer_size =", self.buffer_size)
 
         # }}}
 
