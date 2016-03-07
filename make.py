@@ -21,6 +21,7 @@ except:
 
 if len(sys.argv) >= 2:
     if sys.argv[1] == 'clean':
+        os.system('git clean -dfx')
         quit()
     elif sys.argv[1] == 'only-cmake':
         only_cmake = True
@@ -34,9 +35,9 @@ if sys_name == 'Linux':
     if os.system('cd build && cmake .. && echo') == 0:
         if not only_cmake:
             os.system('cd build && make')
-    
+
 elif sys_name == 'Darwin':
     print '\nMaking for OS X...\n'
-    
+
 elif sys_name == 'Windows':
     print '\nMaking for Windows...\n'
