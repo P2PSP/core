@@ -1,9 +1,0 @@
-{
-    "monitor": {
-        "splitter_addr": "127.0.0.1",
-        "description": "P2PSP monitor",
-        "splitter_port": "4552",
-        "thumbnail_url": "/home/maniotrix/Downloads/orgs/p2psp/src/gui/model/../data/images/monitor_thumbnail.png",
-        "name": "monitor"
-    }
-}
