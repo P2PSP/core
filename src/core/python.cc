@@ -1,4 +1,5 @@
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include "peer_ims.h"
 #include "peer_dbs.h"
@@ -10,6 +11,9 @@ using namespace boost::python;
 
 BOOST_PYTHON_MODULE(libp2psp)
 {
+    class_<std::vector<ip::udp::endpoint>>("MyList")
+        .def(vector_indexing_suite<std::vector<ip::udp::endpoint>>() );
+
     class_<PeerIMS, boost::noncopyable>("PeerIMS")
         .def("Init", &PeerIMS::Init)
         .def("WaitForThePlayer", &PeerIMS::WaitForThePlayer)
@@ -36,13 +40,13 @@ BOOST_PYTHON_MODULE(libp2psp)
         .def("GetPlayedChunk", &PeerIMS::GetPlayedChunk)
         .def("GetChunkSize", &PeerIMS::GetChunkSize)
         .def("GetSendtoCounter", &PeerIMS::GetSendtoCounter)
-        //.def("GetPeerList", &PeerIMS::GetPeerList)
+        .def("GetPeerList", &PeerIMS::GetPeerList)
         .def("GetRecvfromCounter", &PeerIMS::GetRecvfromCounter)
         .def("SetShowBuffer", &PeerIMS::SetShowBuffer)
         .def("SetSendtoCounter", &PeerIMS::SetSendtoCounter)
     ;
     
-    class_<PeerDBS, boost::noncopyable>("PeerDBS")
+    class_<PeerDBS, bases<PeerIMS>, boost::noncopyable>("PeerDBS")
         .def("Init", &PeerDBS::Init)
 	.def("SayHello", &PeerDBS::SayHello)
 	.def("SayGoodbye", &PeerDBS::SayGoodbye)
