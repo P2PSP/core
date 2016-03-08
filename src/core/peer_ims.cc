@@ -438,7 +438,17 @@ int PeerIMS::GetChunkSize() { return chunk_size_; }
 int PeerIMS::GetRecvfromCounter() { return recvfrom_counter_; }
 
 std::vector<ip::udp::endpoint> *PeerIMS::GetPeerList() { return &peer_list_; }
+/*
+std::vector<std::pair<ip::address, uint16_t> > PeerIMS::GetPeerList() {
+	std::vector<std::pair<ip::address, uint16_t> > peer_list_aux_;
+	
+	for(unsigned int i = 0; i < peer_list_.size(); i++){
+		peer_list_aux_.push_back(std::pair<ip::address, uint16_t>(peer_list_[i].address(),peer_list_[i].port()));
+	}
 
+	return peer_list_aux_;
+}
+*/
 int PeerIMS::GetSendtoCounter() { return sendto_counter_; }
 
 void PeerIMS::SetSendtoCounter(int sendto_counter) {

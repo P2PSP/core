@@ -8,11 +8,36 @@
 using namespace p2psp;
 using namespace boost::python;
 
+/*
+std::vector<std::pair<ip::address, uint16_t> > GetList(){
+	
+	py::list peer_list_python;
 
+	std::vector<std::pair<ip::address, uint16_t> > peer_list_aux_;
+	peer_list_aux_.push_back(std::pair<ip::address, uint16_t>(ip::address::from_string("127.0.0.1"),4551));
+	peer_list_aux_.push_back(std::pair<ip::address, uint16_t>(ip::address::from_string("127.0.0.2"),4552));
+	return peer_list_aux_;
+}
+
+boost::python::list GetList()
+{
+  boost::python::list l;
+
+  std::vector<std::pair<ip::address, uint16_t> > peer_list_aux_;
+  peer_list_aux_.push_back(std::pair<ip::address, uint16_t>(ip::address::from_string("127.0.0.1"),4551));
+  peer_list_aux_.push_back(std::pair<ip::address, uint16_t>(ip::address::from_string("127.0.0.2"),4552));
+
+  typename std::vector<std::pair<ip::address, uint16_t> >::const_iterator it;
+  for (it =  peer_list_aux_.begin(); it !=  peer_list_aux_.end(); ++it)
+    l.append(*it);   
+  return l;  
+}
+*/
 BOOST_PYTHON_MODULE(libp2psp)
 {
-    class_<std::vector<ip::udp::endpoint>>("MyList")
-        .def(vector_indexing_suite<std::vector<ip::udp::endpoint>>() );
+    //def("GetList",GetList);
+    //class_<std::vector<std::pair<ip::address, uint16_t> > >("vecEP")
+      //      .def(vector_indexing_suite<std::vector<std::pair<ip::address, uint16_t> > >());
 
     class_<PeerIMS, boost::noncopyable>("PeerIMS")
         .def("Init", &PeerIMS::Init)
@@ -40,7 +65,7 @@ BOOST_PYTHON_MODULE(libp2psp)
         .def("GetPlayedChunk", &PeerIMS::GetPlayedChunk)
         .def("GetChunkSize", &PeerIMS::GetChunkSize)
         .def("GetSendtoCounter", &PeerIMS::GetSendtoCounter)
-        .def("GetPeerList", &PeerIMS::GetPeerList)
+        //.def("GetPeerList", &PeerIMS::GetPeerList)
         .def("GetRecvfromCounter", &PeerIMS::GetRecvfromCounter)
         .def("SetShowBuffer", &PeerIMS::SetShowBuffer)
         .def("SetSendtoCounter", &PeerIMS::SetSendtoCounter)

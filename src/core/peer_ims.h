@@ -175,6 +175,7 @@ class PeerIMS {
   virtual int GetChunkSize();
   virtual int GetSendtoCounter();
   virtual std::vector<ip::udp::endpoint>* GetPeerList();
+  //virtual std::vector<std::pair<ip::address, uint16_t> >* GetPeerList();
   virtual int GetRecvfromCounter();
   virtual void SetShowBuffer(bool);
   virtual void SetSendtoCounter(int);
