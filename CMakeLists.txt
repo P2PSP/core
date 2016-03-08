@@ -28,7 +28,7 @@ list(APPEND BOOST_REQUIRED_COMPONENTS
 )
 
 if(BUILD_PYTHON_WRAPPER)
-  list(APPEND BOOST_REQUIRED_COMPONENTS python)
+  list(APPEND BOOST_REQUIRED_COMPONENTS "python-py34")
 endif()
 
 find_package(Boost COMPONENTS 
@@ -41,7 +41,8 @@ find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 if(BUILD_PYTHON_WRAPPER)
-  find_package(PythonLibs REQUIRED)
+  find_package(PythonLibs 3.4 REQUIRED)
+
 endif()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
