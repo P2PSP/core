@@ -41,7 +41,7 @@ find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 if(BUILD_PYTHON_WRAPPER)
-  find_package(PythonLibs 3.4 REQUIRED)
+  find_package(PythonLibs 3 REQUIRED)
 
 endif()
 

@@ -1,9 +1,10 @@
 #include <boost/python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/tuple.hpp>
 
 #include "peer_ims.h"
 #include "peer_dbs.h"
 
+#include <sstream>
 
 using namespace p2psp;
 using namespace boost::python;
@@ -18,26 +19,48 @@ std::vector<std::pair<ip::address, uint16_t> > GetList(){
 	peer_list_aux_.push_back(std::pair<ip::address, uint16_t>(ip::address::from_string("127.0.0.2"),4552));
 	return peer_list_aux_;
 }
-
-boost::python::list GetList()
-{
-  boost::python::list l;
-
-  std::vector<std::pair<ip::address, uint16_t> > peer_list_aux_;
-  peer_list_aux_.push_back(std::pair<ip::address, uint16_t>(ip::address::from_string("127.0.0.1"),4551));
-  peer_list_aux_.push_back(std::pair<ip::address, uint16_t>(ip::address::from_string("127.0.0.2"),4552));
-
-  typename std::vector<std::pair<ip::address, uint16_t> >::const_iterator it;
-  for (it =  peer_list_aux_.begin(); it !=  peer_list_aux_.end(); ++it)
-    l.append(*it);   
-  return l;  
-}
 */
+//list GetList()
+//{
+  //list l;
+  //std::string address;
+  //std::stringstream ss;
+  //uint16_t port;
+  
+/* 
+  std::vector<ip::udp::endpoint> peer_list_aux_;
+  peer_list_aux_.push_back(ip::udp::endpoint(ip::address::from_string("127.0.0.1"),4551));
+  peer_list_aux_.push_back(ip::udp::endpoint(ip::address::from_string("127.0.0.2"),4552));
+*/
+
+class PyPeerDBS : public PeerDBS{
+  public :
+
+  list GetList (){
+	list l;
+	std::stringstream ss;
+        std::string address;
+ 	uint16_t port;
+         peer_list_.push_back(ip::udp::endpoint(ip::address::from_string("127.0.0.1"),4551));
+ 	 peer_list_.push_back(ip::udp::endpoint(ip::address::from_string("127.0.0.2"),4552));
+	  for (unsigned int i=0;i<peer_list_.size();i++){
+	    ss.str("");
+	    ss << peer_list_[i].address();
+	    address = ss.str();
+	    port = peer_list_[i].port();
+	    
+	    l.append(boost::python::make_tuple(address,port)); //TODO python tuple
+	  }
+	  return l;  
+  }
+};
+
 BOOST_PYTHON_MODULE(libp2psp)
 {
-    //def("GetList",GetList);
-    //class_<std::vector<std::pair<ip::address, uint16_t> > >("vecEP")
-      //      .def(vector_indexing_suite<std::vector<std::pair<ip::address, uint16_t> > >());
+    class_<PyPeerDBS, boost::noncopyable>("PyPeerDBS")
+         .def("GetList", &PyPeerDBS::GetList)
+	 .def("Init", &PyPeerDBS::Init)
+    ;
 
     class_<PeerIMS, boost::noncopyable>("PeerIMS")
         .def("Init", &PeerIMS::Init)
