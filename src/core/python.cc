@@ -9,111 +9,77 @@
 using namespace p2psp;
 using namespace boost::python;
 
-/*
-std::vector<std::pair<ip::address, uint16_t> > GetList(){
-	
-	py::list peer_list_python;
-
-	std::vector<std::pair<ip::address, uint16_t> > peer_list_aux_;
-	peer_list_aux_.push_back(std::pair<ip::address, uint16_t>(ip::address::from_string("127.0.0.1"),4551));
-	peer_list_aux_.push_back(std::pair<ip::address, uint16_t>(ip::address::from_string("127.0.0.2"),4552));
-	return peer_list_aux_;
-}
-*/
-//list GetList()
-//{
-  //list l;
-  //std::string address;
-  //std::stringstream ss;
-  //uint16_t port;
-  
-/* 
-  std::vector<ip::udp::endpoint> peer_list_aux_;
-  peer_list_aux_.push_back(ip::udp::endpoint(ip::address::from_string("127.0.0.1"),4551));
-  peer_list_aux_.push_back(ip::udp::endpoint(ip::address::from_string("127.0.0.2"),4552));
-*/
 
 class PyPeerDBS : public PeerDBS{
   public :
 
-  list GetList (){
+  list GetPeerList_ (){
 	list l;
-	std::stringstream ss;
         std::string address;
  	uint16_t port;
-         peer_list_.push_back(ip::udp::endpoint(ip::address::from_string("127.0.0.1"),4551));
- 	 peer_list_.push_back(ip::udp::endpoint(ip::address::from_string("127.0.0.2"),4552));
-	  for (unsigned int i=0;i<peer_list_.size();i++){
-	    ss.str("");
-	    ss << peer_list_[i].address();
-	    address = ss.str();
+	for (unsigned int i=0;i<peer_list_.size();i++){
+	    address = peer_list_[i].address().to_string();
 	    port = peer_list_[i].port();
-	    
-	    l.append(boost::python::make_tuple(address,port)); //TODO python tuple
-	  }
-	  return l;  
+	    l.append(boost::python::make_tuple(address,port));
+	}
+	return l;  
   }
 };
 
 BOOST_PYTHON_MODULE(libp2psp)
 {
     class_<PyPeerDBS, boost::noncopyable>("PyPeerDBS")
-         .def("GetList", &PyPeerDBS::GetList)
-	 .def("Init", &PyPeerDBS::Init)
-    ;
+	//For variables
+	//.add_property("var", &Class::get_var, &Class::set_var)
 
-    class_<PeerIMS, boost::noncopyable>("PeerIMS")
-        .def("Init", &PeerIMS::Init)
-        .def("WaitForThePlayer", &PeerIMS::WaitForThePlayer)
-        .def("ConnectToTheSplitter", &PeerIMS::ConnectToTheSplitter)
-        .def("DisconnectFromTheSplitter", &PeerIMS::DisconnectFromTheSplitter)
-        .def("ReceiveTheMcasteEndpoint", &PeerIMS::ReceiveTheMcasteEndpoint)
-        .def("ReceiveTheHeader", &PeerIMS::ReceiveTheHeader)
-        .def("ReceiveTheChunkSize", &PeerIMS::ReceiveTheChunkSize)
-        .def("ReceiveTheHeaderSize", &PeerIMS::ReceiveTheHeaderSize)
-        .def("ReceiveTheBufferSize", &PeerIMS::ReceiveTheBufferSize)
-        .def("ListenToTheTeam", &PeerIMS::ListenToTheTeam)
-        .def("ReceiveTheNextMessage", &PeerIMS::ReceiveTheNextMessage)
-        .def("ProcessMessage", &PeerIMS::ProcessMessage)
-        .def("ProcessNextMessage", &PeerIMS::ProcessNextMessage)
-        .def("BufferData", &PeerIMS::BufferData)
-        .def("FindNextChunk", &PeerIMS::FindNextChunk)
-        .def("PlayChunk", &PeerIMS::PlayChunk)
-        .def("PlayNextChunk", &PeerIMS::PlayNextChunk)
-        .def("KeepTheBufferFull", &PeerIMS::KeepTheBufferFull)
-        .def("Run", &PeerIMS::Run)
-        .def("Start", &PeerIMS::Start)
-        .def("GetMcastAddr", &PeerIMS::GetMcastAddr)
-        .def("IsPlayerAlive", &PeerIMS::IsPlayerAlive)
-        .def("GetPlayedChunk", &PeerIMS::GetPlayedChunk)
-        .def("GetChunkSize", &PeerIMS::GetChunkSize)
-        .def("GetSendtoCounter", &PeerIMS::GetSendtoCounter)
+        .def("GetPeerList", &PyPeerDBS::GetPeerList_)
+        .def("Init", &PyPeerDBS::Init)
+        .def("WaitForThePlayer", &PyPeerDBS::WaitForThePlayer)
+        .def("ConnectToTheSplitter", &PyPeerDBS::ConnectToTheSplitter)
+        .def("DisconnectFromTheSplitter", &PyPeerDBS::DisconnectFromTheSplitter)
+        .def("ReceiveTheMcasteEndpoint", &PyPeerDBS::ReceiveTheMcasteEndpoint)
+        .def("ReceiveTheHeader", &PyPeerDBS::ReceiveTheHeader)
+        .def("ReceiveTheChunkSize", &PyPeerDBS::ReceiveTheChunkSize)
+        .def("ReceiveTheHeaderSize", &PyPeerDBS::ReceiveTheHeaderSize)
+        .def("ReceiveTheBufferSize", &PyPeerDBS::ReceiveTheBufferSize)
+        .def("ListenToTheTeam", &PyPeerDBS::ListenToTheTeam)
+        .def("ReceiveTheNextMessage", &PyPeerDBS::ReceiveTheNextMessage)
+        .def("ProcessMessage", &PyPeerDBS::ProcessMessage)
+        .def("ProcessNextMessage", &PyPeerDBS::ProcessNextMessage)
+        .def("BufferData", &PyPeerDBS::BufferData)
+        .def("FindNextChunk", &PyPeerDBS::FindNextChunk)
+        .def("PlayChunk", &PyPeerDBS::PlayChunk)
+        .def("PlayNextChunk", &PyPeerDBS::PlayNextChunk)
+        .def("KeepTheBufferFull", &PyPeerDBS::KeepTheBufferFull)
+        .def("Run", &PyPeerDBS::Run)
+        .def("Start", &PyPeerDBS::Start)
+        .def("GetMcastAddr", &PyPeerDBS::GetMcastAddr)
+        .def("IsPlayerAlive", &PyPeerDBS::IsPlayerAlive)
+        .def("GetPlayedChunk", &PyPeerDBS::GetPlayedChunk)
+        .def("GetChunkSize", &PyPeerDBS::GetChunkSize)
+        .def("GetSendtoCounter", &PyPeerDBS::GetSendtoCounter)
         //.def("GetPeerList", &PeerIMS::GetPeerList)
-        .def("GetRecvfromCounter", &PeerIMS::GetRecvfromCounter)
-        .def("SetShowBuffer", &PeerIMS::SetShowBuffer)
-        .def("SetSendtoCounter", &PeerIMS::SetSendtoCounter)
-    ;
-    
-    class_<PeerDBS, bases<PeerIMS>, boost::noncopyable>("PeerDBS")
-        .def("Init", &PeerDBS::Init)
-	.def("SayHello", &PeerDBS::SayHello)
-	.def("SayGoodbye", &PeerDBS::SayGoodbye)
-	.def("ReceiveMagicFlags", &PeerDBS::ReceiveMagicFlags)
-	.def("ReceiveTheNumberOfPeers", &PeerDBS::ReceiveTheNumberOfPeers)
-	.def("ReceiveTheListOfPeers", &PeerDBS::ReceiveTheListOfPeers)
-	.def("ReceiveMyEndpoint", &PeerDBS::ReceiveMyEndpoint)
-	.def("ListenToTheTeam", &PeerDBS::ListenToTheTeam)
-	.def("ProcessMessage", &PeerDBS::ProcessMessage)
+        .def("GetRecvfromCounter", &PyPeerDBS::GetRecvfromCounter)
+        .def("SetShowBuffer", &PyPeerDBS::SetShowBuffer)
+        .def("SetSendtoCounter", &PyPeerDBS::SetSendtoCounter)
+	.def("SayHello", &PyPeerDBS::SayHello)
+	.def("SayGoodbye", &PyPeerDBS::SayGoodbye)
+	.def("ReceiveMagicFlags", &PyPeerDBS::ReceiveMagicFlags)
+	.def("ReceiveTheNumberOfPeers", &PyPeerDBS::ReceiveTheNumberOfPeers)
+	.def("ReceiveTheListOfPeers", &PyPeerDBS::ReceiveTheListOfPeers)
+	.def("ReceiveMyEndpoint", &PyPeerDBS::ReceiveMyEndpoint)
+	.def("ListenToTheTeam", &PyPeerDBS::ListenToTheTeam)
+	.def("ProcessMessage", &PyPeerDBS::ProcessMessage)
 	//.def("LogMessage", &PeerBDS::LogMessage)
-	.def("BuildLogMessage", &PeerDBS::BuildLogMessage)
-	.def("CalcBufferCorrectness", &PeerDBS::CalcBufferCorrectness)
-	.def("CalcBufferFilling", &PeerDBS::CalcBufferFilling)
-	.def("PoliteFarewell", &PeerDBS::PoliteFarewell)
-	.def("BufferData", &PeerDBS::BufferData)
-	.def("Start", &PeerDBS::Start)
-	.def("Run", &PeerDBS::Run)	
-	.def("AmIAMonitor", &PeerDBS::AmIAMonitor)
-	.def("GetNumberOfPeers", &PeerDBS::GetNumberOfPeers)
-	.def("SetMaxChunkDebt", &PeerDBS::SetMaxChunkDebt)
+	.def("BuildLogMessage", &PyPeerDBS::BuildLogMessage)
+	.def("CalcBufferCorrectness", &PyPeerDBS::CalcBufferCorrectness)
+	.def("CalcBufferFilling", &PyPeerDBS::CalcBufferFilling)
+	.def("PoliteFarewell", &PyPeerDBS::PoliteFarewell)
+	.def("BufferData", &PyPeerDBS::BufferData)
+	.def("Start", &PyPeerDBS::Start)
+	.def("Run", &PyPeerDBS::Run)	
+	.def("AmIAMonitor", &PyPeerDBS::AmIAMonitor)
+	.def("GetNumberOfPeers", &PyPeerDBS::GetNumberOfPeers)
+	.def("SetMaxChunkDebt", &PyPeerDBS::SetMaxChunkDebt)
     ;
 }
