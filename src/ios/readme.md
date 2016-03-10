@@ -17,3 +17,9 @@ This is the `src` path to the XCode project of the **P2PSP for iOS** app. To com
 - Go to `p2psp/src/ios/lib` and run `ln -s /usr/local/Cellar/openssl/[your_version]/ openssl`
 
 Then you can open the project file in `p2psp/src/ios/p2psp-ios/p2psp-ios.xcodeproj` with **XCode 7** (or above) and run it.
+
+## Somethig went wrong? 
+
+- Go to `Xcode Targets > Your Target > Build Phases > Link Binary With Libraries` and remove libboost.a and MobileVLCKit.framework and add them again. 
+
+- In Xcode Build Settings for your project go to Library Search Paths (`LIBRARY_SEARCH_PATHS`) or Header Search Paths (`HEADER_SEARCH_PATHS`) and check if the libraries path here is the same where you have the libraries (if not, you can add the new one manually). 
