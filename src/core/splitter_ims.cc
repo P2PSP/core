@@ -61,9 +61,9 @@ void SplitterIMS::SetupPeerConnectionSocket() {
 void SplitterIMS::ConfigureSockets() {
   try {
     SetupPeerConnectionSocket();
-  } catch (int e) {
-    TRACE(e);
-    TRACE(peer_connection_socket_.local_endpoint().address().to_string() +
+  } catch (system::system_error &error) {
+    TRACE(error.what());
+    TRACE(acceptor_.local_endpoint().address().to_string() +
           "\b: unable to bind the port " + to_string(port_));
     exit(-1);
   }
