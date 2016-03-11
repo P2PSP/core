@@ -9,16 +9,6 @@ bin_dir = 'bin'
 build_dir = 'build'
 only_cmake = False
 
-try:
-    shutil.rmtree(bin_dir)
-except:
-    pass
-
-try:
-    shutil.rmtree(build_dir)
-except:
-    pass
-
 if len(sys.argv) >= 2:
     if sys.argv[1] == 'clean':
         os.system('git clean -dfx')
@@ -26,7 +16,18 @@ if len(sys.argv) >= 2:
     elif sys.argv[1] == 'only-cmake':
         only_cmake = True
 
-os.makedirs(build_dir)
+if not os.path.exists(bin_dir):
+    try:
+        shutil.rmtree(bin_dir)
+    except:
+        pass
+
+if not os.path.exists(build_dir):
+    try:
+        shutil.rmtree(build_dir)
+    except:
+        pass
+    os.makedirs(build_dir)
 
 sys_name = platform.system()
 
