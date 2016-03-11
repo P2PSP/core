@@ -57,7 +57,7 @@ class SplitterDBS : public SplitterIMS {
     stream << endpoint;
     std::hash<std::string> hasher;
     return hasher(stream.str());
-  };
+  }; 
 
  public:
   SplitterDBS();
