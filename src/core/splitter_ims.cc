@@ -62,8 +62,8 @@ void SplitterIMS::ConfigureSockets() {
   try {
     SetupPeerConnectionSocket();
   } catch (system::system_error &error) {
-    TRACE(error.what());
-    TRACE(acceptor_.local_endpoint().address().to_string() +
+    ERROR(error.what());
+    ERROR(acceptor_.local_endpoint().address().to_string() +
           "\b: unable to bind the port " + to_string(port_));
     exit(-1);
   }
@@ -90,7 +90,7 @@ void SplitterIMS::SetupTeamSocket() {
   team_socket_.set_option(reuseAddress, ec);
 
   if (ec) {
-    TRACE("Error: " << ec.message());
+    ERROR(ec.message());
   }
 
   // TODO: Check if reuse_port option exists
@@ -104,8 +104,8 @@ void SplitterIMS::RequestTheVideoFromTheSource() {
   source_socket_.connect(endpoint, ec);
 
   if (ec) {
-    TRACE("Error: " << ec.message());
-    TRACE(source_socket_.local_endpoint().address().to_string()
+    ERROR(ec.message());
+    ERROR(source_socket_.local_endpoint().address().to_string()
           << "\b: unable to connect to the source (" << source_addr_ << ", "
           << to_string(source_port_) << ")");
 
@@ -132,7 +132,7 @@ size_t SplitterIMS::ReceiveNextChunk(asio::streambuf &chunk) {
   // TRACE("Success! Bytes transferred: " << bytes_transferred);
 
   if (ec) {
-    TRACE("Error receiving next chunk: "
+    ERROR("Error receiving next chunk: "
           << ec.message() << " bytes transferred: " << bytes_transferred);
     TRACE("No data in the server!");
     source_socket_.close();
@@ -192,7 +192,7 @@ void SplitterIMS::SendChunk(const vector<char> &message,
   // TRACE("Bytes transferred: " << to_string(bytes_transferred));
 
   if (ec) {
-    TRACE("Error sending chunk: " << ec.message());
+    ERROR("Error sending chunk: " << ec.message());
   }
 
   sendto_counter_++;
@@ -221,7 +221,7 @@ void SplitterIMS::SendTheHeaderSize(
   peer_serve_socket->send(asio::buffer(message), 0, ec);
 
   if (ec) {
-    TRACE("Error: " << ec.message());
+    ERROR(ec.message());
   }
 }
 
@@ -235,7 +235,7 @@ void SplitterIMS::SendTheChunkSize(
   peer_serve_socket->send(asio::buffer(message), 0, ec);
 
   if (ec) {
-    TRACE("Error: " << ec.message());
+    ERROR(ec.message());
   }
 }
 
@@ -247,7 +247,7 @@ void SplitterIMS::SendTheHeader(
   peer_serve_socket->send(header_.data(), 0, ec);
 
   if (ec) {
-    TRACE("Error: " << ec.message());
+    ERROR(ec.message());
   }
 }
 
@@ -261,7 +261,7 @@ void SplitterIMS::SendTheBufferSize(
   peer_serve_socket->send(asio::buffer(message), 0, ec);
 
   if (ec) {
-    TRACE("Error: " << ec.message());
+    ERROR(ec.message());
   }
 }
 
@@ -351,7 +351,7 @@ void SplitterIMS::SayGoodbye() {
   TRACE("Bytes transferred saying goodbye: " << to_string(bytes_transferred));
 
   if (ec) {
-    TRACE("Error saying goodbye: " << ec.message());
+    ERROR("Error saying goodbye: " << ec.message());
   }
 }
 

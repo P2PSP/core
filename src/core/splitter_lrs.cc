@@ -35,7 +35,7 @@ void SplitterLRS::ProcessLostChunk(
   team_socket_.send_to(asio::buffer(message), peer, 0, ec);
 
   if (ec) {
-    TRACE("LRS - Error sending chunk: " << ec.message());
+    ERROR("LRS - Error sending chunk: " << ec.message());
   }
 
   TRACE("Re-sending " << to_string(lost_chunk_number) << " to " << peer);
