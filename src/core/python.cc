@@ -46,11 +46,47 @@ public:
 		return l;
 	}
 
+	int GetLoss_(boost::python::tuple peer){
+		ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
+		uint16_t port = boost::python::extract<uint16_t>(peer[1]);
+		return losses_[boost::asio::ip::udp::endpoint(address,port)];
+	}
+
+	std::string GetChannel_(){
+		return channel_;
+	}
+
+	std::string GetSourceAddr_(){
+		return source_addr_;
+	}
+
+	int GetMonitorNumber_(){
+		return monitor_number_;
+	}
+	
+	int GetBufferSize_(){
+		return buffer_size_;
+	}
+	
+	int GetHeaderSize_(){
+		return header_size_;
+	}
+
+	int GetSourcePort_(){
+		return source_port_;
+	}
+	
+
+
+/*
+				++++++++ UNNECESSARY +++++++++++++
 	void InsertPeer_(boost::python::tuple peer){
 		ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
 		uint16_t port = boost::python::extract<uint16_t>(peer[1]);
 		peer_list_.push_back(boost::asio::ip::udp::endpoint(address,port));
 	}
+
+*/	
 
 };
 
@@ -143,15 +179,20 @@ BOOST_PYTHON_MODULE(libp2psp)
 	.def("GetRecvFromCounter", &PySplitterDBS::GetRecvFromCounter) //used
 	.def("GetSendToCounter", &PySplitterDBS::GetSendToCounter) //used
 	.def("GetChunkSize", &PySplitterDBS::GetChunkSize) //used
-	.def("GetPort", &PySplitterDBS::GetPort)
+	.def("GetBufferSize", &PySplitterDBS::GetBufferSize_) //used
+	.def("GetPort", &PySplitterDBS::GetPort) //used
+	.def("GetChannel", &PySplitterDBS::GetChannel_)
 	.def("SetAlive", &PySplitterDBS::SetAlive) //used
 	.def("SetBufferSize", &PySplitterDBS::SetBufferSize) //used
 	.def("SetChannel", &PySplitterDBS::SetChannel) //used
 	.def("SetChunkSize", &PySplitterDBS::SetChunkSize) //used
 	.def("SetHeaderSize", &PySplitterDBS::SetHeaderSize) //used
+	.def("GetHeaderSize", &PySplitterDBS::GetHeaderSize_) //used
 	.def("SetPort", &PySplitterDBS::SetPort) //used
 	.def("SetSourceAddr", &PySplitterDBS::SetSourceAddr) //used
+	.def("GetSourceAddr", &PySplitterDBS::GetSourceAddr_) //used
 	.def("SetSourcePort", &PySplitterDBS::SetSourcePort) //used
+	.def("GetSourcePort", &PySplitterDBS::GetSourcePort_) //used
 	.def("SetGETMessage", &PySplitterDBS::SetGETMessage)
 
 	//DBS
@@ -160,7 +201,7 @@ BOOST_PYTHON_MODULE(libp2psp)
 	.def("SendTheListOfPeers", &PySplitterDBS::SendTheListOfPeers)
 	.def("SendThePeerEndpoint", &PySplitterDBS::SendThePeerEndpoint)
 	.def("SendConfiguration", &PySplitterDBS::SendConfiguration)
-	.def("InsertPeer", &PySplitterDBS::InsertPeer_)
+	//.def("InsertPeer", &PySplitterDBS::InsertPeer_)
 	.def("HandleAPeerArrival", &PySplitterDBS::HandleAPeerArrival)
 	.def("ReceiveMessage", &PySplitterDBS::ReceiveMessage)
 	.def("GetLostChunkNumber", &PySplitterDBS::GetLostChunkNumber)
@@ -176,7 +217,8 @@ BOOST_PYTHON_MODULE(libp2psp)
 	.def("Start", &PySplitterDBS::Start) //used
 	.def("GetPeerList", &PySplitterDBS::GetPeerList_) //Modified here //used
 	.def("GetMaxChunkLoss", &PySplitterDBS::GetMaxChunkLoss) //used
-	.def("GetLoss", &PySplitterDBS::GetLoss) //used
+	.def("GetMonitorNumber", &PySplitterDBS::GetMonitorNumber_) //used
+	.def("GetLoss", &PySplitterDBS::GetLoss_) //used
 	.def("SetMaxChunkLoss", &PySplitterDBS::SetMaxChunkLoss) //used
 	.def("SetMonitorNumber", &PySplitterDBS::SetMonitorNumber) //used
 	;
