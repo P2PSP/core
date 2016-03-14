@@ -134,7 +134,7 @@ size_t SplitterDBS::ReceiveMessage(std::vector<char> &message,
       team_socket_.receive_from(asio::buffer(message), endpoint, 0, ec);
 
   if (ec) {
-    TRACE("Unexepected error: " << ec.message());
+    ERROR("Unexepected error: " << ec.message());
   }
 
   return bytes_transferred;
@@ -256,7 +256,7 @@ void SplitterDBS::SetupTeamSocket() {
   team_socket_.bind(endpoint);
 
   if (ec) {
-    TRACE("Error: " << ec.message());
+    ERROR(ec.message());
   }
 }
 

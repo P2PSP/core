@@ -45,7 +45,7 @@ void SplitterACS::IncrementUnsupportivityOfPeer(
       period_counter_[peer] = period_[peer];
     }
   } catch (std::exception e) {
-    TRACE("Error: " << e.what());
+    ERROR(e.what());
   }
 }
 
@@ -75,7 +75,7 @@ void SplitterACS::SendChunk(const std::vector<char> &message,
   try {
     number_of_sent_chunks_per_peer_[destination] += 1;
   } catch (std::exception e) {
-    TRACE("Error: " << e.what());
+    ERROR(e.what());
   }
 }
 
@@ -88,7 +88,7 @@ void SplitterACS::ComputeNextPeerNumber(asio::ip::udp::endpoint &peer) {
     }
     period_counter_[peer] = period_[peer];
   } catch (std::exception e) {
-    TRACE("Error: " << e.what());
+    ERROR(e.what());
   }
 }
 

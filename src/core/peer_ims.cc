@@ -96,7 +96,7 @@ void PeerIMS::ConnectToTheSplitter() throw(boost::system::system_error) {
     try {
       s.connect(splitter_);
     } catch (boost::system::system_error e) {
-      TRACE(e.what());
+      ERROR(e.what());
     }
 
     my_ip = s.local_endpoint().address().to_string();
@@ -169,14 +169,14 @@ void PeerIMS::ReceiveTheHeader() {
 
   read(splitter_socket_, chunk, transfer_exactly(header_size_in_bytes), ec);
   if (ec) {
-    TRACE("Error: " << ec.message());
+    ERROR(ec.message());
   }
 
   try {
     write(player_socket_, chunk);
   } catch (std::exception e) {
-    TRACE(e.what());
-    TRACE("error sending data to the player");
+    ERROR(e.what());
+    ERROR("error sending data to the player");
     TRACE("len(data) =" << std::to_string(chunk.size()));
     boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
   }
