@@ -136,6 +136,8 @@ size_t SplitterIMS::ReceiveNextChunk(asio::streambuf &chunk) {
           << ec.message() << " bytes transferred: " << bytes_transferred);
     TRACE("No data in the server!");
     source_socket_.close();
+    header_load_counter_ = header_size_;
+    header_.consume(header_.size());
     this_thread::sleep(posix_time::seconds(1));
     source_socket_.connect(
         asio::ip::tcp::endpoint(asio::ip::address::from_string(source_addr_),
@@ -151,10 +153,11 @@ size_t SplitterIMS::ReceiveChunk(asio::streambuf &chunk) {
   size_t bytes_transferred = ReceiveNextChunk(chunk);
 
   if (header_load_counter_ > 0) {
-    // TODO: Check how to copy from a streambuf to another
-    // header += chunk
+    ostream header_stream_(&header_);
+    header_stream_.write(asio::buffer_cast<const char *>(chunk.data()),
+                         chunk.size());
     header_load_counter_--;
-    TRACE("Loaded" << to_string(header_.size()) << " bytes of header");
+    TRACE("Loaded" << to_string(chunk.size()) << " bytes of header");
   }
   recvfrom_counter_++;
 
