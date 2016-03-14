@@ -33,19 +33,21 @@ except ImportError:
 from core.common import Common
 from core.color import Color
 from core._print_ import _print_
-from core.peer_ims import Peer_IMS
-from core.peer_dbs import Peer_DBS
-from core.lossy_socket import lossy_socket
-from core.symsp_peer import Symsp_Peer
-from core.monitor_dbs import Monitor_DBS
-from core.monitor_lrs import Monitor_LRS
-from core.monitor_nts import Monitor_NTS
-from core.peer_nts import Peer_NTS
-from core.lossy_peer import Lossy_Peer
-from core.peer_strpeds import Peer_StrpeDs
-from core.malicious_peer import MaliciousPeer # Other dir, maybe "DIS" ??
-from core.peer_strpeds_malicious import Peer_StrpeDsMalicious
-from core.trusted_peer import TrustedPeer
+import libp2psp
+
+#from core.peer_ims import Peer_IMS
+#from core.peer_dbs import Peer_DBS
+#from core.lossy_socket import lossy_socket
+#from core.symsp_peer import Symsp_Peer
+#from core.monitor_dbs import Monitor_DBS
+#from core.monitor_lrs import Monitor_LRS
+#from core.monitor_nts import Monitor_NTS
+#from core.peer_nts import Peer_NTS
+#from core.lossy_peer import Lossy_Peer
+#from core.peer_strpeds import Peer_StrpeDs
+#from core.malicious_peer import MaliciousPeer # Other dir, maybe "DIS" ??
+#from core.peer_strpeds_malicious import Peer_StrpeDsMalicious
+#from core.trusted_peer import TrustedPeer
 
 # }}}
 
@@ -70,15 +72,17 @@ class Peer():
 
         # {{{ Args handling and object instantiation
 
+        peer = libp2psp.PeerDBS()	
+
         parser = argparse.ArgumentParser(description='This is the peer node of a P2PSP team.')
 
         parser.add_argument('--enable_chunk_loss', help='Forces a lost of chunks')
-        parser.add_argument('--max_chunk_debt', help='The maximun number of times that other peer can not send a chunk to this peer. Defaut = {}'.format(Peer_DBS.MAX_CHUNK_DEBT))
-        parser.add_argument('--player_port', help='Port to communicate with the player. Default = {}'.format(Peer_IMS.PLAYER_PORT))
-        parser.add_argument('--port_step', help='Source port step forced when behind a sequentially port allocating NAT (conflicts with --chunk_loss_period). Default = {}'.format(Symsp_Peer.PORT_STEP))
-        parser.add_argument('--splitter_addr', help='IP address or hostname of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_ADDR))
-        parser.add_argument('--splitter_port', help='Listening port of the splitter. Default = {}.'.format(Peer_IMS.SPLITTER_PORT))
-        parser.add_argument('--port', help='Port to communicate with the peers. Default {} (the OS will chose it).'.format(Peer_IMS.PORT))
+        parser.add_argument('--max_chunk_debt', help='The maximun number of times that other peer can not send a chunk to this peer. Defaut = {}')#.format(Peer_DBS.MAX_CHUNK_DEBT))
+        parser.add_argument('--player_port', help='Port to communicate with the player. Default = {}')#.format(Peer_IMS.PLAYER_PORT))
+        parser.add_argument('--port_step', help='Source port step forced when behind a sequentially port allocating NAT (conflicts with --chunk_loss_period). Default = {}')#.format(Symsp_Peer.PORT_STEP))
+        parser.add_argument('--splitter_addr', help='IP address or hostname of the splitter. Default = {}.')#.format(Peer_IMS.SPLITTER_ADDR))
+        parser.add_argument('--splitter_port', help='Listening port of the splitter. Default = {}.')#.format(Peer_IMS.SPLITTER_PORT))
+        parser.add_argument('--port', help='Port to communicate with the peers. Default {} (the OS will chose it).')#.format(Peer_IMS.PORT))
         parser.add_argument('--use_localhost', action="store_true", help='Forces the peer to use localhost instead of the IP of the adapter to connect to the splitter. Notice that in this case, peers that run outside of the host will not be able to communicate with this peer.')
         parser.add_argument('--malicious', action="store_true", help='Enables the malicious activity for peer.')
         parser.add_argument('--persistent', action="store_true", help='Forces the peer to send poisoned chunks to other peers.')
@@ -100,67 +104,67 @@ class Peer():
         args = parser.parse_args()
 
         if args.splitter_addr:
-            Peer_IMS.SPLITTER_ADDR = socket.gethostbyname(args.splitter_addr)
-        _print_('Splitter address =', Peer_IMS.SPLITTER_ADDR)
+            peer.splitter_addr = socket.gethostbyname(args.splitter_addr)
+        _print_('Splitter address =',  peer.splitter_addr)
 
         if args.splitter_port:
-            Peer_IMS.SPLITTER_PORT = int(args.splitter_port)
-        _print_('Splitter port =', Peer_IMS.SPLITTER_PORT)
+            peer.splitter_port = int(args.splitter_port)
+        _print_('Splitter port =', peer.splitter_port)
 
         if args.port:
-            Peer_IMS.PORT = int(args.port)
-        _print_('(Peer) PORT =', Peer_IMS.PORT)
+            peer.port = int(args.port)
+        _print_('(Peer) PORT =', peer.port)
 
         if args.player_port:
-            Peer_IMS.PLAYER_PORT = int(args.player_port)
-        _print_('Listening port (player) =', Peer_IMS.PLAYER_PORT)
+            peer.player_port = int(args.player_port)
+        _print_('Listening port (player) =', peer.player_port)
 
         if args.max_chunk_debt:
-            Peer_DBS.MAX_CHUNK_DEBT = int(args.max_chunk_debt)
-        _print_('Maximun chunk debt =', Peer_DBS.MAX_CHUNK_DEBT)
+            peer.max_chunk_debt = int(args.max_chunk_debt)
+        _print_('Maximun chunk debt =',  peer.max_chunk_debt)
 
         if args.use_localhost:
-            Peer_IMS.USE_LOCALHOST = True
+            peer.use_localhost = True
             _print_('Using localhost address')
 
-        peer = Peer_IMS()
-        peer.wait_for_the_player()
-        peer.connect_to_the_splitter()
-        peer.receive_the_mcast_endpoint()
-        peer.receive_the_header_size()
-        peer.receive_the_chunk_size()
-        peer.receive_the_header()
-        peer.receive_the_buffer_size()
+        #peer = Peer_IMS()
+        peer.WaitForThePlayer()
+        peer.ConnectToTheSplitter()
+        peer.ReceiveTheMcasteEndpoint()
+        peer.ReceiveTheHeaderSize()
+        peer.ReceiveTheChunkSize()
+        peer.ReceiveTheHeader()
+        peer.ReceiveTheBufferSize()
         _print_("Using IP Multicast address =", peer.mcast_addr)
 
         if args.show_buffer:
-            Peer_IMS.SHOW_BUFFER = True
+            peer.show_buffer = True
 
         # A multicast address is always received, even for DBS peers.
         if peer.mcast_addr == "0.0.0.0":
             # {{{ IP unicast mode.
 
-            peer = Peer_DBS(peer)
+            #peer = Peer_DBS(peer)
             _print_("Peer DBS enabled")
-            peer.receive_my_endpoint()
-            peer.receive_magic_flags()
-            _print_("Magic flags =", bin(peer.magic_flags))
-            peer.receive_the_number_of_peers()
-            _print_("Number of peers in the team (excluding me) =", peer.number_of_peers)
-            _print_("Am I a monitor peer? =", peer.am_i_a_monitor())
-            peer.listen_to_the_team()
-            peer.receive_the_list_of_peers()
+            peer.ReceiveMyEndpoint()
+            peer.ReceiveMagicFlags()
+            #_print_("Magic flags =", bin(peer.magic_flags))
+            peer.ReceiveTheNumberOfPeers()
+            _print_("Number of peers in the team (excluding me) =", peer.GetNumberOfPeers())
+            _print_("Am I a monitor peer? =", peer.AmIAMonitor())
+            peer.ListenToTheTeam()
+            peer.ReceiveTheListOfPeers()
             _print_("List of peers received")
 
             # After receiving the list of peers, the peer can check
             # whether is a monitor peer or not (only the first
             # arriving peers are monitors)
-            if peer.am_i_a_monitor():
-                peer = Monitor_DBS(peer)
+            if peer.AmIAMonitor():
+                #peer = Monitor_DBS(peer)
                 _print_("Monitor DBS enabled")
 
                 # The peer is a monitor. Now it's time to know the sets of rules that control this team.
-
+                '''
                 if (peer.magic_flags & Common.LRS):
                     peer = Peer_LRS(peer)
                     _print_("Peer LRS enabled")
@@ -171,9 +175,11 @@ class Peer():
                     _print_("Peer NTS enabled")
                     peer = Monitor_NTS(peer)
                     _print_("Monitor NTS enabled")
+                '''
             else:
+                _print_("Peer DBS enabled")
                 # The peer is a normal peer. Let's know the sets of rules that control this team.
-
+                '''
                 if (peer.magic_flags & Common.NTS):
                     peer = Peer_NTS(peer)
                     _print_("Peer NTS enabled")
@@ -186,7 +192,8 @@ class Peer():
                         if int(args.chunk_loss_period) != 0:
                             peer = Lossy_Peer(peer)
                             _print_("Lost of chunks enabled")
-
+                '''
+            '''
             if args.port_step:
                 Symsp_Peer.PORT_STEP = int(args.port_step)
                 print('PORT_STEP =', Symsp_Peer.PORT_STEP)
@@ -225,24 +232,24 @@ class Peer():
             if args.strpe_log != None:
                 peer.LOGGING = True
                 peer.LOG_FILE = open(args.strpe_log, 'w', 0)
-
+            '''
             # }}}
         else:
             # {{{ IP multicast mode
 
-            peer.listen_to_the_team()
+            peer.ListenToTheTeam()
 
             # }}}
 
         # }}}
 
-        print("Created new peer of type %s\n" % peer.__class__.__name__)
+        #print("Created new peer of type %s\n" % peer.__class__.__name__)
 
         # {{{ Run!
 
-        peer.disconnect_from_the_splitter()
-        peer.buffer_data()
-        peer.start()
+        peer.DisconnectFromTheSplitter()
+        peer.BufferData()
+        peer.Start()
 
         print("+-----------------------------------------------------+")
         print("| Received = Received kbps, including retransmissions |")
@@ -254,25 +261,32 @@ class Peer():
         print("    Time |      Real  Expected |       Real  Expected | Team description")
         print("---------+---------------------+----------------------+-----------------------------------...")
 
-        last_chunk_number = peer.played_chunk
-        if hasattr(peer, 'sendto_counter'):
+        last_chunk_number = peer.GetPlayedChunk()
+        peer.SetSendtoCounter(0)
+        last_sendto_counter = 0
+
+        '''        
+	if hasattr(peer, 'sendto_counter'):
             last_sendto_counter = 0
         else:
             peer.sendto_counter = 0
             last_sendto_counter = 0
         if not hasattr(peer, 'peer_list'):
             peer.peer_list = []
-        last_recvfrom_counter = peer.recvfrom_counter
-        while peer.player_alive:
+        '''
+        last_recvfrom_counter = peer.GetRecvfromCounter()
+        while peer.IsPlayerAlive():
             time.sleep(1)
-            kbps_expected_recv = ((peer.played_chunk - last_chunk_number) * peer.chunk_size * 8) / 1000
-            last_chunk_number = peer.played_chunk
-            kbps_recvfrom = ((peer.recvfrom_counter - last_recvfrom_counter) * peer.chunk_size * 8) / 1000
-            last_recvfrom_counter = peer.recvfrom_counter
-            team_ratio = len(peer.peer_list) /(len(peer.peer_list) + 1.0)
+            kbps_expected_recv = ((peer.GetPlayedChunk() - last_chunk_number) * peer.GetChunkSize() * 8) / 1000
+            last_chunk_number = peer.GetPlayedChunk()
+            kbps_recvfrom = ((peer.GetRecvfromCounter() - last_recvfrom_counter) * peer.GetChunkSize() * 8) / 1000
+            last_recvfrom_counter = peer.GetRecvfromCounter()
+            team_ratio = len(peer.GetPeerList()) /(len(peer.GetPeerList()) + 1.0)
             kbps_expected_sent = int(kbps_expected_recv*team_ratio)
-            kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
-            last_sendto_counter = peer.sendto_counter
+            kbps_sendto = ((peer.GetSendtoCounter() - last_sendto_counter) * peer.GetChunkSize() * 8) / 1000
+            last_sendto_counter = peer.GetSendtoCounter()
+            
+            '''
             try:
                 if Common.CONSOLE_MODE == False :
                     from gi.repository import GObject
@@ -285,8 +299,10 @@ class Peer():
                                             ,str(len(peer.peer_list)+1))
             except Exception as msg:
                 pass
+            '''
+
             if kbps_recvfrom > 0 and kbps_expected_recv > 0:
-                nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.peer_list)+1))
+                nice = 100.0/float((float(kbps_expected_recv)/kbps_recvfrom)*(len(peer.GetPeerList())+1))
             else:
                 nice = 0.0
             _print_('|', end=Color.none)
@@ -306,9 +322,9 @@ class Peer():
             print(repr(int(kbps_expected_sent)).rjust(10), end=' | ')
             #sys.stdout.write(Color.none)
             #print(repr(nice).ljust(1)[:6], end=' ')
-            print(len(peer.peer_list), end=' ')
+            print(len(peer.GetPeerList()), end=' ')
             counter = 0
-            for p in peer.peer_list:
+            for p in peer.GetPeerList():
                 if (counter < 5):
                     print(p, end=' ')
                     counter += 1

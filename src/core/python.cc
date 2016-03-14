@@ -28,6 +28,39 @@ public:
 		}
 		return l;
 	}
+
+	void SetMcastAddr(std::string address){
+		mcast_addr_ = ip::address::from_string(address);
+	}
+
+
+	std::string GetSplitterAddr(){
+		return splitter_addr_.to_string();
+	}
+	
+	uint16_t GetSplitterPort(){
+		return splitter_port_;
+	}
+	
+	uint16_t GetPort(){
+		return port_;
+	}
+
+	uint16_t GetPlayerPort(){
+		return player_port_;
+	}
+
+	int GetMaxChunkDebt(){
+		return max_chunk_debt_;
+	}
+	
+	bool GetUseLocalhost(){
+		return use_localhost_;
+	}
+	
+	bool GetShowBuffer(){
+		return show_buffer_;
+	}
 };
 
 //Splitter
@@ -93,8 +126,15 @@ public:
 BOOST_PYTHON_MODULE(libp2psp)
 {
 	class_<PyPeerDBS, boost::noncopyable>("PeerDBS")
-	//For variables
-	//.add_property("var", &Class::get_var, &Class::set_var)
+	//variables
+	.add_property("splitter_addr", &PyPeerDBS::GetSplitterAddr, &PyPeerDBS::SetSplitterAddr)
+	.add_property("splitter_port", &PyPeerDBS::GetSplitterPort, &PyPeerDBS::SetSplitterPort)
+	.add_property("port", &PyPeerDBS::GetPort, &PyPeerDBS::SetPort)
+	.add_property("player_port", &PyPeerDBS::GetPlayerPort, &PyPeerDBS::SetPlayerPort)
+	.add_property("max_chunk_debt", &PyPeerDBS::GetMaxChunkDebt, &PyPeerDBS::SetMaxChunkDebt)
+	.add_property("use_localhost", &PyPeerDBS::GetUseLocalhost, &PyPeerDBS::SetUseLocalhost)
+	.add_property("mcast_addr", &PyPeerDBS::GetMcastAddr, &PyPeerDBS::SetMcastAddr)
+	.add_property("show_buffer", &PyPeerDBS::GetShowBuffer, &PyPeerDBS::SetShowBuffer)
 
 	//IMS
 	.def("Init", &PyPeerDBS::Init) //used
