@@ -98,43 +98,43 @@ class Splitter():
         
 
         if args.buffer_size:
-            splitter.SetBufferSize(int(args.buffer_size))
-        _print_("Buffer size =", str(splitter.GetBufferSize()))
+            splitter.buffer_size = int(args.buffer_size)
+        _print_("Buffer size =", str(splitter.buffer_size))
 
         if args.channel:
-            splitter.SetChannel(args.channel)
-        _print_("Channel = \"" + str(splitter.GetChannel()) + "\"")
+            splitter.channel = args.channel
+        _print_("Channel = \"" + str(splitter.channel) + "\"")
 
         if args.chunk_size:
-            splitter.SetChunkSize(int(args.chunk_size))
-        _print_("Chunk size =", str(splitter.GetChunkSize()))
+            splitter.chunk_size = int(args.chunk_size)
+        _print_("Chunk size =", str(splitter.chunk_size))
 
         if args.header_size:
-            splitter.SetHeaderSize(int(args.header_size))
-        _print_("Header size =", str(splitter.GetHeaderSize()))
+            splitter.header_size = int(args.header_size)
+        _print_("Header size =", str(splitter.header_size))
 
         if args.port:
-            splitter.SetPort(int(args.port))
-        _print_("Listening port =", str(splitter.GetPort()))
+            splitter.port = int(args.port)
+        _print_("Listening port =", str(splitter.port))
 
         if args.source_addr:
-            splitter.SetSourceAddr(socket.gethostbyname(args.source_addr))
-        _print_("Source address = ", str(splitter.GetSourceAddr()))
+            splitter.source_addr = socket.gethostbyname(args.source_addr)
+        _print_("Source address = ", str(splitter.source_addr))
 
         if args.source_port:
-            splitter.SetSourcePort(int(args.source_port))
-        _print_("Source port =", str(splitter.GetSourcePort()))
+            splitter.source_port = int(args.source_port)
+        _print_("Source port =", str(splitter.source_port))
 
         
         _print_("IP unicast mode selected")
 
         if args.max_chunk_loss:
-            splitter.SetMaxChunkLoss( int(args.max_chunk_loss))
-            _print_("Maximun chunk loss =", str(splitter.GetMaxChunkLoss()))
+            splitter.max_chunk_loss = int(args.max_chunk_loss)
+            _print_("Maximun chunk loss =", str(splitter.max_chunk_loss))
 
         if args.max_number_of_monitor_peers:
-           splitter.SetMonitorNumber(int(args.max_number_of_monitor_peers))
-           _print_("Maximun number of monitor peers =", str(splitter.GetMonitorNumber()))
+           splitter.monitor_number = int(args.max_number_of_monitor_peers)
+           _print_("Maximun number of monitor peers =", str(splitter.monitor_number))
 
 
         # {{{ Run!
@@ -147,18 +147,18 @@ class Splitter():
         print("    Time | (kbps)    | (kbps)    | peers (peer) sents   threshold period kbps")
         print("---------+-----------+-----------+-----------------------------------...")
 
-        last_sendto_counter = splitter.GetSendToCounter()
-        last_recvfrom_counter = splitter.GetRecvFromCounter()
+        last_sendto_counter = splitter.sendto_counter
+        last_recvfrom_counter = splitter.recvfrom_counter
 
         while splitter.isAlive():
             try:
                 time.sleep(1)
-                chunks_sendto = splitter.GetSendToCounter() - last_sendto_counter
-                kbps_sendto = (chunks_sendto * splitter.GetChunkSize() * 8) / 1000
-                chunks_recvfrom = splitter.GetRecvFromCounter() - last_recvfrom_counter
-                kbps_recvfrom = ( chunks_recvfrom * splitter.GetChunkSize() * 8) / 1000
-                last_sendto_counter = splitter.GetSendToCounter()
-                last_recvfrom_counter = splitter.GetRecvFromCounter()
+                chunks_sendto = splitter.sendto_counter - last_sendto_counter
+                kbps_sendto = (chunks_sendto * splitter.chunk_size * 8) / 1000
+                chunks_recvfrom = splitter.recvfrom_counter - last_recvfrom_counter
+                kbps_recvfrom = ( chunks_recvfrom * splitter.chunk_size * 8) / 1000
+                last_sendto_counter = splitter.sendto_counter
+                last_recvfrom_counter = splitter.recvfrom_counter
                 sys.stdout.write(Color.none)
                 _print_("|" + repr(int(kbps_recvfrom)).rjust(10) + " |" + repr(int(kbps_sendto)).rjust(10), end=" | ")
                 #print('%5d' % splitter.chunk_number, end=' ')

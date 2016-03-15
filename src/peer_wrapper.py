@@ -246,7 +246,7 @@ class Peer():
         #print("Created new peer of type %s\n" % peer.__class__.__name__)
 
         # {{{ Run!
-
+    
         peer.DisconnectFromTheSplitter()
         peer.BufferData()
         peer.Start()
@@ -262,7 +262,7 @@ class Peer():
         print("---------+---------------------+----------------------+-----------------------------------...")
 
         last_chunk_number = peer.GetPlayedChunk()
-        peer.SetSendtoCounter(0)
+        peer.sendto_counter = 0
         last_sendto_counter = 0
 
         '''        
@@ -274,17 +274,17 @@ class Peer():
         if not hasattr(peer, 'peer_list'):
             peer.peer_list = []
         '''
-        last_recvfrom_counter = peer.GetRecvfromCounter()
+        last_recvfrom_counter = peer.recvfrom_counter
         while peer.IsPlayerAlive():
             time.sleep(1)
-            kbps_expected_recv = ((peer.GetPlayedChunk() - last_chunk_number) * peer.GetChunkSize() * 8) / 1000
+            kbps_expected_recv = ((peer.GetPlayedChunk() - last_chunk_number) * peer.chunk_size * 8) / 1000
             last_chunk_number = peer.GetPlayedChunk()
-            kbps_recvfrom = ((peer.GetRecvfromCounter() - last_recvfrom_counter) * peer.GetChunkSize() * 8) / 1000
-            last_recvfrom_counter = peer.GetRecvfromCounter()
+            kbps_recvfrom = ((peer.recvfrom_counter - last_recvfrom_counter) * peer.chunk_size * 8) / 1000
+            last_recvfrom_counter = peer.recvfrom_counter
             team_ratio = len(peer.GetPeerList()) /(len(peer.GetPeerList()) + 1.0)
             kbps_expected_sent = int(kbps_expected_recv*team_ratio)
-            kbps_sendto = ((peer.GetSendtoCounter() - last_sendto_counter) * peer.GetChunkSize() * 8) / 1000
-            last_sendto_counter = peer.GetSendtoCounter()
+            kbps_sendto = ((peer.sendto_counter - last_sendto_counter) * peer.chunk_size * 8) / 1000
+            last_sendto_counter = peer.sendto_counter
             
             '''
             try:
