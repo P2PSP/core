@@ -9,7 +9,7 @@ option(BUILD_TEST "Build the test" ON)
 option(BUILD_PEER "Build the peer" ON)
 option(BUILD_SPLITTER "Build the splitter" ON)
 
-option(BUILD_PYTHON_WRAPPER "Build the Python wrapper" ON)
+option(BUILD_PYTHON_WRAPPER "Build the Python wrapper" OFF)
 
 # Project name
 project(p2psp C CXX)
@@ -28,7 +28,7 @@ list(APPEND BOOST_REQUIRED_COMPONENTS
 )
 
 if(BUILD_PYTHON_WRAPPER)
-  list(APPEND BOOST_REQUIRED_COMPONENTS "python-py34")
+  list(APPEND BOOST_REQUIRED_COMPONENTS "python")
 endif()
 
 find_package(Boost COMPONENTS 
@@ -41,7 +41,7 @@ find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 if(BUILD_PYTHON_WRAPPER)
-  find_package(PythonLibs 3 REQUIRED)
+  find_package(PythonLibs REQUIRED)
 
 endif()
 
