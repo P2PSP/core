@@ -29,7 +29,7 @@ class SplitterDBS : public SplitterIMS {
   const int kMonitorNumber = 1;
 
   int max_chunk_loss_;
-  int monitor_number_;
+  unsigned int monitor_number_;
 
   int peer_number_;
 
@@ -66,14 +66,14 @@ class SplitterDBS : public SplitterIMS {
       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   void SendTheListSize(
       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-  void SendTheListOfPeers(
+  virtual void SendTheListOfPeers(
       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   void SendThePeerEndpoint(
       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   void SendConfiguration(
       const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) override;
   virtual void InsertPeer(const boost::asio::ip::udp::endpoint &peer);
-  void HandleAPeerArrival(
+  virtual void HandleAPeerArrival(
       std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) override;
   size_t ReceiveMessage(std::vector<char> &message,
                         boost::asio::ip::udp::endpoint &endpoint);

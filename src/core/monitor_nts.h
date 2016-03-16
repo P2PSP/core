@@ -13,12 +13,19 @@
 #ifndef P2PSP_CORE_MONITOR_NTS_H
 #define P2PSP_CORE_MONITOR_NTS_H
 
+#include "monitor_dbs.h"
 #include "peer_nts.h"
 #include "../util/trace.h"
 
 namespace p2psp {
 
-class MonitorNTS : public PeerNTS {
+class MonitorNTS : public PeerNTS, public MonitorDBS {
+ protected:
+  void DisconnectFromTheSplitter() override;
+
+  int ProcessMessage(const std::vector<char>& message_bytes,
+      const ip::udp::endpoint& sender) override;
+
  public:
   MonitorNTS();
   ~MonitorNTS();

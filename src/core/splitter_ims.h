@@ -117,7 +117,7 @@ class SplitterIMS {
   void ConfigureSockets();
   void LoadTheVideoHeader();
   size_t ReceiveNextChunk(boost::asio::streambuf &chunk);
-  size_t ReceiveChunk(boost::asio::streambuf &chunk);
+  virtual size_t ReceiveChunk(boost::asio::streambuf &chunk);
   virtual void SendChunk(const std::vector<char> &message,
                          const boost::asio::ip::udp::endpoint &destination);
   void ReceiveTheHeader();
