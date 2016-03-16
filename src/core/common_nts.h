@@ -28,6 +28,21 @@ typedef std::chrono::steady_clock::time_point timepoint_t;
 
 class CommonNTS {
  public:
+  // Size of the IDs used in NTS for incorporating peers
+  static const int kPeerIdLength = 7;
+
+  // Time between continuously sent packets
+  static const std::chrono::seconds kHelloPacketTiming;
+
+  // Maximum time after peer retries incorporation
+  static const std::chrono::seconds kMaxPeerArrivingTime;
+
+  // Peers needing longer to incorporate are removed from team
+  static const std::chrono::seconds kMaxTotalIncorporationTime;
+
+  // Number of probable source ports that will be tried
+  static const int kMaxPredictedPorts = 20;
+
   // TODO: Provide a similar method with maximal search length
   template <class Container, typename Item>
   static bool Contains(const Container& container, const Item& item) {

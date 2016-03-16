@@ -11,7 +11,9 @@
 #ifndef P2PSP_CORE_COMMON_H
 #define P2PSP_CORE_COMMON_H
 
+#include <chrono>
 #include <openssl/sha.h>
+#include <vector>
 
 namespace p2psp {
 
@@ -21,17 +23,7 @@ class Common {
   // MAX_CHUNK_NUMBER = 2048
   // COUNTERS_TIMING = 0.1
   static const int kCountersTiming = 1;
-  static const int kPeerIdLength = 7;          // Size of the IDs used in NTS
-                                               // for incorporating peers
-  static const int kHelloPacketTiming = 1;     // Time between continuously sent
-                                               // packets
-  static const int kMaxPeerArrivingTime = 15;  // Maximum time after peer
-                                               // retries incorporation
-  static const int kMaxTotalIncorporationTime = 60;  // Peers needing longer to
-  // incorporate are removed from
-  // team
-  static const int kMaxPredictedPorts = 20;  // Number of probable source
-                                             // ports that will be tried
+
   static const bool kConsoleMode = true;
 
   // IMS is enables by defining an IP multicast address

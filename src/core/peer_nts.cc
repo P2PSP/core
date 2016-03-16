@@ -60,7 +60,7 @@ void PeerNTS::SendMessage(const message_t& message_data) {
 void PeerNTS::ReceiveId() {
   LOG("Requesting peer ID from splitter");
   this->peer_id_ = CommonNTS::ReceiveString(this->splitter_socket_,
-      Common::kPeerIdLength);
+      CommonNTS::kPeerIdLength);
   LOG("ID received: " << this->peer_id_);
 }
 
@@ -79,7 +79,7 @@ void PeerNTS::SendHelloThread() {
     for (const message_t& message_data : hello_messages) {
       // Check for timeout
       if (now - hello_messages_times[message_data]
-          > std::chrono::seconds(Common::kMaxPeerArrivingTime)) {
+          > CommonNTS::kMaxPeerArrivingTime) {
         messages_to_remove.push_back(message_data);
         continue;
       }
@@ -92,7 +92,7 @@ void PeerNTS::SendHelloThread() {
               << " (trying " << hello_messages_ports[message_data].size()
               << " ports)");
         } else {
-          LOG("Sending message (" << message.substr(0, Common::kPeerIdLength)
+          LOG("Sending message (" << message.substr(0, CommonNTS::kPeerIdLength)
               << ") of length " << message.size() << " to " << peer
               << " (trying " << hello_messages_ports[message_data].size()
               << " ports)");
@@ -111,7 +111,7 @@ void PeerNTS::SendHelloThread() {
       for (const message_t& message_data : messages_to_remove) {
         if (CommonNTS::Contains(this->hello_messages_, message_data)) {
           LOG("Removed message "
-              << message_data.first.substr(0, Common::kPeerIdLength)
+              << message_data.first.substr(0, CommonNTS::kPeerIdLength)
               << " to " << message_data.second << "due to timeout");
           this->hello_messages_.remove(message_data);
           this->hello_messages_times_.erase(message_data);
@@ -123,8 +123,7 @@ void PeerNTS::SendHelloThread() {
     // TODO: this->hello_messages_event_.clear();
     std::unique_lock<std::mutex> lock(this->hello_messages_event_mutex_);
     this->hello_messages_event_.wait_until(lock,
-        std::chrono::steady_clock::now()
-        + std::chrono::seconds(Common::kHelloPacketTiming));
+        std::chrono::steady_clock::now() + CommonNTS::kHelloPacketTiming);
 
   }
 }
@@ -152,7 +151,7 @@ void PeerNTS::ReceiveTheListOfPeers2() {
   // Skip the monitor peers
   for (int i = 0; i < this->number_of_peers_ - this->number_of_monitors_; i++) {
     std::string peer_id = CommonNTS::ReceiveString(this->splitter_socket_,
-        Common::kPeerIdLength);
+        CommonNTS::kPeerIdLength);
     ip::address IP_addr = ip::address_v4(
         CommonNTS::Receive<uint32_t>(this->splitter_socket_));
     uint16_t port_to_splitter =
@@ -166,7 +165,7 @@ void PeerNTS::ReceiveTheListOfPeers2() {
     std::vector<uint16_t> probable_source_ports;
     if (port_step > 0) {
       for (int port = port_to_splitter + port_step; port < 65536 &&
-          port <= port_to_splitter + (int)Common::kMaxPredictedPorts*port_step;
+          port <= port_to_splitter+(int)CommonNTS::kMaxPredictedPorts*port_step;
           port += port_step) {
         probable_source_ports.push_back(port);
       }
@@ -221,7 +220,7 @@ void PeerNTS::TryToDisconnectFromTheSplitter() {
   // The monitor is not in initial_peer_list
   while (this->initial_peer_list_.size() > 0) {
     if (std::chrono::steady_clock::now() - incorporation_time
-        > std::chrono::seconds(Common::kMaxPeerArrivingTime)) {
+        > CommonNTS::kMaxPeerArrivingTime) {
       // Retry incorporation into the team
       LOG("Retrying incorporation with " << this->initial_peer_list_.size()
           << " peers left: "
@@ -303,7 +302,7 @@ std::set<uint16_t>&& PeerNTS::GetProbablePortDiffs(uint16_t port_diff,
 
   std::set<uint16_t> factors = this->GetFactors(port_diff);
   uint16_t num_combinations = this->CountCombinations(factors);
-  float count_factor = Common::kMaxPredictedPorts/(float)num_combinations;
+  float count_factor = CommonNTS::kMaxPredictedPorts/(float)num_combinations;
 
   std::set<uint16_t> port_diffs;
   for (uint16_t port_step : factors) {
@@ -345,10 +344,10 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
   std::istringstream msg_str(message);
 
   if (sender == this->splitter_ &&
-      message.size() == Common::kPeerIdLength + 10) {
+      message.size() == CommonNTS::kPeerIdLength + 10) {
     // say [hello to (X)] received from splitter
     std::string peer_id =
-        CommonNTS::ReceiveString(msg_str, Common::kPeerIdLength);
+        CommonNTS::ReceiveString(msg_str, CommonNTS::kPeerIdLength);
     ip::address IP_addr = ip::address_v4(CommonNTS::Receive<uint32_t>(msg_str));
     uint16_t source_port_to_splitter = CommonNTS::Receive<uint16_t>(msg_str);
     uint16_t port_diff = CommonNTS::Receive<uint16_t>(msg_str);
@@ -366,10 +365,10 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
     // Directly start packet sending
     this->hello_messages_event_.notify_all();
   } else if (sender == this->splitter_ &&
-      message.size() == Common::kPeerIdLength + 12) {
+      message.size() == CommonNTS::kPeerIdLength + 12) {
     // say [hello to (X)] received from splitter
     std::string peer_id =
-        CommonNTS::ReceiveString(msg_str, Common::kPeerIdLength);
+        CommonNTS::ReceiveString(msg_str, CommonNTS::kPeerIdLength);
     ip::address IP_addr = ip::address_v4(CommonNTS::Receive<uint32_t>(msg_str));
     uint16_t source_port_to_splitter = CommonNTS::Receive<uint16_t>(msg_str);
     uint16_t port_diff = CommonNTS::Receive<uint16_t>(msg_str);
@@ -392,10 +391,10 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
     // Directly start packet sending
     this->hello_messages_event_.notify_all();
   } else if (message == this->peer_id_ || (sender == this->splitter_ &&
-      message.size() == Common::kPeerIdLength + 2) ||
+      message.size() == CommonNTS::kPeerIdLength + 2) ||
       (sender == this->splitter_ &&
-      message.size() == Common::kPeerIdLength + 3) ||
-      message.size() == Common::kPeerIdLength + 1) { // All sent message sizes
+      message.size() == CommonNTS::kPeerIdLength + 3) ||
+      message.size() == CommonNTS::kPeerIdLength + 1) { // All sent msg sizes
     // Acknowledge received; stop sending the message
     {
       std::lock_guard<std::mutex> guard(this->hello_messages_lock_);
@@ -414,9 +413,9 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
       }
     }
     ERROR("NTS: CommonNTS::Received acknowledge from unknown host " << sender);
-  } else if (message.size() == Common::kPeerIdLength) {
+  } else if (message.size() == CommonNTS::kPeerIdLength) {
     std::string peer_id =
-        CommonNTS::ReceiveString(msg_str, Common::kPeerIdLength);
+        CommonNTS::ReceiveString(msg_str, CommonNTS::kPeerIdLength);
     LOG("CommonNTS::Received [hello (ID " << message << ")] from " << sender);
     // Send acknowledge
     this->team_socket_.send_to(buffer(message), sender);

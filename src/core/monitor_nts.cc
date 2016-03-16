@@ -40,20 +40,20 @@ int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
   std::string message(message_bytes.data(), message_bytes.size());
 
   if (sender != PeerNTS::splitter_ &&
-      (message.size() == Common::kPeerIdLength ||
-       message.size() == Common::kPeerIdLength+1)) {
+      (message.size() == CommonNTS::kPeerIdLength ||
+       message.size() == CommonNTS::kPeerIdLength+1)) {
     // Hello message received from peer
     // TODO: if __debug__:
     {
-      LOG("NTS: Received hello (ID " << message.substr(0, Common::kPeerIdLength)
-          << " from " << sender);
+      LOG("NTS: Received hello (ID "
+          << message.substr(0, CommonNTS::kPeerIdLength) << " from " << sender);
     }
     // Send acknowledge
     PeerNTS::team_socket_.send_to(buffer(message), sender);
 
     // TODO: if __debug__:
     {
-      LOG("NTS: Forwarding ID " << message.substr(0, Common::kPeerIdLength)
+      LOG("NTS: Forwarding ID " << message.substr(0, CommonNTS::kPeerIdLength)
           << " and source port " << sender.port() << " to splitter");
     }
     std::ostringstream msg_str(message);
@@ -61,11 +61,11 @@ int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
     message_t message_data = std::make_pair(msg_str.str(), PeerNTS::splitter_);
     this->SendMessage(message_data);
   } else if (sender == PeerNTS::splitter_ &&
-      message.size() == Common::kPeerIdLength + 6) {
+      message.size() == CommonNTS::kPeerIdLength + 6) {
     // [say hello to (X)] received from splitter
     std::istringstream msg_str(message);
     std::string peer_id =
-        CommonNTS::ReceiveString(msg_str, Common::kPeerIdLength);
+        CommonNTS::ReceiveString(msg_str, CommonNTS::kPeerIdLength);
     ip::address IP_addr = ip::address_v4(CommonNTS::Receive<uint32_t>(msg_str));
     uint16_t port = CommonNTS::Receive<uint16_t>(msg_str);
     ip::udp::endpoint peer(IP_addr, port);

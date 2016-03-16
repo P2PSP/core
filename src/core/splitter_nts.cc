@@ -69,10 +69,10 @@ std::string&& SplitterNTS::GenerateId() {
   static std::uniform_int_distribution<> distr(0, 15);
 
   std::ostringstream str;
-  for (int i = 0; i < Common::kPeerIdLength; i++) {
+  for (int i = 0; i < CommonNTS::kPeerIdLength; i++) {
     str << std::hex << distr(gen);
   }
-  assert(str.str().size() == Common::kPeerIdLength); // TODO: remove line
+  assert(str.str().size() == CommonNTS::kPeerIdLength); // TODO: remove line
   return std::move(str.str());
 }
 
@@ -171,7 +171,7 @@ void SplitterNTS::CheckArrivingPeerTime() {
   for (const auto& peer_iter : this->arriving_peers_) {
     const std::string& peer_id = peer_iter.first;
     if (now - this->arriving_peers_[peer_id].arrive_time_
-        > std::chrono::seconds(Common::kMaxPeerArrivingTime)) {
+        > CommonNTS::kMaxPeerArrivingTime) {
       peers_to_remove.push_back(peer_id);
     }
   }
@@ -197,7 +197,7 @@ void SplitterNTS::CheckIncorporatingPeerTime() {
   for (const auto& peer_iter : this->incorporating_peers_) {
     const std::string& peer_id = peer_iter.first;
     if (now - this->incorporating_peers_[peer_id].incorporation_time_
-      > std::chrono::seconds(Common::kMaxTotalIncorporationTime)) {
+      > CommonNTS::kMaxTotalIncorporationTime) {
       peers_to_remove.push_back(peer_id);
     }
   }
@@ -218,8 +218,7 @@ void SplitterNTS::CheckIncorporatingPeerTime() {
 
 void SplitterNTS::CheckTimeoutThread() {
   while (this->alive_) {
-    std::this_thread::sleep_for(
-        std::chrono::seconds(Common::kMaxPeerArrivingTime));
+    std::this_thread::sleep_for(CommonNTS::kMaxPeerArrivingTime);
     // Check timeouts
     this->CheckArrivingPeerTime();
     this->CheckIncorporatingPeerTime();
@@ -236,7 +235,7 @@ void SplitterNTS::ListenExtraSocketThread() {
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 
-  std::vector<char> message_bytes(Common::kPeerIdLength);
+  std::vector<char> message_bytes(CommonNTS::kPeerIdLength);
   std::string message;
   ip::udp::endpoint sender;
 
@@ -255,11 +254,11 @@ void SplitterNTS::ListenExtraSocketThread() {
       continue;
     }
 
-    if (message.size() == Common::kPeerIdLength) {
+    if (message.size() == CommonNTS::kPeerIdLength) {
       // Send acknowledge
       this->extra_socket_->send_to(buffer(message), sender);
 
-      std::string peer_id(message.data(), Common::kPeerIdLength);
+      std::string peer_id(message.data(), CommonNTS::kPeerIdLength);
 
       const ip::udp::endpoint* peer = nullptr;
       // TODO: use std::find or boost::multi_index to optimize this loop
@@ -546,7 +545,7 @@ void SplitterNTS::ModerateTheTeam() {
       // The peer wants to leave the team.
       this->ProcessGoodbye(sender);
 
-    } else if (message.size() == Common::kPeerIdLength) {
+    } else if (message.size() == CommonNTS::kPeerIdLength) {
       // Packet is from the arriving peer itself
       std::string peer_id = message;
 
@@ -589,11 +588,11 @@ void SplitterNTS::ModerateTheTeam() {
     } else if (std::find(this->peer_list_.begin(),
         this->peer_list_.begin() + this->monitor_number_, sender)
         != this->peer_list_.begin() + this->monitor_number_
-        && message.size() == Common::kPeerIdLength + 2) {
+        && message.size() == CommonNTS::kPeerIdLength + 2) {
 
       // Message is from monitor
       std::string peer_id =
-          CommonNTS::ReceiveString(msg_str, Common::kPeerIdLength);
+          CommonNTS::ReceiveString(msg_str, CommonNTS::kPeerIdLength);
       LOG("Received forwarded hello (ID " << peer_id << ") from " << sender);
 
       // Send acknowledge
@@ -619,11 +618,11 @@ void SplitterNTS::ModerateTheTeam() {
         this->IncorporatePeer(peer_id);
       }
 
-    } else if (message.size() == Common::kPeerIdLength + 2) {
+    } else if (message.size() == CommonNTS::kPeerIdLength + 2) {
 
       // Received source port of a peer from another peer
       std::string peer_id =
-          CommonNTS::ReceiveString(msg_str, Common::kPeerIdLength);
+          CommonNTS::ReceiveString(msg_str, CommonNTS::kPeerIdLength);
       LOG("Received source port of peer " << peer_id << " from " << sender);
 
       // Send acknowledge
@@ -648,11 +647,11 @@ void SplitterNTS::ModerateTheTeam() {
       // Update source port information
       this->UpdatePortStep(*peer, source_port);
 
-    } else if (message.size() == Common::kPeerIdLength + 1) {
+    } else if (message.size() == CommonNTS::kPeerIdLength + 1) {
 
       // A peer succeeded or failed to be incorporated into the team
       std::string peer_id =
-          CommonNTS::ReceiveString(msg_str, Common::kPeerIdLength);
+          CommonNTS::ReceiveString(msg_str, CommonNTS::kPeerIdLength);
 
       // Send acknowledge
       this->message_queue_.push(std::make_pair(message, sender));
@@ -709,11 +708,11 @@ void SplitterNTS::ModerateTheTeam() {
     } else if (std::find(this->peer_list_.begin(),
         this->peer_list_.begin() + this->monitor_number_, sender)
         != this->peer_list_.begin() + this->monitor_number_
-        && message.size() == Common::kPeerIdLength + 3) {
+        && message.size() == CommonNTS::kPeerIdLength + 3) {
 
       // Message is from monitor
       std::string peer_id =
-          CommonNTS::ReceiveString(msg_str, Common::kPeerIdLength);
+          CommonNTS::ReceiveString(msg_str, CommonNTS::kPeerIdLength);
       LOG("Received forwarded retry hello (ID " << peer_id << ')');
 
       // Send acknowledge
