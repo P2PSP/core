@@ -81,23 +81,37 @@ class CommonNTS {
     return std::move(std::string(message.data(), length));
   }
 
+  static uint16_t NetworkToHost(uint16_t t) {
+    return ntohs(t);
+  }
+  static uint32_t NetworkToHost(uint32_t t) {
+    return ntohl(t);
+  }
+  static uint16_t HostToNetwork(uint16_t t) {
+    return htons(t);
+  }
+  static uint32_t HostToNetwork(uint32_t t) {
+    return htonl(t);
+  }
+
   template <typename T, class Socket>
   static T Receive(Socket& socket) {
     std::array<char, sizeof(T)> message;
     read(socket, boost::asio::buffer(message));
-    return *(T *)(message.data());
+    return NetworkToHost(*(T *)(message.data()));
   }
 
   template <typename T>
   static T Receive(std::istringstream& str) {
     std::array<char, sizeof(T)> message;
     str.read(message.data(), sizeof(T));
-    return *(T *)(message.data());
+    return NetworkToHost(*(T *)(message.data()));
   }
 
   template <typename T>
   static void Write(std::ostringstream& str, const T& t) {
-    str << std::string((const char*) &t, sizeof(T));
+    T t2 = HostToNetwork(t);
+    str << std::string((const char*) &t2, sizeof(T));
   }
 };
 }
