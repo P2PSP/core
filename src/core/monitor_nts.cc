@@ -20,15 +20,17 @@ MonitorNTS::~MonitorNTS(){}
 
 void MonitorNTS::Init() { LOG("Initialized"); }
 
+// This is from MonitorDBS
 void MonitorNTS::Complain(uint16_t chunk_number) {
-  std::vector<char> message(2);
-  std::memcpy(message.data(), &chunk_number, sizeof(uint16_t));
+  std::ostringstream msg_str;
+  CommonNTS::Write<uint16_t>(msg_str, chunk_number);
 
-  team_socket_.send_to(buffer(message), splitter_);
+  team_socket_.send_to(buffer(msg_str.str()), splitter_);
 
   TRACE("lost chunk:" << std::to_string(chunk_number));
 };
 
+// This is from MonitorDBS
 int MonitorNTS::FindNextChunk() {
   uint16_t chunk_number = (played_chunk_ + 1) % Common::kMaxChunkNumber;
 
@@ -49,7 +51,7 @@ void MonitorNTS::DisconnectFromTheSplitter() {
   // so this->initial_peer_list_ remains empty
 
   // Close the TCP socket
-  this->DisconnectFromTheSplitter();
+  PeerDBS::DisconnectFromTheSplitter();
 }
 
 int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
@@ -98,7 +100,7 @@ int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
       this->debt_[peer] = 0;
     }
   } else {
-    return this->ProcessMessage(message_bytes, sender);
+    return PeerNTS::ProcessMessage(message_bytes, sender);
   }
 
   // No chunk number, as no chunk was received

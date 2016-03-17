@@ -91,19 +91,20 @@ void SplitterNTS::SendMessageThread() {
   }
 }
 
-std::string&& SplitterNTS::GenerateId() {
+std::string SplitterNTS::GenerateId() {
   // Generate a random ID for a newly arriving peer
   // This has about the same number of combinations as a 32 bit integer
   static std::random_device rd;
   static std::mt19937 gen(rd());
-  static std::uniform_int_distribution<> distr(0, 15);
+  static std::uniform_int_distribution<> distr(0, 35);
 
   std::ostringstream str;
   for (int i = 0; i < CommonNTS::kPeerIdLength; i++) {
-    str << std::hex << distr(gen);
+    char c = (char) distr(gen);
+    str << (char)(c >= 10 ? c-10+'A' : c+'0');
   }
-  assert(str.str().size() == CommonNTS::kPeerIdLength); // TODO: remove line
-  return std::move(str.str());
+  std::string id = str.str();
+  return id;
 }
 
 void SplitterNTS::SendTheListOfPeers(
@@ -127,8 +128,8 @@ void SplitterNTS::SendTheListOfPeers(
   peer_serve_socket->send(buffer(msg_str.str()));
   // Send the monitor endpoints
   for (std::vector<ip::udp::endpoint>::iterator peer_iter =
-      this->peer_list_.begin();
-      peer_iter != this->peer_list_.begin() + this->monitor_number_;
+      this->peer_list_.begin(); peer_iter != this->peer_list_.end()
+      && peer_iter != this->peer_list_.begin() + this->monitor_number_;
       ++peer_iter) {
     msg_str.str(std::string());
     CommonNTS::Write<uint32_t>(msg_str,
@@ -329,7 +330,7 @@ void SplitterNTS::HandleAPeerArrival(
   this->SendConfiguration(serve_socket);
   this->SendTheListOfPeers(serve_socket);
   // Send the generated ID to peer
-  std::string peer_id = this->GenerateId();
+  std::string peer_id = "abcdejs";//this->GenerateId();
   LOG("Sending ID " << peer_id << " to peer " << new_peer);
   serve_socket->send(buffer(peer_id));
   if (this->peer_list_.size() < this->monitor_number_) {
@@ -401,6 +402,7 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
     this->extra_socket_->close();
   }
   this->extra_socket_.reset(new ip::udp::socket(this->io_service_));
+  this->extra_socket_->open(ip::udp::v4());
   this->extra_socket_->bind(ip::udp::endpoint(ip::udp::v4(), 0));
   // Do not block the thread forever:
   this->extra_socket_->set_option(socket_base::linger(true, 1));

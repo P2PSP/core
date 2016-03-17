@@ -116,7 +116,7 @@ void PeerNTS::SendHelloThread() {
         if (CommonNTS::Contains(this->hello_messages_, message_data)) {
           LOG("Removed message "
               << message_data.first.substr(0, CommonNTS::kPeerIdLength)
-              << " to " << message_data.second << "due to timeout");
+              << " to " << message_data.second << " due to timeout");
           this->hello_messages_.remove(message_data);
           this->hello_messages_times_.erase(message_data);
           this->hello_messages_ports_.erase(message_data);
@@ -188,6 +188,7 @@ void PeerNTS::DisconnectFromTheSplitter() {
   try {
     this->TryToDisconnectFromTheSplitter();
   } catch(const std::exception& e) {
+    ERROR(e.what());
     ERROR("Probably the splitter removed this peer due to timeout");
     this->player_alive_ = false;
     exit(1);
@@ -206,7 +207,8 @@ void PeerNTS::TryToDisconnectFromTheSplitter() {
   // to create working NAT entries and to determine the
   // source port allocation type of the NAT of this peer
   for (auto peer_iter = this->peer_list_.begin();
-      peer_iter < this->peer_list_.begin() + this->number_of_monitors_;
+      peer_iter != peer_list_.end() &&
+      peer_iter != this->peer_list_.begin() + this->number_of_monitors_;
       ++peer_iter) {
     this->SayHello(*peer_iter);
   }
@@ -257,7 +259,8 @@ void PeerNTS::TryToDisconnectFromTheSplitter() {
       this->SendMessage(std::make_pair(this->peer_id_ + 'N', this->splitter_));
       // Say hello to monitors again, to keep the NAT entry alive
       for (auto peer_iter = this->peer_list_.begin();
-          peer_iter < this->peer_list_.begin() + this->number_of_monitors_;
+          peer_iter != this->peer_list_.end() &&
+          peer_iter != this->peer_list_.begin() + this->number_of_monitors_;
           ++peer_iter) {
         this->SendMessage(std::make_pair(this->peer_id_ + 'N', *peer_iter));
       }

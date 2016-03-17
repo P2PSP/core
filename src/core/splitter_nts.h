@@ -92,7 +92,7 @@ class SplitterNTS : public SplitterDBS {
 
   virtual size_t ReceiveChunk(boost::asio::streambuf &chunk) override;
   virtual void SendMessageThread();
-  virtual std::string&& GenerateId();
+  virtual std::string GenerateId();
   virtual void SendTheListOfPeers(
       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   virtual void SendTheListOfPeers2(
