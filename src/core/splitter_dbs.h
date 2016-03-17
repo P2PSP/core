@@ -57,11 +57,12 @@ class SplitterDBS : public SplitterIMS {
     stream << endpoint;
     std::hash<std::string> hasher;
     return hasher(stream.str());
-  }; 
+  };
 
  public:
   SplitterDBS();
   ~SplitterDBS();
+  char GetMagicFlags();
   void SendMagicFlags(
       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   void SendTheListSize(

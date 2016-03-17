@@ -16,6 +16,7 @@ using namespace boost;
 
 SplitterSTRPE::SplitterSTRPE()
     : SplitterLRS(), logging_(kLogging), current_round_(kCurrentRound) {
+  magic_flags_ = Common::kSTRPE;
   LOG("STrPe");
 }
 

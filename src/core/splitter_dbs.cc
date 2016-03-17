@@ -33,6 +33,10 @@ SplitterDBS::SplitterDBS() : SplitterIMS(), losses_(0, &SplitterDBS::GetHash) {
 
 SplitterDBS::~SplitterDBS() {}
 
+char SplitterDBS::GetMagicFlags() {
+  return magic_flags_;
+}
+
 void SplitterDBS::SendMagicFlags(
     const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
   char message[1];
