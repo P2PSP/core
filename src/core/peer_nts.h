@@ -22,6 +22,7 @@
 #include <set>
 #include <vector>
 #include <mutex>
+#include <thread>
 #include <condition_variable>
 // TODO: other include files
 
@@ -39,6 +40,8 @@ class PeerNTS : public PeerDBS {
   // A list of peer_ids that contains the peers that were in the team when
   // starting incorporation and that are not connected yet
   std::list<std::string> initial_peer_list_;
+
+  std::thread send_hello_thread_;
 
   virtual void SayHello(const ip::udp::endpoint& peer,
       std::vector<uint16_t> additional_ports = {});

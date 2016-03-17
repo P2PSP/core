@@ -19,11 +19,15 @@
 
 namespace p2psp {
 
-class MonitorNTS : public PeerNTS, public MonitorDBS {
+class MonitorNTS : public PeerNTS {
  protected:
-  void DisconnectFromTheSplitter() override;
+  // These two are from MonitorDBS:
+  virtual void Complain(uint16_t);
+  virtual int FindNextChunk() override;
 
-  int ProcessMessage(const std::vector<char>& message_bytes,
+  virtual void DisconnectFromTheSplitter() override;
+
+  virtual int ProcessMessage(const std::vector<char>& message_bytes,
       const ip::udp::endpoint& sender) override;
 
  public:

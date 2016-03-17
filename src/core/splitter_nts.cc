@@ -29,18 +29,41 @@ SplitterNTS::SplitterNTS() : SplitterDBS() {
 
   // The thread regularly checks if (peers are waiting to be incorporated
   // for too long and removes them after a timeout
-  std::thread(&SplitterNTS::CheckTimeoutThread, this);
+  this->check_timeout_thread_ =
+      std::thread(&SplitterNTS::CheckTimeoutThread, this);
 
   // TODO: this->extra_socket_ = None
   // The thread listens to this->extra_socket_ and reports source ports
-  std::thread(&SplitterNTS::ListenExtraSocketThread, this);
+  this->listen_extra_socket_thread_ =
+      std::thread(&SplitterNTS::ListenExtraSocketThread, this);
 
-  std::thread(&SplitterNTS::SendMessageThread, this);
+  this->send_message_thread_ =
+      std::thread(&SplitterNTS::SendMessageThread, this);
 
   LOG("Initialized NTS");
 }
 
-SplitterNTS::~SplitterNTS() {}
+SplitterNTS::~SplitterNTS() {
+  if (this->check_timeout_thread_.joinable()) {
+    this->check_timeout_thread_.join();
+  }
+  if (this->listen_extra_socket_thread_.joinable()) {
+    this->listen_extra_socket_thread_.join();
+  }
+  if (this->send_message_thread_.joinable()) {
+    this->send_message_thread_.join();
+  }
+}
+
+void SplitterNTS::EnqueueMessage(unsigned int count, const message_t& message) {
+  {
+    std::unique_lock<std::mutex> lock(this->message_queue_mutex_);
+    for (unsigned int i = 0; i < count; i++) {
+      this->message_queue_.push(message);
+    }
+  }
+  this->message_queue_event_.notify_all();
+}
 
 size_t SplitterNTS::ReceiveChunk(boost::asio::streambuf &chunk) {
   size_t bytes_transferred = SplitterDBS::ReceiveChunk(chunk);
@@ -51,13 +74,20 @@ size_t SplitterNTS::ReceiveChunk(boost::asio::streambuf &chunk) {
 void SplitterNTS::SendMessageThread() {
   while (this->alive_) {
     // Wait for an enqueued message
-    message_t message_data = this->message_queue_.front();
+    message_t message_data;
+    {
+      std::unique_lock<std::mutex> lock(this->message_queue_mutex_);
+      while (this->message_queue_.empty()) {
+        this->message_queue_event_.wait(lock);
+      }
+      message_data = this->message_queue_.front();
+      this->message_queue_.pop();
+    }
     // Send the message
     this->team_socket_.send_to(buffer(message_data.first), message_data.second);
     // Wait for a chunk from source to avoid network congestion
     std::unique_lock<std::mutex> lock(chunk_received_mutex_);
     this->chunk_received_event_.wait(lock);
-    this->message_queue_.pop();
   }
 }
 
@@ -230,8 +260,8 @@ void SplitterNTS::ListenExtraSocketThread() {
   // allocated source port of incorporated peers behind SYMSP NATs
 
   // Wait until socket is created
-  // TODO: Check if is_open() works here
-  while (this->alive_ && !this->extra_socket_->is_open()) {
+  while (this->alive_
+      && (!this->extra_socket_ || !this->extra_socket_->is_open())) {
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 
@@ -366,11 +396,11 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
 
   // Recreate this->extra_socket_, listening to a random port
   // TODO: is the extra_socket recreated too often?
-  // TODO: if (this->extra_socket_ != None)
-  if (this->extra_socket_->is_open())
+  if (this->extra_socket_)
   {
     this->extra_socket_->close();
   }
+  this->extra_socket_.reset(new ip::udp::socket(this->io_service_));
   this->extra_socket_->bind(ip::udp::endpoint(ip::udp::v4(), 0));
   // Do not block the thread forever:
   this->extra_socket_->set_option(socket_base::linger(true, 1));
@@ -415,9 +445,7 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
 
     std::string message(msg_str.str());
     // Hopefully one of these packets arrives
-    this->message_queue_.push(std::make_pair(message, *peer_iter));
-    this->message_queue_.push(std::make_pair(message, *peer_iter));
-    this->message_queue_.push(std::make_pair(message, *peer_iter));
+    this->EnqueueMessage(3, std::make_pair(message, *peer_iter));
   }
 
   // Send packets to peers currently being incorporated
@@ -441,9 +469,7 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
     CommonNTS::Write<uint16_t>(msg_str, this->peer_list_.size());
     std::string message(msg_str.str());
     // Hopefully one of these packets arrives
-    this->message_queue_.push(std::make_pair(message, peer));
-    this->message_queue_.push(std::make_pair(message, peer));
-    this->message_queue_.push(std::make_pair(message, peer));
+    this->EnqueueMessage(3, std::make_pair(message, peer));
   }
 }
 
@@ -552,7 +578,7 @@ void SplitterNTS::ModerateTheTeam() {
       LOG("Received [hello, I'm " << peer_id << "] from " << sender);
 
       // Send acknowledge
-      this->message_queue_.push(std::make_pair(message, sender));
+      this->EnqueueMessage(1, std::make_pair(message, sender));
       if (!CommonNTS::Contains(this->arriving_peers_, peer_id)) {
         LOG("Peer ID " << peer_id << " is not an arriving peer");
         continue;
@@ -596,7 +622,7 @@ void SplitterNTS::ModerateTheTeam() {
       LOG("Received forwarded hello (ID " << peer_id << ") from " << sender);
 
       // Send acknowledge
-      this->message_queue_.push(std::make_pair(message, sender));
+      this->EnqueueMessage(1, std::make_pair(message, sender));
       if (!CommonNTS::Contains(this->arriving_peers_, peer_id)) {
         LOG("Peer ID " << peer_id << " is not an arriving peer");
         continue;
@@ -626,7 +652,7 @@ void SplitterNTS::ModerateTheTeam() {
       LOG("Received source port of peer " << peer_id << " from " << sender);
 
       // Send acknowledge
-      this->message_queue_.push(std::make_pair(message, sender));
+      this->EnqueueMessage(1, std::make_pair(message, sender));
 
       const ip::udp::endpoint* peer = nullptr;
       // TODO: use std::find or boost::multi_index to optimize this loop
@@ -654,7 +680,7 @@ void SplitterNTS::ModerateTheTeam() {
           CommonNTS::ReceiveString(msg_str, CommonNTS::kPeerIdLength);
 
       // Send acknowledge
-      this->message_queue_.push(std::make_pair(message, sender));
+      this->EnqueueMessage(1, std::make_pair(message, sender));
 
       if (!CommonNTS::Contains(this->incorporating_peers_, peer_id)) {
         // TODO: if (__debug__)
@@ -716,7 +742,7 @@ void SplitterNTS::ModerateTheTeam() {
       LOG("Received forwarded retry hello (ID " << peer_id << ')');
 
       // Send acknowledge
-      this->message_queue_.push(std::make_pair(message, sender));
+      this->EnqueueMessage(1, std::make_pair(message, sender));
       if (!CommonNTS::Contains(this->incorporating_peers_, peer_id)) {
         LOG("Peer ID " << peer_id << " is not an incorporating peer");
         continue;

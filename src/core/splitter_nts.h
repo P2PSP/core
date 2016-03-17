@@ -17,6 +17,7 @@
 #include <string>
 #include <queue>
 #include <mutex>
+#include <thread>
 #include <condition_variable>
 #include <boost/asio.hpp>
 #include <boost/unordered_map.hpp>
@@ -76,10 +77,18 @@ class SplitterNTS : public SplitterDBS {
   // in a dedicated thread instead of the main thread, with a delay between
   // each message to avoid network congestion.
   std::queue<message_t> message_queue_;
+  std::mutex message_queue_mutex_;
+  std::condition_variable message_queue_event_;
 
   // An event that is set for each chunk received by the source
   std::mutex chunk_received_mutex_;
   std::condition_variable chunk_received_event_;
+
+  std::thread check_timeout_thread_;
+  std::thread listen_extra_socket_thread_;
+  std::thread send_message_thread_;
+
+  virtual void EnqueueMessage(unsigned int count, const message_t& message);
 
   virtual size_t ReceiveChunk(boost::asio::streambuf &chunk) override;
   virtual void SendMessageThread();

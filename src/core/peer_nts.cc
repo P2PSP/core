@@ -22,9 +22,13 @@
 
 namespace p2psp {
 
-PeerNTS::PeerNTS(){};
+PeerNTS::PeerNTS(){}
 
-PeerNTS::~PeerNTS(){};
+PeerNTS::~PeerNTS(){
+  if (this->send_hello_thread_.joinable()) {
+    this->send_hello_thread_.join();
+  }
+}
 
 void PeerNTS::Init() { LOG("Initialized"); }
 
@@ -131,7 +135,7 @@ void PeerNTS::SendHelloThread() {
 void PeerNTS::StartSendHelloThread() {
   this->player_alive_ = true; // PeerIMS sets this variable in buffer_data()
   // Start the hello packet sending thread
-  std::thread(&PeerNTS::SendHelloThread, this);
+  this->send_hello_thread_ = std::thread(&PeerNTS::SendHelloThread, this);
 }
 
 void PeerNTS::ReceiveTheListOfPeers2() {

@@ -14,12 +14,30 @@
 
 namespace p2psp {
 
-MonitorNTS::MonitorNTS(){};
+MonitorNTS::MonitorNTS(){}
 
-MonitorNTS::~MonitorNTS(){};
+MonitorNTS::~MonitorNTS(){}
 
 void MonitorNTS::Init() { LOG("Initialized"); }
 
+void MonitorNTS::Complain(uint16_t chunk_number) {
+  std::vector<char> message(2);
+  std::memcpy(message.data(), &chunk_number, sizeof(uint16_t));
+
+  team_socket_.send_to(buffer(message), splitter_);
+
+  TRACE("lost chunk:" << std::to_string(chunk_number));
+};
+
+int MonitorNTS::FindNextChunk() {
+  uint16_t chunk_number = (played_chunk_ + 1) % Common::kMaxChunkNumber;
+
+  while (!chunks_[chunk_number % buffer_size_].received) {
+    Complain(chunk_number);
+    chunk_number = (chunk_number + 1) % Common::kMaxChunkNumber;
+  }
+  return chunk_number;
+}
 
 void MonitorNTS::DisconnectFromTheSplitter() {
   this->StartSendHelloThread();
@@ -31,7 +49,7 @@ void MonitorNTS::DisconnectFromTheSplitter() {
   // so this->initial_peer_list_ remains empty
 
   // Close the TCP socket
-  PeerNTS::DisconnectFromTheSplitter();
+  this->DisconnectFromTheSplitter();
 }
 
 int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
@@ -39,7 +57,7 @@ int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
   // Handle NTS messages; pass other messages to base class
   std::string message(message_bytes.data(), message_bytes.size());
 
-  if (sender != PeerNTS::splitter_ &&
+  if (sender != this->splitter_ &&
       (message.size() == CommonNTS::kPeerIdLength ||
        message.size() == CommonNTS::kPeerIdLength+1)) {
     // Hello message received from peer
@@ -49,7 +67,7 @@ int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
           << message.substr(0, CommonNTS::kPeerIdLength) << " from " << sender);
     }
     // Send acknowledge
-    PeerNTS::team_socket_.send_to(buffer(message), sender);
+    this->team_socket_.send_to(buffer(message), sender);
 
     // TODO: if __debug__:
     {
@@ -58,9 +76,9 @@ int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
     }
     std::ostringstream msg_str(message);
     CommonNTS::Write(msg_str, sender.port());
-    message_t message_data = std::make_pair(msg_str.str(), PeerNTS::splitter_);
+    message_t message_data = std::make_pair(msg_str.str(), this->splitter_);
     this->SendMessage(message_data);
-  } else if (sender == PeerNTS::splitter_ &&
+  } else if (sender == this->splitter_ &&
       message.size() == CommonNTS::kPeerIdLength + 6) {
     // [say hello to (X)] received from splitter
     std::istringstream msg_str(message);
@@ -74,13 +92,13 @@ int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
       LOG("NTS: Received peer ID " << peer_id << ' ' << peer);
     }
     // Sending hello not needed as monitor and peer already communicated
-    if (!CommonNTS::Contains(PeerNTS::peer_list_, peer)) {
+    if (!CommonNTS::Contains(this->peer_list_, peer)) {
       LOG("NTS: Appending peer " << peer_id << ' ' << peer << " to list");
-      PeerNTS::peer_list_.push_back(peer);
-      PeerNTS::debt_[peer] = 0;
+      this->peer_list_.push_back(peer);
+      this->debt_[peer] = 0;
     }
   } else {
-    return PeerNTS::ProcessMessage(message_bytes, sender);
+    return this->ProcessMessage(message_bytes, sender);
   }
 
   // No chunk number, as no chunk was received
