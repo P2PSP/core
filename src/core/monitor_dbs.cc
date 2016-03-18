@@ -31,8 +31,8 @@ void MonitorDBS::Init() { TRACE("Initialized"); }
 
 void MonitorDBS::Complain(uint16_t chunk_number) {
   std::vector<char> message(2);
-  // TODO: check endianness conversion!
-  std::memcpy(message.data(), &chunk_number, sizeof(uint16_t));
+  uint16_t chunk_number_network = htons(chunk_number);
+  std::memcpy(message.data(), &chunk_number_network, sizeof(uint16_t));
 
   team_socket_.send_to(buffer(message), splitter_);
 

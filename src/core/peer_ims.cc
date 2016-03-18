@@ -311,7 +311,8 @@ void PeerIMS::ReceiveTheNextMessage(std::vector<char> &message,
         << team_socket_.local_endpoint().address().to_string() << ","
         << std::to_string(team_socket_.local_endpoint().port()) << ")");
 
-  team_socket_.receive_from(buffer(message), sender);
+  size_t bytes_transferred = team_socket_.receive_from(buffer(message), sender);
+  message.resize(bytes_transferred);
   recvfrom_counter_++;
 
   TRACE("Received a message from ("
@@ -319,7 +320,7 @@ void PeerIMS::ReceiveTheNextMessage(std::vector<char> &message,
         << ") of length " << std::to_string(message.size()));
 
   if (message.size() < 10) {
-    TRACE("Message content =" << std::string(message.data()));
+    TRACE("Message content = " << std::string(message.data()));
   }
 }
 
