@@ -117,9 +117,10 @@ void PeerNTS::SendHelloThread() {
           LOG("Removed message "
               << message_data.first.substr(0, CommonNTS::kPeerIdLength)
               << " to " << message_data.second << " due to timeout");
-          this->hello_messages_.remove(message_data);
+          // TODO: Check if message_data as a reference is ok here
           this->hello_messages_times_.erase(message_data);
           this->hello_messages_ports_.erase(message_data);
+          this->hello_messages_.remove(message_data);
         }
       }
     }
@@ -362,7 +363,7 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
 
     // Endpoint to splitter
     ip::udp::endpoint peer(IP_addr, source_port_to_splitter);
-    LOG("CommonNTS::Received [send hello to " << peer_id << ' ' << peer << ']');
+    LOG("Received [send hello to " << peer_id << ' ' << peer << ']');
     LOG("port_diff = " << port_diff);
     LOG("peer_number = " << peer_number);
     // Here the port prediction happens:
@@ -384,7 +385,7 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
 
     // Endpoint to splitter
     ip::udp::endpoint peer(IP_addr, source_port_to_splitter);
-    LOG("CommonNTS::Received [send hello to " << peer_id << ' ' << peer << ']');
+    LOG("Received [send hello to " << peer_id << ' ' << peer << ']');
     LOG("port_diff = " << port_diff);
     LOG("peer_number = " << peer_number);
     // Here the port prediction happens:
@@ -410,24 +411,26 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
             && sender.address() == hello_data.second.address()
             && CommonNTS::Contains(this->hello_messages_ports_[hello_data],
             sender.port())) {
-          LOG("CommonNTS::Received acknowledge from " << sender);
-          this->hello_messages_.remove(hello_data);
+          LOG("Received acknowledge from " << sender);
+          // TODO: Check if message_data as a reference is ok here
           this->hello_messages_times_.erase(hello_data);
           this->hello_messages_ports_.erase(hello_data);
+          this->hello_messages_.remove(hello_data);
           // No chunk number, as no chunk was received
           return -1;
         }
       }
     }
-    ERROR("NTS: CommonNTS::Received acknowledge from unknown host " << sender);
+    ERROR("Received acknowledge " << message << " from unknown host " << sender);
   } else if (message.size() == CommonNTS::kPeerIdLength) {
     std::string peer_id =
         CommonNTS::ReceiveString(msg_str, CommonNTS::kPeerIdLength);
-    LOG("CommonNTS::Received [hello (ID " << message << ")] from " << sender);
+    LOG("Received [hello (ID " << message << ")] from " << sender);
     // Send acknowledge
     this->team_socket_.send_to(buffer(message), sender);
 
-    std::ostringstream msg_str2(message);
+    std::ostringstream msg_str2;
+    msg_str2 << message;
     if (!CommonNTS::Contains(this->peer_list_, sender)) {
       LOG("Appending peer " << peer_id << ' ' << sender << " to list");
       this->peer_list_.push_back(sender);
@@ -442,7 +445,7 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
       }
     }
   } else if (message == "H") {
-    LOG("CommonNTS::Received [DBS hello] from " << sender);
+    LOG("Received [DBS hello] from " << sender);
     // Ignore hello messages that are sent by PeerDBS instances in
     // CommonNTS::ReceiveTheListOfPeers() before a PeerNTS instance is created
   } else if (sender != this->splitter_

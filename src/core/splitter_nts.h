@@ -77,6 +77,7 @@ class SplitterNTS : public SplitterDBS {
   // in a dedicated thread instead of the main thread, with a delay between
   // each message to avoid network congestion.
   std::queue<message_t> message_queue_;
+  // TODO: Use chunk_received_mutex_ and message_queue_event_ here as well?
   std::mutex message_queue_mutex_;
   std::condition_variable message_queue_event_;
 

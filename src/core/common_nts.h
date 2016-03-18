@@ -69,16 +69,16 @@ class CommonNTS {
   }
 
   template <class Socket>
-  static std::string&& ReceiveString(Socket& socket, size_t length) {
+  static std::string ReceiveString(Socket& socket, size_t length) {
     std::vector<char> message(length);
     read(socket, boost::asio::buffer(message));
-    return std::move(std::string(message.data(), length));
+    return std::string(message.data(), length);
   }
 
-  static std::string&& ReceiveString(std::istringstream& str, size_t length) {
+  static std::string ReceiveString(std::istringstream& str, size_t length) {
     std::vector<char> message(length);
     str.read(message.data(), length);
-    return std::move(std::string(message.data(), length));
+    return std::string(message.data(), length);
   }
 
   static uint16_t NetworkToHost(uint16_t t) {

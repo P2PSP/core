@@ -76,7 +76,8 @@ int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
       LOG("NTS: Forwarding ID " << message.substr(0, CommonNTS::kPeerIdLength)
           << " and source port " << sender.port() << " to splitter");
     }
-    std::ostringstream msg_str(message);
+    std::ostringstream msg_str;
+    msg_str << message;
     CommonNTS::Write(msg_str, sender.port());
     message_t message_data = std::make_pair(msg_str.str(), this->splitter_);
     this->SendMessage(message_data);

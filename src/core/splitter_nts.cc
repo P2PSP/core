@@ -165,7 +165,8 @@ void SplitterNTS::SendTheListOfPeers2(
       peer_iter != this->peer_list_.end(); ++peer_iter) {
     // Also send the port step of the existing peer, in case
     // it is behind a sequentially allocating NAT
-    msg_str.str(this->ids_[*peer_iter]);
+    msg_str.str(std::string());
+    msg_str << this->ids_[*peer_iter];
     CommonNTS::Write<uint32_t>(msg_str,
         (uint32_t)peer_iter->address().to_v4().to_ulong());
     CommonNTS::Write<uint16_t>(msg_str, this->last_source_port_[*peer_iter]);
@@ -184,7 +185,8 @@ void SplitterNTS::SendTheListOfPeers2(
       LOG("Sending peer " << peer_id << " to " << peer);
     }
     const ip::udp::endpoint& peer = peer_iter.second.peer_;
-    msg_str.str(peer_id);
+    msg_str.str(std::string());
+    msg_str << peer_id;
     CommonNTS::Write<uint32_t>(msg_str,
         (uint32_t)peer.address().to_v4().to_ulong());
     CommonNTS::Write<uint16_t>(msg_str, this->last_source_port_[peer]);
@@ -281,7 +283,7 @@ void SplitterNTS::ListenExtraSocketThread() {
       // Ignore timeout
       // continue;
     } catch (const std::exception& e) {
-      LOG("Unexpected error: " << e.what());
+      ERROR("Unexpected error: " << e.what());
       continue;
     }
 
@@ -330,7 +332,7 @@ void SplitterNTS::HandleAPeerArrival(
   this->SendConfiguration(serve_socket);
   this->SendTheListOfPeers(serve_socket);
   // Send the generated ID to peer
-  std::string peer_id = "abcdejs";//this->GenerateId();
+  std::string peer_id = this->GenerateId();
   LOG("Sending ID " << peer_id << " to peer " << new_peer);
   serve_socket->send(buffer(peer_id));
   if (this->peer_list_.size() < this->monitor_number_) {
@@ -368,7 +370,7 @@ void SplitterNTS::IncorporatePeer(const std::string& peer_id) {
       // Send the endpoints of the incorporated peers to the new peer
       this->SendTheListOfPeers2(peer_info.serve_socket_, new_peer);
     } catch (const std::exception& e) {
-      LOG(e.what());
+      ERROR(e.what());
     }
   }
 
@@ -421,8 +423,9 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
   // Send packets to all peers;
   unsigned int peer_number = 0;
   for (auto peer_iter = this->peer_list_.begin();
-      peer_iter != this->peer_list_.end(); ++peer_iter, ++peer_number_) {
-    std::ostringstream msg_str(peer_id);
+      peer_iter != this->peer_list_.end(); ++peer_iter, ++peer_number) {
+    std::ostringstream msg_str;
+    msg_str << peer_id;
     if (peer_number < this->monitor_number_) {
       // Send only the endpoint of the peer to the monitor,
       // as the arriving peer and the monitor already communicated
@@ -445,9 +448,8 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
       }
     }
 
-    std::string message(msg_str.str());
     // Hopefully one of these packets arrives
-    this->EnqueueMessage(3, std::make_pair(message, *peer_iter));
+    this->EnqueueMessage(3, std::make_pair(msg_str.str(), *peer_iter));
   }
 
   // Send packets to peers currently being incorporated
@@ -462,16 +464,16 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
       LOG("Sending peer " << new_peer << " to " << inc_peer_id);
     }
     const ip::udp::endpoint& peer = peer_iter.second.peer_;
-    std::ostringstream msg_str(peer_id);
+    std::ostringstream msg_str;
+    msg_str << peer_id;
     CommonNTS::Write<uint32_t>(msg_str,
         (uint32_t)new_peer.address().to_v4().to_ulong());
     CommonNTS::Write<uint16_t>(msg_str, min_known_source_port);
     CommonNTS::Write<uint16_t>(msg_str, this->port_steps_[new_peer]);
     // Send the length of the peer_list as peer_number
     CommonNTS::Write<uint16_t>(msg_str, this->peer_list_.size());
-    std::string message(msg_str.str());
     // Hopefully one of these packets arrives
-    this->EnqueueMessage(3, std::make_pair(message, peer));
+    this->EnqueueMessage(3, std::make_pair(msg_str.str(), peer));
   }
 }
 
@@ -501,7 +503,7 @@ void SplitterNTS::RetryToIncorporatePeer(const std::string& peer_id) {
   try {
     this->SendTheListOfPeers2(peer_info.serve_socket_, new_peer);
   } catch (const std::exception& e) {
-    LOG(e.what());
+    ERROR(e.what());
   }
 }
 
@@ -535,27 +537,29 @@ void SplitterNTS::RemovePeer(const ip::udp::endpoint& peer) {
     this->port_steps_.erase(peer);
     this->last_source_port_.erase(peer);
   } catch (const std::exception& e) {
+    TRACE(e.what());
     // ignore
   }
 }
 
 void SplitterNTS::ModerateTheTeam() {
-  std::vector<char> message_bytes(2048);
-  ip::udp::endpoint sender;
-  std::string message;
-
   while (this->alive_) {
+    // TODO: Add a constant max_message_size_
+    std::vector<char> message_bytes(this->chunk_size_ + 2);
+    ip::udp::endpoint sender;
+    std::string message;
+
     try {
       // Allow for long messages
       size_t bytes_transferred = this->ReceiveMessage(message_bytes, sender);
+      LOG("Message length = " << bytes_transferred);
       message_bytes.resize(bytes_transferred);
       message = std::string(message_bytes.data(), bytes_transferred);
     } catch (const std::exception& e) {
-      LOG("Unexpected error: " << e.what());
+      ERROR("Unexpected error: " << e.what());
       continue;
     }
 
-    LOG("Message length = " << message.size());
     std::istringstream msg_str(message);
 
     if (message.size() == 2) {
