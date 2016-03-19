@@ -65,20 +65,20 @@ int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
     // Hello message received from peer
     // TODO: if __debug__:
     {
-      LOG("NTS: Received hello (ID "
-          << message.substr(0, CommonNTS::kPeerIdLength) << " from " << sender);
+      LOG("Received hello (ID "
+          << message.substr(0, CommonNTS::kPeerIdLength) << ") from " << sender);
     }
     // Send acknowledge
     this->team_socket_.send_to(buffer(message), sender);
 
     // TODO: if __debug__:
     {
-      LOG("NTS: Forwarding ID " << message.substr(0, CommonNTS::kPeerIdLength)
+      LOG("Forwarding ID " << message.substr(0, CommonNTS::kPeerIdLength)
           << " and source port " << sender.port() << " to splitter");
     }
     std::ostringstream msg_str;
     msg_str << message;
-    CommonNTS::Write(msg_str, sender.port());
+    CommonNTS::Write<uint16_t>(msg_str, (uint16_t) sender.port());
     message_t message_data = std::make_pair(msg_str.str(), this->splitter_);
     this->SendMessage(message_data);
   } else if (sender == this->splitter_ &&
@@ -92,11 +92,11 @@ int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
     ip::udp::endpoint peer(IP_addr, port);
     // TODO: if __debug__:
     {
-      LOG("NTS: Received peer ID " << peer_id << ' ' << peer);
+      LOG("Received peer ID " << peer_id << ' ' << peer);
     }
     // Sending hello not needed as monitor and peer already communicated
     if (!CommonNTS::Contains(this->peer_list_, peer)) {
-      LOG("NTS: Appending peer " << peer_id << ' ' << peer << " to list");
+      LOG("Appending peer " << peer_id << ' ' << peer << " to list");
       this->peer_list_.push_back(peer);
       this->debt_[peer] = 0;
     }

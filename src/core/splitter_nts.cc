@@ -635,7 +635,6 @@ void SplitterNTS::ModerateTheTeam() {
       }
       ArrivingPeerInfo& peer_info = this->arriving_peers_[peer_id];
 
-      std::istringstream msg_str(message);
       uint16_t source_port_to_monitor = CommonNTS::Receive<uint16_t>(msg_str);
 
       // Get monitor number
