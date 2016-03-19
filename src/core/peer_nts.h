@@ -53,11 +53,11 @@ class PeerNTS : public PeerDBS {
   virtual void DisconnectFromTheSplitter() override;
   virtual void TryToDisconnectFromTheSplitter();
 
-  virtual std::set<uint16_t>&& GetFactors(uint16_t n);
+  virtual std::set<uint16_t> GetFactors(uint16_t n);
   virtual uint16_t CountCombinations(const std::set<uint16_t>& factors);
-  virtual std::set<uint16_t>&& GetProbablePortDiffs(uint16_t port_diff,
+  virtual std::set<uint16_t> GetProbablePortDiffs(uint16_t port_diff,
       uint16_t peer_number);
-  virtual std::vector<uint16_t>&& GetProbableSourcePorts(
+  virtual std::vector<uint16_t> GetProbableSourcePorts(
       uint16_t source_port_to_splitter, uint16_t port_diff,
       uint16_t peer_number);
 

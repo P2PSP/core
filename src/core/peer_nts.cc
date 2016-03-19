@@ -280,14 +280,15 @@ void PeerNTS::TryToDisconnectFromTheSplitter() {
   LOG("Incorporation successful");
 }
 
-std::set<uint16_t>&& PeerNTS::GetFactors(uint16_t n) {
+std::set<uint16_t> PeerNTS::GetFactors(uint16_t n) {
   std::set<uint16_t> factors;
   for (int i = (int)sqrtf(n); i>=1; i--) {
     if (n%i == 0) {
-      factors.insert(n);
+      factors.insert(i);
+      factors.insert(n/i);
     }
   }
-  return std::move(factors);
+  return factors;
 }
 
 uint16_t PeerNTS::CountCombinations(const std::set<uint16_t>& factors) {
@@ -300,7 +301,7 @@ uint16_t PeerNTS::CountCombinations(const std::set<uint16_t>& factors) {
   return std::accumulate(factors.begin(), factors.end(), 0);
 }
 
-std::set<uint16_t>&& PeerNTS::GetProbablePortDiffs(uint16_t port_diff,
+std::set<uint16_t> PeerNTS::GetProbablePortDiffs(uint16_t port_diff,
     uint16_t peer_number) {
   // The actual port prediction happens here:
   // port_diff is the measured source port difference so the NAT could have
@@ -319,10 +320,10 @@ std::set<uint16_t>&& PeerNTS::GetProbablePortDiffs(uint16_t port_diff,
       port_diffs.insert(port_step * (peer_number + skips));
     }
   }
-  return std::move(port_diffs);
+  return port_diffs;
 }
 
-std::vector<uint16_t>&& PeerNTS::GetProbableSourcePorts(
+std::vector<uint16_t> PeerNTS::GetProbableSourcePorts(
     uint16_t source_port_to_splitter, uint16_t port_diff,
     uint16_t peer_number) {
   // Predict probable source ports that the arriving peer will use
@@ -331,7 +332,7 @@ std::vector<uint16_t>&& PeerNTS::GetProbableSourcePorts(
   std::vector<uint16_t> probable_source_ports;
   if (port_diff <= 0) {
     // Constant source port (Cone NAT)
-    return std::move(probable_source_ports);
+    return probable_source_ports;
   }
 
   // Port prediction:
@@ -342,7 +343,7 @@ std::vector<uint16_t>&& PeerNTS::GetProbableSourcePorts(
           source_port_to_splitter + probable_port_diff);
     }
   }
-  return std::move(probable_source_ports);
+  return probable_source_ports;
 }
 
 int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
@@ -369,6 +370,8 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
     // Here the port prediction happens:
     std::vector<uint16_t> additional_ports = this->GetProbableSourcePorts(
         source_port_to_splitter, port_diff, peer_number);
+    LOG("Probable source ports: " << source_port_to_splitter << " and "
+        << CommonNTS::Join(additional_ports, ", "));
     this->SayHello(peer, additional_ports);
     // Directly start packet sending
     this->hello_messages_event_.notify_all();
@@ -391,6 +394,8 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
     // Here the port prediction happens:
     std::vector<uint16_t> additional_ports = this->GetProbableSourcePorts(
         source_port_to_splitter, port_diff, peer_number);
+    LOG("Probable source ports: " << source_port_to_splitter << " and "
+        << CommonNTS::Join(additional_ports, ", "));
     this->SayHello(peer, additional_ports);
     // Send to extra splitter port to determine currently allocated
     // source port
