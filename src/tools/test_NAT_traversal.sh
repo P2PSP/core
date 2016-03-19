@@ -3,12 +3,12 @@
 # Configuration
 nat_configs="fcn rcn prcn sympp symsp symrp"
 user="ladmin"
-dir="p2psp/src"
+dir="p2psp/bin"
 source_filename="Big_Buck_Bunny_small.ogv"
 # As local source address you have to specify the local IP address of the host
 # that is reachable by the virtual machines
 local_source_addr=192.168.57.1
-sequential_runs=5
+sequential_runs=1
 parallel_runs=10
 testruns=$((sequential_runs*parallel_runs))
 local_source_port=7000
@@ -28,7 +28,8 @@ nat2_pub="192.168.57.5"
 function stop_processes() {
     set +e
     for host in $splitter $pc1 $pc2; do
-        ssh "$user@$host" "pkill -f 'python3 -u $dir'" 2>/dev/null
+        ssh "$user@$host" "pkill -f '$dir/peer'" 2>/dev/null
+        ssh "$user@$host" "pkill -f '$dir/splitter'" 2>/dev/null
     done
     killall vlc 2>/dev/null
     killall netcat 2>/dev/null
@@ -41,12 +42,12 @@ trap stop_processes EXIT
 set -e
 
 # Get P2PSP configuration from code
-splitter_class="$(ssh $user@$splitter cat $dir/splitter.py \
-    | sed -n "s/.* splitter = \(Splitter_...\)(.*/\1/p" | tail -n1)"
-monitor_class="$(ssh $user@$pc1 cat $dir/peer.py \
-    | sed -n "s/.* peer = \(Monitor_...\)(.*/\1/p" | tail -n1)"
-peer_class="$(ssh $user@$pc2 cat $dir/peer.py \
-    | sed -n "s/.* peer = \(Peer_...\)(.*/\1/p" | tail -n1)"
+splitter_class="$(ssh $user@$splitter cat $dir/../src/splitter.cc \
+    | sed -n "s/.*new p2psp::\(Splitter[^(]*\)().*/\1/p" | tail -n1)"
+monitor_class="$(ssh $user@$pc1 cat $dir/../src/core/peer_core.cc \
+    | sed -n "s/.*peer.reset(new p2psp::\(Monitor[^(]*\)());.*/\1/p" | tail -n1)"
+peer_class="$(ssh $user@$pc1 cat $dir/../src/core/peer_core.cc \
+    | sed -n "s/.*peer.reset(new p2psp::\(Peer[^(]*\)());.*/\1/p" | tail -n1)"
 branch="$(ssh $user@$pc1 cd $dir \; git rev-parse --abbrev-ref HEAD)"
 commit="$(ssh $user@$pc1 cd $dir \; git rev-parse --short HEAD)"
 configuration="$splitter_class, $monitor_class, $peer_class (branch $branch, commit $commit)"
@@ -83,15 +84,18 @@ $nat1_config "
             # parameters: splitter_port, peer_port, player_port
 
             # Run splitter
-            ssh "$user@$splitter" python3 -u "$dir/splitter.py" --NTS --source_addr "$local_source_addr" \
+            ssh "$user@$splitter" unbuffer "$dir/splitter" --NTS --source_addr "$local_source_addr" \
                 --source_port "$local_source_port" --channel "$source_filename" --port "$splitter_port" >/dev/null &
 
             # Run monitor on same host as splitter
-            peer_cmd="python3 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
+            peer_cmd="unbuffer $dir/peer --splitter_addr '$splitter' --player_port '$3' \
                 --splitter_port '$1' --port '$2' | sed 's_[^m]*m__g'"
-            peer_cmd_symsp="python3 -u $dir/peer.py --splitter_addr '$splitter' --player_port '$3' \
+            peer_cmd_symsp="unbuffer $dir/peer --splitter_addr '$splitter' --player_port '$3' \
                 --splitter_port '$1' --port '$2' --port_step 1 | sed 's_[^m]*m__g'"
-            ssh "$user@$splitter" "$peer_cmd" >/dev/null &
+            # TODO: --monitor should not be needed as soon as automatic SoR detection is implemented
+            monitor_cmd="unbuffer $dir/peer --splitter_addr '$splitter' --player_port '$3' \
+                --splitter_port '$1' --port '$2' --monitor | sed 's_[^m]*m__g'"
+            ssh "$user@$splitter" "$monitor_cmd" >/dev/null &
 
             # Run peers
             if [ "$nat1_config" == "symsp" ]; then
@@ -108,9 +112,9 @@ $nat1_config "
 
             # Run players
             netcat "$splitter" "$3" 2>/dev/null >/dev/null &
-            sleep 1
+            sleep 2
             netcat "$pc1" "$3" 2>/dev/null >/dev/null &
-            sleep 1
+            sleep 2
             netcat "$pc2" "$3" 2>/dev/null >/dev/null &
 
             # Get outputs; the exit value is determined by "grep" and will be "0"
