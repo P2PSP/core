@@ -58,6 +58,9 @@ class CommonNTS {
 
   template <class Container>
   static std::string Join(const Container& container, std::string delimiter) {
+    if (container.size() == 0) {
+      return std::string();
+    }
     std::ostringstream str;
     auto iter = container.begin();
     str << *iter;
