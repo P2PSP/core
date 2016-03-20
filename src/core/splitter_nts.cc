@@ -253,6 +253,7 @@ void SplitterNTS::CheckTimeoutThread() {
   while (this->alive_) {
     std::this_thread::sleep_for(CommonNTS::kMaxPeerArrivingTime);
     // Check timeouts
+    std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
     this->CheckArrivingPeerTime();
     this->CheckIncorporatingPeerTime();
   }
@@ -335,6 +336,7 @@ void SplitterNTS::HandleAPeerArrival(
   std::string peer_id = this->GenerateId();
   LOG("Sending ID " << peer_id << " to peer " << new_peer);
   serve_socket->send(buffer(peer_id));
+  std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
   if (this->peer_list_.size() < this->monitor_number_) {
     // Directly incorporate the monitor peer into the team.
     // The source ports are all set to the same, as the monitor peers
@@ -385,7 +387,8 @@ void SplitterNTS::IncorporatePeer(const std::string& peer_id) {
   // Insert the peer into the list
   this->ids_[new_peer] = peer_id;
   // The peer is in the team, but is not connected to all peers yet,
-  // so add to the list
+  // so add to the list.
+  // arriving_incorporating_peers_mutex_ is already locked in ProcessMessage()
   this->incorporating_peers_[peer_id] = IncorporatingPeerInfo{new_peer,
       std::chrono::steady_clock::now(), 0,
       std::vector<uint16_t>(this->monitor_number_, 0), peer_info.serve_socket_};
@@ -479,6 +482,7 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
 
 void SplitterNTS::RetryToIncorporatePeer(const std::string& peer_id) {
   // Update source port information
+  // arriving_incorporating_peers_mutex_ is already locked in ProcessMessage()
   const IncorporatingPeerInfo& peer_info = this->incorporating_peers_[peer_id];
   const ip::udp::endpoint& peer = peer_info.peer_;
   this->UpdatePortStep(peer, peer_info.source_port_to_splitter_);
@@ -585,6 +589,8 @@ void SplitterNTS::ModerateTheTeam() {
 
       // Send acknowledge
       this->EnqueueMessage(1, std::make_pair(message, sender));
+
+      std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
       if (!CommonNTS::Contains(this->arriving_peers_, peer_id)) {
         LOG("Peer ID " << peer_id << " is not an arriving peer");
         continue;
@@ -629,6 +635,8 @@ void SplitterNTS::ModerateTheTeam() {
 
       // Send acknowledge
       this->EnqueueMessage(1, std::make_pair(message, sender));
+
+      std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
       if (!CommonNTS::Contains(this->arriving_peers_, peer_id)) {
         LOG("Peer ID " << peer_id << " is not an arriving peer");
         continue;
@@ -687,6 +695,7 @@ void SplitterNTS::ModerateTheTeam() {
       // Send acknowledge
       this->EnqueueMessage(1, std::make_pair(message, sender));
 
+      std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
       if (!CommonNTS::Contains(this->incorporating_peers_, peer_id)) {
         // TODO: if (__debug__)
         {
@@ -748,6 +757,7 @@ void SplitterNTS::ModerateTheTeam() {
 
       // Send acknowledge
       this->EnqueueMessage(1, std::make_pair(message, sender));
+      std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
       if (!CommonNTS::Contains(this->incorporating_peers_, peer_id)) {
         LOG("Peer ID " << peer_id << " is not an incorporating peer");
         continue;

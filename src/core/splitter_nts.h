@@ -68,6 +68,8 @@ class SplitterNTS : public SplitterDBS {
   // The source port values are set when the peer retries incorporation.
   std::map<std::string, IncorporatingPeerInfo> incorporating_peers_;
 
+  std::mutex arriving_incorporating_peers_mutex_;
+
   // This socket is closed and created again when a new peer arrives,
   // and all incorporated peers with port_step != 0 send a message to this
   // socket to determine the currently allocated source port
