@@ -25,7 +25,7 @@ void MonitorNTS::Complain(uint16_t chunk_number) {
   std::ostringstream msg_str;
   CommonNTS::Write<uint16_t>(msg_str, chunk_number);
 
-  team_socket_.send_to(buffer(msg_str.str()), splitter_);
+  this->SendMessage(msg_str.str(), splitter_);
 
   TRACE("lost chunk:" << std::to_string(chunk_number));
 };
@@ -69,7 +69,7 @@ int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
           << message.substr(0, CommonNTS::kPeerIdLength) << ") from " << sender);
     }
     // Send acknowledge
-    this->team_socket_.send_to(buffer(message), sender);
+    this->SendMessage(message, sender);
 
     // TODO: if __debug__:
     {

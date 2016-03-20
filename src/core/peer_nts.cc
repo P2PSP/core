@@ -103,8 +103,7 @@ void PeerNTS::SendHelloThread() {
         }
       }
       for (uint16_t port : hello_messages_ports[message_data]) {
-        this->team_socket_.send_to(buffer(message),
-            ip::udp::endpoint(peer.address(), port));
+        this->SendMessage(message, ip::udp::endpoint(peer.address(), port));
         // Avoid network congestion
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
       }
@@ -131,6 +130,11 @@ void PeerNTS::SendHelloThread() {
         std::chrono::steady_clock::now() + CommonNTS::kHelloPacketTiming);
 
   }
+}
+
+void PeerNTS::SendMessage(std::string message,
+    boost::asio::ip::udp::endpoint endpoint) {
+  this->team_socket_.send_to(buffer(message), endpoint);
 }
 
 void PeerNTS::StartSendHelloThread() {
@@ -370,8 +374,8 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
     // Here the port prediction happens:
     std::vector<uint16_t> additional_ports = this->GetProbableSourcePorts(
         source_port_to_splitter, port_diff, peer_number);
-    LOG("Probable source ports: " << source_port_to_splitter << " and "
-        << CommonNTS::Join(additional_ports, ", "));
+    LOG("Probable source ports: " << source_port_to_splitter << " and ["
+        << CommonNTS::Join(additional_ports, ", ") << ']');
     this->SayHello(peer, additional_ports);
     // Directly start packet sending
     this->hello_messages_event_.notify_all();
@@ -394,8 +398,8 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
     // Here the port prediction happens:
     std::vector<uint16_t> additional_ports = this->GetProbableSourcePorts(
         source_port_to_splitter, port_diff, peer_number);
-    LOG("Probable source ports: " << source_port_to_splitter << " and "
-        << CommonNTS::Join(additional_ports, ", "));
+    LOG("Probable source ports: " << source_port_to_splitter << " and ["
+        << CommonNTS::Join(additional_ports, ", ") << ']');
     this->SayHello(peer, additional_ports);
     // Send to extra splitter port to determine currently allocated
     // source port
@@ -432,7 +436,7 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
         CommonNTS::ReceiveString(msg_str, CommonNTS::kPeerIdLength);
     LOG("Received [hello (ID " << message << ")] from " << sender);
     // Send acknowledge
-    this->team_socket_.send_to(buffer(message), sender);
+    this->SendMessage(message, sender);
 
     std::ostringstream msg_str2;
     msg_str2 << message;

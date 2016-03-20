@@ -48,6 +48,8 @@ class PeerNTS : public PeerDBS {
   virtual void SendMessage(const message_t& message_data);
   virtual void ReceiveId();
   virtual void SendHelloThread();
+  virtual void SendMessage(std::string message,
+      boost::asio::ip::udp::endpoint endpoint);
   virtual void StartSendHelloThread();
   virtual void ReceiveTheListOfPeers2();
   virtual void DisconnectFromTheSplitter() override;
