@@ -148,6 +148,13 @@ class Peer():
             peer.receive_the_number_of_peers()
             _print_("Number of peers in the team (excluding me) =", peer.number_of_peers)
             _print_("Am I a monitor peer? =", peer.am_i_a_monitor())
+
+            if args.port_step:
+                Symsp_Peer.PORT_STEP = int(args.port_step)
+                print('PORT_STEP =', Symsp_Peer.PORT_STEP)
+                if int(args.port_step) != 0:
+                    peer = Symsp_Peer(peer)
+
             peer.listen_to_the_team()
             peer.receive_the_list_of_peers()
             _print_("List of peers received")
@@ -186,12 +193,6 @@ class Peer():
                         if int(args.chunk_loss_period) != 0:
                             peer = Lossy_Peer(peer)
                             _print_("Lost of chunks enabled")
-
-            if args.port_step:
-                Symsp_Peer.PORT_STEP = int(args.port_step)
-                print('PORT_STEP =', Symsp_Peer.PORT_STEP)
-                if int(args.port_step) != 0:
-                    peer = Symsp_Peer(peer)
 
             if args.strpeds:
                 peer = Peer_StrpeDs(peer)
