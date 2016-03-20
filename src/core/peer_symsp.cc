@@ -30,13 +30,8 @@ void PeerSYMSP::SendMessage(std::string message,
     if (!CommonNTS::Contains(this->endpoints_, endpoint)) {
       this->endpoints_.push_back(endpoint);
       for (unsigned int i = 0; i < this->port_step_; i++) {
-        ip::udp::endpoint local_endpoint(ip::address_v4::any(),
-            this->splitter_socket_.local_endpoint().port());
         ip::udp::socket socket(this->io_service_);
-        socket.open(local_endpoint.protocol());
-        //~ socket.set_option(ip::udp::socket::reuse_address(true));
-        //~ socket.bind(local_endpoint);
-        //~ socket.bind(ip::udp::endpoint(ip::udp::v4(), this->team_socket_.local_endpoint().port()+i));
+        socket.open(ip::udp::v4());
         socket.send_to(buffer(std::string()), endpoint);
         socket.close();
       }
