@@ -32,9 +32,9 @@ trap stop_processes EXIT
 
 ssh $user@$splitter python3 -u "$dir/splitter.py" --source_addr "$local_source_addr" \
     --source_port "$local_source_port" --channel "$src_channel" --port "$splitter_port" \
-    --NTS --max_number_of_monitor_peers 1 \
+    --NTS --max_number_of_monitor_peers 2 \
     | sed -n -e 's_.*NTS:\(.*\)_\x1b[93mSplitter:\1\x1b[0m_p' &
-sleep 2
+sleep 10
 ssh $user@$splitter python3 -u $dir/peer.py --splitter_addr "$splitter" \
     --splitter_port "$splitter_port" --port "$peer_port" \
     | sed -n -e 's_.*NTS:\(.*\)_\x1b[92mMonitor1:\1\x1b[0m_p' &

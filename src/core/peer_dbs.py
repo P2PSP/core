@@ -78,7 +78,7 @@ class Peer_DBS(Peer_IMS):
     def receive_magic_flags(self):
         self.magic_flags = struct.unpack("B",self.splitter_socket.recv(struct.calcsize("B")))[0]
         _p_("Magic flags =", bin(self.magic_flags))
-        
+
     def receive_the_number_of_peers(self):
         # {{{
 
@@ -95,7 +95,7 @@ class Peer_DBS(Peer_IMS):
         #sys.stdout.write(Color.none)
 
         # }}}
-        
+
     def receive_the_list_of_peers(self):
         # {{{
 
@@ -145,7 +145,7 @@ class Peer_DBS(Peer_IMS):
     def listen_to_the_team(self):
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
-        self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.create_team_socket()
         try:
             # In Windows systems this call doesn't work!
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -358,7 +358,7 @@ class Peer_DBS(Peer_IMS):
     # }}}
 
     # The following methods should be inheritaged ... in DIS??
-    
+
     def calc_buffer_correctnes(self):
         zerochunk = struct.pack("1024s", "0")
         goodchunks = badchunks = 0
