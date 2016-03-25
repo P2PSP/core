@@ -27,7 +27,7 @@ void MonitorNTS::Complain(uint16_t chunk_number) {
 
   this->SendMessage(msg_str.str(), splitter_);
 
-  TRACE("lost chunk:" << std::to_string(chunk_number));
+  DEBUG("lost chunk:" << std::to_string(chunk_number));
 };
 
 // This is from MonitorDBS
@@ -63,19 +63,13 @@ int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
       (message.size() == CommonNTS::kPeerIdLength ||
        message.size() == CommonNTS::kPeerIdLength+1)) {
     // Hello message received from peer
-    // TODO: if __debug__:
-    {
-      LOG("Received hello (ID "
-          << message.substr(0, CommonNTS::kPeerIdLength) << ") from " << sender);
-    }
+    LOG("Received hello (ID "
+        << message.substr(0, CommonNTS::kPeerIdLength) << ") from " << sender);
     // Send acknowledge
     this->SendMessage(message, sender);
 
-    // TODO: if __debug__:
-    {
-      LOG("Forwarding ID " << message.substr(0, CommonNTS::kPeerIdLength)
-          << " and source port " << sender.port() << " to splitter");
-    }
+    LOG("Forwarding ID " << message.substr(0, CommonNTS::kPeerIdLength)
+        << " and source port " << sender.port() << " to splitter");
     std::ostringstream msg_str;
     msg_str << message;
     CommonNTS::Write<uint16_t>(msg_str, (uint16_t) sender.port());
@@ -90,10 +84,7 @@ int MonitorNTS::ProcessMessage(const std::vector<char>& message_bytes,
     ip::address IP_addr = ip::address_v4(CommonNTS::Receive<uint32_t>(msg_str));
     uint16_t port = CommonNTS::Receive<uint16_t>(msg_str);
     ip::udp::endpoint peer(IP_addr, port);
-    // TODO: if __debug__:
-    {
-      LOG("Received peer ID " << peer_id << ' ' << peer);
-    }
+    LOG("Received peer ID " << peer_id << ' ' << peer);
     // Sending hello not needed as monitor and peer already communicated
     if (!CommonNTS::Contains(this->peer_list_, peer)) {
       LOG("Appending peer " << peer_id << ' ' << peer << " to list");

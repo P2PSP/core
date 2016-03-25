@@ -113,10 +113,7 @@ void SplitterNTS::SendTheListOfPeers(
   // are sent together with their IDs when a PeerNTS instance has been
   // created from the PeerDBS instance, in SendTheListOfPeers2()
 
-  // TODO: if (__debug__) {
-  {
-    LOG("Sending the monitors as the list of peers");
-  }
+  LOG("Sending the monitors as the list of peers");
   // Send the number of monitors
   std::ostringstream msg_str;
   CommonNTS::Write<uint16_t>(msg_str, this->monitor_number_);
@@ -151,11 +148,8 @@ void SplitterNTS::SendTheListOfPeers2(
     // Do not send the peer endpoint to itself
     number_of_other_peers = std::max(0, number_of_other_peers - 1);
   }
-  // TODO: if (__debug__) {
-  {
-    LOG("Sending the list of peers except monitors (" << number_of_other_peers
-        << " peers)");
-  }
+  LOG("Sending the list of peers except monitors (" << number_of_other_peers
+      << " peers)");
   std::ostringstream msg_str;
   CommonNTS::Write<uint16_t>(msg_str, number_of_other_peers);
   peer_serve_socket->send(buffer(msg_str.str()));
@@ -180,10 +174,7 @@ void SplitterNTS::SendTheListOfPeers2(
     if (CommonNTS::Contains(this->ids_, peer) && peer_id == this->ids_[peer]) {
       continue;
     }
-    // TODO: if (__debug__) {
-    {
-      LOG("Sending peer " << peer_id << " to " << peer);
-    }
+    LOG("Sending peer " << peer_id << " to " << peer);
     const ip::udp::endpoint& peer = peer_iter.second.peer_;
     msg_str.str(std::string());
     msg_str << peer_id;
@@ -284,7 +275,7 @@ void SplitterNTS::ListenExtraSocketThread() {
       // Ignore timeout
       // continue;
     } catch (const std::exception& e) {
-      ERROR("Unexpected error: " << e.what());
+      ERROR(e.what());
       continue;
     }
 
@@ -304,12 +295,12 @@ void SplitterNTS::ListenExtraSocketThread() {
         }
       }
       if (peer == nullptr) {
-        LOG("Peer ID " << peer_id << " unknown");
+        DEBUG("Peer ID " << peer_id << " unknown");
         continue;
       }
       // Check sender address
       if (sender.address() != peer->address()) {
-        LOG("Peer " << peer_id << " switched from " << peer->address()
+        DEBUG("Peer " << peer_id << " switched from " << peer->address()
             << " to " << sender.address() << ", ignoring");
         continue;
       }
@@ -318,7 +309,8 @@ void SplitterNTS::ListenExtraSocketThread() {
           << peer_id);
       this->UpdatePortStep(*peer, sender.port());
     } else {
-      LOG("Ignoring packet of length " << message.size() << " from " << sender);
+      DEBUG("Ignoring packet of length " << message.size() << " from "
+          << sender);
     }
   }
 }
@@ -412,11 +404,8 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
   // Do not block the thread forever:
   this->extra_socket_->set_option(socket_base::linger(true, 1));
   uint16_t extra_listen_port = this->extra_socket_->local_endpoint().port();
-  // TODO: if (__debug__)
-  {
-    LOG("Listening to the extra port " << extra_listen_port);
-    LOG("Sending [send hello to " << new_peer << ']');
-  }
+  DEBUG("Listening to the extra port " << extra_listen_port);
+  DEBUG("Sending [send hello to " << new_peer << ']');
   // The peers start port prediction at the minimum known source port,
   // counting up using their peer_number
   std::vector<uint16_t> source_ports(source_ports_to_monitors);
@@ -462,10 +451,7 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
       // Do not send the peer endpoint to the peer itself
       continue;
     }
-    // TODO: if (__debug__)
-    {
-      LOG("Sending peer " << new_peer << " to " << inc_peer_id);
-    }
+    LOG("Sending peer " << new_peer << " to " << inc_peer_id);
     const ip::udp::endpoint& peer = peer_iter.second.peer_;
     std::ostringstream msg_str;
     msg_str << peer_id;
@@ -527,7 +513,6 @@ void SplitterNTS::UpdatePortStep(const ip::udp::endpoint peer,
   uint16_t previous_port_step = this->port_steps_[peer];
   this->port_steps_[peer] = gcd(previous_port_step, port_diff);
   if (this->port_steps_[peer] != previous_port_step) {
-    // TODO: if (__debug__)
     LOG("Updated port step of peer " << peer << " from " << previous_port_step
         << " to " << this->port_steps_[peer]);
   }
@@ -556,11 +541,11 @@ void SplitterNTS::ModerateTheTeam() {
     try {
       // Allow for long messages
       size_t bytes_transferred = this->ReceiveMessage(message_bytes, sender);
-      LOG("Message length = " << bytes_transferred);
+      DEBUG("Message length = " << bytes_transferred);
       message_bytes.resize(bytes_transferred);
       message = std::string(message_bytes.data(), bytes_transferred);
     } catch (const std::exception& e) {
-      ERROR("Unexpected error: " << e.what());
+      ERROR(e.what());
       continue;
     }
 
@@ -592,17 +577,14 @@ void SplitterNTS::ModerateTheTeam() {
 
       std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
       if (!CommonNTS::Contains(this->arriving_peers_, peer_id)) {
-        LOG("Peer ID " << peer_id << " is not an arriving peer");
+        DEBUG("Peer ID " << peer_id << " is not an arriving peer");
         continue;
       }
 
-      // TODO: if (__debug__)
-      {
-        if (this->arriving_peers_[peer_id].peer_address_ != sender.address()) {
-          LOG("ID " << peer_id << ": peer address over TCP ("
-              << this->arriving_peers_[peer_id].peer_address_ << ") and UDP ("
-              << sender.address() << ") is different");
-        }
+      if (this->arriving_peers_[peer_id].peer_address_ != sender.address()) {
+        DEBUG("ID " << peer_id << ": peer address over TCP ("
+            << this->arriving_peers_[peer_id].peer_address_ << ") and UDP ("
+            << sender.address() << ") is different");
       }
 
       uint16_t source_port_to_splitter = sender.port();
@@ -638,7 +620,7 @@ void SplitterNTS::ModerateTheTeam() {
 
       std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
       if (!CommonNTS::Contains(this->arriving_peers_, peer_id)) {
-        LOG("Peer ID " << peer_id << " is not an arriving peer");
+        DEBUG("Peer ID " << peer_id << " is not an arriving peer");
         continue;
       }
       ArrivingPeerInfo& peer_info = this->arriving_peers_[peer_id];
@@ -677,7 +659,7 @@ void SplitterNTS::ModerateTheTeam() {
         }
       }
       if (peer == nullptr) {
-        LOG("Peer ID " << peer_id << " unknown");
+        DEBUG("Peer ID " << peer_id << " unknown");
         continue;
       }
 
@@ -697,17 +679,14 @@ void SplitterNTS::ModerateTheTeam() {
 
       std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
       if (!CommonNTS::Contains(this->incorporating_peers_, peer_id)) {
-        // TODO: if (__debug__)
-        {
-          LOG("Unknown peer " << peer_id);
-        }
+        DEBUG("Unknown peer " << peer_id);
         continue;
       }
 
       // Check sender address
       if (sender.address() !=
           this->incorporating_peers_[peer_id].peer_.address()) {
-        LOG("Peer " << peer_id << " switched from "
+        DEBUG("Peer " << peer_id << " switched from "
             << this->incorporating_peers_[peer_id].peer_.address() << " to "
             << sender.address() << ", ignoring");
         continue;
@@ -726,7 +705,7 @@ void SplitterNTS::ModerateTheTeam() {
 
         if (sender.port() == peer_info.peer_.port()) {
           // This could be due to a duplicate UDP packet
-          LOG("Peer " << peer_id
+          DEBUG("Peer " << peer_id
               << " retries incorporation from same port, ignoring");
           continue;
         }
@@ -759,7 +738,7 @@ void SplitterNTS::ModerateTheTeam() {
       this->EnqueueMessage(1, std::make_pair(message, sender));
       std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
       if (!CommonNTS::Contains(this->incorporating_peers_, peer_id)) {
-        LOG("Peer ID " << peer_id << " is not an incorporating peer");
+        DEBUG("Peer ID " << peer_id << " is not an incorporating peer");
         continue;
       }
       IncorporatingPeerInfo& peer_info = this->incorporating_peers_[peer_id];
@@ -778,7 +757,8 @@ void SplitterNTS::ModerateTheTeam() {
         this->RetryToIncorporatePeer(peer_id);
       }
     } else {
-      LOG("Ignoring packet of length " << message.size() << " from " << sender);
+      DEBUG("Ignoring packet of length " << message.size() << " from "
+          << sender);
     }
   }
 }

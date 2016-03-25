@@ -89,18 +89,15 @@ void PeerNTS::SendHelloThread() {
       }
       std::string message = message_data.first;
       ip::udp::endpoint peer = message_data.second;
-      // TODO: if __debug__:
-      {
-        if (message == this->peer_id_) {
-          LOG("Sending [hello (" << message << ")] to " << peer
-              << " (trying " << hello_messages_ports[message_data].size()
-              << " ports)");
-        } else {
-          LOG("Sending message (" << message.substr(0, CommonNTS::kPeerIdLength)
-              << ") of length " << message.size() << " to " << peer
-              << " (trying " << hello_messages_ports[message_data].size()
-              << " ports)");
-        }
+      if (message == this->peer_id_) {
+        DEBUG("Sending [hello (" << message << ")] to " << peer
+            << " (trying " << hello_messages_ports[message_data].size()
+            << " ports)");
+      } else {
+        DEBUG("Sending message (" << message.substr(0, CommonNTS::kPeerIdLength)
+            << ") of length " << message.size() << " to " << peer
+            << " (trying " << hello_messages_ports[message_data].size()
+            << " ports)");
       }
       for (uint16_t port : hello_messages_ports[message_data]) {
         this->SendMessage(message, ip::udp::endpoint(peer.address(), port));
@@ -374,7 +371,7 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
     // Here the port prediction happens:
     std::vector<uint16_t> additional_ports = this->GetProbableSourcePorts(
         source_port_to_splitter, port_diff, peer_number);
-    LOG("Probable source ports: " << source_port_to_splitter << " and ["
+    DEBUG("Probable source ports: " << source_port_to_splitter << " and ["
         << CommonNTS::Join(additional_ports, ", ") << ']');
     this->SayHello(peer, additional_ports);
     // Directly start packet sending
@@ -398,7 +395,7 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
     // Here the port prediction happens:
     std::vector<uint16_t> additional_ports = this->GetProbableSourcePorts(
         source_port_to_splitter, port_diff, peer_number);
-    LOG("Probable source ports: " << source_port_to_splitter << " and ["
+    DEBUG("Probable source ports: " << source_port_to_splitter << " and ["
         << CommonNTS::Join(additional_ports, ", ") << ']');
     this->SayHello(peer, additional_ports);
     // Send to extra splitter port to determine currently allocated
@@ -420,7 +417,7 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
             && sender.address() == hello_data.second.address()
             && CommonNTS::Contains(this->hello_messages_ports_[hello_data],
             sender.port())) {
-          LOG("Received acknowledge from " << sender);
+          DEBUG("Received acknowledge from " << sender);
           // TODO: Check if message_data as a reference is ok here
           this->hello_messages_times_.erase(hello_data);
           this->hello_messages_ports_.erase(hello_data);
@@ -430,7 +427,8 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
         }
       }
     }
-    ERROR("Received acknowledge " << message << " from unknown host " << sender);
+    WARNING("Received acknowledge " << message << " from unknown host "
+        << sender);
   } else if (message.size() == CommonNTS::kPeerIdLength) {
     std::string peer_id =
         CommonNTS::ReceiveString(msg_str, CommonNTS::kPeerIdLength);
@@ -459,7 +457,7 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
     // CommonNTS::ReceiveTheListOfPeers() before a PeerNTS instance is created
   } else if (sender != this->splitter_
       && !CommonNTS::Contains(this->peer_list_, sender)) {
-    LOG("Ignoring message of length " << message.size() << " from unknown "
+    DEBUG("Ignoring message of length " << message.size() << " from unknown "
         << sender);
   } else if (this->initial_peer_list_.size() == 0) {
     // Start receiving chunks when fully incorporated
