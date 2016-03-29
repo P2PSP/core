@@ -1,3 +1,8 @@
+"""
+@package core
+peer_ims_gui module
+"""
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -17,10 +22,9 @@ import struct
 import time
 from gi.repository import GObject
 
-from . import common
-from core.color import Color
-from core._print_ import _print_
-from core.peer_ims import Peer_IMS
+from core.common import Common
+#from color import Color
+from _print_ import _print_
 
 try:
     from gui.adapter import buffering_adapter
@@ -31,7 +35,7 @@ except ImportError as msg:
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
-    sys.stdout.write(common.IMS_COLOR)
+    sys.stdout.write(Common.IMS_COLOR)
     _print_("IMS:", *args)
     sys.stdout.write(Color.none)
 
@@ -113,9 +117,14 @@ class Peer_IMS_GUI(Peer_IMS):
         # Now, fill up to the half of the buffer.
         for x in range(int(self.buffer_size/2)):
             _print_("{:.2%}\r".format((1.0*x)/(self.buffer_size/2)), end='')
+<<<<<<< HEAD
             BUFFER_STATUS = int((100*x)/(self.buffer_size/2)+1)
             if common.CONSOLE_MODE == False :
                 _print_(str(BUFFER_STATUS))
+=======
+            BUFFER_STATUS = (100*x)/(self.buffer_size/2) +1
+            if Common.CONSOLE_MODE == False :
+>>>>>>> master
                 GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
             else:
                 pass

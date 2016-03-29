@@ -1,6 +1,6 @@
 """
 @package core
-monitor_dbs splitter_nts
+monitor_dbs module
 """
 
 # -*- coding: iso-8859-15 -*-
@@ -19,7 +19,8 @@ import socket
 import struct
 import threading
 
-from . import common
+from core.common import Common
+
 from core.peer_ims import Peer_IMS
 from core.peer_dbs import Peer_DBS
 from core._print_ import _print_
@@ -30,7 +31,7 @@ from core.color import Color
 def _p_(*args, **kwargs):
     if __debug__:
         """Colorize the output."""
-        sys.stdout.write(common.DBS_COLOR)
+        sys.stdout.write(Common.DBS_COLOR)
         _print_("DBS:", *args)
         sys.stdout.write(Color.none)
 
@@ -66,10 +67,10 @@ class Monitor_DBS(Peer_DBS):
     def find_next_chunk(self):
         # {{{
 
-        chunk_number = (self.played_chunk + 1) % common.MAX_CHUNK_NUMBER
+        chunk_number = (self.played_chunk + 1) % Common.MAX_CHUNK_NUMBER
         while not self.received_flag[chunk_number % self.buffer_size]:
             self.complain(chunk_number)
-            chunk_number = (chunk_number + 1) % common.MAX_CHUNK_NUMBER
+            chunk_number = (chunk_number + 1) % Common.MAX_CHUNK_NUMBER
         return chunk_number
 
         # }}}

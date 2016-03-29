@@ -8,10 +8,10 @@ SoR=IMS
 #export BUFFER_SIZE=512
 #export CHANNEL="big_buck_bunny_480p_stereo.ogg"
 
-export BUFFER_SIZE=512  # Important for the lost of chunks!!!
+BUFFER_SIZE=512  # Important for the lost of chunks!!!
 #export BUFFER_SIZE=128
 #export BUFFER_SIZE=64
-export CHANNEL="Big_Buck_Bunny_small.ogv"
+CHANNEL="BBB-134.ogv"
 
 #export BUFFER_SIZE=32
 #export CHANNEL="The_Last_of_the_Mohicans-promentory.ogg"
@@ -19,29 +19,29 @@ export CHANNEL="Big_Buck_Bunny_small.ogv"
 #export BUFFER_SIZE=128
 #export CHANNEL="sintel_trailer-144p.ogg"
 
-export MAX_CHUNK_LOSS=8
+MAX_CHUNK_LOSS=8
 
-export HEADER_SIZE=10
-export MAX_CHUNK_DEBT=8
-export CHUNK_SIZE=1024
+HEADER_SIZE=10
+MAX_CHUNK_DEBT=8
+CHUNK_SIZE=1024
 #export MAX_CHUNK_DEBT=32
 #export MAX_CHUNK_DEBT=128
 #export MAX_CHUNK_DEBT=32
 #export MAX_CHUNK_DEBT=0
-export ITERATIONS=100
-export SOURCE_ADDR="127.0.0.1"
-export SOURCE_PORT=8080
-export SPLITTER_ADDR="127.0.0.1"
-export SPLITTER_PORT=4552
+ITERATIONS=10
+SOURCE_ADDR="127.0.0.1"
+SOURCE_PORT=8080
+SPLITTER_ADDR="127.0.0.1"
+SPLITTER_PORT=4552
 #export MCAST="--mcast"
-export MCAST_ADDR="224.0.0.1"
-export MCAST=""
+MCAST_ADDR="224.0.0.1"
+MCAST=""
 #export MCAST_ADDR="0.0.0.0"
-export TEAM_PORT=5007
-export MAX_LIFE=180
-export BIRTHDAY_PERIOD=1
+TEAM_PORT=5007
+MAX_LIFE=180
+BIRTHDAY_PERIOD=1
 #export CHUNK_LOSS_PERIOD=100
-export CHUNK_LOSS_PERIOD=0
+CHUNK_LOSS_PERIOD=0
 
 usage() {
     echo $0
@@ -159,7 +159,7 @@ set -x
 
 rm -f *.dat
 
-SPLITTER="../src/splitter.py \
+SPLITTER="../splitter.py \
 --buffer_size=$BUFFER_SIZE \
 --channel=$CHANNEL \
 --chunk_size=$CHUNK_SIZE \
@@ -196,7 +196,7 @@ vlc http://localhost:9999 > /dev/null 2> /dev/null &
 
 sleep 1
 
-PEER="../src/peer.py \
+PEER="../peer.py \
 --use_localhost \
 --player_port=9998 \
 --splitter_addr=$SPLITTER_ADDR \

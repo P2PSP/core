@@ -51,10 +51,7 @@ done
 
 export PLAYER_PORT=`shuf -i 2000-65000 -n 1`
 
-PEER="../src/peer.py \
---use_localhost \
---chunk_loss_period=$CHUNK_LOSS_PERIOD \
---max_chunk_debt=$MAX_CHUNK_DEBT \
+PEER="python3 -O ../peer.py \
 --player_port $PLAYER_PORT \
 --splitter_addr $SPLITTER_ADDR \
 --splitter_port $SPLITTER_PORT"
@@ -65,5 +62,7 @@ echo $PEER
 
 xterm -sl 10000 -e "$PEER | tee $PLAYER_PORT.dat" &
 
-sleep 15.0; netcat localhost $PLAYER_PORT -v > /dev/null &
+# sleep 1; netcat localhost $PLAYER_PORT -v > /dev/null &
+
+sleep 1; vlc http://localhost:$PLAYER_PORT &
 

@@ -1,4 +1,8 @@
-#!/usr/bin/python -O
+"""
+@package core
+malicious_peer module
+"""
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -16,6 +20,15 @@ from core.color import Color
 from core._print_ import _print_
 from core.peer_dbs import Peer_DBS
 from core.peer_strpeds import Peer_StrpeDs
+<<<<<<< HEAD
+=======
+
+def _p_(*args, **kwargs):
+    """Colorize the output."""
+    sys.stdout.write(Common.DBS)
+    _print_("DBS (STRPEDS malicious):", *args)
+    sys.stdout.write(Color.none)
+>>>>>>> master
 
 class Peer_StrpeDsMalicious(Peer_StrpeDs):
 
@@ -27,23 +40,8 @@ class Peer_StrpeDsMalicious(Peer_StrpeDs):
     badMouthAttack = False
 
     def __init__(self, peer):
-        sys.stdout.write(Color.yellow)
-        _print_("STrPe-DS Malicious Peer")
-        sys.stdout.write(Color.none)
 
-        threading.Thread.__init__(self)
-
-        self.splitter_socket = peer.splitter_socket
-        self.player_socket = peer.player_socket
-        self.buffer_size = peer.buffer_size
-        self.splitter = peer.splitter
-        self.chunk_size = peer.chunk_size
-        self.peer_list = peer.peer_list
-        self.debt = peer.debt
-        self.message_format = peer.message_format
-        self.team_socket = peer.team_socket
-        self.bad_peers = peer.bad_peers
-        self.dsa_key = peer.dsa_key
+        _p_("Initialized")
 
     def process_message(self, message, sender):
         if sender in self.bad_peers:

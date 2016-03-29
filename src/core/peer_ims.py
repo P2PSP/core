@@ -21,7 +21,8 @@ import socket
 import struct
 import time
 
-from . import common
+from core.common import Common
+
 from core._print_ import _print_
 from core.color import Color
 
@@ -36,7 +37,7 @@ except ImportError as msg:
 def _p_(*args, **kwargs):
     """Colorize the output."""
     if __debug__:
-        sys.stdout.write(common.IMS_COLOR)
+        sys.stdout.write(Common.IMS_COLOR)
         _print_("IMS:", *args)
         sys.stdout.write(Color.none)
 
@@ -47,7 +48,7 @@ class Peer_IMS(threading.Thread):
 
     PLAYER_PORT = 9999          # Port used to serve the player.
     SPLITTER_ADDR = "127.0.0.1" # Address of the splitter.
-    SPLITTER_PORT = 4552        # Port of the splitter.
+    SPLITTER_PORT = 8001        # Port of the splitter.
     PORT = 0                    # TCP->UDP port used to communicate.
     USE_LOCALHOST = False       # Use localhost instead the IP of the addapter
     BUFFER_STATUS = int(0)      # ?
@@ -55,17 +56,19 @@ class Peer_IMS(threading.Thread):
 
     # }}}
 
-    def __new__(typ, *args, **kwargs):
+    def __new__(new_type, *args, **kwargs):
         # {{{
 
         if len(args) == 1 and isinstance(args[0], Peer_IMS):
             # Parameter is a peer instance; extending its class instead of nesting:
             instance = args[0]
-            instance.__class__ = typ
+            old_type = instance.__class__
+            new_class_name = old_type.__name__ + '.' + new_type.__name__
+            instance.__class__ = type(new_class_name, (old_type,), dict(new_type.__dict__))
             return instance
         else:
             # Use default object creation
-            return object.__new__(typ, *args, **kwargs)
+            return object.__new__(new_type, *args, **kwargs)
 
         # }}}
 
@@ -77,7 +80,7 @@ class Peer_IMS(threading.Thread):
         _p_("Splitter =", self.SPLITTER_ADDR)
         _p_("(Peer) port =", self.PORT)
         _p_("Initialized")
-        
+
         # }}}
 
     def wait_for_the_player(self):
@@ -121,7 +124,7 @@ class Peer_IMS(threading.Thread):
             try:
                 self.splitter_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             except Exception as e:
-                _p_(e)
+                _print_(e)
                 pass
             #sys.stdout.write(Color.purple)
             _p_("I'm using port the port", self.PORT)
@@ -132,7 +135,10 @@ class Peer_IMS(threading.Thread):
         try:
             self.splitter_socket.connect(self.splitter)
         except Exception as e:
-            _p_(e)
+            if __debug__:
+                _p_(e)
+            else:
+                _print_(e)
             #sys.stdout.write(Color.red)
             #sys.exit("Sorry. Can't connect to the splitter at " + str(self.splitter))
             #sys.stdout.write(Color.none)
@@ -215,10 +221,18 @@ class Peer_IMS(threading.Thread):
 
         # }}}
 
+    def create_team_socket(self):
+        # {{{ Create "team_socket" (UDP) for using the multicast channel
+
+        # This method can be overridden to use special socket types
+        self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+
+        # }}}
+
     def listen_to_the_team(self):
         # {{{ Create "team_socket" (UDP) for using the multicast channel
 
-        self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.create_team_socket()
         try:
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         except Exception as e:
@@ -264,28 +278,21 @@ class Peer_IMS(threading.Thread):
         self.recvfrom_counter += 1
 
         _p_("Received a message from", sender, "of length", len(message))
+        if __debug__:
+            if len(message) < 10:
+                _p_("Message content =", message)
 
         return message, sender
 
         # }}}
 
-    def process_next_message(self):
-        # {{{
-        try:
-            # {{{ Receive the next message and process it
-
-            message, sender = self.receive_the_next_message()
-            # The process_message method can be overridden by inheriting peers
-            return self.process_message(message, sender)
-
-            # }}}
-        except socket.timeout:
-            return -2
-
-        # }}}
-
+    # This method is overridden by the inheriting classes DBS and NTS
     def process_message(self, message, sender):
-        # {{{ Receive a chunk
+        # {{{
+
+        # Ojo, an attacker could send a packet smaller and pollute the
+        # buffer, althought this is difficult in IP multicst. This
+        # method should be inheritaged to solve this issue.
 
         chunk_number, chunk = self.unpack_message(message)
 
@@ -294,6 +301,20 @@ class Peer_IMS(threading.Thread):
         self.received_counter += 1
 
         return chunk_number
+
+        # }}}
+
+    def process_next_message(self):
+        # {{{
+        try:
+            message, sender = self.receive_the_next_message()
+        except socket.timeout:
+            return -2
+
+        return self.process_message(message, sender)
+
+        #except Exception:
+        #    return -1
 
         # }}}
 
@@ -367,7 +388,7 @@ class Peer_IMS(threading.Thread):
         for x in range(int(self.buffer_size/2)):
             _print_("{:.2%}\r".format((1.0*x)/(self.buffer_size/2)), end='')
             BUFFER_STATUS = (100*x)/(self.buffer_size/2) +1
-            #if common.CONSOLE_MODE == False :
+            #if Common.CONSOLE_MODE == False :
             #    GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
             #else:
             #    pass
@@ -391,12 +412,12 @@ class Peer_IMS(threading.Thread):
         # {{{
         #print (".")
         #counter = 0
-        chunk_number = (self.played_chunk + 1) % common.MAX_CHUNK_NUMBER
+        chunk_number = (self.played_chunk + 1) % Common.MAX_CHUNK_NUMBER
         while not self.received_flag[chunk_number % self.buffer_size]:
             #sys.stdout.write(Color.cyan)
             _p_("lost chunk", chunk_number)
             #sys.stdout.write(Color.none)
-            chunk_number = (chunk_number + 1) % common.MAX_CHUNK_NUMBER
+            chunk_number = (chunk_number + 1) % Common.MAX_CHUNK_NUMBER
             #counter += 1
             #if counter > self.buffer_size:
             #    break

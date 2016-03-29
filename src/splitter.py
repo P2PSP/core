@@ -1,4 +1,6 @@
-#!/usr/bin/python -O
+##!/opt/local/bin/python3.4
+##!/usr/bin/python -O
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -17,12 +19,13 @@ import socket
 import threading
 import struct
 
+from core.common import Common
+from core._print_ import _print_
+from core.color import Color
 from core.splitter_ims import Splitter_IMS
 from core.splitter_dbs import Splitter_DBS
 from core.splitter_acs import Splitter_ACS
-import core.common
-from core._print_ import _print_
-from core.color import Color
+from core.splitter_nts import Splitter_NTS
 
 try:
     import colorama                       # Enable console color using ANSI codes in Windows
@@ -92,6 +95,8 @@ class Splitter():
         args = parser.parse_args()
         #args = parser.parse_known_args()[0]
 
+        _print_("My IP address is =", socket.gethostbyname(socket.gethostname()))
+        
         if args.buffer_size:
             Splitter_IMS.BUFFER_SIZE = int(args.buffer_size)
         _print_("Buffer size =", Splitter_IMS.BUFFER_SIZE)
@@ -142,21 +147,24 @@ class Splitter():
             _print_("Maximun chunk loss =", Splitter_DBS.MAX_CHUNK_LOSS)
 
             if args.max_number_of_monitor_peers:
-                Splitter_DBS.MONITOR_NUMBER = int(args.monitor_number)
+                Splitter_DBS.MONITOR_NUMBER = int(args.max_number_of_monitor_peers)
             _print_("Maximun number of monitor peers =", Splitter_DBS.MONITOR_NUMBER)
 
             splitter = Splitter_DBS()
+
             if args.NTS:
-                from splitter_nts import Splitter_NTS
                 splitter = Splitter_NTS(splitter)
                 _print_("NTS enabled")
+
             if args.ACS:
                 splitter = Splitter_ACS(splitter)
                 _print_("ACS enabled")
+
             if args.LRS:
-                from splitter_lrs import Splitter_LRS
+                from core.splitter_lrs import Splitter_LRS
                 splitter = Splitter_LRS(splitter)
                 _print_("LRS enabled")
+
             if args.DIS:
                 from splitter_strpe import StrpeSplitter
                 from splitter_strpeds import StrpeDsSplitter
@@ -214,7 +222,7 @@ class Splitter():
                 last_sendto_counter = splitter.sendto_counter
                 last_recvfrom_counter = splitter.recvfrom_counter
                 sys.stdout.write(Color.none)
-                _print_("|" + repr(kbps_recvfrom).rjust(10) + " |" + repr(kbps_sendto).rjust(10), end=" | ")
+                _print_("|" + repr(int(kbps_recvfrom)).rjust(10) + " |" + repr(int(kbps_sendto)).rjust(10), end=" | ")
                 #print('%5d' % splitter.chunk_number, end=' ')
                 sys.stdout.write(Color.cyan)
                 print(len(splitter.peer_list), end=' ')
@@ -253,10 +261,11 @@ class Splitter():
                 # Wake up the "moderate_the_team" daemon, which is
                 # waiting in a recvfrom().
                 if not args.IMS:
-                    splitter.say_goodbye(("127.0.0.1", splitter.PORT), splitter.team_socket)
+                    #splitter.say_goodbye(("127.0.0.1", splitter.PORT), splitter.team_socket)
+                    splitter.team_socket.sendto(b'', ("127.0.0.1", splitter.PORT))
 
                 # Wake up the "handle_arrivals" daemon, which is waiting
-                # in a accept().
+                # in an accept().
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.connect(("127.0.0.1", splitter.PORT))
                 sock.recv(struct.calcsize("4sH")) # Multicast channel
@@ -264,6 +273,8 @@ class Splitter():
                 sock.recv(struct.calcsize("H")) # Chunk size
                 sock.recv(splitter.CHUNK_SIZE*splitter.HEADER_SIZE) # Header
                 sock.recv(struct.calcsize("H")) # Buffer size
+                sock.recv(struct.calcsize("4sH")) # Endpoint
+                sock.recv(struct.calcsize("B")) # Magic flags
                 if args.IMS:
                     number_of_peers = 0
                 else:

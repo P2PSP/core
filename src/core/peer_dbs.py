@@ -21,7 +21,8 @@ import socket
 import struct
 import time
 
-from . import common
+from core.common import Common
+
 from core.color import Color
 from core._print_ import _print_
 #from core.peer_ims import Peer_IMS
@@ -36,7 +37,7 @@ PORT = 1
 def _p_(*args, **kwargs):
     """Colorize the output."""
     if __debug__:
-        sys.stdout.write(common.DBS_COLOR)
+        sys.stdout.write(Common.DBS_COLOR)
         _print_("DBS:", *args)
         sys.stdout.write(Color.none)
 
@@ -47,11 +48,9 @@ class Peer_DBS(Peer_IMS):
 
     MAX_CHUNK_DEBT = 128 # Peer's rejecting threshold
 
-    LOGGING = False
-    LOG_FILE = ""
+    LOGGING = False # A IMS???
+    LOG_FILE = ""   # A IMS???
 
-    #MAGIC_FLAG = 0b00000000
-    
     # }}}
 
     def __init__(self, peer):
@@ -66,6 +65,7 @@ class Peer_DBS(Peer_IMS):
         # {{{
 
         self.team_socket.sendto(b'H', node)
+        _p_("[Hello] sent to %s" % str(node))
 
         # }}}
 
@@ -73,13 +73,14 @@ class Peer_DBS(Peer_IMS):
         # {{{
 
         self.team_socket.sendto(b'G', node)
+        _p_("[Goodbye] sent to %s" % str(node))
 
         # }}}
 
     def receive_magic_flags(self):
         self.magic_flags = struct.unpack("B",self.splitter_socket.recv(struct.calcsize("B")))[0]
-        _p_("Magic flags =", self.magic_flags)
-        
+        _p_("Magic flags =", bin(self.magic_flags))
+
     def receive_the_number_of_peers(self):
         # {{{
 
@@ -96,7 +97,7 @@ class Peer_DBS(Peer_IMS):
         #sys.stdout.write(Color.none)
 
         # }}}
-        
+
     def receive_the_list_of_peers(self):
         # {{{
 
@@ -115,7 +116,7 @@ class Peer_DBS(Peer_IMS):
             IP_addr = socket.inet_ntoa(IP_addr)
             port = socket.ntohs(port)
             peer = (IP_addr, port)
-            print("DBS: [hello] sent to", peer)
+            _p_("[hello] sent to", peer)
             self.say_hello(peer)
             if __debug__:
                 _p_("[%5d]" % tmp, peer)
@@ -146,7 +147,7 @@ class Peer_DBS(Peer_IMS):
     def listen_to_the_team(self):
         # {{{ Create "team_socket" (UDP) as a copy of "splitter_socket" (TCP)
 
-        self.team_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.create_team_socket()
         try:
             # In Windows systems this call doesn't work!
             self.team_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -180,7 +181,7 @@ class Peer_DBS(Peer_IMS):
                 # {{{ debug
 
                 _p_(self.team_socket.getsockname(), "<-", chunk_number, "-", sender)
-                if __debug__:
+                if __debug__: # No aqui. Tal vez, DIS
 
                     if self.LOGGING:
                         self.log_message("buffer correctnes {0}".format(self.calc_buffer_correctnes()))
@@ -284,12 +285,12 @@ class Peer_DBS(Peer_IMS):
             for i in self.debt:
                 self.debt[i] /= 2
 
-        if __debug__:
-            _p_("Number of peers in the team:", len(self.peer_list)+1)
-            _p_(self.team_socket.getsockname(),)
-            for p in self.peer_list:
-                print ("DBS:", p,)
-            print ()
+        #_p_("Number of peers in the team:", len(self.peer_list)+1)
+        #_p_(self.team_socket.getsockname(),)
+        #if __debug__:
+        #    for p in self.peer_list:
+        #        print ("DBS:", p,)
+        #    print ()
 
         # }}}
 
@@ -357,6 +358,8 @@ class Peer_DBS(Peer_IMS):
         # }}}
 
     # }}}
+
+    # The following methods should be inheritaged ... in DIS??
 
     def calc_buffer_correctnes(self):
         zerochunk = struct.pack("1024s", "0")

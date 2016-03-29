@@ -79,3 +79,6 @@ done
 # Configure packet forwarding
 ip netns exec nat1 sysctl net.ipv4.ip_forward=1
 ip netns exec nat2 sysctl net.ipv4.ip_forward=1
+# Initial NAT settings
+ip netns exec nat1 iptables-restore /etc/iptables/iptables.rules.prcn1
+ip netns exec nat2 iptables-restore /etc/iptables/iptables.rules.prcn2

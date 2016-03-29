@@ -1,4 +1,9 @@
 #!/usr/bin/python -O
+"""
+@package core
+splitter_strpeds module
+"""
+
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
@@ -123,7 +128,7 @@ class StrpeDsSplitter(Splitter_NTS):
                 message = self.get_message(self.chunk_number, chunk, peer)
                 self.send_chunk(message, peer)
 
-                self.destination_of_chunk[self.chunk_number % self.BUFFER_SIZE] = peer
+                self.destination_of_chunk[self.chunk_number % Common.BUFFER_SIZE] = peer
                 self.chunk_number = (self.chunk_number + 1) % common.MAX_CHUNK_NUMBER
                 self.compute_next_peer_number(peer)
 
