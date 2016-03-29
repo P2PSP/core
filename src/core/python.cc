@@ -3,6 +3,7 @@
 
 #include "peer_ims.h"
 #include "peer_dbs.h"
+#include "monitor_dbs.h"
 #include "splitter_ims.h"
 #include "splitter_dbs.h"
 
@@ -11,6 +12,63 @@
 using namespace p2psp;
 using namespace boost::python;
 
+//Monitor
+class PyMonitorDBS: public MonitorDBS {
+public:
+
+  list GetPeerList_() {
+    list l;
+    std::string address;
+    uint16_t port;
+    for (unsigned int i = 0; i < peer_list_.size(); i++) {
+      address = peer_list_[i].address().to_string();
+      port = peer_list_[i].port();
+      l.append(boost::python::make_tuple(address, port));
+    }
+    return l;
+  }
+
+  void SetMcastAddr(std::string address){
+    mcast_addr_ = ip::address::from_string(address);
+  }
+
+  void SetChunkSize(int chunk_size){
+    chunk_size_ = chunk_size;
+  }
+
+  void SetRecvfromCounter(int recvfrom_counter){
+    recvfrom_counter_ = recvfrom_counter;
+  }
+  
+  std::string GetSplitterAddr(){
+    return splitter_addr_.to_string();
+  }
+  
+  uint16_t GetSplitterPort(){
+    return splitter_port_;
+  }
+  
+  uint16_t GetPort(){
+    return port_;
+  }
+
+  uint16_t GetPlayerPort(){
+    return player_port_;
+  }
+  
+  int GetMaxChunkDebt(){
+	  return max_chunk_debt_;
+  }
+  
+  bool GetUseLocalhost(){
+    return use_localhost_;
+  }
+  
+  bool GetShowBuffer(){
+    return show_buffer_;
+  }
+};
+  
 //Peer
 class PyPeerDBS: public PeerDBS {
 public:
@@ -192,6 +250,65 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("SetMaxChunkDebt", &PyPeerDBS::SetMaxChunkDebt) 
     ;
 
+   class_<PyMonitorDBS, boost::noncopyable>("MonitorDBS")
+    //variables
+    .add_property("splitter_addr", &PyMonitorDBS::GetSplitterAddr, &PyMonitorDBS::SetSplitterAddr)
+    .add_property("splitter_port", &PyMonitorDBS::GetSplitterPort, &PyMonitorDBS::SetSplitterPort)
+    .add_property("port", &PyMonitorDBS::GetPort, &PyMonitorDBS::SetPort)
+    .add_property("player_port", &PyMonitorDBS::GetPlayerPort, &PyMonitorDBS::SetPlayerPort)
+    .add_property("max_chunk_debt", &PyMonitorDBS::GetMaxChunkDebt, &PyMonitorDBS::SetMaxChunkDebt)
+    .add_property("use_localhost", &PyMonitorDBS::GetUseLocalhost, &PyMonitorDBS::SetUseLocalhost)
+    .add_property("mcast_addr", &PyMonitorDBS::GetMcastAddr, &PyMonitorDBS::SetMcastAddr)
+    .add_property("show_buffer", &PyMonitorDBS::GetShowBuffer, &PyMonitorDBS::SetShowBuffer)
+    .add_property("chunk_size", &PyMonitorDBS::GetChunkSize, &PyMonitorDBS::SetChunkSize)
+    .add_property("sendto_counter", &PyMonitorDBS::GetSendtoCounter, &PyMonitorDBS::SetSendtoCounter)
+    .add_property("recvfrom_counter", &PyMonitorDBS::GetRecvfromCounter, &PyMonitorDBS::SetRecvfromCounter)
+	  
+    //IMS
+    .def("Init", &PyMonitorDBS::Init) //used
+    .def("WaitForThePlayer", &PyMonitorDBS::WaitForThePlayer)
+    .def("ConnectToTheSplitter", &PyMonitorDBS::ConnectToTheSplitter)
+    .def("DisconnectFromTheSplitter", &PyMonitorDBS::DisconnectFromTheSplitter)
+    .def("ReceiveTheMcasteEndpoint", &PyMonitorDBS::ReceiveTheMcasteEndpoint) 
+    .def("ReceiveTheHeader", &PyMonitorDBS::ReceiveTheHeader)
+    .def("ReceiveTheChunkSize", &PyMonitorDBS::ReceiveTheChunkSize)
+    .def("ReceiveTheHeaderSize", &PyMonitorDBS::ReceiveTheHeaderSize)
+    .def("ReceiveTheBufferSize", &PyMonitorDBS::ReceiveTheBufferSize)
+    .def("ListenToTheTeam", &PyMonitorDBS::ListenToTheTeam)
+    .def("ReceiveTheNextMessage", &PyMonitorDBS::ReceiveTheNextMessage)
+    .def("ProcessMessage", &PyMonitorDBS::ProcessMessage)
+    .def("ProcessNextMessage", &PyMonitorDBS::ProcessNextMessage)
+    .def("BufferData", &PyMonitorDBS::BufferData)
+    .def("FindNextChunk", &PyMonitorDBS::FindNextChunk)
+    .def("PlayChunk", &PyMonitorDBS::PlayChunk)
+    .def("PlayNextChunk", &PyMonitorDBS::PlayNextChunk)
+    .def("KeepTheBufferFull", &PyMonitorDBS::KeepTheBufferFull)
+    .def("Run", &PyMonitorDBS::Run)
+    .def("Start", &PyMonitorDBS::Start)
+    .def("IsPlayerAlive", &PyMonitorDBS::IsPlayerAlive)
+    .def("GetPlayedChunk", &PyMonitorDBS::GetPlayedChunk)
+    .def("GetPeerList", &PyMonitorDBS::GetPeerList_) //Modified here
+
+    //DBS
+    .def("SayHello", &PyMonitorDBS::SayHello)
+    .def("SayGoodbye", &PyMonitorDBS::SayGoodbye)
+    .def("ReceiveMagicFlags", &PyMonitorDBS::ReceiveMagicFlags)
+    .def("ReceiveTheNumberOfPeers", &PyMonitorDBS::ReceiveTheNumberOfPeers)
+    .def("ReceiveTheListOfPeers", &PyMonitorDBS::ReceiveTheListOfPeers)
+    .def("ReceiveMyEndpoint", &PyMonitorDBS::ReceiveMyEndpoint)
+    .def("ListenToTheTeam", &PyMonitorDBS::ListenToTheTeam)
+    .def("ProcessMessage", &PyMonitorDBS::ProcessMessage)
+    .def("LogMessage", &PyMonitorDBS::LogMessage)
+    .def("BuildLogMessage", &PyMonitorDBS::BuildLogMessage)
+    .def("PoliteFarewell", &PyMonitorDBS::PoliteFarewell)
+    .def("BufferData", &PyMonitorDBS::BufferData)
+    .def("Start", &PyMonitorDBS::Start)
+    .def("Run", &PyMonitorDBS::Run)
+    .def("AmIAMonitor", &PyMonitorDBS::AmIAMonitor)
+    .def("GetNumberOfPeers", &PyMonitorDBS::GetNumberOfPeers)
+    .def("SetMaxChunkDebt", &PyMonitorDBS::SetMaxChunkDebt) 
+    ;
+  
   class_<PySplitterDBS, boost::noncopyable>("SplitterDBS")
     //Variables
     .add_property("buffer_size", &PySplitterDBS::GetBufferSize, &PySplitterDBS::SetBufferSize)
