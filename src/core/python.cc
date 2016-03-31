@@ -70,9 +70,18 @@ public:
 };
 
 //Peer
-class PyPeerDBS: public PeerDBS {
+class PyPeerDBS: public PeerDBS, public wrapper<PeerDBS> {
 public:
-
+  //const std::vector<char> &message, const ip::udp::endpoint &sender
+  int ProcessMessage(std::vector<char> &message,  const ip::udp::endpoint &sender) {
+    //ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(sender[0]));
+    //uint16_t port = boost::python::extract<uint16_t>(sender[1]);
+    //boost::asio::ip::udp::endpoint sender_ = boost::asio::ip::udp::endpoint(address,port);
+    if (override ProcessMessage = this->get_override("ProcessMessage"))
+      return ProcessMessage(message, sender);
+    return PeerDBS::ProcessMessage(message, sender);
+  }
+  
   list GetPeerList_() {
     list l;
     std::string address;
