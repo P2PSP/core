@@ -15,7 +15,7 @@ using namespace boost::python;
 //Monitor
 class PyMonitorDBS: public MonitorDBS {
 public:
-
+  
   list GetPeerList_() {
     list l;
     std::string address;
@@ -27,15 +27,15 @@ public:
     }
     return l;
   }
-
+  
   void SetMcastAddr(std::string address){
     mcast_addr_ = ip::address::from_string(address);
   }
-
+  
   void SetChunkSize(int chunk_size){
     chunk_size_ = chunk_size;
   }
-
+  
   void SetRecvfromCounter(int recvfrom_counter){
     recvfrom_counter_ = recvfrom_counter;
   }
@@ -51,7 +51,7 @@ public:
   uint16_t GetPort(){
     return port_;
   }
-
+  
   uint16_t GetPlayerPort(){
     return player_port_;
   }
@@ -68,7 +68,7 @@ public:
     return show_buffer_;
   }
 };
-  
+
 //Peer
 class PyPeerDBS: public PeerDBS {
 public:
@@ -125,7 +125,7 @@ public:
     return show_buffer_;
   }
 };
-
+  
 //Splitter
 class PySplitterDBS: public SplitterDBS {
 public:
@@ -229,7 +229,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("IsPlayerAlive", &PyPeerDBS::IsPlayerAlive)
     .def("GetPlayedChunk", &PyPeerDBS::GetPlayedChunk)
     .def("GetPeerList", &PyPeerDBS::GetPeerList_) //Modified here
-
+    
     //DBS
     .def("SayHello", &PyPeerDBS::SayHello)
     .def("SayGoodbye", &PyPeerDBS::SayGoodbye)
@@ -250,7 +250,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("SetMaxChunkDebt", &PyPeerDBS::SetMaxChunkDebt) 
     ;
 
-   class_<PyMonitorDBS, boost::noncopyable>("MonitorDBS")
+  class_<PyMonitorDBS, boost::noncopyable>("MonitorDBS")
     //variables
     .add_property("splitter_addr", &PyMonitorDBS::GetSplitterAddr, &PyMonitorDBS::SetSplitterAddr)
     .add_property("splitter_port", &PyMonitorDBS::GetSplitterPort, &PyMonitorDBS::SetSplitterPort)
