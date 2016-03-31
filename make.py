@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # :-)
 
@@ -36,16 +36,13 @@ if not os.path.exists(build_dir):
 
 sys_name = platform.system()
 
-if sys_name == 'Linux':
+if sys_name == 'Linux' or sys_name == 'Darwin':
     print '\nMaking for Linux...\n'
     command = 'cd build && ' + cmake + ' .. && echo'
     if os.system(command) == 0:
         command = 'cd build && make'
         if not only_cmake:
             os.system(command)
-
-elif sys_name == 'Darwin':
-    print '\nMaking for OS X...\n'
 
 elif sys_name == 'Windows':
     print '\nMaking for Windows...\n'
