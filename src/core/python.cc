@@ -72,13 +72,17 @@ public:
 //Peer
 class PyPeerDBS: public PeerDBS, public wrapper<PeerDBS> {
 public:
-  //const std::vector<char> &message, const ip::udp::endpoint &sender
-  int ProcessMessage(std::vector<char> &message,  const ip::udp::endpoint &sender) {
-    //ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(sender[0]));
-    //uint16_t port = boost::python::extract<uint16_t>(sender[1]);
-    //boost::asio::ip::udp::endpoint sender_ = boost::asio::ip::udp::endpoint(address,port);
-    if (override ProcessMessage = this->get_override("ProcessMessage"))
-      return ProcessMessage(message, sender);
+  PyPeerDBS () : PeerDBS(){}
+  
+  int ProcessMessage(const std::vector<char> &message,  const ip::udp::endpoint &sender) {
+    if (override ProcessMessage = this->get_override("ProcessMessage")){
+      std::string address = sender.address().to_string();
+      uint16_t port = sender.port();
+      //This doesn't work properly. It seems a problem with message
+      //data type. What is the corresponding one in python?
+      //std::string message_(message.begin(),message.end());
+      return ProcessMessage(message, boost::python::make_tuple(address, port));
+    }
     return PeerDBS::ProcessMessage(message, sender);
   }
   
@@ -226,7 +230,6 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("ReceiveTheBufferSize", &PyPeerDBS::ReceiveTheBufferSize)
     .def("ListenToTheTeam", &PyPeerDBS::ListenToTheTeam)
     .def("ReceiveTheNextMessage", &PyPeerDBS::ReceiveTheNextMessage)
-    .def("ProcessMessage", &PyPeerDBS::ProcessMessage)
     .def("ProcessNextMessage", &PyPeerDBS::ProcessNextMessage)
     .def("BufferData", &PyPeerDBS::BufferData)
     .def("FindNextChunk", &PyPeerDBS::FindNextChunk)
@@ -247,7 +250,6 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("ReceiveTheListOfPeers", &PyPeerDBS::ReceiveTheListOfPeers)
     .def("ReceiveMyEndpoint", &PyPeerDBS::ReceiveMyEndpoint)
     .def("ListenToTheTeam", &PyPeerDBS::ListenToTheTeam)
-    .def("ProcessMessage", &PyPeerDBS::ProcessMessage)
     .def("LogMessage", &PyPeerDBS::LogMessage)
     .def("BuildLogMessage", &PyPeerDBS::BuildLogMessage)
     .def("PoliteFarewell", &PyPeerDBS::PoliteFarewell)
@@ -256,7 +258,12 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("Run", &PyPeerDBS::Run)
     .def("AmIAMonitor", &PyPeerDBS::AmIAMonitor)
     .def("GetNumberOfPeers", &PyPeerDBS::GetNumberOfPeers)
-    .def("SetMaxChunkDebt", &PyPeerDBS::SetMaxChunkDebt) 
+    .def("SetMaxChunkDebt", &PyPeerDBS::SetMaxChunkDebt)
+
+    //Overrides
+    .def("ProcessMessage", &PyPeerDBS::ProcessMessage)
+
+    
     ;
 
   class_<PyMonitorDBS, boost::noncopyable>("MonitorDBS")
