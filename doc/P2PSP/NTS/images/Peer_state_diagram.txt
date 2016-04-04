@@ -1,0 +1,41 @@
+
+    #--------------------------------#
+    | Peer initialized               | 
+    #-----+--------------------------# 
+          v 
+    .--------------------------------. 
+    | Connecting to splitter via TCP,| connection failed    .------. 
+    | receiving configuration (list  +=====================>| Quit | 
+    | of peers) and stream header    |                      '------' 
+    '-----+--------------------------' 
+          | 
+          | connection successful 
+          v 
+    #--------------------------------# 
+    | Peer arriving                  |<=================. 
+    #-----+--------------------------#                  : 
+          v                                             : 
+    .--------------------------------.                  : 
+    | Sending UDP hello packets      | timeout (~10s)   :   .------. 
+    | to splitter and monitors,      +=====================>| Quit | 
+    | receiving acknowledge          |                  :   '------' 
+    '-----+--------------------------'                  : 
+          |                                             : 
+          | all acknowledgements received in time       : 
+          v                                        .----+----------. 
+    #--------------------------------#             | retrying      | 
+    | Peer incorporating             |             | incorporation | 
+    #-----+--------------------------#             '---------------' 
+          v                                             ^ 
+    .--------------------------------. timeout (~15s)   : 
+    | Sending UDP hello packets to   +==================' 
+    | all other incorporated and     |                      .------. 
+    | currently incorporating peers  +=====================>| Quit | 
+    '-----+--------------------------' timeout (~60s)       '------' 
+          | 
+          | all acknowledgements received in time 
+          v 
+    #--------------------------------# 
+    | Peer successfully incorporated | 
+    #--------------------------------# 
+
