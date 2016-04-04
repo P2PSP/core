@@ -73,19 +73,28 @@ public:
 class PyPeerDBS: public PeerDBS, public wrapper<PeerDBS> {
 public:
   PyPeerDBS () : PeerDBS(){}
-  
+
+   /*
   int ProcessMessage(const std::vector<char> &message,  const ip::udp::endpoint &sender) {
     if (override ProcessMessage = this->get_override("ProcessMessage")){
       std::string address = sender.address().to_string();
       uint16_t port = sender.port();
-      //This doesn't work properly. It seems a problem with message
-      //data type. What is the corresponding one in python?
-      //std::string message_(message.begin(),message.end());
-      return ProcessMessage(message, boost::python::make_tuple(address, port));
+      std::string message_(message.begin(),message.end());
+      return ProcessMessage(message_.c_str(), boost::python::make_tuple(address, port));
     }
     return PeerDBS::ProcessMessage(message, sender);
   }
-  
+   */
+  void SendChunk(const ip::udp::endpoint &peer){
+    if (override SendChunk = this->get_override("SendChunk")){
+      std::string address = peer.address().to_string();
+      uint16_t port = peer.port();
+      SendChunk(boost::python::make_tuple(address, port));
+    }
+    PeerDBS::SendChunk(peer);
+  }
+
+    
   list GetPeerList_() {
     list l;
     std::string address;
@@ -137,6 +146,7 @@ public:
   bool GetShowBuffer(){
     return show_buffer_;
   }
+
 };
   
 //Splitter
@@ -217,7 +227,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("chunk_size", &PyPeerDBS::GetChunkSize, &PyPeerDBS::SetChunkSize)
     .add_property("sendto_counter", &PyPeerDBS::GetSendtoCounter, &PyPeerDBS::SetSendtoCounter)
     .add_property("recvfrom_counter", &PyPeerDBS::GetRecvfromCounter, &PyPeerDBS::SetRecvfromCounter)
-	  
+
     //IMS
     .def("Init", &PyPeerDBS::Init) //used
     .def("WaitForThePlayer", &PyPeerDBS::WaitForThePlayer)
@@ -261,7 +271,8 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("SetMaxChunkDebt", &PyPeerDBS::SetMaxChunkDebt)
 
     //Overrides
-    .def("ProcessMessage", &PyPeerDBS::ProcessMessage)
+    //.def("ProcessMessage", &PyPeerDBS::ProcessMessage)
+    .def("SendChunk", &PyPeerDBS::SendChunk)
 
     
     ;
