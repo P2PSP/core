@@ -78,7 +78,7 @@ public:
     if (override ProcessMessage = this->get_override("ProcessMessage")){
       std::string address = sender.address().to_string();
       uint16_t port = sender.port();
-      //std::string message_(message.begin(),message.end());
+      /std::string message_(message.begin(),message.end());
       return ProcessMessage(message, make_tuple(address, port));
      }
     return PeerDBS::ProcessMessage(message, sender);
@@ -227,6 +227,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("chunk_size", &PyPeerDBS::GetChunkSize, &PyPeerDBS::SetChunkSize)
     .add_property("sendto_counter", &PyPeerDBS::GetSendtoCounter, &PyPeerDBS::SetSendtoCounter)
     .add_property("recvfrom_counter", &PyPeerDBS::GetRecvfromCounter, &PyPeerDBS::SetRecvfromCounter)
+    .def_readwrite("team_socket", &PyPeerDBS::team_socket_)
 
     //IMS
     .def("Init", &PyPeerDBS::Init) //used
@@ -290,7 +291,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("chunk_size", &PyMonitorDBS::GetChunkSize, &PyMonitorDBS::SetChunkSize)
     .add_property("sendto_counter", &PyMonitorDBS::GetSendtoCounter, &PyMonitorDBS::SetSendtoCounter)
     .add_property("recvfrom_counter", &PyMonitorDBS::GetRecvfromCounter, &PyMonitorDBS::SetRecvfromCounter)
-	  
+    
     //IMS
     .def("Init", &PyMonitorDBS::Init) //used
     .def("WaitForThePlayer", &PyMonitorDBS::WaitForThePlayer)
