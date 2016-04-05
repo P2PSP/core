@@ -74,17 +74,17 @@ class PyPeerDBS: public PeerDBS, public wrapper<PeerDBS> {
 public:
   PyPeerDBS () : PeerDBS(){}
 
-   /*
-  int ProcessMessage(const std::vector<char> &message,  const ip::udp::endpoint &sender) {
+  int ProcessMessage(const std::vector<char> &message, const ip::udp::endpoint &sender) {
     if (override ProcessMessage = this->get_override("ProcessMessage")){
       std::string address = sender.address().to_string();
       uint16_t port = sender.port();
-      std::string message_(message.begin(),message.end());
-      return ProcessMessage(message_.c_str(), boost::python::make_tuple(address, port));
-    }
+      //std::string message_(message.begin(),message.end());
+      return ProcessMessage(message, make_tuple(address, port));
+     }
     return PeerDBS::ProcessMessage(message, sender);
   }
-   */
+  
+    /*
   void SendChunk(const ip::udp::endpoint &peer){
     if (override SendChunk = this->get_override("SendChunk")){
       std::string address = peer.address().to_string();
@@ -93,7 +93,7 @@ public:
     }
     PeerDBS::SendChunk(peer);
   }
-
+*/
     
   list GetPeerList_() {
     list l;
@@ -271,8 +271,8 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("SetMaxChunkDebt", &PyPeerDBS::SetMaxChunkDebt)
 
     //Overrides
-    //.def("ProcessMessage", &PyPeerDBS::ProcessMessage)
-    .def("SendChunk", &PyPeerDBS::SendChunk)
+    .def("ProcessMessage", &PyPeerDBS::ProcessMessage)
+    //.def("SendChunk", &PyPeerDBS::SendChunk)
 
     
     ;

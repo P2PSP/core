@@ -177,7 +177,7 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
         peer = peer_list_[receive_and_feed_counter_];
         //team_socket_.send_to(::buffer(receive_and_feed_previous_), peer);
         //sendto_counter_++;
-	SendChunk(peer);
+	SendChunk(receive_and_feed_previous_,peer);
 	
         TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
                   << std::to_string(team_socket_.local_endpoint().port()) << ")"
@@ -235,7 +235,7 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
       peer = peer_list_[receive_and_feed_counter_];
       //team_socket_.send_to(::buffer(receive_and_feed_previous_), peer);
       //sendto_counter_++;
-      SendChunk(peer);
+      SendChunk(receive_and_feed_previous_,peer);
       
       debt_[peer]++;
 
@@ -297,8 +297,8 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
   return -1;
 }
   
-  void PeerDBS::SendChunk(const ip::udp::endpoint &peer){
-    team_socket_.send_to(buffer(receive_and_feed_previous_), peer);
+  void PeerDBS::SendChunk(const std::vector<char> &message, const ip::udp::endpoint &peer){
+    team_socket_.send_to(::buffer(message), peer);
     sendto_counter_++;
     }
   
