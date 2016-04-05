@@ -78,10 +78,18 @@ public:
     if (override ProcessMessage = this->get_override("ProcessMessage")){
       std::string address = sender.address().to_string();
       uint16_t port = sender.port();
-      /std::string message_(message.begin(),message.end());
-      return ProcessMessage(message, make_tuple(address, port));
-     }
+      //This doesn't work properly. It seems a problem with message
+      //data type. What is the corresponding one in python?
+      std::string message_(message.begin(),message.end());
+      return ProcessMessage(message_.c_str(), boost::python::make_tuple(address, port));
+    }
     return PeerDBS::ProcessMessage(message, sender);
+  }
+
+  int SendChunk(std::string message, boost::python::tuple peer){
+    ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
+    uint16_t port = boost::python::extract<uint16_t>(peer[1]);
+      return team_socket_.send_to(::buffer(message), boost::asio::ip::udp::endpoint(address,port));
   }
   
     /*
@@ -227,8 +235,8 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("chunk_size", &PyPeerDBS::GetChunkSize, &PyPeerDBS::SetChunkSize)
     .add_property("sendto_counter", &PyPeerDBS::GetSendtoCounter, &PyPeerDBS::SetSendtoCounter)
     .add_property("recvfrom_counter", &PyPeerDBS::GetRecvfromCounter, &PyPeerDBS::SetRecvfromCounter)
-    .def_readwrite("team_socket", &PyPeerDBS::team_socket_)
-
+    .def_readonly("team_socket", &PyPeerDBS::team_socket_)
+    
     //IMS
     .def("Init", &PyPeerDBS::Init) //used
     .def("WaitForThePlayer", &PyPeerDBS::WaitForThePlayer)
@@ -273,8 +281,7 @@ BOOST_PYTHON_MODULE(libp2psp)
 
     //Overrides
     .def("ProcessMessage", &PyPeerDBS::ProcessMessage)
-    //.def("SendChunk", &PyPeerDBS::SendChunk)
-
+    .def("SendChunk", &PyPeerDBS::SendChunk)
     
     ;
 
