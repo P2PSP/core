@@ -58,6 +58,8 @@ class PeerIMS {
   // Default
   static const bool kShowBuffer = false;
 
+  static const int kChunkIndexSize = 2;
+  
   // Port used to serve the player.
   uint16_t player_port_;
 
@@ -82,6 +84,8 @@ class PeerIMS {
   bool show_buffer_;
 
   int buffer_size_;
+  int message_size_;
+  
   int chunk_size_;
   std::vector<Chunk> chunks_;
   int header_size_in_chunks_;

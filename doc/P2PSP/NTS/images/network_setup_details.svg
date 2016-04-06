@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <!-- Created with ASCIIToSVG (http://9vx.org/~dho/a2s/) -->
-<svg width="847px" height="416px" version="1.1"
+<svg width="837px" height="416px" version="1.1"
   xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <defs>
     <filter id="dsFilterNoBlur" width="150%" height="150%">
@@ -33,55 +33,55 @@
   </defs><g id="boxes" stroke="black" stroke-width="2" fill="none" >
 <g id="group0">
 	<path id="path0" filter="url(#dsFilter)" fill="#fff" d="M 319.5 18 Q 319.5 8 329.5 8 L 399.5 8 Q 409.5 8 409.5 18 L 409.5 78 Q 409.5 88 399.5 88 L 329.5 88 Q 319.5 88 319.5 78 Z" />
-	<text x="332.1" y="44.8" id="text0" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Splitter </text>
+	<text x="332.1" y="44.8" id="text0" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Splitter </text>
 
-	<text x="332.1" y="60.8" id="text0" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >+Monitor </text>
+	<text x="332.1" y="60.8" id="text0" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >+Monitor </text>
 
 </g>
 <g id="group2">
 	<path id="path2" filter="url(#dsFilter)" fill="#fff" d="M 427.5 18 Q 427.5 8 437.5 8 L 507.5 8 Q 517.5 8 517.5 18 L 517.5 78 Q 517.5 88 507.5 88 L 437.5 88 Q 427.5 88 427.5 78 Z" />
-	<text x="440.1" y="44.8" id="text2" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Second </text>
+	<text x="440.1" y="44.8" id="text2" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Second </text>
 
-	<text x="440.1" y="60.8" id="text2" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Monitor </text>
+	<text x="440.1" y="60.8" id="text2" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Monitor </text>
 
 </g>
 <g id="group11">
 	<path id="path11" filter="url(#dsFilter)" fill="#fff" d="M 13.5 146 Q 13.5 136 23.5 136 L 93.5 136 Q 103.5 136 103.5 146 L 103.5 190 Q 103.5 200 93.5 200 L 23.5 200 Q 13.5 200 13.5 190 Z" />
-	<text x="35.1" y="156.8" id="text11" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Peer1 </text>
+	<text x="35.1" y="156.8" id="text11" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Peer1 </text>
 
-	<text x="26.1" y="188.8" id="text11" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >&lt;ifpc1&gt; </text>
+	<text x="26.1" y="188.8" id="text11" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >&lt;ifpc1&gt; </text>
 
 </g>
 <g id="group13">
 	<path id="path13" filter="url(#dsFilter)" fill="#fff" d="M 229.5 136 L 328.5 136 L 328.5 232 L 229.5 232 Z" />
-	<text x="251.1" y="156.8" id="text13" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >NAT 1 </text>
+	<text x="251.1" y="156.8" id="text13" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >NAT 1 </text>
 
-	<text x="242.1" y="188.8" id="text13" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >&lt;ifnat11&gt; </text>
+	<text x="242.1" y="188.8" id="text13" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >&lt;ifnat11&gt; </text>
 
-	<text x="242.1" y="220.8" id="text13" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >&lt;ifnat12&gt; </text>
+	<text x="242.1" y="220.8" id="text13" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >&lt;ifnat12&gt; </text>
 
 </g>
 <g id="group15">
 	<path id="path15" filter="url(#dsFilter)" fill="#fff" d="M 508.5 136 L 607.5 136 L 607.5 232 L 508.5 232 Z" />
-	<text x="530.1" y="156.8" id="text15" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >NAT 2 </text>
+	<text x="530.1" y="156.8" id="text15" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >NAT 2 </text>
 
-	<text x="521.1" y="188.8" id="text15" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >&lt;ifnat22&gt; </text>
+	<text x="521.1" y="188.8" id="text15" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >&lt;ifnat22&gt; </text>
 
-	<text x="521.1" y="220.8" id="text15" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >&lt;ifnat21&gt; </text>
+	<text x="521.1" y="220.8" id="text15" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >&lt;ifnat21&gt; </text>
 
 </g>
 <g id="group17">
 	<path id="path17" filter="url(#dsFilter)" fill="#fff" d="M 733.5 146 Q 733.5 136 743.5 136 L 813.5 136 Q 823.5 136 823.5 146 L 823.5 190 Q 823.5 200 813.5 200 L 743.5 200 Q 733.5 200 733.5 190 Z" />
-	<text x="755.1" y="156.8" id="text17" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Peer2 </text>
+	<text x="755.1" y="156.8" id="text17" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Peer2 </text>
 
-	<text x="746.1" y="188.8" id="text17" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >&lt;ifpc2&gt; </text>
+	<text x="746.1" y="188.8" id="text17" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >&lt;ifpc2&gt; </text>
 
 </g>
 <g id="group60">
 	<path id="path60" filter="url(#dsFilter)" fill="#fff" d="M 373.5 296 L 463.5 296 L 463.5 376 L 373.5 376 Z" />
-	<text x="395.1" y="332.8" id="text60" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >Local </text>
+	<text x="395.1" y="332.8" id="text60" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Local </text>
 
-	<text x="395.1" y="348.8" id="text60" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >host </text>
+	<text x="395.1" y="348.8" id="text60" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >host </text>
 
 </g>
 </g>
@@ -129,7 +129,7 @@
 	<path id="path2191" d="M 733.5 168 L 823.5 168 " />
 </g>
 </g>
-<g id="text" fill="black" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >
+<g id="text" fill="black" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >
 <text x="377.1" y="108.8" id="text4" fill="#000" >.6 </text>
 <text x="449.1" y="108.8" id="text5" fill="#000" >.7 </text>
 <text x="152.1" y="156.8" id="text7" fill="#000" >LAN1 </text>

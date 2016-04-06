@@ -156,7 +156,8 @@ void PeerIMS::ReceiveTheChunkSize() {
   read(splitter_socket_, ::buffer(buffer));
 
   chunk_size_ = ntohs(*(short *)(buffer.c_array()));
-
+  message_size_=kChunkIndexSize+chunk_size_;
+  
   TRACE("chunk_size (bytes) = " << std::to_string(chunk_size_));
 }
 

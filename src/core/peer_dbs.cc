@@ -140,7 +140,7 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
   // Now, receive and send.
 
   // TODO: remove hardcoded values
-  if (message.size() == 1026) {
+  if (message.size() == message_size_) {
     // A video chunk has been received
 
     ip::udp::endpoint peer;
