@@ -1,5 +1,6 @@
 #include <boost/python.hpp>
 #include <boost/python/tuple.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include "peer_ims.h"
 #include "peer_dbs.h"
@@ -80,8 +81,8 @@ public:
       uint16_t port = sender.port();
       //This doesn't work properly. It seems a problem with message
       //data type. What is the corresponding one in python?
-      std::string message_(message.begin(),message.end());
-      return ProcessMessage(message_.c_str(), boost::python::make_tuple(address, port));
+      //std::string message_(message.begin(),message.end());
+      return ProcessMessage(message, boost::python::make_tuple(address, port));
     }
     return PeerDBS::ProcessMessage(message, sender);
   }
@@ -113,6 +114,18 @@ public:
       l.append(boost::python::make_tuple(address, port));
     }
     return l;
+  }
+
+  void InsertPeer_(boost::python::tuple peer){
+    ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
+    uint16_t port = boost::python::extract<uint16_t>(peer[1]);
+    peer_list_.push_back(boost::asio::ip::udp::endpoint(address,port));
+  }
+
+  void RemovePeer_(boost::python::tuple peer){
+    ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
+    uint16_t port = boost::python::extract<uint16_t>(peer[1]);
+    peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), boost::asio::ip::udp::endpoint(address,port)));
   }
 
   void SetMcastAddr(std::string address){
@@ -153,6 +166,14 @@ public:
   
   bool GetShowBuffer(){
     return show_buffer_;
+  }
+
+  int GetMessageSize(){
+    return message_size_;
+  }
+
+  void SetMessageSize(int message_size){
+    message_size_ = message_size;
   }
 
 };
@@ -222,6 +243,8 @@ public:
 
 BOOST_PYTHON_MODULE(libp2psp)
 {
+  class_<std::vector<char> >("CharVec")
+            .def(vector_indexing_suite<std::vector<char> >());
   class_<PyPeerDBS, boost::noncopyable>("PeerDBS")
     //variables
     .add_property("splitter_addr", &PyPeerDBS::GetSplitterAddr, &PyPeerDBS::SetSplitterAddr)
@@ -235,7 +258,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("chunk_size", &PyPeerDBS::GetChunkSize, &PyPeerDBS::SetChunkSize)
     .add_property("sendto_counter", &PyPeerDBS::GetSendtoCounter, &PyPeerDBS::SetSendtoCounter)
     .add_property("recvfrom_counter", &PyPeerDBS::GetRecvfromCounter, &PyPeerDBS::SetRecvfromCounter)
-    .def_readonly("team_socket", &PyPeerDBS::team_socket_)
+    .add_property("message_size", &PyPeerDBS::GetMessageSize, &PyPeerDBS::SetMessageSize)
     
     //IMS
     .def("Init", &PyPeerDBS::Init) //used
@@ -278,7 +301,9 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("AmIAMonitor", &PyPeerDBS::AmIAMonitor)
     .def("GetNumberOfPeers", &PyPeerDBS::GetNumberOfPeers)
     .def("SetMaxChunkDebt", &PyPeerDBS::SetMaxChunkDebt)
-
+    .def("InsertPeer", &PyPeerDBS::InsertPeer_) //Modified here
+    .def("RemovePeer", &PyPeerDBS::RemovePeer_) //Modified here
+    
     //Overrides
     .def("ProcessMessage", &PyPeerDBS::ProcessMessage)
     .def("SendChunk", &PyPeerDBS::SendChunk)
