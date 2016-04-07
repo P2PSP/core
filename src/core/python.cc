@@ -76,15 +76,23 @@ public:
   PyPeerDBS () : PeerDBS(){}
 
   int ProcessMessage(const std::vector<char> &message, const ip::udp::endpoint &sender) {
+    TRACE("ENTRA EN PROCESS MESSAGE!!!");
     if (override ProcessMessage = this->get_override("ProcessMessage")){
+      TRACE("ENTRA EN PROCESS MESSAGE por PYTHON!!!");
       std::string address = sender.address().to_string();
       uint16_t port = sender.port();
       //This doesn't work properly. It seems a problem with message
       //data type. What is the corresponding one in python?
       //std::string message_(message.begin(),message.end());
-      return ProcessMessage(message, boost::python::make_tuple(address, port));
+      boost::python::list l;
+      for (unsigned int i = 0; i < message.size(); i++) {
+      	l.append((unsigned char)message[i]);
+      }
+      TRACE("SALE DE PROCESS MESSAGE por PYTHON!!!");
+      return ProcessMessage(l, boost::python::make_tuple(address, port));
     }
-    return PeerDBS::ProcessMessage(message, sender);
+    TRACE("SALE DE PROCESS MESSAGE por C++!!!");
+    return this->PeerDBS::ProcessMessage(message, sender);
   }
 
   int SendChunk(std::string message, boost::python::tuple peer){
@@ -92,7 +100,15 @@ public:
     uint16_t port = boost::python::extract<uint16_t>(peer[1]);
       return team_socket_.send_to(::buffer(message), boost::asio::ip::udp::endpoint(address,port));
   }
-  
+
+  void InsertChunk(int position, boost::python::list chunk){
+    std::vector<char> chunk_(len(chunk));
+    for (int i = 0; i < len(chunk); ++i)
+    {
+        chunk_.push_back(boost::python::extract<unsigned char>(chunk[i]));
+    }
+    chunks_[position]= {chunk_,true};
+  }
     /*
   void SendChunk(const ip::udp::endpoint &peer){
     if (override SendChunk = this->get_override("SendChunk")){
@@ -176,6 +192,29 @@ public:
     message_size_ = message_size;
   }
 
+  int GetBufferSize(){
+    return buffer_size_;
+  }
+
+  void SetBufferSize(int buffer_size){
+    buffer_size_=buffer_size;
+  }
+
+  int GetReceivedCounter(){
+    return received_counter_;
+  }
+
+  void SetReceivedCounter(int received_counter){
+    received_counter_ = received_counter;
+  }
+
+  int GetRecAndFeedCounter(){
+    return receive_and_feed_counter_;
+  }
+
+  void SetRecAndFeedCounter (int receive_and_feed_counter ){
+    receive_and_feed_counter_ = receive_and_feed_counter;
+  }
 };
   
 //Splitter
@@ -245,6 +284,7 @@ BOOST_PYTHON_MODULE(libp2psp)
 {
   class_<std::vector<char> >("CharVec")
             .def(vector_indexing_suite<std::vector<char> >());
+  
   class_<PyPeerDBS, boost::noncopyable>("PeerDBS")
     //variables
     .add_property("splitter_addr", &PyPeerDBS::GetSplitterAddr, &PyPeerDBS::SetSplitterAddr)
@@ -259,7 +299,10 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("sendto_counter", &PyPeerDBS::GetSendtoCounter, &PyPeerDBS::SetSendtoCounter)
     .add_property("recvfrom_counter", &PyPeerDBS::GetRecvfromCounter, &PyPeerDBS::SetRecvfromCounter)
     .add_property("message_size", &PyPeerDBS::GetMessageSize, &PyPeerDBS::SetMessageSize)
-    
+    .add_property("buffer_size", &PyPeerDBS::GetBufferSize, &PyPeerDBS::SetBufferSize)
+    .add_property("received_counter", &PyPeerDBS::GetReceivedCounter, &PyPeerDBS::SetReceivedCounter)
+    .add_property("receive_and_feed_counter", &PyPeerDBS::GetRecAndFeedCounter, &PyPeerDBS::SetRecAndFeedCounter)
+
     //IMS
     .def("Init", &PyPeerDBS::Init) //used
     .def("WaitForThePlayer", &PyPeerDBS::WaitForThePlayer)
@@ -307,7 +350,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     //Overrides
     .def("ProcessMessage", &PyPeerDBS::ProcessMessage)
     .def("SendChunk", &PyPeerDBS::SendChunk)
-    
+    .def("InsertChunk", &PyPeerDBS::InsertChunk)
     ;
 
   class_<PyMonitorDBS, boost::noncopyable>("MonitorDBS")

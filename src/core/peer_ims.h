@@ -35,8 +35,7 @@ struct Chunk {
 };
 
 class PeerIMS {
-  // protected:
- public:
+ protected:
   // Default port used to serve the player.
   static const uint16_t kPlayerPort = 9999;
 
