@@ -1,6 +1,7 @@
 #include <boost/python.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <exception>
 
 #include "peer_ims.h"
 #include "peer_dbs.h"
@@ -77,7 +78,8 @@ public:
 
   int ProcessMessage(const std::vector<char> &message, const ip::udp::endpoint &sender) {
     TRACE("ENTRA EN PROCESS MESSAGE!!!");
-    if (override ProcessMessage = this->get_override("ProcessMessage")){
+
+    if (override ProcessMessage = get_override("ProcessMessage")){
       TRACE("ENTRA EN PROCESS MESSAGE por PYTHON!!!");
       std::string address = sender.address().to_string();
       uint16_t port = sender.port();
@@ -94,6 +96,7 @@ public:
     TRACE("SALE DE PROCESS MESSAGE por C++!!!");
     return this->PeerDBS::ProcessMessage(message, sender);
   }
+
 
   int SendChunk(std::string message, boost::python::tuple peer){
     ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
@@ -304,27 +307,27 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("receive_and_feed_counter", &PyPeerDBS::GetRecAndFeedCounter, &PyPeerDBS::SetRecAndFeedCounter)
 
     //IMS
-    .def("Init", &PyPeerDBS::Init) //used
-    .def("WaitForThePlayer", &PyPeerDBS::WaitForThePlayer)
-    .def("ConnectToTheSplitter", &PyPeerDBS::ConnectToTheSplitter)
-    .def("DisconnectFromTheSplitter", &PyPeerDBS::DisconnectFromTheSplitter)
-    .def("ReceiveTheMcasteEndpoint", &PyPeerDBS::ReceiveTheMcasteEndpoint) 
-    .def("ReceiveTheHeader", &PyPeerDBS::ReceiveTheHeader)
-    .def("ReceiveTheChunkSize", &PyPeerDBS::ReceiveTheChunkSize)
-    .def("ReceiveTheHeaderSize", &PyPeerDBS::ReceiveTheHeaderSize)
-    .def("ReceiveTheBufferSize", &PyPeerDBS::ReceiveTheBufferSize)
-    .def("ListenToTheTeam", &PyPeerDBS::ListenToTheTeam)
-    .def("ReceiveTheNextMessage", &PyPeerDBS::ReceiveTheNextMessage)
-    .def("ProcessNextMessage", &PyPeerDBS::ProcessNextMessage)
-    .def("BufferData", &PyPeerDBS::BufferData)
-    .def("FindNextChunk", &PyPeerDBS::FindNextChunk)
-    .def("PlayChunk", &PyPeerDBS::PlayChunk)
-    .def("PlayNextChunk", &PyPeerDBS::PlayNextChunk)
-    .def("KeepTheBufferFull", &PyPeerDBS::KeepTheBufferFull)
-    .def("Run", &PyPeerDBS::Run)
-    .def("Start", &PyPeerDBS::Start)
-    .def("IsPlayerAlive", &PyPeerDBS::IsPlayerAlive)
-    .def("GetPlayedChunk", &PyPeerDBS::GetPlayedChunk)
+    .def("Init", &PeerDBS::Init) //used
+    .def("WaitForThePlayer", &PeerDBS::WaitForThePlayer)
+    .def("ConnectToTheSplitter", &PeerDBS::ConnectToTheSplitter)
+    .def("DisconnectFromTheSplitter", &PeerDBS::DisconnectFromTheSplitter)
+    .def("ReceiveTheMcasteEndpoint", &PeerDBS::ReceiveTheMcasteEndpoint) 
+    .def("ReceiveTheHeader", &PeerDBS::ReceiveTheHeader)
+    .def("ReceiveTheChunkSize", &PeerDBS::ReceiveTheChunkSize)
+    .def("ReceiveTheHeaderSize", &PeerDBS::ReceiveTheHeaderSize)
+    .def("ReceiveTheBufferSize", &PeerDBS::ReceiveTheBufferSize)
+    .def("ListenToTheTeam", &PeerDBS::ListenToTheTeam)
+    .def("ReceiveTheNextMessage", &PeerDBS::ReceiveTheNextMessage)
+    .def("ProcessNextMessage", &PeerDBS::ProcessNextMessage)
+    .def("BufferData", &PeerDBS::BufferData)
+    .def("FindNextChunk", &PeerDBS::FindNextChunk)
+    .def("PlayChunk", &PeerDBS::PlayChunk)
+    .def("PlayNextChunk", &PeerDBS::PlayNextChunk)
+    .def("KeepTheBufferFull", &PeerDBS::KeepTheBufferFull)
+    .def("Run", &PeerDBS::Run)
+    .def("Start", &PeerDBS::Start)
+    .def("IsPlayerAlive", &PeerDBS::IsPlayerAlive)
+    .def("GetPlayedChunk", &PeerDBS::GetPlayedChunk)
     .def("GetPeerList", &PyPeerDBS::GetPeerList_) //Modified here
     
     //DBS
