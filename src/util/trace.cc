@@ -37,49 +37,49 @@
 
 namespace p2psp {
 
-using namespace boost;
+  using namespace boost;
 
-class TraceSystem::Sink {
- public:
-  shared_ptr<boost::log::sinks::synchronous_sink<
-      boost::log::sinks::text_file_backend> >
-      log_sink_;
-};
+  class TraceSystem::Sink {
+  public:
+    shared_ptr<boost::log::sinks::synchronous_sink<
+		 boost::log::sinks::text_file_backend> >
+    log_sink_;
+  };
 
-TraceSystem TraceSystem::trace_system_;
+  TraceSystem TraceSystem::trace_system_;
 
-TraceSystem::TraceSystem() {
+  TraceSystem::TraceSystem() {
 #ifdef TRACE_FILE_OUPUT
 
-  sink_ptr_.reset(new TraceSystem::Sink());
+    sink_ptr_.reset(new TraceSystem::Sink());
 
-  sink_ptr_->log_sink_ = log::add_file_log(
-      log::keywords::file_name = "p2psp_%N.log",
-      log::keywords::rotation_size = 10 * 1024 * 1024,
-      log::keywords::time_based_rotation =
-          log::sinks::file::rotation_at_time_point(0, 0, 0),
-      log::keywords::format =
-          (log::expressions::stream
-           << log::expressions::format_date_time<posix_time::ptime>(
-                  "TimeStamp", "%Y-%m-%d %H:%M:%S.%f")
-           << " " << log::expressions::smessage));
+    sink_ptr_->log_sink_ = log::add_file_log(
+					     log::keywords::file_name = "p2psp_%N.log",
+					     log::keywords::rotation_size = 10 * 1024 * 1024,
+					     log::keywords::time_based_rotation =
+					     log::sinks::file::rotation_at_time_point(0, 0, 0),
+					     log::keywords::format =
+					     (log::expressions::stream
+					      << log::expressions::format_date_time<posix_time::ptime>(
+												       "TimeStamp", "%Y-%m-%d %H:%M:%S.%f")
+					      << " " << log::expressions::smessage));
 
 #endif  // TRACE_FILE_OUTPUT
 
-  log::add_console_log(
-      std::cout, log::keywords::format =
-                     (log::expressions::stream
-                      << log::expressions::format_date_time<posix_time::ptime>(
-                             "TimeStamp", "%Y-%m-%d %H:%M:%S.%f")
-                      << " " << log::expressions::smessage));
+    log::add_console_log(
+			 std::cout, log::keywords::format =
+			 (log::expressions::stream
+			  << log::expressions::format_date_time<posix_time::ptime>(
+										   "TimeStamp", "%Y-%m-%d %H:%M:%S.%f")
+			  << " " << log::expressions::smessage));
 
-  log::core::get()->set_filter(log::trivial::severity >=
-                               log::trivial::TRACE_THRESHOLD);
+    log::core::get()->set_filter(log::trivial::severity >=
+				 log::trivial::TRACE_THRESHOLD);
 
-  log::add_common_attributes();
-}
+    log::add_common_attributes();
+  }
 
-void TraceSystem::Flush() {
-  if (trace_system_.sink_ptr_) trace_system_.sink_ptr_->log_sink_->flush();
-}
+  void TraceSystem::Flush() {
+    if (trace_system_.sink_ptr_) trace_system_.sink_ptr_->log_sink_->flush();
+  }
 }

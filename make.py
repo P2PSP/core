@@ -21,6 +21,7 @@ if len(sys.argv) >= 2:
     if sys.argv[1] == 'debug':
         cmake = cmake + ' -DCMAKE_BUILD_TYPE=Debug'
     elif sys.argv[1] == 'only-cmake':
+#        cmake = cmake + ' -DTRACE_SILENT_MODE'
         only_cmake = True
 
 if not os.path.exists(bin_dir):

@@ -14,7 +14,6 @@
 #include <memory>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
-
       
 namespace p2psp
 {
@@ -25,10 +24,11 @@ namespace p2psp
    */
   class TraceSystem
   {
+
   private:
+
     class Sink;
-    typedef boost::log::sources::severity_logger<
-      boost::log::trivial::severity_level> Logger;
+    typedef boost::log::sources::severity_logger<boost::log::trivial::severity_level> Logger;
         
     Logger logger_;
     std::unique_ptr<Sink> sink_ptr_;
@@ -36,6 +36,7 @@ namespace p2psp
     static TraceSystem trace_system_;
     
   public:
+
     TraceSystem();
     
     static Logger& logger()
@@ -44,11 +45,10 @@ namespace p2psp
     }
     
     static void Flush();
+    
   };
 
 }
-
-
 
 #define _RED            "31m"
 #define _GREEN          "32m"
@@ -95,6 +95,5 @@ namespace p2psp
 #define TRACE(a)    {}
 
 #endif // TRACE_SILENT_MODE
-
 
 #endif // P2PSP_UTIL_TRACE_H
