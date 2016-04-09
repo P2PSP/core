@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-# :-)
-
+from __future__ import print_function
 import os
 import sys
 import shutil
@@ -13,6 +12,9 @@ only_cmake = False
 cmake = 'cmake'
 
 if len(sys.argv) >= 2:
+    if sys.argv[1] == '-h':
+        print("{clean|debug}")
+        quit()
     if sys.argv[1] == 'clean':
         os.system('git clean -dfx')
         quit()
@@ -37,7 +39,7 @@ if not os.path.exists(build_dir):
 sys_name = platform.system()
 
 if sys_name == 'Linux' or sys_name == 'Darwin':
-    print '\nMaking for Linux...\n'
+    print('\nMaking for Linux...\n')
     command = 'cd build && ' + cmake + ' .. && echo'
     if os.system(command) == 0:
         command = 'cd build && make'
@@ -45,4 +47,4 @@ if sys_name == 'Linux' or sys_name == 'Darwin':
             os.system(command)
 
 elif sys_name == 'Windows':
-    print '\nMaking for Windows...\n'
+    print('\nMaking for Windows...\n')

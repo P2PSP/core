@@ -83,7 +83,7 @@ class PeerIMS {
   bool show_buffer_;
 
   int buffer_size_;
-  int message_size_;
+  unsigned int message_size_;
   
   int chunk_size_;
   std::vector<Chunk> chunks_;
