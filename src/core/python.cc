@@ -1,6 +1,7 @@
 #include <boost/python.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/thread/thread.hpp>
 #include <exception>
 
 #include "peer_ims.h"
@@ -13,6 +14,33 @@
 
 using namespace p2psp;
 using namespace boost::python;
+
+class acquireGIL 
+{
+public:
+    inline acquireGIL(){
+        state = PyGILState_Ensure();
+    }
+
+    inline ~acquireGIL(){
+        PyGILState_Release(state);
+    }
+private:
+    PyGILState_STATE state;
+};
+
+class releaseGIL{
+public:
+    inline releaseGIL(){
+        save_state = PyEval_SaveThread();
+    }
+
+    inline ~releaseGIL(){
+        PyEval_RestoreThread(save_state);
+    }
+private:
+    PyThreadState *save_state;
+};
 
 //Monitor
 class PyMonitorDBS: public MonitorDBS {
@@ -76,10 +104,21 @@ class PyPeerDBS: public PeerDBS, public wrapper<PeerDBS> {
 public:
   PyPeerDBS () : PeerDBS(){}
 
+  void Run(){
+    //PyThreadState *m_thread_state = PyEval_SaveThread();
+    //std::cout << "ENTRA EN RUN del WRAPPER" << std::endl;
+    TRACE("ENTRA EN RUN del WRAPPER");
+    acquireGIL lock;
+    PeerDBS::Run();
+    releaseGIL unlock;
+    //PyEval_RestoreThread(m_thread_state);
+    //m_thread_state=NULL;
+  }
+  
   int ProcessMessage(const std::vector<char> &message, const ip::udp::endpoint &sender) {
     TRACE("ENTRA EN PROCESS MESSAGE!!!");
-
-    if (override ProcessMessage = get_override("ProcessMessage")){
+    
+     if (override ProcessMessage = get_override("ProcessMessage")){
       TRACE("ENTRA EN PROCESS MESSAGE por PYTHON!!!");
       std::string address = sender.address().to_string();
       uint16_t port = sender.port();
@@ -92,25 +131,33 @@ public:
       }
       TRACE("SALE DE PROCESS MESSAGE por PYTHON!!!");
       return ProcessMessage(l, boost::python::make_tuple(address, port));
-    }
+      }
     TRACE("SALE DE PROCESS MESSAGE por C++!!!");
+    return PeerDBS::ProcessMessage(message, sender);
+  }
+
+  int Default_ProcessMessage(const std::vector<char> &message, const ip::udp::endpoint &sender){
     return this->PeerDBS::ProcessMessage(message, sender);
   }
 
-
-  int SendChunk(std::string message, boost::python::tuple peer){
+  int SendChunk(boost::python::list message, boost::python::tuple peer){
     ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
     uint16_t port = boost::python::extract<uint16_t>(peer[1]);
-      return team_socket_.send_to(::buffer(message), boost::asio::ip::udp::endpoint(address,port));
+    std::vector<char> msg(len(message));
+    for (int i = 0; i < len(message); ++i)
+    {
+      msg.push_back((char)boost::python::extract<unsigned char>(message[i]));
+    }
+    return team_socket_.send_to(::buffer(msg), boost::asio::ip::udp::endpoint(address,port));
   }
 
   void InsertChunk(int position, boost::python::list chunk){
     std::vector<char> chunk_(len(chunk));
     for (int i = 0; i < len(chunk); ++i)
     {
-        chunk_.push_back(boost::python::extract<unsigned char>(chunk[i]));
+      chunk_.push_back((char)boost::python::extract<unsigned char>(chunk[i]));
     }
-    chunks_[position]= {chunk_,true};
+    chunks_[position]= {chunk_, true};
   }
     /*
   void SendChunk(const ip::udp::endpoint &peer){
@@ -122,6 +169,20 @@ public:
     PeerDBS::SendChunk(peer);
   }
 */
+  list GetReceiveAndFeedPrevious(){
+    boost::python::list l;
+    for (unsigned int i = 0; i < receive_and_feed_previous_.size(); i++) {
+      	l.append((unsigned char)receive_and_feed_previous_[i]);
+    }
+    return l; 
+  }
+
+  void SetReceiveAndFeedPrevious(boost::python::list l){
+    for (int i = 0; i < len(l); ++i)
+    {
+        receive_and_feed_previous_.push_back(boost::python::extract<unsigned char>(l[i]));
+    }
+  }
     
   list GetPeerList_() {
     list l;
@@ -145,6 +206,30 @@ public:
     ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
     uint16_t port = boost::python::extract<uint16_t>(peer[1]);
     peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), boost::asio::ip::udp::endpoint(address,port)));
+  }
+
+  void AddDebt(boost::python::tuple peer){
+    ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
+    uint16_t port = boost::python::extract<uint16_t>(peer[1]);
+    debt_[boost::asio::ip::udp::endpoint(address,port)]++;
+  }
+
+  void SetDebt(boost::python::tuple peer, int value){
+    ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
+    uint16_t port = boost::python::extract<uint16_t>(peer[1]);
+    debt_[boost::asio::ip::udp::endpoint(address,port)] = value;
+  }
+
+  int GetDebt(boost::python::tuple peer){
+    ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
+    uint16_t port = boost::python::extract<uint16_t>(peer[1]);
+    return debt_[boost::asio::ip::udp::endpoint(address,port)];
+  }
+
+  void RemoveDebt(boost::python::tuple peer){
+    ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
+    uint16_t port = boost::python::extract<uint16_t>(peer[1]);
+    debt_.erase(boost::asio::ip::udp::endpoint(address,port));
   }
 
   void SetMcastAddr(std::string address){
@@ -285,6 +370,7 @@ public:
 
 BOOST_PYTHON_MODULE(libp2psp)
 {
+  PyEval_InitThreads();
   class_<std::vector<char> >("CharVec")
             .def(vector_indexing_suite<std::vector<char> >());
   
@@ -305,7 +391,8 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("buffer_size", &PyPeerDBS::GetBufferSize, &PyPeerDBS::SetBufferSize)
     .add_property("received_counter", &PyPeerDBS::GetReceivedCounter, &PyPeerDBS::SetReceivedCounter)
     .add_property("receive_and_feed_counter", &PyPeerDBS::GetRecAndFeedCounter, &PyPeerDBS::SetRecAndFeedCounter)
-
+    .add_property("receive_and_feed_previous_" , &PyPeerDBS::GetReceiveAndFeedPrevious, &PyPeerDBS::SetReceiveAndFeedPrevious)
+    
     //IMS
     .def("Init", &PeerDBS::Init) //used
     .def("WaitForThePlayer", &PeerDBS::WaitForThePlayer)
@@ -349,9 +436,13 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("SetMaxChunkDebt", &PyPeerDBS::SetMaxChunkDebt)
     .def("InsertPeer", &PyPeerDBS::InsertPeer_) //Modified here
     .def("RemovePeer", &PyPeerDBS::RemovePeer_) //Modified here
-    
+    .def("AddDebt", &PyPeerDBS::AddDebt)
+    .def("GetDebt", &PyPeerDBS::GetDebt)
+    .def("RemoveDebt", &PyPeerDBS::RemoveDebt)
+    .def("SetDebt", &PyPeerDBS::SetDebt)
+	 
     //Overrides
-    .def("ProcessMessage", &PyPeerDBS::ProcessMessage)
+    .def("ProcessMessage", &PyPeerDBS::ProcessMessage, &PyPeerDBS::Default_ProcessMessage)
     .def("SendChunk", &PyPeerDBS::SendChunk)
     .def("InsertChunk", &PyPeerDBS::InsertChunk)
     ;

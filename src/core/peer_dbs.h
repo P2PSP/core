@@ -65,7 +65,6 @@ class PeerDBS : public PeerIMS {
   virtual void ListenToTheTeam() override;
   virtual int ProcessMessage(const std::vector<char>&,
                              const ip::udp::endpoint&) override;
-  virtual void SendChunk(const std::vector<char>&, const ip::udp::endpoint&);
   virtual void LogMessage(const std::string&);
   virtual void BuildLogMessage(const std::string&);
   virtual float CalcBufferCorrectness();

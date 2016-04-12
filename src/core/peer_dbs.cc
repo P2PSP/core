@@ -175,9 +175,8 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
       while (receive_and_feed_counter_ < (int)peer_list_.size() &&
              receive_and_feed_counter_ > 0) {
         peer = peer_list_[receive_and_feed_counter_];
-        //team_socket_.send_to(::buffer(receive_and_feed_previous_), peer);
-        //sendto_counter_++;
-	SendChunk(receive_and_feed_previous_,peer);
+        team_socket_.send_to(::buffer(receive_and_feed_previous_), peer);
+        sendto_counter_++;
 	
         TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
                   << std::to_string(team_socket_.local_endpoint().port()) << ")"
@@ -233,9 +232,8 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
       // Send the previous chunk in congestion avoiding mode.
 
       peer = peer_list_[receive_and_feed_counter_];
-      //team_socket_.send_to(::buffer(receive_and_feed_previous_), peer);
-      //sendto_counter_++;
-      SendChunk(receive_and_feed_previous_,peer);
+      team_socket_.send_to(::buffer(receive_and_feed_previous_), peer);
+      sendto_counter_++;
       
       debt_[peer]++;
 
@@ -296,12 +294,7 @@ int PeerDBS::ProcessMessage(const std::vector<char> &message,
 
   return -1;
 }
-  
-  void PeerDBS::SendChunk(const std::vector<char> &message, const ip::udp::endpoint &peer){
-    team_socket_.send_to(::buffer(message), peer);
-    sendto_counter_++;
-    }
-  
+    
 void PeerDBS::LogMessage(const std::string &message) {
   // TODO: self.LOG_FILE.write(self.build_log_message(message) + "\n")
   // print >>self.LOG_FILE, self.build_log_message(message)

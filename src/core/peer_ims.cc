@@ -392,17 +392,18 @@ int PeerIMS::FindNextChunk() {
   // counter = 0
 
   int chunk_number = (played_chunk_ + 1) % Common::kMaxChunkNumber;
-
+  
   while (!chunks_[chunk_number % buffer_size_].received) {
     // sys.stdout.write(Color.cyan)
     TRACE("lost chunk " << std::to_string(chunk_number));
     // sys.stdout.write(Color.none)
 
     chunk_number = (chunk_number + 1) % Common::kMaxChunkNumber;
-  }
+    }
   // counter++
   // if counter > self.buffer_size:
   //    break
+  //TRACE("CHUNK Finded: " <<std::to_string(chunk_number));
   return chunk_number;
 }
 
