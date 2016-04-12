@@ -100,10 +100,10 @@ void SplitterDBS::SendConfiguration(
 }
 
 void SplitterDBS::InsertPeer(const boost::asio::ip::udp::endpoint &peer) {
-  if (find(peer_list_.begin(), peer_list_.end(), peer) == peer_list_.end()) {
-    peer_list_.push_back(peer);
+  if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
+    peer_list_.erase(find(peer_list_.begin(), peer_list_.end(), peer));
   }
-
+  peer_list_.push_back(peer);
   losses_[peer] = 0;
   TRACE("Inserted peer " << peer);
 }
