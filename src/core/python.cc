@@ -45,6 +45,12 @@ private:
 //Monitor
 class PyMonitorDBS: public MonitorDBS {
 public:
+
+  void Run(){
+    TRACE("ENTRA EN RUN del WRAPPER");
+    releaseGIL unlock;
+    PeerDBS::Run();
+  }
   
   list GetPeerList_() {
     list l;
@@ -105,19 +111,14 @@ public:
   PyPeerDBS () : PeerDBS(){}
 
   void Run(){
-    //PyThreadState *m_thread_state = PyEval_SaveThread();
-    //std::cout << "ENTRA EN RUN del WRAPPER" << std::endl;
     TRACE("ENTRA EN RUN del WRAPPER");
-    acquireGIL lock;
-    PeerDBS::Run();
     releaseGIL unlock;
-    //PyEval_RestoreThread(m_thread_state);
-    //m_thread_state=NULL;
+    PeerDBS::Run();
   }
   
   int ProcessMessage(const std::vector<char> &message, const ip::udp::endpoint &sender) {
     TRACE("ENTRA EN PROCESS MESSAGE!!!");
-    
+     acquireGIL lock;
      if (override ProcessMessage = get_override("ProcessMessage")){
       TRACE("ENTRA EN PROCESS MESSAGE por PYTHON!!!");
       std::string address = sender.address().to_string();
