@@ -134,8 +134,15 @@ class SplitterIMS {
   int GetRecvFromCounter();
   int GetSendToCounter();
   int GetChunkSize();
-  int GetPort();
-
+  int GetPort(); // GetTeamPort()
+  int GetBufferSize();
+  std::string GetChannel();
+  int GetHeaderSize();
+  std::string GetMcastAddr();
+  std::string GetSourceAddr();
+  int GetSourcePort();
+  int GetTTL();
+  
   // Setters
   void SetAlive(bool alive);
   void SetBufferSize(int buffer_size);
