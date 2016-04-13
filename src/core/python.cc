@@ -126,12 +126,13 @@ public:
       //This doesn't work properly. It seems a problem with message
       //data type. What is the corresponding one in python?
       //std::string message_(message.begin(),message.end());
-      boost::python::list l;
-      for (unsigned int i = 0; i < message.size(); i++) {
-      	l.append((unsigned char)message[i]);
-      }
+      //boost::python::list l;
+      //for (unsigned int i = 0; i < message.size(); i++) {
+      //	l.append((unsigned char)message[i]);
+      //}
+      boost::python::object memoryView(boost::python::handle<>(PyMemoryView_FromMemory((char*)message.data(), message.size(), PyBUF_READ)));
       TRACE("SALE DE PROCESS MESSAGE por PYTHON!!!");
-      return ProcessMessage(l, boost::python::make_tuple(address, port));
+      return ProcessMessage(memoryView, boost::python::make_tuple(address, port));
       }
     TRACE("SALE DE PROCESS MESSAGE por C++!!!");
     return PeerDBS::ProcessMessage(message, sender);
@@ -144,6 +145,7 @@ public:
   int SendChunk(boost::python::list message, boost::python::tuple peer){
     ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
     uint16_t port = boost::python::extract<uint16_t>(peer[1]);
+    
     std::vector<char> msg(len(message));
     for (int i = 0; i < len(message); ++i)
     {
@@ -152,12 +154,16 @@ public:
     return team_socket_.send_to(::buffer(msg), boost::asio::ip::udp::endpoint(address,port));
   }
 
-  void InsertChunk(int position, boost::python::list chunk){
+  void InsertChunk(int position, boost::python::object chunk){//boost::python::list chunk){
+    /*
     std::vector<char> chunk_(len(chunk));
     for (int i = 0; i < len(chunk); ++i)
     {
       chunk_.push_back((char)boost::python::extract<unsigned char>(chunk[i]));
-    }
+      }*/
+
+    std::vector<char> chunk_ = boost::python::extract<std::vector<char> >(chunk);
+    
     chunks_[position]= {chunk_, true};
   }
     /*
