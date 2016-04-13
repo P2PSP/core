@@ -50,9 +50,9 @@ class SplitterIMS {
   int ttl_;
 
   /*
-   An IMS splitter runs 2 threads. The main one serves the
-   chunks to the team. The other controls peer arrivals. This
-   variable is true while the player is receiving data.
+   An IMS splitter runs 2 threads. The main one serves the chunks to
+   the team. The other controls peer arrivals. This variable is true
+   while the consumer is receiving data.
    */
   bool alive_;
 

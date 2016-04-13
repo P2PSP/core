@@ -19,15 +19,15 @@ namespace p2psp {
   PeerIMS::PeerIMS()
     : io_service_(),
       acceptor_(io_service_),
-      player_socket_(io_service_),
+      consumer_socket_(io_service_),
       splitter_socket_(io_service_),
       team_socket_(io_service_) {
 
     // Default values
-    player_port_ = kPlayerPort;
+    consumer_port_ = kConsumerPort;
     splitter_addr_ = ip::address::from_string(kSplitterAddr);
     splitter_port_ = kSplitterPort;
-    port_ = kPort;
+    team_port_ = kTeamPort;
     use_localhost_ = kUseLocalhost;
     buffer_status_ = kBufferStatus;
     show_buffer_ = kShowBuffer;
@@ -46,8 +46,8 @@ namespace p2psp {
     mcast_addr_ = ip::address::from_string("0.0.0.0");
     mcast_port_ = 0;
 
-    played_chunk_ = 0;
-    player_alive_ = false;
+    consumed_chunk_ = 0;
+    consumer_alive_ = false;
 
     received_counter_ = 0;
     received_flag_ = std::vector<bool>();
@@ -60,23 +60,23 @@ namespace p2psp {
 
   void PeerIMS::Init(){};
 
-  void PeerIMS::WaitForThePlayer() {
-    std::string port = std::to_string(player_port_);
-    ip::tcp::endpoint endpoint(ip::tcp::v4(), player_port_);
+  void PeerIMS::WaitForTheConsumer() {
+    std::string port = std::to_string(consumer_port_);
+    ip::tcp::endpoint endpoint(ip::tcp::v4(), consumer_port_);
 
     acceptor_.open(endpoint.protocol());
     acceptor_.set_option(ip::tcp::acceptor::reuse_address(true));
     acceptor_.bind(endpoint);
     acceptor_.listen();
 
-    TRACE("Waiting for the player at (" << endpoint.address().to_string() << ","
+    TRACE("Waiting for the consumer at (" << endpoint.address().to_string() << ","
 	  << std::to_string(endpoint.port())
 	  << ")");
-    acceptor_.accept(player_socket_);
+    acceptor_.accept(consumer_socket_);
 
-    TRACE("The player is ("
-	  << player_socket_.remote_endpoint().address().to_string() << ","
-	  << std::to_string(player_socket_.remote_endpoint().port()) << ")");
+    TRACE("The consumer is ("
+	  << consumer_socket_.remote_endpoint().address().to_string() << ","
+	  << std::to_string(consumer_socket_.remote_endpoint().port()) << ")");
   }
 
   void PeerIMS::ConnectToTheSplitter() throw(boost::system::system_error) {
@@ -109,9 +109,9 @@ namespace p2psp {
     TRACE("Connecting to the splitter at ("
 	  << splitter_tcp_endpoint.address().to_string() << ","
 	  << std::to_string(splitter_tcp_endpoint.port()) << ") from " << my_ip);
-    if (port_ != 0) {
-      TRACE("I'm using port" << std::to_string(port_));
-      tcp_endpoint = ip::tcp::endpoint(ip::address::from_string(my_ip), port_);
+    if (team_port_ != 0) {
+      TRACE("I'm using port" << std::to_string(team_port_));
+      tcp_endpoint = ip::tcp::endpoint(ip::address::from_string(my_ip), team_port_);
       splitter_socket_.set_option(ip::udp::socket::reuse_address(true));
     } else {
       tcp_endpoint = ip::tcp::endpoint(ip::address::from_string(my_ip), 0);
@@ -175,10 +175,10 @@ namespace p2psp {
     }
 
     try {
-      write(player_socket_, chunk);
+      write(consumer_socket_, chunk);
     } catch (std::exception e) {
       ERROR(e.what());
-      ERROR("error sending data to the player");
+      ERROR("error sending data to the consumer");
       TRACE("len(data) =" << std::to_string(chunk.size()));
       boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
     }
@@ -211,22 +211,24 @@ namespace p2psp {
   }
 
   void PeerIMS::BufferData() {
-    // The peer dies if the player disconnects.
-    player_alive_ = true;
+    // The peer dies if the consumer disconnects.
+    consumer_alive_ = true;
 
-    // The last chunk sent to the player.
-    played_chunk_ = 0;
+    // The last chunk sent to the consumer.
+    consumed_chunk_ = 0;
 
     // Counts the number of executions of the recvfrom() function.
     recvfrom_counter_ = 0;
 
-    // The buffer of chunks is a structure that is used to delay the playback of
-    // the chunks in order to accommodate the network jittter. Two components are
-    // needed: (1) the "chunks" buffer that stores the received chunks and (2) the
-    // "received" buffer that stores if a chunk has been received or not. Notice
-    // that each peer can use a different buffer_size: the smaller the buffer
-    // size, the lower start-up time, the higher chunk-loss ratio. However, for
-    // the sake of simpliticy, all peers will use the same buffer size.
+    // The buffer of chunks is a structure that is used to delay the
+    // consumption of the chunks in order to accommodate the network
+    // jittter. Two components are needed: (1) the "chunks" buffer
+    // that stores the received chunks and (2) the "received" buffer
+    // that stores if a chunk has been received or not. Notice that
+    // each peer can use a different buffer_size: the smaller the
+    // buffer size, the lower start-up time, the higher chunk-loss
+    // ratio. However, for the sake of simpliticy, all peers will use
+    // the same buffer size.
 
     chunks_.resize(buffer_size_);
     received_counter_ = 0;
@@ -234,32 +236,35 @@ namespace p2psp {
     // Wall time (execution time plus waiting time).
     clock_t start_time = clock();
 
-    // We will send a chunk to the player when a new chunk is received. Besides,
-    // those slots in the buffer that have not been filled by a new chunk will not
-    // be send to the player. Moreover, chunks can be delayed an unknown time.
-    // This means that (due to the jitter) after chunk X, the chunk X+Y can be
-    // received (instead of the chunk X+1). Alike, the chunk X-Y could follow the
-    // chunk X. Because we implement the buffer as a circular queue, in order to
-    // minimize the probability of a delayed chunk overwrites a new chunk that is
-    // waiting for traveling the player, we wil fill only the half of the circular
-    // queue.
+    // We will send a chunk to the consumer when a new chunk is
+    // received. Besides, those slots in the buffer that have not been
+    // filled by a new chunk will not be send to the
+    // consumer. Moreover, chunks can be delayed an unknown time.
+    // This means that (due to the jitter) after chunk X, the chunk
+    // X+Y can be received (instead of the chunk X+1). Alike, the
+    // chunk X-Y could follow the chunk X. Because we implement the
+    // buffer as a circular queue, in order to minimize the
+    // probability of a delayed chunk overwrites a new chunk that is
+    // waiting for traveling the consumer, we wil fill only the half
+    // of the circular queue.
 
     TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
 	  << std::to_string(team_socket_.local_endpoint().port()) << ")"
 	  << "\b: buffering = 000.00%");
     TraceSystem::Flush();
 
-    // First chunk to be sent to the player.  The process_next_message() procedure
-    // returns the chunk number if a packet has been received or -2 if a time-out
-    // exception has been arised.
+    // First chunk to be sent to the consumer.  The
+    // process_next_message() procedure returns the chunk number if a
+    // packet has been received or -2 if a time-out exception has been
+    // arised.
 
     int chunk_number = ProcessNextMessage();
     while (chunk_number < 0) {
       chunk_number = ProcessNextMessage();
       TRACE(std::to_string(chunk_number));
     }
-    played_chunk_ = chunk_number;
-    TRACE("First chunk to play " << std::to_string(played_chunk_));
+    consumed_chunk_ = chunk_number;
+    TRACE("First chunk to consume " << std::to_string(consumed_chunk_));
     TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
 	  << std::to_string(team_socket_.local_endpoint().port()) << ")"
 	  << "\b: buffering (\b" << std::to_string(100.0 / buffer_size_));
@@ -355,7 +360,7 @@ namespace p2psp {
     while (chunk_number < 0) {
       chunk_number = ProcessNextMessage();
     }
-    // while ((chunk_number - self.played_chunk) % self.buffer_size) <
+    // while ((chunk_number - self.consumed_chunk) % self.buffer_size) <
     // self.buffer_size/2:
     while (received_counter_ < buffer_size_ / 2) {
       chunk_number = ProcessNextMessage();
@@ -380,10 +385,10 @@ namespace p2psp {
     // sys.stdout.write(Color.none)
   }
 
-  void PeerIMS::PlayNextChunk() {
-    played_chunk_ = FindNextChunk();
-    PlayChunk(played_chunk_);
-    chunks_[played_chunk_ % buffer_size_].received = false;
+  void PeerIMS::ConsumeNextChunk() {
+    consumed_chunk_ = FindNextChunk();
+    ConsumeChunk(consumed_chunk_);
+    chunks_[consumed_chunk_ % buffer_size_].received = false;
     received_counter_--;
   }
 
@@ -392,7 +397,7 @@ namespace p2psp {
     // print (".")
     // counter = 0
 
-    int chunk_number = (played_chunk_ + 1) % Common::kMaxChunkNumber;
+    int chunk_number = (consumed_chunk_ + 1) % Common::kMaxChunkNumber;
 
     while (!chunks_[chunk_number % buffer_size_].received) {
       // sys.stdout.write(Color.cyan)
@@ -407,19 +412,19 @@ namespace p2psp {
     return chunk_number;
   }
 
-  void PeerIMS::PlayChunk(int chunk) {
+  void PeerIMS::ConsumeChunk(int chunk) {
     try {
-      write(player_socket_, buffer(chunks_[chunk % buffer_size_].data));
+      write(consumer_socket_, buffer(chunks_[chunk % buffer_size_].data));
     } catch (std::exception e) {
-      TRACE("Player disconnected!");
-      player_alive_ = false;
+      TRACE("Consumer disconnected!");
+      consumer_alive_ = false;
     }
   }
 
   void PeerIMS::Run() {
-    while (player_alive_) {
+    while (consumer_alive_) {
       KeepTheBufferFull();
-      PlayNextChunk();
+      ConsumeNextChunk();
     }
   }
 
@@ -432,9 +437,9 @@ namespace p2psp {
 
   void PeerIMS::SetShowBuffer(bool show_buffer) { show_buffer_ = show_buffer; }
 
-  bool PeerIMS::IsPlayerAlive() { return player_alive_; }
+  bool PeerIMS::IsConsumerAlive() { return consumer_alive_; }
 
-  int PeerIMS::GetPlayedChunk() { return played_chunk_; }
+  int PeerIMS::GetConsumedChunk() { return consumed_chunk_; }
 
   int PeerIMS::GetChunkSize() { return chunk_size_; }
 
@@ -448,8 +453,8 @@ namespace p2psp {
     sendto_counter_ = sendto_counter;
   }
 
-  void PeerIMS::SetPlayerPort(uint16_t player_port) {
-    player_port_ = player_port;
+  void PeerIMS::SetConsumerPort(uint16_t consumer_port) {
+    consumer_port_ = consumer_port;
   }
 
   void PeerIMS::SetSplitterAddr(std::string splitter_addr) {
@@ -460,7 +465,7 @@ namespace p2psp {
     splitter_port_ = splitter_port;
   }
 
-  void PeerIMS::SetPort(uint16_t port) { port_ = port; }
+  void PeerIMS::SetTeamPort(uint16_t team_port) { team_port_ = team_port; }
 
   void PeerIMS::SetUseLocalhost(bool use_localhost) {
     use_localhost_ = use_localhost;

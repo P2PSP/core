@@ -38,8 +38,8 @@ namespace p2psp {
 
   protected:
 
-    // Default port used to serve the player.
-    static const uint16_t kPlayerPort = 9999;
+    // Default port used to serve the consumer.
+    static const uint16_t kConsumerPort = 9999;
 
     // Default address of the splitter.
     static constexpr char kSplitterAddr[] = "127.0.0.1";
@@ -48,7 +48,7 @@ namespace p2psp {
     static const uint16_t kSplitterPort = 4552;
 
     // Default TCP->UDP port used to communicate.
-    static const uint16_t kPort = 0;
+    static const uint16_t kTeamPort = 0;
 
     // Default use localhost instead the IP of the addapter
     static const bool kUseLocalhost = false;
@@ -61,8 +61,8 @@ namespace p2psp {
 
     static const int kChunkIndexSize = 2;
   
-    // Port used to serve the player.
-    uint16_t player_port_;
+    // Port used to serve the consumer.
+    uint16_t consumer_port_;
 
     // Address of the splitter.
     ip::address splitter_addr_;
@@ -71,7 +71,7 @@ namespace p2psp {
     uint16_t splitter_port_;
 
     // TCP->UDP port used to communicate.
-    uint16_t port_;
+    uint16_t team_port_;
 
     // Use localhost instead the IP of the addapter
     bool use_localhost_;
@@ -93,8 +93,8 @@ namespace p2psp {
     ip::address mcast_addr_;
     uint16_t mcast_port_;
 
-    int played_chunk_;
-    bool player_alive_;
+    int consumed_chunk_;
+    bool consumer_alive_;
 
     int received_counter_;
     std::vector<bool> received_flag_;
@@ -108,8 +108,8 @@ namespace p2psp {
     // Acceptor used to listen to incoming connections.
     ip::tcp::acceptor acceptor_;
 
-    // Used to listen to the player
-    ip::tcp::socket player_socket_;
+    // Used to listen to the consumer
+    ip::tcp::socket consumer_socket_;
 
     // Used to listen to the splitter
     ip::tcp::socket splitter_socket_;
@@ -136,9 +136,9 @@ namespace p2psp {
     virtual void Init();
 
     /**
-     *  Setup "player_socket" and wait for the player
+     *  Setup "consumer_socket" and wait for the consumer
      */
-    virtual void WaitForThePlayer();
+    virtual void WaitForTheConsumer();
 
     /**
      *  Setup "splitter" and "splitter_socket"
@@ -165,8 +165,8 @@ namespace p2psp {
      */
     virtual void BufferData();
     virtual int FindNextChunk();
-    virtual void PlayChunk(int);
-    virtual void PlayNextChunk();
+    virtual void ConsumeChunk(int);
+    virtual void ConsumeNextChunk();
     virtual void KeepTheBufferFull();
 
     /**
@@ -179,18 +179,18 @@ namespace p2psp {
      *  Getter/setters
      */
     virtual std::string GetMcastAddr();
-    virtual bool IsPlayerAlive();
-    virtual int GetPlayedChunk();
+    virtual bool IsConsumerAlive();
+    virtual int GetConsumedChunk();
     virtual int GetChunkSize();
     virtual int GetSendtoCounter();
     virtual std::vector<ip::udp::endpoint>* GetPeerList();
     virtual int GetRecvfromCounter();
     virtual void SetShowBuffer(bool);
     virtual void SetSendtoCounter(int);
-    virtual void SetPlayerPort(uint16_t);
+    virtual void SetConsumerPort(uint16_t);
     virtual void SetSplitterAddr(std::string);
     virtual void SetSplitterPort(uint16_t);
-    virtual void SetPort(uint16_t);
+    virtual void SetTeamPort(uint16_t);
     virtual void SetUseLocalhost(bool);
   };
 }
