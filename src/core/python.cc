@@ -125,14 +125,16 @@ public:
       uint16_t port = sender.port();
       //This doesn't work properly. It seems a problem with message
       //data type. What is the corresponding one in python?
-      //std::string message_(message.begin(),message.end());
-      //boost::python::list l;
-      //for (unsigned int i = 0; i < message.size(); i++) {
-      //	l.append((unsigned char)message[i]);
-      //}
-      boost::python::object memoryView(boost::python::handle<>(PyMemoryView_FromMemory((char*)message.data(), message.size(), PyBUF_READ)));
+      
+      std::string message_(message.begin(),message.end());
+      boost::python::list l;
+      for (unsigned int i = 0; i < message.size(); i++) {
+      	l.append((unsigned char)message[i]);
+	}
+      /*
+	boost::python::object memoryView(boost::python::handle<>(PyMemoryView_FromMemory((char*)message.data(), message.size(), PyBUF_READ)));*/
       TRACE("SALE DE PROCESS MESSAGE por PYTHON!!!");
-      return ProcessMessage(memoryView, boost::python::make_tuple(address, port));
+      return ProcessMessage(l, boost::python::make_tuple(address, port));
       }
     TRACE("SALE DE PROCESS MESSAGE por C++!!!");
     return PeerDBS::ProcessMessage(message, sender);
@@ -155,16 +157,15 @@ public:
   }
 
   void InsertChunk(int position, boost::python::object chunk){//boost::python::list chunk){
-    /*
+    
     std::vector<char> chunk_(len(chunk));
     for (int i = 0; i < len(chunk); ++i)
     {
       chunk_.push_back((char)boost::python::extract<unsigned char>(chunk[i]));
-      }*/
-
-    std::vector<char> chunk_ = boost::python::extract<std::vector<char> >(chunk);
-    
-    chunks_[position]= {chunk_, true};
+      TRACE(chunk[i]);
+      }
+  
+    chunks_[position] = {chunk_, true};
   }
     /*
   void SendChunk(const ip::udp::endpoint &peer){
