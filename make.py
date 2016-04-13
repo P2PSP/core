@@ -9,7 +9,9 @@ import platform
 bin_dir = 'bin'
 build_dir = 'build'
 only_cmake = False
+build_debug = False
 cmake = 'cmake'
+make = 'make'
 
 if len(sys.argv) >= 2:
     if sys.argv[1] == '-h':
@@ -19,7 +21,9 @@ if len(sys.argv) >= 2:
         os.system('git clean -dfx')
         quit()
     if sys.argv[1] == 'debug':
+        build_debug = True
         cmake = cmake + ' -DCMAKE_BUILD_TYPE=Debug'
+        make = make + ' VERBOSE=1'
     elif sys.argv[1] == 'only-cmake':
 #        cmake = cmake + ' -DTRACE_SILENT_MODE'
         only_cmake = True
@@ -41,9 +45,13 @@ sys_name = platform.system()
 
 if sys_name == 'Linux' or sys_name == 'Darwin':
     print('\nMaking for Linux...\n')
+    if build_debug:
+        print('Building for Debug...\n')
+    else:
+        print('Building for Release...\n')
     command = 'cd build && ' + cmake + ' .. && echo'
     if os.system(command) == 0:
-        command = 'cd build && make'
+        command = 'cd build && ' + make
         if not only_cmake:
             os.system(command)
 
