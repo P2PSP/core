@@ -111,72 +111,41 @@ public:
   PyPeerDBS () : PeerDBS(){}
 
   void Run(){
-    TRACE("ENTRA EN RUN del WRAPPER");
     releaseGIL unlock;
     PeerDBS::Run();
   }
   
   int ProcessMessage(const std::vector<char> &message, const ip::udp::endpoint &sender) {
-    TRACE("ENTRA EN PROCESS MESSAGE!!!");
-     acquireGIL lock;
-     if (override ProcessMessage = get_override("ProcessMessage")){
-      TRACE("ENTRA EN PROCESS MESSAGE por PYTHON!!!");
+    acquireGIL lock;
+    if (override ProcessMessage = get_override("ProcessMessage")){     
       std::string address = sender.address().to_string();
       uint16_t port = sender.port();
-      //This doesn't work properly. It seems a problem with message
-      //data type. What is the corresponding one in python?
       
-      std::string message_(message.begin(),message.end());
-      boost::python::list l;
-      for (unsigned int i = 0; i < message.size(); i++) {
-      	l.append((unsigned char)message[i]);
-	}
-      /*
-	boost::python::object memoryView(boost::python::handle<>(PyMemoryView_FromMemory((char*)message.data(), message.size(), PyBUF_READ)));*/
-      TRACE("SALE DE PROCESS MESSAGE por PYTHON!!!");
-      return ProcessMessage(l, boost::python::make_tuple(address, port));
-      }
-    TRACE("SALE DE PROCESS MESSAGE por C++!!!");
+      boost::python::object memoryView(boost::python::handle<>(PyMemoryView_FromMemory((char*)message.data(), message.size(), PyBUF_READ)));
+      return ProcessMessage(memoryView, boost::python::make_tuple(address, port));
+    }
     return PeerDBS::ProcessMessage(message, sender);
   }
+  
 
-  int Default_ProcessMessage(const std::vector<char> &message, const ip::udp::endpoint &sender){
-    return this->PeerDBS::ProcessMessage(message, sender);
-  }
-
-  int SendChunk(boost::python::list message, boost::python::tuple peer){
+  int SendChunk(boost::python::object message, boost::python::tuple peer){
     ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
     uint16_t port = boost::python::extract<uint16_t>(peer[1]);
-    
-    std::vector<char> msg(len(message));
-    for (int i = 0; i < len(message); ++i)
-    {
-      msg.push_back((char)boost::python::extract<unsigned char>(message[i]));
-    }
+
+    boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
+    boost::python::stl_input_iterator<unsigned char> begin(message), end;
+    std::vector<char> msg(begin, end);
+   
     return team_socket_.send_to(::buffer(msg), boost::asio::ip::udp::endpoint(address,port));
   }
 
   void InsertChunk(int position, boost::python::object chunk){//boost::python::list chunk){
-    
-    std::vector<char> chunk_(len(chunk));
-    for (int i = 0; i < len(chunk); ++i)
-    {
-      chunk_.push_back((char)boost::python::extract<unsigned char>(chunk[i]));
-      TRACE(chunk[i]);
-      }
-  
+    boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
+    boost::python::stl_input_iterator<unsigned char> begin(chunk), end;
+    std::vector<char> chunk_(begin, end);
     chunks_[position] = {chunk_, true};
   }
-    /*
-  void SendChunk(const ip::udp::endpoint &peer){
-    if (override SendChunk = this->get_override("SendChunk")){
-      std::string address = peer.address().to_string();
-      uint16_t port = peer.port();
-      SendChunk(boost::python::make_tuple(address, port));
-    }
-    PeerDBS::SendChunk(peer);
-  }
-*/
+
   list GetReceiveAndFeedPrevious(){
     boost::python::list l;
     for (unsigned int i = 0; i < receive_and_feed_previous_.size(); i++) {
@@ -450,7 +419,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("SetDebt", &PyPeerDBS::SetDebt)
 	 
     //Overrides
-    .def("ProcessMessage", &PyPeerDBS::ProcessMessage, &PyPeerDBS::Default_ProcessMessage)
+    .def("ProcessMessage", &PyPeerDBS::ProcessMessage)
     .def("SendChunk", &PyPeerDBS::SendChunk)
     .def("InsertChunk", &PyPeerDBS::InsertChunk)
     ;
