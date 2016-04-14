@@ -28,8 +28,8 @@ class SplitterDBS : public SplitterIMS {
       32;  // Chunk losses threshold to reject a peer from the team
   const int kMonitorNumber = 1;
 
-  int max_chunk_loss_;
-  int monitor_number_;
+  int max_number_of_chunk_loss_;
+  int max_number_of_monitors_;
 
   int peer_number_;
 
@@ -97,11 +97,12 @@ class SplitterDBS : public SplitterIMS {
 
   // Getters
   std::vector<boost::asio::ip::udp::endpoint> GetPeerList();
-  int GetMaxChunkLoss();
+  int GetMaxNumberOfChunkLoss();
+  int GetMaxNumberOfMonitors();
   int GetLoss(const boost::asio::ip::udp::endpoint &peer);
 
-  void SetMaxChunkLoss(int max_chunk_loss);
-  void SetMonitorNumber(int monitor_number);
+  void SetMaxNumberOfChunkLoss(int max_number_of_chunk_loss);
+  void SetMaxNumberOfMonitors(int max_number_of_monitors);
 };
 }
 

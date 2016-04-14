@@ -40,7 +40,7 @@ void MonitorDBS::Complain(uint16_t chunk_number) {
 };
 
 int MonitorDBS::FindNextChunk() {
-  uint16_t chunk_number = (played_chunk_ + 1) % Common::kMaxChunkNumber;
+  uint16_t chunk_number = (consumed_chunk_ + 1) % Common::kMaxChunkNumber;
 
   while (!chunks_[chunk_number % buffer_size_].received) {
     Complain(chunk_number);

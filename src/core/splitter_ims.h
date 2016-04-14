@@ -50,9 +50,9 @@ class SplitterIMS {
   int ttl_;
 
   /*
-   An IMS splitter runs 2 threads. The main one serves the
-   chunks to the team. The other controls peer arrivals. This
-   variable is true while the player is receiving data.
+   An IMS splitter runs 2 threads. The main one serves the chunks to
+   the team. The other controls peer arrivals. This variable is true
+   while the consumer is receiving data.
    */
   bool alive_;
 
@@ -134,8 +134,15 @@ class SplitterIMS {
   int GetRecvFromCounter();
   int GetSendToCounter();
   int GetChunkSize();
-  int GetPort();
-
+  int GetPort(); // GetTeamPort()
+  int GetBufferSize();
+  std::string GetChannel();
+  int GetHeaderSize();
+  std::string GetMcastAddr();
+  std::string GetSourceAddr();
+  int GetSourcePort();
+  int GetTTL();
+  
   // Setters
   void SetAlive(bool alive);
   void SetBufferSize(int buffer_size);
