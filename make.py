@@ -45,14 +45,18 @@ if not os.path.exists(build_dir):
 sys_name = platform.system()
 
 if sys_name == 'Linux' or sys_name == 'Darwin':
-    print('\nMaking for Linux...\n')
+    print('\nMaking for Linux...')
+    number_of_cores = int(subprocess.Popen("nproc", stdout=subprocess.PIPE).stdout.read())
+    print('Number of cores = ' + str(number_of_cores) + '\n')
+
     if build_debug:
         print('Building for Debug...\n')
     else:
         print('Building for Release...\n')
+
     command = 'cd build && ' + cmake + ' .. && echo'
     if os.system(command) == 0:
-        command = 'cd build && ' + make
+        command = 'cd build && make -j' + str(number_of_cores)
         if not only_cmake:
             os.system(command)
 
