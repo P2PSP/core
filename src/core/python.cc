@@ -72,6 +72,14 @@ public:
     mcast_addr_ = ip::address::from_string(address);
   }
   
+  std::string GetSplitterAddr_(){
+    return splitter_addr_.to_string();
+  }
+
+  void SetSplitterAddr_(std::string address){
+    splitter_addr_ = ip::address::from_string(address);
+  }
+  
   void SetChunkSize(int chunk_size){
     chunk_size_ = chunk_size;
   }
@@ -80,28 +88,13 @@ public:
     recvfrom_counter_ = recvfrom_counter;
   }
   */
-  std::string GetSplitterAddr_(){
-    return splitter_addr_.to_string();
-  }
-
-  void SetSplitterAddr_(std::string address){
-    splitter_addr_ = ip::address::from_string(address);
-  }
-   
-  uint16_t GetPlayerPort(){
-    return player_port_;
-  }
-  
-  int GetMaxChunkDebt(){
-	  return max_chunk_debt_;
-  }
-  
-  bool GetUseLocalhost(){
-    return use_localhost_;
-  }
   
   bool GetShowBuffer(){
     return show_buffer_;
+  }
+
+  bool GetUseLocalhost(){
+    return use_localhost_;
   }
 };
 
@@ -355,6 +348,8 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("received_counter", &PyPeerDBS::GetReceivedCounter, &PyPeerDBS::SetReceivedCounter)
     .add_property("receive_and_feed_counter", &PyPeerDBS::GetRecAndFeedCounter, &PyPeerDBS::SetRecAndFeedCounter)
     .add_property("receive_and_feed_previous_" , &PyPeerDBS::GetReceiveAndFeedPrevious, &PyPeerDBS::SetReceiveAndFeedPrevious)
+    .add_property("sendto_counter", &PyMonitorDBS::GetSendtoCounter, &PyMonitorDBS::SetSendtoCounter)
+
     
     //IMS
     .def("Init", &PeerDBS::Init) //used
@@ -421,7 +416,8 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("mcast_addr", &PyMonitorDBS::GetMcastAddr_, &PyMonitorDBS::SetMcastAddr_)
     .add_property("show_buffer", &PyMonitorDBS::GetShowBuffer, &PyMonitorDBS::SetShowBuffer)
     .add_property("chunk_size", &PyMonitorDBS::GetChunkSize, &PyMonitorDBS::SetChunkSize)
-    
+    .add_property("sendto_counter", &PyMonitorDBS::GetSendtoCounter, &PyMonitorDBS::SetSendtoCounter)
+
     //IMS
     .def("Init", &PyMonitorDBS::Init) //used
     .def("WaitForThePlayer", &PyMonitorDBS::WaitForThePlayer)

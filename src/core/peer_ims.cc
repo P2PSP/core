@@ -473,9 +473,9 @@ namespace p2psp {
     return sendto_counter_;
   }
 
-  /*void PeerIMS::SetSendtoCounter(int sendto_counter) {
+  void PeerIMS::SetSendtoCounter(int sendto_counter) {
     sendto_counter_ = sendto_counter;
-    }*/
+  }
 
   void PeerIMS::SetPlayerPort(uint16_t player_port) {
     player_port_ = player_port;

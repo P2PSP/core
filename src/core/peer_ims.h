@@ -137,7 +137,7 @@ namespace p2psp {
     virtual std::vector<ip::udp::endpoint>* GetPeerList();
     virtual int GetRecvfromCounter();
     virtual void SetShowBuffer(bool);
-    //virtual void SetSendtoCounter(int);
+    virtual void SetSendtoCounter(int);
     virtual int  GetSendtoCounter();
     virtual void     SetPlayerPort(uint16_t);
     virtual uint16_t GetPlayerPort();
