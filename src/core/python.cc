@@ -71,23 +71,19 @@ public:
   void SetChunkSize(int chunk_size){
     chunk_size_ = chunk_size;
   }
-  
+  /*
   void SetRecvfromCounter(int recvfrom_counter){
     recvfrom_counter_ = recvfrom_counter;
   }
-  
-  std::string GetSplitterAddr(){
+  */
+  std::string GetSplitterAddr_(){
     return splitter_addr_.to_string();
   }
-  
-  uint16_t GetSplitterPort(){
-    return splitter_port_;
+
+  void SetSplitterAddr_(std::string address){
+    splitter_addr_ = ip::address::from_string(address);
   }
-  
-  uint16_t GetPort(){
-    return port_;
-  }
-  
+   
   uint16_t GetPlayerPort(){
     return player_port_;
   }
@@ -221,18 +217,14 @@ public:
     recvfrom_counter_ = recvfrom_counter;
   }
   
-  std::string GetSplitterAddr(){
+  std::string GetSplitterAddr_(){
     return splitter_addr_.to_string();
   }
-  
-  uint16_t GetSplitterPort(){
-    return splitter_port_;
-  }
-  
-  uint16_t GetPort(){
-    return port_;
-  }
 
+  void SetSplitterAddr_(std::string address){
+    splitter_addr_ = ip::address::from_string(address);
+  }
+  
   uint16_t GetPlayerPort(){
     return player_port_;
   }
@@ -311,11 +303,7 @@ public:
   std::string GetSourceAddr(){
     return source_addr_;
   }
-  
-  int GetMonitorNumber(){
-    return monitor_number_;
-  }
-  
+    
   int GetBufferSize(){
     return buffer_size_;
   }
@@ -326,14 +314,6 @@ public:
 
   int GetSourcePort(){
     return source_port_;
-  }
-  
-  void SetRecvFromCounter(int recvfrom_counter){
-    recvfrom_counter_ = recvfrom_counter;
-  }
-
-  void SetSendToCounter(int sendto_counter){
-    sendto_counter_ = sendto_counter;
   }
 
   void InsertPeer_(boost::python::tuple peer){
@@ -353,17 +333,15 @@ BOOST_PYTHON_MODULE(libp2psp)
   
   class_<PyPeerDBS, boost::noncopyable>("PeerDBS")
     //variables
-    .add_property("splitter_addr", &PyPeerDBS::GetSplitterAddr, &PyPeerDBS::SetSplitterAddr)
+    .add_property("splitter_addr", &PyPeerDBS::GetSplitterAddr_, &PyPeerDBS::SetSplitterAddr_)
     .add_property("splitter_port", &PyPeerDBS::GetSplitterPort, &PyPeerDBS::SetSplitterPort)
-    .add_property("port", &PyPeerDBS::GetPort, &PyPeerDBS::SetPort)
+    .add_property("team_port", &PyPeerDBS::GetTeamPort, &PyPeerDBS::SetTeamPort)
     .add_property("player_port", &PyPeerDBS::GetPlayerPort, &PyPeerDBS::SetPlayerPort)
     .add_property("max_chunk_debt", &PyPeerDBS::GetMaxChunkDebt, &PyPeerDBS::SetMaxChunkDebt)
     .add_property("use_localhost", &PyPeerDBS::GetUseLocalhost, &PyPeerDBS::SetUseLocalhost)
     .add_property("mcast_addr", &PyPeerDBS::GetMcastAddr, &PyPeerDBS::SetMcastAddr)
     .add_property("show_buffer", &PyPeerDBS::GetShowBuffer, &PyPeerDBS::SetShowBuffer)
     .add_property("chunk_size", &PyPeerDBS::GetChunkSize, &PyPeerDBS::SetChunkSize)
-    .add_property("sendto_counter", &PyPeerDBS::GetSendtoCounter, &PyPeerDBS::SetSendtoCounter)
-    .add_property("recvfrom_counter", &PyPeerDBS::GetRecvfromCounter, &PyPeerDBS::SetRecvfromCounter)
     .add_property("message_size", &PyPeerDBS::GetMessageSize, &PyPeerDBS::SetMessageSize)
     .add_property("buffer_size", &PyPeerDBS::GetBufferSize, &PyPeerDBS::SetBufferSize)
     .add_property("received_counter", &PyPeerDBS::GetReceivedCounter, &PyPeerDBS::SetReceivedCounter)
@@ -426,9 +404,9 @@ BOOST_PYTHON_MODULE(libp2psp)
 
   class_<PyMonitorDBS, boost::noncopyable>("MonitorDBS")
     //variables
-    .add_property("splitter_addr", &PyMonitorDBS::GetSplitterAddr, &PyMonitorDBS::SetSplitterAddr)
+    .add_property("splitter_addr", &PyMonitorDBS::GetSplitterAddr_, &PyMonitorDBS::SetSplitterAddr_)
     .add_property("splitter_port", &PyMonitorDBS::GetSplitterPort, &PyMonitorDBS::SetSplitterPort)
-    .add_property("port", &PyMonitorDBS::GetPort, &PyMonitorDBS::SetPort)
+    .add_property("team_port", &PyMonitorDBS::GetTeamPort, &PyMonitorDBS::SetTeamPort)
     .add_property("player_port", &PyMonitorDBS::GetPlayerPort, &PyMonitorDBS::SetPlayerPort)
     .add_property("max_chunk_debt", &PyMonitorDBS::GetMaxChunkDebt, &PyMonitorDBS::SetMaxChunkDebt)
     .add_property("use_localhost", &PyMonitorDBS::GetUseLocalhost, &PyMonitorDBS::SetUseLocalhost)
@@ -492,10 +470,8 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("port", &PySplitterDBS::GetPort, &PySplitterDBS::SetPort)
     .add_property("source_addr", &PySplitterDBS::GetSourceAddr, &PySplitterDBS::SetSourceAddr)
     .add_property("source_port", &PySplitterDBS::GetSourcePort, &PySplitterDBS::SetSourcePort)
-    .add_property("sendto_counter", &PySplitterDBS::GetSendToCounter, &PySplitterDBS::SetSendToCounter)
-    .add_property("recvfrom_counter", &PySplitterDBS::GetRecvFromCounter, &PySplitterDBS::SetRecvFromCounter)
-    .add_property("max_chunk_loss", &PySplitterDBS::GetMaxChunkLoss, &PySplitterDBS::SetMaxChunkLoss)
-    .add_property("monitor_number", &PySplitterDBS::GetMonitorNumber, &PySplitterDBS::SetMonitorNumber)
+    .add_property("max_number_of_chunk_loss", &PySplitterDBS::GetMaxNumberOfChunkLoss, &PySplitterDBS::SetMaxNumberOfChunkLoss)
+    .add_property("max_number_of_monitors", &PySplitterDBS::GetMaxNumberOfMonitors, &PySplitterDBS::SetMaxNumberOfMonitors)
     
     
     //IMS
