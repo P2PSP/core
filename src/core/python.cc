@@ -139,21 +139,18 @@ public:
     chunks_[position] = {chunk_, true};
   }
 
-  list GetReceiveAndFeedPrevious(){
-    boost::python::list l;
-    for (unsigned int i = 0; i < receive_and_feed_previous_.size(); i++) {
-      	l.append((unsigned char)receive_and_feed_previous_[i]);
-    }
-    return l; 
+  boost::python::object GetReceiveAndFeedPrevious(){
+     boost::python::object receive_and_fedd_previous(boost::python::handle<>(PyMemoryView_FromMemory((char*)receive_and_feed_previous_.data(), receive_and_feed_previous_.size(), PyBUF_READ)));
+    return receive_and_fedd_previous; 
   }
 
-  void SetReceiveAndFeedPrevious(boost::python::list l){
-    for (int i = 0; i < len(l); ++i)
-    {
-        receive_and_feed_previous_.push_back(boost::python::extract<unsigned char>(l[i]));
-    }
+  void SetReceiveAndFeedPrevious(boost::python::object receive_and_fedd_previous){
+    boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
+    boost::python::stl_input_iterator<unsigned char> begin(receive_and_fedd_previous), end;
+    std::vector<char> msg(begin, end);
+    receive_and_feed_previous_ = msg;
   }
-    
+
   list GetPeerList_() {
     list l;
     std::string address;
@@ -347,7 +344,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("buffer_size", &PyPeerDBS::GetBufferSize, &PyPeerDBS::SetBufferSize)
     .add_property("received_counter", &PyPeerDBS::GetReceivedCounter, &PyPeerDBS::SetReceivedCounter)
     .add_property("receive_and_feed_counter", &PyPeerDBS::GetRecAndFeedCounter, &PyPeerDBS::SetRecAndFeedCounter)
-    .add_property("receive_and_feed_previous_" , &PyPeerDBS::GetReceiveAndFeedPrevious, &PyPeerDBS::SetReceiveAndFeedPrevious)
+    .add_property("receive_and_feed_previous" , &PyPeerDBS::GetReceiveAndFeedPrevious, &PyPeerDBS::SetReceiveAndFeedPrevious)
     .add_property("sendto_counter", &PyMonitorDBS::GetSendtoCounter, &PyMonitorDBS::SetSendtoCounter)
 
     
