@@ -10,6 +10,8 @@
 //  IMS: Ip Multicasting Set of rules
 //
 
+#define _1_ // Temporal!!!
+
 #include "peer_ims.h"
 
 namespace p2psp {
@@ -58,9 +60,10 @@ namespace p2psp {
 
   PeerIMS::~PeerIMS() {}
 
-  void PeerIMS::Init(){};
+  void PeerIMS::Init() {};
 
   void PeerIMS::WaitForThePlayer() {
+#ifdef _1_
     std::string port = std::to_string(player_port_);
     ip::tcp::endpoint endpoint(ip::tcp::v4(), player_port_);
 
@@ -77,6 +80,7 @@ namespace p2psp {
     TRACE("The player is ("
 	  << player_socket_.remote_endpoint().address().to_string() << ","
 	  << std::to_string(player_socket_.remote_endpoint().port()) << ")");
+#endif
   }
 
   void PeerIMS::ConnectToTheSplitter() throw(boost::system::system_error) {
@@ -129,7 +133,7 @@ namespace p2psp {
 
   void PeerIMS::DisconnectFromTheSplitter() { splitter_socket_.close(); }
 
-  void PeerIMS::ReceiveTheMcasteEndpoint() {
+  void PeerIMS::ReceiveTheMcastEndpoint() {
     boost::array<char, 6> buffer;
     read(splitter_socket_, ::buffer(buffer));
 
@@ -264,7 +268,7 @@ namespace p2psp {
       TRACE(std::to_string(chunk_number));
     }
     played_chunk_ = chunk_number;
-    TRACE("First chunk to consume " << std::to_string(played_chunk_));
+    TRACE("First chunk to play " << std::to_string(played_chunk_));
     TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
 	  << std::to_string(team_socket_.local_endpoint().port()) << ")"
 	  << "\b: buffering (\b" << std::to_string(100.0 / buffer_size_));
@@ -385,9 +389,9 @@ namespace p2psp {
     // sys.stdout.write(Color.none)
   }
 
-  void PeerIMS::ConsumeNextChunk() {
+  void PeerIMS::PlayNextChunk() {
     played_chunk_ = FindNextChunk();
-    ConsumeChunk(played_chunk_);
+    PlayChunk(played_chunk_);
     chunks_[played_chunk_ % buffer_size_].received = false;
     received_counter_--;
   }
@@ -412,20 +416,21 @@ namespace p2psp {
     return chunk_number;
   }
 
-
-  void PeerIMS::ConsumeChunk(int chunk) {
+  void PeerIMS::PlayChunk(int chunk) {
+#ifdef _1_
     try {
       write(player_socket_, buffer(chunks_[chunk % buffer_size_].data));
     } catch (std::exception e) {
       TRACE("Player disconnected!");
       player_alive_ = false;
     }
+#endif
   }
 
   void PeerIMS::Run() {
     while (player_alive_) {
       KeepTheBufferFull();
-      ConsumeNextChunk();
+      PlayNextChunk();
     }
   }
 

@@ -64,7 +64,7 @@ namespace p2psp {
     int GetRecvFromCounter();
     int GetSendToCounter();
     int GetChunkSize();
-    int GetPort(); // GetTeamPort()
+    int GetTeamPort(); // GetPort()
     int GetBufferSize();
     std::string GetChannel();
     int GetHeaderSize();
@@ -79,7 +79,7 @@ namespace p2psp {
     void SetChannel(std::string channel);
     void SetChunkSize(int chunk_size);
     void SetHeaderSize(int header_size);
-    void SetPort(int port);
+    void SetTeamPort(int team_port);
     void SetSourceAddr(std::string source_addr);
     void SetSourcePort(int source_port);
     void SetGETMessage(std::string channel);
@@ -99,7 +99,7 @@ namespace p2psp {
     std::string channel_;
     int chunk_size_;
     int header_size_;
-    unsigned short port_;
+    unsigned short team_port_;
     std::string source_addr_;
     unsigned short source_port_;
     std::string mcast_addr_;

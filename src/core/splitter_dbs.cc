@@ -251,7 +251,7 @@ namespace p2psp {
 
   void SplitterDBS::SetupTeamSocket() {
     system::error_code ec;
-    asio::ip::udp::endpoint endpoint(asio::ip::udp::v4(), port_);
+    asio::ip::udp::endpoint endpoint(asio::ip::udp::v4(), team_port_);
 
     team_socket_.open(asio::ip::udp::v4());
 

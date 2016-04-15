@@ -27,7 +27,7 @@ namespace p2psp {
     channel_ = kChannel;
     chunk_size_ = kChunkSize;
     header_size_ = kHeaderSize;
-    port_ = kPort;
+    team_port_ = kPort;
     source_addr_ = kSourceAddr;
     source_port_ = kSourcePort;
     mcast_addr_ = kMCastAddr;
@@ -51,7 +51,7 @@ namespace p2psp {
   SplitterIMS::~SplitterIMS() {}
 
   void SplitterIMS::SetupPeerConnectionSocket() {
-    asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), port_);
+    asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), team_port_);
     acceptor_.open(endpoint.protocol());
     acceptor_.set_option(asio::ip::tcp::acceptor::reuse_address(true));
     acceptor_.bind(endpoint);
@@ -64,7 +64,7 @@ namespace p2psp {
     } catch (system::system_error &error) {
       ERROR(error.what());
       ERROR(acceptor_.local_endpoint().address().to_string() +
-	    "\b: unable to bind the port " + to_string(port_));
+	    "\b: unable to bind the port " + to_string(team_port_));
       exit(-1);
     }
 
@@ -204,13 +204,13 @@ namespace p2psp {
   void SplitterIMS::SendTheMcastChannel(
 					const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     TRACE("Communicating the multicast channel (" << mcast_addr_ << ", "
-	  << to_string(port_) << ")");
+	  << to_string(team_port_) << ")");
 
     char message[6];
     in_addr addr;
     inet_aton(mcast_addr_.c_str(), &addr);
     (*(in_addr *)&message) = addr;
-    (*(uint16_t *)(message + 4)) = htons(port_);
+    (*(uint16_t *)(message + 4)) = htons(team_port_);
     peer_serve_socket->send(asio::buffer(message));
   }
 
@@ -344,7 +344,7 @@ namespace p2psp {
     message[0] = '\0';
 
     asio::ip::udp::endpoint destination(
-					asio::ip::address::from_string("127.0.0.1"), port_);
+					asio::ip::address::from_string("127.0.0.1"), team_port_);
 
     system::error_code ec;
 
@@ -368,7 +368,7 @@ namespace p2psp {
 
   int SplitterIMS::GetChunkSize() { return chunk_size_; }
 
-  int SplitterIMS::GetPort() { return port_; };
+  int SplitterIMS::GetTeamPort() { return team_port_; };
 
   void SplitterIMS::SetBufferSize(int buffer_size) { buffer_size_ = buffer_size; }
 
@@ -415,7 +415,7 @@ namespace p2psp {
 
   void SplitterIMS::SetHeaderSize(int header_size) { header_size_ = header_size; }
 
-  void SplitterIMS::SetPort(int port) { port_ = port; }
+  void SplitterIMS::SetTeamPort(int team_port) { team_port_ = team_port; }
 
   void SplitterIMS::SetSourceAddr(std::string source_addr) {
     source_addr_ = source_addr;

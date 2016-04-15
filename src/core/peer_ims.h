@@ -33,7 +33,7 @@ namespace p2psp {
     std::vector<char> data;
     bool received;
   };
-
+  
   class PeerIMS {
 
   protected:
@@ -96,7 +96,7 @@ namespace p2psp {
      */
     virtual void ConnectToTheSplitter() throw(boost::system::system_error);
     virtual void DisconnectFromTheSplitter();
-    virtual void ReceiveTheMcasteEndpoint();
+    virtual void ReceiveTheMcastEndpoint();
     virtual void ReceiveTheHeader();
     virtual void ReceiveTheChunkSize();
     virtual void ReceiveTheHeaderSize();
@@ -116,8 +116,8 @@ namespace p2psp {
      */
     virtual void BufferData();
     virtual int FindNextChunk();
-    virtual void ConsumeChunk(int);
-    virtual void ConsumeNextChunk();
+    virtual void PlayChunk(int);
+    virtual void PlayNextChunk();
     virtual void KeepTheBufferFull();
 
     /**

@@ -63,8 +63,12 @@ public:
     }
     return l;
   }
+
+  std::string GetMcastAddr_(){
+    return mcast_addr_.to_string();
+  }
   
-  void SetMcastAddr(std::string address){
+  void SetMcastAddr_(std::string address){
     mcast_addr_ = ip::address::from_string(address);
   }
   
@@ -205,7 +209,11 @@ public:
     debt_.erase(boost::asio::ip::udp::endpoint(address,port));
   }
 
-  void SetMcastAddr(std::string address){
+  std::string GetMcastAddr_(){
+    return mcast_addr_.to_string();
+  }
+  
+  void SetMcastAddr_(std::string address){
     mcast_addr_ = ip::address::from_string(address);
   }
 
@@ -339,7 +347,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("player_port", &PyPeerDBS::GetPlayerPort, &PyPeerDBS::SetPlayerPort)
     .add_property("max_chunk_debt", &PyPeerDBS::GetMaxChunkDebt, &PyPeerDBS::SetMaxChunkDebt)
     .add_property("use_localhost", &PyPeerDBS::GetUseLocalhost, &PyPeerDBS::SetUseLocalhost)
-    .add_property("mcast_addr", &PyPeerDBS::GetMcastAddr, &PyPeerDBS::SetMcastAddr)
+    .add_property("mcast_addr", &PyPeerDBS::GetMcastAddr_, &PyPeerDBS::SetMcastAddr_)
     .add_property("show_buffer", &PyPeerDBS::GetShowBuffer, &PyPeerDBS::SetShowBuffer)
     .add_property("chunk_size", &PyPeerDBS::GetChunkSize, &PyPeerDBS::SetChunkSize)
     .add_property("message_size", &PyPeerDBS::GetMessageSize, &PyPeerDBS::SetMessageSize)
@@ -353,7 +361,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("WaitForThePlayer", &PeerDBS::WaitForThePlayer)
     .def("ConnectToTheSplitter", &PeerDBS::ConnectToTheSplitter)
     .def("DisconnectFromTheSplitter", &PeerDBS::DisconnectFromTheSplitter)
-    .def("ReceiveTheMcasteEndpoint", &PeerDBS::ReceiveTheMcasteEndpoint) 
+    .def("ReceiveTheMcastEndpoint", &PeerDBS::ReceiveTheMcastEndpoint) 
     .def("ReceiveTheHeader", &PeerDBS::ReceiveTheHeader)
     .def("ReceiveTheChunkSize", &PeerDBS::ReceiveTheChunkSize)
     .def("ReceiveTheHeaderSize", &PeerDBS::ReceiveTheHeaderSize)
@@ -410,18 +418,16 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("player_port", &PyMonitorDBS::GetPlayerPort, &PyMonitorDBS::SetPlayerPort)
     .add_property("max_chunk_debt", &PyMonitorDBS::GetMaxChunkDebt, &PyMonitorDBS::SetMaxChunkDebt)
     .add_property("use_localhost", &PyMonitorDBS::GetUseLocalhost, &PyMonitorDBS::SetUseLocalhost)
-    .add_property("mcast_addr", &PyMonitorDBS::GetMcastAddr, &PyMonitorDBS::SetMcastAddr)
+    .add_property("mcast_addr", &PyMonitorDBS::GetMcastAddr_, &PyMonitorDBS::SetMcastAddr_)
     .add_property("show_buffer", &PyMonitorDBS::GetShowBuffer, &PyMonitorDBS::SetShowBuffer)
     .add_property("chunk_size", &PyMonitorDBS::GetChunkSize, &PyMonitorDBS::SetChunkSize)
-    .add_property("sendto_counter", &PyMonitorDBS::GetSendtoCounter, &PyMonitorDBS::SetSendtoCounter)
-    .add_property("recvfrom_counter", &PyMonitorDBS::GetRecvfromCounter, &PyMonitorDBS::SetRecvfromCounter)
     
     //IMS
     .def("Init", &PyMonitorDBS::Init) //used
     .def("WaitForThePlayer", &PyMonitorDBS::WaitForThePlayer)
     .def("ConnectToTheSplitter", &PyMonitorDBS::ConnectToTheSplitter)
     .def("DisconnectFromTheSplitter", &PyMonitorDBS::DisconnectFromTheSplitter)
-    .def("ReceiveTheMcasteEndpoint", &PyMonitorDBS::ReceiveTheMcasteEndpoint) 
+    .def("ReceiveTheMcastEndpoint", &PyMonitorDBS::ReceiveTheMcastEndpoint) 
     .def("ReceiveTheHeader", &PyMonitorDBS::ReceiveTheHeader)
     .def("ReceiveTheChunkSize", &PyMonitorDBS::ReceiveTheChunkSize)
     .def("ReceiveTheHeaderSize", &PyMonitorDBS::ReceiveTheHeaderSize)
@@ -467,7 +473,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("channel", &PySplitterDBS::GetChannel, &PySplitterDBS::SetChannel)
     .add_property("chunk_size", &PySplitterDBS::GetChunkSize, &PySplitterDBS::SetChunkSize)
     .add_property("header_size", &PySplitterDBS::GetHeaderSize, &PySplitterDBS::SetHeaderSize)
-    .add_property("port", &PySplitterDBS::GetPort, &PySplitterDBS::SetPort)
+    .add_property("team_port", &PySplitterDBS::GetTeamPort, &PySplitterDBS::SetTeamPort)
     .add_property("source_addr", &PySplitterDBS::GetSourceAddr, &PySplitterDBS::SetSourceAddr)
     .add_property("source_port", &PySplitterDBS::GetSourcePort, &PySplitterDBS::SetSourcePort)
     .add_property("max_number_of_chunk_loss", &PySplitterDBS::GetMaxNumberOfChunkLoss, &PySplitterDBS::SetMaxNumberOfChunkLoss)
@@ -497,7 +503,8 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("isAlive", &PySplitterDBS::isAlive)
     .def("SetAlive", &PySplitterDBS::SetAlive)
     .def("SetGETMessage", &PySplitterDBS::SetGETMessage)
-
+    .def("GetSendToCounter", &PySplitterDBS::GetSendToCounter)
+    .def("GetRecvFromCounter", &PySplitterDBS::GetRecvFromCounter)
     //DBS
     .def("SendMagicFlags", &PySplitterDBS::SendMagicFlags)
     .def("SendTheListSize", &PySplitterDBS::SendTheListSize)
