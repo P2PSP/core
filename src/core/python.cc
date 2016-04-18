@@ -330,6 +330,7 @@ BOOST_PYTHON_MODULE(libp2psp)
             .def(vector_indexing_suite<std::vector<char> >());
   
   class_<PyPeerDBS, boost::noncopyable>("PeerDBS")
+    
     //variables
     .add_property("splitter_addr", &PyPeerDBS::GetSplitterAddr_, &PyPeerDBS::SetSplitterAddr_)
     .add_property("splitter_port", &PyPeerDBS::GetSplitterPort, &PyPeerDBS::SetSplitterPort)
