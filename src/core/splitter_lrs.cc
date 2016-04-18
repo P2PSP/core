@@ -11,6 +11,7 @@
 //
 
 #include "splitter_lrs.h"
+#include "../util/trace.h"
 
 namespace p2psp {
 using namespace std;

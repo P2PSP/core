@@ -22,7 +22,7 @@
 #include <sstream>
 #include <string>
 #include <tuple>
-#include "../util/trace.h"
+//#include "../util/trace.h"
 #include "common.h"
 
 namespace p2psp {
