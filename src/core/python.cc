@@ -273,9 +273,16 @@ public:
 };
   
 //Splitter
-class PySplitterDBS: public SplitterDBS {
+class PySplitterDBS: public SplitterDBS, public wrapper<SplitterDBS>  {
 public:
 
+  void Run(){
+    if (override Run = get_override("Run")){
+      Run();
+    }
+    SplitterDBS::Run();
+  }
+  
   list GetPeerList_() {
     list l;
     std::string address;
