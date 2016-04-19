@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <boost/asio.hpp>
 #include <boost/unordered_map.hpp>
-#include "../util/trace.h"
 #include "splitter_dbs.h"
 #include "common.h"
 

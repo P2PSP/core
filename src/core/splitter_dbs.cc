@@ -11,6 +11,7 @@
 //
 
 #include "splitter_dbs.h"
+#include "../util/trace.h"
 
 namespace p2psp {
   using namespace std;

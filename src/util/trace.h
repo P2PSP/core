@@ -103,7 +103,7 @@ namespace p2psp
 
 #endif // NDEBUG
     
-#else
+#else // TRACE_SILENT_MODE
 
 #define LOG(a)      {}
 #define LOGC(c, a)  {}
