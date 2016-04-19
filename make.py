@@ -25,6 +25,9 @@ if len(sys.argv) >= 2:
         build_debug = True
         cmake = cmake + ' -DCMAKE_BUILD_TYPE=Debug'
         make = make + ' VERBOSE=1'
+    if sys.argv[1] == 'release':
+        cmake = cmake + ' -DCMAKE_BUILD_TYPE=Release'
+        
     elif sys.argv[1] == 'only-cmake':
 #        cmake = cmake + ' -DTRACE_SILENT_MODE'
         only_cmake = True
