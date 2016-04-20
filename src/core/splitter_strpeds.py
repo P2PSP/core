@@ -73,7 +73,7 @@ class StrpeDsSplitter(Splitter_NTS):
         y = self.long_to_hex(self.dsa_key.y)
         g = self.long_to_hex(self.dsa_key.g)
         p = self.long_to_hex(self.dsa_key.p)
-        q = self.long_to_hex(self.dsa_key.q)
+        q = self.long_to_hex(self.dsa_keyDSA_generate_key.q)
         message = struct.pack('256s256s256s40s', y, g, p, q)
         sock.sendall(message)
 
