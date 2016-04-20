@@ -273,15 +273,8 @@ public:
 };
   
 //Splitter
-class PySplitterDBS: public SplitterDBS, public wrapper<SplitterDBS>  {
+class PySplitterDBS: public SplitterDBS  {
 public:
-
-  void Run(){
-    if (override Run = get_override("Run")){
-      Run();
-    }
-    SplitterDBS::Run();
-  }
   
   list GetPeerList_() {
     list l;
@@ -328,6 +321,54 @@ public:
   }
   
 
+};
+
+//Splitter STRPEDS
+class PySplitterSTRPEDS: public StrpeDsSplitter {
+public:
+   list GetPeerList_() {
+    list l;
+    std::string address;
+    uint16_t port;
+    for (unsigned int i = 0; i < peer_list_.size(); i++) {
+      address = peer_list_[i].address().to_string();
+      port = peer_list_[i].port();
+      l.append(boost::python::make_tuple(address, port));
+    }
+    return l;
+  }
+  
+  int GetLoss_(boost::python::tuple peer){
+    ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
+    uint16_t port = boost::python::extract<uint16_t>(peer[1]);
+    return losses_[boost::asio::ip::udp::endpoint(address,port)];
+  }
+
+  std::string GetChannel(){
+    return channel_;
+  }
+  
+  std::string GetSourceAddr(){
+    return source_addr_;
+  }
+    
+  int GetBufferSize(){
+    return buffer_size_;
+  }
+  
+  int GetHeaderSize(){
+    return header_size_;
+  }
+
+  int GetSourcePort(){
+    return source_port_;
+  }
+
+  void InsertPeer_(boost::python::tuple peer){
+    ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
+    uint16_t port = boost::python::extract<uint16_t>(peer[1]);
+    peer_list_.push_back(boost::asio::ip::udp::endpoint(address,port));
+  }
 };
 
 BOOST_PYTHON_MODULE(libp2psp)
@@ -528,5 +569,66 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("Start", &PySplitterDBS::Start)
     .def("GetPeerList", &PySplitterDBS::GetPeerList_) //Modified here
     .def("GetLoss", &PySplitterDBS::GetLoss_) //Modified here
+    ;
+
+  class_<PySplitterSTRPEDS, boost::noncopyable>("SplitterSTRPEDS")
+    //Variables
+    .add_property("buffer_size", &PySplitterSTRPEDS::GetBufferSize, &PySplitterSTRPEDS::SetBufferSize)
+    .add_property("channel", &PySplitterSTRPEDS::GetChannel, &PySplitterSTRPEDS::SetChannel)
+    .add_property("chunk_size", &PySplitterSTRPEDS::GetChunkSize, &PySplitterSTRPEDS::SetChunkSize)
+    .add_property("header_size", &PySplitterSTRPEDS::GetHeaderSize, &PySplitterSTRPEDS::SetHeaderSize)
+    .add_property("team_port", &PySplitterSTRPEDS::GetTeamPort, &PySplitterSTRPEDS::SetTeamPort)
+    .add_property("source_addr", &PySplitterSTRPEDS::GetSourceAddr, &PySplitterSTRPEDS::SetSourceAddr)
+    .add_property("source_port", &PySplitterSTRPEDS::GetSourcePort, &PySplitterSTRPEDS::SetSourcePort)
+    .add_property("max_number_of_chunk_loss", &PySplitterSTRPEDS::GetMaxNumberOfChunkLoss, &PySplitterSTRPEDS::SetMaxNumberOfChunkLoss)
+    .add_property("max_number_of_monitors", &PySplitterSTRPEDS::GetMaxNumberOfMonitors, &PySplitterSTRPEDS::SetMaxNumberOfMonitors)
+    
+    //IMS
+    .def("SendTheHeader", &PySplitterSTRPEDS::SendTheHeader)
+    .def("SendTheBufferSize", &PySplitterSTRPEDS::SendTheBufferSize)
+    .def("SendTheChunkSize", &PySplitterSTRPEDS::SendTheChunkSize)
+    .def("SendTheMcastChannel", &PySplitterSTRPEDS::SendTheMcastChannel)
+    .def("SendTheHeaderSize", &PySplitterSTRPEDS::SendTheHeaderSize)
+    .def("SendConfiguration", &PySplitterSTRPEDS::SendConfiguration)
+    .def("HandleAPeerArrival", &PySplitterSTRPEDS::HandleAPeerArrival)
+    .def("HandleArrivals", &PySplitterSTRPEDS::HandleArrivals)
+    .def("SetupPeerConnectionSocket", &PySplitterSTRPEDS::SetupPeerConnectionSocket)
+    .def("SetupTeamSocket", &PySplitterSTRPEDS::SetupTeamSocket)
+    .def("RequestTheVideoFromTheSource", &PySplitterSTRPEDS::RequestTheVideoFromTheSource)
+    .def("ConfigureSockets", &PySplitterSTRPEDS::ConfigureSockets)
+    .def("LoadTheVideoHeader", &PySplitterSTRPEDS::LoadTheVideoHeader)
+    .def("ReceiveNextChunk", &PySplitterSTRPEDS::ReceiveNextChunk)
+    .def("ReceiveChunk", &PySplitterSTRPEDS::ReceiveChunk)
+    .def("SendChunk", &PySplitterSTRPEDS::SendChunk)
+    .def("ReceiveTheHeader", &PySplitterSTRPEDS::ReceiveTheHeader)
+    .def("SayGoodbye", &PySplitterSTRPEDS::SayGoodbye)
+    .def("Start", &PySplitterSTRPEDS::Start)
+    .def("isAlive", &PySplitterSTRPEDS::isAlive)
+    .def("SetAlive", &PySplitterSTRPEDS::SetAlive)
+    .def("SetGETMessage", &PySplitterSTRPEDS::SetGETMessage)
+    .def("GetSendToCounter", &PySplitterSTRPEDS::GetSendToCounter)
+    .def("GetRecvFromCounter", &PySplitterSTRPEDS::GetRecvFromCounter)
+    //DBS
+    .def("SendMagicFlags", &PySplitterSTRPEDS::SendMagicFlags)
+    .def("SendTheListSize", &PySplitterSTRPEDS::SendTheListSize)
+    .def("SendTheListOfPeers", &PySplitterSTRPEDS::SendTheListOfPeers)
+    .def("SendThePeerEndpoint", &PySplitterSTRPEDS::SendThePeerEndpoint)
+    .def("SendConfiguration", &PySplitterSTRPEDS::SendConfiguration)
+    .def("InsertPeer", &PySplitterSTRPEDS::InsertPeer_) //Modified here
+    .def("HandleAPeerArrival", &PySplitterSTRPEDS::HandleAPeerArrival)
+    .def("ReceiveMessage", &PySplitterSTRPEDS::ReceiveMessage)
+    .def("GetLostChunkNumber", &PySplitterSTRPEDS::GetLostChunkNumber)
+    .def("RemovePeer", &PySplitterSTRPEDS::RemovePeer)
+    .def("IncrementUnsupportivityOfPeer", &PySplitterSTRPEDS::IncrementUnsupportivityOfPeer)
+    .def("ProcessLostChunk", &PySplitterSTRPEDS::ProcessLostChunk)
+    .def("ProcessGoodbye", &PySplitterSTRPEDS::ProcessGoodbye)
+    .def("ModerateTheTeam", &PySplitterSTRPEDS::ModerateTheTeam)
+    .def("SetupTeamSocket", &PySplitterSTRPEDS::SetupTeamSocket)
+    .def("ResetCounters", &PySplitterSTRPEDS::ResetCounters)
+    .def("ResetCountersThread", &PySplitterSTRPEDS::ResetCountersThread)
+    .def("ComputeNextPeerNumber", &PySplitterSTRPEDS::ComputeNextPeerNumber)
+    .def("Start", &PySplitterSTRPEDS::Start)
+    .def("GetPeerList", &PySplitterSTRPEDS::GetPeerList_) //Modified here
+    .def("GetLoss", &PySplitterSTRPEDS::GetLoss_) //Modified here
     ;
 }
