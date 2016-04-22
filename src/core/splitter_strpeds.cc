@@ -41,10 +41,10 @@ namespace p2psp {
   void SplitterSTRPEDS::SendDsaKey(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock){
     // send Public key (y), Sub-group generator (g), Modulus, finite field order (p), Sub-group order (q)
     // in one message  
-    std::stringstream y = LongToHex(dsa_key->pub_key);
-    std::stringstream g = LongToHex(dsa_key->g);
-    std::stringstream p = LongToHex(dsa_key->p);
-    std::stringstream q = LongToHex(dsa_key->q);
+    std::stringstream y = LongToHex(*dsa_key->pub_key);
+    std::stringstream g = LongToHex(*dsa_key->g);
+    std::stringstream p = LongToHex(*dsa_key->p);
+    std::stringstream q = LongToHex(*dsa_key->q);
 
     char message[1024];
     
@@ -78,7 +78,7 @@ namespace p2psp {
 
   asio::ip::udp::endpoint SplitterSTRPEDS::GetTrustedPeerForGathering(){
     trusted_gathering_counter_ = (trusted_gathering_counter_ + 1) % trusted_peers_.size();
-    if (std::find(peers_list_.begin(), peer_list_.end(), trusted_peers_.[trusted_gathering_counter_] ) != peer_list_.end() ){
+    if (std::find(peer_list_.begin(), peer_list_.end(), trusted_peers_[trusted_gathering_counter_] ) != peer_list_.end() ){
       return trusted_peers_[trusted_gathering_counter_];
     }
     return NULL;	
@@ -171,25 +171,28 @@ namespace p2psp {
      srand (time(NULL));
      long k = rand() % (dsa_key->q-1) + 1;
 
-     /* HEREEEEEEE */
-
-    int Siglen; 
+    unsigned int Siglen;
 
     unsigned char *sig = malloc(DSA_size(dsa_key));
-    if((DSA_sign(0, h, h.size(), sig, &Siglen, dsa_key)) != 1) {
+    if((DSA_sign(0, (unsigned char *)h.data(), h.size(), sig, &Siglen, dsa_key)) != 1) {
       printf("ERROR: Digital signature signing failed.\n"); 
       DSA_free(dsa); 
       exit(0); 
     } 
     
-    char message[1024];
     
-    (*(std::stringstream *)&message) = y;
-    (*(std::stringstream *)(message + 256)) = g;
-    (*(std::stringstream *)(message + 512)) = p;
-    (*(std::stringstream *)(message + 768)) = q;
+    std::vector<char> message;
+
+    (*(std::vector<char>*)message) = m;
+    (*(unsigned char *)(message + m.size())) = sig;
+
+    return message;
+
   }
 
+  std::stringstream SplitterSTRPEDS::LongToHex(BIGNUM value){
+	  return std::hex << value;
+  }
   
   void SplitterSTRPEDS::ModerateTheTeam() {
   // TODO: Check if something fails and a try catch statement has to be added
