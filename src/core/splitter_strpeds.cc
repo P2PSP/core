@@ -194,10 +194,29 @@ namespace p2psp {
 	  return std::hex << value;
   }
   
+  void SplitterSTRPE::AddTrustedPeer(const boost::asio::ip::udp::endpoint &peer) {
+    trusted_peers_.push_back(peer);
+  }
+
+  /*
+  size_t SplitterDBS::ReceiveMessage(std::vector<char> &message, boost::asio::ip::udp::endpoint &endpoint) {
+    system::error_code ec;
+
+    size_t bytes_transferred =
+      team_socket_.receive_from(asio::buffer(message), endpoint, 0, ec);
+
+    if (ec) {
+      ERROR("Unexepected error: " << ec.message());
+    }
+
+    return bytes_transferred;
+  }
+  */
+
   void SplitterSTRPEDS::ModerateTheTeam() {
   // TODO: Check if something fails and a try catch statement has to be added
 
-  std::vector<char> message(34);
+  std::vector<char> message(5);
   asio::ip::udp::endpoint sender;
 
   while (alive_) {
@@ -216,7 +235,7 @@ namespace p2psp {
       uint16_t lost_chunk_number = GetLostChunkNumber(message);
       ProcessLostChunk(lost_chunk_number, sender);
 
-    } else if (bytes_transferred == 34) {
+    } else if (bytes_transferred == 6) {
       /*
        Trusted peer sends hash of received chunk
        number of chunk, hash (sha256) of chunk
@@ -224,7 +243,7 @@ namespace p2psp {
 
       if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) !=
           trusted_peers_.end()) {
-        ProcessChunkHashMessage(message);
+    	  ProcessBadPeersMessage(message, sender);
       }
     }
 
@@ -246,9 +265,9 @@ namespace p2psp {
   LOG("Exiting moderate the team");
 }
 
-void SplitterSTRPE::AddTrustedPeer(const boost::asio::ip::udp::endpoint &peer) {
-  trusted_peers_.push_back(peer);
-}
+  void ProcessBadPeersMessage(const std::vector<char> &message, const boost::asio::ip::udp::endpoint &sender){
+
+  }
 
 void SplitterSTRPE::PunishMaliciousPeer(const boost::asio::ip::udp::endpoint &peer) {
   if (logging_) {

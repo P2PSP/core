@@ -64,8 +64,9 @@ class SplitterSTRPEDS : public SplitterDBS {
   std::vector<char> GetMessage(int chunk_number,  boost::asio::streambuf chunk, const boost::asio::ip::udp::endpoint dst);
   std::stringstream LongToHex(BIGNUM value);
   void AddTrustedPeer(const boost::asio::ip::udp::endpoint &peer);
+  //size_t SplitterDBS::ReceiveMessage(std::vector<char> &message, boost::asio::ip::udp::endpoint &endpoint) override;
   void ModerateTheTeam();
-  void ProcessBadPeerMessage(const std::vector<char> &message, const boost::asio::ip::tcp::endpoint &sender);
+  void ProcessBadPeersMessage(const std::vector<char> &message, const boost::asio::ip::udp::endpoint &sender);
   void HandleBadPeerFromTrusted(const boost::asio::ip::udp::endpoint &bad_peer, const boost::asio::ip::udp::endpoint &sender);
   void HandleBadPeerFromRegular(const boost::asio::ip::udp::endpoint &bad_peer, const boost::asio::ip::udp::endpoint &sender);
   void AddComplain(const boost::asio::ip::udp::endpoint &bad_peer, const boost::asio::ip::udp::endpoint &sender);
