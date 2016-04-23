@@ -25,8 +25,10 @@ class MonitorNTS : public PeerNTS {
   virtual void Complain(uint16_t);
   virtual int FindNextChunk() override;
 
+  // Receive the generated ID for this peer from splitter and disconnect
   virtual void DisconnectFromTheSplitter() override;
 
+  // Handle NTS messages; pass other messages to base class
   virtual int ProcessMessage(const std::vector<char>& message_bytes,
       const ip::udp::endpoint& sender) override;
 

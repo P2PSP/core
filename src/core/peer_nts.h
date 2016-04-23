@@ -46,7 +46,11 @@ class PeerNTS : public PeerDBS {
   virtual void SayHello(const ip::udp::endpoint& peer) override;
   virtual void SendHello(const ip::udp::endpoint& peer,
       std::vector<uint16_t> additional_ports = {});
+
+  // Parameter: message_data = (message, destination)
+  // Send a general message continuously until acknowledge is received
   virtual void SendMessage(const message_t& message_data);
+
   virtual void ReceiveId();
   virtual void SendHelloThread();
   virtual void SendMessage(std::string message,
@@ -57,13 +61,21 @@ class PeerNTS : public PeerDBS {
   virtual void TryToDisconnectFromTheSplitter();
 
   virtual std::set<uint16_t> GetFactors(uint16_t n);
+
+  // Get the number of possible products of a factor and another integer
+  // that are less or equal to the original number n.
   virtual uint16_t CountCombinations(const std::set<uint16_t>& factors);
+
   virtual std::set<uint16_t> GetProbablePortDiffs(uint16_t port_diff,
       uint16_t peer_number);
+
+  // Predict probable source ports that the arriving peer will use
+  // to communicate with this peer
   virtual std::vector<uint16_t> GetProbableSourcePorts(
       uint16_t source_port_to_splitter, uint16_t port_diff,
       uint16_t peer_number);
 
+  // Handle NTS messages; pass other messages to base class
   virtual int ProcessMessage(const std::vector<char>& message,
       const ip::udp::endpoint& sender) override;
 

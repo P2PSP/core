@@ -85,7 +85,8 @@ void SplitterNTS::SendMessageThread() {
     }
     // Send the message
     try {
-      this->team_socket_.send_to(buffer(message_data.first), message_data.second);
+      this->team_socket_.send_to(buffer(message_data.first),
+        message_data.second);
     } catch (std::exception e) {
       ERROR(e.what());
     }

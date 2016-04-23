@@ -87,26 +87,50 @@ class SplitterNTS : public SplitterDBS {
   std::mutex chunk_received_mutex_;
   std::condition_variable chunk_received_event_;
 
+  // The thread regularly checks if (peers are waiting to be incorporated
+  // for too long and removes them after a timeout
   std::thread check_timeout_thread_;
+
+  // The thread listens to this->extra_socket_ and reports source ports
   std::thread listen_extra_socket_thread_;
+
   std::thread send_message_thread_;
 
   virtual void EnqueueMessage(unsigned int count, const message_t& message);
 
   virtual size_t ReceiveChunk(boost::asio::streambuf &chunk) override;
+
+  // Before sending a message, wait for a chunk from source to avoid network
+  // congestion
   virtual void SendMessageThread();
+
+  // Generate a random ID for a newly arriving peer
   virtual std::string GenerateId();
+
+  // For NTS, send only the monitor peers
   virtual void SendTheListOfPeers(
       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+  // Send all peers except the monitor peers with their peer ID
+  // plus all peers currently being incorporated
   virtual void SendTheListOfPeers2(
       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket,
       const boost::asio::ip::udp::endpoint& peer);
+
+  // Remove peers that are waiting to be incorporated too long
   virtual void CheckArrivingPeerTime();
+  // Remove peers that try to connect to the existing peers too long
   virtual void CheckIncorporatingPeerTime();
+  // Check timeouts
   virtual void CheckTimeoutThread();
+
+  // The thread listens to this->extra_socket_ to determine the currently
+  // allocated source port of incorporated peers behind SYMSP NATs
   virtual void ListenExtraSocketThread();
+
+  // This method implements the NAT traversal algorithms.
   virtual void HandleAPeerArrival(
       std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) override;
+
   virtual void IncorporatePeer(const std::string& peer_id);
   virtual void SendNewPeer(const std::string& peer_id,
       const boost::asio::ip::udp::endpoint& new_peer,

@@ -50,9 +50,6 @@ void PeerNTS::SendHello(const ip::udp::endpoint& peer,
 }
 
 void PeerNTS::SendMessage(const message_t& message_data) {
-  // Parameter: message_data = (message, destination)
-  // Send a general message continuously until acknowledge is received
-
   std::lock_guard<std::mutex> guard(this->hello_messages_lock_);
   if (!CommonNTS::Contains(this->hello_messages_, message_data)) {
     this->hello_messages_.push_back(message_data);
