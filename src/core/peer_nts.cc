@@ -32,7 +32,11 @@ PeerNTS::~PeerNTS(){
 
 void PeerNTS::Init() { LOG("Initialized"); }
 
-void PeerNTS::SayHello(const ip::udp::endpoint& peer,
+void PeerNTS::SayHello(const ip::udp::endpoint& peer) {
+  // Do nothing, as this is handled later in the program by SendHello
+}
+
+void PeerNTS::SendHello(const ip::udp::endpoint& peer,
     std::vector<uint16_t> additional_ports) {
   std::lock_guard<std::mutex> guard(this->hello_messages_lock_);
   std::string message = this->peer_id_;
@@ -180,7 +184,7 @@ void PeerNTS::ReceiveTheListOfPeers2() {
         probable_source_ports.push_back(port);
       }
     }
-    this->SayHello(peer, probable_source_ports);
+    this->SendHello(peer, probable_source_ports);
     LOG("[hello] sent to " << peer);
   }
 
@@ -216,9 +220,9 @@ void PeerNTS::TryToDisconnectFromTheSplitter() {
       peer_iter != peer_list_.end() &&
       peer_iter != this->peer_list_.begin() + this->number_of_monitors_;
       ++peer_iter) {
-    this->SayHello(*peer_iter);
+    this->SendHello(*peer_iter);
   }
-  this->SayHello(this->splitter_);
+  this->SendHello(this->splitter_);
   // Directly start packet sending
   this->hello_messages_event_.notify_all();
 
@@ -377,7 +381,7 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
         source_port_to_splitter, port_diff, peer_number);
     DEBUG("Probable source ports: " << source_port_to_splitter << " and ["
         << CommonNTS::Join(additional_ports, ", ") << ']');
-    this->SayHello(peer, additional_ports);
+    this->SendHello(peer, additional_ports);
     // Directly start packet sending
     this->hello_messages_event_.notify_all();
   } else if (sender == this->splitter_ &&
@@ -401,10 +405,10 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
         source_port_to_splitter, port_diff, peer_number);
     DEBUG("Probable source ports: " << source_port_to_splitter << " and ["
         << CommonNTS::Join(additional_ports, ", ") << ']');
-    this->SayHello(peer, additional_ports);
+    this->SendHello(peer, additional_ports);
     // Send to extra splitter port to determine currently allocated
     // source port
-    this->SayHello(ip::udp::endpoint(this->splitter_.address(),
+    this->SendHello(ip::udp::endpoint(this->splitter_.address(),
         extra_splitter_port));
     // Directly start packet sending
     this->hello_messages_event_.notify_all();

@@ -56,6 +56,7 @@ class PeerDBS : public PeerIMS {
   PeerDBS();
   ~PeerDBS();
   virtual void Init() override;
+  virtual void SayHello(const ip::udp::endpoint&);
   virtual void SayGoodbye(const ip::udp::endpoint&);
   virtual void ReceiveMagicFlags();
   virtual void ReceiveTheNumberOfPeers();

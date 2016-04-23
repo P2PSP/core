@@ -23,6 +23,16 @@ void PeerDBS::Init() {
   TRACE("Initialized");
 }
 
+void PeerDBS::SayHello(const ip::udp::endpoint &node) {
+  std::string hello("H");
+
+  team_socket_.send_to(buffer(hello), node);
+
+  TRACE("[Hello] sent to "
+        << "(" << node.address().to_string() << ","
+        << std::to_string(node.port()) << ")");
+}
+
 void PeerDBS::SayGoodbye(const ip::udp::endpoint &node) {
   std::string goodbye("G");
 
@@ -79,6 +89,9 @@ void PeerDBS::ReceiveTheListOfPeers() {
     port = ntohs(*(short *)(raw_data + 4));
 
     peer = ip::udp::endpoint(ip_addr, port);
+    TRACE("[hello] sent to (" << peer.address().to_string() << ","
+                              << std::to_string(peer.port()) << ")");
+    SayHello(peer);
 
     TRACE(std::to_string((number_of_peers_ - tmp) / number_of_peers_));
 

@@ -43,7 +43,8 @@ class PeerNTS : public PeerDBS {
 
   std::thread send_hello_thread_;
 
-  virtual void SayHello(const ip::udp::endpoint& peer,
+  virtual void SayHello(const ip::udp::endpoint& peer) override;
+  virtual void SendHello(const ip::udp::endpoint& peer,
       std::vector<uint16_t> additional_ports = {});
   virtual void SendMessage(const message_t& message_data);
   virtual void ReceiveId();
