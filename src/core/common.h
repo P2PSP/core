@@ -32,6 +32,7 @@ class Common {
   static const char kLRS = 2;  // LRS magic number
   static const char kNTS = 4;  // NIS magic number
   static const char kDIS = 8;  // DIS magic number
+  static const char kSTRPE= 16;  // STRPE magic number
 
   // TODO: Use colors
   // IMS_COLOR = Color.red

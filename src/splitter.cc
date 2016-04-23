@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <memory>
+#include "core/common.h"
 #include "core/splitter_ims.h"
 #include "core/splitter_dbs.h"
 #include "core/splitter_acs.h"
@@ -22,7 +23,9 @@
 
 // TODO: LOG fails if splitter is defined outside the main
 // p2psp::SplitterSTRPE splitter;
-std::unique_ptr<p2psp::SplitterSTRPE> splitter_ptr;
+std::shared_ptr<p2psp::SplitterIMS> splitter_ptr;
+// True if splitter_ptr is SplitterIMS and no subclass
+bool is_IMS_only;
 
 void HandlerCtrlC(int s) {
   LOG("Keyboard interrupt detected ... Exiting!");
@@ -49,6 +52,20 @@ void HandlerEndOfExecution() {
   // with multiple receive calls in order to read the configuration sent by the
   // splitter
   socket.close();
+}
+
+bool HasParameter(const boost::program_options::variables_map& vm,
+    const std::string& param_name, char min_magic_flags) {
+  if (!vm.count(param_name)) {
+    return false;
+  }
+  if (is_IMS_only || std::static_pointer_cast<p2psp::SplitterDBS>(
+      splitter_ptr)->GetMagicFlags() < min_magic_flags) {
+    ERROR("The parameter --" << param_name
+        << " is not available for this splitter mode.");
+    return false;
+  }
+  return true;
 }
 
 int main(int argc, const char *argv[]) {
@@ -116,7 +133,21 @@ int main(int argc, const char *argv[]) {
     return 1;
   }
 
-  splitter_ptr.reset(new p2psp::SplitterSTRPE());
+  is_IMS_only = false;
+  if (vm.count("strpe")) {
+    splitter_ptr.reset(new p2psp::SplitterSTRPE());
+  } else if (vm.count("LRS")) {
+    splitter_ptr.reset(new p2psp::SplitterLRS());
+  } else if (vm.count("ACS")) {
+    splitter_ptr.reset(new p2psp::SplitterACS());
+  // } else if (vm.count("NTS")) {
+  //  splitter_ptr.reset(new p2psp::SplitterNTS());
+  } else if (vm.count("IMS")) {
+    is_IMS_only = true;
+    splitter_ptr.reset(new p2psp::SplitterIMS());
+  } else {
+    splitter_ptr.reset(new p2psp::SplitterDBS());
+  }
 
   if (vm.count("buffer_size")) {
     splitter_ptr->SetBufferSize(vm["buffer_size"].as<int>());
@@ -147,23 +178,24 @@ int main(int argc, const char *argv[]) {
   }
 
   // Parameters if splitter is not IMS
-  if (vm.count("max_chunk_loss")) {
-    splitter_ptr->SetMaxChunkLoss(vm["max_chunk_loss"].as<int>());
+  if (HasParameter(vm, "max_chunk_loss", p2psp::Common::kDBS)) {
+    std::shared_ptr<p2psp::SplitterDBS> splitter_dbs =
+        std::static_pointer_cast<p2psp::SplitterDBS>(splitter_ptr);
+    splitter_dbs->SetMaxChunkLoss(vm["max_chunk_loss"].as<int>());
   }
 
-  if (vm.count("max_number_of_monitor_peers")) {
-    splitter_ptr->SetMonitorNumber(vm["max_number_of_monitor_peers"].as<int>());
+  if (HasParameter(vm, "max_number_of_monitor_peers", p2psp::Common::kDBS)) {
+    std::shared_ptr<p2psp::SplitterDBS> splitter_dbs =
+        std::static_pointer_cast<p2psp::SplitterDBS>(splitter_ptr);
+    splitter_dbs->SetMonitorNumber(vm["max_number_of_monitor_peers"].as<int>());
   }
 
   // Parameters if STRPE
-  if (vm.count("strpe_log")) {
-    splitter_ptr->SetLogging(vm["strpe_log"].as<bool>());
-    splitter_ptr->SetLogging(vm["strpe_log"].as<bool>());
-  }
-
-  if (vm.count("strpe_log")) {
-    splitter_ptr->SetLogging(true);
-    splitter_ptr->SetLogFile(vm["strpe_log"].as<std::string>());
+  if (HasParameter(vm, "strpe_log", p2psp::Common::kSTRPE)) {
+    std::shared_ptr<p2psp::SplitterSTRPE> splitter_strpe =
+        std::static_pointer_cast<p2psp::SplitterSTRPE>(splitter_ptr);
+    splitter_strpe->SetLogging(true);
+    splitter_strpe->SetLogFile(vm["strpe_log"].as<std::string>());
   }
 
   splitter_ptr->Start();
@@ -190,6 +222,14 @@ int main(int argc, const char *argv[]) {
   sigIntHandler.sa_flags = 0;
   sigaction(SIGINT, &sigIntHandler, NULL);
 
+  std::shared_ptr<p2psp::SplitterDBS> splitter_dbs;
+  if (!is_IMS_only) { // GetPeerList is only in DBS and derivated classes
+    splitter_dbs = std::static_pointer_cast<p2psp::SplitterDBS>(splitter_ptr);
+  }
+  std::shared_ptr<p2psp::SplitterACS> splitter_acs;
+  if (!is_IMS_only && splitter_dbs->GetMagicFlags() >= p2psp::Common::kACS) {
+    splitter_acs = std::static_pointer_cast<p2psp::SplitterACS>(splitter_ptr);
+  }
   while (splitter_ptr->isAlive()) {
     boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
     chunks_sendto = splitter_ptr->GetSendToCounter() - last_sendto_counter;
@@ -203,28 +243,29 @@ int main(int argc, const char *argv[]) {
     LOG("|" << kbps_recvfrom << "|" << kbps_sendto << "|");
     // LOG(_SET_COLOR(_CYAN));
 
-    // TODO: GetPeerList is only in DBS and derivated classes
-    peer_list = splitter_ptr->GetPeerList();
-    LOG("Size peer list: " << peer_list.size());
+    if (!is_IMS_only) { // GetPeerList is only in DBS and derivated classes
+      peer_list = splitter_dbs->GetPeerList();
+      LOG("Size peer list: " << peer_list.size());
 
-    std::vector<boost::asio::ip::udp::endpoint>::iterator it;
-    for (it = peer_list.begin(); it != peer_list.end(); ++it) {
-      // _SET_COLOR(_BLUE);
-      LOG("Peer: " << *it);
-      // _SET_COLOR(_RED);
+      std::vector<boost::asio::ip::udp::endpoint>::iterator it;
+      for (it = peer_list.begin(); it != peer_list.end(); ++it) {
+        // _SET_COLOR(_BLUE);
+        LOG("Peer: " << *it);
+        // _SET_COLOR(_RED);
 
-      // TODO: GetLoss and GetMaxChunkLoss are only in DBS and derivated classes
-      LOG(splitter_ptr->GetLoss(*it) << "/" << chunks_sendto << " "
-                                     << splitter_ptr->GetMaxChunkLoss());
+        LOG(splitter_dbs->GetLoss(*it) << "/" << chunks_sendto << " "
+                                       << splitter_dbs->GetMaxChunkLoss());
 
-      // TODO: If is ACS
-      // _SET_COLOR(_YELLOW);
-      LOG(splitter_ptr->GetPeriod(*it));
-      // _SET_COLOR(_PURPLE)
-      LOG((splitter_ptr->GetNumberOfSentChunksPerPeer(*it) *
-           splitter_ptr->GetChunkSize() * 8) /
-          1000);
-      splitter_ptr->SetNumberOfSentChunksPerPeer(*it, 0);
+        if (splitter_dbs->GetMagicFlags() >= p2psp::Common::kACS) { // If is ACS
+          // _SET_COLOR(_YELLOW);
+          LOG(splitter_acs->GetPeriod(*it));
+          // _SET_COLOR(_PURPLE)
+          LOG((splitter_acs->GetNumberOfSentChunksPerPeer(*it) *
+               splitter_acs->GetChunkSize() * 8) /
+              1000);
+          splitter_acs->SetNumberOfSentChunksPerPeer(*it, 0);
+        }
+      }
     }
   }
 

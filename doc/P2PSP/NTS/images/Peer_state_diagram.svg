@@ -1,0 +1,151 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Created with ASCIIToSVG (http://9vx.org/~dho/a2s/) -->
+<svg width="621px" height="672px" version="1.1"
+  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <filter id="dsFilterNoBlur" width="150%" height="150%">
+      <feOffset result="offOut" in="SourceGraphic" dx="3" dy="3"/>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix" values="0.2 0 0 0 0 0 0.2 0 0 0 0 0 0.2 0 0 0 0 0 1 0"/>
+      <feBlend in="SourceGraphic" in2="matrixOut" mode="normal"/>
+    </filter>
+    <filter id="dsFilter" width="150%" height="150%">
+      <feOffset result="offOut" in="SourceGraphic" dx="3" dy="3"/>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix" values="0.2 0 0 0 0 0 0.2 0 0 0 0 0 0.2 0 0 0 0 0 1 0"/>
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="3"/>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"/>
+    </filter>
+    <marker id="iPointer"
+      viewBox="0 0 10 10" refX="5" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="8" markerHeight="7"
+      orient="auto">
+      <path d="M 10 0 L 10 10 L 0 5 z" />
+    </marker>
+    <marker id="Pointer"
+      viewBox="0 0 10 10" refX="5" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="8" markerHeight="7"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+  </defs><g id="boxes" stroke="black" stroke-width="2" fill="none" >
+<g id="group0">
+	<path id="path0" filter="url(#dsFilter)" fill="#fff" d="M 40.5 24 L 337.5 24 L 337.5 56 L 40.5 56 Z" />
+	<text x="53.1" y="44.8" id="text0" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Peer initialized </text>
+
+</g>
+<g id="group5">
+	<path id="path5" filter="url(#dsFilter)" fill="#fff" d="M 40.5 98 Q 40.5 88 50.5 88 L 327.5 88 Q 337.5 88 337.5 98 L 337.5 142 Q 337.5 152 327.5 152 L 50.5 152 Q 40.5 152 40.5 142 Z" />
+	<text x="53.1" y="108.8" id="text5" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Connecting to splitter via TCP, </text>
+
+	<text x="53.1" y="124.8" id="text5" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >receiving configuration (list </text>
+
+	<text x="53.1" y="140.8" id="text5" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >of peers) and stream header </text>
+
+</g>
+<g id="group7">
+	<path id="path7" filter="url(#dsFilter)" fill="#fff" d="M 544.5 114 Q 544.5 104 554.5 104 L 597.5 104 Q 607.5 104 607.5 114 L 607.5 126 Q 607.5 136 597.5 136 L 554.5 136 Q 544.5 136 544.5 126 Z" />
+	<text x="557.1" y="124.8" id="text7" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Quit </text>
+
+</g>
+<g id="group15">
+	<path id="path15" filter="url(#dsFilter)" fill="#fff" d="M 40.5 216 L 337.5 216 L 337.5 248 L 40.5 248 Z" />
+	<text x="53.1" y="236.8" id="text15" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Peer arriving </text>
+
+</g>
+<g id="group21">
+	<path id="path21" filter="url(#dsFilter)" fill="#fff" d="M 40.5 290 Q 40.5 280 50.5 280 L 327.5 280 Q 337.5 280 337.5 290 L 337.5 334 Q 337.5 344 327.5 344 L 50.5 344 Q 40.5 344 40.5 334 Z" />
+	<text x="53.1" y="300.8" id="text21" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Sending UDP hello packets </text>
+
+	<text x="53.1" y="316.8" id="text21" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >to splitter and monitors, </text>
+
+	<text x="53.1" y="332.8" id="text21" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >receiving acknowledge </text>
+
+</g>
+<g id="group23">
+	<path id="path23" filter="url(#dsFilter)" fill="#fff" d="M 544.5 306 Q 544.5 296 554.5 296 L 597.5 296 Q 607.5 296 607.5 306 L 607.5 318 Q 607.5 328 597.5 328 L 554.5 328 Q 544.5 328 544.5 318 Z" />
+	<text x="557.1" y="316.8" id="text23" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Quit </text>
+
+</g>
+<g id="group31">
+	<path id="path31" filter="url(#dsFilter)" fill="#fff" d="M 463.5 402 Q 463.5 392 473.5 392 L 597.5 392 Q 607.5 392 607.5 402 L 607.5 430 Q 607.5 440 597.5 440 L 473.5 440 Q 463.5 440 463.5 430 Z" />
+	<text x="476.1" y="412.8" id="text31" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >retrying </text>
+
+	<text x="476.1" y="428.8" id="text31" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >incorporation </text>
+
+</g>
+<g id="group34">
+	<path id="path34" filter="url(#dsFilter)" fill="#fff" d="M 40.5 408 L 337.5 408 L 337.5 440 L 40.5 440 Z" />
+	<text x="53.1" y="428.8" id="text34" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Peer incorporating </text>
+
+</g>
+<g id="group41">
+	<path id="path41" filter="url(#dsFilter)" fill="#fff" d="M 40.5 482 Q 40.5 472 50.5 472 L 327.5 472 Q 337.5 472 337.5 482 L 337.5 526 Q 337.5 536 327.5 536 L 50.5 536 Q 40.5 536 40.5 526 Z" />
+	<text x="53.1" y="492.8" id="text41" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Sending UDP hello packets to </text>
+
+	<text x="53.1" y="508.8" id="text41" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >all other incorporated and </text>
+
+	<text x="53.1" y="524.8" id="text41" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >currently incorporating peers </text>
+
+</g>
+<g id="group45">
+	<path id="path45" filter="url(#dsFilter)" fill="#fff" d="M 544.5 514 Q 544.5 504 554.5 504 L 597.5 504 Q 607.5 504 607.5 514 L 607.5 526 Q 607.5 536 597.5 536 L 554.5 536 Q 544.5 536 544.5 526 Z" />
+	<text x="557.1" y="524.8" id="text45" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Quit </text>
+
+</g>
+<g id="group53">
+	<path id="path53" filter="url(#dsFilter)" fill="#fff" d="M 40.5 600 L 337.5 600 L 337.5 632 L 40.5 632 Z" />
+	<text x="53.1" y="620.8" id="text53" fill="#000" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >Peer successfully incorporated </text>
+
+</g>
+</g>
+<g id="lines" stroke="black" stroke-width="2" fill="none" >
+<g id="group481">
+	<path id="path481" marker-start="url(#iPointer)" d="M 94.5 72 L 94.5 56 " />
+</g>
+<g id="group486">
+	<path id="path486" marker-end="url(#Pointer)" d="M 94.5 152 L 94.5 200 " />
+</g>
+<g id="group494">
+	<path id="path494" marker-start="url(#iPointer)" d="M 94.5 264 L 94.5 248 " />
+</g>
+<g id="group499">
+	<path id="path499" marker-end="url(#Pointer)" d="M 94.5 344 L 94.5 392 " />
+</g>
+<g id="group507">
+	<path id="path507" marker-start="url(#iPointer)" d="M 94.5 456 L 94.5 440 " />
+</g>
+<g id="group512">
+	<path id="path512" marker-end="url(#Pointer)" d="M 94.5 536 L 94.5 584 " />
+</g>
+<g id="group1621">
+	<path id="path1621" stroke-dasharray="5 5" marker-end="url(#Pointer)" d="M 337.5 120 L 535.5 120 " />
+</g>
+<g id="group1634">
+	<path id="path1634" stroke-dasharray="5 5" marker-end="url(#Pointer)" d="M 337.5 312 L 535.5 312 " />
+</g>
+<g id="group1646">
+	<path id="path1646" stroke-dasharray="5 5" marker-end="url(#Pointer)" d="M 337.5 488 L 498.5 488 Q 508.5 488 508.5 478 L 508.5 456 " />
+</g>
+<g id="group1649">
+	<path id="path1649" stroke-dasharray="5 5" marker-end="url(#Pointer)" d="M 337.5 520 L 535.5 520 " />
+</g>
+<g id="group1674">
+	<path id="path1674" stroke-dasharray="5 5" marker-start="url(#iPointer)" d="M 346.5 232 L 498.5 232 Q 508.5 232 508.5 242 L 508.5 296 " />
+</g>
+<g id="group2436">
+	<path id="path2436" stroke-dasharray="5 5" d="M 508.5 328 L 508.5 392 " />
+</g>
+</g>
+<g id="text" fill="black" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:16.8px" >
+<text x="350.1" y="108.8" id="text3" fill="#000" >connection failed </text>
+<text x="107.1" y="188.8" id="text7" fill="#000" >connection successful </text>
+<text x="350.1" y="300.8" id="text10" fill="#000" >timeout (~10s) </text>
+<text x="107.1" y="380.8" id="text14" fill="#000" >all acknowledgements received in time </text>
+<text x="350.1" y="476.8" id="text18" fill="#000" >timeout (~15s) </text>
+<text x="350.1" y="540.8" id="text23" fill="#000" >timeout (~60s) </text>
+<text x="107.1" y="572.8" id="text24" fill="#000" >all acknowledgements received in time </text>
+</g>
+</svg>

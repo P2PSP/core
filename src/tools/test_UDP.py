@@ -56,13 +56,13 @@ class Packets_per_second(Thread):
     def run(self):
         global sent_packets
         global last_sent
-        iters = 1
+        iters = 0
         while True:
+            time.sleep(1)
+            iters += 1
             last_sent = sent_packets - last_sent
             print str(last_sent*payload_size*8/1000) + " Kbps" + " ( average = " + str(sent_packets*payload_size*8/(iters*1000)) + " Kbps )"
             last_sent = sent_packets
-            time.sleep(1)
-            iters += 1
 
 pack = Packets_per_second()
 pack.daemon = True
