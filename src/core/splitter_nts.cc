@@ -270,11 +270,7 @@ void SplitterNTS::ListenExtraSocketThread() {
       size_t bytes_transferred =
           this->extra_socket_->receive_from(buffer(message_bytes), sender);
       message = std::string(message_bytes.data(), bytes_transferred);
-    // TODO:
-    // } catch (socket.timeout) {
-      // Ignore timeout
-      // continue;
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
       ERROR(e.what());
       continue;
     }
@@ -363,7 +359,7 @@ void SplitterNTS::IncorporatePeer(const std::string& peer_id) {
     try {
       // Send the endpoints of the incorporated peers to the new peer
       this->SendTheListOfPeers2(peer_info.serve_socket_, new_peer);
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
       ERROR(e.what());
     }
   }
@@ -400,7 +396,11 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
   }
   this->extra_socket_.reset(new ip::udp::socket(this->io_service_));
   this->extra_socket_->open(ip::udp::v4());
-  this->extra_socket_->bind(ip::udp::endpoint(ip::udp::v4(), 0));
+  try {
+    this->extra_socket_->bind(ip::udp::endpoint(ip::udp::v4(), 0));
+  } catch (std::exception e) {
+    ERROR(e.what());
+  }
   // Do not block the thread forever:
   this->extra_socket_->set_option(socket_base::linger(true, 1));
   uint16_t extra_listen_port = this->extra_socket_->local_endpoint().port();
@@ -492,7 +492,7 @@ void SplitterNTS::RetryToIncorporatePeer(const std::string& peer_id) {
   // Send all peers to the retrying peer
   try {
     this->SendTheListOfPeers2(peer_info.serve_socket_, new_peer);
-  } catch (const std::exception& e) {
+  } catch (std::exception e) {
     ERROR(e.what());
   }
 }
@@ -525,7 +525,7 @@ void SplitterNTS::RemovePeer(const ip::udp::endpoint& peer) {
     this->ids_.erase(peer);
     this->port_steps_.erase(peer);
     this->last_source_port_.erase(peer);
-  } catch (const std::exception& e) {
+  } catch (std::exception e) {
     TRACE(e.what());
     // ignore
   }
@@ -544,7 +544,7 @@ void SplitterNTS::ModerateTheTeam() {
       DEBUG("Message length = " << bytes_transferred);
       message_bytes.resize(bytes_transferred);
       message = std::string(message_bytes.data(), bytes_transferred);
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
       ERROR(e.what());
       continue;
     }

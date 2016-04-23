@@ -15,7 +15,7 @@
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 
-      
+
 namespace p2psp
 {
 
@@ -29,20 +29,20 @@ namespace p2psp
     class Sink;
     typedef boost::log::sources::severity_logger<
       boost::log::trivial::severity_level> Logger;
-        
+
     Logger logger_;
     std::unique_ptr<Sink> sink_ptr_;
-      
+
     static TraceSystem trace_system_;
-    
+
   public:
     TraceSystem();
-    
+
     static Logger& logger()
     {
       return trace_system_.logger_;
     }
-    
+
     static void Flush();
   };
 
@@ -82,15 +82,26 @@ namespace p2psp
     << _SET_COLOR(_RED) << __FILE__ << ":" << __LINE__ << ": ERROR: " \
     << a << _RESET_COLOR(); }
 
+#define WARNING(a)    \
+  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::warning)  \
+    << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": WARNING: " \
+    << a << _RESET_COLOR(); }
+
+#define DEBUG(a)    \
+  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::debug)  \
+    << __FILE__ << ":" << __LINE__ << ": DEBUG: " << a; }
+
 #define TRACE(a)    \
   { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::trace)  \
     << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " \
     << a << _RESET_COLOR(); }
-    
+
 #else
 
 #define LOG(a)      {}
 #define LOGC(c, a)  {}
+#define WARNING(a)    {}
+#define DEBUG(a)    {}
 #define ERROR(a)    {}
 #define TRACE(a)    {}
 

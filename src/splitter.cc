@@ -16,6 +16,7 @@
 #include "core/splitter_acs.h"
 #include "core/splitter_lrs.h"
 #include "core/splitter_strpe.h"
+#include "core/splitter_nts.h"
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <signal.h>
@@ -140,8 +141,8 @@ int main(int argc, const char *argv[]) {
     splitter_ptr.reset(new p2psp::SplitterLRS());
   } else if (vm.count("ACS")) {
     splitter_ptr.reset(new p2psp::SplitterACS());
-  // } else if (vm.count("NTS")) {
-  //  splitter_ptr.reset(new p2psp::SplitterNTS());
+  } else if (vm.count("NTS")) {
+    splitter_ptr.reset(new p2psp::SplitterNTS());
   } else if (vm.count("IMS")) {
     is_IMS_only = true;
     splitter_ptr.reset(new p2psp::SplitterIMS());
