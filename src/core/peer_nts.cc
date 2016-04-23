@@ -131,7 +131,11 @@ void PeerNTS::SendHelloThread() {
 
 void PeerNTS::SendMessage(std::string message,
     boost::asio::ip::udp::endpoint endpoint) {
-  this->team_socket_.send_to(buffer(message), endpoint);
+  try {
+    this->team_socket_.send_to(buffer(message), endpoint);
+  } catch (std::exception e) {
+    ERROR(e.what());
+  }
 }
 
 void PeerNTS::StartSendHelloThread() {

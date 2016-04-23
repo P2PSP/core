@@ -84,7 +84,11 @@ void SplitterNTS::SendMessageThread() {
       this->message_queue_.pop();
     }
     // Send the message
-    this->team_socket_.send_to(buffer(message_data.first), message_data.second);
+    try {
+      this->team_socket_.send_to(buffer(message_data.first), message_data.second);
+    } catch (std::exception e) {
+      ERROR(e.what());
+    }
     // Wait for a chunk from source to avoid network congestion
     std::unique_lock<std::mutex> lock(chunk_received_mutex_);
     this->chunk_received_event_.wait(lock);
@@ -277,7 +281,11 @@ void SplitterNTS::ListenExtraSocketThread() {
 
     if (message.size() == CommonNTS::kPeerIdLength) {
       // Send acknowledge
-      this->extra_socket_->send_to(buffer(message), sender);
+      try {
+        this->extra_socket_->send_to(buffer(message), sender);
+      } catch (std::exception e) {
+        ERROR(e.what());
+      }
 
       std::string peer_id(message.data(), CommonNTS::kPeerIdLength);
 

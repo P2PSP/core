@@ -32,7 +32,11 @@ void PeerSYMSP::SendMessage(std::string message,
       for (unsigned int i = 0; i < this->port_step_; i++) {
         ip::udp::socket socket(this->io_service_);
         socket.open(ip::udp::v4());
-        socket.send_to(buffer(std::string()), endpoint);
+        try {
+          socket.send_to(buffer(std::string()), endpoint);
+        } catch (std::exception e) {
+          ERROR(e.what());
+        }
         socket.close();
       }
     }
