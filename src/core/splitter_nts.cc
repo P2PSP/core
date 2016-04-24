@@ -442,7 +442,8 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
           (uint32_t)new_peer.address().to_v4().to_ulong());
       CommonNTS::Write<uint16_t>(msg_str, min_known_source_port);
       CommonNTS::Write<uint16_t>(msg_str, this->port_steps_[new_peer]);
-      CommonNTS::Write<uint16_t>(msg_str, peer_number);
+      // Splitter is "peer number 0", thus add 1
+      CommonNTS::Write<uint16_t>(msg_str, peer_number+1);
       if (this->port_steps_[*peer_iter] != 0) {
         // Send the port of this->extra_socket_ to determine the
         // currently allocated source port of the incorporated peer
@@ -470,7 +471,7 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
     CommonNTS::Write<uint16_t>(msg_str, min_known_source_port);
     CommonNTS::Write<uint16_t>(msg_str, this->port_steps_[new_peer]);
     // Send the length of the peer_list as peer_number
-    CommonNTS::Write<uint16_t>(msg_str, this->peer_list_.size());
+    CommonNTS::Write<uint16_t>(msg_str, this->peer_list_.size()+1);
     // Hopefully one of these packets arrives
     this->EnqueueMessage(3, std::make_pair(msg_str.str(), peer));
   }

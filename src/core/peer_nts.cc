@@ -213,13 +213,13 @@ void PeerNTS::TryToDisconnectFromTheSplitter() {
   // Send UDP packets to splitter and monitor peers
   // to create working NAT entries and to determine the
   // source port allocation type of the NAT of this peer
+  this->SendHello(this->splitter_);
   for (auto peer_iter = this->peer_list_.begin();
       peer_iter != peer_list_.end() &&
       peer_iter != this->peer_list_.begin() + this->number_of_monitors_;
       ++peer_iter) {
     this->SendHello(*peer_iter);
   }
-  this->SendHello(this->splitter_);
   // Directly start packet sending
   this->hello_messages_event_.notify_all();
 
