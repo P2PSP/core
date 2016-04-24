@@ -40,7 +40,7 @@ class TrustedPeer : public MaliciousPeer {
   virtual int CalculateNextSampled();
   virtual void SendChunkHash(int);
   virtual void ReceiveTheNextMessage(std::vector<char> &,
-                                     ip::udp::endpoint &) override; 
+                                     ip::udp::endpoint &) override;
   virtual float CalcBufferCorrectness() override;
   virtual int ProcessNextMessage() override;
 };

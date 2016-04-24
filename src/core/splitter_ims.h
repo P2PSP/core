@@ -72,7 +72,7 @@ namespace p2psp {
     std::string GetSourceAddr();
     int GetSourcePort();
     int GetTTL();
-  
+
     // Setters
     void SetAlive(bool alive);
     void SetBufferSize(int buffer_size);
