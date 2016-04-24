@@ -33,7 +33,7 @@ namespace p2psp {
     std::vector<char> data;
     bool received;
   };
-  
+
   class PeerIMS {
 
   protected:
@@ -46,7 +46,7 @@ namespace p2psp {
     static const int kBufferStatus = 0;                   // Default ?
     static const bool kShowBuffer = false;                // Default
     static const int kChunkIndexSize = 2;
-  
+
     uint16_t player_port_;                                // Port used to serve the player.
     ip::address splitter_addr_;                           // Address of the splitter.
     uint16_t splitter_port_;                              // Port of the splitter.
@@ -108,7 +108,7 @@ namespace p2psp {
     virtual void ListenToTheTeam();
     virtual void ReceiveTheNextMessage(std::vector<char>&, ip::udp::endpoint&);
     virtual int ProcessMessage(const std::vector<char>&,
-			       const ip::udp::endpoint&);
+                               const ip::udp::endpoint&);
     virtual int ProcessNextMessage();
 
     /**
@@ -149,7 +149,7 @@ namespace p2psp {
     virtual void     SetTeamPort(uint16_t);
     virtual uint16_t GetTeamPort();
     virtual void SetUseLocalhost(bool);
-    
+
   };
 }
 

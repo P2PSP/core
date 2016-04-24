@@ -73,13 +73,13 @@ namespace p2psp {
     acceptor_.listen();
 
     TRACE("Waiting for the player at (" << endpoint.address().to_string() << ","
-	  << std::to_string(endpoint.port())
-	  << ")");
+          << std::to_string(endpoint.port())
+          << ")");
     acceptor_.accept(player_socket_);
 
     TRACE("The player is ("
-	  << player_socket_.remote_endpoint().address().to_string() << ","
-	  << std::to_string(player_socket_.remote_endpoint().port()) << ")");
+          << player_socket_.remote_endpoint().address().to_string() << ","
+          << std::to_string(player_socket_.remote_endpoint().port()) << ")");
 #endif
   }
 
@@ -99,9 +99,9 @@ namespace p2psp {
     } else {
       ip::udp::socket s(io_service_);
       try {
-	s.connect(splitter_);
+        s.connect(splitter_);
       } catch (boost::system::system_error e) {
-	ERROR(e.what());
+        ERROR(e.what());
       }
 
       my_ip = s.local_endpoint().address().to_string();
@@ -111,8 +111,8 @@ namespace p2psp {
     splitter_socket_.open(splitter_tcp_endpoint.protocol());
 
     TRACE("Connecting to the splitter at ("
-	  << splitter_tcp_endpoint.address().to_string() << ","
-	  << std::to_string(splitter_tcp_endpoint.port()) << ") from " << my_ip);
+          << splitter_tcp_endpoint.address().to_string() << ","
+          << std::to_string(splitter_tcp_endpoint.port()) << ") from " << my_ip);
     if (team_port_ != 0) {
       TRACE("I'm using port" << std::to_string(team_port_));
       tcp_endpoint = ip::tcp::endpoint(ip::address::from_string(my_ip), team_port_);
@@ -127,8 +127,8 @@ namespace p2psp {
     splitter_socket_.connect(splitter_tcp_endpoint);
 
     TRACE("Connected to the splitter at ("
-	  << splitter_tcp_endpoint.address().to_string() << ","
-	  << std::to_string(splitter_tcp_endpoint.port()) << ")");
+          << splitter_tcp_endpoint.address().to_string() << ","
+          << std::to_string(splitter_tcp_endpoint.port()) << ")");
   }
 
   void PeerIMS::DisconnectFromTheSplitter() { splitter_socket_.close(); }
@@ -144,7 +144,7 @@ namespace p2psp {
     mcast_port_ = ntohs(*(short *)(raw_data + 4));
 
     TRACE("mcast_endpoint = (" << mcast_addr_.to_string() << ","
-	  << std::to_string(mcast_port_) << ")");
+          << std::to_string(mcast_port_) << ")");
   }
 
   void PeerIMS::ReceiveTheHeaderSize() {
@@ -162,7 +162,7 @@ namespace p2psp {
 
     chunk_size_ = ntohs(*(short *)(buffer.c_array()));
     message_size_=kChunkIndexSize+chunk_size_;
-  
+
     TRACE("chunk_size (bytes) = " << std::to_string(chunk_size_));
   }
 
@@ -188,7 +188,7 @@ namespace p2psp {
     }
 
     TRACE("Received " << std::to_string(header_size_in_bytes)
-	  << "bytes of header");
+          << "bytes of header");
   }
 
   void PeerIMS::ReceiveTheBufferSize() {
@@ -210,8 +210,8 @@ namespace p2psp {
     team_socket_.set_option(ip::multicast::join_group(mcast_addr_));
 
     TRACE("Listening to the mcast_channel = (" << mcast_addr_.to_string() << ","
-	  << std::to_string(mcast_port_)
-	  << ")");
+          << std::to_string(mcast_port_)
+          << ")");
   }
 
   void PeerIMS::BufferData() {
@@ -253,8 +253,8 @@ namespace p2psp {
     // of the circular queue.
 
     TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
-	  << std::to_string(team_socket_.local_endpoint().port()) << ")"
-	  << "\b: buffering = 000.00%");
+          << std::to_string(team_socket_.local_endpoint().port()) << ")"
+          << "\b: buffering = 000.00%");
     TraceSystem::Flush();
 
     // First chunk to be sent to the player.  The
@@ -270,8 +270,8 @@ namespace p2psp {
     played_chunk_ = chunk_number;
     TRACE("First chunk to play " << std::to_string(played_chunk_));
     TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
-	  << std::to_string(team_socket_.local_endpoint().port()) << ")"
-	  << "\b: buffering (\b" << std::to_string(100.0 / buffer_size_));
+          << std::to_string(team_socket_.local_endpoint().port()) << ")"
+          << "\b: buffering (\b" << std::to_string(100.0 / buffer_size_));
     // TODO: Justify: .rjust(4)
 
     // Now, fill up to the half of the buffer.
@@ -283,21 +283,21 @@ namespace p2psp {
       // BUFFER_STATUS = (100 * x) / (buffer_size_ / 2.0f) + 1;
 
       if (!Common::kConsoleMode) {
-	// GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
+        // GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
       } else {
-	// pass
+        // pass
       }
       TRACE("!");
       TraceSystem::Flush();
 
       while (ProcessNextMessage() < 0)
-	;
+        ;
     }
 
     TRACE("");
     TRACE("latency = " << std::to_string((clock() - start_time) /
-					 (float)CLOCKS_PER_SEC)
-	  << " seconds");
+                                         (float)CLOCKS_PER_SEC)
+          << " seconds");
     TRACE("buffering done.");
     TraceSystem::Flush();
   }
@@ -317,18 +317,18 @@ namespace p2psp {
   }
 
   void PeerIMS::ReceiveTheNextMessage(std::vector<char> &message,
-				      ip::udp::endpoint &sender) {
+                                      ip::udp::endpoint &sender) {
     TRACE("Waiting for a chunk at ("
-	  << team_socket_.local_endpoint().address().to_string() << ","
-	  << std::to_string(team_socket_.local_endpoint().port()) << ")");
+          << team_socket_.local_endpoint().address().to_string() << ","
+          << std::to_string(team_socket_.local_endpoint().port()) << ")");
 
     size_t bytes_transferred = team_socket_.receive_from(buffer(message), sender);
     message.resize(bytes_transferred);
     recvfrom_counter_++;
 
     TRACE("Received a message from ("
-	  << sender.address().to_string() << "," << std::to_string(sender.port())
-	  << ") of length " << std::to_string(message.size()));
+          << sender.address().to_string() << "," << std::to_string(sender.port())
+          << ") of length " << std::to_string(message.size()));
 
     if (message.size() < 10) {
       TRACE("Message content = " << std::string(message.data()));
@@ -336,7 +336,7 @@ namespace p2psp {
   }
 
   int PeerIMS::ProcessMessage(const std::vector<char> &message,
-			      const ip::udp::endpoint &sender) {
+                              const ip::udp::endpoint &sender) {
     // Ojo, an attacker could send a packet smaller and pollute the buffer,
     // althought this is difficult in IP multicst. This method should be
     // inheritaged to solve this issue.
@@ -369,18 +369,18 @@ namespace p2psp {
     while (received_counter_ < buffer_size_ / 2) {
       chunk_number = ProcessNextMessage();
       while (chunk_number < 0) {
-	chunk_number = ProcessNextMessage();
+        chunk_number = ProcessNextMessage();
       }
     }
 
     if (show_buffer_) {
       for (int i = 0; buffer_size_; i++) {
-	if (chunks_[i].received) {
-	  // TODO: Avoid line feed in LOG function
-	  TRACE(std::to_string(i % 10));
-	} else {
-	  TRACE(".");
-	}
+        if (chunks_[i].received) {
+          // TODO: Avoid line feed in LOG function
+          TRACE(std::to_string(i % 10));
+        } else {
+          TRACE(".");
+        }
       }
       TRACE("");
     }
@@ -484,7 +484,7 @@ namespace p2psp {
   uint16_t PeerIMS::GetPlayerPort() {
     return  player_port_;
   }
-  
+
   //void PeerIMS::SetSplitterAddr(std::string splitter_addr) {
   void PeerIMS::SetSplitterAddr(ip::address splitter_addr) {
     splitter_addr_ = splitter_addr;//ip::address::from_string(splitter_addr);
@@ -497,11 +497,11 @@ namespace p2psp {
   uint16_t PeerIMS::GetSplitterPort() {
     return splitter_port_;
   }
-  
+
   ip::address PeerIMS::GetSplitterAddr() {
     return splitter_addr_;
   }
-  
+
   void PeerIMS::SetTeamPort(uint16_t team_port) {
     team_port_ = team_port;
   }
@@ -509,7 +509,7 @@ namespace p2psp {
   uint16_t PeerIMS::GetTeamPort() {
     return team_port_;
   }
-  
+
   void PeerIMS::SetUseLocalhost(bool use_localhost) {
     use_localhost_ = use_localhost;
   }
