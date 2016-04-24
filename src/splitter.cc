@@ -137,12 +137,12 @@ int main(int argc, const char *argv[]) {
   is_IMS_only = false;
   if (vm.count("strpe")) {
     splitter_ptr.reset(new p2psp::SplitterSTRPE());
+  } else if (vm.count("NTS")) {
+    splitter_ptr.reset(new p2psp::SplitterNTS());
   } else if (vm.count("LRS")) {
     splitter_ptr.reset(new p2psp::SplitterLRS());
   } else if (vm.count("ACS")) {
     splitter_ptr.reset(new p2psp::SplitterACS());
-  } else if (vm.count("NTS")) {
-    splitter_ptr.reset(new p2psp::SplitterNTS());
   } else if (vm.count("IMS")) {
     is_IMS_only = true;
     splitter_ptr.reset(new p2psp::SplitterIMS());
