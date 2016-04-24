@@ -33,6 +33,9 @@ class PeerSYMSP : public PeerNTS {
   PeerSYMSP();
   ~PeerSYMSP();
   virtual void Init() override;
+
+  unsigned int GetPortStep();
+  void SetPortStep(unsigned int port_step);
 };
 }
 

@@ -44,4 +44,12 @@ void PeerSYMSP::SendMessage(std::string message,
   PeerNTS::SendMessage(message, endpoint);
 }
 
+unsigned int PeerSYMSP::GetPortStep() {
+  return this->port_step_;
+}
+
+void PeerSYMSP::SetPortStep(unsigned int port_step) {
+  this->port_step_ = port_step;
+}
+
 }
