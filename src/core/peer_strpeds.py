@@ -18,12 +18,20 @@ import struct
 import time
 #import traceback
 
+<<<<<<< HEAD
+from . import common
+=======
 from core.common import Common
+>>>>>>> master
 from core.color import Color
 from core._print_ import _print_
 #from peer_ims import Peer_IMS
 #from peer_dbs import Peer_DBS
+<<<<<<< HEAD
+from core.peer_nts import Peer_NTS
+=======
 from core.peer_dbs import Peer_DBS
+>>>>>>> master
 try:
     from Crypto.PublicKey import DSA
     from Crypto.Hash import SHA256

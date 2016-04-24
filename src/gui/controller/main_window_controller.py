@@ -15,27 +15,27 @@ main_window_controller module
 
 import traceback
 try:
-    from common.decorators import exc_handler
-    from adapter.buffering_adapter import Buffering_Adapter
-    from adapter.speed_adapter import Speed_Adapter
+    from gui.common.decorators import exc_handler
+    from gui.adapter.buffering_adapter import Buffering_Adapter
+    from gui.adapter.speed_adapter import Speed_Adapter
     from gi.repository import Gdk
     from gi.repository import Gtk
     from gi.repository import GdkX11
     from gi.repository import GObject
-    import common.file_util as file_util
-    from model.peer_thread import Peer_Thread
-    from model import peer_thread
-    from model.channel import Channel
-    from model import channel_store
-    from model.channel_store import Channel_Store
-    from channel_import_controller import Import_Controller
-    from channel_export_controller import Export_Controller
-    from channel_add_controller import Add_Controller
-    from channel_edit_controller import Edit_Controller
-    import common.graphics_util as graphics_util
-    from common.json_exporter import JSON_Exporter
-    from common.json_importer import JSON_Importer
-    from model.channel_encoder import Channel_Encoder
+    from gui.common import file_util
+    from gui.model.peer_thread import Peer_Thread
+    from gui.model import peer_thread
+    from gui.model.channel import Channel
+    from gui.model import channel_store
+    from gui.model.channel_store import Channel_Store
+    from gui.controller.channel_import_controller import Import_Controller
+    from gui.controller.channel_export_controller import Export_Controller
+    from gui.controller.channel_add_controller import Add_Controller
+    from gui.controller.channel_edit_controller import Edit_Controller
+    from gui.common import graphics_util
+    from gui.common.json_exporter import JSON_Exporter
+    from gui.common.json_importer import JSON_Importer
+    from gui.model.channel_encoder import Channel_Encoder
 except ImportError as msg:
     traceback.print_exc()
 
@@ -54,7 +54,7 @@ class Main_Controller():
     try:
         ## Path of P2PSP logo.
         PLAYER_MEDIA_SOURCE = file_util.find_file(__file__,
-                                                  "../../data/images/p2psp.jpg")
+                                                  "../data/images/p2psp.jpg")
     except Exception as msg:
         traceback.print_exc()
 
@@ -143,7 +143,7 @@ class Main_Controller():
 
        ## path where channel data is exported.
        path = file_util.find_file(__file__,
-                                   "../../data/channels/to_import_sample_data.p2psp")
+                                   "../data/channels/to_import_sample_data.p2psp")
 
        ## JSON Exporter
        exporter  = JSON_Exporter()
@@ -159,7 +159,7 @@ class Main_Controller():
         """
         
         _file =file_util.find_file(__file__,
-                                   "../../data/channels/saved_channels")
+                                   "../data/channels/saved_channels")
         importer = JSON_Importer()
         self.restored_data = importer.from_JSON(_file)
         if self.restored_data is not None:
@@ -363,7 +363,7 @@ class Main_Controller():
         """
         exporter  = JSON_Exporter()
         path = file_util.find_file(__file__,
-                                   "../../data/channels/saved_channels")
+                                   "../data/channels/saved_channels")
         if path != '':
             exporter.to_JSON(path
                             ,Channel_Store.ALL.get_channels()
@@ -377,7 +377,7 @@ class Main_Controller():
         """
         self.player.stop()
         path = file_util.find_file(__file__,
-                                    "../../data/channels/to_import_sample_data.p2psp")
+                                    "../data/channels/to_import_sample_data.p2psp")
         file_util.file_del(path)
         
         self.save_app_state()

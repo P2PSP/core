@@ -13,9 +13,9 @@
 
 import threading
 import sys
-from peer_dbs import Peer_DBS
-from _print_ import _print_
-from color import Color
+from core.peer_dbs import Peer_DBS
+from core._print_ import _print_
+from core.color import Color
 
 # }}}
 

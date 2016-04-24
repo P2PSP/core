@@ -11,6 +11,7 @@
 //
 
 #include "monitor_nts.h"
+#include "../util/trace.h"
 
 namespace p2psp {
 

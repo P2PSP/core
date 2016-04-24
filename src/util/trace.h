@@ -15,7 +15,6 @@
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 
-
 namespace p2psp
 {
 
@@ -25,7 +24,9 @@ namespace p2psp
    */
   class TraceSystem
   {
+
   private:
+
     class Sink;
     typedef boost::log::sources::severity_logger<
       boost::log::trivial::severity_level> Logger;
@@ -36,6 +37,7 @@ namespace p2psp
     static TraceSystem trace_system_;
 
   public:
+
     TraceSystem();
 
     static Logger& logger()
@@ -44,11 +46,10 @@ namespace p2psp
     }
 
     static void Flush();
+
   };
 
 }
-
-
 
 #define _RED            "31m"
 #define _GREEN          "32m"
@@ -68,6 +69,8 @@ namespace p2psp
 #endif // TRACE_NO_COLORS
 
 #ifndef TRACE_SILENT_MODE
+
+#ifndef NDEBUG
 
 #define LOG(a)      \
   { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) \
@@ -102,10 +105,16 @@ namespace p2psp
 #define LOGC(c, a)  {}
 #define WARNING(a)    {}
 #define DEBUG(a)    {}
-#define ERROR(a)    {}
+
+#define ERROR(a)    \
+  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::error)  \
+    << _SET_COLOR(_RED) << __FILE__ << ":" << __LINE__ << ": ERROR: " \
+    << a << _RESET_COLOR(); }
+
 #define TRACE(a)    {}
 
-#endif // TRACE_SILENT_MODE
+#endif // NDEBUG
 
+#endif // TRACE_SILENT_MODE
 
 #endif // P2PSP_UTIL_TRACE_H

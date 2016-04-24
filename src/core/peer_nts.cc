@@ -13,6 +13,7 @@
 #include "peer_nts.h"
 #include "common_nts.h"
 #include "common.h"
+#include "../util/trace.h"
 #include <ctime>
 #include <chrono>
 #include <thread>

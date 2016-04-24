@@ -10,9 +10,19 @@ malicious_peer module
 # Copyright (C) 2015, the P2PSP team.
 # http://www.p2psp.org
 
+<<<<<<< HEAD
+from .peer_dbs import Peer_DBS
+
 import struct
 import sys
 import socket
+from core.color import Color
+from core._print_ import _print_
+=======
+import struct
+import sys
+import socket
+>>>>>>> master
 import threading
 import hashlib
 import random

@@ -20,12 +20,15 @@ from core.color import Color
 from core._print_ import _print_
 from core.peer_dbs import Peer_DBS
 from core.peer_strpeds import Peer_StrpeDs
+<<<<<<< HEAD
+=======
 
 def _p_(*args, **kwargs):
     """Colorize the output."""
     sys.stdout.write(Common.DBS)
     _print_("DBS (STRPEDS malicious):", *args)
     sys.stdout.write(Color.none)
+>>>>>>> master
 
 class Peer_StrpeDsMalicious(Peer_StrpeDs):
 

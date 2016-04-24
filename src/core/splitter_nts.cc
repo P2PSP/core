@@ -13,6 +13,7 @@
 #include "splitter_nts.h"
 #include "common_nts.h"
 #include "common.h"
+#include "../util/trace.h"
 #include <cassert>
 #include <thread>
 
@@ -122,17 +123,18 @@ void SplitterNTS::SendTheListOfPeers(
   LOG("Sending the monitors as the list of peers");
   // Send the number of monitors
   std::ostringstream msg_str;
-  CommonNTS::Write<uint16_t>(msg_str, this->monitor_number_);
+  CommonNTS::Write<uint16_t>(msg_str, this->max_number_of_monitors_);
   peer_serve_socket->send(buffer(msg_str.str()));
   // Send a peer list size equal to the number of monitor peers
   msg_str.str(std::string());
   CommonNTS::Write<uint16_t>(msg_str,
-      std::min(this->monitor_number_, (unsigned int)this->peer_list_.size()));
+      std::min((unsigned int) this->max_number_of_monitors_,
+      (unsigned int) this->peer_list_.size()));
   peer_serve_socket->send(buffer(msg_str.str()));
   // Send the monitor endpoints
   for (std::vector<ip::udp::endpoint>::iterator peer_iter =
       this->peer_list_.begin(); peer_iter != this->peer_list_.end()
-      && peer_iter != this->peer_list_.begin() + this->monitor_number_;
+      && peer_iter != this->peer_list_.begin() + this->max_number_of_monitors_;
       ++peer_iter) {
     msg_str.str(std::string());
     CommonNTS::Write<uint32_t>(msg_str,
@@ -148,7 +150,7 @@ void SplitterNTS::SendTheListOfPeers2(
   // Send all peers except the monitor peers with their peer ID
   // plus all peers currently being incorporated
   uint16_t number_of_other_peers = this->peer_list_.size()
-      - this->monitor_number_ + this->incorporating_peers_.size();
+      - this->max_number_of_monitors_ + this->incorporating_peers_.size();
   if (CommonNTS::Contains(this->ids_, peer)) {
     // Then peer is also in this->incorporating_peers_
     // Do not send the peer endpoint to itself
@@ -161,7 +163,7 @@ void SplitterNTS::SendTheListOfPeers2(
   peer_serve_socket->send(buffer(msg_str.str()));
 
   for (std::vector<ip::udp::endpoint>::iterator peer_iter =
-      this->peer_list_.begin() + this->monitor_number_;
+      this->peer_list_.begin() + this->max_number_of_monitors_;
       peer_iter != this->peer_list_.end(); ++peer_iter) {
     // Also send the port step of the existing peer, in case
     // it is behind a sequentially allocating NAT
@@ -335,7 +337,7 @@ void SplitterNTS::HandleAPeerArrival(
   LOG("Sending ID " << peer_id << " to peer " << new_peer);
   serve_socket->send(buffer(peer_id));
   std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
-  if (this->peer_list_.size() < this->monitor_number_) {
+  if (this->peer_list_.size() < (unsigned int) this->max_number_of_monitors_) {
     // Directly incorporate the monitor peer into the team.
     // The source ports are all set to the same, as the monitor peers
     // should be publicly accessible
@@ -343,13 +345,13 @@ void SplitterNTS::HandleAPeerArrival(
     this->port_steps_[new_peer] = 0;
     this->last_source_port_[new_peer] = new_peer.port();
     this->SendNewPeer(peer_id, new_peer,
-        std::vector<uint16_t>(this->monitor_number_, new_peer.port()));
+        std::vector<uint16_t>(this->max_number_of_monitors_, new_peer.port()));
     this->InsertPeer(new_peer);
     serve_socket->close();
   } else {
     this->arriving_peers_[peer_id] = ArrivingPeerInfo{serve_socket,
         new_peer.address(), 0,
-        std::vector<uint16_t>(this->monitor_number_, 0),
+        std::vector<uint16_t>(this->max_number_of_monitors_, 0),
         std::chrono::steady_clock::now()};
     // Splitter will continue with IncorporatePeer() as soon as the
     // arriving peer has sent UDP packets to splitter and monitor
@@ -365,7 +367,7 @@ void SplitterNTS::IncorporatePeer(const std::string& peer_id) {
 
   ip::udp::endpoint new_peer(peer_info.peer_address_,
       peer_info.source_port_to_splitter_);
-  if (this->peer_list_.size() >= this->monitor_number_) {
+  if (this->peer_list_.size() >= (unsigned int) this->max_number_of_monitors_) {
     try {
       // Send the endpoints of the incorporated peers to the new peer
       this->SendTheListOfPeers2(peer_info.serve_socket_, new_peer);
@@ -389,7 +391,8 @@ void SplitterNTS::IncorporatePeer(const std::string& peer_id) {
   // arriving_incorporating_peers_mutex_ is already locked in ProcessMessage()
   this->incorporating_peers_[peer_id] = IncorporatingPeerInfo{new_peer,
       std::chrono::steady_clock::now(), 0,
-      std::vector<uint16_t>(this->monitor_number_, 0), peer_info.serve_socket_};
+      std::vector<uint16_t>(this->max_number_of_monitors_, 0),
+      peer_info.serve_socket_};
 
   this->arriving_peers_.erase(peer_id);
 }
@@ -428,7 +431,7 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
       peer_iter != this->peer_list_.end(); ++peer_iter, ++peer_number) {
     std::ostringstream msg_str;
     msg_str << peer_id;
-    if (peer_number < this->monitor_number_) {
+    if (peer_number < (unsigned int) this->max_number_of_monitors_) {
       // Send only the endpoint of the peer to the monitor,
       // as the arriving peer and the monitor already communicated
       CommonNTS::Write<uint32_t>(msg_str,
@@ -495,7 +498,8 @@ void SplitterNTS::RetryToIncorporatePeer(const std::string& peer_id) {
   this->port_steps_.erase(peer);
   this->incorporating_peers_[peer_id] = IncorporatingPeerInfo{new_peer,
       peer_info.incorporation_time_, 0,
-      std::vector<uint16_t>(this->monitor_number_, 0), peer_info.serve_socket_};
+      std::vector<uint16_t>(this->max_number_of_monitors_, 0),
+      peer_info.serve_socket_};
 
   // Send the updated endpoint to the existing peers
   this->SendNewPeer(peer_id, new_peer, peer_info.source_ports_to_monitors_);
@@ -616,8 +620,8 @@ void SplitterNTS::ModerateTheTeam() {
       }
 
     } else if (std::find(this->peer_list_.begin(),
-        this->peer_list_.begin() + this->monitor_number_, sender)
-        != this->peer_list_.begin() + this->monitor_number_
+        this->peer_list_.begin() + this->max_number_of_monitors_, sender)
+        != this->peer_list_.begin() + this->max_number_of_monitors_
         && message.size() == CommonNTS::kPeerIdLength + 2) {
 
       // Message is from monitor
@@ -735,8 +739,8 @@ void SplitterNTS::ModerateTheTeam() {
       }
 
     } else if (std::find(this->peer_list_.begin(),
-        this->peer_list_.begin() + this->monitor_number_, sender)
-        != this->peer_list_.begin() + this->monitor_number_
+        this->peer_list_.begin() + this->max_number_of_monitors_, sender)
+        != this->peer_list_.begin() + this->max_number_of_monitors_
         && message.size() == CommonNTS::kPeerIdLength + 3) {
 
       // Message is from monitor

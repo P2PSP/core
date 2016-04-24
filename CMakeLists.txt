@@ -6,10 +6,10 @@ option(BUILD_REDUCED_LIB "Build a reduced version" OFF)
 
 option(BUILD_TEST "Build the test" ON)
 
-option(BUILD_PEER "Build the peer" ON)
-option(BUILD_SPLITTER "Build the splitter" ON)
+#option(BUILD_PEER "Build the peer" ON)
+#option(BUILD_SPLITTER "Build the splitter" ON)
 
-option(BUILD_PYTHON_WRAPPER "Build the Python wrapper" OFF)
+option(BUILD_PYTHON_WRAPPER "Build the Python wrapper" ON)
 
 # Project name
 project(p2psp C CXX)
@@ -28,7 +28,7 @@ list(APPEND BOOST_REQUIRED_COMPONENTS
 )
 
 if(BUILD_PYTHON_WRAPPER)
-  list(APPEND BOOST_REQUIRED_COMPONENTS python)
+  list(APPEND BOOST_REQUIRED_COMPONENTS python-py34)
 endif()
 
 find_package(Boost COMPONENTS
@@ -41,7 +41,7 @@ find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 if(BUILD_PYTHON_WRAPPER)
-  find_package(PythonLibs REQUIRED)
+  find_package(PythonLibs 3 REQUIRED)
 endif()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
@@ -115,37 +115,37 @@ if(BUILD_LIB)
   set_property(TARGET p2psp PROPERTY CXX_STANDARD_REQUIRED ON)
 endif()
 
-if(BUILD_PEER AND NOT BUILD_REDUCED_LIB)
+#if(BUILD_PEER AND NOT BUILD_REDUCED_LIB)
   # Executable
-  add_executable(peer "src/peer.cc")
+#  add_executable(peer "src/peer.cc")
 
   # Libraries
-  target_link_libraries(peer
-    p2psp
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${Boost_LIBRARIES}
-  )
+#  target_link_libraries(peer
+#    p2psp
+#    ${CMAKE_THREAD_LIBS_INIT}
+#    ${Boost_LIBRARIES}
+#  )
 
   # Enable C++11 for CMake 3.1.0 or later
-  set_property(TARGET peer PROPERTY CXX_STANDARD 11)
-  set_property(TARGET peer PROPERTY CXX_STANDARD_REQUIRED ON)
-endif()
+#  set_property(TARGET peer PROPERTY CXX_STANDARD 11)
+#  set_property(TARGET peer PROPERTY CXX_STANDARD_REQUIRED ON)
+#endif()
 
-if(BUILD_SPLITTER AND NOT BUILD_REDUCED_LIB)
+#if(BUILD_SPLITTER AND NOT BUILD_REDUCED_LIB)
   # Executable
-  add_executable(splitter "src/splitter.cc")
+#  add_executable(splitter "src/splitter.cc")
 
   # Libraries
-  target_link_libraries(splitter
-    p2psp
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${Boost_LIBRARIES}
-  )
+#  target_link_libraries(splitter
+#    p2psp
+#    ${CMAKE_THREAD_LIBS_INIT}
+#    ${Boost_LIBRARIES}
+#  )
 
   # Enable C++11 for CMake 3.1.0 or later
-  set_property(TARGET splitter PROPERTY CXX_STANDARD 11)
-  set_property(TARGET splitter PROPERTY CXX_STANDARD_REQUIRED ON)
-endif()
+#  set_property(TARGET splitter PROPERTY CXX_STANDARD 11)
+#  set_property(TARGET splitter PROPERTY CXX_STANDARD_REQUIRED ON)
+#endif()
 
 if(BUILD_TEST)
   # Executable

@@ -17,36 +17,38 @@
 
 namespace p2psp {
 
-class Common {
- public:
-  static const int kMaxChunkNumber = 65536;
-  // MAX_CHUNK_NUMBER = 2048
-  // COUNTERS_TIMING = 0.1
-  static const int kCountersTiming = 1;
+  class Common {
 
-  static const bool kConsoleMode = true;
+  public:
 
-  // IMS is enables by defining an IP multicast address
-  static const char kDBS = 0;  // DBS magic number
-  static const char kACS = 1;  // ACS magic number
-  static const char kLRS = 2;  // LRS magic number
-  static const char kNTS = 4;  // NIS magic number
-  static const char kDIS = 8;  // DIS magic number
-  static const char kSTRPE= 16;  // STRPE magic number
+    static const int kMaxChunkNumber = 65536;
+    // MAX_CHUNK_NUMBER = 2048
+    // COUNTERS_TIMING = 0.1
+    static const int kCountersTiming = 1;
 
-  // TODO: Use colors
-  // IMS_COLOR = Color.red
-  // DBS_COLOR = Color.green
-  // ACS_COLOR = Color.blue
-  // LRS_COLOR = Color.cyan
-  // NTS_COLOR = Color.purple
-  // DIS_COLOR = Color.yellow
+    static const bool kConsoleMode = true;
 
-  static void sha256(std::vector<char> string, std::vector<char> &digest) {
-    SHA256((unsigned char *)string.data(), string.size(),
-           (unsigned char *)digest.data());
-  }
-};
+    // IMS is enables by defining an IP multicast address
+    static const char kDBS = 0;  // DBS magic number
+    static const char kACS = 1;  // ACS magic number
+    static const char kLRS = 2;  // LRS magic number
+    static const char kNTS = 4;  // NIS magic number
+    static const char kDIS = 8;  // DIS magic number
+    static const char kSTRPE= 16;  // STRPE magic number
+
+    // TODO: Use colors
+    // IMS_COLOR = Color.red
+    // DBS_COLOR = Color.green
+    // ACS_COLOR = Color.blue
+    // LRS_COLOR = Color.cyan
+    // NTS_COLOR = Color.purple
+    // DIS_COLOR = Color.yellow
+
+    static void sha256(std::vector<char> string, std::vector<char> &digest) {
+      SHA256((unsigned char *)string.data(), string.size(),
+	     (unsigned char *)digest.data());
+    }
+  };
 }
 
 #endif  // P2PSP_CORE_COMMON_H

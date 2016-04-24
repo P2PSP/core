@@ -15,8 +15,8 @@ edit_box module
 
 import traceback
 try:
-    import common.file_util as file_util
-    from common.decorators import exc_handler
+    from gui.common import file_util
+    from gui.common.decorators import exc_handler
 except ImportError as msg:
     traceback.print_exc()
 
@@ -41,7 +41,7 @@ class Edit_Box():
         """
         
         self.interface = file_util.get_user_interface(__file__,
-                                        '../../data/glade/edit_dialog.glade')
+                                        '../data/glade/edit_dialog.glade')
         self.load_widgets()
 
     @exc_handler

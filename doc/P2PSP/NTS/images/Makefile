@@ -1,22 +1,27 @@
+# Rules.
 
-IMAGES_TXT=$(wildcard *.txt)
-IMAGES_SVG=$(IMAGES_TXT:.txt=.svg)
-IMAGES_PNG=$(IMAGES_SVG:.svg=.png)
 
-all: images.create
+# .svg -> .pdf
+../PDFs/%.pdf:	%.svg
+	 rsvg-convert -f pdf -o ../PDFs/$*.pdf $*.svg
 
-images.create: $(IMAGES_SVG) $(IMAGES_PNG)
+# .svg -> .eps
+../EPSs/%.eps:	%.svg
+	rsvg-convert -f ps -o $*.ps $*.svg
+	ps2eps --loose < $*.ps > ../EPSs/$*.eps
+	rm $*.ps
 
-%.svg: %.txt
-	@sed -e 's/\([^ ]\)$$/\1 /g' -e :a -e '/^\n*$$/{$$d;N;};/\n$$/ba' $< > $<.improved
-	echo >> $<.improved
-	@mv $<.improved $<
-	# This uses https://bitbucket.org/dhobsd/asciitosvg
-	a2s -i$< -o$@
+# Original files
+SVGs := $(wildcard *.svg)
 
-%.png: %.svg
-	rsvg-convert $< -b white -o $@
+# Temporal files
+TMPs += $(SVGs:%.svg=../PDFs/%.pdf)
+TMPs += $(SVGs:%.svg=../EPSs/%.eps)
 
-images.clean:
-	rm -f $(IMAGES_SVG) $(IMAGES_PNG)
+all:	$(TMPs)
 
+info:
+	@echo $(TMPs)
+
+clean:
+	rm -f $(TMPs)

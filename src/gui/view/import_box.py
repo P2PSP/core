@@ -16,8 +16,8 @@ import_box module
 import traceback
 try:
     from gi.repository import Gtk
-    import common.file_util as file_util
-    from common.decorators import exc_handler
+    from gui.common import file_util
+    from gui.common.decorators import exc_handler
 except ImportError as msg:
     traceback.print_exc()
 
@@ -43,7 +43,7 @@ class Import_Box():
         """
 
         self.interface = file_util.get_user_interface(__file__,
-                                        '../../data/glade/importbox.glade')
+                                        '../data/glade/importbox.glade')
         self.load_widgets()
 
         ## List_Store to store channel data.

@@ -22,12 +22,13 @@ import struct
 import time
 
 from core.common import Common
+
 from core._print_ import _print_
 from core.color import Color
 
 #from gi.repository import GObject
 try:
-    from adapter import buffering_adapter
+    from gui.adapter import buffering_adapter
 except ImportError as msg:
     pass
 
@@ -476,8 +477,11 @@ class Peer_IMS(threading.Thread):
         #    if chunk_number >= 0:
         #        break
         chunk_number = self.process_next_message()
+        current_time=time.time()
         while chunk_number < 0:
             chunk_number = self.process_next_message()
+            if((time.time()-current_time)>15):
+                return -2
         #while ((chunk_number - self.played_chunk) % self.buffer_size) < self.buffer_size/2:
         while self.received_counter < self.buffer_size/2:
             chunk_number = self.process_next_message()
@@ -502,8 +506,10 @@ class Peer_IMS(threading.Thread):
         #threading.Thread(target=self.play).start()
 
         while self.player_alive:
-            self.keep_the_buffer_full()
+            status=self.keep_the_buffer_full()
             self.play_next_chunk()
+            if(status==-2):
+                return
 
         # }}}
 

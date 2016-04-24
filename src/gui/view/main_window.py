@@ -19,8 +19,8 @@ try:
     from gi.repository import Gtk
     from gi.repository import Gdk
     from gi.repository.GdkPixbuf import Pixbuf
-    import common.file_util as file_util
-    from common.decorators import exc_handler
+    from gui.common import file_util
+    from gui.common.decorators import exc_handler
 except ImportError as msg:
     traceback.print_exc()
 
@@ -58,7 +58,7 @@ class Main_Window():
 
         ## Gtk Builder of the main_window.
         self.interface = file_util.get_user_interface(__file__,
-                                        '../../data/glade/mainwindow.glade')
+                                        '../data/glade/mainwindow.glade')
         self.load_widgets()
         self.window.connect("destroy",Gtk.main_quit)
         self.channel_box.set_size_request((self.SCREEN.get_width()/8)+50,

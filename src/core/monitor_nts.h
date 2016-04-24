@@ -15,7 +15,6 @@
 
 #include "monitor_dbs.h"
 #include "peer_nts.h"
-#include "../util/trace.h"
 
 namespace p2psp {
 

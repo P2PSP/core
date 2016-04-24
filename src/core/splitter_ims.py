@@ -21,7 +21,11 @@ import threading
 import struct
 import time
 
+<<<<<<< HEAD
+from . import common
+=======
 from core.common import Common
+>>>>>>> master
 from core._print_ import _print_
 from core.color import Color
 

@@ -13,12 +13,12 @@ channel_edit_controller module
 
 # {{{ Imports
 
-from model.channel_store import Channel_Store
-from model.channel import Channel
-from view.edit_box import Edit_Box
-from common.decorators import exc_handler
-import common.url_util as url_util
-import common.graphics_util as graphics_util
+from gui.model.channel_store import Channel_Store
+from gui.model.channel import Channel
+from gui.view.edit_box import Edit_Box
+from gui.common.decorators import exc_handler
+from gui.common import url_util
+from gui.common import graphics_util
 from gi.repository import Gtk
 
 # }}}

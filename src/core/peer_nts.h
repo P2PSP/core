@@ -16,7 +16,6 @@
 #include "peer_dbs.h"
 #include "common.h"
 #include "common_nts.h"
-#include "../util/trace.h"
 #include <cstdint>
 #include <list>
 #include <set>

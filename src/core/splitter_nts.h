@@ -21,7 +21,6 @@
 #include <condition_variable>
 #include <boost/asio.hpp>
 #include <boost/unordered_map.hpp>
-#include "../util/trace.h"
 #include "splitter_lrs.h"
 #include "common.h"
 #include "common_nts.h"

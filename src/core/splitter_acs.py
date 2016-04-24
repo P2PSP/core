@@ -21,8 +21,13 @@ import socket
 import struct
 import time
 
+<<<<<<< HEAD
+from . import common
+#from core.color import Color
+=======
 from core.common import Common
 from core.color import Color
+>>>>>>> master
 from core._print_ import _print_
 #from splitter_ims import Splitter_IMS
 from core.splitter_dbs import Splitter_DBS
