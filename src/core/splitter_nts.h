@@ -1,5 +1,5 @@
 //
-//  splitter_dbs.h
+//  splitter_nts.h
 //  P2PSP
 //
 //  This code is distributed under the GNU General Public License (see
@@ -22,7 +22,7 @@
 #include <boost/asio.hpp>
 #include <boost/unordered_map.hpp>
 #include "../util/trace.h"
-#include "splitter_dbs.h"
+#include "splitter_lrs.h"
 #include "common.h"
 #include "common_nts.h"
 
@@ -46,8 +46,10 @@ struct IncorporatingPeerInfo {
   std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket_;
 };
 
-class SplitterNTS : public SplitterDBS {
+class SplitterNTS : public SplitterLRS {
  protected:
+  const int max_message_size_;
+
   // The IDs of the peers in the team.
   std::map<boost::asio::ip::udp::endpoint, std::string> ids_;
 

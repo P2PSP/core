@@ -1,5 +1,5 @@
 //
-//  splitter_dbs.cc
+//  splitter_nts.cc
 //  P2PSP
 //
 //  This code is distributed under the GNU General Public License (see
@@ -24,7 +24,8 @@ uint16_t gcd(uint16_t a, uint16_t b) {
     return b == 0 ? a : gcd(b, a % b);
 }
 
-SplitterNTS::SplitterNTS() : SplitterDBS() {
+SplitterNTS::SplitterNTS() : SplitterLRS(),
+    max_message_size_(this->chunk_size_ + 2) {
   this->magic_flags_ = Common::kNTS;
 
   // The thread regularly checks if (peers are waiting to be incorporated
@@ -66,7 +67,7 @@ void SplitterNTS::EnqueueMessage(unsigned int count, const message_t& message) {
 }
 
 size_t SplitterNTS::ReceiveChunk(boost::asio::streambuf &chunk) {
-  size_t bytes_transferred = SplitterDBS::ReceiveChunk(chunk);
+  size_t bytes_transferred = SplitterLRS::ReceiveChunk(chunk);
   this->chunk_received_event_.notify_all();
   return bytes_transferred;
 }
@@ -528,7 +529,7 @@ void SplitterNTS::UpdatePortStep(const ip::udp::endpoint peer,
 }
 
 void SplitterNTS::RemovePeer(const ip::udp::endpoint& peer) {
-  SplitterDBS::RemovePeer(peer);
+  SplitterLRS::RemovePeer(peer);
 
   try {
     this->ids_.erase(peer);
@@ -542,8 +543,7 @@ void SplitterNTS::RemovePeer(const ip::udp::endpoint& peer) {
 
 void SplitterNTS::ModerateTheTeam() {
   while (this->alive_) {
-    // TODO: Add a constant max_message_size_
-    std::vector<char> message_bytes(this->chunk_size_ + 2);
+    std::vector<char> message_bytes(this->max_message_size_);
     ip::udp::endpoint sender;
     std::string message;
 
