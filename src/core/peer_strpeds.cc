@@ -29,9 +29,9 @@ void PeerSTRPEDS::ReceiveTheNextMessage(std::vector<char> &message,
   current_sender_ = sender;
 }
 void PeerSTRPEDS::ReceiveDsaKey() {
-  int number_of_bytes = 256 + 256 + 256 + 40;
-  std::vector<char> message(number_of_bytes);
+  std::vector<char> message;
   read(splitter_socket_, ::buffer(message));
+
   // TODO: finish implementation
 }
 
@@ -70,8 +70,27 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
     // m = str(chunk_number) + str(chunk) + str(sender)
     // return self.dsa_key.verify(SHA256.new(m).digest(), sign)
 
+	  uint16_t chunk_number = *(uint16_t *)(message.data());
 
+	  std::vector<char> chunk;
+	  std::copy(message.data() + sizeof(uint16_t), message.data() + sizeof(uint16_t) + chunk_size_, chunk.data());
 
+	  unsigned char *signature;
+	  std::copy(message.data() + sizeof(uint16_t) + chunk_size_, message.data() + message.size(), signature);
+
+	  std::vector<char> h;
+	  std::vector<char> m;
+	  boost::asio::ip::udp::endpoint dst = team_socket_.local_endpoint();
+
+	  (*(uint16_t *)m.data()) = htons(chunk_number);
+
+	  std::copy(chunk.data(), chunk.data() + chunk.size(), m.data() + sizeof(uint16_t));
+
+	  (*(boost::asio::ip::udp::endpoint *)(m.data() + chunk.size() + sizeof(uint16_t))) = dst;
+
+	  Common::sha256(m, h);
+
+	  return DSA_verify(0, (unsigned char *)h.data() , h.size(), signature, strlen(reinterpret_cast<char*>(signature)), dsa_key);
   }
 
   return true;

@@ -16,6 +16,8 @@
 
 #include "trusted_peer.h"
 #include "../util/trace.h"
+#include "openssl/dsa.h"
+#include "common.h"
 
 namespace p2psp {
 
@@ -25,6 +27,8 @@ class PeerSTRPEDS: public PeerDBS {
  protected:
   std::vector<ip::udp::endpoint> bad_peers_;
   ip::udp::endpoint current_sender_;
+
+  DSA* dsa_key;
 
  public:
   PeerSTRPEDS(){};

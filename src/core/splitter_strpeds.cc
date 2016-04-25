@@ -54,7 +54,7 @@ namespace p2psp {
     (*(std::stringstream *)(message + 512)) = p;
     (*(std::stringstream *)(message + 768)) = q;
     */
-    TRACE("Sending DSA Key =>" + message.str());
+    TRACE("Sending DSA Key => Size pub_key: " + to_string(strlen(y)) + "g" + to_string(strlen(g)) + "p" + to_string(strlen(p)) + "q"+ to_string(strlen(g)) + "message: " + message.str());
     sock->send(asio::buffer(message.str()));
   }
 
@@ -115,7 +115,7 @@ namespace p2psp {
     thread t3(bind(&SplitterDBS::ResetCountersThread, this));
     thread t4(bind(&SplitterSTRPEDS::GatherBadPeers, this));
 
-    vector<char> message(sizeof(uint16_t) + chunk_size_ + digest_size_ + digest_size_);
+    vector<char> message;
     asio::ip::udp::endpoint peer;
 
     while (alive_) {
@@ -169,6 +169,7 @@ namespace p2psp {
 	std::vector<char> m;
 
 	(*(uint16_t *)m.data()) = htons(chunk_number);
+
 	copy(asio::buffer_cast<const char *>(chunk.data()),
 	  	     asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
 	  	     m.data() + sizeof(uint16_t));
@@ -184,12 +185,12 @@ namespace p2psp {
      BN_rand_range(k, dsa_key->q);
 
     unsigned int siglen;
+    TRACE("SIG LEN "+ to_string(siglen));
 
     unsigned char *sig;
     if((DSA_sign(0, (unsigned char *)h.data(), h.size(), sig, &siglen, dsa_key)) != 1) {
       printf("ERROR: Digital signature signing failed.\n"); 
       DSA_free(dsa_key);
-      exit(0); 
     } 
 
     std::vector<char> message = m;
