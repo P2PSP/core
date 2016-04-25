@@ -54,6 +54,7 @@ namespace p2psp {
     (*(std::stringstream *)(message + 512)) = p;
     (*(std::stringstream *)(message + 768)) = q;
     */
+    TRACE("Sending DSA Key =>" + message.str());
     sock->send(asio::buffer(message.str()));
   }
 

@@ -12,7 +12,7 @@
 
 namespace p2psp {
 
-void PeerStrpeDs::Init() {
+void PeerSTRPEDS::Init() {
   // message_format variable is not used in C++
   // self.message_format += '40s40s'
   bad_peers_ = std::vector<ip::udp::endpoint>();
@@ -20,33 +20,33 @@ void PeerStrpeDs::Init() {
   LOG("Initialized");
 }
 
-bool PeerStrpeDs::IsCurrentMessageFromSplitter() {
+bool PeerSTRPEDS::IsCurrentMessageFromSplitter() {
   return current_sender_ == splitter_;
 }
-void PeerStrpeDs::ReceiveTheNextMessage(std::vector<char> &message,
+void PeerSTRPEDS::ReceiveTheNextMessage(std::vector<char> &message,
                                         ip::udp::endpoint &sender) {
   PeerIMS::ReceiveTheNextMessage(message, sender);
   current_sender_ = sender;
 }
-void PeerStrpeDs::ReceiveDsaKey() {
+void PeerSTRPEDS::ReceiveDsaKey() {
   int number_of_bytes = 256 + 256 + 256 + 40;
   std::vector<char> message(number_of_bytes);
   read(splitter_socket_, ::buffer(message));
   // TODO: finish implementation
 }
 
-void PeerStrpeDs::ProcessBadMessage(const std::vector<char> &message,
+void PeerSTRPEDS::ProcessBadMessage(const std::vector<char> &message,
                                     const ip::udp::endpoint &sender) {
   LOG("bad peer: " << sender);
   bad_peers_.push_back(sender);
   peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), sender));
 }
 
-bool PeerStrpeDs::IsControlMessage(std::vector<char> message) {
+bool PeerSTRPEDS::IsControlMessage(std::vector<char> message) {
   return message.size() != (1026 + 40 + 40);
 }
 
-bool PeerStrpeDs::CheckMessage(std::vector<char> message,
+bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
                                ip::udp::endpoint sender) {
   if (std::find(bad_peers_.begin(), bad_peers_.end(), sender) ==
       bad_peers_.end()) {
@@ -69,12 +69,15 @@ bool PeerStrpeDs::CheckMessage(std::vector<char> message,
     // sign = (self.convert_to_long(k1), self.convert_to_long(k2))
     // m = str(chunk_number) + str(chunk) + str(sender)
     // return self.dsa_key.verify(SHA256.new(m).digest(), sign)
+
+
+
   }
 
   return true;
 }
 
-int PeerStrpeDs::HandleBadPeersRequest() {
+int PeerSTRPEDS::HandleBadPeersRequest() {
   std::string bad("bad");
   std::vector<char> header(5);
   std::vector<char> msg(8);
@@ -99,7 +102,7 @@ int PeerStrpeDs::HandleBadPeersRequest() {
   return -1;
 }
 
-int PeerStrpeDs::ProcessMessage(const std::vector<char> &message,
+int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
                                 const ip::udp::endpoint &sender) {
   if (std::find(bad_peers_.begin(), bad_peers_.end(), sender) ==
       bad_peers_.end()) {

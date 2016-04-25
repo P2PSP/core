@@ -21,13 +21,14 @@ namespace p2psp {
 
 using namespace boost::asio;
 
-class PeerStrpeDs : public TrustedPeer {
+class PeerSTRPEDS: public PeerDBS {
  protected:
   std::vector<ip::udp::endpoint> bad_peers_;
+  ip::udp::endpoint current_sender_;
 
  public:
-  PeerStrpeDs(){};
-  ~PeerStrpeDs(){};
+  PeerSTRPEDS(){};
+  ~PeerSTRPEDS(){};
   virtual void Init() override;
   virtual bool IsCurrentMessageFromSplitter();
   virtual void ReceiveTheNextMessage(std::vector<char> &,
