@@ -17,7 +17,7 @@
 #include <boost/unordered_map.hpp>
 #include <fstream>
 #include "../util/trace.h"
-#include "splitter_lrs.h"
+#include "splitter_dbs.h"
 #include "common.h"
 #include "openssl/dsa.h"
 
@@ -45,6 +45,9 @@ class SplitterSTRPEDS : public SplitterDBS {
 
   DSA* dsa_key;
   
+  //endpoint -> position in the complains_ vector.
+  std::map<boost::asio::ip::udp::endpoint, int> complains_map_;
+
   // Thread management
   void Run() override;
 
@@ -63,6 +66,7 @@ class SplitterSTRPEDS : public SplitterDBS {
   void InitKey();
   std::vector<char> GetMessage(int chunk_number,  boost::asio::streambuf chunk, const boost::asio::ip::udp::endpoint dst);
   std::stringstream LongToHex(BIGNUM value);
+
   void AddTrustedPeer(const boost::asio::ip::udp::endpoint &peer);
   //size_t SplitterDBS::ReceiveMessage(std::vector<char> &message, boost::asio::ip::udp::endpoint &endpoint) override;
   void ModerateTheTeam();

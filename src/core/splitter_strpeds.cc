@@ -194,7 +194,7 @@ namespace p2psp {
 	  return std::hex << value;
   }
   
-  void SplitterSTRPE::AddTrustedPeer(const boost::asio::ip::udp::endpoint &peer) {
+  void SplitterSTRPEDS::AddTrustedPeer(const boost::asio::ip::udp::endpoint &peer) {
     trusted_peers_.push_back(peer);
   }
 
@@ -265,9 +265,43 @@ namespace p2psp {
   LOG("Exiting moderate the team");
 }
 
-  void ProcessBadPeersMessage(const std::vector<char> &message, const boost::asio::ip::udp::endpoint &sender){
+  void SplitterSTRPEDS::ProcessBadPeersMessage(const std::vector<char> &message, const boost::asio::ip::udp::endpoint &sender){
+	  system::error_code ec;
+	  std::vector<char> msg;
+	  boost::asio::ip::udp::endpoint sdr;
+	  boost::asio::ip::udp::endpoint bad_peer;
 
+	  uint16_t bad_number = *(uint16_t *)(message.data()+3);
+	  for (int i=0; i<bad_number; i++){
+		  team_socket_.receive_from(asio::buffer(msg), sdr, 0, ec);
+		  if (ec) ERROR("Unexepected error: " << ec.message());
+		  bad_peer = *(boost::asio::ip::udp::endpoint *)msg.data();
+		  TRACE("BAD Peer: " + bad_peer);
+
+		  if (std::find(trusted_peers_.begin(), trusted_peers_.end(), sdr) != trusted_peers_.end() ){
+			  HandleBadPeerFromTrusted(bad_peer, sdr);
+		  }else{
+			  HandleBadPeerFromRegular(bad_peer, sdr);
+		  }
+
+	  }
   }
+
+
+  void SplitterSTRPEDS::HandleBadPeerFromTrusted(const boost::asio::ip::udp::endpoint &bad_peer, const boost::asio::ip::udp::endpoint &sender){
+	  AddComplain(bad_peer, sender);
+	  PunishPeer(bad_peer, "by trusted");
+  }
+
+  void SplitterSTRPEDS::HandleBadPeerFromRegular(const boost::asio::ip::udp::endpoint &bad_peer, const boost::asio::ip::udp::endpoint &sender){
+	  AddComplain(bad_peer, sender);
+	  int x = complains_[bad_peer].size() / std::max(1, (int)(peer_list_.size()-1));
+	  if (x >= majority_ratio_) {
+		  PunishPeer(bad_peer, "by majority decision");
+	  }
+  }
+
+
 
 void SplitterSTRPE::PunishMaliciousPeer(const boost::asio::ip::udp::endpoint &peer) {
   if (logging_) {
