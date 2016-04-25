@@ -59,7 +59,7 @@ if sys_name == 'Linux' or sys_name == 'Darwin':
 
     command = 'cd build && ' + cmake + ' .. && echo'
     if os.system(command) == 0:
-        command = 'cd build && make -j' + str(number_of_cores)
+        command = 'cd build && make -j' + str(1)#str(number_of_cores)
         if not only_cmake:
             os.system(command)
 

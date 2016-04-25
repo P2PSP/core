@@ -41,28 +41,31 @@ namespace p2psp {
   void SplitterSTRPEDS::SendDsaKey(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock){
     // send Public key (y), Sub-group generator (g), Modulus, finite field order (p), Sub-group order (q)
     // in one message  
-    std::stringstream y = LongToHex(*dsa_key->pub_key);
-    std::stringstream g = LongToHex(*dsa_key->g);
-    std::stringstream p = LongToHex(*dsa_key->p);
-    std::stringstream q = LongToHex(*dsa_key->q);
+    char* y = BN_bn2hex(dsa_key->pub_key);
+    char* g = BN_bn2hex(dsa_key->g);
+    char* p = BN_bn2hex(dsa_key->p);
+    char* q = BN_bn2hex(dsa_key->q);
 
-    char message[1024];
-    
+    std::stringstream message;
+    message << y << g << p << q;
+    /*
     (*(std::stringstream *)&message) = y;
     (*(std::stringstream *)(message + 256)) = g;
     (*(std::stringstream *)(message + 512)) = p;
     (*(std::stringstream *)(message + 768)) = q;
-    sock->send(asio::buffer(message));
+    */
+    sock->send(asio::buffer(message.str()));
   }
 
   void SplitterSTRPEDS::GatherBadPeers(){
+	boost::asio::ip::udp::endpoint nopeer =  boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string("0.0.0.0"),0);
     while (alive_){
       if (peer_list_.size() > 0 ){
     	  boost::asio::ip::udp::endpoint peer = GetPeerForGathering();
     	  RequestBadPeers(peer);
     	  sleep(2);
     	  boost::asio::ip::udp::endpoint tp = GetTrustedPeerForGathering();
-    	  if (tp != NULL and tp != peer){
+    	  if (tp != nopeer and tp != peer){
     		  RequestBadPeers(tp);
     	  }
       }
@@ -72,7 +75,7 @@ namespace p2psp {
   
   asio::ip::udp::endpoint SplitterSTRPEDS::GetPeerForGathering(){
     gathering_counter_ = (gathering_counter_ + 1) % peer_list_.size();
-    asio::ip::tcp::endpoint peer = peer_list_[gathering_counter_];
+    asio::ip::udp::endpoint peer = peer_list_[gathering_counter_];
     return peer;
   }
 
@@ -81,7 +84,7 @@ namespace p2psp {
     if (std::find(peer_list_.begin(), peer_list_.end(), trusted_peers_[trusted_gathering_counter_] ) != peer_list_.end() ){
       return trusted_peers_[trusted_gathering_counter_];
     }
-    return NULL;	
+    return boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string("0.0.0.0"),0);
   }
 
   void SplitterSTRPEDS::RequestBadPeers(const asio::ip::udp::endpoint &dest){
@@ -160,40 +163,42 @@ namespace p2psp {
     DSA_generate_key(dsa_key);
   }
 
-  std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,  asio::streambuf chunk, const boost::asio::ip::udp::endpoint dst){
+  std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,  const asio::streambuf &chunk, const boost::asio::ip::udp::endpoint &dst){
 
-    std::vector<char> m = std::to_string(chunk_number_) + chunk + dst.address().to_string() + std::to_string(dst.port());
+	std::vector<char> m;
+
+	(*(uint16_t *)m.data()) = htons(chunk_number);
+	copy(asio::buffer_cast<const char *>(chunk.data()),
+	  	     asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
+	  	     m.data() + sizeof(uint16_t));
+
+	(*(asio::ip::udp::endpoint *)(m.data() + chunk.size() + sizeof(uint16_t))) = dst;
     
     std::vector<char> h;
     Common::sha256(m, h);
 
     /* initialize random seed: */
      srand (time(NULL));
-     long k = rand() % (dsa_key->q-1) + 1;
+     BIGNUM* k = BN_new();
+     BN_rand_range(k, dsa_key->q);
 
-    unsigned int Siglen;
+    unsigned int siglen;
 
-    unsigned char *sig = malloc(DSA_size(dsa_key));
-    if((DSA_sign(0, (unsigned char *)h.data(), h.size(), sig, &Siglen, dsa_key)) != 1) {
+    unsigned char *sig;
+    if((DSA_sign(0, (unsigned char *)h.data(), h.size(), sig, &siglen, dsa_key)) != 1) {
       printf("ERROR: Digital signature signing failed.\n"); 
-      DSA_free(dsa); 
+      DSA_free(dsa_key);
       exit(0); 
     } 
-    
-    
-    std::vector<char> message;
 
-    (*(std::vector<char>*)message) = m;
-    (*(unsigned char *)(message + m.size())) = sig;
-
+    std::vector<char> message = m;
+    //std::vector<char> signature = reinterpret_cast<vector<char> >(sig);
+    char* signature = reinterpret_cast<char*>(sig);
+    copy(signature, signature + siglen, message.data() + message.size());
     return message;
 
   }
 
-  std::stringstream SplitterSTRPEDS::LongToHex(BIGNUM value){
-	  return std::hex << value;
-  }
-  
   void SplitterSTRPEDS::AddTrustedPeer(const boost::asio::ip::udp::endpoint &peer) {
     trusted_peers_.push_back(peer);
   }
@@ -276,7 +281,7 @@ namespace p2psp {
 		  team_socket_.receive_from(asio::buffer(msg), sdr, 0, ec);
 		  if (ec) ERROR("Unexepected error: " << ec.message());
 		  bad_peer = *(boost::asio::ip::udp::endpoint *)msg.data();
-		  TRACE("BAD Peer: " + bad_peer);
+		  TRACE("BAD Peer: " + bad_peer.address().to_string() + ":" + to_string(bad_peer.port()));
 
 		  if (std::find(trusted_peers_.begin(), trusted_peers_.end(), sdr) != trusted_peers_.end() ){
 			  HandleBadPeerFromTrusted(bad_peer, sdr);
@@ -295,68 +300,51 @@ namespace p2psp {
 
   void SplitterSTRPEDS::HandleBadPeerFromRegular(const boost::asio::ip::udp::endpoint &bad_peer, const boost::asio::ip::udp::endpoint &sender){
 	  AddComplain(bad_peer, sender);
-	  int x = complains_[bad_peer].size() / std::max(1, (int)(peer_list_.size()-1));
+	  int x = complains_[complains_map_[bad_peer]].size() / std::max(1, (int)(peer_list_.size()-1));
 	  if (x >= majority_ratio_) {
 		  PunishPeer(bad_peer, "by majority decision");
 	  }
   }
 
+ void SplitterSTRPEDS::AddComplain(const boost::asio::ip::udp::endpoint &bad_peer, const boost::asio::ip::udp::endpoint &sender){
+	 if (complains_map_.find(bad_peer) != complains_map_.end()){
+		 if (complains_map_.find(sender) == complains_map_.end()){
+			 complains_[complains_map_[bad_peer]].push_back(sender);
+		 }
+	 }else{
+		 std::vector<boost::asio::ip::udp::endpoint> bads;
+		 bads.push_back(sender);
+		 complains_.push_back(bads);
+		 complains_map_.insert(std::pair<boost::asio::ip::udp::endpoint,int>(bad_peer, complains_.size()-1));
 
+	 }
+ }
 
-void SplitterSTRPE::PunishMaliciousPeer(const boost::asio::ip::udp::endpoint &peer) {
+void SplitterSTRPEDS::PunishPeer(const boost::asio::ip::udp::endpoint &peer, std::string message) {
   if (logging_) {
-    LogMessage("!!! malicious peer" + peer.address().to_string() + ":" +
-               to_string(peer.port()));
+    LogMessage("!!! bad peer" + peer.address().to_string() + ":" +
+               to_string(peer.port()) + "(" + message + ")");
   }
 
-  LOG("!!! malicious peer " << peer);
+  LOG("!!! bad peer " << peer);
 
   RemovePeer(peer);
 }
 
-void SplitterSTRPE::ProcessChunkHashMessage(const std::vector<char> &message) {
-  uint16_t chunk_number = *(uint16_t *)message.data();
-  std::vector<char> hash(32);
 
-  copy(message.data() + sizeof(uint16_t), message.data() + message.size(),
-       hash.data());
 
-  std::vector<char> chunk_message = buffer_[chunk_number % buffer_size_];
-
-  uint16_t stored_chunk_number = *(uint16_t *)chunk_message.data();
-  std::vector<char> chunk;
-  copy(chunk_message.data() + sizeof(uint16_t),
-       chunk_message.data() + chunk_size_, chunk.data());
-
-  stored_chunk_number = ntohs(stored_chunk_number);
-
-  std::vector<char> digest(32);
-  Common::sha256(chunk, digest);
-  if (stored_chunk_number == chunk_number && digest != hash) {
-    asio::ip::udp::endpoint peer =
-        destination_of_chunk_[chunk_number % buffer_size_];
-    PunishMaliciousPeer(peer);
-  }
-}
-
-void SplitterSTRPE::SetLogFile(const std::string &filename) {
-  log_file_.open(filename);
-}
-
-void SplitterSTRPE::SetLogging(bool enabled) { logging_ = enabled; }
-
-void SplitterSTRPE::LogMessage(const std::string &message) {
+void SplitterSTRPEDS::LogMessage(const std::string &message) {
   log_file_ << BuildLogMessage(message);
   // TODO: Where to close the ofstream?
 }
 
-string SplitterSTRPE::BuildLogMessage(const std::string &message) {
+string SplitterSTRPEDS::BuildLogMessage(const std::string &message) {
   return to_string(time(NULL)) + "\t" + message;
 }
 
 
-void SplitterSTRPE::Start() {
+void SplitterSTRPEDS::Start() {
   LOG("Start");
-  thread_.reset(new boost::thread(boost::bind(&SplitterSTRPE::Run, this)));
+  thread_.reset(new boost::thread(boost::bind(&SplitterSTRPEDS::Run, this)));
 }
 }

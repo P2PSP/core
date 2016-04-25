@@ -9,6 +9,7 @@
 #include "monitor_dbs.h"
 #include "splitter_ims.h"
 #include "splitter_dbs.h"
+#include "splitter_strpeds.h"
 
 #include <sstream>
 
@@ -324,7 +325,7 @@ public:
 };
 
 //Splitter STRPEDS
-class PySplitterSTRPEDS: public StrpeDsSplitter {
+class PySplitterSTRPEDS: public SplitterSTRPEDS {
 public:
    list GetPeerList_() {
     list l;
