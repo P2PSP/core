@@ -17,9 +17,9 @@
 namespace p2psp {
 
   class Common {
-    
+
   public:
-    
+
     static const int kMaxChunkNumber = 65536;
     // MAX_CHUNK_NUMBER = 2048
     // COUNTERS_TIMING = 0.1
@@ -55,7 +55,7 @@ namespace p2psp {
 
     static void sha256(std::vector<char> string, std::vector<char> &digest) {
       SHA256((unsigned char *)string.data(), string.size(),
-	     (unsigned char *)digest.data());
+             (unsigned char *)digest.data());
     }
   };
 }
