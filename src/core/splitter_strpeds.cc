@@ -166,7 +166,7 @@ namespace p2psp {
 
   std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,  const asio::streambuf &chunk, const boost::asio::ip::udp::endpoint &dst){
 
-	std::vector<char> m;
+	std::vector<char> m(2+1024+40+40);
 
 	(*(uint16_t *)m.data()) = htons(chunk_number);
 
@@ -176,8 +176,15 @@ namespace p2psp {
 
 	(*(asio::ip::udp::endpoint *)(m.data() + chunk.size() + sizeof(uint16_t))) = dst;
     
-    std::vector<char> h;
+	std::string str(m.begin(),m.end());
+
+	uint16_t a = *(uint16_t *)m.data();
+
+	TRACE(str + to_string(a));
+
+    std::vector<char> h(256);
     Common::sha256(m, h);
+
 
     /* initialize random seed: */
      srand (time(NULL));
@@ -185,7 +192,7 @@ namespace p2psp {
      BN_rand_range(k, dsa_key->q);
 
     unsigned int siglen;
-    TRACE("SIG LEN "+ to_string(siglen));
+    TRACE("SIG LEN " << siglen);
 
     unsigned char *sig;
     if((DSA_sign(0, (unsigned char *)h.data(), h.size(), sig, &siglen, dsa_key)) != 1) {
@@ -193,11 +200,10 @@ namespace p2psp {
       DSA_free(dsa_key);
     } 
 
-    std::vector<char> message = m;
     //std::vector<char> signature = reinterpret_cast<vector<char> >(sig);
     char* signature = reinterpret_cast<char*>(sig);
-    copy(signature, signature + siglen, message.data() + message.size());
-    return message;
+    copy(signature, signature + siglen, m.data() + m.size());
+    return m;
 
   }
 
