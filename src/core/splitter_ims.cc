@@ -17,6 +17,16 @@ namespace p2psp {
   using namespace std;
   using namespace boost;
 
+  const int SplitterIMS::kBufferSize = 256;                 // Buffer size in chunks
+  const std::string SplitterIMS::kChannel = "test.ogg";     // Default channel
+  const int SplitterIMS::kChunkSize = 1024;                 // Chunk size in bytes (larger than MTU)
+  const int SplitterIMS::kHeaderSize = 10;                  // Chunks/header
+  const unsigned short SplitterIMS::kPort = 8001;           // Listening port
+  const std::string SplitterIMS::kSourceAddr = "127.0.0.1"; // Streaming server's host
+  const int SplitterIMS::kSourcePort = 8000;                // Streaming server's listening port
+  const std::string SplitterIMS::kMCastAddr = "224.0.0.1";  // All Systems on this subnet
+  const int SplitterIMS::kTTL = 1;                          // Time To Live of multicast packets
+
   SplitterIMS::SplitterIMS()
     : io_service_(),
       peer_connection_socket_(io_service_),
@@ -427,5 +437,41 @@ namespace p2psp {
   void SplitterIMS::Start() {
     TRACE("Start");
     thread_.reset(new boost::thread(boost::bind(&SplitterIMS::Run, this)));
+  }
+
+  int SplitterIMS::GetDefaultChunkSize() {
+    return kChunkSize;
+  }
+
+  int SplitterIMS::GetDefaultTeamPort() {
+    return kPort;
+  }
+
+  int SplitterIMS::GetDefaultBufferSize() {
+    return kBufferSize;
+  }
+
+  std::string SplitterIMS::GetDefaultChannel() {
+    return kChannel;
+  }
+
+  int SplitterIMS::GetDefaultHeaderSize() {
+    return kHeaderSize;
+  }
+
+  std::string SplitterIMS::GetDefaultMcastAddr() {
+    return kMCastAddr;
+  }
+
+  std::string SplitterIMS::GetDefaultSourceAddr() {
+    return kSourceAddr;
+  }
+
+  int SplitterIMS::GetDefaultSourcePort() {
+    return kSourcePort;
+  }
+
+  int SplitterIMS::GetDefaultTTL() {
+    return kTTL;
   }
 }

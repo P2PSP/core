@@ -23,9 +23,8 @@
 namespace p2psp {
 class SplitterDBS : public SplitterIMS {
  protected:
-  const int kMaxChunkLoss =
-      32;  // Chunk losses threshold to reject a peer from the team
-  const int kMonitorNumber = 1;
+  static const int kMaxChunkLoss; // Chunk losses threshold to reject a peer from the team
+  static const int kMonitorNumber;
 
   int max_number_of_chunk_loss_;
   int max_number_of_monitors_;
@@ -102,6 +101,10 @@ class SplitterDBS : public SplitterIMS {
 
   void SetMaxNumberOfChunkLoss(int max_number_of_chunk_loss);
   void SetMaxNumberOfMonitors(int max_number_of_monitors);
+
+  // Default getters
+  static int GetDefaultMaxNumberOfChunkLoss();
+  static int GetDefaultMaxNumberOfMonitors();
 };
 }
 

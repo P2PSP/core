@@ -84,16 +84,27 @@ namespace p2psp {
     void SetSourcePort(int source_port);
     void SetGETMessage(std::string channel);
 
+    // Default getters
+    static int GetDefaultChunkSize();
+    static int GetDefaultTeamPort(); // GetDefaultPort()
+    static int GetDefaultBufferSize();
+    static std::string GetDefaultChannel();
+    static int GetDefaultHeaderSize();
+    static std::string GetDefaultMcastAddr();
+    static std::string GetDefaultSourceAddr();
+    static int GetDefaultSourcePort();
+    static int GetDefaultTTL();
+
   protected:
-    const int kBufferSize = 256;                 // Buffer size in chunks
-    const std::string kChannel = "test.ogg";     // Default channel
-    const int kChunkSize = 1024;                 // Chunk size in bytes (larger than MTU)
-    const int kHeaderSize = 10;                  // Chunks/header
-    const unsigned short kPort = 8001;           // Listening port
-    const std::string kSourceAddr = "127.0.0.1"; // Streaming server's host
-    const int kSourcePort = 8000;                // Streaming server's listening port
-    const std::string kMCastAddr = "224.0.0.1";  // All Systems on this subnet
-    const int kTTL = 1;                          // Time To Live of multicast packets
+    static const int kBufferSize;          // Buffer size in chunks
+    static const std::string kChannel;     // Default channel
+    static const int kChunkSize;           // Chunk size in bytes (larger than MTU)
+    static const int kHeaderSize;          // Chunks/header
+    static const unsigned short kPort;     // Listening port
+    static const std::string kSourceAddr;  // Streaming server's host
+    static const int kSourcePort;          // Streaming server's listening port
+    static const std::string kMCastAddr;   // All Systems on this subnet
+    static const int kTTL;                 // Time To Live of multicast packets
 
     int buffer_size_;
     std::string channel_;

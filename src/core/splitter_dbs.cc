@@ -17,6 +17,10 @@ namespace p2psp {
   using namespace std;
   using namespace boost;
 
+  const int SplitterDBS::kMaxChunkLoss =
+      32;  // Chunk losses threshold to reject a peer from the team
+  const int SplitterDBS::kMonitorNumber = 1;
+
   SplitterDBS::SplitterDBS() : SplitterIMS(), losses_(0, &SplitterDBS::GetHash) {
     // TODO: Check if there is a better way to replace kMcastAddr with 0.0.0.0
     mcast_addr_ = "0.0.0.0";
@@ -360,5 +364,13 @@ namespace p2psp {
   void SplitterDBS::Start() {
     TRACE("Start");
     thread_.reset(new boost::thread(boost::bind(&SplitterDBS::Run, this)));
+  }
+
+  int SplitterDBS::GetDefaultMaxNumberOfChunkLoss() {
+    return kMaxChunkLoss;
+  }
+
+  int SplitterDBS::GetDefaultMaxNumberOfMonitors() {
+    return kMonitorNumber;
   }
 }
