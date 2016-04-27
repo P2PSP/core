@@ -31,7 +31,7 @@ namespace p2psp {
 
   class PeerDBS : public PeerIMS {
   protected:
-    int kMaxChunkDebt = 128;  // Peer's rejecting threshold
+    static const int kMaxChunkDebt = 128;  // Peer's rejecting threshold
 
     bool kLogging = false;  // A IMS???
     std::string kLogFile;   // A IMS???
@@ -78,6 +78,8 @@ namespace p2psp {
     virtual int GetNumberOfPeers();
     virtual void SetMaxChunkDebt(int);
     virtual int GetMaxChunkDebt();
+
+    static int GetDefaultMaxChunkDebt();
 
   };
 }

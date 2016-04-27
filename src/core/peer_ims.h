@@ -150,6 +150,11 @@ namespace p2psp {
     virtual uint16_t GetTeamPort();
     virtual void SetUseLocalhost(bool);
 
+    static uint16_t GetDefaultPlayerPort();
+    static uint16_t GetDefaultTeamPort();
+    static ip::address GetDefaultSplitterAddr();
+    static uint16_t GetDefaultSplitterPort();
+
   };
 }
 
