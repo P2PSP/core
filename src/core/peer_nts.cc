@@ -33,6 +33,14 @@ PeerNTS::~PeerNTS(){
 
 void PeerNTS::Init() { LOG("Initialized"); }
 
+bool operator==(const HelloMessage& msg1, const HelloMessage& msg2) {
+  return msg1.message_ == msg2.message_;
+}
+
+bool operator==(const HelloMessage& msg1, const message_t& msg2) {
+  return msg1.message_ == msg2;
+}
+
 void PeerNTS::SayHello(const ip::udp::endpoint& peer) {
   // Do nothing, as this is handled later in the program by SendHello
 }
@@ -43,21 +51,18 @@ void PeerNTS::SendHello(const ip::udp::endpoint& peer,
   std::string message = this->peer_id_;
   message_t hello_data = std::make_pair(message, peer);
   if (!CommonNTS::Contains(this->hello_messages_, hello_data)) {
-    this->hello_messages_.push_back(hello_data);
-    this->hello_messages_times_[hello_data] = std::chrono::steady_clock::now();
     additional_ports.push_back(peer.port());
-    this->hello_messages_ports_[hello_data] = additional_ports;
+    this->hello_messages_.push_back(HelloMessage{hello_data,
+        std::chrono::steady_clock::now(), additional_ports});
   }
 }
 
 void PeerNTS::SendMessage(const message_t& message_data) {
   std::lock_guard<std::mutex> guard(this->hello_messages_lock_);
   if (!CommonNTS::Contains(this->hello_messages_, message_data)) {
-    this->hello_messages_.push_back(message_data);
-    this->hello_messages_times_[message_data] =
-        std::chrono::steady_clock::now();
-    this->hello_messages_ports_[message_data]
-        .push_back(message_data.second.port());
+    this->hello_messages_.push_back(HelloMessage{message_data,
+        std::chrono::steady_clock::now(),
+        std::vector<uint16_t>(1, message_data.second.port())});
     // Directly start packet sending
     this->hello_messages_event_.notify_all();
   }
@@ -75,33 +80,29 @@ void PeerNTS::SendHelloThread() {
     // Continuously send hello UDP packets to arriving peers
     // until a connection is established
     timepoint_t now = std::chrono::steady_clock::now();
-    std::list<message_t> messages_to_remove;
+    std::list<HelloMessage> messages_to_remove;
     // Make local copies as entries may be removed
-    std::list<message_t> hello_messages = this->hello_messages_;
-    std::map<message_t, timepoint_t> hello_messages_times =
-        this->hello_messages_times_;
-    std::map<message_t, std::vector<uint16_t> > hello_messages_ports =
-        this->hello_messages_ports_;
-    for (const message_t& message_data : hello_messages) {
+    std::list<HelloMessage> hello_messages = this->hello_messages_;
+    for (const HelloMessage& hello_message : hello_messages) {
       // Check for timeout
-      if (now - hello_messages_times[message_data]
+      if (now - hello_message.time_
           > CommonNTS::kMaxPeerArrivingTime) {
-        messages_to_remove.push_back(message_data);
+        messages_to_remove.push_back(hello_message);
         continue;
       }
-      std::string message = message_data.first;
-      ip::udp::endpoint peer = message_data.second;
+      std::string message = hello_message.message_.first;
+      ip::udp::endpoint peer = hello_message.message_.second;
       if (message == this->peer_id_) {
         DEBUG("Sending [hello (" << message << ")] to " << peer
-            << " (trying " << hello_messages_ports[message_data].size()
+            << " (trying " << hello_message.ports_.size()
             << " ports)");
       } else {
         DEBUG("Sending message (" << message.substr(0, CommonNTS::kPeerIdLength)
             << ") of length " << message.size() << " to " << peer
-            << " (trying " << hello_messages_ports[message_data].size()
+            << " (trying " << hello_message.ports_.size()
             << " ports)");
       }
-      for (uint16_t port : hello_messages_ports[message_data]) {
+      for (uint16_t port : hello_message.ports_) {
         this->SendMessage(message, ip::udp::endpoint(peer.address(), port));
         // Avoid network congestion
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -110,15 +111,14 @@ void PeerNTS::SendHelloThread() {
     // Remove messages that timed out
     {
       std::lock_guard<std::mutex> guard(this->hello_messages_lock_);
-      for (const message_t& message_data : messages_to_remove) {
-        if (CommonNTS::Contains(this->hello_messages_, message_data)) {
+      for (const HelloMessage& hello_message : messages_to_remove) {
+        if (CommonNTS::Contains(this->hello_messages_, hello_message)) {
           LOG("Removed message "
-              << message_data.first.substr(0, CommonNTS::kPeerIdLength)
-              << " to " << message_data.second << " due to timeout");
-          // TODO: Check if message_data as a reference is ok here
-          this->hello_messages_times_.erase(message_data);
-          this->hello_messages_ports_.erase(message_data);
-          this->hello_messages_.remove(message_data);
+              << hello_message.message_.first.substr(0,
+              CommonNTS::kPeerIdLength) << " to "
+              << hello_message.message_.second << " due to timeout");
+          // TODO: Check if hello_message as a reference is ok here
+          this->hello_messages_.remove(hello_message);
         }
       }
     }
@@ -243,8 +243,6 @@ void PeerNTS::TryToDisconnectFromTheSplitter() {
       // Cleaning hello messages
       {
         std::lock_guard<std::mutex> guard(this->hello_messages_lock_);
-        this->hello_messages_times_.clear();
-        this->hello_messages_ports_.clear();
         this->hello_messages_.clear();
       }
       // Resetting peer lists
@@ -418,16 +416,14 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
     // Acknowledge received; stop sending the message
     {
       std::lock_guard<std::mutex> guard(this->hello_messages_lock_);
-      for (const message_t& hello_data : this->hello_messages_) {
-        if (message == hello_data.first
-            && sender.address() == hello_data.second.address()
-            && CommonNTS::Contains(this->hello_messages_ports_[hello_data],
+      for (const HelloMessage& hello_message : this->hello_messages_) {
+        if (message == hello_message.message_.first
+            && sender.address() == hello_message.message_.second.address()
+            && CommonNTS::Contains(hello_message.ports_,
             sender.port())) {
           DEBUG("Received acknowledge from " << sender);
           // TODO: Check if message_data as a reference is ok here
-          this->hello_messages_times_.erase(hello_data);
-          this->hello_messages_ports_.erase(hello_data);
-          this->hello_messages_.remove(hello_data);
+          this->hello_messages_.remove(hello_message);
           // No chunk number, as no chunk was received
           return -1;
         }

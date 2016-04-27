@@ -151,7 +151,7 @@ void SplitterNTS::SendTheListOfPeers2(
   // plus all peers currently being incorporated
   uint16_t number_of_other_peers = this->peer_list_.size()
       - this->max_number_of_monitors_ + this->incorporating_peers_.size();
-  if (CommonNTS::Contains(this->ids_, peer)) {
+  if (CommonNTS::Contains(this->peers_, peer)) {
     // Then peer is also in this->incorporating_peers_
     // Do not send the peer endpoint to itself
     number_of_other_peers = std::max(0, number_of_other_peers - 1);
@@ -167,29 +167,32 @@ void SplitterNTS::SendTheListOfPeers2(
       peer_iter != this->peer_list_.end(); ++peer_iter) {
     // Also send the port step of the existing peer, in case
     // it is behind a sequentially allocating NAT
+    const PeerInfo& peer_info = this->peers_[*peer_iter];
     msg_str.str(std::string());
-    msg_str << this->ids_[*peer_iter];
+    msg_str << peer_info.id_;
     CommonNTS::Write<uint32_t>(msg_str,
         (uint32_t)peer_iter->address().to_v4().to_ulong());
-    CommonNTS::Write<uint16_t>(msg_str, this->last_source_port_[*peer_iter]);
-    CommonNTS::Write<uint16_t>(msg_str, this->port_steps_[*peer_iter]);
+    CommonNTS::Write<uint16_t>(msg_str, peer_info.last_source_port_);
+    CommonNTS::Write<uint16_t>(msg_str, peer_info.port_step_);
     peer_serve_socket->send(buffer(msg_str.str()));
   }
   // Send the peers currently being incorporated
   for (const auto& peer_iter : this->incorporating_peers_) {
     const std::string& peer_id = peer_iter.first;
     // Do not send the peer endpoint to itself
-    if (CommonNTS::Contains(this->ids_, peer) && peer_id == this->ids_[peer]) {
+    if (CommonNTS::Contains(this->peers_, peer)
+        && peer_id == this->peers_[peer].id_) {
       continue;
     }
     LOG("Sending peer " << peer_id << " to " << peer);
     const ip::udp::endpoint& peer = peer_iter.second.peer_;
+    const PeerInfo& peer_info = this->peers_[peer];
     msg_str.str(std::string());
     msg_str << peer_id;
     CommonNTS::Write<uint32_t>(msg_str,
         (uint32_t)peer.address().to_v4().to_ulong());
-    CommonNTS::Write<uint16_t>(msg_str, this->last_source_port_[peer]);
-    CommonNTS::Write<uint16_t>(msg_str, this->port_steps_[peer]);
+    CommonNTS::Write<uint16_t>(msg_str, peer_info.last_source_port_);
+    CommonNTS::Write<uint16_t>(msg_str, peer_info.port_step_);
     peer_serve_socket->send(buffer(msg_str.str()));
   }
 }
@@ -214,8 +217,6 @@ void SplitterNTS::CheckArrivingPeerTime() {
     // Close socket
     peer_info.serve_socket_->close();
     // Remove peer
-    this->last_source_port_.erase(ip::udp::endpoint(peer_info.peer_address_,
-        peer_info.source_port_to_splitter_));
     this->arriving_peers_.erase(peer_id);
   }
 }
@@ -241,9 +242,6 @@ void SplitterNTS::CheckIncorporatingPeerTime() {
     // Close TCP socket
     peer_info.serve_socket_->close();
     // Remove peer
-    this->ids_.erase(peer_info.peer_);
-    this->port_steps_.erase(peer_info.peer_);
-    this->last_source_port_.erase(peer_info.peer_);
     this->incorporating_peers_.erase(peer_id);
   }
 }
@@ -295,9 +293,9 @@ void SplitterNTS::ListenExtraSocketThread() {
 
       const ip::udp::endpoint* peer = nullptr;
       // TODO: use std::find or boost::multi_index to optimize this loop
-      for (auto peer_iter = this->ids_.begin(); peer_iter != this->ids_.end();
-          ++peer_iter) {
-        if (peer_id == peer_iter->second) {
+      for (auto peer_iter = this->peers_.begin();
+          peer_iter != this->peers_.end(); ++peer_iter) {
+        if (peer_id == peer_iter->second.id_) {
           peer = &peer_iter->first;
           break;
         }
@@ -341,11 +339,10 @@ void SplitterNTS::HandleAPeerArrival(
     // Directly incorporate the monitor peer into the team.
     // The source ports are all set to the same, as the monitor peers
     // should be publicly accessible
-    this->ids_[new_peer] = peer_id;
-    this->port_steps_[new_peer] = 0;
-    this->last_source_port_[new_peer] = new_peer.port();
+    this->peers_[new_peer] = PeerInfo{peer_id, .port_step_ = 0,
+        .last_source_port_ = new_peer.port()};
     this->SendNewPeer(peer_id, new_peer,
-        std::vector<uint16_t>(this->max_number_of_monitors_, new_peer.port()));
+        std::vector<uint16_t>(this->max_number_of_monitors_, new_peer.port()), 0);
     this->InsertPeer(new_peer);
     serve_socket->close();
   } else {
@@ -376,30 +373,27 @@ void SplitterNTS::IncorporatePeer(const std::string& peer_id) {
     }
   }
 
-  this->port_steps_[new_peer] = (uint16_t)-1;
+  // The peer is in the team, but is not connected to all peers yet,
+  // so add to the list of incorporating peers.
+  // arriving_incorporating_peers_mutex_ is already locked in ProcessMessage()
+  this->incorporating_peers_[peer_id] = IncorporatingPeerInfo{new_peer,
+      std::chrono::steady_clock::now(), peer_info.source_port_to_splitter_,
+      peer_info.source_ports_to_monitors_, peer_info.serve_socket_,
+      (uint16_t)-1, 0};
   for (uint16_t source_port_to_monitor : peer_info.source_ports_to_monitors_) {
     this->UpdatePortStep(new_peer, source_port_to_monitor);
   }
 
   // Send the new peer endpoint to the incorporated peers
-  this->SendNewPeer(peer_id, new_peer, peer_info.source_ports_to_monitors_);
-
-  // Insert the peer into the list
-  this->ids_[new_peer] = peer_id;
-  // The peer is in the team, but is not connected to all peers yet,
-  // so add to the list.
-  // arriving_incorporating_peers_mutex_ is already locked in ProcessMessage()
-  this->incorporating_peers_[peer_id] = IncorporatingPeerInfo{new_peer,
-      std::chrono::steady_clock::now(), 0,
-      std::vector<uint16_t>(this->max_number_of_monitors_, 0),
-      peer_info.serve_socket_};
+  this->SendNewPeer(peer_id, new_peer, peer_info.source_ports_to_monitors_,
+      this->incorporating_peers_[peer_id].port_step_);
 
   this->arriving_peers_.erase(peer_id);
 }
 
 void SplitterNTS::SendNewPeer(const std::string& peer_id,
     const ip::udp::endpoint& new_peer,
-    const std::vector<uint16_t>& source_ports_to_monitors) {
+    const std::vector<uint16_t>& source_ports_to_monitors, uint16_t port_step) {
 
   // Recreate this->extra_socket_, listening to a random port
   // TODO: is the extra_socket recreated too often?
@@ -444,10 +438,10 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
       CommonNTS::Write<uint32_t>(msg_str,
           (uint32_t)new_peer.address().to_v4().to_ulong());
       CommonNTS::Write<uint16_t>(msg_str, min_known_source_port);
-      CommonNTS::Write<uint16_t>(msg_str, this->port_steps_[new_peer]);
+      CommonNTS::Write<uint16_t>(msg_str, port_step);
       // Splitter is "peer number 0", thus add 1
       CommonNTS::Write<uint16_t>(msg_str, peer_number+1);
-      if (this->port_steps_[*peer_iter] != 0) {
+      if (this->peers_[*peer_iter].port_step_ != 0) {
         // Send the port of this->extra_socket_ to determine the
         // currently allocated source port of the incorporated peer
         CommonNTS::Write<uint16_t>(msg_str, extra_listen_port);
@@ -472,7 +466,7 @@ void SplitterNTS::SendNewPeer(const std::string& peer_id,
     CommonNTS::Write<uint32_t>(msg_str,
         (uint32_t)new_peer.address().to_v4().to_ulong());
     CommonNTS::Write<uint16_t>(msg_str, min_known_source_port);
-    CommonNTS::Write<uint16_t>(msg_str, this->port_steps_[new_peer]);
+    CommonNTS::Write<uint16_t>(msg_str, port_step);
     // Send the length of the peer_list as peer_number
     CommonNTS::Write<uint16_t>(msg_str, this->peer_list_.size()+1);
     // Hopefully one of these packets arrives
@@ -492,17 +486,14 @@ void SplitterNTS::RetryToIncorporatePeer(const std::string& peer_id) {
   // Update peer lists
   ip::udp::endpoint new_peer(peer.address(),
       peer_info.source_port_to_splitter_);
-  this->ids_[new_peer] = this->ids_[peer];
-  this->ids_.erase(peer);
-  this->port_steps_[new_peer] = this->port_steps_[peer];
-  this->port_steps_.erase(peer);
-  this->incorporating_peers_[peer_id] = IncorporatingPeerInfo{new_peer,
-      peer_info.incorporation_time_, 0,
-      std::vector<uint16_t>(this->max_number_of_monitors_, 0),
-      peer_info.serve_socket_};
+  this->incorporating_peers_[peer_id].peer_ = new_peer;
+  this->incorporating_peers_[peer_id].source_port_to_splitter_ = 0;
+  this->incorporating_peers_[peer_id].source_ports_to_monitors_ =
+      std::vector<uint16_t>(this->max_number_of_monitors_, 0);
 
   // Send the updated endpoint to the existing peers
-  this->SendNewPeer(peer_id, new_peer, peer_info.source_ports_to_monitors_);
+  this->SendNewPeer(peer_id, new_peer, peer_info.source_ports_to_monitors_,
+      peer_info.port_step_);
 
   // Send all peers to the retrying peer
   try {
@@ -514,22 +505,48 @@ void SplitterNTS::RetryToIncorporatePeer(const std::string& peer_id) {
 
 void SplitterNTS::UpdatePortStep(const ip::udp::endpoint peer,
     uint16_t source_port) {
-  // Set last known source port
-  this->last_source_port_[peer] = source_port;
+  if (CommonNTS::Contains(this->peers_, peer)) {
+    PeerInfo& peer_info = this->peers_[peer];
+    // Set last known source port
+    peer_info.last_source_port_ = source_port;
+
+    this->UpdatePortStep(peer, peer_info.port_step_, source_port);
+  } else {
+    for (std::pair<const std::string, IncorporatingPeerInfo>& peer_iter
+        : this->incorporating_peers_) {
+      IncorporatingPeerInfo& peer_info = peer_iter.second;
+      if (peer_info.peer_ == peer) {
+        // Set last known source port
+        peer_info.last_source_port_ = source_port;
+        this->UpdatePortStep(peer, peer_info.port_step_, source_port);
+        return;
+      }
+    }
+    // TODO: Better error handling
+    ERROR("While updating port step: Peer " << peer << " not found.");
+    throw new std::exception();
+  }
+}
+
+void SplitterNTS::UpdatePortStep(const ip::udp::endpoint peer,
+    uint16_t& port_step, uint16_t source_port) {
   // Skip check if (measured port step is 0
-  if (this->port_steps_[peer] == 0) {
+  if (port_step == 0) {
     return;
   }
-  if (this->port_steps_[peer] == (uint16_t)-1) {
-    this->port_steps_[peer] = 0;
+  if (port_step == (uint16_t)-1) {
+    port_step = 0;
   }
   // Update source port information
   uint16_t port_diff = std::abs(peer.port() - source_port);
-  uint16_t previous_port_step = this->port_steps_[peer];
-  this->port_steps_[peer] = gcd(previous_port_step, port_diff);
-  if (this->port_steps_[peer] != previous_port_step) {
+  uint16_t previous_port_step = port_step;
+  port_step = gcd(previous_port_step, port_diff);
+  DEBUG("Previous port step: " << previous_port_step
+      << ". Port diff: " << peer.port() << " - " << source_port
+      << ". New port step: " << port_step);
+  if (port_step != previous_port_step) {
     LOG("Updated port step of peer " << peer << " from " << previous_port_step
-        << " to " << this->port_steps_[peer]);
+        << " to " << port_step);
   }
 }
 
@@ -537,9 +554,7 @@ void SplitterNTS::RemovePeer(const ip::udp::endpoint& peer) {
   SplitterLRS::RemovePeer(peer);
 
   try {
-    this->ids_.erase(peer);
-    this->port_steps_.erase(peer);
-    this->last_source_port_.erase(peer);
+    this->peers_.erase(peer);
   } catch (std::exception e) {
     TRACE(e.what());
     // ignore
@@ -665,9 +680,9 @@ void SplitterNTS::ModerateTheTeam() {
 
       const ip::udp::endpoint* peer = nullptr;
       // TODO: use std::find or boost::multi_index to optimize this loop
-      for (auto peer_iter = this->ids_.begin(); peer_iter != this->ids_.end();
+      for (auto peer_iter = this->peers_.begin(); peer_iter != this->peers_.end();
           ++peer_iter) {
-        if (peer_id == peer_iter->second) {
+        if (peer_id == peer_iter->second.id_) {
           peer = &peer_iter->first;
           break;
         }
@@ -712,6 +727,11 @@ void SplitterNTS::ModerateTheTeam() {
         // Close TCP socket
         this->incorporating_peers_[peer_id].serve_socket_->close();
         this->InsertPeer(this->incorporating_peers_[peer_id].peer_);
+        this->peers_[this->incorporating_peers_[peer_id].peer_] =
+            PeerInfo{peer_id,
+            .port_step_ = this->incorporating_peers_[peer_id].port_step_,
+            .last_source_port_ =
+            this->incorporating_peers_[peer_id].last_source_port_};
         this->incorporating_peers_.erase(peer_id);
 
       } else {

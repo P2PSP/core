@@ -27,13 +27,17 @@
 
 namespace p2psp {
 
+struct HelloMessage {
+  message_t message_;
+  timepoint_t time_;
+  std::vector<uint16_t> ports_;
+};
+
 class PeerNTS : public PeerDBS {
  protected:
   std::string peer_id_;
   std::mutex hello_messages_lock_;
-  std::list<message_t> hello_messages_;
-  std::map<message_t, timepoint_t> hello_messages_times_;
-  std::map<message_t, std::vector<uint16_t> > hello_messages_ports_;
+  std::list<HelloMessage> hello_messages_;
   std::condition_variable hello_messages_event_;
   std::mutex hello_messages_event_mutex_;
   // A list of peer_ids that contains the peers that were in the team when

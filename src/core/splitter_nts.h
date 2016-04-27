@@ -43,21 +43,31 @@ struct IncorporatingPeerInfo {
   uint16_t source_port_to_splitter_;
   std::vector<uint16_t> source_ports_to_monitors_;
   std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket_;
+
+  // The port step is already needed for incorporating peers, in case two peers
+  // are incorporating simultaneously
+  uint16_t port_step_;
+  // The last known allocated source port for the peer
+  uint16_t last_source_port_;
+};
+
+struct PeerInfo {
+  std::string id_;
+
+  // The source port step (smallest difference of the source ports
+  // when connecting to different endpoints) of the peer
+  uint16_t port_step_;
+
+  // The last known allocated source port for the peer
+  uint16_t last_source_port_;
 };
 
 class SplitterNTS : public SplitterLRS {
  protected:
   const int max_message_size_;
 
-  // The IDs of the peers in the team.
-  std::map<boost::asio::ip::udp::endpoint, std::string> ids_;
-
-  // The source port steps (smallest difference of the source ports
-  // when connecting to different endpoints) of the peers in the team.
-  std::map<boost::asio::ip::udp::endpoint, uint16_t> port_steps_;
-
-  // The last known allocated source port for each peer in the team.
-  std::map<boost::asio::ip::udp::endpoint, uint16_t> last_source_port_;
+  // Peer information for each incorporated peer in the team.
+  std::map<boost::asio::ip::udp::endpoint, PeerInfo> peers_;
 
   // The arriving peers. Key: ID. Value: ArrivingPeerInfo
   std::map<std::string, ArrivingPeerInfo> arriving_peers_;
@@ -135,10 +145,13 @@ class SplitterNTS : public SplitterLRS {
   virtual void IncorporatePeer(const std::string& peer_id);
   virtual void SendNewPeer(const std::string& peer_id,
       const boost::asio::ip::udp::endpoint& new_peer,
-      const std::vector<uint16_t>& source_ports_to_monitors);
+      const std::vector<uint16_t>& source_ports_to_monitors,
+      uint16_t port_step);
   virtual void RetryToIncorporatePeer(const std::string& peer_id);
   virtual void UpdatePortStep(const boost::asio::ip::udp::endpoint peer,
       uint16_t source_port);
+  virtual void UpdatePortStep(const boost::asio::ip::udp::endpoint peer,
+      uint16_t& port_step, uint16_t source_port);
   virtual void RemovePeer(const boost::asio::ip::udp::endpoint& peer) override;
   virtual void ModerateTheTeam() override;
 
