@@ -29,10 +29,33 @@ void PeerSTRPEDS::ReceiveTheNextMessage(std::vector<char> &message,
   current_sender_ = sender;
 }
 void PeerSTRPEDS::ReceiveDsaKey() {
-  std::vector<char> message;
+  std::vector<char> message(256+256+256+40);
   read(splitter_socket_, ::buffer(message));
 
-  // TODO: finish implementation
+  TRACE("Ready to receive DSA Key");
+
+  char *y = new char[256];
+  char *g = new char[256];
+  char *p = new char[256];
+  char *q = new char[40];
+
+  std::copy(message.data(), message.data() + 256, y);
+  std::copy(message.data() + 256, message.data() + 256 + 256, g);
+  std::copy(message.data() + 256 + 256, message.data() + 256 + 256 +256, p);
+  std::copy(message.data() + 256 + 256 + 256, message.data() + 256 + 256 +256 + 40, q);
+
+  dsa_key = DSA_new();
+
+  BN_hex2bn(&dsa_key->pub_key,y);
+  BN_hex2bn(&dsa_key->g,g);
+  BN_hex2bn(&dsa_key->p,p);
+  BN_hex2bn(&dsa_key->q,q);
+
+
+  delete[] y; delete[] g; delete[] p; delete[] q;
+
+  TRACE("DSA key received");
+
 }
 
 void PeerSTRPEDS::ProcessBadMessage(const std::vector<char> &message,
@@ -54,32 +77,19 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
   }
 
   if (!IsControlMessage(message)) {
-    /*
-     TODO:
-     uint16_t chunk_number = ntohs(*(short *)message.data());
-    std::string chunk(message.data() + 2, message.data() + 2 + 1024);
-    int k1 = boost::lexical_cast<int>(
-        "0x" +
-        std::string(message.data() + 2 + 1024, message.data() + 2 + 1024 + 40));
-    int k2 = boost::lexical_cast<int>(
-        "0x" + std::string(message.data() + 2 + 1024 + 40,
-                           message.data() + 2 + 1024 + 40 + 40));*/
-
-    // TODO: DSA
-    // sign = (self.convert_to_long(k1), self.convert_to_long(k2))
-    // m = str(chunk_number) + str(chunk) + str(sender)
-    // return self.dsa_key.verify(SHA256.new(m).digest(), sign)
 
 	  uint16_t chunk_number = *(uint16_t *)(message.data());
 
-	  std::vector<char> chunk;
+	  std::vector<char> chunk(chunk_size_);
 	  std::copy(message.data() + sizeof(uint16_t), message.data() + sizeof(uint16_t) + chunk_size_, chunk.data());
 
-	  unsigned char *signature;
-	  std::copy(message.data() + sizeof(uint16_t) + chunk_size_, message.data() + message.size(), signature);
+	  char* sigr[40];
+	  std::copy(message.data() + sizeof(uint16_t) + chunk_size_, message.data() + sizeof(uint16_t) + chunk_size_ + 40, sigr);
+	  char* sigs[40];
+	  std::copy(message.data() + sizeof(uint16_t) + chunk_size_ + 40, message.data() + sizeof(uint16_t) + chunk_size_ + 40 + 40, sigs);
 
-	  std::vector<char> h;
-	  std::vector<char> m;
+	  std::vector<char> h(256);
+	  std::vector<char> m(2+1024+40+40);
 	  boost::asio::ip::udp::endpoint dst = team_socket_.local_endpoint();
 
 	  (*(uint16_t *)m.data()) = htons(chunk_number);

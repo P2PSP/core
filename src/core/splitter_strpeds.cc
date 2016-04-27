@@ -54,7 +54,7 @@ namespace p2psp {
     (*(std::stringstream *)(message + 512)) = p;
     (*(std::stringstream *)(message + 768)) = q;
     */
-    TRACE("Sending DSA Key => Size pub_key: " + to_string(strlen(y)) + "g" + to_string(strlen(g)) + "p" + to_string(strlen(p)) + "q"+ to_string(strlen(g)) + "message: " + message.str());
+    TRACE("Sending DSA Key => Size pub_key: " + to_string(strlen(y)) + "g" + to_string(strlen(g)) + "p" + to_string(strlen(p)) + "q"+ to_string(strlen(q)) + "message: " + message.str());
     sock->send(asio::buffer(message.str()));
   }
 
@@ -115,7 +115,7 @@ namespace p2psp {
     thread t3(bind(&SplitterDBS::ResetCountersThread, this));
     thread t4(bind(&SplitterSTRPEDS::GatherBadPeers, this));
 
-    vector<char> message;
+    vector<char> message(2+1024+40+40);
     asio::ip::udp::endpoint peer;
 
     while (alive_) {
@@ -166,7 +166,7 @@ namespace p2psp {
 
   std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,  const asio::streambuf &chunk, const boost::asio::ip::udp::endpoint &dst){
 
-	std::vector<char> m(2+1024+47);
+	std::vector<char> m(2+1024+4+2);
 
 	(*(uint16_t *)m.data()) = htons(chunk_number);
 
@@ -180,42 +180,25 @@ namespace p2psp {
 	(*(in_addr *)(m.data() + chunk.size() + sizeof(uint16_t))) = addr;
 	(*(uint16_t *)(m.data() + chunk.size() + sizeof(uint16_t) + 4)) = htons(dst.port());
 
-
-	/*
-	std::string str(m.begin(),m.end());
-	uint16_t a = *(uint16_t *)m.data();
-	TRACE(str + to_string(a));
-	 */
-
     std::vector<char> h(256);
     Common::sha256(m, h);
 
-    //std::string str(h.begin(),h.end());
-    //TRACE("Hash: " + str);
+    TRACE("HASH");
 
-    /* initialize random seed: */
-     srand (time(NULL));
-     BIGNUM* k = BN_new();
-     BN_rand_range(k, dsa_key->q);
+    DSA_SIG *sig = DSA_do_sign((unsigned char*)h.data(), 256, dsa_key);
 
-     //TRACE ("K = " << k->d);
+    char * sigr = BN_bn2hex(sig->r);
+    char * sigs = BN_bn2hex(sig->s);
 
-    unsigned int siglen;
-    unsigned char *sig;
+    TRACE("SINGATURE");
 
-    if((DSA_sign(0, (unsigned char *)h.data(), h.size(), sig, &siglen, dsa_key)) != 1) {
-      printf("ERROR: Digital signature signing failed.\n"); 
-      DSA_free(dsa_key);
-    } 
+    std::vector<char> message(2+1024+40+40);
+    copy(m.data(), m.data() + chunk_size_ + sizeof(uint16_t), message.data());
 
-    TRACE("SIG LEN " << siglen);
-    //TRACE(sig);
+    copy(sigr, sigr + strlen(sigr), message.data() + chunk.size() + sizeof(uint16_t));
+    copy(sigs, sigs + strlen(sigs), message.data() + chunk.size() + sizeof(uint16_t) + 40);
 
-    //std::vector<char> signature = reinterpret_cast<vector<char> >(sig);
-    char* signature = reinterpret_cast<char*>(sig);
-    copy(signature, signature + siglen, m.data() + m.size());
-
-    return m;
+    return message;
 
   }
 
@@ -292,7 +275,7 @@ namespace p2psp {
 
   void SplitterSTRPEDS::ProcessBadPeersMessage(const std::vector<char> &message, const boost::asio::ip::udp::endpoint &sender){
 	  system::error_code ec;
-	  std::vector<char> msg;
+	  std::vector<char> msg(5);
 	  boost::asio::ip::udp::endpoint sdr;
 	  boost::asio::ip::udp::endpoint bad_peer;
 
