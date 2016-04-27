@@ -117,13 +117,11 @@ void PeerNTS::SendHelloThread() {
               << hello_message.message_.first.substr(0,
               CommonNTS::kPeerIdLength) << " to "
               << hello_message.message_.second << " due to timeout");
-          // TODO: Check if hello_message as a reference is ok here
           this->hello_messages_.remove(hello_message);
         }
       }
     }
 
-    // TODO: this->hello_messages_event_.clear();
     std::unique_lock<std::mutex> lock(this->hello_messages_event_mutex_);
     this->hello_messages_event_.wait_until(lock,
         std::chrono::steady_clock::now() + CommonNTS::kHelloPacketTiming);
@@ -251,7 +249,6 @@ void PeerNTS::TryToDisconnectFromTheSplitter() {
       // Recreate the socket
       // Similar to PeerDBS.listen_to_the_team, binds to a random port
       this->team_socket_.close();
-      // TODO: this->create_team_socket();
       // to allow override in symsp_peer
       this->team_socket_ = ip::udp::socket(this->io_service_);
       this->team_socket_.open(ip::udp::v4());
@@ -424,7 +421,6 @@ int PeerNTS::ProcessMessage(const std::vector<char>& message_bytes,
           DEBUG("Received acknowledge from " << sender);
           // TODO: Check if message_data as a reference is ok here
           this->hello_messages_.remove(hello_message);
-          // No chunk number, as no chunk was received
           return -1;
         }
       }

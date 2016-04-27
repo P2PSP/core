@@ -23,7 +23,6 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
-// TODO: other include files
 
 namespace p2psp {
 

@@ -34,7 +34,6 @@ SplitterNTS::SplitterNTS() : SplitterLRS(),
   this->check_timeout_thread_ =
       std::thread(&SplitterNTS::CheckTimeoutThread, this);
 
-  // TODO: this->extra_socket_ = None
   // The thread listens to this->extra_socket_ and reports source ports
   this->listen_extra_socket_thread_ =
       std::thread(&SplitterNTS::ListenExtraSocketThread, this);
