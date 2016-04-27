@@ -406,4 +406,8 @@ namespace p2psp {
     return max_chunk_debt_;
   }
 
+  int PeerDBS::GetDefaultMaxChunkDebt() {
+    return kMaxChunkDebt;
+  }
+
 }

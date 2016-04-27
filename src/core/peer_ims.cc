@@ -513,4 +513,20 @@ namespace p2psp {
   void PeerIMS::SetUseLocalhost(bool use_localhost) {
     use_localhost_ = use_localhost;
   }
+
+  uint16_t PeerIMS::GetDefaultPlayerPort() {
+    return kPlayerPort;
+  }
+
+  uint16_t PeerIMS::GetDefaultTeamPort() {
+    return kTeamPort;
+  }
+
+  uint16_t PeerIMS::GetDefaultSplitterPort() {
+    return kSplitterPort;
+  }
+
+  ip::address PeerIMS::GetDefaultSplitterAddr() {
+    return ip::address::from_string(kSplitterAddr);;
+  }
 }
