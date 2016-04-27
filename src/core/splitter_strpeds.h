@@ -20,8 +20,17 @@
 #include "splitter_dbs.h"
 #include "common.h"
 #include "openssl/dsa.h"
+#include <exception>
 
 namespace p2psp {
+
+class null: public std::exception {
+public:
+	null(){}
+	~null(){}
+};
+
+
 class SplitterSTRPEDS : public SplitterDBS {
  protected:
   

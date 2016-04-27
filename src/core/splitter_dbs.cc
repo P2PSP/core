@@ -280,7 +280,8 @@ namespace p2psp {
   }
 
   void SplitterDBS::ComputeNextPeerNumber(asio::ip::udp::endpoint &peer) {
-    peer_number_ = (peer_number_ + 1) % peer_list_.size();
+	if (peer_list_.size() > 0)
+		peer_number_ = (peer_number_ + 1) % peer_list_.size();
   }
 
   void SplitterDBS::Run() {

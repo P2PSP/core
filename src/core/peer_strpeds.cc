@@ -66,13 +66,16 @@ void PeerSTRPEDS::ProcessBadMessage(const std::vector<char> &message,
 }
 
 bool PeerSTRPEDS::IsControlMessage(std::vector<char> message) {
+	TRACE("Control message: " +  message.size());
   return message.size() != (1026 + 40 + 40);
 }
 
 bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
                                ip::udp::endpoint sender) {
-  if (std::find(bad_peers_.begin(), bad_peers_.end(), sender) ==
+	TRACE("Check Message");
+  if (std::find(bad_peers_.begin(), bad_peers_.end(), sender) !=
       bad_peers_.end()) {
+	  TRACE("Sender is in bad peer list");
     return false;
   }
 
@@ -83,24 +86,38 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  std::vector<char> chunk(chunk_size_);
 	  std::copy(message.data() + sizeof(uint16_t), message.data() + sizeof(uint16_t) + chunk_size_, chunk.data());
 
-	  char* sigr[40];
+	  char* sigr = new char[40];
 	  std::copy(message.data() + sizeof(uint16_t) + chunk_size_, message.data() + sizeof(uint16_t) + chunk_size_ + 40, sigr);
-	  char* sigs[40];
+	  char* sigs = new char[40];
 	  std::copy(message.data() + sizeof(uint16_t) + chunk_size_ + 40, message.data() + sizeof(uint16_t) + chunk_size_ + 40 + 40, sigs);
 
 	  std::vector<char> h(256);
-	  std::vector<char> m(2+1024+40+40);
+	  std::vector<char> m(2+1024+4+2);
 	  boost::asio::ip::udp::endpoint dst = team_socket_.local_endpoint();
 
 	  (*(uint16_t *)m.data()) = htons(chunk_number);
 
 	  std::copy(chunk.data(), chunk.data() + chunk.size(), m.data() + sizeof(uint16_t));
 
-	  (*(boost::asio::ip::udp::endpoint *)(m.data() + chunk.size() + sizeof(uint16_t))) = dst;
+	  in_addr addr;
+	  inet_aton(dst.address().to_string().c_str(), &addr);
+
+	  (*(in_addr *)(m.data() + chunk.size() + sizeof(uint16_t))) = addr;
+	  (*(uint16_t *)(m.data() + chunk.size() + sizeof(uint16_t) + 4)) = htons(dst.port());
 
 	  Common::sha256(m, h);
 
-	  return DSA_verify(0, (unsigned char *)h.data() , h.size(), signature, strlen(reinterpret_cast<char*>(signature)), dsa_key);
+	  DSA_SIG* sig = DSA_SIG_new();
+
+	  BN_hex2bn(&sig->r, sigr);
+	  BN_hex2bn(&sig->s, sigs);
+
+
+	  if (DSA_do_verify((unsigned char*)h.data(), h.size(), sig, dsa_key)){
+		  DSA_SIG_free(sig);
+		  delete[] sigr; delete[] sigs;
+		  return true;
+	  }
   }
 
   return true;
@@ -133,11 +150,13 @@ int PeerSTRPEDS::HandleBadPeersRequest() {
 
 int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
                                 const ip::udp::endpoint &sender) {
-  if (std::find(bad_peers_.begin(), bad_peers_.end(), sender) ==
+  if (std::find(bad_peers_.begin(), bad_peers_.end(), sender) !=
       bad_peers_.end()) {
+	  TRACE("Sender is in the bad peer list");
     return -1;
   }
 
+  TRACE("Sender is clean");
   if (IsCurrentMessageFromSplitter() || CheckMessage(message, sender)) {
     if (IsControlMessage(message) and (message[0] == 'B')) {
       return HandleBadPeersRequest();

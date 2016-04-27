@@ -647,7 +647,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("receive_and_feed_counter", &PyPeerSTRPEDS::GetRecAndFeedCounter, &PyPeerSTRPEDS::SetRecAndFeedCounter)
     .add_property("receive_and_feed_previous" , &PyPeerSTRPEDS::GetReceiveAndFeedPrevious, &PyPeerSTRPEDS::SetReceiveAndFeedPrevious)
     .add_property("sendto_counter", &PyPeerSTRPEDS::GetSendtoCounter, &PyPeerSTRPEDS::SetSendtoCounter)
-
+    .add_property("recvfrom_counter", &PyPeerSTRPEDS::GetRecvfromCounter, &PyPeerSTRPEDS::SetRecvfromCounter)
     
     //IMS
     .def("Init", &PeerSTRPEDS::Init) //used
