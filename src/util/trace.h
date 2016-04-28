@@ -103,7 +103,7 @@ namespace p2psp
 
 #define LOG(a)      {}
 #define LOGC(c, a)  {}
-#define WARNING(a)    {}
+#define WARNING(a)  {}
 #define DEBUG(a)    {}
 
 #define ERROR(a)    \
@@ -114,6 +114,15 @@ namespace p2psp
 #define TRACE(a)    {}
 
 #endif // NDEBUG
+
+#else // TRACE_SILENT_MODE
+
+#define LOG(a)      {}
+#define LOGC(c, a)  {}
+#define ERROR(a)    {}
+#define WARNING(a)  {}
+#define DEBUG(a)    {}
+#define TRACE(a)    {}
 
 #endif // TRACE_SILENT_MODE
 
