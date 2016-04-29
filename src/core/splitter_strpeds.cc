@@ -52,12 +52,7 @@ void SplitterSTRPEDS::SendDsaKey(
 
 	std::stringstream message;
 	message << y << g << p << q;
-	/*
-	 (*(std::stringstream *)&message) = y;
-	 (*(std::stringstream *)(message + 256)) = g;
-	 (*(std::stringstream *)(message + 512)) = p;
-	 (*(std::stringstream *)(message + 768)) = q;
-	 */
+
 	TRACE(
 			"Sending DSA Key => Size pub_key: " + to_string(strlen(y)) + "g"
 					+ to_string(strlen(g)) + "p" + to_string(strlen(p)) + "q"
