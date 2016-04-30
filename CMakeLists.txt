@@ -35,7 +35,14 @@ list(APPEND BOOST_REQUIRED_COMPONENTS
 )
 
 if(BUILD_PYTHON_WRAPPER)
-  list(APPEND BOOST_REQUIRED_COMPONENTS python3)
+  execute_process(COMMAND sh -c "ldconfig -p | grep libboost_python-py34" RESULT_VARIABLE res_var)
+  if("${res_var}" STREQUAL "0")
+    # on Ubuntu, python-py34 is available
+    list(APPEND BOOST_REQUIRED_COMPONENTS python-py34)
+  else()
+    # on Arch, python3 is available
+    list(APPEND BOOST_REQUIRED_COMPONENTS python3)
+  endif()
 endif()
 
 find_package(Boost COMPONENTS
