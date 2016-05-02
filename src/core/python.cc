@@ -339,6 +339,18 @@ public:
     return l;
   }
 
+   list GetBadPeerList() {
+    list l;
+    std::string address;
+    uint16_t port;
+    for (unsigned int i = 0; i < bad_peers_.size(); i++) {
+      address = bad_peers_[i].address().to_string();
+      port = bad_peers_[i].port();
+      l.append(boost::python::make_tuple(address, port));
+    }
+    return l;
+  }
+
   void InsertPeer_(boost::python::tuple peer){
     ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
     uint16_t port = boost::python::extract<uint16_t>(peer[1]);
@@ -700,13 +712,14 @@ BOOST_PYTHON_MODULE(libp2psp)
     //Overrides
     .def("ProcessMessage", &PyPeerSTRPEDS::ProcessMessage)
     .def("SendChunk", &PyPeerSTRPEDS::SendChunk)
-    .def("InsertChunk", &PyPeerSTRPEDS::InsertChunk)
+    .def("InsertChunk", &PyPeerSTRPEDS::InsertChunk)    
     
-    
-    //Cryto
+    //STRPEDS
     .def("ReceiveDsaKey", &PyPeerSTRPEDS::ReceiveDsaKey)
+    .def("GetBadPeerList", &PyPeerSTRPEDS::GetBadPeerList)
     ;
-  
+
+   
 
   class_<PyMonitorDBS, boost::noncopyable>("MonitorDBS")
     //variables
