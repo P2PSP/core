@@ -11,6 +11,13 @@ option(BUILD_TEST "Build the test" ON)
 
 option(BUILD_PYTHON_WRAPPER "Build the Python wrapper" ON)
 
+option(BUILD_WITH_CLANG "Build using the Clang compiler" OFF)
+
+if(BUILD_WITH_CLANG)
+  set(CMAKE_C_COMPILER clang)
+  set(CMAKE_CXX_COMPILER clang++)
+endif()
+
 # Project name
 project(p2psp C CXX)
 
@@ -28,7 +35,14 @@ list(APPEND BOOST_REQUIRED_COMPONENTS
 )
 
 if(BUILD_PYTHON_WRAPPER)
-  list(APPEND BOOST_REQUIRED_COMPONENTS python-py34)
+  execute_process(COMMAND sh -c "ldconfig -p | grep libboost_python-py34" RESULT_VARIABLE res_var)
+  if("${res_var}" STREQUAL "0")
+    # on Ubuntu, python-py34 is available
+    list(APPEND BOOST_REQUIRED_COMPONENTS python-py34)
+  else()
+    # on Arch, python3 is available
+    list(APPEND BOOST_REQUIRED_COMPONENTS python3)
+  endif()
 endif()
 
 find_package(Boost COMPONENTS
@@ -71,7 +85,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
         message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.7 or greater")
     endif ()
 elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 else ()
     message(FATAL_ERROR "Your C++ compiler does not support C++11")
 endif ()
@@ -158,6 +172,7 @@ if(BUILD_TEST)
   target_link_libraries(test
     ${CMAKE_THREAD_LIBS_INIT}
     ${Boost_LIBRARIES}
+    ${PYTHON_LIBRARIES}
   )
 
   # Enable C++11 for CMake 3.1.0 or later

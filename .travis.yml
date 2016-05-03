@@ -1,0 +1,19 @@
+language: cpp
+sudo: required
+dist: trusty
+compiler:
+- clang
+os:
+- linux
+addons:
+  apt:
+    packages:
+    - libboost-all-dev
+before_script: mkdir build && cd build && cmake ../
+script: make -j2
+notifications:
+  slack:
+    secure: afWqFIIggfqUbkON5ZjU03vA13TPZggjjYX7PXM4sTxY9NCktPaxef5QcFboDWAxiuDU3n3TIluwhzbzVZzXa9V7QSn5P+EEC0zZRoXLqzAoUX+kpixpoyqV6dIR+K5DrAp/Ej3WLB7RGAnzMN0G9JfJ+w5s43IgXqYniUolpx2qunVaCp+0mDyffniMXBM2jV4XVYN3dY1GOSjH6xyClCqZWttEO/7nVJCgXbHFjRVXr6wHoCHJ7ECii2GqO+hZfFU42TPQ7c5y1RcnfwQt2NITc7+/gIUuh1Ov3ya5l8YP8DiHP1fYMg9hoG0XUSAPRpArhbQ+PFtvXxT61hKe7E4T7ycjClh4U9G1YYmoo6lVbfzxVufyOEfPsqKSHXrPV3Jdpb+iqiPcDUgQzOiDdOHeIY0WT/TaLBULmJmDDId0Z7wtM3zmPGDPz5hjU63xbCtwFxOGtUAw2hsXUEpydOmC2mQmX6Qp0TKzBmHJQOiZs/XCyAkarJI258xBAUnZTXqK67hPqweOo9k4OQ9kT6kExc6UfvnuCJq8UaAv2TWhP0RJTJkpGcxGswwEOlqsDW5tIx0CksnN02LZrkVEY4adRzz9yX4NNiUGSy2pLc+PNdf8187yYKJyEHNNI0CXnyLiJSk1ON7nx7DyxrtM6DrpthA7HGVdEv1S1IJvXsg=
+env:
+  global:
+  - LANG="en_US.UTF-8"
