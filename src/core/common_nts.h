@@ -99,16 +99,16 @@ class CommonNTS {
 
   template <typename T, class Socket>
   static T Receive(Socket& socket) {
-    std::array<char, sizeof(T)> message;
-    read(socket, boost::asio::buffer(message));
-    return NetworkToHost(*(T *)(message.data()));
+    T t[1];
+    read(socket, boost::asio::buffer(t, sizeof(T)));
+    return NetworkToHost(t[0]);
   }
 
   template <typename T>
   static T Receive(std::istringstream& str) {
-    std::array<char, sizeof(T)> message;
-    str.read(message.data(), sizeof(T));
-    return NetworkToHost(*(T *)(message.data()));
+    T t[1];
+    str.read((char*)t, sizeof(T));
+    return NetworkToHost(t[0]);
   }
 
   template <typename T>
