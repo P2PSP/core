@@ -142,6 +142,7 @@ void SplitterSTRPEDS::Run() {
 
 			message = GetMessage(chunk_number_, chunk, peer);
 
+			TRACE("sending a message with size " << message.size());
 			SendChunk(message, peer);
 
 			destination_of_chunk_[chunk_number_ % buffer_size_] = peer;

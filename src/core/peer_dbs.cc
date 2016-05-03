@@ -139,8 +139,9 @@ namespace p2psp {
 			      const ip::udp::endpoint &sender) {
     // Now, receive and send.
 
+	TRACE("Size: " << message.size() << " vs " << message_size_)
     // TODO: remove hardcoded values
-    if (message.size() == message_size_) {
+    if (message.size() == message_size_ ) {
       // A video chunk has been received
 
       ip::udp::endpoint peer;
@@ -149,7 +150,7 @@ namespace p2psp {
 
       chunks_[chunk_number % buffer_size_] = {
         std::vector<char>(message.data() + sizeof(uint16_t),
-                          message.data() + message.size()),
+                          message.data() + sizeof(uint16_t) + chunk_size_),
         true};
 
       received_counter_++;
@@ -201,6 +202,7 @@ namespace p2psp {
 	}
 
 	receive_and_feed_counter_ = 0;
+
 	receive_and_feed_previous_ = message;
       } else {
 	TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
@@ -364,7 +366,7 @@ namespace p2psp {
     // the splitter. It is used to send the previous received chunk in the
     // congestion avoiding mode. In that mode, the peer sends a chunk only when it
     // received a chunk from another peer or from the splitter.
-    receive_and_feed_previous_ = std::vector<char>();
+    receive_and_feed_previous_ = std::vector<char>(sizeof(uint16_t)+chunk_size_);
 
     sendto_counter_ = 0;
 

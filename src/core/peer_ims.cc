@@ -304,7 +304,7 @@ namespace p2psp {
 
   int PeerIMS::ProcessNextMessage() {
     // (Chunk number + chunk payload) length
-    std::vector<char> message(sizeof(uint16_t) + chunk_size_);
+    std::vector<char> message(message_size_);
     ip::udp::endpoint sender;
 
     try {

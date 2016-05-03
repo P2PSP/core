@@ -134,6 +134,8 @@ public:
     return team_socket_.send_to(::buffer(msg), boost::asio::ip::udp::endpoint(address,port));
   }
 
+  
+
   void InsertChunk(int position, boost::python::object chunk){//boost::python::list chunk){
     boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
     boost::python::stl_input_iterator<unsigned char> begin(chunk), end;
@@ -295,7 +297,36 @@ public:
     }
     return PeerSTRPEDS::ProcessMessage(message, sender);
   }
+
+  bool CheckMessage(boost::python::object message, boost::python::tuple peer) {
+       ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
+       uint16_t port = boost::python::extract<uint16_t>(peer[1]);
+       
+       boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
+       boost::python::stl_input_iterator<unsigned char> begin(message), end;
+       std::vector<char> msg(begin, end);
+      
+     return PeerSTRPEDS::CheckMessage(msg, boost::asio::ip::udp::endpoint(address,port));
+  }
+
+   void ProcessBadMessage(boost::python::object message, boost::python::tuple peer){
+    ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
+    uint16_t port = boost::python::extract<uint16_t>(peer[1]);
+
+    boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
+    boost::python::stl_input_iterator<unsigned char> begin(message), end;
+    std::vector<char> msg(begin, end);
+   
+    PeerSTRPEDS::ProcessBadMessage(msg, boost::asio::ip::udp::endpoint(address,port));
+  }
   
+  bool IsControlMessage(boost::python::object message){
+    boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
+    boost::python::stl_input_iterator<unsigned char> begin(message), end;
+    std::vector<char> msg(begin, end);
+
+    return PeerSTRPEDS::IsControlMessage(msg);
+  }
 
   int SendChunk(boost::python::object message, boost::python::tuple peer){
     ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
@@ -717,6 +748,10 @@ BOOST_PYTHON_MODULE(libp2psp)
     //STRPEDS
     .def("ReceiveDsaKey", &PyPeerSTRPEDS::ReceiveDsaKey)
     .def("GetBadPeerList", &PyPeerSTRPEDS::GetBadPeerList)
+    .def("IsCurrentMessageFromSplitter", &PyPeerSTRPEDS::IsCurrentMessageFromSplitter)
+    .def("CheckMessage", &PyPeerSTRPEDS::CheckMessage)
+    .def("IsControlMessage", &PyPeerSTRPEDS::IsControlMessage)
+    .def("ProcessBadMessage", &PyPeerSTRPEDS::ProcessBadMessage)
     ;
 
    

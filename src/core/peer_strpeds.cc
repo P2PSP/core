@@ -55,6 +55,7 @@ void PeerSTRPEDS::ReceiveDsaKey() {
   delete[] y; delete[] g; delete[] p; delete[] q;
 
   TRACE("DSA key received");
+  message_size_=kChunkIndexSize+chunk_size_+40+40;
 
 }
 
@@ -66,8 +67,8 @@ void PeerSTRPEDS::ProcessBadMessage(const std::vector<char> &message,
 }
 
 bool PeerSTRPEDS::IsControlMessage(std::vector<char> message) {
-	TRACE("Control message: " +  message.size());
-  return message.size() != (1026 + 40 + 40);
+	TRACE("Control message: " <<  message.size());
+	return message.size() != (1026 + 40 + 40);
 }
 
 bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
@@ -82,7 +83,7 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
   if (!IsControlMessage(message)) {
 
 	  uint16_t chunk_number = *(uint16_t *)(message.data());
-
+	  TRACE("LLEGA");
 	  std::vector<char> chunk(chunk_size_);
 	  std::copy(message.data() + sizeof(uint16_t), message.data() + sizeof(uint16_t) + chunk_size_, chunk.data());
 
@@ -90,6 +91,8 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  std::copy(message.data() + sizeof(uint16_t) + chunk_size_, message.data() + sizeof(uint16_t) + chunk_size_ + 40, sigr);
 	  char* sigs = new char[40];
 	  std::copy(message.data() + sizeof(uint16_t) + chunk_size_ + 40, message.data() + sizeof(uint16_t) + chunk_size_ + 40 + 40, sigs);
+
+	  TRACE("LLEGA2");
 
 	  std::vector<char> h(256);
 	  std::vector<char> m(2+1024+4+2);
@@ -116,10 +119,14 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  if (DSA_do_verify((unsigned char*)h.data(), h.size(), sig, dsa_key)){
 		  DSA_SIG_free(sig);
 		  delete[] sigr; delete[] sigs;
+		  TRACE("Sender is clean");
 		  return true;
+	  }else{
+		  TRACE("Sender is bad");
+		  return false;
 	  }
   }
-
+  TRACE("Sender is clean");
   return true;
 }
 
@@ -127,7 +134,9 @@ int PeerSTRPEDS::HandleBadPeersRequest() {
   std::string bad("bad");
   std::vector<char> header(5);
   std::vector<char> msg(8);
+
   std::copy(bad.begin(), bad.end(), header.begin());
+
   *((uint16_t *)(header.data() + bad.size())) = (uint16_t)bad_peers_.size();
 
   team_socket_.send_to(buffer(header), splitter_);
@@ -156,7 +165,6 @@ int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
     return -1;
   }
 
-  TRACE("Sender is clean");
   if (IsCurrentMessageFromSplitter() || CheckMessage(message, sender)) {
     if (IsControlMessage(message) and (message[0] == 'B')) {
       return HandleBadPeersRequest();
