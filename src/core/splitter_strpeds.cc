@@ -190,15 +190,17 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 	in_addr addr;
 	inet_aton(dst.address().to_string().c_str(), &addr);
 	(*(in_addr *) (m.data() + chunk.size() + sizeof(uint16_t))) = addr;
-	(*(uint16_t *) (m.data() + chunk.size() + sizeof(uint16_t) + 4)) = htons(
-			dst.port());
+	(*(uint16_t *) (m.data() + chunk.size() + sizeof(uint16_t) + 4)) = dst.port();
 
-	std::vector<char> h(256);
+	std::vector<char> h(32);
 	Common::sha256(m, h);
 
 	//TRACE("HASH");
 
-	DSA_SIG *sig = DSA_do_sign((unsigned char*) h.data(), 256, dsa_key);
+	std::string str(h.begin(), h.end());
+	LOG("Chunk " + std::to_string(chunk_number) + " dest " + dst.address().to_string() + ":"+ std::to_string(dst.port()) +" HASH= " + str);
+
+	DSA_SIG *sig = DSA_do_sign((unsigned char*) h.data(), h.size(), dsa_key);
 
 	char * sigr = BN_bn2hex(sig->r);
 	char * sigs = BN_bn2hex(sig->s);

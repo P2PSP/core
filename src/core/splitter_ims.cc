@@ -17,6 +17,16 @@ namespace p2psp {
   using namespace std;
   using namespace boost;
 
+  const int SplitterIMS::kBufferSize = 256;                 // Buffer size in chunks
+  const std::string SplitterIMS::kChannel = "test.ogg";     // Default channel
+  const int SplitterIMS::kChunkSize = 1024;                 // Chunk size in bytes (larger than MTU)
+  const int SplitterIMS::kHeaderSize = 10;                  // Chunks/header
+  const unsigned short SplitterIMS::kPort = 8001;           // Listening port
+  const std::string SplitterIMS::kSourceAddr = "127.0.0.1"; // Streaming server's host
+  const int SplitterIMS::kSourcePort = 8000;                // Streaming server's listening port
+  const std::string SplitterIMS::kMCastAddr = "224.0.0.1";  // All Systems on this subnet
+  const int SplitterIMS::kTTL = 1;                          // Time To Live of multicast packets
+
   SplitterIMS::SplitterIMS()
     : io_service_(),
       peer_connection_socket_(io_service_),
@@ -65,7 +75,7 @@ namespace p2psp {
     } catch (system::system_error &error) {
       ERROR(error.what());
       ERROR(acceptor_.local_endpoint().address().to_string() +
-	    "\b: unable to bind the port " + to_string(team_port_));
+            "\b: unable to bind the port " + to_string(team_port_));
       exit(-1);
     }
 
@@ -100,50 +110,50 @@ namespace p2psp {
   void SplitterIMS::RequestTheVideoFromTheSource() {
     system::error_code ec;
     asio::ip::tcp::endpoint endpoint(asio::ip::address::from_string(source_addr_),
-				     source_port_);
+                                     source_port_);
 
     source_socket_.connect(endpoint, ec);
 
     if (ec) {
       ERROR(ec.message());
       ERROR(source_socket_.local_endpoint().address().to_string()
-	    << "\b: unable to connect to the source (" << source_addr_ << ", "
-	    << to_string(source_port_) << ")");
+            << "\b: unable to connect to the source (" << source_addr_ << ", "
+            << to_string(source_port_) << ")");
 
       source_socket_.close();
       exit(-1);
     }
 
     TRACE(source_socket_.local_endpoint().address().to_string()
-	  << " connected to (" << source_addr_ << ", " << to_string(source_port_)
-	  << ")");
+          << " connected to (" << source_addr_ << ", " << to_string(source_port_)
+          << ")");
 
     source_socket_.send(asio::buffer(GET_message_));
 
     TRACE(source_socket_.local_endpoint().address().to_string()
-	  << "IMS: GET_message = " << GET_message_);
+          << "IMS: GET_message = " << GET_message_);
   }
 
   size_t SplitterIMS::ReceiveNextChunk(asio::streambuf &chunk) {
     system::error_code ec;
 
     size_t bytes_transferred = asio::read(
-					  source_socket_, chunk, asio::transfer_exactly(chunk_size_), ec);
+                                          source_socket_, chunk, asio::transfer_exactly(chunk_size_), ec);
 
     // TRACE("Success! Bytes transferred: " << bytes_transferred);
 
     if (ec) {
       ERROR("Error receiving next chunk: "
-	    << ec.message() << " bytes transferred: " << bytes_transferred);
+            << ec.message() << " bytes transferred: " << bytes_transferred);
       TRACE("No data in the server!");
       source_socket_.close();
       header_load_counter_ = header_size_;
       header_.consume(header_.size());
       this_thread::sleep(posix_time::seconds(1));
       source_socket_.connect(
-			     asio::ip::tcp::endpoint(asio::ip::address::from_string(source_addr_),
-						     source_port_),
-			     ec);
+                             asio::ip::tcp::endpoint(asio::ip::address::from_string(source_addr_),
+                                                     source_port_),
+                             ec);
       source_socket_.send(asio::buffer(GET_message_));
     }
 
@@ -156,7 +166,7 @@ namespace p2psp {
     if (header_load_counter_ > 0) {
       ostream header_stream_(&header_);
       header_stream_.write(asio::buffer_cast<const char *>(chunk.data()),
-			   chunk.size());
+                           chunk.size());
       header_load_counter_--;
       TRACE("Loaded" << to_string(chunk.size()) << " bytes of header");
     }
@@ -183,7 +193,7 @@ namespace p2psp {
   }
 
   void SplitterIMS::SendChunk(const vector<char> &message,
-			      const asio::ip::udp::endpoint &destination) {
+                              const asio::ip::udp::endpoint &destination) {
     system::error_code ec;
 
     // TRACE(std::to_string(ntohs(*(unsigned short *)message.data())));
@@ -203,9 +213,9 @@ namespace p2psp {
   }
 
   void SplitterIMS::SendTheMcastChannel(
-					const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+                                        const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     TRACE("Communicating the multicast channel (" << mcast_addr_ << ", "
-	  << to_string(team_port_) << ")");
+          << to_string(team_port_) << ")");
 
     char message[6];
     in_addr addr;
@@ -216,7 +226,7 @@ namespace p2psp {
   }
 
   void SplitterIMS::SendTheHeaderSize(
-				      const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+                                      const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     TRACE("Communicating the header size " << to_string(header_size_));
 
     system::error_code ec;
@@ -230,7 +240,7 @@ namespace p2psp {
   }
 
   void SplitterIMS::SendTheChunkSize(
-				     const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+                                     const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     TRACE("Sending a chunk_size of " << to_string(chunk_size_) << " bytes");
 
     system::error_code ec;
@@ -244,7 +254,7 @@ namespace p2psp {
   }
 
   void SplitterIMS::SendTheHeader(
-				  const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+                                  const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     TRACE("Sending a header of " << to_string(header_.size()) << " bytes");
 
     system::error_code ec;
@@ -256,7 +266,7 @@ namespace p2psp {
   }
 
   void SplitterIMS::SendTheBufferSize(
-				      const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+                                      const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     TRACE("Sending a buffer_size of " << to_string(buffer_size_) << " bytes");
 
     system::error_code ec;
@@ -270,7 +280,7 @@ namespace p2psp {
   }
 
   void SplitterIMS::SendConfiguration(
-				      const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
+                                      const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
     SendTheMcastChannel(sock);
     SendTheHeaderSize(sock);
     SendTheChunkSize(sock);
@@ -279,11 +289,11 @@ namespace p2psp {
   }
 
   void SplitterIMS::HandleAPeerArrival(
-				       std::shared_ptr<asio::ip::tcp::socket> serve_socket) {
+                                       std::shared_ptr<asio::ip::tcp::socket> serve_socket) {
     TRACE(serve_socket->local_endpoint().address().to_string()
-	  << "\b: IMS: accepted connection from peer ("
-	  << serve_socket->remote_endpoint().address().to_string() << ", "
-	  << to_string(serve_socket->remote_endpoint().port()) << ")");
+          << "\b: IMS: accepted connection from peer ("
+          << serve_socket->remote_endpoint().address().to_string() << ", "
+          << to_string(serve_socket->remote_endpoint().port()) << ")");
 
     SendConfiguration(serve_socket);
     serve_socket->close();
@@ -298,7 +308,7 @@ namespace p2psp {
         make_shared<asio::ip::tcp::socket>(boost::ref(io_service_));
       acceptor_.accept(*peer_serve_socket);
       threads.create_thread(
-			    bind(&SplitterIMS::HandleAPeerArrival, this, peer_serve_socket));
+                            bind(&SplitterIMS::HandleAPeerArrival, this, peer_serve_socket));
     }
 
     TRACE("Exiting handle arrivals");
@@ -329,8 +339,8 @@ namespace p2psp {
       (*(uint16_t *)message.data()) = htons(chunk_number_);
 
       copy(asio::buffer_cast<const char *>(chunk.data()),
-	   asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
-	   message.data() + sizeof(uint16_t));
+           asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
+           message.data() + sizeof(uint16_t));
 
       SendChunk(message, mcast_channel_);
 
@@ -345,7 +355,7 @@ namespace p2psp {
     message[0] = '\0';
 
     asio::ip::udp::endpoint destination(
-					asio::ip::address::from_string("127.0.0.1"), team_port_);
+                                        asio::ip::address::from_string("127.0.0.1"), team_port_);
 
     system::error_code ec;
 
@@ -374,7 +384,7 @@ namespace p2psp {
   void SplitterIMS::SetBufferSize(int buffer_size) { buffer_size_ = buffer_size; }
 
   int SplitterIMS::GetBufferSize() { return buffer_size_; }
-  
+
   void SplitterIMS::SetChannel(std::string channel) {
     channel_ = channel;
     SetGETMessage(channel_);
@@ -403,7 +413,7 @@ namespace p2psp {
   int SplitterIMS::GetTTL() {
     return ttl_;
   }
-  
+
   void SplitterIMS::SetGETMessage(std::string channel) {
     std::stringstream ss;
     ss << "GET /" << channel << " HTTP/1.1\r\n"
@@ -427,5 +437,41 @@ namespace p2psp {
   void SplitterIMS::Start() {
     TRACE("Start");
     thread_.reset(new boost::thread(boost::bind(&SplitterIMS::Run, this)));
+  }
+
+  int SplitterIMS::GetDefaultChunkSize() {
+    return kChunkSize;
+  }
+
+  int SplitterIMS::GetDefaultTeamPort() {
+    return kPort;
+  }
+
+  int SplitterIMS::GetDefaultBufferSize() {
+    return kBufferSize;
+  }
+
+  std::string SplitterIMS::GetDefaultChannel() {
+    return kChannel;
+  }
+
+  int SplitterIMS::GetDefaultHeaderSize() {
+    return kHeaderSize;
+  }
+
+  std::string SplitterIMS::GetDefaultMcastAddr() {
+    return kMCastAddr;
+  }
+
+  std::string SplitterIMS::GetDefaultSourceAddr() {
+    return kSourceAddr;
+  }
+
+  int SplitterIMS::GetDefaultSourcePort() {
+    return kSourcePort;
+  }
+
+  int SplitterIMS::GetDefaultTTL() {
+    return kTTL;
   }
 }

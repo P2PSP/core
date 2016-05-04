@@ -17,6 +17,10 @@ namespace p2psp {
   using namespace std;
   using namespace boost;
 
+  const int SplitterDBS::kMaxChunkLoss =
+      32;  // Chunk losses threshold to reject a peer from the team
+  const int SplitterDBS::kMonitorNumber = 1;
+
   SplitterDBS::SplitterDBS() : SplitterIMS(), losses_(0, &SplitterDBS::GetHash) {
     // TODO: Check if there is a better way to replace kMcastAddr with 0.0.0.0
     mcast_addr_ = "0.0.0.0";
@@ -39,7 +43,7 @@ namespace p2psp {
   }
 
   void SplitterDBS::SendMagicFlags(
-				   const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+                                   const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     char message[1];
 
     message[0] = magic_flags_;
@@ -48,7 +52,7 @@ namespace p2psp {
   }
 
   void SplitterDBS::SendTheListSize(
-				    const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+                                    const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     char message[2];
 
     TRACE("Sending the number of monitors " << max_number_of_monitors_);
@@ -61,7 +65,7 @@ namespace p2psp {
   }
 
   void SplitterDBS::SendTheListOfPeers(
-				       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+                                       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     SendTheListSize(peer_serve_socket);
 
     int counter = 0;
@@ -70,7 +74,7 @@ namespace p2psp {
     in_addr addr;
 
     for (std::vector<asio::ip::udp::endpoint>::iterator it = peer_list_.begin();
-	 it != peer_list_.end(); ++it) {
+         it != peer_list_.end(); ++it) {
       inet_aton(it->address().to_string().c_str(), &addr);
       (*(in_addr *)&message) = addr;
       (*(uint16_t *)(message + 4)) = htons(it->port());
@@ -82,7 +86,7 @@ namespace p2psp {
   }
 
   void SplitterDBS::SendThePeerEndpoint(
-					const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+                                        const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     asio::ip::tcp::endpoint peer_endpoint = peer_serve_socket->remote_endpoint();
 
     char message[6];
@@ -94,7 +98,7 @@ namespace p2psp {
   }
 
   void SplitterDBS::SendConfiguration(
-				      const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
+                                      const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
     SplitterIMS::SendConfiguration(sock);
     SendThePeerEndpoint(sock);
     SendMagicFlags(sock);
@@ -110,7 +114,7 @@ namespace p2psp {
   }
 
   void SplitterDBS::HandleAPeerArrival(
-				       std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) {
+                                       std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) {
     /* In the DBS, the splitter sends to the incomming peer the
        list of peers. Notice that the transmission of the list of
        peers (something that could need some time if the team is
@@ -126,13 +130,13 @@ namespace p2psp {
     SendTheListOfPeers(serve_socket);
     serve_socket->close();
     InsertPeer(boost::asio::ip::udp::endpoint(incoming_peer.address(),
-					      incoming_peer.port()));
+                                              incoming_peer.port()));
 
     // TODO: In original code, incoming_peer is returned, but is not used
   }
 
   size_t SplitterDBS::ReceiveMessage(std::vector<char> &message,
-				     boost::asio::ip::udp::endpoint &endpoint) {
+                                     boost::asio::ip::udp::endpoint &endpoint) {
     system::error_code ec;
 
     size_t bytes_transferred =
@@ -146,7 +150,7 @@ namespace p2psp {
   }
 
   void SplitterDBS::IncrementUnsupportivityOfPeer(
-						  const boost::asio::ip::udp::endpoint &peer) {
+                                                  const boost::asio::ip::udp::endpoint &peer) {
     bool peerExists = true;
 
     try {
@@ -167,14 +171,14 @@ namespace p2psp {
   }
 
   void SplitterDBS::ProcessLostChunk(
-				     int lost_chunk_number, const boost::asio::ip::udp::endpoint &sender) {
+                                     int lost_chunk_number, const boost::asio::ip::udp::endpoint &sender) {
     asio::ip::udp::endpoint destination = GetLosser(lost_chunk_number);
 
     TRACE("" << sender << " complains about lost chunk "
-	  << to_string(lost_chunk_number) << " sent to " << destination);
+          << to_string(lost_chunk_number) << " sent to " << destination);
 
     if (find(peer_list_.begin() + max_number_of_monitors_, peer_list_.end(),
-	     destination) != peer_list_.end()) {
+             destination) != peer_list_.end()) {
       TRACE("Lost chunk index = " << lost_chunk_number);
     }
 
@@ -194,15 +198,15 @@ namespace p2psp {
     // If peer_list_ contains the peer, remove it
     if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
       peer_list_.erase(remove(peer_list_.begin(), peer_list_.end(), peer),
-		       peer_list_.end());
+                       peer_list_.end());
 
       // In order to avoid negative peer_number_ value while peer_list_ still
       // contains any peer (in Python this is not necessary because negative
       // indexes can be used)
       if (peer_list_.size() > 0) {
-	peer_number_ = (peer_number_ - 1) % peer_list_.size();
+        peer_number_ = (peer_number_ - 1) % peer_list_.size();
       } else {
-	peer_number_--;
+        peer_number_--;
       }
     }
 
@@ -225,27 +229,27 @@ namespace p2psp {
       size_t bytes_transferred = ReceiveMessage(message, sender);
 
       if (bytes_transferred == 2) {
-	/*
-	  The peer complains about a lost chunk.
+        /*
+          The peer complains about a lost chunk.
 
-	  In this situation, the splitter counts the number of
-	  complains. If this number exceeds a threshold, the
-	  unsupportive peer is expelled from the
-	  team.
-	*/
+          In this situation, the splitter counts the number of
+          complains. If this number exceeds a threshold, the
+          unsupportive peer is expelled from the
+          team.
+        */
 
-	uint16_t lost_chunk_number = GetLostChunkNumber(message);
-	ProcessLostChunk(lost_chunk_number, sender);
+        uint16_t lost_chunk_number = GetLostChunkNumber(message);
+        ProcessLostChunk(lost_chunk_number, sender);
 
       } else {
-	/*
-	  The peer wants to leave the team.
+        /*
+          The peer wants to leave the team.
 
-	  A !2-length payload means that the peer wants to go
-	  away.
-	*/
+          A !2-length payload means that the peer wants to go
+          away.
+        */
 
-	ProcessGoodbye(sender);
+        ProcessGoodbye(sender);
       }
     }
   }
@@ -312,22 +316,22 @@ namespace p2psp {
       asio::streambuf chunk;
       size_t bytes_transferred = ReceiveChunk(chunk);
       try {
-	peer = peer_list_.at(peer_number_);
+        peer = peer_list_.at(peer_number_);
 
-	(*(uint16_t *)message.data()) = htons(chunk_number_);
+        (*(uint16_t *)message.data()) = htons(chunk_number_);
 
-	copy(asio::buffer_cast<const char *>(chunk.data()),
-	     asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
-	     message.data() + sizeof(uint16_t));
+        copy(asio::buffer_cast<const char *>(chunk.data()),
+             asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
+             message.data() + sizeof(uint16_t));
 
-	SendChunk(message, peer);
+        SendChunk(message, peer);
 
-	destination_of_chunk_[chunk_number_ % buffer_size_] = peer;
-	chunk_number_ = (chunk_number_ + 1) % Common::kMaxChunkNumber;
-	ComputeNextPeerNumber(peer);
+        destination_of_chunk_[chunk_number_ % buffer_size_] = peer;
+        chunk_number_ = (chunk_number_ + 1) % Common::kMaxChunkNumber;
+        ComputeNextPeerNumber(peer);
       } catch (const std::out_of_range &oor) {
-	TRACE("The monitor peer has died!");
-	exit(-1);
+        TRACE("The monitor peer has died!");
+        exit(-1);
       }
 
       chunk.consume(bytes_transferred);
@@ -349,7 +353,7 @@ namespace p2psp {
   int SplitterDBS::GetMaxNumberOfChunkLoss() {
     return max_number_of_chunk_loss_;
   }
-  
+
   void SplitterDBS::SetMaxNumberOfMonitors(int max_number_of_monitors) {
     max_number_of_monitors_ = max_number_of_monitors;
   }
@@ -357,9 +361,17 @@ namespace p2psp {
   int SplitterDBS::GetMaxNumberOfMonitors() {
     return max_number_of_monitors_;
   }
-  
+
   void SplitterDBS::Start() {
     TRACE("Start");
     thread_.reset(new boost::thread(boost::bind(&SplitterDBS::Run, this)));
+  }
+
+  int SplitterDBS::GetDefaultMaxNumberOfChunkLoss() {
+    return kMaxChunkLoss;
+  }
+
+  int SplitterDBS::GetDefaultMaxNumberOfMonitors() {
+    return kMonitorNumber;
   }
 }
