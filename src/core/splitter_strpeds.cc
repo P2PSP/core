@@ -399,6 +399,7 @@ void SplitterSTRPEDS::PunishPeer(const boost::asio::ip::udp::endpoint &peer,
 	LOG("!!! bad peer " << peer);
 
 	RemovePeer(peer);
+	LOG("Peer: " << peer << " removed");
 }
 
 void SplitterSTRPEDS::OnRoundBeginning(){
@@ -407,8 +408,9 @@ void SplitterSTRPEDS::OnRoundBeginning(){
 }
 
 void SplitterSTRPEDS::RefreshTPs(){
+
 	trusted_peers_.clear();
-	trusted_file_.open("/home/cmedina/war-games/trusted.txt");
+	trusted_file_.open("trusted.txt");
 	if(trusted_file_.is_open()){
 		TRACE("Abierto el fichero");
 
