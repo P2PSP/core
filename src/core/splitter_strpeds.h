@@ -21,6 +21,7 @@
 #include "common.h"
 #include "openssl/dsa.h"
 #include <exception>
+#include <boost/tokenizer.hpp>
 
 namespace p2psp {
 
@@ -38,14 +39,18 @@ class SplitterSTRPEDS : public SplitterDBS {
   const int kGatherBadPeersSleep = 5;
   const bool kLogging = false;
   const int kCurrentRound = 0;
+  const int p_mpl = 100;
 
   int digest_size_;
   int gather_bad_peers_sleep_;
   bool logging_;
   std::ofstream log_file_;
+  std::ifstream trusted_file_;
   int current_round_;
  
   std::vector<boost::asio::ip::udp::endpoint> trusted_peers_;
+  std::vector<boost::asio::ip::udp::endpoint> bad_peers_;
+
   int gathering_counter_;
   int trusted_gathering_counter_;
   std::vector<boost::asio::ip::udp::endpoint> gathered_bad_peers_;
@@ -84,6 +89,9 @@ class SplitterSTRPEDS : public SplitterDBS {
   void HandleBadPeerFromRegular(const boost::asio::ip::udp::endpoint &bad_peer, const boost::asio::ip::udp::endpoint &sender);
   void AddComplain(const boost::asio::ip::udp::endpoint &bad_peer, const boost::asio::ip::udp::endpoint &sender);
   void PunishPeer(const boost::asio::ip::udp::endpoint &bad_peer, std::string message);
+  void OnRoundBeginning();
+  void RefreshTPs();
+  void PunishPeers();
   
   void LogMessage(const std::string &message);
   std::string BuildLogMessage(const std::string &message);	   
