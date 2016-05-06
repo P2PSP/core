@@ -64,6 +64,9 @@ void PeerSTRPEDS::ProcessBadMessage(const std::vector<char> &message,
   LOG("bad peer: " << sender);
   bad_peers_.push_back(sender);
   peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), sender));
+
+  //Informing to the splitter ASAP. Only TP will be taking into account.
+  HandleBadPeersRequest();
 }
 
 bool PeerSTRPEDS::IsControlMessage(std::vector<char> message) {
@@ -178,7 +181,6 @@ int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
 
   if (IsCurrentMessageFromSplitter() || CheckMessage(message, sender)) {
     if (IsControlMessage(message) and (message[0] == 'B')) {
-    	TRACE("Go to HandleBadPeersRequest")
       return HandleBadPeersRequest();
     } else {
       return PeerDBS::ProcessMessage(message, sender);

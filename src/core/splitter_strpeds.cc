@@ -412,8 +412,6 @@ void SplitterSTRPEDS::RefreshTPs(){
 	trusted_peers_.clear();
 	trusted_file_.open("trusted.txt");
 	if(trusted_file_.is_open()){
-		TRACE("Abierto el fichero");
-
 		std::string str;
 		while (std::getline(trusted_file_, str))
 			{
@@ -428,9 +426,10 @@ void SplitterSTRPEDS::RefreshTPs(){
 			  AddTrustedPeer(boost::asio::ip::udp::endpoint(address,port));
 
 			}
+		TRACE("TP list updated");
 		trusted_file_.close();
 	}else{
-			TRACE("No se ha abierto");
+			ERROR("trusted.txt doesn't exist");
 	}
 
 }
