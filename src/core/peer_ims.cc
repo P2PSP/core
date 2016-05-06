@@ -174,6 +174,7 @@ namespace p2psp {
     streambuf chunk;
 
     read(splitter_socket_, chunk, transfer_exactly(header_size_in_bytes), ec);
+
     if (ec) {
       ERROR(ec.message());
     }
