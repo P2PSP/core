@@ -177,6 +177,8 @@ namespace p2psp {
 
     if (ec) {
       ERROR(ec.message());
+      splitter_socket_.close();
+      ConnectToTheSplitter();
     }
 
     try {

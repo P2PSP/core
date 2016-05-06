@@ -147,7 +147,9 @@ namespace p2psp {
             << ec.message() << " bytes transferred: " << bytes_transferred);
       TRACE("No data in the server!");
       source_socket_.close();
+      /*
       header_load_counter_ = header_size_;
+
       header_.consume(header_.size());
       this_thread::sleep(posix_time::seconds(1));
       source_socket_.connect(
@@ -155,6 +157,8 @@ namespace p2psp {
                                                      source_port_),
                              ec);
       source_socket_.send(asio::buffer(GET_message_));
+      */
+      RequestTheVideoFromTheSource();
     }
 
     return bytes_transferred;
