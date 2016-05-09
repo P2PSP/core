@@ -36,7 +36,7 @@ class SplitterSTRPEDS : public SplitterDBS {
  protected:
   
   const int kDigestSize = 40;
-  const int kGatherBadPeersSleep = 1;
+  const int kGatherBadPeersSleep = 10;
   const bool kLogging = false;
   const int kCurrentRound = 0;
   const int p_mpl = 100;

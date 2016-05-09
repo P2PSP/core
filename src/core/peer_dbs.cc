@@ -14,12 +14,12 @@
 
 namespace p2psp {
 
-  PeerDBS::PeerDBS() {}
+  PeerDBS::PeerDBS() {max_chunk_debt_ = kMaxChunkDebt;}
 
   PeerDBS::~PeerDBS() {}
 
   void PeerDBS::Init() {
-    TRACE("max_chunk_debt =" << std::to_string(kMaxChunkDebt));
+    TRACE("max_chunk_debt =" + std::to_string(kMaxChunkDebt));
     TRACE("Initialized");
   }
 

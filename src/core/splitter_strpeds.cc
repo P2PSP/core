@@ -124,7 +124,7 @@ void SplitterSTRPEDS::Run() {
 	thread t1(bind(&SplitterIMS::HandleArrivals, this));
 	thread t2(bind(&SplitterSTRPEDS::ModerateTheTeam, this));
 	thread t3(bind(&SplitterDBS::ResetCountersThread, this));
-	thread t4(bind(&SplitterSTRPEDS::GatherBadPeers, this));
+	//thread t4(bind(&SplitterSTRPEDS::GatherBadPeers, this));
 
 	vector<char> message(2 + 1024 + 40 + 40);
 	asio::ip::udp::endpoint peer;
