@@ -205,20 +205,28 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 
 	//TRACE("HASH");
 
-	/*
+
 	std::string str(h.begin(), h.end());
 	LOG("Chunk Number " + std::to_string(chunk_number) + " dest " + dst.address().to_string() + ":"+ std::to_string(dst.port()) +" HASH= " + str);
 
-	LOG(" ----- MESSAGE ----- ")
+	LOG(" ----- MESSAGE ----- ");
 	std::string b(m.begin(), m.end());
 	LOG(b);
-	LOG(" ---- FIN MESSAGE ----")
-	 */
+	LOG(" ---- FIN MESSAGE ----");
+
 
 	DSA_SIG *sig = DSA_do_sign((unsigned char*) h.data(), h.size(), dsa_key);
 
+	LOG("Size r: " << *(sig->r->d));
+	LOG("Size s: " << *(sig->s->d));
+
 	char * sigr = BN_bn2hex(sig->r);
 	char * sigs = BN_bn2hex(sig->s);
+
+	  LOG(" ---- SIGNATURES ----");
+	  LOG(sigr);
+	  LOG(sigs);
+	  LOG(" ---- FIN SIGNATURES ----");
 
 	//TRACE("SINGATURE");
 

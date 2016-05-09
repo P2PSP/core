@@ -92,7 +92,6 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  char* sigs = new char[40];
 	  std::copy(message.data() + sizeof(uint16_t) + chunk_size_ + 40, message.data() + sizeof(uint16_t) + chunk_size_ + 40 + 40, sigs);
 
-	  std::vector<char> h(32);
 	  std::vector<char> m(2 + 1024 + 4 + 2);
 	  boost::asio::ip::udp::endpoint dst = sender;//team_socket_.local_endpoint();
 
@@ -107,32 +106,43 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  (*(uint16_t *)(m.data() + chunk_size_ + sizeof(uint16_t) + 4)) = htons(dst.port());
 
 	  LOG("chunk " + std::to_string(chunk_number) + "dst= " + dst.address().to_string() + ":" + std::to_string(dst.port()));
+	  std::vector<char> h(32);
 	  Common::sha256(m, h);
 
-	  /*
+	  //LOG("TAMANO: "+ std::to_string(h.size()));
+
 	  std::string str(h.begin(), h.end());
 	  LOG("HASH= " + str);
 
-	  LOG(" ----- MESSAGE ----- ")
+	  LOG(" ----- MESSAGE ----- ");
 	  std::string b(m.begin(), m.end());
 	  LOG(b);
-	  LOG(" ---- FIN MESSAGE ----")
-	   */
+	  LOG(" ---- FIN MESSAGE ----");
+
+	  LOG(" ---- SIGNATURES ----");
+	  LOG("->" << sigr << "<-");
+	  LOG("->" << sigs << "<-");
+	  LOG(" ---- FIN SIGNATURES ----");
 
 	  DSA_SIG* sig = DSA_SIG_new();
 
 	  BN_hex2bn(&sig->r, sigr);
 	  BN_hex2bn(&sig->s, sigs);
 
+		LOG("Size r: " << *(sig->r->d));
+		LOG("Size s: " << *(sig->s->d));
+
 	  if (DSA_do_verify((unsigned char*)h.data(), h.size(), sig, dsa_key)){
-		  DSA_SIG_free(sig);
-		  delete[] sigr; delete[] sigs;
 		  TRACE("Sender is clean: sign verified. CN: " + std::to_string(chunk_number));
 		  return true;
 	  }else{
 		  TRACE("Sender is bad: sign doesn't match CN: " + std::to_string(chunk_number));
 		  return false;
 	  }
+
+	  DSA_SIG_free(sig);
+	  delete[] sigr; delete[] sigs;
+
   }else{
 	  TRACE("Sender sent a control message: " + std::to_string(message.size()));
   }

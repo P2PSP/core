@@ -343,6 +343,8 @@ public:
     ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
     uint16_t port = boost::python::extract<uint16_t>(peer[1]);
     std::vector<char> fake_chunk(1106);
+    fake_chunk = receive_and_feed_previous_;
+    fake_chunk[2] = 'F';
     return team_socket_.send_to(::buffer(fake_chunk), boost::asio::ip::udp::endpoint(address,port));
   }
 

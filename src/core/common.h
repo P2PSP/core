@@ -55,7 +55,7 @@ namespace p2psp {
 
     static void sha256(std::vector<char> string, std::vector<char> &digest) {
       SHA256((unsigned char *)string.data(), string.size(),
-             (unsigned char *)digest.data());
+    		  (unsigned char *)digest.data());
     }
   };
 }
