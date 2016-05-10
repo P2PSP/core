@@ -338,7 +338,7 @@ public:
    
     return team_socket_.send_to(::buffer(msg), boost::asio::ip::udp::endpoint(address,port));
   }
-
+  /*
   int SendFakeChunk(boost::python::tuple peer){
     ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
     uint16_t port = boost::python::extract<uint16_t>(peer[1]);
@@ -353,7 +353,7 @@ public:
     uint16_t port = boost::python::extract<uint16_t>(peer[1]);
     return team_socket_.send_to(::buffer(receive_and_feed_previous_), boost::asio::ip::udp::endpoint(address,port));
   }
-
+  */
   void InsertChunk(int position, boost::python::object chunk){//boost::python::list chunk){
     boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
     boost::python::stl_input_iterator<unsigned char> begin(chunk), end;
@@ -767,8 +767,8 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("CheckMessage", &PyPeerSTRPEDS::CheckMessage)
     .def("IsControlMessage", &PyPeerSTRPEDS::IsControlMessage)
     .def("ProcessBadMessage", &PyPeerSTRPEDS::ProcessBadMessage)
-    .def("SendRegularChunk", &PyPeerSTRPEDS::SendRegularChunk)
-    .def("SendFakeChunk", &PyPeerSTRPEDS::SendFakeChunk)
+    //.def("SendRegularChunk", &PyPeerSTRPEDS::SendRegularChunk)
+    //.def("SendFakeChunk", &PyPeerSTRPEDS::SendFakeChunk)
     ;
 
    
