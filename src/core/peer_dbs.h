@@ -16,6 +16,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <fstream>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -35,6 +36,9 @@ namespace p2psp {
 
     bool kLogging = false;  // A IMS???
     std::string kLogFile;   // A IMS???
+
+    bool logging_;
+    std::ofstream log_file_;
 
     int kAddr = 0;
     int kPort = 1;
@@ -66,7 +70,7 @@ namespace p2psp {
     virtual int ProcessMessage(const std::vector<char>&,
                                const ip::udp::endpoint&) override;
     virtual void LogMessage(const std::string&);
-    virtual void BuildLogMessage(const std::string&);
+    virtual std::string BuildLogMessage(const std::string&);
     virtual float CalcBufferCorrectness();
     virtual float CalcBufferFilling();
     virtual void PoliteFarewell();

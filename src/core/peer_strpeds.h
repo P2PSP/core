@@ -35,6 +35,8 @@ class PeerSTRPEDS: public PeerDBS {
   ~PeerSTRPEDS(){};
   virtual void Init() override;
   virtual bool IsCurrentMessageFromSplitter();
+  void SetLogging(bool enabled);
+  void SetLogFile(const std::string &filename);
   virtual void ReceiveTheNextMessage(std::vector<char> &,
                                      ip::udp::endpoint &) override;
   virtual void ReceiveDsaKey();

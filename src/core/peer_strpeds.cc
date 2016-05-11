@@ -205,4 +205,10 @@ int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
 
   return -1;
 }
+
+void PeerSTRPEDS::SetLogFile(const std::string &filename) {
+  log_file_.open(filename);
+}
+
+void PeerSTRPEDS::SetLogging(bool enabled) { logging_ = enabled; }
 }

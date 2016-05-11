@@ -93,6 +93,8 @@ class SplitterSTRPEDS : public SplitterDBS {
   void RefreshTPs();
   void PunishPeers();
   
+  void SetLogging(bool enabled);
+  void SetLogFile(const std::string &filename);
   void LogMessage(const std::string &message);
   std::string BuildLogMessage(const std::string &message);	   
   

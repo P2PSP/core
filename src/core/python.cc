@@ -767,6 +767,8 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("CheckMessage", &PyPeerSTRPEDS::CheckMessage)
     .def("IsControlMessage", &PyPeerSTRPEDS::IsControlMessage)
     .def("ProcessBadMessage", &PyPeerSTRPEDS::ProcessBadMessage)
+    .def("SetLogging", &PyPeerSTRPEDS::SetLogging)
+    .def("SetLogFile", &PyPeerSTRPEDS::SetLogFile)
     //.def("SendRegularChunk", &PyPeerSTRPEDS::SendRegularChunk)
     //.def("SendFakeChunk", &PyPeerSTRPEDS::SendFakeChunk)
     ;
@@ -930,6 +932,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("SetGETMessage", &PySplitterSTRPEDS::SetGETMessage)
     .def("GetSendToCounter", &PySplitterSTRPEDS::GetSendToCounter)
     .def("GetRecvFromCounter", &PySplitterSTRPEDS::GetRecvFromCounter)
+
     //DBS
     .def("SendMagicFlags", &PySplitterSTRPEDS::SendMagicFlags)
     .def("SendTheListSize", &PySplitterSTRPEDS::SendTheListSize)
@@ -952,5 +955,9 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("Start", &PySplitterSTRPEDS::Start)
     .def("GetPeerList", &PySplitterSTRPEDS::GetPeerList_) //Modified here
     .def("GetLoss", &PySplitterSTRPEDS::GetLoss_) //Modified here
-    ;
+
+    //STRPEDS
+    .def("SetLogging", &PySplitterSTRPEDS::SetLogging)
+    .def("SetLogFile", &PySplitterSTRPEDS::SetLogFile)
+	;
 }

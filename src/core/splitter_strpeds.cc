@@ -465,6 +465,12 @@ void SplitterSTRPEDS::PunishPeers(){
 
 }
 
+void SplitterSTRPEDS::SetLogFile(const std::string &filename) {
+  log_file_.open(filename);
+}
+
+void SplitterSTRPEDS::SetLogging(bool enabled) { logging_ = enabled; }
+
 void SplitterSTRPEDS::LogMessage(const std::string &message) {
 	log_file_ << BuildLogMessage(message);
 	// TODO: Where to close the ofstream?
