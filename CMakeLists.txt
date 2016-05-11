@@ -35,9 +35,13 @@ list(APPEND BOOST_REQUIRED_COMPONENTS
 )
 
 if(BUILD_PYTHON_WRAPPER)
-  execute_process(COMMAND sh -c "ldconfig -p | grep libboost_python-py35" RESULT_VARIABLE res_var)
-  if("${res_var}" STREQUAL "0")
+  execute_process(COMMAND sh -c "ldconfig -p | grep libboost_python-py34" RESULT_VARIABLE py34)
+  execute_process(COMMAND sh -c "ldconfig -p | grep libboost_python-py35" RESULT_VARIABLE py35)
+  if("${py34}" STREQUAL "0")
     # on Ubuntu, python-py34 is available
+    list(APPEND BOOST_REQUIRED_COMPONENTS python-py34)
+  elseif("${py35}" STREQUAL "0")
+    # Cristóbal has python-py35 available
     list(APPEND BOOST_REQUIRED_COMPONENTS python-py35)
   else()
     # on Arch, python3 is available
