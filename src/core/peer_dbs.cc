@@ -168,7 +168,7 @@ namespace p2psp {
 	      << std::to_string(sender.port()) << ")");
 	// No aqui. Tal vez, DIS
 
-	if (kLogging) {
+	if (logging_) {
 	  LogMessage("buffer correctnes " +
 		     std::to_string(CalcBufferCorrectness()));
 	  LogMessage("buffer filling " + std::to_string(CalcBufferFilling()));
@@ -301,7 +301,7 @@ namespace p2psp {
   void PeerDBS::LogMessage(const std::string &message) {
     // TODO: self.LOG_FILE.write(self.build_log_message(message) + "\n")
     // print >>self.LOG_FILE, self.build_log_message(message)
-	log_file_ << BuildLogMessage(message);
+	log_file_ << BuildLogMessage(message+"\n");
 
   }
 
