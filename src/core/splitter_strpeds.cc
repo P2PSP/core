@@ -155,7 +155,12 @@ void SplitterSTRPEDS::Run() {
 					current_round_++;
 					//TODO: Add the peers contained in peer_list_ to the message
 					std::string message = to_string(current_round_)
-							+ to_string(peer_list_.size());
+							+ " " + to_string(peer_list_.size());
+
+					for (int i=0; i<peer_list_.size(); i++){
+						message	= message + " " + peer_list_.at(i).address().to_string() + ":" + std::to_string(peer_list_.at(i).port());
+					}
+
 					LogMessage(message);
 				}
 			}
@@ -472,7 +477,7 @@ void SplitterSTRPEDS::SetLogFile(const std::string &filename) {
 void SplitterSTRPEDS::SetLogging(bool enabled) { logging_ = enabled; }
 
 void SplitterSTRPEDS::LogMessage(const std::string &message) {
-	log_file_ << BuildLogMessage(message);
+	log_file_ << BuildLogMessage(message+"\n");
 	// TODO: Where to close the ofstream?
 }
 
