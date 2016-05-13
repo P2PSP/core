@@ -47,19 +47,31 @@ void SplitterSTRPEDS::SendDsaKey(
 		const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
 	// send Public key (y), Sub-group generator (g), Modulus, finite field order (p), Sub-group order (q)
 	// in one message
-	char* y = BN_bn2hex(dsa_key->pub_key);
-	char* g = BN_bn2hex(dsa_key->g);
-	char* p = BN_bn2hex(dsa_key->p);
-	char* q = BN_bn2hex(dsa_key->q);
+	char* y = new char[256];
+	y = BN_bn2hex(dsa_key->pub_key);
+	char* g = new char[256];
+	g = BN_bn2hex(dsa_key->g);
+	char* p = new char[256];
+	p = BN_bn2hex(dsa_key->p);
+	char* q = new char[40];
+	q = BN_bn2hex(dsa_key->q);
+
+	LOG("**** DSA key *****");
+	LOG("pub_key: " << y);
+	LOG("g: " << g);
+	LOG("p: " << p);
+	LOG("q: " << q);
 
 	std::stringstream message;
 	message << y << g << p << q;
 
 	TRACE(
-			"Sending DSA Key => Size pub_key: " + to_string(strlen(y)) + "g"
-					+ to_string(strlen(g)) + "p" + to_string(strlen(p)) + "q"
-					+ to_string(strlen(q)) + "message: " + message.str());
+			"Sending DSA Key => Size pub_key: " + to_string(strlen(y)) + " g "
+					+ to_string(strlen(g)) + " p " + to_string(strlen(p)) + " q "
+					+ to_string(strlen(q)) + " message: " + message.str());
 	sock->send(asio::buffer(message.str()));
+
+    delete[] y; delete[] g; delete[] p; delete[] q;
 }
 
 void SplitterSTRPEDS::GatherBadPeers() {
@@ -157,7 +169,7 @@ void SplitterSTRPEDS::Run() {
 					std::string message = to_string(current_round_)
 							+ " " + to_string(peer_list_.size());
 
-					for (int i=0; i<peer_list_.size(); i++){
+					for (unsigned int i=0; i<peer_list_.size(); i++){
 						message	= message + " " + peer_list_.at(i).address().to_string() + ":" + std::to_string(peer_list_.at(i).port());
 					}
 
@@ -210,7 +222,7 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 
 	//TRACE("HASH");
 
-	/*
+
 	std::string str(h.begin(), h.end());
 	LOG("Chunk Number " + std::to_string(chunk_number) + " dest " + dst.address().to_string() + ":"+ std::to_string(dst.port()) +" HASH= " + str);
 
@@ -218,7 +230,7 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 	std::string b(m.begin(), m.end());
 	LOG(b);
 	LOG(" ---- FIN MESSAGE ----");
-     */
+
 
 	DSA_SIG *sig = DSA_do_sign((unsigned char*) h.data(), h.size(), dsa_key);
 
@@ -229,12 +241,12 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 	char* sigs = new char[40];
 	sigr = BN_bn2hex(sig->r);
 	sigs = BN_bn2hex(sig->s);
-	/*
+
     LOG(" ---- SIGNATURES ----");
     LOG(sigr);
     LOG(sigs);
     LOG(" ---- FIN SIGNATURES ----");
-	*/
+
 	//TRACE("SINGATURE");
 
 	std::vector<char> message(sizeof(uint16_t) + chunk_size_ + 40 + 40);
@@ -414,7 +426,7 @@ void SplitterSTRPEDS::PunishPeer(const boost::asio::ip::udp::endpoint &peer,
 		std::string message) {
 	if (logging_) {
 		LogMessage(
-				"!!! bad peer" + peer.address().to_string() + ":"
+				"bad peer " + peer.address().to_string() + ":"
 						+ to_string(peer.port()) + "(" + message + ")");
 	}
 

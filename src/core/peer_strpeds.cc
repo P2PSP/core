@@ -34,15 +34,30 @@ void PeerSTRPEDS::ReceiveDsaKey() {
 
   TRACE("Ready to receive DSA Key");
 
-  char *y = new char[256];
-  char *g = new char[256];
-  char *p = new char[256];
-  char *q = new char[40];
+  char y[256];
+  char g[256];
+  char p[256];
+  char q[40];
 
-  std::copy(message.data(), message.data() + 256, y);
-  std::copy(message.data() + 256, message.data() + 256 + 256, g);
-  std::copy(message.data() + 256 + 256, message.data() + 256 + 256 +256, p);
-  std::copy(message.data() + 256 + 256 + 256, message.data() + 256 + 256 +256 + 40, q);
+  std::string msg(message.begin(), message.end());
+
+  strcpy(y, msg.substr(0,256).c_str());
+  strcpy(g, msg.substr(256,256).c_str());
+  strcpy(p, msg.substr(512,256).c_str());
+  strcpy(q, msg.substr(768,40).c_str());
+
+
+  /*
+  std::copy(message.begin(), message.begin() + 256, y);
+  std::copy(message.begin() + 256, message.begin() + 256 + 256, g);
+  std::copy(message.begin() + 256 + 256, message.begin() + 256 + 256 +256, p);
+  std::copy(message.begin() + 256 + 256 + 256, message.end() + 40, q);
+*/
+  LOG("**** DSA key *****");
+  LOG("pub_key: " << y);
+  LOG("g: " << g);
+  LOG("p: " << p);
+  LOG("q: " << q);
 
   dsa_key = DSA_new();
 
@@ -51,8 +66,6 @@ void PeerSTRPEDS::ReceiveDsaKey() {
   BN_hex2bn(&dsa_key->p,p);
   BN_hex2bn(&dsa_key->q,q);
 
-
-  delete[] y; delete[] g; delete[] p; delete[] q;
 
   TRACE("DSA key received");
   message_size_=kChunkIndexSize+chunk_size_+40+40;
@@ -111,7 +124,7 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 
 	  //LOG("TAMANO: "+ std::to_string(h.size()));
 
-	  /*
+
 	  std::string str(h.begin(), h.end());
 	  LOG("HASH= " + str);
 
@@ -124,7 +137,7 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  LOG("->" << sigr << "<-");
 	  LOG("->" << sigs << "<-");
 	  LOG(" ---- FIN SIGNATURES ----");
-	*/
+
 	  DSA_SIG* sig = DSA_SIG_new();
 
 	  BN_hex2bn(&sig->r, sigr);
@@ -171,7 +184,6 @@ int PeerSTRPEDS::HandleBadPeersRequest() {
     inet_aton((*peer).address().to_string().c_str(), &net_ip);
     std::memcpy(msg.data(), &net_ip, sizeof(net_ip));
     int port = htons(peer->port());
-    LOG("PUERTO: " + std::to_string(port));
     std::memcpy(msg.data() + sizeof(net_ip), &port, sizeof(port));
     team_socket_.send_to(buffer(msg), splitter_);
   }
