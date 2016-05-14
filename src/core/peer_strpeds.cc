@@ -41,11 +41,16 @@ void PeerSTRPEDS::ReceiveDsaKey() {
 
   std::string msg(message.begin(), message.end());
 
+  LOG("message: " + msg);
+  // ERROR here: Check if this proccess is correct.
   strcpy(y, msg.substr(0,256).c_str());
+ 
   strcpy(g, msg.substr(256,256).c_str());
+ 
   strcpy(p, msg.substr(512,256).c_str());
+ 
   strcpy(q, msg.substr(768,40).c_str());
-
+  
 
   /*
   std::copy(message.begin(), message.begin() + 256, y);
