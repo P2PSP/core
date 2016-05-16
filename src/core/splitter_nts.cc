@@ -16,6 +16,7 @@
 #include "../util/trace.h"
 #include <cassert>
 #include <thread>
+#include <random>
 
 using namespace boost::asio;
 
