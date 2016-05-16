@@ -43,34 +43,25 @@ void PeerSTRPEDS::ReceiveDsaKey() {
 
   LOG("message: " + msg);
   // ERROR here: Check if this proccess is correct.
-  strcpy(y, msg.substr(0,256).c_str());
- 
-  strcpy(g, msg.substr(256,256).c_str());
- 
-  strcpy(p, msg.substr(512,256).c_str());
- 
-  strcpy(q, msg.substr(768,40).c_str());
-  
 
-  /*
-  std::copy(message.begin(), message.begin() + 256, y);
-  std::copy(message.begin() + 256, message.begin() + 256 + 256, g);
-  std::copy(message.begin() + 256 + 256, message.begin() + 256 + 256 +256, p);
-  std::copy(message.begin() + 256 + 256 + 256, message.end() + 40, q);
-*/
   LOG("**** DSA key *****");
-  LOG("pub_key: " << y);
-  LOG("g: " << g);
-  LOG("p: " << p);
-  LOG("q: " << q);
-
   dsa_key = DSA_new();
 
+  strcpy(y, msg.substr(0,256).c_str());
   BN_hex2bn(&dsa_key->pub_key,y);
-  BN_hex2bn(&dsa_key->g,g);
-  BN_hex2bn(&dsa_key->p,p);
-  BN_hex2bn(&dsa_key->q,q);
+  LOG("pub_key: " << y);
 
+  strcpy(g, msg.substr(256,256).c_str());
+  BN_hex2bn(&dsa_key->g,g);
+  LOG("g: " << g);
+
+  strcpy(p, msg.substr(512,256).c_str());
+  BN_hex2bn(&dsa_key->p,p);
+  LOG("p: " << p);
+
+  strcpy(q, msg.substr(768,40).c_str());
+  BN_hex2bn(&dsa_key->q,q);
+  LOG("q: " << q);
 
   TRACE("DSA key received");
   message_size_=kChunkIndexSize+chunk_size_+40+40;

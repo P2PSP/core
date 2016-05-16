@@ -432,6 +432,7 @@ void SplitterSTRPEDS::PunishPeer(const boost::asio::ip::udp::endpoint &peer,
 
 	LOG("!!! bad peer " << peer);
 
+	//TODO: Add p_mpl probability
 	RemovePeer(peer);
 	LOG("Peer: " << peer << " removed");
 }
