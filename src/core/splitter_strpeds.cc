@@ -69,6 +69,7 @@ void SplitterSTRPEDS::SendDsaKey(
 			"Sending DSA Key => Size pub_key: " + to_string(strlen(y)) + " g "
 					+ to_string(strlen(g)) + " p " + to_string(strlen(p)) + " q "
 					+ to_string(strlen(q)) + " message: " + message.str());
+
 	sock->send(asio::buffer(message.str()));
 
     delete[] y; delete[] g; delete[] p; delete[] q;
