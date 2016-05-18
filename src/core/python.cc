@@ -608,7 +608,7 @@ public:
 
 BOOST_PYTHON_MODULE(libp2psp)
 {
-  PyEval_InitThreads();
+  //PyEval_InitThreads();
 
   class_<PyPeerDBS, boost::noncopyable>("PeerDBS")
 
