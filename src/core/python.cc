@@ -609,8 +609,6 @@ public:
 BOOST_PYTHON_MODULE(libp2psp)
 {
   PyEval_InitThreads();
-  class_<std::vector<char> >("CharVec")
-            .def(vector_indexing_suite<std::vector<char> >());
 
   class_<PyPeerDBS, boost::noncopyable>("PeerDBS")
 
