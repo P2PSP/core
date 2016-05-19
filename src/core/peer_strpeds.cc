@@ -41,7 +41,7 @@ void PeerSTRPEDS::ReceiveDsaKey() {
 
   std::string msg(message.begin(), message.end());
 
-  LOG("message: " + msg);
+  //LOG("message: " + msg);
   // ERROR here: Check if this proccess is correct.
 
   LOG("**** DSA key *****");
@@ -49,19 +49,19 @@ void PeerSTRPEDS::ReceiveDsaKey() {
 
   strcpy(y, msg.substr(0,256).c_str());
   BN_hex2bn(&dsa_key->pub_key,y);
-  LOG("pub_key: " << y);
+  //LOG("pub_key: " << y);
 
   strcpy(g, msg.substr(256,256).c_str());
   BN_hex2bn(&dsa_key->g,g);
-  LOG("g: " << g);
+  //LOG("g: " << g);
 
   strcpy(p, msg.substr(512,256).c_str());
   BN_hex2bn(&dsa_key->p,p);
-  LOG("p: " << p);
+  //LOG("p: " << p);
 
   strcpy(q, msg.substr(768,40).c_str());
   BN_hex2bn(&dsa_key->q,q);
-  LOG("q: " << q);
+  //LOG("q: " << q);
 
   TRACE("DSA key received");
   message_size_=kChunkIndexSize+chunk_size_+40+40;
@@ -120,7 +120,7 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 
 	  //LOG("TAMANO: "+ std::to_string(h.size()));
 
-
+	  /*
 	  std::string str(h.begin(), h.end());
 	  LOG("HASH= " + str);
 
@@ -133,6 +133,7 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  LOG("->" << sigr << "<-");
 	  LOG("->" << sigs << "<-");
 	  LOG(" ---- FIN SIGNATURES ----");
+	  */
 
 	  DSA_SIG* sig = DSA_SIG_new();
 

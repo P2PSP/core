@@ -65,11 +65,12 @@ void SplitterSTRPEDS::SendDsaKey(
 	std::stringstream message;
 	message << y << g << p << q;
 
+	/*
 	TRACE(
 			"Sending DSA Key => Size pub_key: " + to_string(strlen(y)) + " g "
 					+ to_string(strlen(g)) + " p " + to_string(strlen(p)) + " q "
 					+ to_string(strlen(q)) + " message: " + message.str());
-
+	*/
 	sock->send(asio::buffer(message.str()));
 
     delete[] y; delete[] g; delete[] p; delete[] q;
@@ -223,7 +224,7 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 
 	//TRACE("HASH");
 
-
+	/*
 	std::string str(h.begin(), h.end());
 	LOG("Chunk Number " + std::to_string(chunk_number) + " dest " + dst.address().to_string() + ":"+ std::to_string(dst.port()) +" HASH= " + str);
 
@@ -231,28 +232,28 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 	std::string b(m.begin(), m.end());
 	LOG(b);
 	LOG(" ---- FIN MESSAGE ----");
-
+	*/
 
 	DSA_SIG *sig = DSA_do_sign((unsigned char*) h.data(), h.size(), dsa_key);
 
-	LOG("Size r: " << *(sig->r->d));
-	LOG("Size s: " << *(sig->s->d));
+	//LOG("Size r: " << *(sig->r->d));
+	//LOG("Size s: " << *(sig->s->d));
 
 	char* sigr = new char[40];
 	char* sigs = new char[40];
 	sigr = BN_bn2hex(sig->r);
 	sigs = BN_bn2hex(sig->s);
 
+	/*
     LOG(" ---- SIGNATURES ----");
     LOG(sigr);
     LOG(sigs);
     LOG(" ---- FIN SIGNATURES ----");
-
+	*/
 	//TRACE("SINGATURE");
 
 	std::vector<char> message(sizeof(uint16_t) + chunk_size_ + 40 + 40);
 	copy(m.data(), m.data() + chunk_size_ + sizeof(uint16_t), message.data());
-
 	copy(sigr, sigr + 40,
 			message.data() + chunk.size() + sizeof(uint16_t));
 	copy(sigs, sigs + 40,
