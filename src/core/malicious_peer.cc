@@ -12,7 +12,9 @@
 
 namespace p2psp {
 
-MaliciousPeer::MaliciousPeer(){};
+MaliciousPeer::MaliciousPeer(){
+  magic_flags_ = Common::kDBS;
+};
 MaliciousPeer::~MaliciousPeer(){};
 
 void MaliciousPeer::Init() { LOG("Initialized"); }

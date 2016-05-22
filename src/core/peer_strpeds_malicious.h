@@ -27,7 +27,9 @@ class PeerStrpeDsMalicious : public PeerStrpeDs {
   bool bad_mouth_attack_;
 
  public:
-  PeerStrpeDsMalicious(){};
+  PeerStrpeDsMalicious(){
+    magic_flags_ = Common::kSTRPE;
+  };
   ~PeerStrpeDsMalicious(){};
   virtual void Init() override;
   virtual void SetBadMouthAttack(bool, std::string);

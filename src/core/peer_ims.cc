@@ -25,6 +25,8 @@ namespace p2psp {
       splitter_socket_(io_service_),
       team_socket_(io_service_) {
 
+    magic_flags_ = Common::kDBS;
+
     // Default values
     player_port_ = kPlayerPort;
     splitter_addr_ = ip::address::from_string(kSplitterAddr);
@@ -437,6 +439,10 @@ namespace p2psp {
   void PeerIMS::Start() {
     thread_group_.interrupt_all();
     thread_group_.add_thread(new boost::thread(&PeerIMS::Run, this));
+  }
+
+  char PeerIMS::GetMagicFlags() {
+    return magic_flags_;
   }
 
   //std::string PeerIMS::GetMcastAddr() {

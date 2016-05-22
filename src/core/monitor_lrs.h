@@ -26,7 +26,9 @@ using namespace boost::asio;
 class MonitorLRS : public MonitorDBS {
  protected:
  public:
-  MonitorLRS(){};
+  MonitorLRS(){
+    magic_flags_ = Common::kLRS;
+  };
   ~MonitorLRS(){};
   virtual void Init() override;
   virtual void ReceiveTheBufferSize() override;

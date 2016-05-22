@@ -15,7 +15,9 @@
 
 namespace p2psp {
 
-MonitorNTS::MonitorNTS(){}
+MonitorNTS::MonitorNTS(){
+    magic_flags_ = Common::kNTS;
+}
 
 MonitorNTS::~MonitorNTS(){}
 
