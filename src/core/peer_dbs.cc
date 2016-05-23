@@ -155,6 +155,8 @@ namespace p2psp {
 
       received_counter_++;
 
+      LOG("Chunk Inserted at: " << (chunk_number%buffer_size_));
+
       if (sender == splitter_) {
 
 	// Send the previous chunk in burst sending
@@ -340,7 +342,7 @@ namespace p2psp {
       }
     }
 
-    LOG("Chunks in the buffer: " << chunks << " total chunks " << chunks_.size() << "buffer size " << buffer_size_);
+    LOG("Chunks in Buffer: " << chunks)
     return chunks / (float)buffer_size_;
   }
 

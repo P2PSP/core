@@ -376,16 +376,20 @@ namespace p2psp {
       }
     }
 
+    show_buffer_=true;
+    std::string bf="";
     if (show_buffer_) {
-      for (int i = 0; buffer_size_; i++) {
+      for (int i = 0; i<buffer_size_; i++) {
         if (chunks_[i].received) {
           // TODO: Avoid line feed in LOG function
-          TRACE(std::to_string(i % 10));
+          //TRACE(std::to_string(i % 10));
+        	bf=bf+"1";
         } else {
-          TRACE(".");
+          //TRACE(".");
+          bf=bf+"0";
         }
       }
-      TRACE("");
+      LOG("Buffer state: "+bf);
     }
 
     // print (self.team_socket.getsockname(),)
@@ -393,10 +397,17 @@ namespace p2psp {
   }
 
   void PeerIMS::PlayNextChunk() {
-    played_chunk_ = FindNextChunk();
+    //played_chunk_ = FindNextChunk();
+
+	played_chunk_++;
+	if (chunks_[played_chunk_ % buffer_size_].received){
     PlayChunk(played_chunk_);
     chunks_[played_chunk_ % buffer_size_].received = false;
     received_counter_--;
+    LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
+	}else{
+		TRACE("lost chunk " << std::to_string(played_chunk_));
+	}
   }
 
   // Tiene pinta de que los tres siguientes metodos pueden simplificarse...

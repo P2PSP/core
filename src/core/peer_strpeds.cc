@@ -185,7 +185,7 @@ int PeerSTRPEDS::HandleBadPeersRequest() {
     team_socket_.send_to(buffer(msg), splitter_);
   }
 
-  bad_peers_.clear();
+  //bad_peers_.clear();
 
   return -1;
 }
