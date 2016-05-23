@@ -358,6 +358,7 @@ public:
     boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
     boost::python::stl_input_iterator<unsigned char> begin(chunk), end;
     std::vector<char> chunk_(begin, end);
+    TRACE("InsertChunk at " << position);
     chunks_[position] = {chunk_, true};
   }
 

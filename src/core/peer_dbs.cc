@@ -340,6 +340,7 @@ namespace p2psp {
       }
     }
 
+    LOG("Chunks in the buffer: " << chunks << " total chunks " << chunks_.size() << "buffer size " << buffer_size_);
     return chunks / (float)buffer_size_;
   }
 
