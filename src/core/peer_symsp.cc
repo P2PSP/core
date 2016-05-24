@@ -16,6 +16,7 @@
 namespace p2psp {
 
 PeerSYMSP::PeerSYMSP(){
+  magic_flags_ = Common::kNTS;
   this->port_step_ = 1;
 }
 

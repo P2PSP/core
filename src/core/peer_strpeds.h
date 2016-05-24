@@ -26,7 +26,9 @@ class PeerStrpeDs : public TrustedPeer {
   std::vector<ip::udp::endpoint> bad_peers_;
 
  public:
-  PeerStrpeDs(){};
+  PeerStrpeDs(){
+    magic_flags_ = Common::kSTRPE;
+  };
   ~PeerStrpeDs(){};
   virtual void Init() override;
   virtual bool IsCurrentMessageFromSplitter();

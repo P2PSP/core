@@ -23,7 +23,9 @@
 
 namespace p2psp {
 
-PeerNTS::PeerNTS(){}
+PeerNTS::PeerNTS(){
+    magic_flags_ = Common::kNTS;
+}
 
 PeerNTS::~PeerNTS(){
   if (this->send_hello_thread_.joinable()) {

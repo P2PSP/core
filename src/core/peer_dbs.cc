@@ -14,7 +14,9 @@
 
 namespace p2psp {
 
-  PeerDBS::PeerDBS() {}
+  PeerDBS::PeerDBS() {
+    magic_flags_ = Common::kDBS;
+  }
 
   PeerDBS::~PeerDBS() {}
 
@@ -46,7 +48,15 @@ namespace p2psp {
   void PeerDBS::ReceiveMagicFlags() {
     std::vector<char> magic_flags(1);
     read(splitter_socket_, ::buffer(magic_flags));
-    TRACE("Magic flags =" << std::bitset<8>(magic_flags[0]));
+    TRACE("Magic flags = " << std::bitset<8>(magic_flags[0]));
+    if (this->magic_flags_ != magic_flags[0]) {
+      ERROR("The splitter has different magic flags ("
+        << std::bitset<8>(magic_flags[0]) << ") than this peer ("
+        << std::bitset<8>(magic_flags_) << ").");
+      ERROR("Please run splitter with a different parameter, or compile peer "
+        << "with a different set of rules.");
+      exit(1);
+    }
   }
 
   void PeerDBS::ReceiveTheNumberOfPeers() {

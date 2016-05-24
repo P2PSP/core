@@ -47,6 +47,7 @@ namespace p2psp {
     static const bool kShowBuffer = false;                // Default
     static const int kChunkIndexSize = 2;
 
+    char magic_flags_;
     uint16_t player_port_;                                // Port used to serve the player.
     ip::address splitter_addr_;                           // Address of the splitter.
     uint16_t splitter_port_;                              // Port of the splitter.
@@ -129,6 +130,7 @@ namespace p2psp {
     /**
      *  Getters/setters
      */
+    virtual char GetMagicFlags();
     //virtual std::string GetMcastAddr();
     virtual ip::address GetMcastAddr();
     virtual bool IsPlayerAlive();
