@@ -75,6 +75,7 @@ namespace p2psp {
     ip::udp::socket team_socket_;                         // Used to communicate with the rest of the team
     boost::thread_group thread_group_;                    // Thread group to join all threads
     std::vector<ip::udp::endpoint> peer_list_;            // DBS variables
+    int previous_chunk_number_=0;
 
   public:
 

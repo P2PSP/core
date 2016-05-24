@@ -280,22 +280,24 @@ namespace p2psp {
     // Now, fill up to the half of the buffer.
 
     // float BUFFER_STATUS = 0.0f;
-    for (int x = 0; x < buffer_size_ / 2; x++) {
+    while ((chunk_number - played_chunk_)< buffer_size_/2) {
       // TODO Format string
       // LOG("{:.2%}\r".format((1.0*x)/(buffer_size_/2)), end='');
       // BUFFER_STATUS = (100 * x) / (buffer_size_ / 2.0f) + 1;
 
-      if (!Common::kConsoleMode) {
+      //if (!Common::kConsoleMode) {
         // GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
-      } else {
+      //} else {
         // pass
-      }
+      //}
       TRACE("!");
       TraceSystem::Flush();
 
-      while (ProcessNextMessage() < 0)
+      while ((chunk_number = ProcessNextMessage()) < 0)
         ;
     }
+
+    previous_chunk_number_=chunk_number;
 
     TRACE("");
     TRACE("latency = " << std::to_string((clock() - start_time) /
@@ -369,12 +371,23 @@ namespace p2psp {
     }
     // while ((chunk_number - self.played_chunk) % self.buffer_size) <
     // self.buffer_size/2:
+    /*
     while (received_counter_ < buffer_size_ / 2) {
       chunk_number = ProcessNextMessage();
       while (chunk_number < 0) {
         chunk_number = ProcessNextMessage();
       }
     }
+     */
+    for (int i = 0; i < (chunk_number-previous_chunk_number_);i++) {
+    	PlayChunk(played_chunk_);
+    	chunks_[played_chunk_ % buffer_size_].received = false;
+    	received_counter_--;
+    	LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
+    	played_chunk_++;
+    }
+
+    previous_chunk_number_=chunk_number;
 
     show_buffer_=true;
     std::string bf="";
@@ -397,17 +410,17 @@ namespace p2psp {
   }
 
   void PeerIMS::PlayNextChunk() {
-    //played_chunk_ = FindNextChunk();
+    played_chunk_ = FindNextChunk();
 
-	played_chunk_++;
-	if (chunks_[played_chunk_ % buffer_size_].received){
+	//played_chunk_++;
+	//if (chunks_[played_chunk_ % buffer_size_].received){
     PlayChunk(played_chunk_);
     chunks_[played_chunk_ % buffer_size_].received = false;
     received_counter_--;
     LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
-	}else{
-		TRACE("lost chunk " << std::to_string(played_chunk_));
-	}
+	//}else{
+		//TRACE("lost chunk " << std::to_string(played_chunk_));
+	//}
   }
 
   // Tiene pinta de que los tres siguientes metodos pueden simplificarse...
@@ -444,7 +457,7 @@ namespace p2psp {
   void PeerIMS::Run() {
     while (player_alive_) {
       KeepTheBufferFull();
-      PlayNextChunk();
+      //PlayNextChunk();
     }
   }
 
