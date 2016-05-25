@@ -47,6 +47,8 @@ class PeerSTRPEDS: public PeerDBS {
   virtual int HandleBadPeersRequest();
   virtual int ProcessMessage(const std::vector<char> &,
                              const ip::udp::endpoint &) override;
+  virtual void PlayNextChunk(int chunk_number) override;
+  virtual void Complain(int chunk_number);
 };
 }
 

@@ -191,7 +191,7 @@ namespace p2psp {
 
 	  debt_[peer]++;
 
-	  if (debt_[peer] > kMaxChunkDebt) {
+	  if (debt_[peer] > max_chunk_debt_/*kMaxChunkDebt*/) {
 	    TRACE("(" << peer.address().to_string() << ","
 		  << std::to_string(peer.port()) << ")"
 		  << " removed by unsupportive (" +
@@ -242,7 +242,7 @@ namespace p2psp {
 
         debt_[peer]++;
 
-        if (debt_[peer] > kMaxChunkDebt) {
+        if (debt_[peer] > max_chunk_debt_/*kMaxChunkDebt*/) {
           TRACE("(" << peer.address().to_string() << ","
                 << std::to_string(peer.port()) << ")"
                 << " removed by unsupportive (" +
@@ -253,7 +253,7 @@ namespace p2psp {
 
         TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
               << std::to_string(team_socket_.local_endpoint().port()) << ")"
-              << "-" << std::to_string(ntohs(receive_and_feed_previous_[0]))
+              << "-" << std::to_string(ntohs(*(short *)receive_and_feed_previous_.data()))
               << "->"
               << "(" << peer.address().to_string() << ","
               << std::to_string(peer.port()) << ")");
@@ -377,7 +377,7 @@ namespace p2psp {
 
     sendto_counter_ = 0;
 
-    debt_memory_ = 1 << kMaxChunkDebt;
+    debt_memory_ = 1 << max_chunk_debt_/*kMaxChunkDebt*/;
 
     PeerIMS::BufferData();
   }

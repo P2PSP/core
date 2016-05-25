@@ -297,7 +297,7 @@ namespace p2psp {
         ;
     }
 
-    previous_chunk_number_=chunk_number;
+    latest_chunk_number_=chunk_number;
 
     TRACE("");
     TRACE("latency = " << std::to_string((clock() - start_time) /
@@ -379,15 +379,10 @@ namespace p2psp {
       }
     }
      */
-    for (int i = 0; i < (chunk_number-previous_chunk_number_);i++) {
-    	PlayChunk(played_chunk_);
-    	chunks_[played_chunk_ % buffer_size_].received = false;
-    	received_counter_--;
-    	LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
-    	played_chunk_++;
-    }
 
-    previous_chunk_number_=chunk_number;
+    LOG("C " << chunk_number << "PC " << previous_chunk_number_ << "Current Distance: " << (chunk_number-previous_chunk_number_));
+
+    PlayNextChunk(chunk_number);
 
     show_buffer_=true;
     std::string bf="";
@@ -409,8 +404,8 @@ namespace p2psp {
     // sys.stdout.write(Color.none)
   }
 
-  void PeerIMS::PlayNextChunk() {
-    played_chunk_ = FindNextChunk();
+  void PeerIMS::PlayNextChunk(int chunk_number) {
+    /*played_chunk_ = FindNextChunk();
 
 	//played_chunk_++;
 	//if (chunks_[played_chunk_ % buffer_size_].received){
@@ -420,7 +415,21 @@ namespace p2psp {
     LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
 	//}else{
 		//TRACE("lost chunk " << std::to_string(played_chunk_));
-	//}
+	//}*/
+
+
+  for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
+	    if (chunks_[chunk_number % buffer_size_].received){
+	    	PlayChunk(played_chunk_);
+			chunks_[played_chunk_ % buffer_size_].received = false;
+	    }
+		received_counter_--;
+		LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
+		played_chunk_++;
+	}
+
+	if ((latest_chunk_number_ % Common::kMaxChunkNumber) < chunk_number)
+			latest_chunk_number_=chunk_number;
   }
 
   // Tiene pinta de que los tres siguientes metodos pueden simplificarse...

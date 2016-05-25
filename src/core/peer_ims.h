@@ -76,6 +76,7 @@ namespace p2psp {
     boost::thread_group thread_group_;                    // Thread group to join all threads
     std::vector<ip::udp::endpoint> peer_list_;            // DBS variables
     int previous_chunk_number_=0;
+    int latest_chunk_number_ = 0;
 
   public:
 
@@ -118,7 +119,7 @@ namespace p2psp {
     virtual void BufferData();
     virtual int FindNextChunk();
     virtual void PlayChunk(int);
-    virtual void PlayNextChunk();
+    virtual void PlayNextChunk(int chunk_number);
     virtual void KeepTheBufferFull();
 
     /**

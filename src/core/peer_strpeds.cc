@@ -215,6 +215,34 @@ int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
   return -1;
 }
 
+void PeerSTRPEDS::PlayNextChunk(int chunk_number) {
+
+  for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
+	    if (chunks_[played_chunk_ % buffer_size_].received){
+	    	PlayChunk(played_chunk_);
+	    	chunks_[played_chunk_ % buffer_size_].received = false;
+	    }else{
+	    	Complain(played_chunk_);
+	    }
+		received_counter_--;
+		LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
+		played_chunk_++;
+	}
+
+	if ((latest_chunk_number_ % Common::kMaxChunkNumber) < chunk_number)
+			latest_chunk_number_=chunk_number;
+  }
+
+void PeerSTRPEDS::Complain(int chunk_number) {
+  std::vector<char> message(2);
+  uint16_t chunk_number_network = htons(chunk_number);
+  std::memcpy(message.data(), &chunk_number_network, sizeof(uint16_t));
+
+  team_socket_.send_to(buffer(message), splitter_);
+
+  TRACE("lost chunk:" << std::to_string(chunk_number));
+};
+
 void PeerSTRPEDS::SetLogFile(const std::string &filename) {
   log_file_.open(filename);
 }
