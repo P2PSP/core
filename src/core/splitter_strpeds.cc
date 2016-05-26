@@ -312,9 +312,11 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 			 */
 			if (find(trusted_peers_.begin(), trusted_peers_.end(), sender)
 								!= trusted_peers_.end()) {
-				LOG("Complaint from TP about lost chunk");
-				uint16_t lost_chunk_number = GetLostChunkNumber(message);
-				ProcessLostChunk(lost_chunk_number, sender);
+
+				//uint16_t lost_chunk_number = GetLostChunkNumber(message);
+				//asio::ip::udp::endpoint bad_peer = GetLosser(lost_chunk_number);
+				//HandleBadPeerFromTrusted(bad_peer, sender);
+				//LOG("Complaint from TP (" << sender.port() <<") about lost chunk " << lost_chunk_number << " by " << bad_peer.port());
 			}
 
 		} else if (bytes_transferred == 5) {
@@ -393,7 +395,10 @@ void SplitterSTRPEDS::HandleBadPeerFromTrusted(
 		const boost::asio::ip::udp::endpoint &bad_peer,
 		const boost::asio::ip::udp::endpoint &sender) {
 	AddComplain(bad_peer, sender);
-	bad_peers_.push_back(bad_peer);
+	if (std::find(bad_peers_.begin(), bad_peers_.end(), sender) ==
+	      bad_peers_.end()) {
+		bad_peers_.push_back(bad_peer);
+	}
 	//PunishPeer(bad_peer, "by trusted");
 }
 
