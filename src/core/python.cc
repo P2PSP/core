@@ -904,7 +904,8 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("source_port", &PySplitterSTRPEDS::GetSourcePort, &PySplitterSTRPEDS::SetSourcePort)
     .add_property("max_number_of_chunk_loss", &PySplitterSTRPEDS::GetMaxNumberOfChunkLoss, &PySplitterSTRPEDS::SetMaxNumberOfChunkLoss)
     .add_property("max_number_of_monitors", &PySplitterSTRPEDS::GetMaxNumberOfMonitors, &PySplitterSTRPEDS::SetMaxNumberOfMonitors)
-    
+    .add_property("p_mpl", &PySplitterSTRPEDS::GetPMPL, &PySplitterSTRPEDS::SetPMPL)
+
     //IMS
     .def("SendTheHeader", &PySplitterSTRPEDS::SendTheHeader)
     .def("SendTheBufferSize", &PySplitterSTRPEDS::SendTheBufferSize)

@@ -39,7 +39,8 @@ class SplitterSTRPEDS : public SplitterDBS {
   const int kGatherBadPeersSleep = 5;
   const bool kLogging = false;
   const int kCurrentRound = 0;
-  const int p_mpl = 100;
+
+  int p_mpl_ = 100;
 
   int digest_size_;
   int gather_bad_peers_sleep_;
@@ -94,6 +95,8 @@ class SplitterSTRPEDS : public SplitterDBS {
   void PunishPeers();
   
   void SetLogging(bool enabled);
+  void SetPMPL(int probability);
+  int GetPMPL();
   void SetLogFile(const std::string &filename);
   void LogMessage(const std::string &message);
   std::string BuildLogMessage(const std::string &message);	   
