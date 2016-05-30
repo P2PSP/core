@@ -385,7 +385,7 @@ void SplitterSTRPEDS::ProcessBadPeersMessage(const std::vector<char> &message,
 				!= trusted_peers_.end()) {
 			HandleBadPeerFromTrusted(bad_peer, sdr);
 		} else {
-			HandleBadPeerFromRegular(bad_peer, sdr);
+			//HandleBadPeerFromRegular(bad_peer, sdr);
 		}
 
 	}
@@ -479,7 +479,7 @@ void SplitterSTRPEDS::RefreshTPs(){
 
 void SplitterSTRPEDS::PunishPeers(){
 	int r;
-	for (int i =0; i<bad_peers_.size(); i++) {
+	for (unsigned int i =0; i<bad_peers_.size(); i++) {
 				r = rand() % 100 + 1;
 				if (r <= p_mpl_){
 					PunishPeer(bad_peers_[i], "by trusted");
