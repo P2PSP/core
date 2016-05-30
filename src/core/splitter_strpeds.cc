@@ -433,16 +433,21 @@ void SplitterSTRPEDS::AddComplain(
 
 void SplitterSTRPEDS::PunishPeer(const boost::asio::ip::udp::endpoint &peer,
 		std::string message) {
-	if (logging_) {
-		LogMessage(
-				"bad peer " + peer.address().to_string() + ":"
-						+ to_string(peer.port()) + "(" + message + ")");
+
+	if (std::find(peer_list_.begin(), peer_list_.end(), peer)
+					!= peer_list_.end()) {
+		if (logging_) {
+				LogMessage(
+						"bad peer " + peer.address().to_string() + ":"
+								+ to_string(peer.port()) + "(" + message + ")");
+		}
+
+		LOG("!!! bad peer " << peer);
+
+		RemovePeer(peer);
+		LOG("Peer: " << peer << " removed");
+
 	}
-
-	LOG("!!! bad peer " << peer);
-
-	RemovePeer(peer);
-	LOG("Peer: " << peer << " removed");
 }
 
 void SplitterSTRPEDS::OnRoundBeginning(){
