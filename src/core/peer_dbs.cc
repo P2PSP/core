@@ -170,7 +170,7 @@ namespace p2psp {
 	      << std::to_string(sender.port()) << ")");
 	// No aqui. Tal vez, DIS
 
-	if (logging_) {
+	if (logging_ and latest_chunk_number_!=0) {
 	  LogMessage("buffer correctnes " +
 		     std::to_string(CalcBufferCorrectness()));
 	  LogMessage("buffer filling " + std::to_string(CalcBufferFilling()));
