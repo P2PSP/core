@@ -380,8 +380,6 @@ namespace p2psp {
     }
      */
 
-    LOG("C " << chunk_number << "PC " << previous_chunk_number_ << "Current Distance: " << (chunk_number-previous_chunk_number_));
-
     PlayNextChunk(chunk_number);
 
     show_buffer_=true;
