@@ -251,18 +251,21 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 	*/
 	//TRACE("SINGATURE");
 
-	std::vector<char> message(sizeof(uint16_t) + chunk_size_ + 40 + 40);
+	std::vector<char> message(sizeof(uint16_t) + chunk_size_ + 40 + 40 + sizeof(uint32_t));
+
 	copy(m.data(), m.data() + chunk_size_ + sizeof(uint16_t), message.data());
 	copy(sigr, sigr + 40,
-			message.data() + chunk.size() + sizeof(uint16_t));
+			message.data() + chunk_size_ + sizeof(uint16_t));
 	copy(sigs, sigs + 40,
-			message.data() + chunk.size() + sizeof(uint16_t) + 40);
+			message.data() + chunk_size_ + sizeof(uint16_t) + 40);
+	(*(uint32_t *) (message.data() + chunk_size_ + sizeof(uint16_t) + 40 + 40)) = htonl(current_round_);
+
 	/*
 	LOG(" ----- MESSAGE CON SIGNATURE ----- ");
 		std::string c(message.begin(), message.end());
 		LOG(c);
 	LOG(" ---- FIN MESSAGE ----");
-	*/
+	 */
 	delete[] sigr; delete[] sigs;
 
 	return message;
@@ -513,7 +516,7 @@ void SplitterSTRPEDS::LogMessage(const std::string &message) {
 }
 
 string SplitterSTRPEDS::BuildLogMessage(const std::string &message) {
-	return to_string(time(NULL)) + "\t" + message;
+	return to_string(current_round_) + "\t" + message;
 }
 
 void SplitterSTRPEDS::Start() {

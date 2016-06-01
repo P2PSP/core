@@ -64,7 +64,7 @@ void PeerSTRPEDS::ReceiveDsaKey() {
   //LOG("q: " << q);
 
   TRACE("DSA key received");
-  message_size_=kChunkIndexSize+chunk_size_+40+40;
+  message_size_=4+kChunkIndexSize+chunk_size_+40+40;
 
 }
 
@@ -77,7 +77,7 @@ void PeerSTRPEDS::ProcessBadMessage(const std::vector<char> &message,
 
 bool PeerSTRPEDS::IsControlMessage(std::vector<char> message) {
 	TRACE("Control message: " <<  message.size());
-	return message.size() != (sizeof(uint16_t) + chunk_size_ + 40 + 40);
+	return message.size() != (sizeof(uint32_t) + sizeof(uint16_t) + chunk_size_ + 40 + 40);
 }
 
 bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
@@ -123,7 +123,6 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  /*
 	  std::string str(h.begin(), h.end());
 	  LOG("HASH= " + str);
-
 	  LOG(" ----- MESSAGE ----- ");
 	  std::string b(m.begin(), m.end());
 	  LOG(b);
@@ -133,7 +132,7 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  LOG("->" << sigr << "<-");
 	  LOG("->" << sigs << "<-");
 	  LOG(" ---- FIN SIGNATURES ----");
-	  */
+		*/
 
 	  DSA_SIG* sig = DSA_SIG_new();
 
@@ -199,6 +198,10 @@ int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
     return -1;
   }
 
+  // --------------- For current round ---------------------
+  current_round_ = ntohl(*(uint32_t *)(message.data() + sizeof(uint16_t) + chunk_size_ + 40 + 40));
+  LOG("Current Round: " << current_round_);
+  //---------------------
 
   if (IsCurrentMessageFromSplitter() or CheckMessage(message, sender)) {
     if (IsControlMessage(message) and (message[0] == 'B')) {
@@ -248,9 +251,15 @@ void PeerSTRPEDS::Complain(int chunk_number) {
   TRACE("lost chunk:" << std::to_string(chunk_number));
 };
 
+std::string PeerSTRPEDS::BuildLogMessage(const std::string &message) {
+  // return "{0}\t{1}".format(repr(time.time()), message)
+	return std::to_string(current_round_) + "\t" + message;
+}
+
 void PeerSTRPEDS::SetLogFile(const std::string &filename) {
   log_file_.open(filename);
 }
 
 void PeerSTRPEDS::SetLogging(bool enabled) { logging_ = enabled; }
 }
+

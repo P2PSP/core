@@ -29,6 +29,7 @@ class PeerSTRPEDS: public PeerDBS {
   ip::udp::endpoint current_sender_;
 
   DSA* dsa_key;
+  uint32_t current_round_;
 
  public:
   PeerSTRPEDS(){};
@@ -49,6 +50,7 @@ class PeerSTRPEDS: public PeerDBS {
                              const ip::udp::endpoint &) override;
   virtual void PlayNextChunk(int chunk_number) override;
   virtual void Complain(int chunk_number);
+  virtual std::string BuildLogMessage(const std::string &message) override;
 };
 }
 

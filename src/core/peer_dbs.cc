@@ -135,6 +135,7 @@ namespace p2psp {
     team_socket_.set_option(socket_base::linger(true, 30));
   }
 
+
   int PeerDBS::ProcessMessage(const std::vector<char> &message,
                               const ip::udp::endpoint &sender) {
     // Now, receive and send.
@@ -179,6 +180,7 @@ namespace p2psp {
 	while (receive_and_feed_counter_ < (int)peer_list_.size() &&
 	       receive_and_feed_counter_ > 0) {
 	  peer = peer_list_[receive_and_feed_counter_];
+
 	  team_socket_.send_to(::buffer(receive_and_feed_previous_), peer);
 	  sendto_counter_++;
 
@@ -237,6 +239,7 @@ namespace p2psp {
         // Send the previous chunk in congestion avoiding mode.
 
         peer = peer_list_[receive_and_feed_counter_];
+
         team_socket_.send_to(::buffer(receive_and_feed_previous_), peer);
         sendto_counter_++;
 
