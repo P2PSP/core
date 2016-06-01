@@ -34,12 +34,6 @@ namespace p2psp {
   protected:
     static const int kMaxChunkDebt = 128;  // Peer's rejecting threshold
 
-    bool kLogging = false;  // A IMS???
-    std::string kLogFile;   // A IMS???
-
-    bool logging_;
-    std::ofstream log_file_;
-
     int kAddr = 0;
     int kPort = 1;
 
@@ -69,8 +63,6 @@ namespace p2psp {
     virtual void ListenToTheTeam() override;
     virtual int ProcessMessage(const std::vector<char>&,
                                const ip::udp::endpoint&) override;
-    virtual void LogMessage(const std::string&);
-    virtual std::string BuildLogMessage(const std::string&);
     virtual float CalcBufferCorrectness();
     virtual float CalcBufferFilling();
     virtual void PoliteFarewell();

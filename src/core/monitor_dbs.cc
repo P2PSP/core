@@ -48,4 +48,25 @@ int MonitorDBS::FindNextChunk() {
   }
   return chunk_number;
 }
+
+void MonitorDBS::PlayNextChunk(int chunk_number) {
+
+
+  for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
+	    if (chunks_[chunk_number % buffer_size_].received){
+	    	PlayChunk(played_chunk_);
+			chunks_[played_chunk_ % buffer_size_].received = false;
+			received_counter_--;
+			LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
+	    }else{
+	    	Complain(chunk_number);
+	    	LOG("Chunk lost at: " << played_chunk_ % buffer_size_)
+	    }
+
+		played_chunk_++;
+	}
+
+	if ((latest_chunk_number_ % Common::kMaxChunkNumber) < chunk_number)
+			latest_chunk_number_=chunk_number;
+  }
 }

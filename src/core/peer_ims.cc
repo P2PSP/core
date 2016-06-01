@@ -417,12 +417,15 @@ namespace p2psp {
 
 
   for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
-	    if (chunks_[chunk_number % buffer_size_].received){
+	    if (chunks_[chunk_number % buffer_size_].received == true){
 	    	PlayChunk(played_chunk_);
 			chunks_[played_chunk_ % buffer_size_].received = false;
+			received_counter_--;
+			LOG("Chunk Consumed at:" << played_chunk_ % buffer_size_)
+	    }else{
+	    	LOG("Chunk lost at: " << played_chunk_ % buffer_size_)
 	    }
-		received_counter_--;
-		LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
+
 		played_chunk_++;
 	}
 
@@ -459,6 +462,18 @@ namespace p2psp {
       player_alive_ = false;
     }
 #endif
+  }
+
+  void PeerIMS::LogMessage(const std::string &message) {
+    // TODO: self.LOG_FILE.write(self.build_log_message(message) + "\n")
+    // print >>self.LOG_FILE, self.build_log_message(message)
+	log_file_ << BuildLogMessage(message+"\n");
+
+  }
+
+  std::string PeerIMS::BuildLogMessage(const std::string &message) {
+    // return "{0}\t{1}".format(repr(time.time()), message)
+	  return std::to_string(time(NULL)) + "\t" + message;
   }
 
   void PeerIMS::Run() {

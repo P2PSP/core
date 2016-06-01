@@ -221,11 +221,16 @@ void PeerSTRPEDS::PlayNextChunk(int chunk_number) {
 	    if (chunks_[played_chunk_ % buffer_size_].received){
 	    	PlayChunk(played_chunk_);
 	    	chunks_[played_chunk_ % buffer_size_].received = false;
+	    	received_counter_--;
+	    	LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
 	    }else{
 	    	Complain(played_chunk_);
+	    	if (logging_) {
+	    		  LogMessage("Chunk lost at: " + std::to_string(played_chunk_ % buffer_size_));
+	    	}
+	    	LOG("Chunk lost at: " << played_chunk_ % buffer_size_)
 	    }
-		received_counter_--;
-		LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
+
 		played_chunk_++;
 	}
 

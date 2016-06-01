@@ -300,18 +300,6 @@ namespace p2psp {
     return -1;
   }
 
-  void PeerDBS::LogMessage(const std::string &message) {
-    // TODO: self.LOG_FILE.write(self.build_log_message(message) + "\n")
-    // print >>self.LOG_FILE, self.build_log_message(message)
-	log_file_ << BuildLogMessage(message+"\n");
-
-  }
-
-  std::string PeerDBS::BuildLogMessage(const std::string &message) {
-    // return "{0}\t{1}".format(repr(time.time()), message)
-	  return std::to_string(time(NULL)) + "\t" + message;
-  }
-
   float PeerDBS::CalcBufferCorrectness() {
     std::vector<char> zerochunk(1024, 0);
 
