@@ -229,7 +229,7 @@ void PeerSTRPEDS::PlayNextChunk(int chunk_number) {
 	    }else{
 	    	Complain(played_chunk_);
 	    	if (logging_) {
-	    		  LogMessage("Chunk lost at: " + std::to_string(played_chunk_ % buffer_size_));
+	    		  LogMessage("chunk lost at " + std::to_string(played_chunk_ % buffer_size_));
 	    	}
 	    	LOG("Chunk lost at: " << played_chunk_ % buffer_size_)
 	    }
@@ -261,5 +261,12 @@ void PeerSTRPEDS::SetLogFile(const std::string &filename) {
 }
 
 void PeerSTRPEDS::SetLogging(bool enabled) { logging_ = enabled; }
+
+uint32_t PeerSTRPEDS::GetCurrentRound(){return current_round_;}
+void PeerSTRPEDS::SetCurrentRound(uint32_t current_round){current_round_=current_round;}
+
 }
+
+
+
 
