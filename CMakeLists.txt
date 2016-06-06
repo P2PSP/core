@@ -49,6 +49,10 @@ if(BUILD_PYTHON_WRAPPER)
   endif()
 endif()
 
+if(APPLE)
+  set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
+endif(APPLE)
+
 find_package(Boost COMPONENTS
   ${BOOST_REQUIRED_COMPONENTS}
 REQUIRED)

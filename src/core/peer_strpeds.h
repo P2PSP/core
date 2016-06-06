@@ -32,8 +32,12 @@ class PeerSTRPEDS: public PeerDBS {
   uint32_t current_round_;
 
  public:
-  PeerSTRPEDS(){};
+
+  PeerSTRPEDS(){
+  magic_flags_ = Common::kSTRPE;
+  };
   ~PeerSTRPEDS(){};
+
   virtual void Init() override;
   virtual bool IsCurrentMessageFromSplitter();
   void SetLogging(bool enabled);

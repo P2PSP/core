@@ -223,10 +223,11 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 
 	//TRACE("HASH");
 
-	/*
+
 	std::string str(h.begin(), h.end());
 	LOG("Chunk Number " + std::to_string(chunk_number) + " dest " + dst.address().to_string() + ":"+ std::to_string(dst.port()) +" HASH= " + str);
 
+	/*
 	LOG(" ----- MESSAGE ----- ");
 	std::string b(m.begin(), m.end());
 	LOG(b);
@@ -235,11 +236,13 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 
 	DSA_SIG *sig = DSA_do_sign((unsigned char*) h.data(), h.size(), dsa_key);
 
-	//LOG("Size r: " << *(sig->r->d));
-	//LOG("Size s: " << *(sig->s->d));
+	LOG("R: " << *(sig->r->d));
+	LOG("S: " << *(sig->s->d));
 
 	char* sigr = new char[40];
+	//char sigr[40];
 	char* sigs = new char[40];
+	//char sigs[40];
 	sigr = BN_bn2hex(sig->r);
 	sigs = BN_bn2hex(sig->s);
 
@@ -249,6 +252,7 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
     LOG(sigs);
     LOG(" ---- FIN SIGNATURES ----");
 	*/
+
 	//TRACE("SINGATURE");
 
 	std::vector<char> message(sizeof(uint16_t) + chunk_size_ + 40 + 40 + sizeof(uint32_t));
@@ -332,7 +336,7 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 
 			if (find(trusted_peers_.begin(), trusted_peers_.end(), sender)
 					!= trusted_peers_.end()) {
-				LOG("Complaint from TP about bad peer");
+				LOG("Complaint about bad peer from " << sender.address().to_string() << ":" << sender.port());
 				ProcessBadPeersMessage(message, sender);
 			}
 		}

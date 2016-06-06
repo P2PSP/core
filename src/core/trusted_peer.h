@@ -32,7 +32,9 @@ class TrustedPeer : public MaliciousPeer {
   ip::udp::endpoint current_sender_;
 
  public:
-  TrustedPeer(){};
+  TrustedPeer(){
+    magic_flags_ = Common::kDBS;
+  };
   ~TrustedPeer(){};
   virtual void Init() override;
 

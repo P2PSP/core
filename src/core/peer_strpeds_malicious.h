@@ -33,7 +33,9 @@ class PeerStrpeDsMalicious : public PeerSTRPEDS {
   std::vector<boost::asio::ip::udp::endpoint> selected_peers_for_attack_;
 
  public:
-  PeerStrpeDsMalicious(){};
+  PeerStrpeDsMalicious(){
+    magic_flags_ = Common::kSTRPE;
+  };
   ~PeerStrpeDsMalicious(){};
   virtual void Init() override;
   virtual void SetBadMouthAttack(bool, std::string);

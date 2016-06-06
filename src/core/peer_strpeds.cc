@@ -96,9 +96,9 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  std::vector<char> chunk(chunk_size_);
 	  std::copy(message.data() + sizeof(uint16_t), message.data() + sizeof(uint16_t) + chunk_size_, chunk.data());
 
-	  char sigr[40];
+	  char sigr[41]; sigr[40]=0;
 	  std::copy(message.data() + sizeof(uint16_t) + chunk_size_, message.data() + sizeof(uint16_t) + chunk_size_ + 40, sigr);
-	  char sigs[40];
+	  char sigs[41]; sigs[40]=0;
 	  std::copy(message.data() + sizeof(uint16_t) + chunk_size_ + 40, message.data() + sizeof(uint16_t) + chunk_size_ + 40 + 40, sigs);
 
 	  std::vector<char> m(2 + 1024 + 4 + 2);
@@ -120,27 +120,30 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 
 	  //LOG("TAMANO: "+ std::to_string(h.size()));
 
-	  /*
+
 	  std::string str(h.begin(), h.end());
 	  LOG("HASH= " + str);
+
+	  /*
 	  LOG(" ----- MESSAGE ----- ");
 	  std::string b(m.begin(), m.end());
 	  LOG(b);
 	  LOG(" ---- FIN MESSAGE ----");
 
+
 	  LOG(" ---- SIGNATURES ----");
 	  LOG("->" << sigr << "<-");
 	  LOG("->" << sigs << "<-");
 	  LOG(" ---- FIN SIGNATURES ----");
-		*/
+	   */
 
 	  DSA_SIG* sig = DSA_SIG_new();
 
 	  BN_hex2bn(&sig->r, sigr);
 	  BN_hex2bn(&sig->s, sigs);
 
-	LOG("Size r: " << *(sig->r->d));
-	LOG("Size s: " << *(sig->s->d));
+	 LOG("Size r: " << *(sig->r->d));
+	 LOG("Size s: " << *(sig->s->d));
 
 	  if (DSA_do_verify((unsigned char*)h.data(), h.size(), sig, dsa_key)){
 		  TRACE("Sender is clean: sign verified. CN: " + std::to_string(chunk_number));

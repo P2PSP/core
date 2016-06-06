@@ -14,7 +14,9 @@
 
 namespace p2psp {
 
-MonitorDBS::MonitorDBS(){};
+MonitorDBS::MonitorDBS(){
+    magic_flags_ = Common::kDBS;
+};
 
 MonitorDBS::~MonitorDBS(){};
 
