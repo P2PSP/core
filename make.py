@@ -6,6 +6,7 @@ import sys
 import shutil
 import platform
 import subprocess
+import multiprocessing
 
 bin_dir = 'bin'
 build_dir = 'build'
@@ -27,7 +28,7 @@ if len(sys.argv) >= 2:
         make = make + ' VERBOSE=1'
     if sys.argv[1] == 'release':
         cmake = cmake + ' -DCMAKE_BUILD_TYPE=Release'
-        
+
     elif sys.argv[1] == 'only-cmake':
 #        cmake = cmake + ' -DTRACE_SILENT_MODE'
         only_cmake = True
@@ -49,7 +50,7 @@ sys_name = platform.system()
 
 if sys_name == 'Linux' or sys_name == 'Darwin':
     print('\nMaking for Linux...')
-    number_of_cores = int(subprocess.Popen("nproc", stdout=subprocess.PIPE).stdout.read())
+    number_of_cores = multiprocessing.cpu_count()
     print('Number of cores = ' + str(number_of_cores) + '\n')
 
     if build_debug:
