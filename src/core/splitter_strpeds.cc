@@ -224,8 +224,8 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 	//TRACE("HASH");
 
 
-	std::string str(h.begin(), h.end());
-	LOG("Chunk Number " + std::to_string(chunk_number) + " dest " + dst.address().to_string() + ":"+ std::to_string(dst.port()) +" HASH= " + str);
+	//std::string str(h.begin(), h.end());
+	//LOG("Chunk Number " + std::to_string(chunk_number) + " dest " + dst.address().to_string() + ":"+ std::to_string(dst.port()) +" HASH= " + str);
 
 	/*
 	LOG(" ----- MESSAGE ----- ");
@@ -306,7 +306,6 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 
 	while (alive_) {
 		size_t bytes_transferred = ReceiveMessage(message, sender);
-		LOG("Bytes Transfered= " + bytes_transferred);
 
 		if (bytes_transferred == 2) {
 			/*

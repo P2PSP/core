@@ -114,15 +114,15 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  (*(in_addr *)(m.data() + chunk_size_ + sizeof(uint16_t))) = addr;
 	  (*(uint16_t *)(m.data() + chunk_size_ + sizeof(uint16_t) + 4)) = htons(dst.port());
 
-	  LOG("chunk " + std::to_string(chunk_number) + "dst= " + dst.address().to_string() + ":" + std::to_string(dst.port()));
+	  //LOG("chunk " + std::to_string(chunk_number) + "dst= " + dst.address().to_string() + ":" + std::to_string(dst.port()));
 	  std::vector<char> h(32);
 	  Common::sha256(m, h);
 
 	  //LOG("TAMANO: "+ std::to_string(h.size()));
 
 
-	  std::string str(h.begin(), h.end());
-	  LOG("HASH= " + str);
+	  //std::string str(h.begin(), h.end());
+	  //LOG("HASH= " + str);
 
 	  /*
 	  LOG(" ----- MESSAGE ----- ");
