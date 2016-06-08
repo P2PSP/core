@@ -202,9 +202,16 @@ int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
   }
 
   // --------------- For current round ---------------------
-  current_round_ = ntohl(*(uint32_t *)(message.data() + sizeof(uint16_t) + chunk_size_ + 40 + 40));
-  LOG("Current Round: " << current_round_);
+  if (message.size()>2)
+	  current_round_ = ntohl(*(uint32_t *)(message.data() + sizeof(uint16_t) + chunk_size_ + 40 + 40));
+  	  LOG("Current Round: " << current_round_);
   //---------------------
+
+  if (message.size()==1026){
+	  std::string msg(message.begin(), message.end());
+	  LOG("Message of 1026: "+msg+" from "+std::to_string(sender.port()));
+	  return -1;
+  }
 
   if (IsCurrentMessageFromSplitter() or CheckMessage(message, sender)) {
     if (IsControlMessage(message) and (message[0] == 'B')) {
@@ -225,7 +232,7 @@ void PeerSTRPEDS::PlayNextChunk(int chunk_number) {
 
   for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
 	    if (chunks_[played_chunk_ % buffer_size_].received){
-	    	PlayChunk(played_chunk_);
+	    	//PlayChunk(played_chunk_);
 	    	chunks_[played_chunk_ % buffer_size_].received = false;
 	    	received_counter_--;
 	    	LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
@@ -258,6 +265,8 @@ std::string PeerSTRPEDS::BuildLogMessage(const std::string &message) {
   // return "{0}\t{1}".format(repr(time.time()), message)
 	return std::to_string(current_round_) + "\t" + message;
 }
+
+void PeerSTRPEDS::WaitForThePlayer() {}
 
 void PeerSTRPEDS::SetLogFile(const std::string &filename) {
   log_file_.open(filename);

@@ -56,6 +56,8 @@ class PeerSTRPEDS: public PeerDBS {
   virtual void Complain(int chunk_number);
   virtual std::string BuildLogMessage(const std::string &message) override;
 
+  virtual void WaitForThePlayer() override;
+
   virtual uint32_t GetCurrentRound();
   virtual void SetCurrentRound(uint32_t current_round);
 };

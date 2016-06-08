@@ -323,6 +323,8 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 				//asio::ip::udp::endpoint bad_peer = GetLosser(lost_chunk_number);
 				//HandleBadPeerFromTrusted(bad_peer, sender);
 				//LOG("Complaint from TP (" << sender.port() <<") about lost chunk " << lost_chunk_number << " by " << bad_peer.port());
+				uint16_t lost_chunk_number = GetLostChunkNumber(message);
+				ProcessLostChunk(lost_chunk_number, sender);
 			}
 
 		} else if (bytes_transferred == 5) {
@@ -476,7 +478,7 @@ void SplitterSTRPEDS::RefreshTPs(){
 			  boost::asio::ip::address address = boost::asio::ip::address::from_string(*t);
 			  t++;
 			  uint16_t port = atoi((*t).c_str());
-			  LOG("IP: " + address.to_string() + ":" + std::to_string(port));
+			  //LOG("IP: " + address.to_string() + ":" + std::to_string(port));
 			  AddTrustedPeer(boost::asio::ip::udp::endpoint(address,port));
 
 			}
