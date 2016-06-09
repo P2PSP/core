@@ -29,7 +29,6 @@ namespace p2psp {
   void PeerDBS::SayHello(const ip::udp::endpoint &node) {
     std::string hello("H");
 
-    TRACE("Send a message with size: " << hello.length())
     team_socket_.send_to(buffer(hello), node);
 
     TRACE("[Hello] sent to "
@@ -40,7 +39,6 @@ namespace p2psp {
   void PeerDBS::SayGoodbye(const ip::udp::endpoint &node) {
     std::string goodbye("G");
 
-    TRACE("Send a message with size: " << goodbye.length());
     team_socket_.send_to(buffer(goodbye), node);
 
     TRACE("[Goodbye] sent to "
@@ -194,7 +192,6 @@ namespace p2psp {
 					&& receive_and_feed_counter_ > 0) {
 				peer = peer_list_[receive_and_feed_counter_];
 
-				TRACE("Send a message with size: " << receive_and_feed_previous_.size());
 				team_socket_.send_to(::buffer(receive_and_feed_previous_),
 						peer);
 				sendto_counter_++;
@@ -218,8 +215,6 @@ namespace p2psp {
 
 			receive_and_feed_counter_ = 0;
 
-			TRACE("Saving a message with size: " << message.size() << " and chunk number " << message[0]);
-
 			receive_and_feed_previous_ = message;
 		} else {
 			TRACE(
@@ -241,15 +236,14 @@ namespace p2psp {
 		// of
 		// the list of peers.
 
-		//std::vector<char> empty(1024, 0);
+		std::vector<char> empty(message_size_, 0);
 
 		if (receive_and_feed_counter_ < (int) peer_list_.size()
-				&& !receive_and_feed_previous_.empty()) {
+				&& receive_and_feed_previous_!=empty) {
 			// Send the previous chunk in congestion avoiding mode.
 
 			peer = peer_list_[receive_and_feed_counter_];
 
-			TRACE("Send a message with size " << receive_and_feed_previous_.size());
 			team_socket_.send_to(::buffer(receive_and_feed_previous_), peer);
 			sendto_counter_++;
 

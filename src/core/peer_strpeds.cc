@@ -90,8 +90,9 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
     return false;
   }
 
-  if (!IsControlMessage(message)) {
 
+  if (!IsControlMessage(message)) {
+	  LOG("MESSAGE SIZE: " << message.size() << " from " << sender.port());
 	  uint16_t chunk_number = ntohs(*(short *)message.data());
 	  std::vector<char> chunk(chunk_size_);
 	  std::copy(message.data() + sizeof(uint16_t), message.data() + sizeof(uint16_t) + chunk_size_, chunk.data());
@@ -120,11 +121,11 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 
 	  //LOG("TAMANO: "+ std::to_string(h.size()));
 
-
-	  //std::string str(h.begin(), h.end());
-	  //LOG("HASH= " + str);
-
 	  /*
+	  std::string str(h.begin(), h.end());
+	  LOG("HASH= " + str);
+
+
 	  LOG(" ----- MESSAGE ----- ");
 	  std::string b(m.begin(), m.end());
 	  LOG(b);
@@ -142,8 +143,8 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  BN_hex2bn(&sig->r, sigr);
 	  BN_hex2bn(&sig->s, sigs);
 
-	 LOG("Size r: " << *(sig->r->d));
-	 LOG("Size s: " << *(sig->s->d));
+	 LOG("Size r: " << sig->r->d);
+	 LOG("Size s: " << sig->s->d);
 
 	  if (DSA_do_verify((unsigned char*)h.data(), h.size(), sig, dsa_key)){
 		  TRACE("Sender is clean: sign verified. CN: " + std::to_string(chunk_number));
@@ -202,16 +203,10 @@ int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
   }
 
   // --------------- For current round ---------------------
-  if (message.size()>2)
+  if (!IsControlMessage(message))
 	  current_round_ = ntohl(*(uint32_t *)(message.data() + sizeof(uint16_t) + chunk_size_ + 40 + 40));
   	  LOG("Current Round: " << current_round_);
   //---------------------
-
-  if (message.size()==1026){
-	  std::string msg(message.begin(), message.end());
-	  LOG("Message of 1026: "+msg+" from "+std::to_string(sender.port()));
-	  return -1;
-  }
 
   if (IsCurrentMessageFromSplitter() or CheckMessage(message, sender)) {
     if (IsControlMessage(message) and (message[0] == 'B')) {
@@ -267,6 +262,25 @@ std::string PeerSTRPEDS::BuildLogMessage(const std::string &message) {
 }
 
 void PeerSTRPEDS::WaitForThePlayer() {}
+
+void PeerSTRPEDS::ReceiveTheHeader() {
+    int header_size_in_bytes = header_size_in_chunks_ * chunk_size_;
+    std::vector<char> header(header_size_in_bytes);
+
+    boost::system::error_code ec;
+    streambuf chunk;
+
+    read(splitter_socket_, chunk, transfer_exactly(header_size_in_bytes), ec);
+
+    if (ec) {
+      ERROR(ec.message());
+      splitter_socket_.close();
+      ConnectToTheSplitter();
+    }
+
+    TRACE("Received " << std::to_string(header_size_in_bytes)
+          << "bytes of header");
+  }
 
 void PeerSTRPEDS::SetLogFile(const std::string &filename) {
   log_file_.open(filename);
