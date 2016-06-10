@@ -177,16 +177,6 @@ namespace p2psp {
 
 			TRACE(
 					"(" << team_socket_.local_endpoint().address().to_string() << "," << std::to_string(team_socket_.local_endpoint().port()) << ")" << "<-" << std::to_string(chunk_number) << "-" << "(" << sender.address().to_string() << "," << std::to_string(sender.port()) << ")");
-			// No aqui. Tal vez, DIS
-
-			if (logging_ and latest_chunk_number_ != 0) {
-				LogMessage(
-						"buffer correctnes "
-								+ std::to_string(CalcBufferCorrectness()));
-				LogMessage(
-						"buffer filling "
-								+ std::to_string(CalcBufferFilling()));
-			}
 
 			while (receive_and_feed_counter_ < (int) peer_list_.size()
 					&& receive_and_feed_counter_ > 0) {

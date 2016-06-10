@@ -324,6 +324,7 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 				//HandleBadPeerFromTrusted(bad_peer, sender);
 				//LOG("Complaint from TP (" << sender.port() <<") about lost chunk " << lost_chunk_number << " by " << bad_peer.port());
 				uint16_t lost_chunk_number = GetLostChunkNumber(message);
+				trusted_peers_discovered_.push_back(sender);
 				ProcessLostChunk(lost_chunk_number, sender);
 			}
 
@@ -338,6 +339,7 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 			if (find(trusted_peers_.begin(), trusted_peers_.end(), sender)
 					!= trusted_peers_.end()) {
 				LOG("Complaint about bad peer from " << sender.address().to_string() << ":" << sender.port());
+				trusted_peers_discovered_.push_back(sender);
 				ProcessBadPeersMessage(message, sender);
 			}
 		}
@@ -403,7 +405,7 @@ void SplitterSTRPEDS::HandleBadPeerFromTrusted(
 		const boost::asio::ip::udp::endpoint &bad_peer,
 		const boost::asio::ip::udp::endpoint &sender) {
 	AddComplain(bad_peer, sender);
-	if (std::find(bad_peers_.begin(), bad_peers_.end(), sender) ==
+	if (std::find(bad_peers_.begin(), bad_peers_.end(), bad_peer) ==
 	      bad_peers_.end()) {
 		bad_peers_.push_back(bad_peer);
 	}
@@ -461,6 +463,7 @@ void SplitterSTRPEDS::PunishPeer(const boost::asio::ip::udp::endpoint &peer,
 void SplitterSTRPEDS::OnRoundBeginning(){
 	RefreshTPs();
 	PunishPeers();
+	PunishTPs();
 }
 
 void SplitterSTRPEDS::RefreshTPs(){
@@ -503,11 +506,56 @@ void SplitterSTRPEDS::PunishPeers(){
 
 }
 
+void SplitterSTRPEDS::PunishTPs(){
+	int r;
+	for (unsigned int i =0; i<trusted_peers_discovered_.size(); i++) {
+				r = rand() % 100 + 1;
+				if (r <= p_tpl_){
+					PunishPeer(trusted_peers_discovered_[i], "by splitter");
+					trusted_peers_discovered_.erase(remove(trusted_peers_discovered_.begin(), trusted_peers_discovered_.end(), trusted_peers_discovered_[i]),
+							trusted_peers_discovered_.end());
+				}
+	}
+
+}
+
+void SplitterSTRPEDS::IncrementUnsupportivityOfPeer(
+                                                const boost::asio::ip::udp::endpoint &peer) {
+  bool peerExists = true;
+
+  try {
+	  if (find(trusted_peers_.begin(), trusted_peers_.end(), peer)
+	  								== trusted_peers_.end()) {
+		  losses_[peer] += 1;
+	  }
+  } catch (std::exception e) {
+    TRACE("The unsupportive peer " << peer << " does not exist!");
+    peerExists = false;
+  }
+
+  if (peerExists) {
+    TRACE("" << peer << " has lost " << to_string(losses_[peer]) << " chunks");
+
+    if (losses_[peer] > max_number_of_chunk_loss_) {
+    	if (std::find(bad_peers_.begin(), bad_peers_.end(), peer) ==
+    		      bad_peers_.end()) {
+    			bad_peers_.push_back(peer);
+    		}
+    }
+  }
+}
+
 void SplitterSTRPEDS::SetPMPL(int probability){
 	p_mpl_=probability;
 }
 int SplitterSTRPEDS::GetPMPL(){
 	return p_mpl_;
+}
+void SplitterSTRPEDS::SetPTPL(int probability){
+	p_tpl_=probability;
+}
+int SplitterSTRPEDS::GetPTPL(){
+	return p_tpl_;
 }
 void SplitterSTRPEDS::SetLogFile(const std::string &filename) {
   log_file_.open(filename);

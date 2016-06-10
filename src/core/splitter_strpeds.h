@@ -41,6 +41,7 @@ class SplitterSTRPEDS : public SplitterDBS {
   const int kCurrentRound = 0;
 
   int p_mpl_ = 100;
+  int p_tpl_ = 100;
 
   int digest_size_;
   int gather_bad_peers_sleep_;
@@ -50,6 +51,7 @@ class SplitterSTRPEDS : public SplitterDBS {
   int current_round_;
  
   std::vector<boost::asio::ip::udp::endpoint> trusted_peers_;
+  std::vector<boost::asio::ip::udp::endpoint> trusted_peers_discovered_;
   std::vector<boost::asio::ip::udp::endpoint> bad_peers_;
 
   int gathering_counter_;
@@ -93,13 +95,18 @@ class SplitterSTRPEDS : public SplitterDBS {
   void OnRoundBeginning();
   void RefreshTPs();
   void PunishPeers();
+  void PunishTPs();
   
   void SetLogging(bool enabled);
   void SetPMPL(int probability);
   int GetPMPL();
+  void SetPTPL(int probability);
+  int GetPTPL();
   void SetLogFile(const std::string &filename);
   void LogMessage(const std::string &message);
-  std::string BuildLogMessage(const std::string &message);	   
+  std::string BuildLogMessage(const std::string &message);
+
+  void IncrementUnsupportivityOfPeer(const boost::asio::ip::udp::endpoint &peer) override;
   
   //void SetLogging(bool enabled);
   //void SetLogFile(const std::string &filename);

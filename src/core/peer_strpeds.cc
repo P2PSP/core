@@ -143,8 +143,8 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  BN_hex2bn(&sig->r, sigr);
 	  BN_hex2bn(&sig->s, sigs);
 
-	 LOG("Size r: " << sig->r->d);
-	 LOG("Size s: " << sig->s->d);
+	 LOG("Size r: " << *(sig->r->d));
+	 LOG("Size s: " << *(sig->s->d));
 
 	  if (DSA_do_verify((unsigned char*)h.data(), h.size(), sig, dsa_key)){
 		  TRACE("Sender is clean: sign verified. CN: " + std::to_string(chunk_number));
@@ -203,9 +203,17 @@ int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
   }
 
   // --------------- For current round ---------------------
-  if (!IsControlMessage(message))
+  if (!IsControlMessage(message) and IsCurrentMessageFromSplitter()){
 	  current_round_ = ntohl(*(uint32_t *)(message.data() + sizeof(uint16_t) + chunk_size_ + 40 + 40));
   	  LOG("Current Round: " << current_round_);
+	  if (logging_ and latest_chunk_number_ != 0) {
+		LogMessage("buffer correctnes " + std::to_string(CalcBufferCorrectness()));
+	    LogMessage("buffer filling " + std::to_string(CalcBufferFilling()));
+	    if (peer_list_.size() > 0)
+	    	LogMessage("buffer fullness " + std::to_string(1-(losses_/(float)peer_list_.size())));
+	  }
+	  losses_ = 0;
+  }
   //---------------------
 
   if (IsCurrentMessageFromSplitter() or CheckMessage(message, sender)) {
@@ -233,9 +241,12 @@ void PeerSTRPEDS::PlayNextChunk(int chunk_number) {
 	    	LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
 	    }else{
 	    	Complain(played_chunk_);
-	    	if (logging_) {
+	    	losses_++;
+	    	/*
+	    	 if (logging_) {
 	    		  LogMessage("chunk lost at " + std::to_string(played_chunk_ % buffer_size_));
 	    	}
+	    	*/
 	    	LOG("Chunk lost at: " << played_chunk_ % buffer_size_)
 	    }
 
