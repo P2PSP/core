@@ -508,7 +508,7 @@ void SplitterSTRPEDS::PunishPeers(){
 
 void SplitterSTRPEDS::PunishTPs(){
 	int r;
-	for (unsigned int i =0; i<trusted_peers_discovered_.size(); i++) {
+	for (unsigned int i = 0; i<trusted_peers_discovered_.size(); i++) {
 				r = rand() % 100 + 1;
 				if (r <= p_tpl_){
 					PunishPeer(trusted_peers_discovered_[i], "by splitter");
