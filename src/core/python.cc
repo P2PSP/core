@@ -504,6 +504,10 @@ public:
   void SetRecAndFeedCounter (int receive_and_feed_counter ){
     receive_and_feed_counter_ = receive_and_feed_counter;
   }
+
+  void KillThePlayer(){
+    player_alive_ = false;
+  }
 };
 
   
@@ -768,6 +772,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("ProcessBadMessage", &PyPeerSTRPEDS::ProcessBadMessage)
     .def("SetLogging", &PyPeerSTRPEDS::SetLogging)
     .def("SetLogFile", &PyPeerSTRPEDS::SetLogFile)
+    .def("KillThePlayer", &PyPeerSTRPEDS::KillThePlayer)
     //.def("SendRegularChunk", &PyPeerSTRPEDS::SendRegularChunk)
     //.def("SendFakeChunk", &PyPeerSTRPEDS::SendFakeChunk)
     ;
