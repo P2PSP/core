@@ -324,7 +324,7 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 				//HandleBadPeerFromTrusted(bad_peer, sender);
 				//LOG("Complaint from TP (" << sender.port() <<") about lost chunk " << lost_chunk_number << " by " << bad_peer.port());
 				uint16_t lost_chunk_number = GetLostChunkNumber(message);
-				trusted_peers_discovered_.push_back(sender);
+				//trusted_peers_discovered_.push_back(sender);
 				ProcessLostChunk(lost_chunk_number, sender);
 			}
 
@@ -565,6 +565,7 @@ void SplitterSTRPEDS::SetLogging(bool enabled) { logging_ = enabled; }
 
 void SplitterSTRPEDS::LogMessage(const std::string &message) {
 	log_file_ << BuildLogMessage(message+"\n");
+	log_file_.flush();
 	// TODO: Where to close the ofstream?
 }
 

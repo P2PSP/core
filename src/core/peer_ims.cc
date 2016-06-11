@@ -470,7 +470,7 @@ namespace p2psp {
     // TODO: self.LOG_FILE.write(self.build_log_message(message) + "\n")
     // print >>self.LOG_FILE, self.build_log_message(message)
 	log_file_ << BuildLogMessage(message+"\n");
-
+	log_file_.flush();
   }
 
   std::string PeerIMS::BuildLogMessage(const std::string &message) {
