@@ -379,26 +379,32 @@ void SplitterSTRPEDS::ProcessBadPeersMessage(const std::vector<char> &message,
 	std::string m(message.begin(), message.end());
 	LOG("Message received: " << m);
 
+	/* CAMBIAR: RECIBIR TODA LA LISTA EN UN ENVIO (se pueden colar mensajes de otros peers) */
+
 	for (int i = 0; i < bad_number; i++) {
 		team_socket_.receive_from(asio::buffer(msg), sdr, 0, ec);
 		if (ec)
 			ERROR("Unexepected error: " << ec.message());
 
-		in_addr ip_raw = *(in_addr *)(msg.data());
-		ip_addr = boost::asio::ip::address::from_string(inet_ntoa(ip_raw));
-		port = ntohs(*(short *)(msg.data() + 4));
+		if (sdr == sender){
+			in_addr ip_raw = *(in_addr *)(msg.data());
+			ip_addr = boost::asio::ip::address::from_string(inet_ntoa(ip_raw));
+			port = ntohs(*(short *)(msg.data() + 4));
 
-		bad_peer = boost::asio::ip::udp::endpoint(ip_addr, port);
+			bad_peer = boost::asio::ip::udp::endpoint(ip_addr, port);
 
-		TRACE(
-				"BAD Peer: " + bad_peer.address().to_string() + ":"
-						+ to_string(bad_peer.port()));
+			TRACE(
+					"BAD Peer: " + bad_peer.address().to_string() + ":"
+							+ to_string(bad_peer.port()));
 
-		if (std::find(trusted_peers_.begin(), trusted_peers_.end(), sdr)
-				!= trusted_peers_.end()) {
-			HandleBadPeerFromTrusted(bad_peer, sdr);
-		} else {
-			//HandleBadPeerFromRegular(bad_peer, sdr);
+			if (std::find(trusted_peers_.begin(), trusted_peers_.end(), sdr)
+					!= trusted_peers_.end()) {
+				HandleBadPeerFromTrusted(bad_peer, sdr);
+			} else {
+				//HandleBadPeerFromRegular(bad_peer, sdr);
+			}
+		}else{
+			ERROR("Message received while BAD list was being listened");
 		}
 
 	}

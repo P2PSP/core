@@ -165,7 +165,8 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 int PeerSTRPEDS::HandleBadPeersRequest() {
   std::string bad("bad");
   std::vector<char> header(5);
-  std::vector<char> msg(8);
+  std::vector<char> msg(6);
+  ip::udp::endpoint peer;
 
   std::copy(bad.begin(), bad.end(), header.begin());
 
@@ -175,20 +176,32 @@ int PeerSTRPEDS::HandleBadPeersRequest() {
   TRACE("BAD = " + str + " peer size= " + std::to_string(bad_peers_.size()));
 
   std::string m(header.begin(), header.end());
-  LOG("Message received: " << m);
+  LOG("Message Header: " << m);
 
   team_socket_.send_to(buffer(header), splitter_);
 
   TRACE("Bad Header sent to the splitter");
 
-  std::vector<ip::udp::endpoint>::iterator peer;
-  for ( peer = bad_peers_.begin(); peer != bad_peers_.end(); peer++) {
+  //std::vector<ip::udp::endpoint>::iterator peer;
+  //for ( peer = bad_peers_.begin(); peer != bad_peers_.end(); peer++) {
+
+  /* CAMBIAR: ENVIAR TODA LA LISTA EN UN ENVIO (se pueden colar mensajes de otros peers) */
+
+
+  for (unsigned int i = 0; i < bad_peers_.size(); i++){
+	peer = bad_peers_.at(i);
     in_addr net_ip;
-    inet_aton((*peer).address().to_string().c_str(), &net_ip);
+    LOG("IP: " << peer.address().to_string());
+    inet_aton(peer.address().to_string().c_str(), &net_ip);
     std::memcpy(msg.data(), &net_ip, sizeof(net_ip));
-    int port = htons(peer->port());
+    LOG("Port: " << peer.port());
+    int port = htons(peer.port());
     std::memcpy(msg.data() + sizeof(net_ip), &port, sizeof(port));
+
     team_socket_.send_to(buffer(msg), splitter_);
+
+    std::string s(msg.begin(), msg.end());
+    LOG("Message List: " << s);
   }
 
   //bad_peers_.clear();
