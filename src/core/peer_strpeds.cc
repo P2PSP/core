@@ -169,10 +169,13 @@ int PeerSTRPEDS::HandleBadPeersRequest() {
 
   std::copy(bad.begin(), bad.end(), header.begin());
 
-  *((uint16_t *)(header.data() + bad.size())) = (uint16_t)bad_peers_.size();
+  *((uint16_t *)(header.data() + bad.size())) = htons((uint16_t)bad_peers_.size());
 
   std::string str(header.begin(),header.end());
   TRACE("BAD = " + str + " peer size= " + std::to_string(bad_peers_.size()));
+
+  std::string m(header.begin(), header.end());
+  LOG("Message received: " << m);
 
   team_socket_.send_to(buffer(header), splitter_);
 

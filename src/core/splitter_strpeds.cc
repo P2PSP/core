@@ -372,9 +372,12 @@ void SplitterSTRPEDS::ProcessBadPeersMessage(const std::vector<char> &message,
 	boost::asio::ip::address ip_addr;
     uint16_t port;
 
-	uint16_t bad_number = *(uint16_t *) (message.data() + 3);
+	uint16_t bad_number = ntohs(*(uint16_t *) (message.data() + 3));
 
 	LOG("Number of BAD: "+ std::to_string(bad_number));
+
+	std::string m(message.begin(), message.end());
+	LOG("Message received: " << m);
 
 	for (int i = 0; i < bad_number; i++) {
 		team_socket_.receive_from(asio::buffer(msg), sdr, 0, ec);
