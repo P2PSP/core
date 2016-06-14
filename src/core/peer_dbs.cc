@@ -268,7 +268,8 @@ namespace p2psp {
 				debt_[sender] = 0;
 				TRACE(
 						"(" << sender.address().to_string() << "," << std::to_string(sender.port()) << ")" << " added by [hello] ");
-			} else {
+			}
+		} else {
 				if (peer_list_.end()
 						!= std::find(peer_list_.begin(), peer_list_.end(),
 								sender)) {
@@ -280,15 +281,21 @@ namespace p2psp {
 							std::find(peer_list_.begin(), peer_list_.end(),
 									sender));
 					debt_.erase(sender);
+					receive_and_feed_counter_--;
+				}else{
+					if (sender == splitter_){
+						waiting_for_goodbye_ = false;
+
+					}
 				}
+
 			}
 
-			return -1;
-		}
+		return -1;
 	}
 
 	return -1;
-}
+  }
 
   float PeerDBS::CalcBufferCorrectness() {
     std::vector<char> zerochunk(1024, 0);
@@ -325,16 +332,22 @@ namespace p2psp {
   }
 
   void PeerDBS::PoliteFarewell() {
-    TRACE("Goodbye!");
+	std::vector<char> message(message_size_);
+	ip::udp::endpoint sender;
 
-    for (int i = 0; i < 3; i++) {
-      // ProcessNextMessage();
-      SayGoodbye(splitter_);
-    }
+    TRACE("Goodbye!");
 
     for (std::vector<ip::udp::endpoint>::iterator it = peer_list_.begin();
          it != peer_list_.end(); ++it) {
       SayGoodbye(*it);
+      //team_socket_.receive_from(buffer(message), sender);
+    }
+
+    while (receive_and_feed_counter_ < (int) peer_list_.size()) {
+    	team_socket_.send_to(::buffer(receive_and_feed_previous_), peer_list_[receive_and_feed_counter_]);
+    	team_socket_.receive_from(buffer(message), sender, 0);
+    	TRACE("(" << team_socket_.local_endpoint().address().to_string() << "," << std::to_string(team_socket_.local_endpoint().port()) << ")" << "-" << std::to_string(ntohs(receive_and_feed_previous_[0])) << "->" << "(" << peer_list_[receive_and_feed_counter_].address().to_string() << "," << std::to_string(peer_list_[receive_and_feed_counter_].port()) << ")");
+    	receive_and_feed_counter_++;
     }
   }
 
@@ -357,6 +370,8 @@ namespace p2psp {
 
     debt_memory_ = 1 << max_chunk_debt_/*kMaxChunkDebt*/;
 
+    waiting_for_goodbye_ = true;
+
     PeerIMS::BufferData();
   }
 
@@ -366,7 +381,21 @@ namespace p2psp {
   }
 
   void PeerDBS::Run() {
-    PeerIMS::Run();
+	 std::vector<char> message(message_size_);
+	 ip::udp::endpoint sender;
+
+	 while (player_alive_ or waiting_for_goodbye_) {
+	       KeepTheBufferFull();
+
+	       if (!player_alive_){
+	    	   //or (int i = 0; i < 1; i++) {
+	    	         // ProcessNextMessage();
+	    	         SayGoodbye(splitter_);
+	    	         //team_socket_.receive_from(buffer(message), sender);
+	    	       //}
+	       }
+	        //PlayNextChunk();
+	}
     PoliteFarewell();
   }
 

@@ -354,24 +354,6 @@ namespace p2psp {
     }
   }
 
-  void SplitterIMS::SayGoodbye() {
-    char message[1];
-    message[0] = '\0';
-
-    asio::ip::udp::endpoint destination(
-                                        asio::ip::address::from_string("127.0.0.1"), team_port_);
-
-    system::error_code ec;
-
-    size_t bytes_transferred =
-      team_socket_.send_to(asio::buffer(message), destination, 0, ec);
-
-    TRACE("Bytes transferred saying goodbye: " << to_string(bytes_transferred));
-
-    if (ec) {
-      ERROR("Error saying goodbye: " << ec.message());
-    }
-  }
 
   bool SplitterIMS::isAlive() { return alive_; }
 

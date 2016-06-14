@@ -219,6 +219,17 @@ namespace p2psp {
     // TODO: stdout flush?
 
     RemovePeer(peer);
+
+    SayGoodbye(peer);
+  }
+
+  void SplitterDBS::SayGoodbye(const boost::asio::ip::udp::endpoint &peer) {
+	  std::string goodbye("G");
+	  team_socket_.send_to(boost::asio::buffer(goodbye), peer);
+
+      TRACE("[Goodbye] sent to "
+              << "(" << peer.address().to_string() << ","
+              << std::to_string(peer.port()) << ")");
   }
 
   void SplitterDBS::ModerateTheTeam() {

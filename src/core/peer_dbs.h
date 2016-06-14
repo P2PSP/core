@@ -49,6 +49,7 @@ namespace p2psp {
     ip::udp::endpoint me_;
 
     int debt_memory_;
+    bool waiting_for_goodbye_;
 
   public:
     PeerDBS();

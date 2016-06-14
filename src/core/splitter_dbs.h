@@ -89,6 +89,7 @@ class SplitterDBS : public SplitterIMS {
   virtual void ResetCounters();
   void ResetCountersThread();
   virtual void ComputeNextPeerNumber(boost::asio::ip::udp::endpoint &peer);
+  void SayGoodbye(const boost::asio::ip::udp::endpoint &peer);
 
   // Thread management
   virtual void Start() override;
