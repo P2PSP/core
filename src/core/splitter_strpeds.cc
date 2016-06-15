@@ -38,9 +38,12 @@ void SplitterSTRPEDS::HandleAPeerArrival(
 	SendTheListOfPeers(serve_socket);
 	SendDsaKey(serve_socket);
 	serve_socket->close();
-	InsertPeer(
-			boost::asio::ip::udp::endpoint(incoming_peer.address(),
-					incoming_peer.port()));
+
+	InsertPeer(boost::asio::ip::udp::endpoint(incoming_peer.address(),incoming_peer.port()));
+
+	//InsertPeer(
+	//		boost::asio::ip::udp::endpoint(incoming_peer.address(),
+	//				incoming_peer.port()));
 }
 
 void SplitterSTRPEDS::SendDsaKey(
@@ -146,18 +149,6 @@ void SplitterSTRPEDS::Run() {
 	while (alive_) {
 		asio::streambuf chunk;
 
-
-		if (peer_number_ == 0){
-			OnRoundBeginning();
-			for (unsigned int i=0; i<outgoing_peer_list_.size(); i++){
-				RemovePeer(outgoing_peer_list_[i]);
-			  SayGoodbye(outgoing_peer_list_[i]);
-			}
-
-			outgoing_peer_list_.clear();
-		}
-
-
 		size_t bytes_transferred = ReceiveChunk(chunk);
 
 		try {
@@ -192,9 +183,20 @@ void SplitterSTRPEDS::Run() {
 				}
 			}
 
+			if (peer_number_ == ((int) peer_list_.size()) - 1){
+				OnRoundBeginning();
+
+				for (unsigned int i=0; i<outgoing_peer_list_.size(); i++){
+					RemovePeer(outgoing_peer_list_[i]);
+					SayGoodbye(outgoing_peer_list_[i]);
+				}
+
+				outgoing_peer_list_.clear();
+
+			}
+
 			//TODO: Here or before logging?
 			ComputeNextPeerNumber(peer);
-
 
 		} catch (const std::out_of_range &oor) {
 			TRACE("The monitor peer has died!");
