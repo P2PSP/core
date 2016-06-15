@@ -178,7 +178,7 @@ namespace p2psp {
 					"(" << team_socket_.local_endpoint().address().to_string() << "," << std::to_string(team_socket_.local_endpoint().port()) << ")" << "<-" << std::to_string(chunk_number) << "-" << "(" << sender.address().to_string() << "," << std::to_string(sender.port()) << ")");
 
 			while (receive_and_feed_counter_ < (int) peer_list_.size()
-					&& receive_and_feed_counter_ > 0) {
+					&& (receive_and_feed_counter_ > 0 or modified_list_)) {
 				peer = peer_list_[receive_and_feed_counter_];
 
 				team_socket_.send_to(buffer(receive_and_feed_previous_),
@@ -197,12 +197,13 @@ namespace p2psp {
 					peer_list_.erase(
 							std::find(peer_list_.begin(), peer_list_.end(),
 									peer));
-					receive_and_feed_counter_--;
+					//receive_and_feed_counter_--;
 				}
 
 				receive_and_feed_counter_++;
 			}
 
+			modified_list_ = false;
 			TRACE("Sent " << receive_and_feed_counter_ << " of " << peer_list_.size() );
 			receive_and_feed_counter_ = 0;
 			TRACE("Last Chunk saved in receive and feed: " << ntohs(*(uint16_t *)message.data()));
@@ -235,6 +236,7 @@ namespace p2psp {
 
 			peer = peer_list_[receive_and_feed_counter_];
 
+			TRACE("Sending in congestion avoiding mode to " << peer.address().to_string() << ":" << peer.port() << "/ counter " << receive_and_feed_counter_)
 			team_socket_.send_to(buffer(receive_and_feed_previous_), peer);
 			sendto_counter_++;
 
@@ -246,7 +248,7 @@ namespace p2psp {
 				debt_.erase(peer);
 				peer_list_.erase(
 						std::find(peer_list_.begin(), peer_list_.end(), peer));
-				receive_and_feed_counter_--;
+				//receive_and_feed_counter_--;
 			}
 
 			TRACE(
@@ -283,9 +285,13 @@ namespace p2psp {
 							std::find(peer_list_.begin(), peer_list_.end(),
 									sender));
 					debt_.erase(sender);
-					receive_and_feed_counter_--;
+					if (receive_and_feed_counter_ > 0){
+						modified_list_ = true;
+						receive_and_feed_counter_--;
+					}
 				}else{
 					if (sender == splitter_){
+						TRACE("Goodbye received from splitter");
 						waiting_for_goodbye_ = false;
 					}
 				}
@@ -338,18 +344,19 @@ namespace p2psp {
 
     TRACE("Goodbye!");
 
+    while (receive_and_feed_counter_ < (int) peer_list_.size()) {
+    	team_socket_.send_to(buffer(receive_and_feed_previous_), peer_list_[receive_and_feed_counter_]);
+    	team_socket_.receive_from(buffer(message), sender);
+    	TRACE("(" << team_socket_.local_endpoint().address().to_string() << "," << std::to_string(team_socket_.local_endpoint().port()) << ")" << "-" << std::to_string(ntohs(*(uint16_t*)receive_and_feed_previous_.data())) << "->" << "(" << peer_list_[receive_and_feed_counter_].address().to_string() << "," << std::to_string(peer_list_[receive_and_feed_counter_].port()) << ")");
+    	receive_and_feed_counter_++;
+    }
+
     for (std::vector<ip::udp::endpoint>::iterator it = peer_list_.begin();
          it != peer_list_.end(); ++it) {
       SayGoodbye(*it);
       team_socket_.receive_from(buffer(message), sender);
     }
 
-    while (receive_and_feed_counter_ < (int) peer_list_.size()) {
-    	team_socket_.send_to(buffer(receive_and_feed_previous_), peer_list_[receive_and_feed_counter_]);
-    	//team_socket_.receive_from(buffer(message), sender);
-    	TRACE("(" << team_socket_.local_endpoint().address().to_string() << "," << std::to_string(team_socket_.local_endpoint().port()) << ")" << "-" << std::to_string(ntohs(*(uint16_t*)receive_and_feed_previous_.data())) << "->" << "(" << peer_list_[receive_and_feed_counter_].address().to_string() << "," << std::to_string(peer_list_[receive_and_feed_counter_].port()) << ")");
-    	receive_and_feed_counter_++;
-    }
 
     TRACE("Ready to leave the team!");
   }
@@ -391,7 +398,7 @@ namespace p2psp {
 	       KeepTheBufferFull();
 
 	       if (!player_alive_){
-	    	   //or (int i = 0; i < 1; i++) {
+	    	   //for (int i = 0; i < 1; i++) {
 	    	         // ProcessNextMessage();
 	    	         SayGoodbye(splitter_);
 	    	         //team_socket_.receive_from(buffer(message), sender);

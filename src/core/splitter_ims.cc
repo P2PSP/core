@@ -344,7 +344,7 @@ namespace p2psp {
 
       copy(asio::buffer_cast<const char *>(chunk.data()),
            asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
-           message.data() + sizeof(uint16_t));
+		   message.data() + sizeof(uint16_t));
 
       SendChunk(message, mcast_channel_);
 

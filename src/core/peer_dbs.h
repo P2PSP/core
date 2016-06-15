@@ -50,6 +50,8 @@ namespace p2psp {
 
     int debt_memory_;
     bool waiting_for_goodbye_;
+    bool modified_list_;
+
 
   public:
     PeerDBS();

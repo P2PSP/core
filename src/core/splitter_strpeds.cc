@@ -33,7 +33,7 @@ void SplitterSTRPEDS::SetMajorityRatio(int majority_ratio) {
 void SplitterSTRPEDS::HandleAPeerArrival(
 		std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) {
 	asio::ip::tcp::endpoint incoming_peer = serve_socket->remote_endpoint();
-	TRACE("Accepted connection from peer " << incoming_peer);
+	TRACE("STRPEDS: Accepted connection from peer " << incoming_peer);
 	SendConfiguration(serve_socket);
 	SendTheListOfPeers(serve_socket);
 	SendDsaKey(serve_socket);
@@ -145,7 +145,21 @@ void SplitterSTRPEDS::Run() {
 
 	while (alive_) {
 		asio::streambuf chunk;
+
+
+		if (peer_number_ == 0){
+			OnRoundBeginning();
+			for (unsigned int i=0; i<outgoing_peer_list_.size(); i++){
+				RemovePeer(outgoing_peer_list_[i]);
+			  SayGoodbye(outgoing_peer_list_[i]);
+			}
+
+			outgoing_peer_list_.clear();
+		}
+
+
 		size_t bytes_transferred = ReceiveChunk(chunk);
+
 		try {
 			peer = peer_list_.at(peer_number_);
 			/*
@@ -178,13 +192,8 @@ void SplitterSTRPEDS::Run() {
 				}
 			}
 
-			if (peer_number_ == 0){
-				OnRoundBeginning();
-			}
-
 			//TODO: Here or before logging?
 			ComputeNextPeerNumber(peer);
-
 
 
 		} catch (const std::out_of_range &oor) {
@@ -193,6 +202,8 @@ void SplitterSTRPEDS::Run() {
 		}
 
 		chunk.consume(bytes_transferred);
+
+
 	}
 }
 
