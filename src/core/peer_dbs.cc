@@ -203,6 +203,15 @@ namespace p2psp {
 				receive_and_feed_counter_++;
 			}
 
+
+			// Start playback with the first chunk received from the splitter //
+			std::vector<char> empty(message_size_, 0);
+			if (receive_and_feed_previous_ == empty){
+				played_chunk_ = ntohs(*(uint16_t *)message.data());
+			    TRACE("First chunk to play modified " << std::to_string(played_chunk_));
+			}
+			// --------------------------------------------- //
+
 			modified_list_ = false;
 			TRACE("Sent " << receive_and_feed_counter_ << " of " << peer_list_.size() );
 			receive_and_feed_counter_ = 0;
