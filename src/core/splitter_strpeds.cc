@@ -312,7 +312,8 @@ void SplitterSTRPEDS::AddTrustedPeer(
 void SplitterSTRPEDS::ModerateTheTeam() {
 	// TODO: Check if something fails and a try catch statement has to be added
 
-	std::vector<char> message(5);
+	// Max: 50 peer (6 bytes for each one) + 3bytes for header
+	std::vector<char> message(303, 0);
 	asio::ip::udp::endpoint sender;
 
 	TRACE("ALIVE?" + alive_);
@@ -341,29 +342,24 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 				ProcessLostChunk(lost_chunk_number, sender);
 			}
 
-		} else if (bytes_transferred == 5) {
-			/*
-			 Trusted peer sends hash of received chunk
-			 number of chunk, hash (sha256) of chunk
-			 */
-
-			LOG("Bad complaint received");
-
-			if (find(trusted_peers_.begin(), trusted_peers_.end(), sender)
-					!= trusted_peers_.end()) {
-				LOG("Complaint about bad peer from " << sender.address().to_string() << ":" << sender.port());
-				trusted_peers_discovered_.push_back(sender);
-				ProcessBadPeersMessage(message, sender);
-			}
-		}
-
-		else {
+		} else {
 			/*
 			 The peer wants to leave the team.
 
 			 A !2-length payload means that the peer wants to go
 			 away.
 			 */
+
+			if (message.at(0) == 'B'){
+				LOG("Bad complaint received");
+
+				if (find(trusted_peers_.begin(), trusted_peers_.end(), sender)
+						!= trusted_peers_.end()) {
+					LOG("Complaint about bad peer from " << sender.address().to_string() << ":" << sender.port());
+					trusted_peers_discovered_.push_back(sender);
+					ProcessBadPeersMessage(message, sender);
+				}
+			}
 
 			// 'G'oodbye
 			if (message.at(0) == 'G') {
@@ -377,47 +373,39 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 
 void SplitterSTRPEDS::ProcessBadPeersMessage(const std::vector<char> &message,
 		const boost::asio::ip::udp::endpoint &sender) {
-	system::error_code ec;
-	std::vector<char> msg(6);
-	boost::asio::ip::udp::endpoint sdr;
+
+	std::string bad("B");
 	boost::asio::ip::udp::endpoint bad_peer;
 
 	boost::asio::ip::address ip_addr;
     uint16_t port;
 
-	uint16_t bad_number = ntohs(*(uint16_t *) (message.data() + 3));
+	uint16_t bad_number = ntohs(*(uint16_t *) (message.data() + bad.size()));
+
+	 std::string s(message.begin(), message.end());
+	  LOG("Message List: " << s);
 
 	LOG("Number of BAD: "+ std::to_string(bad_number));
 
-	std::string m(message.begin(), message.end());
-	LOG("Message received: " << m);
-
-	/* CAMBIAR: RECIBIR TODA LA LISTA EN UN ENVIO (se pueden colar mensajes de otros peers) */
-
 	for (int i = 0; i < bad_number; i++) {
-		team_socket_.receive_from(asio::buffer(msg), sdr, 0, ec);
-		if (ec)
-			ERROR("Unexepected error: " << ec.message());
 
-		if (sdr == sender){
-			in_addr ip_raw = *(in_addr *)(msg.data());
-			ip_addr = boost::asio::ip::address::from_string(inet_ntoa(ip_raw));
-			port = ntohs(*(short *)(msg.data() + 4));
+		in_addr ip_raw = *(in_addr *)(message.data() + bad.size() + sizeof(uint16_t) + (6*i));
+		ip_addr = boost::asio::ip::address::from_string(inet_ntoa(ip_raw));
 
-			bad_peer = boost::asio::ip::udp::endpoint(ip_addr, port);
+		TRACE("IP BAD: " << ip_addr.to_string());
 
-			TRACE(
-					"BAD Peer: " + bad_peer.address().to_string() + ":"
-							+ to_string(bad_peer.port()));
+		port = ntohs(*(uint16_t *)(message.data() + bad.size() + sizeof(uint16_t) + (6*i) + sizeof(ip_raw)));
 
-			if (std::find(trusted_peers_.begin(), trusted_peers_.end(), sdr)
-					!= trusted_peers_.end()) {
-				HandleBadPeerFromTrusted(bad_peer, sdr);
-			} else {
+		TRACE("PORT BAD: " << port);
+
+		bad_peer = boost::asio::ip::udp::endpoint(ip_addr, port);
+
+		TRACE("BAD Peer: " + bad_peer.address().to_string() + ":" + to_string(bad_peer.port()));
+
+		if (std::find(trusted_peers_.begin(), trusted_peers_.end(), sender) != trusted_peers_.end()) {
+				HandleBadPeerFromTrusted(bad_peer, sender);
+		} else {
 				//HandleBadPeerFromRegular(bad_peer, sdr);
-			}
-		}else{
-			ERROR("Message received while BAD list was being listened");
 		}
 
 	}
