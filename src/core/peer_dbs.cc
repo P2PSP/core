@@ -115,6 +115,7 @@ namespace p2psp {
     TRACE("List of peers received");
   }
 
+  //This method is never used
   void PeerDBS::ReceiveMyEndpoint() {
     boost::array<char, 6> buffer;
     char *raw_data = buffer.data();
@@ -394,10 +395,12 @@ namespace p2psp {
     PeerIMS::BufferData();
   }
 
+
   void PeerDBS::Start() {
     thread_group_.interrupt_all();
     thread_group_.add_thread(new boost::thread(&PeerDBS::Run, this));
   }
+
 
   void PeerDBS::Run() {
 	 std::vector<char> message(message_size_);

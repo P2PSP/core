@@ -213,7 +213,7 @@ int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
 		LogMessage("buffer correctnes " + std::to_string(CalcBufferCorrectness()));
 	    LogMessage("buffer filling " + std::to_string(CalcBufferFilling()));
 	    if (peer_list_.size() > 0)
-	    	LogMessage("buffer fullness " + std::to_string(1-(losses_/(float)peer_list_.size())));
+	    	LogMessage("buffer fullness " + std::to_string((losses_/(float)peer_list_.size())));
 	  }
 	  losses_ = 0;
   }
