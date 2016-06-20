@@ -18,19 +18,11 @@ namespace p2psp {
   using namespace boost;
 
 
-  SplitterEMS::SplitterEMS() /*: SplitterIMS(), losses_(0, &SplitterEMS::GetHash)*/ {
-    // TODO: Check if there is a better way to replace kMcastAddr with 0.0.0.0
-    /*mcast_addr_ = "0.0.0.0";
-    max_number_of_chunk_loss_ = kMaxChunkLoss;
-    max_number_of_monitors_ = kMonitorNumber;
+  SplitterEMS::SplitterEMS() {
 
-    peer_number_ = 0;
-    destination_of_chunk_.reserve(buffer_size_);
     magic_flags_ = Common::kEMS;
 
-    TRACE("max_number_of_chunk_loss = " << max_number_of_chunk_loss_);
-    TRACE("mcast_addr = " << mcast_addr_);
-    TRACE("Initialized EMS");*/
+    TRACE("Initialized EMS");
   }
 
   SplitterEMS::~SplitterEMS() {}
@@ -65,18 +57,6 @@ namespace p2psp {
     }
   }
 
-  //TODO:implement after deciding on message format
-  void SplitterEMS::InsertPeer(const boost::asio::ip::udp::endpoint &peer) {
-    if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
-      peer_list_.erase(find(peer_list_.begin(), peer_list_.end(), peer));
-    }
-
-    peer_list_.push_back(peer);
-    //peer_pairs_.insert(peer);
-    losses_[peer] = 0;
-
-    TRACE("Inserted peer " << peer);
-  }
 
 
 /* TODO::handle arrival after deciding on message format of hello from peer*/
@@ -91,34 +71,41 @@ namespace p2psp {
 
     asio::ip::tcp::endpoint incoming_peer = serve_socket->remote_endpoint();
 
+    //recieve local ip of peer
     TRACE("Accepted connection from peer " << incoming_peer);
+    boost::array<char, 6> buffer;
+    char *raw_data = buffer.data();
+    boost::asio::ip::address ip_addr;
+    boost::asio::ip::udp::endpoint peer;
+    int port;
+
+    read((*serve_socket), boost::asio::buffer(buffer));
+    in_addr ip_raw = *(in_addr *)(raw_data);
+    ip_addr = boost::asio::ip::address::from_string(inet_ntoa(ip_raw));
+    port = ntohs(*(short *)(raw_data + 4));
+
+    boost::asio::ip::udp::endpoint peer_local_endpoint_ = boost::asio::ip::udp::endpoint(ip_addr, port);
+
+    TRACE("peer local endpoint = (" << peer_local_endpoint_.address().to_string() << ","
+          << std::to_string(peer_local_endpoint_.port()) << ")");
+
 
     SendConfiguration(serve_socket);
     SendTheListOfPeers(serve_socket);
     serve_socket->close();
     InsertPeer(boost::asio::ip::udp::endpoint(incoming_peer.address(),
                                               incoming_peer.port()));
-
+    AddPeerToDictionary(boost::asio::ip::udp::endpoint(incoming_peer.address(),
+                                              incoming_peer.port()), peer_local_endpoint_);
     // TODO: In original code, incoming_peer is returned, but is not used
   }
 
-  void SplitterEMS::ProcessLostChunk(
-                                     int lost_chunk_number, const boost::asio::ip::udp::endpoint &sender) {
-    asio::ip::udp::endpoint destination = GetLosser(lost_chunk_number);
-
-    TRACE("" << sender << " complains about lost chunk "
-          << to_string(lost_chunk_number) << " sent to " << destination);
-
-    if (find(peer_list_.begin() + max_number_of_monitors_, peer_list_.end(),
-             destination) != peer_list_.end()) {
-      TRACE("Lost chunk index = " << lost_chunk_number);
-    }
-
-    IncrementUnsupportivityOfPeer(destination);
+  void SplitterEMS::AddPeerToDictionary(const boost::asio::ip::udp::endpoint &peer,
+    const boost::asio::ip::udp::endpoint &local){
+      peer_pairs_[peer] = local;
   }
-
   //TODO:corrrect type mismatch with GetHash
-  void SplitterEMS::RemovePeer(const asio::ip::udp::endpoint &peer) {
+  /*void SplitterEMS::RemovePeer(const asio::ip::udp::endpoint &peer) {
     // If peer_list_ contains the peer, remove it
     if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
       peer_list_.erase(remove(peer_list_.begin(), peer_list_.end(), peer),
@@ -126,7 +113,7 @@ namespace p2psp {
 
 
       //remove peer from public-private hashtable
-      //peer_pairs_.erase(GetHash(peer));
+      peer_pairs_.erase(GetHash(peer));
 
       // In order to avoid negative peer_number_ value while peer_list_ still
       // contains any peer (in Python this is not necessary because negative
@@ -139,67 +126,12 @@ namespace p2psp {
     }
 
     losses_.erase(peer);
-  }
+  }*/
 
-
-  void SplitterEMS::Run() {
-    ReceiveTheHeader();
-
-    /* A DB_S splitter runs 4 threads. The main one and the
-       "handle_arrivals" thread are equivalent to the daemons used
-       by the IMS splitter. "moderate_the_team" and
-       "reset_counters_thread" are new.
-    */
-
-    TRACE("waiting for the monitor peers ...");
-
-    std::shared_ptr<asio::ip::tcp::socket> connection =
-      make_shared<asio::ip::tcp::socket>(boost::ref(io_service_));
-    acceptor_.accept(*connection);
-    HandleAPeerArrival(connection);
-
-    // Threads
-    thread t1(bind(&SplitterIMS::HandleArrivals, this));
-    thread t2(bind(&SplitterEMS::ModerateTheTeam, this));
-    thread t3(bind(&SplitterEMS::ResetCountersThread, this));
-
-    vector<char> message(sizeof(uint16_t) + chunk_size_);
-    asio::ip::udp::endpoint peer;
-
-    while (alive_) {
-      asio::streambuf chunk;
-      size_t bytes_transferred = ReceiveChunk(chunk);
-      try {
-        peer = peer_list_.at(peer_number_);
-
-        (*(uint16_t *)message.data()) = htons(chunk_number_);
-
-        copy(asio::buffer_cast<const char *>(chunk.data()),
-             asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
-             message.data() + sizeof(uint16_t));
-
-        SendChunk(message, peer);
-
-        destination_of_chunk_[chunk_number_ % buffer_size_] = peer;
-        chunk_number_ = (chunk_number_ + 1) % Common::kMaxChunkNumber;
-        ComputeNextPeerNumber(peer);
-      } catch (const std::out_of_range &oor) {
-        TRACE("The monitor peer has died!");
-        exit(-1);
-      }
-
-      chunk.consume(bytes_transferred);
-    }
-  }
 
   std::vector<boost::asio::ip::udp::endpoint> SplitterEMS::GetPeerList() {
     //TODO:investigate if private/public address should be returned...i think public?
     return peer_list_;
-  }
-
-  void SplitterEMS::Start() {
-    TRACE("Start");
-    thread_.reset(new boost::thread(boost::bind(&SplitterEMS::Run, this)));
   }
 
 }

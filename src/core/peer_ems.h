@@ -36,7 +36,7 @@ namespace p2psp {
     PeerEMS();
     ~PeerEMS();
 
-    virtual void SayHello(const ip::udp::endpoint&) override;
+    virtual void ConnectToTheSplitter() throw(boost::system::system_error)  override;
 
 
   };

@@ -34,20 +34,13 @@ class SplitterEMS : public SplitterDBS {
   boost::unordered_map<boost::asio::ip::udp::endpoint, boost::asio::ip::udp::endpoint,
                        std::size_t (*)(const boost::asio::ip::udp::endpoint &)>
       peer_pairs_;
-  // Destination peers of the chunk, indexed by a chunk
-  // number. Used to find the peer to which a chunk has been sent
-  std::vector<boost::asio::ip::udp::endpoint> destination_of_chunk_;
+
 
   // TODO: Endpoint doesn't implement hash_value, decide if string can be used
   // instead
   boost::unordered_map<boost::asio::ip::udp::endpoint, int,
                        std::size_t (*)(const boost::asio::ip::udp::endpoint &)>
       losses_;
-
-  char magic_flags_;
-
-  // Thread management
-  virtual void Run() override;
 
   // Hasher for unordered_maps
   static std::size_t GetHash(const boost::asio::ip::udp::endpoint &endpoint) {
@@ -62,16 +55,11 @@ class SplitterEMS : public SplitterDBS {
   ~SplitterEMS();
   virtual void SendTheListOfPeers(
       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-  virtual void InsertPeer(const boost::asio::ip::udp::endpoint &peer);
+  virtual void AddPeerToDictionary(const boost::asio::ip::udp::endpoint &peer, const boost::asio::ip::udp::endpoint &local);
   virtual void HandleAPeerArrival(
       std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) override;
-  boost::asio::ip::udp::endpoint GetLosser(int lost_chunk_number);
   virtual void RemovePeer(const boost::asio::ip::udp::endpoint &peer);
-  virtual void ProcessLostChunk(int lost_chunk_number,
-                                const boost::asio::ip::udp::endpoint &sender);
 
-  // Thread management
-  virtual void Start() override;
 
   // Getters
   std::vector<boost::asio::ip::udp::endpoint> GetPeerList();
