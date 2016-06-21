@@ -54,7 +54,6 @@ namespace p2psp {
 
     // TODO: SendChunk can be used instead if the increment of sendto_counter
     // doesn't matter
-    void SayGoodbye();
 
     // Thread management
     virtual void Start();

@@ -19,6 +19,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/thread.hpp>
 #include <ctime>
+#include <fstream>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -76,6 +77,12 @@ namespace p2psp {
     ip::udp::socket team_socket_;                         // Used to communicate with the rest of the team
     boost::thread_group thread_group_;                    // Thread group to join all threads
     std::vector<ip::udp::endpoint> peer_list_;            // DBS variables
+    int previous_chunk_number_=0;
+    int latest_chunk_number_ = 0;
+    bool kLogging = false;
+    std::string kLogFile;
+    bool logging_;
+    std::ofstream log_file_;
 
   public:
 
@@ -118,7 +125,7 @@ namespace p2psp {
     virtual void BufferData();
     virtual int FindNextChunk();
     virtual void PlayChunk(int);
-    virtual void PlayNextChunk();
+    virtual void PlayNextChunk(int chunk_number);
     virtual void KeepTheBufferFull();
 
     /**
@@ -126,6 +133,12 @@ namespace p2psp {
      */
     virtual void Run();
     virtual void Start();
+
+    /**
+     * Log Messages
+     */
+    virtual void LogMessage(const std::string&);
+    virtual std::string BuildLogMessage(const std::string&);
 
     /**
      *  Getters/setters
