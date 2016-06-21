@@ -143,7 +143,7 @@ void SplitterSTRPEDS::Run() {
 	thread t3(bind(&SplitterDBS::ResetCountersThread, this));
 	//thread t4(bind(&SplitterSTRPEDS::GatherBadPeers, this));
 
-	vector<char> message(2 + 1024 + 40 + 40);
+	vector<char> message(2 + chunk_size_ + 40 + 40);
 	asio::ip::udp::endpoint peer;
 
 	while (alive_) {
@@ -218,7 +218,7 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 		const asio::streambuf &chunk,
 		const boost::asio::ip::udp::endpoint &dst) {
 
-	std::vector<char> m(2 + 1024 + 4 + 2);
+	std::vector<char> m(2 + chunk_size_ + 4 + 2);
 
 	(*(uint16_t *) m.data()) = htons(chunk_number);
 
