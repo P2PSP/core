@@ -48,7 +48,7 @@ namespace p2psp {
 
     message[0] = magic_flags_;
     peer_serve_socket->send(asio::buffer(message));
-    LOG("Magic flags = " << bitset<8>(message[0]));
+    TRACE("Magic flags = " << bitset<8>(message[0]));
   }
 
   void SplitterDBS::SendTheListSize(

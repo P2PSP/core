@@ -25,7 +25,7 @@ namespace p2psp {
       splitter_socket_(io_service_),
       team_socket_(io_service_) {
 
-    magic_flags_ = Common::kDBS;
+    //magic_flags_ = Common::kDBS;
 
     // Default values
     player_port_ = kPlayerPort;
@@ -490,9 +490,9 @@ namespace p2psp {
     thread_group_.add_thread(new boost::thread(&PeerIMS::Run, this));
   }
 
-  char PeerIMS::GetMagicFlags() {
+  /*char PeerIMS::GetMagicFlags() {
     return magic_flags_;
-  }
+  }*/
 
   //std::string PeerIMS::GetMcastAddr() {
   ip::address PeerIMS::GetMcastAddr() {

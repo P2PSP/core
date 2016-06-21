@@ -50,6 +50,7 @@ namespace p2psp {
     std::vector<char> magic_flags(1);
     read(splitter_socket_, ::buffer(magic_flags));
     TRACE("Magic flags = " << std::bitset<8>(magic_flags[0]));
+
     if (this->magic_flags_ != magic_flags[0]) {
       ERROR("The splitter has different magic flags ("
         << std::bitset<8>(magic_flags[0]) << ") than this peer ("
