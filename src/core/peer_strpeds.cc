@@ -102,7 +102,7 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  char sigs[41]; sigs[40]=0;
 	  std::copy(message.data() + sizeof(uint16_t) + chunk_size_ + 40, message.data() + sizeof(uint16_t) + chunk_size_ + 40 + 40, sigs);
 
-	  std::vector<char> m(2 + 1024 + 4 + 2);
+	  std::vector<char> m(2 + chunk_size_ + 4 + 2);
 	  boost::asio::ip::udp::endpoint dst = sender;//team_socket_.local_endpoint();
 
 	  (*(uint16_t *)m.data()) = htons(chunk_number);

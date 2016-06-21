@@ -315,7 +315,7 @@ namespace p2psp {
   }
 
   float PeerDBS::CalcBufferCorrectness() {
-    std::vector<char> zerochunk(1024, 0);
+    std::vector<char> zerochunk(chunk_size_, 0);
 
     int goodchunks = 0;
     int badchunks = 0;
