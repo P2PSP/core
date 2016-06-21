@@ -445,6 +445,7 @@ namespace p2psp {
     while (!chunks_[chunk_number % buffer_size_].received) {
       // sys.stdout.write(Color.cyan)
       TRACE("lost chunk " << std::to_string(chunk_number));
+      PlayChunk(-1);
       // sys.stdout.write(Color.none)
 
       chunk_number = (chunk_number + 1) % Common::kMaxChunkNumber;
@@ -458,7 +459,12 @@ namespace p2psp {
   void PeerIMS::PlayChunk(int chunk) {
 #ifdef _1_
     try {
+    if(chunk == -1) {
+    write(player_socket_, buffer(std::vector<char>(1024,0)));
+    }
+    else {
       write(player_socket_, buffer(chunks_[chunk % buffer_size_].data));
+      }
     } catch (std::exception e) {
       TRACE("Player disconnected!");
       player_alive_ = false;
