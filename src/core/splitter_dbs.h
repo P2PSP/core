@@ -34,6 +34,9 @@ class SplitterDBS : public SplitterIMS {
   // The list of peers in the team
   std::vector<boost::asio::ip::udp::endpoint> peer_list_;
 
+  // Outgoing peers
+  std::vector<boost::asio::ip::udp::endpoint> outgoing_peer_list_;
+
   // Destination peers of the chunk, indexed by a chunk
   // number. Used to find the peer to which a chunk has been sent
   std::vector<boost::asio::ip::udp::endpoint> destination_of_chunk_;
@@ -89,6 +92,7 @@ class SplitterDBS : public SplitterIMS {
   virtual void ResetCounters();
   void ResetCountersThread();
   virtual void ComputeNextPeerNumber(boost::asio::ip::udp::endpoint &peer);
+  void SayGoodbye(const boost::asio::ip::udp::endpoint &peer);
 
   // Thread management
   virtual void Start() override;

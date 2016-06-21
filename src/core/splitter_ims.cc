@@ -66,7 +66,7 @@ namespace p2psp {
     acceptor_.open(endpoint.protocol());
     acceptor_.set_option(asio::ip::tcp::acceptor::reuse_address(true));
     acceptor_.bind(endpoint);
-    acceptor_.listen();
+    acceptor_.listen(1000);
   }
 
   void SplitterIMS::ConfigureSockets() {
@@ -147,7 +147,9 @@ namespace p2psp {
             << ec.message() << " bytes transferred: " << bytes_transferred);
       TRACE("No data in the server!");
       source_socket_.close();
+      /*
       header_load_counter_ = header_size_;
+
       header_.consume(header_.size());
       this_thread::sleep(posix_time::seconds(1));
       source_socket_.connect(
@@ -155,6 +157,8 @@ namespace p2psp {
                                                      source_port_),
                              ec);
       source_socket_.send(asio::buffer(GET_message_));
+      */
+      RequestTheVideoFromTheSource();
     }
 
     return bytes_transferred;
@@ -340,7 +344,7 @@ namespace p2psp {
 
       copy(asio::buffer_cast<const char *>(chunk.data()),
            asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
-           message.data() + sizeof(uint16_t));
+		   message.data() + sizeof(uint16_t));
 
       SendChunk(message, mcast_channel_);
 
@@ -350,24 +354,6 @@ namespace p2psp {
     }
   }
 
-  void SplitterIMS::SayGoodbye() {
-    char message[1];
-    message[0] = '\0';
-
-    asio::ip::udp::endpoint destination(
-                                        asio::ip::address::from_string("127.0.0.1"), team_port_);
-
-    system::error_code ec;
-
-    size_t bytes_transferred =
-      team_socket_.send_to(asio::buffer(message), destination, 0, ec);
-
-    TRACE("Bytes transferred saying goodbye: " << to_string(bytes_transferred));
-
-    if (ec) {
-      ERROR("Error saying goodbye: " << ec.message());
-    }
-  }
 
   bool SplitterIMS::isAlive() { return alive_; }
 

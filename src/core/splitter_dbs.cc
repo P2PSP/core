@@ -124,13 +124,14 @@ namespace p2psp {
 
     asio::ip::tcp::endpoint incoming_peer = serve_socket->remote_endpoint();
 
-    TRACE("Accepted connection from peer " << incoming_peer);
+    TRACE("DBS: Accepted connection from peer " << incoming_peer);
 
     SendConfiguration(serve_socket);
     SendTheListOfPeers(serve_socket);
     serve_socket->close();
-    InsertPeer(boost::asio::ip::udp::endpoint(incoming_peer.address(),
-                                              incoming_peer.port()));
+    boost::asio::ip::udp::endpoint incoming_peer_udp(incoming_peer.address(),
+                                                  incoming_peer.port());
+    InsertPeer(incoming_peer_udp);
 
     // TODO: In original code, incoming_peer is returned, but is not used
   }
@@ -218,7 +219,26 @@ namespace p2psp {
 
     // TODO: stdout flush?
 
-    RemovePeer(peer);
+    if (find(outgoing_peer_list_.begin(), outgoing_peer_list_.end(),peer) == outgoing_peer_list_.end()){
+    	if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()){
+    		outgoing_peer_list_.push_back(peer);
+    		TRACE("Marked for deletion: " << peer);
+    	}
+    }
+
+
+    //SayGoodbye(peer);
+    //RemovePeer(peer);
+
+  }
+
+  void SplitterDBS::SayGoodbye(const boost::asio::ip::udp::endpoint &peer) {
+	  std::string goodbye("G");
+	  team_socket_.send_to(boost::asio::buffer(goodbye), peer);
+
+      TRACE("[Goodbye] sent to "
+              << "(" << peer.address().to_string() << ","
+              << std::to_string(peer.port()) << ")");
   }
 
   void SplitterDBS::ModerateTheTeam() {
@@ -284,7 +304,8 @@ namespace p2psp {
   }
 
   void SplitterDBS::ComputeNextPeerNumber(asio::ip::udp::endpoint &peer) {
-    peer_number_ = (peer_number_ + 1) % peer_list_.size();
+	if (peer_list_.size() > 0)
+		peer_number_ = (peer_number_ + 1) % peer_list_.size();
   }
 
   void SplitterDBS::Run() {
@@ -331,6 +352,14 @@ namespace p2psp {
       } catch (const std::out_of_range &oor) {
         TRACE("The monitor peer has died!");
         exit(-1);
+      }
+
+      if (peer_number_ == 0){
+    	  for (unsigned int i=0; i<outgoing_peer_list_.size(); i++){
+    		  SayGoodbye(outgoing_peer_list_[i]);
+    		  RemovePeer(outgoing_peer_list_[i]);
+    	  }
+    	  outgoing_peer_list_.clear();
       }
 
       chunk.consume(bytes_transferred);

@@ -176,8 +176,11 @@ namespace p2psp {
     streambuf chunk;
 
     read(splitter_socket_, chunk, transfer_exactly(header_size_in_bytes), ec);
+
     if (ec) {
       ERROR(ec.message());
+      splitter_socket_.close();
+      ConnectToTheSplitter();
     }
 
     try {
@@ -279,22 +282,24 @@ namespace p2psp {
     // Now, fill up to the half of the buffer.
 
     // float BUFFER_STATUS = 0.0f;
-    for (int x = 0; x < buffer_size_ / 2; x++) {
+    while ((chunk_number - played_chunk_)< buffer_size_/2) {
       // TODO Format string
       // LOG("{:.2%}\r".format((1.0*x)/(buffer_size_/2)), end='');
       // BUFFER_STATUS = (100 * x) / (buffer_size_ / 2.0f) + 1;
 
-      if (!Common::kConsoleMode) {
+      //if (!Common::kConsoleMode) {
         // GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
-      } else {
+      //} else {
         // pass
-      }
+      //}
       TRACE("!");
       TraceSystem::Flush();
 
-      while (ProcessNextMessage() < 0)
+      while ((chunk_number = ProcessNextMessage()) < 0)
         ;
     }
+
+    latest_chunk_number_=chunk_number;
 
     TRACE("");
     TRACE("latency = " << std::to_string((clock() - start_time) /
@@ -306,7 +311,7 @@ namespace p2psp {
 
   int PeerIMS::ProcessNextMessage() {
     // (Chunk number + chunk payload) length
-    std::vector<char> message(sizeof(uint16_t) + chunk_size_);
+    std::vector<char> message(message_size_);
     ip::udp::endpoint sender;
 
     try {
@@ -368,34 +373,66 @@ namespace p2psp {
     }
     // while ((chunk_number - self.played_chunk) % self.buffer_size) <
     // self.buffer_size/2:
+    /*
     while (received_counter_ < buffer_size_ / 2) {
       chunk_number = ProcessNextMessage();
       while (chunk_number < 0) {
         chunk_number = ProcessNextMessage();
       }
     }
+     */
 
+    PlayNextChunk(chunk_number);
+
+    show_buffer_=true;
+    std::string bf="";
     if (show_buffer_) {
-      for (int i = 0; buffer_size_; i++) {
+      for (int i = 0; i<buffer_size_; i++) {
         if (chunks_[i].received) {
           // TODO: Avoid line feed in LOG function
-          TRACE(std::to_string(i % 10));
+          //TRACE(std::to_string(i % 10));
+        	bf=bf+"1";
         } else {
-          TRACE(".");
+          //TRACE(".");
+          bf=bf+"0";
         }
       }
-      TRACE("");
+      LOG("Buffer state: "+bf);
     }
 
     // print (self.team_socket.getsockname(),)
     // sys.stdout.write(Color.none)
   }
 
-  void PeerIMS::PlayNextChunk() {
-    played_chunk_ = FindNextChunk();
+  void PeerIMS::PlayNextChunk(int chunk_number) {
+    /*played_chunk_ = FindNextChunk();
+
+	//played_chunk_++;
+	//if (chunks_[played_chunk_ % buffer_size_].received){
     PlayChunk(played_chunk_);
     chunks_[played_chunk_ % buffer_size_].received = false;
     received_counter_--;
+    LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
+	//}else{
+		//TRACE("lost chunk " << std::to_string(played_chunk_));
+	//}*/
+
+
+  for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
+	    if (chunks_[chunk_number % buffer_size_].received == true){
+	    	PlayChunk(played_chunk_);
+			chunks_[played_chunk_ % buffer_size_].received = false;
+			received_counter_--;
+			LOG("Chunk Consumed at:" << played_chunk_ % buffer_size_)
+	    }else{
+	    	LOG("Chunk lost at: " << played_chunk_ % buffer_size_)
+	    }
+
+		played_chunk_++;
+	}
+
+	if ((latest_chunk_number_ % Common::kMaxChunkNumber) < chunk_number)
+			latest_chunk_number_=chunk_number;
   }
 
   // Tiene pinta de que los tres siguientes metodos pueden simplificarse...
@@ -429,10 +466,22 @@ namespace p2psp {
 #endif
   }
 
+  void PeerIMS::LogMessage(const std::string &message) {
+    // TODO: self.LOG_FILE.write(self.build_log_message(message) + "\n")
+    // print >>self.LOG_FILE, self.build_log_message(message)
+	log_file_ << BuildLogMessage(message+"\n");
+	log_file_.flush();
+  }
+
+  std::string PeerIMS::BuildLogMessage(const std::string &message) {
+    // return "{0}\t{1}".format(repr(time.time()), message)
+	  return std::to_string(time(NULL)) + "\t" + message;
+  }
+
   void PeerIMS::Run() {
     while (player_alive_) {
       KeepTheBufferFull();
-      PlayNextChunk();
+      //PlayNextChunk();
     }
   }
 
