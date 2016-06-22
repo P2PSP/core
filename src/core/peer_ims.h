@@ -143,7 +143,7 @@ namespace p2psp {
     /**
      *  Getters/setters
      */
-    virtual char GetMagicFlags();
+    //virtual char GetMagicFlags();
     //virtual std::string GetMcastAddr();
     virtual ip::address GetMcastAddr();
     virtual bool IsPlayerAlive();
