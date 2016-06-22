@@ -9,7 +9,7 @@ option(BUILD_TEST "Build the test" ON)
 #option(BUILD_PEER "Build the peer" ON)
 #option(BUILD_SPLITTER "Build the splitter" ON)
 
-option(BUILD_PYTHON_WRAPPER "Build the Python wrapper" OFF)
+option(BUILD_PYTHON_WRAPPER "Build the Python wrapper" ON)
 
 option(BUILD_WITH_CLANG "Build using the Clang compiler" OFF)
 
