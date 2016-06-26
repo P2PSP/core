@@ -27,38 +27,22 @@ namespace p2psp {
 class SplitterEMS : public SplitterDBS {
  protected:
 
-  // The list of peers in the team listed by public address
-  std::vector<boost::asio::ip::udp::endpoint> peer_list_;
-
   // HashTable of public to private endpoints
   boost::unordered_map<boost::asio::ip::udp::endpoint, boost::asio::ip::udp::endpoint,
                        std::size_t (*)(const boost::asio::ip::udp::endpoint &)>
       peer_pairs_;
 
 
-  // TODO: Endpoint doesn't implement hash_value, decide if string can be used
-  // instead
-  boost::unordered_map<boost::asio::ip::udp::endpoint, int,
-                       std::size_t (*)(const boost::asio::ip::udp::endpoint &)>
-      losses_;
-
-  // Hasher for unordered_maps
-  static std::size_t GetHash(const boost::asio::ip::udp::endpoint &endpoint) {
-    std::ostringstream stream;
-    stream << endpoint;
-    std::hash<std::string> hasher;
-    return hasher(stream.str());
-  };
 
  public:
   SplitterEMS();
   ~SplitterEMS();
   virtual void SendTheListOfPeers(
       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-  virtual void AddPeerToDictionary(const boost::asio::ip::udp::endpoint &peer, const boost::asio::ip::udp::endpoint &local);
+  
   virtual void HandleAPeerArrival(
       std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) override;
-  virtual void RemovePeer(const boost::asio::ip::udp::endpoint &peer);
+
 
 
   // Getters
