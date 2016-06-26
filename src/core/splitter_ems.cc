@@ -42,9 +42,11 @@ namespace p2psp {
 
     for (std::vector<asio::ip::udp::endpoint>::iterator it = peer_list_.begin();
          it != peer_list_.end(); ++it) {
+
       LOG("sending peer number : [" << std::to_string(counter) << "]");
       asio::ip::udp::endpoint peer_endpoint = boost::asio::ip::udp::endpoint(it->address(),
                                                                              it->port());
+      //send private instead of public endpoint if target peer is in same private network
       if (it->address() == target_address) {
         peer_endpoint = peer_pairs_[peer_endpoint];
         LOG("target peer at" << target_address.to_string() << " is in a private network with peer sent as("
@@ -64,26 +66,7 @@ namespace p2psp {
     }
   }
 
-  /*void SplitterEMS::SendTheListOfPeers(
-          const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
-    SendTheListSize(peer_serve_socket);
-
-    int counter = 0;
-
-    char message[6];
-    in_addr addr;
-
-    for (std::vector<asio::ip::udp::endpoint>::iterator it = peer_list_.begin();
-         it != peer_list_.end(); ++it) {
-      inet_aton(it->address().to_string().c_str(), &addr);
-      (*(in_addr *)&message) = addr;
-      (*(uint16_t *)(message + 4)) = htons(it->port());
-      peer_serve_socket->send(asio::buffer(message));
-
-      TRACE(to_string(counter) << ", " << *it);
-      counter++;
-    }
-  }*/
+  //TODO: implement removePeer
 
 
 
@@ -119,6 +102,7 @@ namespace p2psp {
     SendConfiguration(serve_socket);
     SendTheListOfPeers(serve_socket);
     serve_socket->close();
+    //add peer to dictionary of public<->private endpoints
     SplitterEMS::peer_pairs_.emplace(boost::asio::ip::udp::endpoint(incoming_peer.address(),
                                               incoming_peer.port()), peer_local_endpoint_);
     InsertPeer(boost::asio::ip::udp::endpoint(incoming_peer.address(),
@@ -128,7 +112,6 @@ namespace p2psp {
   
 
   std::vector<boost::asio::ip::udp::endpoint> SplitterEMS::GetPeerList() {
-    //TODO:investigate if private/public address should be returned...i think public?
     return peer_list_;
   }
 

@@ -30,7 +30,7 @@ using namespace boost::asio;
 namespace p2psp {
 
   class PeerEMS : public PeerDBS {
-  /* the only extension is a slightly modified hello method*/
+  /* the only extension is a slightly modified connect to splitter method*/
 
   public:
     PeerEMS();
