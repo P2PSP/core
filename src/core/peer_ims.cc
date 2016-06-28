@@ -426,6 +426,7 @@ namespace p2psp {
 			LOG("Chunk Consumed at:" << played_chunk_ % buffer_size_)
 	    }else{
 	    	LOG("Chunk lost at: " << played_chunk_ % buffer_size_)
+	    	SendEmptyChunk();
 	    }
 
 		played_chunk_++;
@@ -434,7 +435,13 @@ namespace p2psp {
 	if ((latest_chunk_number_ % Common::kMaxChunkNumber) < chunk_number)
 			latest_chunk_number_=chunk_number;
   }
-
+  void PeerIMS::SendEmptyChunk() {
+  try{
+  write(player_socket_, buffer(std::vector<char>(chunk_size_,0)));
+  }
+  catch(std::exception e)
+  {}
+  }
   // Tiene pinta de que los tres siguientes metodos pueden simplificarse...
   int PeerIMS::FindNextChunk() {
     // print (".")
@@ -459,13 +466,9 @@ namespace p2psp {
   void PeerIMS::PlayChunk(int chunk) {
 #ifdef _1_
     try {
-    if(chunk == -1) {
-    write(player_socket_, buffer(std::vector<char>(chunk_size_,0)));
-    }
-    else {
       write(player_socket_, buffer(chunks_[chunk % buffer_size_].data));
       }
-    } catch (std::exception e) {
+      catch (std::exception e) {
       TRACE("Player disconnected!");
       player_alive_ = false;
     }

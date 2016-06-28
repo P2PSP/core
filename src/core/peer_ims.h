@@ -127,6 +127,7 @@ namespace p2psp {
     virtual void PlayChunk(int);
     virtual void PlayNextChunk(int chunk_number);
     virtual void KeepTheBufferFull();
+    virtual void SendEmptyChunk();
 
     /**
      *  Thread management
