@@ -460,7 +460,7 @@ namespace p2psp {
 #ifdef _1_
     try {
     if(chunk == -1) {
-    write(player_socket_, buffer(std::vector<char>(1024,0)));
+    write(player_socket_, buffer(std::vector<char>(chunk_size_,0)));
     }
     else {
       write(player_socket_, buffer(chunks_[chunk % buffer_size_].data));
