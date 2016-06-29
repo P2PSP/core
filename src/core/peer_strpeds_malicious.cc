@@ -81,7 +81,7 @@ boost::asio::ip::udp::endpoint PeerStrpeDsMalicious::ChooseMainTarget(){
 	boost::asio::ip::udp::endpoint re;
 	bool re_found = false;
 	while (!re_found){
-		int r = rand() % peer_list_.size();
+		int r = rand() % (int)peer_list_.size();
 		if (std::find(attacked_peers.begin(), attacked_peers.end(), peer_list_[r])== attacked_peers.end() and std::find(malicious_peers.begin(), malicious_peers.end(), peer_list_[r]) == malicious_peers.end()) {
 			re = peer_list_[r];
 			re_found = true;
