@@ -20,6 +20,7 @@ void PeerStrpeDsMalicious::Init() {
 	all_attack_c_ = false;
 	bad_mouth_attack_ = false;
 	MPTR = 5;
+	FirstMainTarget();
 	TRACE("Initialized");
 }
 
@@ -196,6 +197,7 @@ void PeerStrpeDsMalicious::SendChunk(const ip::udp::endpoint &peer) {
 	  }else{
 		  team_socket_.send_to(buffer(receive_and_feed_previous_), peer);
 		  sendto_counter_++;
+		  TRACE("No attack");
 	  }
 
     return;
