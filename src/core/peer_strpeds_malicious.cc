@@ -20,7 +20,6 @@ void PeerStrpeDsMalicious::Init() {
 	all_attack_c_ = false;
 	bad_mouth_attack_ = false;
 	MPTR = 5;
-	FirstMainTarget();
 	TRACE("Initialized");
 }
 
