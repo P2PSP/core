@@ -304,7 +304,8 @@ void PeerSTRPEDS::SetLogging(bool enabled) { logging_ = enabled; }
 
 uint32_t PeerSTRPEDS::GetCurrentRound(){return current_round_;}
 void PeerSTRPEDS::SetCurrentRound(uint32_t current_round){current_round_=current_round;}
-
+void PeerSTRPEDS::SetPlayerAlive(bool status){player_alive_ = status;}
+  
 }
 
 
