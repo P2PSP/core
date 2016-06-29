@@ -181,6 +181,7 @@ void SplitterSTRPEDS::Run() {
 
 					LogMessage(message);
 				}
+
 			}
 
 			if (peer_number_ == ((int) peer_list_.size()) - 1){
@@ -193,6 +194,7 @@ void SplitterSTRPEDS::Run() {
 
 				outgoing_peer_list_.clear();
 
+
 			}
 
 			//TODO: Here or before logging?
@@ -204,7 +206,6 @@ void SplitterSTRPEDS::Run() {
 		}
 
 		chunk.consume(bytes_transferred);
-
 
 	}
 }

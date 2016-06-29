@@ -29,12 +29,12 @@ namespace p2psp {
     static const bool kConsoleMode = true;
 
     // IMS is enables by defining an IP multicast address
-    static const char kDBS = 0;  // DBS magic number
-    static const char kACS = 1;  // ACS magic number
-    static const char kLRS = 2;  // LRS magic number
-    static const char kNTS = 4;  // NIS magic number
-    static const char kDIS = 8;  // DIS magic number
-    static const char kSTRPE= 16;  // STRPE magic number
+    static const char kDBS   = 0x00;  // DBS magic number
+    static const char kACS   = 0x01;  // ACS magic number
+    static const char kLRS   = 0x02;  // LRS magic number
+    static const char kNTS   = 0x04;  // NIS magic number
+    static const char kDIS   = 0x08;  // DIS magic number
+    static const char kSTRPE = 0x10;  // STRPE magic number
 
     // TODO: Use colors
     // IMS_COLOR = Color.red
