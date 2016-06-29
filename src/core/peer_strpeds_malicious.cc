@@ -429,5 +429,10 @@ void PeerStrpeDsMalicious::SetMPTR(int mptr){
 	MPTR = mptr;
 }
 
+void PeerStrpeDsMalicious::ReceiveTheListOfPeers(){
+	PeerDBS::ReceiveTheListOfPeers();
+	FirstMainTarget();
+}
+
 
 }

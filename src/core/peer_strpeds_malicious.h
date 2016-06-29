@@ -59,6 +59,7 @@ class PeerStrpeDsMalicious : public PeerSTRPEDS {
                                 const ip::udp::endpoint&);
   virtual int ProcessMessage(const std::vector<char>&,
                              const ip::udp::endpoint&) override;
+  virtual void ReceiveTheListOfPeers() override;
 };
 }
 
