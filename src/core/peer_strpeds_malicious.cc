@@ -12,14 +12,6 @@
 
 namespace p2psp {
 void PeerStrpeDsMalicious::Init() {
-	persistent_attack_ = false;
-	on_off_attack_ = false;
-	on_off_ratio_ = 100;
-	selective_attack_ = false;
-	number_chunks_send_to_main_target_ = 0;
-	all_attack_c_ = false;
-	bad_mouth_attack_ = false;
-	MPTR = 5;
 	TRACE("Initialized");
 }
 

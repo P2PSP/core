@@ -143,7 +143,7 @@ void SplitterSTRPEDS::Run() {
 	thread t3(bind(&SplitterDBS::ResetCountersThread, this));
 	//thread t4(bind(&SplitterSTRPEDS::GatherBadPeers, this));
 
-	vector<char> message(2 + chunk_size_ + 40 + 40);
+	vector<char> message(2 + chunk_size_ + 40 + 40 + 4);
 	asio::ip::udp::endpoint peer;
 
 	while (alive_) {

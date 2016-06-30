@@ -14,6 +14,7 @@
 #include <memory>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
+#include <iostream>
 
 namespace p2psp
 {
@@ -71,33 +72,26 @@ namespace p2psp
 #ifndef TRACE_SILENT_MODE
 
 #ifndef NDEBUG
+/*
+#define LOG(a)  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) << a; }
 
-#define LOG(a)      \
-  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) \
-    << a; }
+#define LOGC(c, a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) << _SET_COLOR(c) << a << _RESET_COLOR(); }
 
-#define LOGC(c, a)  \
-  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) \
-    << _SET_COLOR(c) << a << _RESET_COLOR(); }
+#define ERROR(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::error) << _SET_COLOR(_RED) << __FILE__ << ":" << __LINE__ << ": ERROR: " << a << _RESET_COLOR(); }
 
-#define ERROR(a)    \
-  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::error)  \
-    << _SET_COLOR(_RED) << __FILE__ << ":" << __LINE__ << ": ERROR: " \
-    << a << _RESET_COLOR(); }
+#define WARNING(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::warning) << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": WARNING: " << a << _RESET_COLOR(); }
 
-#define WARNING(a)    \
-  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::warning)  \
-    << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": WARNING: " \
-    << a << _RESET_COLOR(); }
+#define DEBUG(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::debug) << __FILE__ << ":" << __LINE__ << ": DEBUG: " << a; }
 
-#define DEBUG(a)    \
-  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::debug)  \
-    << __FILE__ << ":" << __LINE__ << ": DEBUG: " << a; }
+#define TRACE(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::trace) << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a << _RESET_COLOR(); }
+*/
 
-#define TRACE(a)    \
-  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::trace)  \
-    << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " \
-    << a << _RESET_COLOR(); }
+#define LOG(a)      {std::cout << a << std::endl;}
+#define LOGC(c, a)  {std::cout << a << std::endl;}
+#define WARNING(a)  {std::cout << a << std::endl;}
+#define DEBUG(a)    {std::cout << a << std::endl;}
+#define TRACE(a)    {std::cout  << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a  << _RESET_COLOR() << std::endl;}
+#define ERROR(a)    {std::cout << a << std::endl;}
 
 #else
 

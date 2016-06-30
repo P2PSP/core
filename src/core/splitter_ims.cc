@@ -66,7 +66,7 @@ namespace p2psp {
     acceptor_.open(endpoint.protocol());
     acceptor_.set_option(asio::ip::tcp::acceptor::reuse_address(true));
     acceptor_.bind(endpoint);
-    acceptor_.listen(5);
+    acceptor_.listen();
   }
 
   void SplitterIMS::ConfigureSockets() {
