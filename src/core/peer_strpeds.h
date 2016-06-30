@@ -31,6 +31,7 @@ class PeerSTRPEDS: public PeerDBS {
   DSA* dsa_key;
   uint32_t current_round_;
   int losses_;
+  int played_;
 
  public:
 
