@@ -34,11 +34,13 @@ namespace p2psp {
     SplitterIMS();
     ~SplitterIMS();
 
-    void SendTheHeader(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-    void SendTheBufferSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-    void SendTheChunkSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-    void SendTheMcastChannel(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-    void SendTheHeaderSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    void SendHeader(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    void SendBufferSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    void SendChunkSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    void SendMcastChannel(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    void SendHeaderSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    char GetMagicFlags();
+    void SendMagicFlags(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     virtual void SendConfiguration(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
     virtual void HandleAPeerArrival(std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);
     void HandleArrivals();
@@ -115,6 +117,8 @@ namespace p2psp {
     std::string mcast_addr_;
     int ttl_;
 
+    char magic_flags_;
+    
     /*
       An IMS splitter runs 2 threads. The main one serves the chunks to
       the team. The other controls peer arrivals. This variable is true

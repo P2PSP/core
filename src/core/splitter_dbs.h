@@ -47,8 +47,6 @@ class SplitterDBS : public SplitterIMS {
                        std::size_t (*)(const boost::asio::ip::udp::endpoint &)>
       losses_;
 
-  char magic_flags_;
-
   // Thread management
   virtual void Run() override;
 
@@ -63,9 +61,9 @@ class SplitterDBS : public SplitterIMS {
  public:
   SplitterDBS();
   ~SplitterDBS();
-  char GetMagicFlags();
-  void SendMagicFlags(
-      const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+  //char GetMagicFlags();
+  /*void SendMagicFlags(
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);*/
   void SendTheListSize(
       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
   virtual void SendTheListOfPeers(

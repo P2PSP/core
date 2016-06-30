@@ -46,7 +46,7 @@ namespace p2psp {
           << std::to_string(node.port()) << ")");
   }
 
-  void PeerDBS::ReceiveMagicFlags() {
+  /*void PeerDBS::ReceiveMagicFlags() {
     std::vector<char> magic_flags(1);
     read(splitter_socket_, ::buffer(magic_flags));
     TRACE("Magic flags = " << std::bitset<8>(magic_flags[0]));
@@ -59,7 +59,7 @@ namespace p2psp {
         << "with a different set of rules.");
       exit(1);
     }
-  }
+  }*/
 
   void PeerDBS::ReceiveTheNumberOfPeers() {
     boost::array<char, 2> buffer;
@@ -114,25 +114,6 @@ namespace p2psp {
     }
 
     TRACE("List of peers received");
-  }
-
-  //This method is never used
-  void PeerDBS::ReceiveMyEndpoint() {
-    boost::array<char, 6> buffer;
-    char *raw_data = buffer.data();
-    ip::address ip_addr;
-    ip::udp::endpoint peer;
-    int port;
-
-    read(splitter_socket_, ::buffer(buffer));
-    in_addr ip_raw = *(in_addr *)(raw_data);
-    ip_addr = ip::address::from_string(inet_ntoa(ip_raw));
-    port = ntohs(*(short *)(raw_data + 4));
-
-    me_ = ip::udp::endpoint(ip_addr, port);
-
-    TRACE("me = (" << me_.address().to_string() << ","
-          << std::to_string(me_.port()) << ")");
   }
 
   void PeerDBS::ListenToTheTeam() {

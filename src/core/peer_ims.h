@@ -83,6 +83,8 @@ namespace p2psp {
     std::string kLogFile;
     bool logging_;
     std::ofstream log_file_;
+    ip::udp::endpoint me_;
+    int number_of_peers_;
 
   public:
 
@@ -104,11 +106,14 @@ namespace p2psp {
      */
     virtual void ConnectToTheSplitter() throw(boost::system::system_error);
     virtual void DisconnectFromTheSplitter();
-    virtual void ReceiveTheMcastEndpoint();
+    virtual void ReceiveTheMcastChannel();
     virtual void ReceiveTheHeader();
     virtual void ReceiveTheChunkSize();
     virtual void ReceiveTheHeaderSize();
     virtual void ReceiveTheBufferSize();
+    void ReceiveMagicFlags();
+    virtual void ReceiveMyEndpoint();
+    //virtual void ReceiveTheNumberOfPeers();
 
     /**
      *  Create "team_socket" (UDP) for using the multicast channel
@@ -163,8 +168,14 @@ namespace p2psp {
     virtual uint16_t GetSplitterPort();
     virtual void     SetTeamPort(uint16_t);
     virtual uint16_t GetTeamPort();
-    virtual void SetUseLocalhost(bool);
-
+    virtual void SetUseLocalHost(bool);
+    bool GetUseLocalHost();
+    virtual int GetHeaderSize();
+    virtual int GetBufferSize();
+    int GetNumberOfPeers() { return 0; }
+    // bool AmIAMonitor() { return false; }
+    //void ReceiveTheListOfPeers() {}
+    
     static uint16_t GetDefaultPlayerPort();
     static uint16_t GetDefaultTeamPort();
     static ip::address GetDefaultSplitterAddr();

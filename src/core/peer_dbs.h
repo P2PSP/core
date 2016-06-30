@@ -40,13 +40,10 @@ namespace p2psp {
     std::map<ip::udp::endpoint, int> debt_;
 
     int number_of_monitors_;
-    int number_of_peers_;
     int max_chunk_debt_;
 
     int receive_and_feed_counter_;
     std::vector<char> receive_and_feed_previous_;
-
-    ip::udp::endpoint me_;
 
     int debt_memory_;
     bool waiting_for_goodbye_;
@@ -59,10 +56,9 @@ namespace p2psp {
     virtual void Init() override;
     virtual void SayHello(const ip::udp::endpoint&);
     virtual void SayGoodbye(const ip::udp::endpoint&);
-    virtual void ReceiveMagicFlags();
-    virtual void ReceiveTheNumberOfPeers();
-    virtual void ReceiveTheListOfPeers();
-    virtual void ReceiveMyEndpoint();
+    //void ReceiveMagicFlags();
+    void ReceiveTheListOfPeers();
+    void ReceiveTheNumberOfPeers();
     virtual void ListenToTheTeam() override;
     virtual int ProcessMessage(const std::vector<char>&,
                                const ip::udp::endpoint&) override;
@@ -72,9 +68,9 @@ namespace p2psp {
     virtual void BufferData() override;
     virtual void Start() override;
     virtual void Run() override;
-    virtual bool AmIAMonitor();
+    bool AmIAMonitor();
 
-    virtual int GetNumberOfPeers();
+    int GetNumberOfPeers();
     virtual void SetMaxChunkDebt(int);
     virtual int GetMaxChunkDebt();
 

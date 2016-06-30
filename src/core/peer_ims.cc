@@ -25,7 +25,7 @@ namespace p2psp {
       splitter_socket_(io_service_),
       team_socket_(io_service_) {
 
-    magic_flags_ = Common::kDBS;
+    magic_flags_ = Common::kIMS;
 
     // Default values
     player_port_ = kPlayerPort;
@@ -135,7 +135,22 @@ namespace p2psp {
 
   void PeerIMS::DisconnectFromTheSplitter() { splitter_socket_.close(); }
 
-  void PeerIMS::ReceiveTheMcastEndpoint() {
+  void PeerIMS::ReceiveMagicFlags() {
+    std::vector<char> magic_flags(1);
+    read(splitter_socket_, ::buffer(magic_flags));
+    TRACE("Magic flags = " << std::bitset<8>(magic_flags[0]));
+
+    /*if (this->magic_flags_ != magic_flags[0]) {
+      ERROR("The splitter has different magic flags ("
+        << std::bitset<8>(magic_flags[0]) << ") than this peer ("
+        << std::bitset<8>(magic_flags_) << ").");
+      ERROR("Please run splitter with a different parameter, or compile peer "
+        << "with a different set of rules.");
+	exit(1);*
+	}*/
+  }
+  
+  void PeerIMS::ReceiveTheMcastChannel() {
     boost::array<char, 6> buffer;
     read(splitter_socket_, ::buffer(buffer));
 
@@ -192,8 +207,9 @@ namespace p2psp {
       boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
     }
 
-    TRACE("Received " << std::to_string(header_size_in_bytes)
-          << "bytes of header");
+    TRACE("Received "
+	  << std::to_string(header_size_in_bytes)
+          << " bytes of header");
   }
 
   void PeerIMS::ReceiveTheBufferSize() {
@@ -204,6 +220,9 @@ namespace p2psp {
 
     TRACE("buffer_size_ = " << std::to_string(buffer_size_));
   }
+
+  /*void PeerIMS::ReceiveTheNumberOfPeers() {
+    }*/
 
   void PeerIMS::ListenToTheTeam() {
     ip::udp::endpoint endpoint(ip::address_v4::any(), mcast_port_);
@@ -494,6 +513,14 @@ namespace p2psp {
     return magic_flags_;
   }
 
+  int PeerIMS::GetHeaderSize() {
+    return header_size_in_chunks_;
+  }
+
+  int PeerIMS::GetBufferSize() {
+    return buffer_size_;
+  }
+
   //std::string PeerIMS::GetMcastAddr() {
   ip::address PeerIMS::GetMcastAddr() {
     //return mcast_addr_.to_string();
@@ -565,8 +592,12 @@ namespace p2psp {
     return team_port_;
   }
 
-  void PeerIMS::SetUseLocalhost(bool use_localhost) {
+  void PeerIMS::SetUseLocalHost(bool use_localhost) {
     use_localhost_ = use_localhost;
+  }
+
+  bool PeerIMS::GetUseLocalHost() {
+    return use_localhost_;
   }
 
   uint16_t PeerIMS::GetDefaultPlayerPort() {
@@ -584,4 +615,23 @@ namespace p2psp {
   ip::address PeerIMS::GetDefaultSplitterAddr() {
     return ip::address::from_string(kSplitterAddr);;
   }
+
+  void PeerIMS::ReceiveMyEndpoint() {
+    boost::array<char, 6> buffer;
+    char *raw_data = buffer.data();
+    ip::address ip_addr;
+    ip::udp::endpoint peer;
+    int port;
+
+    read(splitter_socket_, ::buffer(buffer));
+    in_addr ip_raw = *(in_addr *)(raw_data);
+    ip_addr = ip::address::from_string(inet_ntoa(ip_raw));
+    port = ntohs(*(short *)(raw_data + 4));
+
+    me_ = ip::udp::endpoint(ip_addr, port);
+
+    TRACE("me = (" << me_.address().to_string() << ","
+          << std::to_string(me_.port()) << ")");
+  }
+
 }
