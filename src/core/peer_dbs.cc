@@ -10,6 +10,42 @@
 //  DBS: Data Broadcasting Set of rules
 //
 
+  std::vector<ip::udp::endpoint> *Peer_CORE::GetPeerList() {
+    return &peer_list_;
+  }
+
+  void Peer_CORE::SetTeamPort(uint16_t team_port) {
+    team_port_ = team_port;
+  }
+
+  uint16_t Peer_CORE::GetTeamPort() {
+    return team_port_;
+  }
+
+  uint16_t Peer_CORE::GetDefaultTeamPort() {
+    return kTeamPort;
+  }
+
+  void Peer_CORE::ReceiveMyEndpoint() {
+    boost::array<char, 6> buffer;
+    char *raw_data = buffer.data();
+    ip::address ip_addr;
+    ip::udp::endpoint peer;
+    int port;
+
+    read(splitter_socket_, ::buffer(buffer));
+    in_addr ip_raw = *(in_addr *)(raw_data);
+    ip_addr = ip::address::from_string(inet_ntoa(ip_raw));
+    port = ntohs(*(short *)(raw_data + 4));
+
+    me_ = ip::udp::endpoint(ip_addr, port);
+
+    TRACE("me = (" << me_.address().to_string() << ","
+          << std::to_string(me_.port()) << ")");
+  }
+
+
+
 #include "peer_dbs.h"
 
 namespace p2psp {

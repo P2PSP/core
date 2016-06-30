@@ -3,15 +3,15 @@
 //  P2PSP
 //
 //  This code is distributed under the GNU General Public License (see
-//  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
-//  Copyright (C) 2016, the P2PSP team.
+//  the THE_GENERAL_GNU_PUBLIC_LICENSE.txt file for extending this
+//  information).  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
 //
 //  DBS: Data Broadcasting Set of rules
 //
 
-#ifndef P2PSP_CORE_PEER_DBS_H
-#define P2PSP_CORE_PEER_DBS_H
+//#ifndef P2PSP_CORE_PEER_DBS_H
+//#define P2PSP_CORE_PEER_DBS_H
 
 #include <vector>
 #include <string>
@@ -30,7 +30,7 @@ using namespace boost::asio;
 
 namespace p2psp {
 
-  class PeerDBS : public PeerIMS {
+  class Peer_DBS_IMS : public Peer_core {
   protected:
     static const int kMaxChunkDebt = 128;  // Peer's rejecting threshold
 
@@ -79,4 +79,4 @@ namespace p2psp {
   };
 }
 
-#endif  // P2PSP_CORE_PEER_DBS_H
+//#endif  // P2PSP_CORE_PEER_DBS_H
