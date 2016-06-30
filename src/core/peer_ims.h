@@ -1,9 +1,9 @@
 //
-//  peer_ims.h
-//  P2PSP
+//  peer_ims.h -- P2PSP's IP multicast transmission
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+//
 //  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
 //
@@ -13,50 +13,15 @@
 #ifndef P2PSP_CORE_PEER_IMS_H
 #define P2PSP_CORE_PEER_IMS_H
 
-#include <arpa/inet.h>
-#include <boost/array.hpp>
-#include <boost/asio.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread/thread.hpp>
-#include <ctime>
-#include <fstream>
-#include <string>
-#include <tuple>
-#include <vector>
-#include "../util/trace.h"
-#include "common.h"
-
-using namespace boost::asio;
+#include "peer_core.h"
 
 namespace p2psp {
 
-  struct Chunk {
-    std::vector<char> data;
-    bool received;
-  };
-
-  class PeerIMS {
+  class Peer_IMS {
 
   protected:
 
-    static const uint16_t kPlayerPort = 9999;             // Default port used to serve the player.
-    static constexpr char kSplitterAddr[] = "127.0.0.1";  // Default address of the splitter.
-    static const uint16_t kSplitterPort = 4552;           // Default port of the splitter.
-    static const uint16_t kTeamPort = 0;                  // Default TCP->UDP port used to communicate.
-    static const bool kUseLocalhost = false;              // Default use localhost instead the IP of the addapter
-    static const int kBufferStatus = 0;                   // Default ?
-    static const bool kShowBuffer = false;                // Default
-    static const int kChunkIndexSize = 2;
-
-    char magic_flags_;
-    uint16_t player_port_;                                // Port used to serve the player.
-    ip::address splitter_addr_;                           // Address of the splitter.
-    uint16_t splitter_port_;                              // Port of the splitter.
-    uint16_t team_port_;                                  // TCP->UDP port used to communicate.
-    bool use_localhost_;                                  // Use localhost instead the IP of the addapter
-    int buffer_status_;                                   // ?
-    int sendto_counter_;                                  // Initialized to -1 in clases that don't use it
-    bool show_buffer_;
+    bool show_buffer_; // Quitar
     int buffer_size_;
     unsigned int message_size_;
     int chunk_size_;

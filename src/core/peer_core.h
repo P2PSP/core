@@ -47,7 +47,6 @@ namespace p2psp {
     static const int kChunkIndexSize = 2;
 
     char magic_flags_;
-    uint16_t player_port_;                                // Port used to serve the player.
     ip::address splitter_addr_;                           // Address of the splitter.
     uint16_t splitter_port_;                              // Port of the splitter.
     uint16_t team_port_;                                  // TCP->UDP port used to communicate.
@@ -89,44 +88,23 @@ namespace p2psp {
     PeerIMS();
     ~PeerIMS();
 
-    /**
-     *  This function must be called after constructing a new object.
-     */
-    virtual void Init();
-
-    /**
-     *  Setup "player_socket" and wait for the player
-     */
-    virtual void WaitForThePlayer();
-
-    /**
-     *  Setup "splitter" and "splitter_socket"
-     */
-    virtual void ConnectToTheSplitter() throw(boost::system::system_error);
-    virtual void DisconnectFromTheSplitter();
-    virtual void ReceiveTheMcastChannel();
-    virtual void ReceiveTheHeader();
-    virtual void ReceiveTheChunkSize();
-    virtual void ReceiveTheHeaderSize();
-    virtual void ReceiveTheBufferSize();
+    void Init();
+    void ConnectToTheSplitter() throw(boost::system::system_error);
+    void DisconnectFromTheSplitter();
     void ReceiveMagicFlags();
-    virtual void ReceiveMyEndpoint();
-    //virtual void ReceiveTheNumberOfPeers();
-
-    /**
-     *  Create "team_socket" (UDP) for using the multicast channel
-     */
-    virtual void ListenToTheTeam();
-    virtual void ReceiveTheNextMessage(std::vector<char>&, ip::udp::endpoint&);
-    virtual int ProcessMessage(const std::vector<char>&,
-                               const ip::udp::endpoint&);
-    virtual int ProcessNextMessage();
+    void ReceiveHeaderSize();
+    void ReceiveHeader();
+    void ReceiveChunkSize();
+    void ReceiveBufferSize();
+    void ReceiveNextMessage(std::vector<char>& message, ip::udp::endpoint& sender);
+    int ProcessNextMessage();
+    virtual void PlayChunk(int chunk_index);
 
     /**
      *  Buffering
      */
     virtual void BufferData();
-    virtual int FindNextChunk();
+    //virtual int FindNextChunk();
     virtual void PlayChunk(int);
     virtual void PlayNextChunk(int chunk_number);
     virtual void KeepTheBufferFull();

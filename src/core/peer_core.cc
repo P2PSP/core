@@ -49,9 +49,6 @@ namespace p2psp {
 
   void Peer_core::Init() {};
 
-  /*void Peer_core::WaitForThePlayer() {
-    }*/
-
   void Peer_core::ConnectToTheSplitter() throw(boost::system::system_error) {
     // {{{
 
@@ -140,19 +137,6 @@ namespace p2psp {
     // }}}
   }
 
-  void Peer_core::ReceiveChunkSize() {
-    // {{{
-
-    boost::array<char, 2> buffer;
-    read(splitter_socket_, ::buffer(buffer));
-    chunk_size_ = ntohs(*(short *)(buffer.c_array()));
-    message_size_=kChunkIndexSize+chunk_size_;
-    TRACE("chunk_size (bytes) = "
-	  << std::to_string(chunk_size_));
-
-    // }}}
-  }
-
   void Peer_core::ReceiveHeader() {
     // {{{
 
@@ -184,6 +168,19 @@ namespace p2psp {
     // }}}
   }
 
+  void Peer_core::ReceiveChunkSize() {
+    // {{{
+
+    boost::array<char, 2> buffer;
+    read(splitter_socket_, ::buffer(buffer));
+    chunk_size_ = ntohs(*(short *)(buffer.c_array()));
+    message_size_=kChunkIndexSize+chunk_size_;
+    TRACE("chunk_size (bytes) = "
+	  << std::to_string(chunk_size_));
+
+    // }}}
+  }
+
   void Peer_core::ReceiveBufferSize() {
     // {{{
 
@@ -195,7 +192,6 @@ namespace p2psp {
 
     // }}}
   }
-
 
   void Peer_core::BufferData() {
     // {{{
@@ -291,26 +287,7 @@ namespace p2psp {
     // }}}
   }
 
-  int Peer_core::ProcessNextMessage() {
-    // {{{
-
-    // (Chunk number + chunk payload) length
-    std::vector<char> message(message_size_);
-    ip::udp::endpoint sender;
-
-    try {
-      ReceiveTheNextMessage(message, sender);
-    } catch (std::exception e) {
-      return -2;
-    }
-
-    return ProcessMessage(message, sender);
-
-    // }}}
-  }
-
-  void Peer_core::ReceiveNextMessage(std::vector<char> &message,
-                                      ip::udp::endpoint &sender) {
+  void Peer_core::ReceiveNextMessage(std::vector<char> &message, ip::udp::endpoint &sender) {
     // {{{
 
     TRACE("Waiting for a chunk at ("
@@ -332,6 +309,25 @@ namespace p2psp {
     if (message.size() < 10) {
       TRACE("Message content = " << std::string(message.data()));
     }
+
+    // }}}
+  }
+
+  // Change the name of this function
+  int Peer_core::ProcessNextMessage() {
+    // {{{
+
+    // (Chunk number + chunk payload) length
+    std::vector<char> message(message_size_);
+    ip::udp::endpoint sender;
+
+    try {
+      ReceiveTheNextMessage(message, sender);
+    } catch (std::exception e) {
+      return -2;
+    }
+
+    return ProcessMessage(message, sender);
 
     // }}}
   }
@@ -418,6 +414,7 @@ namespace p2psp {
     // }}}
   }
 
+#ifdef _1_
   // Tiene pinta de que los tres siguientes metodos pueden simplificarse...
   int Peer_core::FindNextChunk() {
     // {{{
@@ -441,7 +438,9 @@ namespace p2psp {
 
     // }}}
   }
+#endif
 
+  // Delete?
   void Peer_core::LogMessage(const std::string &message) {
     // {{{
 
