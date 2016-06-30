@@ -8,8 +8,8 @@
 //  http://www.p2psp.org
 //
 
-#ifndef P2PSP_CORE_COMMON_H
-#define P2PSP_CORE_COMMON_H
+//#ifndef P2PSP_CORE_COMMON_H
+//#define P2PSP_CORE_COMMON_H
 
 #include <chrono>
 #include <openssl/sha.h>
@@ -26,7 +26,7 @@ namespace p2psp {
     // COUNTERS_TIMING = 0.1
     static const int kCountersTiming = 1; // In seconds
 
-    static const bool kConsoleMode = true;
+    //static const bool kConsoleMode = true;
 
     // Set of rules flags
     static const char kIMS = 0x00; // IMS
@@ -34,8 +34,8 @@ namespace p2psp {
     static const char kACS = 0x02; // ACS
     static const char kLRS = 0x04; // LRS
     static const char kNTS = 0x08; // NIS
-    //static const char kDIS = 0x10; // DIS
     static const char kSTRPE = 0x10; // This should be renamed to kCIS
+    //static const char kDIS = 0x11; // DIS
     
     // TODO: Use colors
     // IMS_COLOR = Color.red
@@ -52,4 +52,4 @@ namespace p2psp {
   };
 }
 
-#endif  // P2PSP_CORE_COMMON_H
+//#endif  // P2PSP_CORE_COMMON_H
