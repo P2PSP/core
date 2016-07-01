@@ -48,17 +48,19 @@ namespace p2psp {
     int debt_memory_;
     bool waiting_for_goodbye_;
     bool modified_list_;
-
+    std::vector<ip::udp::endpoint> peer_list_;
+    char magic_flags_;
 
   public:
     PeerDBS();
     ~PeerDBS();
-    virtual void Init() override;
+    virtual void ReceiveMagicFlags(void);
+    //virtual void Init() override;
     virtual void SayHello(const ip::udp::endpoint&);
     virtual void SayGoodbye(const ip::udp::endpoint&);
     //void ReceiveMagicFlags();
-    void ReceiveTheListOfPeers();
-    void ReceiveTheNumberOfPeers();
+    virtual void ReceiveTheListOfPeers();
+    virtual void ReceiveTheNumberOfPeers();
     virtual void ListenToTheTeam() override;
     virtual int ProcessMessage(const std::vector<char>&,
                                const ip::udp::endpoint&) override;

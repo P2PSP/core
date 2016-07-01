@@ -21,7 +21,6 @@ namespace p2psp {
 
   protected:
 
-    ip::address mcast_addr_;
     uint16_t mcast_port_;
 
   public:

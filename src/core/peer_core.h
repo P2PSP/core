@@ -1,5 +1,5 @@
 //
-//  peer_core.h - P2PSP's core stuff
+//  peer_core.h - P2PSP's core stuff definition
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
@@ -38,42 +38,36 @@ namespace p2psp {
 
   protected:
 
-    static constexpr char kSplitterAddr[] = "127.0.0.1";  // Default address of the splitter.
-    static const uint16_t kSplitterPort = 4552;           // Default port of the splitter.
-    static const uint16_t kTeamPort = 0;                  // Default TCP->UDP port used to communicate.
-    static const bool kUseLocalhost = false;              // Default use localhost instead the IP of the addapter
-    static const int kBufferStatus = 0;                   // Default ?
-    static const bool kShowBuffer = false;                // Default
+    static constexpr char kSplitterAddr[] = "127.0.0.1";
+    static const uint16_t kSplitterPort = 4552;
+    static const uint16_t kTeamPort = 0;
+    static const bool kUseLocalhost = false; // Default use localhost instead the IP of the addapter
     static const int kChunkIndexSize = 2;
 
-    char magic_flags_;
-    ip::address splitter_addr_;                           // Address of the splitter.
-    uint16_t splitter_port_;                              // Port of the splitter.
-    uint16_t team_port_;                                  // TCP->UDP port used to communicate.
-    bool use_localhost_;                                  // Use localhost instead the IP of the addapter
-    int buffer_status_;                                   // ?
-    int sendto_counter_;                                  // Initialized to -1 in clases that don't use it
-    bool show_buffer_;
+    ip::address splitter_addr_;
+    uint16_t splitter_port_;
+    uint16_t team_port_;
+    bool use_localhost_;
+    int buffer_status_;
+    int sendto_counter_; // Initialized to -1 in clases that don't use it
     int buffer_size_;
     unsigned int message_size_;
     int chunk_size_;
     std::vector<Chunk> chunks_;
     int header_size_in_chunks_;
     ip::address mcast_addr_;
-    uint16_t mcast_port_;
     int played_chunk_;
     bool player_alive_;
     int received_counter_;
     std::vector<bool> received_flag_;
     int recvfrom_counter_;
     ip::udp::endpoint splitter_;
-    io_service io_service_;                               // Service for I/O operations
-    ip::tcp::acceptor acceptor_;                          // Acceptor used to listen to incoming connections.
-    ip::tcp::socket player_socket_;                       // Used to listen to the player
-    ip::tcp::socket splitter_socket_;                     // Used to listen to the splitter
-    ip::udp::socket team_socket_;                         // Used to communicate with the rest of the team
-    boost::thread_group thread_group_;                    // Thread group to join all threads
-    std::vector<ip::udp::endpoint> peer_list_;            // DBS variables
+    io_service io_service_;
+    ip::tcp::acceptor acceptor_; // Acceptor used to listen to incoming connections.
+    ip::tcp::socket player_socket_;
+    ip::tcp::socket splitter_socket_;
+    ip::udp::socket team_socket_;
+    boost::thread_group thread_group_;
     int previous_chunk_number_=0;
     int latest_chunk_number_ = 0;
     bool kLogging = false;
@@ -88,43 +82,32 @@ namespace p2psp {
     PeerIMS();
     ~PeerIMS();
 
-    void Init();
-    void ConnectToTheSplitter() throw(boost::system::system_error);
-    void DisconnectFromTheSplitter();
-    void ReceiveMagicFlags();
-    void ReceiveHeaderSize();
-    void ReceiveHeader();
-    void ReceiveChunkSize();
-    void ReceiveBufferSize();
-    void ReceiveNextMessage(std::vector<char>& message, ip::udp::endpoint& sender);
-    int ProcessNextMessage();
-    virtual void PlayChunk(int chunk_index);
+    virtual void Init(void);
+    virtual void ConnectToTheSplitter() throw(boost::system::system_error);
+    virtual void DisconnectFromTheSplitter(void);
+    virtual void ReceiveHeaderSize(void);
+    virtual void ReceiveHeader(void);
+    virtual void ReceiveChunkSize(void);
+    virtual void ReceiveBufferSize(void);
+    virtual void ReceiveNextMessage(std::vector<char>& message, ip::udp::endpoint& sender);
+    virtual int ProcessNextMessage();
+    //virtual void PlayChunk(int chunk_index);
 
-    /**
-     *  Buffering
-     */
     virtual void BufferData();
     //virtual int FindNextChunk();
-    virtual void PlayChunk(int);
-    virtual void PlayNextChunk(int chunk_number);
-    virtual void KeepTheBufferFull();
+    //virtual void PlayNextChunk(int chunk_number);
+    //virtual void KeepTheBufferFull();
 
-    /**
-     *  Thread management
-     */
     virtual void Run();
     virtual void Start();
 
-    /**
-     * Log Messages
-     */
     virtual void LogMessage(const std::string&);
     virtual std::string BuildLogMessage(const std::string&);
 
     /**
      *  Getters/setters
      */
-    virtual char GetMagicFlags();
+    virtuar char GetMagicFlags();
     //virtual std::string GetMcastAddr();
     virtual ip::address GetMcastAddr();
     virtual bool IsPlayerAlive();

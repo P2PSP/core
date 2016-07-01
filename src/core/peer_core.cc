@@ -1,8 +1,9 @@
 //
-//  peer_core.cc - P2PSP's core stuff
+//  peer_core.cc - P2PSP's core stuff implementation
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+//
 //  Copyright (C) 2016, the P2PSP team.
 //
 //  http://www.p2psp.org
@@ -22,23 +23,22 @@ namespace p2psp {
       team_socket_(io_service_) {
     // {{{
 
-    player_port_ = kPlayerPort;
+    //player_port_ = kPlayerPort;
     splitter_addr_ = ip::address::from_string(kSplitterAddr);
     splitter_port_ = kSplitterPort;
     team_port_ = kTeamPort;
     use_localhost_ = kUseLocalhost;
-    buffer_status_ = kBufferStatus;
-    show_buffer_ = kShowBuffer;
-    buffer_size_ = 0;
-    chunk_size_ = 0;
+    //buffer_status_ = kBufferStatus;
+    //show_buffer_ = kShowBuffer;
+    //buffer_size_ = 0;
+    //chunk_size_ = 0;
     chunks_ = std::vector<Chunk>();
-    header_size_in_chunks_ = 0;
-    mcast_addr_ = ip::address::from_string("0.0.0.0");
-    mcast_port_ = 0;
+    //header_size_in_chunks_ = 0;
+    //mcast_addr_ = ip::address::from_string("0.0.0.0");
+    //mcast_port_ = 0;
     played_chunk_ = 0;
     player_alive_ = false;
     received_counter_ = 0;
-    received_flag_ = std::vector<bool>();
     recvfrom_counter_ = 0;
     sendto_counter_ = -1;
 
@@ -114,16 +114,6 @@ namespace p2psp {
 
     // }}}
   }
-
-  void Peer_core::ReceiveMagicFlags() {
-    // {{{
-
-    std::vector<char> magic_flags(1);
-    read(splitter_socket_, ::buffer(magic_flags));
-    TRACE("Magic flags = " << std::bitset<8>(magic_flags[0]));
-
-    // }}}
- }
 
   void Peer_core::ReceiveHeaderSize() {
     // {{{
