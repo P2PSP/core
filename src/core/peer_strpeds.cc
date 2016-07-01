@@ -214,13 +214,13 @@ int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
 	  if (logging_ and latest_chunk_number_ != 0) {
 		LogMessage("buffer correctnes " + std::to_string(CalcBufferCorrectness()));
 	    LogMessage("buffer filling " + std::to_string(CalcBufferFilling()));
-	    if (played_ > 0){
+	    if (played_ > 0 and played_ >= peer_list_.size()){
 	      TRACE("Losses in the previous round: " << losses_ << " played " << played_);
 	      LogMessage("buffer fullness " + std::to_string((float)losses_ / (float)played_));
+	      losses_ = 0;
+	      played_ = 0;
 	    }
 	  }
-	  losses_ = 0;
-	  played_ = 0;
   }
   //---------------------
 
