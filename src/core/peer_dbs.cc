@@ -10,6 +10,8 @@
 //  DBS: Data Broadcasting Set of rules
 //
 
+    int sendto_counter_;                                  // Initialized to -1 in clases that don't use it
+
   std::vector<ip::udp::endpoint> *Peer_CORE::GetPeerList() {
     return &peer_list_;
   }
