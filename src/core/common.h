@@ -8,8 +8,8 @@
 //  http://www.p2psp.org
 //
 
-//#ifndef P2PSP_CORE_COMMON_H
-//#define P2PSP_CORE_COMMON_H
+#ifndef P2PSP_CORE_COMMON_H
+#define P2PSP_CORE_COMMON_H
 
 #include <chrono>
 #include <openssl/sha.h>
@@ -52,4 +52,4 @@ namespace p2psp {
   };
 }
 
-//#endif  // P2PSP_CORE_COMMON_H
+#endif  // P2PSP_CORE_COMMON_H
