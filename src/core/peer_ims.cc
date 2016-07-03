@@ -19,34 +19,13 @@ namespace p2psp {
   Peer_IMS::Peer_IMS() {
 
     // Initialized in Peer_IMS::ReceiveTheMcasteEndpoint()
-    mcast_addr_ = ip::address::from_string("0.0.0.0");
-    mcast_port_ = 0;
+    //mcast_addr_ = ip::address::from_string("0.0.0.0");
+    //mcast_port_ = 0;
   }
 
   Peer_IMS::~Peer_IMS() {}
 
   void Peer_IMS::Init() {};
-
-  void Peer_IMS::ReceiveMcastChannel() {
-    // {{{
-
-    boost::array<char, 6> buffer;
-    read(splitter_socket_, ::buffer(buffer));
-
-    char *raw_data = buffer.data();
-
-    in_addr ip_raw = *(in_addr *)(raw_data);
-    mcast_addr_ = ip::address::from_string(inet_ntoa(ip_raw));
-    mcast_port_ = ntohs(*(short *)(raw_data + 4));
-
-    TRACE("mcast_endpoint = ("
-	  << mcast_addr_.to_string()
-	  << ","
-          << std::to_string(mcast_port_)
-	  << ")");
-
-    // }}}
-  }
 
   void Peer_IMS::ListenToTheTeam() {
     // {{{
@@ -67,7 +46,7 @@ namespace p2psp {
   }
 
   int Peer_IMS::ProcessMessage(const std::vector<char> &message,
-                              const ip::udp::endpoint &sender) {
+			       const ip::udp::endpoint &sender) {
     // {{{
 
     // Ojo, an attacker could send a packet smaller and pollute the buffer,
@@ -89,13 +68,4 @@ namespace p2psp {
   }
 
   //std::string Peer_IMS::GetMcastAddr() {
-  ip::address Peer_IMS::GetMcastAddr() {
-    // {{{
-
-    //return mcast_addr_.to_string();
-    return mcast_addr_;
-
-    // }}}
-  }
-
 }

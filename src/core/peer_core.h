@@ -68,13 +68,15 @@ namespace p2psp {
     ip::tcp::socket splitter_socket_;
     ip::udp::socket team_socket_;
     boost::thread_group thread_group_;
-    int previous_chunk_number_=0;
+    int previous_chunk_number_ = 0;
     int latest_chunk_number_ = 0;
     bool kLogging = false;
     std::string kLogFile;
     bool logging_;
     std::ofstream log_file_;
     ip::udp::endpoint me_;
+    uint16_t mcast_port_;
+    char magic_flags_;
 
   public:
 
@@ -90,12 +92,17 @@ namespace p2psp {
     virtual void ReceiveBufferSize(void);
     virtual void ReceiveNextMessage(std::vector<char>& message, ip::udp::endpoint& sender);
     virtual int ProcessNextMessage();
+    virtual int ProcessMessage(const std::vector<char>&,
+				const ip::udp::endpoint&);
     //virtual void PlayChunk(int chunk_index);
+    virtual void ReceiveMcastChannel();
 
     virtual void BufferData();
     //virtual int FindNextChunk();
-    //virtual void PlayNextChunk(int chunk_number);
-    //virtual void KeepTheBufferFull();
+    virtual void PlayNextChunk(int chunk_number);
+    virtual void KeepTheBufferFull();
+
+    virtual void PlayChunk(int chunk_number);
 
     virtual void Run();
     virtual void Start();

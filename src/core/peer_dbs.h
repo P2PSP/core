@@ -49,14 +49,13 @@ namespace p2psp {
     bool waiting_for_goodbye_;
     bool modified_list_;
     std::vector<ip::udp::endpoint> peer_list_;
-    char magic_flags_;
     int number_of_peers_;
 
   public:
     Peer_DBS();
     ~Peer_DBS();
     virtual void ReceiveMagicFlags(void);
-    //virtual void Init() override;
+    virtual void Init() override;
     virtual void SayHello(const ip::udp::endpoint&);
     virtual void SayGoodbye(const ip::udp::endpoint&);
     //void ReceiveMagicFlags();
@@ -76,9 +75,11 @@ namespace p2psp {
     int GetNumberOfPeers();
     virtual void SetMaxChunkDebt(int);
     virtual int GetMaxChunkDebt();
-
+    virtual std::vector<ip::udp::endpoint> *GetPeerList();
     static int GetDefaultMaxChunkDebt();
+    virtual void ReceiveMyEndpoint();
 
+    
   };
 }
 

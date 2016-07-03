@@ -37,23 +37,23 @@ namespace p2psp {
     // }}}
   }
 
-  std::vector<ip::udp::endpoint> *Peer_CORE::GetPeerList() {
+  std::vector<ip::udp::endpoint> *Peer_DBS::GetPeerList() {
     return &peer_list_;
   }
 
-  void Peer_CORE::SetTeamPort(uint16_t team_port) {
+  /*void Peer_DBS::SetTeamPort(uint16_t team_port) {
     team_port_ = team_port;
   }
 
-  uint16_t Peer_CORE::GetTeamPort() {
+  uint16_t Peer_DBS::GetTeamPort() {
     return team_port_;
   }
 
-  uint16_t Peer_CORE::GetDefaultTeamPort() {
+  uint16_t Peer_DBS::GetDefaultTeamPort() {
     return kTeamPort;
-  }
+    }*/
 
-  void Peer_CORE::ReceiveMyEndpoint() {
+  void Peer_DBS::ReceiveMyEndpoint() {
     boost::array<char, 6> buffer;
     char *raw_data = buffer.data();
     ip::address ip_addr;
@@ -217,11 +217,10 @@ namespace p2psp {
     // }}}
   }
 
-  int Peer_DBS::ProcessMessage
-  (const std::vector<char> &message,
-   const ip::udp::endpoint &sender) {
+  int Peer_DBS::ProcessMessage(const std::vector<char> &message,
+			       const ip::udp::endpoint &sender) {
     // {{{
-
+    
     // Now, receive and send.
     
     TRACE("Size: "
