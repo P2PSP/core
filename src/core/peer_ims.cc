@@ -12,59 +12,20 @@
 //  IMS: Ip Multicasting Set of rules
 //
 
-#define _1_ // Temporal!!!
-
 #include "peer_ims.h"
 
 namespace p2psp {
+  
+  Peer_IMS::Peer_IMS() {
 
-  constexpr char PeerIMS::kSplitterAddr[];
-
-  PeerIMS::PeerIMS()
-    : io_service_(),
-      acceptor_(io_service_),
-      player_socket_(io_service_),
-      splitter_socket_(io_service_),
-      team_socket_(io_service_) {
-
-    magic_flags_ = Common::kIMS;
-
-    // Default values
-    player_port_ = kPlayerPort;
-    splitter_addr_ = ip::address::from_string(kSplitterAddr);
-    splitter_port_ = kSplitterPort;
-    team_port_ = kTeamPort;
-    use_localhost_ = kUseLocalhost;
-    buffer_status_ = kBufferStatus;
-    show_buffer_ = kShowBuffer;
-
-    // Initialized in PeerIMS::ReceiveTheBufferSize()
-    buffer_size_ = 0;
-
-    // Initialized in PeerIMS::ReceiveTheChunkSize()
-    chunk_size_ = 0;
-    chunks_ = std::vector<Chunk>();
-
-    // Initialized in PeerIMS::ReceiveTheHeaderSize()
-    header_size_in_chunks_ = 0;
-
-    // Initialized in PeerIMS::ReceiveTheMcasteEndpoint()
+    // Initialized in Peer_IMS::ReceiveTheMcasteEndpoint()
     mcast_addr_ = ip::address::from_string("0.0.0.0");
     mcast_port_ = 0;
-
-    played_chunk_ = 0;
-    player_alive_ = false;
-
-    received_counter_ = 0;
-    received_flag_ = std::vector<bool>();
-    recvfrom_counter_ = 0;
-
-    sendto_counter_ = -1;
   }
 
-  PeerIMS::~PeerIMS() {}
+  Peer_IMS::~Peer_IMS() {}
 
-  void PeerIMS::Init() {};
+  void Peer_IMS::Init() {};
 
   void Peer_IMS::ReceiveMcastChannel() {
     // {{{
@@ -105,7 +66,7 @@ namespace p2psp {
     // }}}
   }
 
-  int PeerIMS::ProcessMessage(const std::vector<char> &message,
+  int Peer_IMS::ProcessMessage(const std::vector<char> &message,
                               const ip::udp::endpoint &sender) {
     // {{{
 
@@ -127,8 +88,8 @@ namespace p2psp {
     // }}}
   }
 
-  //std::string PeerIMS::GetMcastAddr() {
-  ip::address PeerIMS::GetMcastAddr() {
+  //std::string Peer_IMS::GetMcastAddr() {
+  ip::address Peer_IMS::GetMcastAddr() {
     // {{{
 
     //return mcast_addr_.to_string();

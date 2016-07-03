@@ -101,7 +101,10 @@ endif ()
 # Sources
 if(NOT BUILD_REDUCED_LIB)
   file(GLOB P2PSP_SOURCES
-    "src/core/*.cc"
+    #"src/core/*.cc"
+    "src/core/peer_core.cc"
+    "src/core/peer_ims.cc"
+    "src/core/peer_dbs.cc"
     "src/util/*.cc"
   )
 else()

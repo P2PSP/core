@@ -13,24 +13,24 @@
 //#ifndef P2PSP_CORE_PEER_DBS_H
 //#define P2PSP_CORE_PEER_DBS_H
 
-#include <vector>
-#include <string>
-#include <map>
-#include <fstream>
-#include <boost/asio.hpp>
-#include <boost/array.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread/thread.hpp>
-#include <arpa/inet.h>
-#include <ctime>
-#include "../util/trace.h"
-#include "peer_ims.h"
+/* #include <vector> */
+/* #include <string> */
+/* #include <map> */
+/* #include <fstream> */
+/* #include <boost/asio.hpp> */
+/* #include <boost/array.hpp> */
+/* #include <boost/date_time/posix_time/posix_time.hpp> */
+/* #include <boost/thread/thread.hpp> */
+/* #include <arpa/inet.h> */
+/* #include <ctime> */
+/* #include "../util/trace.h" */
+#include "peer_core.h"
 
 using namespace boost::asio;
 
 namespace p2psp {
 
-  class Peer_DBS_IMS : public Peer_core {
+  class Peer_DBS : public Peer_core {
   protected:
     static const int kMaxChunkDebt = 128;  // Peer's rejecting threshold
 
@@ -50,10 +50,11 @@ namespace p2psp {
     bool modified_list_;
     std::vector<ip::udp::endpoint> peer_list_;
     char magic_flags_;
+    int number_of_peers_;
 
   public:
-    PeerDBS();
-    ~PeerDBS();
+    Peer_DBS();
+    ~Peer_DBS();
     virtual void ReceiveMagicFlags(void);
     //virtual void Init() override;
     virtual void SayHello(const ip::udp::endpoint&);
@@ -61,7 +62,7 @@ namespace p2psp {
     //void ReceiveMagicFlags();
     virtual void ReceiveTheListOfPeers();
     virtual void ReceiveTheNumberOfPeers();
-    virtual void ListenToTheTeam() override;
+    virtual void ListenToTheTeam()/* override*/;
     virtual int ProcessMessage(const std::vector<char>&,
                                const ip::udp::endpoint&) override;
     virtual float CalcBufferCorrectness();

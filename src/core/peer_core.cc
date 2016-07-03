@@ -41,6 +41,7 @@ namespace p2psp {
     received_counter_ = 0;
     recvfrom_counter_ = 0;
     sendto_counter_ = -1;
+    received_flag_ = std::vector<bool>();
 
     // }}}
   }

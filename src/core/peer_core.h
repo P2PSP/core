@@ -55,7 +55,7 @@ namespace p2psp {
     int chunk_size_;
     std::vector<Chunk> chunks_;
     int header_size_in_chunks_;
-    ip::address mcast_addr_;
+    ip::address mcast_addr_;  // Used to determine if IMS or rest
     int played_chunk_;
     bool player_alive_;
     int received_counter_;
@@ -75,12 +75,11 @@ namespace p2psp {
     bool logging_;
     std::ofstream log_file_;
     ip::udp::endpoint me_;
-    int number_of_peers_;
 
   public:
 
-    PeerIMS();
-    ~PeerIMS();
+    Peer_core();
+    ~Peer_core();
 
     virtual void Init(void);
     virtual void ConnectToTheSplitter() throw(boost::system::system_error);
@@ -107,7 +106,7 @@ namespace p2psp {
     /**
      *  Getters/setters
      */
-    virtuar char GetMagicFlags();
+    virtual char GetMagicFlags();
     //virtual std::string GetMcastAddr();
     virtual ip::address GetMcastAddr();
     virtual bool IsPlayerAlive();

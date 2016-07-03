@@ -10,7 +10,32 @@
 //  DBS: Data Broadcasting Set of rules
 //
 
-    int sendto_counter_;                                  // Initialized to -1 in clases that don't use it
+
+
+#include "peer_dbs.h"
+
+namespace p2psp {
+
+  Peer_DBS::Peer_DBS() {
+    // {{{
+
+    max_chunk_debt_ = kMaxChunkDebt;
+    magic_flags_ = Common::kDBS;
+    received_flag_ = std::vector<bool>();
+
+    // }}}
+  }
+
+  Peer_DBS::~Peer_DBS() {}
+
+  void Peer_DBS::Init() {
+    // {{{
+
+    TRACE("max_chunk_debt =" + std::to_string(kMaxChunkDebt));
+    TRACE("Initialized");
+
+    // }}}
+  }
 
   std::vector<ip::udp::endpoint> *Peer_CORE::GetPeerList() {
     return &peer_list_;
@@ -47,33 +72,7 @@
   }
 
 
-
-#include "peer_dbs.h"
-
-namespace p2psp {
-
-  PeerDBS::PeerDBS() {
-    // {{{
-
-    max_chunk_debt_ = kMaxChunkDebt;
-    magic_flags_ = Common::kDBS;
-    received_flag_ = std::vector<bool>();
-
-    // }}}
-  }
-
-  PeerDBS::~PeerDBS() {}
-
-  void PeerDBS::Init() {
-    // {{{
-
-    TRACE("max_chunk_debt =" + std::to_string(kMaxChunkDebt));
-    TRACE("Initialized");
-
-    // }}}
-  }
-
-  void Peer_core::ReceiveMagicFlags() {
+  void Peer_DBS::ReceiveMagicFlags() {
     // {{{
 
     std::vector<char> magic_flags(1);
@@ -83,7 +82,7 @@ namespace p2psp {
     // }}}
  }
 
-  void PeerDBS::SayHello(const ip::udp::endpoint &node) {
+  void Peer_DBS::SayHello(const ip::udp::endpoint &node) {
     // {{{
 
     std::string hello("H");
@@ -97,7 +96,7 @@ namespace p2psp {
     // }}}
   }
 
-  void PeerDBS::SayGoodbye(const ip::udp::endpoint &node) {
+  void Peer_DBS::SayGoodbye(const ip::udp::endpoint &node) {
     // {{{
 
     std::string goodbye("G");
@@ -113,7 +112,7 @@ namespace p2psp {
     // }}}
   }
 
-  /*void PeerDBS::ReceiveMagicFlags() {
+  /*void Peer_DBS::ReceiveMagicFlags() {
     std::vector<char> magic_flags(1);
     read(splitter_socket_, ::buffer(magic_flags));
     TRACE("Magic flags = " << std::bitset<8>(magic_flags[0]));
@@ -128,7 +127,7 @@ namespace p2psp {
     }
   }*/
 
-  void PeerDBS::ReceiveTheNumberOfPeers() {
+  void Peer_DBS::ReceiveTheNumberOfPeers() {
     // {{{
 
     boost::array<char, 2> buffer;
@@ -152,7 +151,7 @@ namespace p2psp {
     // }}}
   }
 
-  void PeerDBS::ReceiveTheListOfPeers() {
+  void Peer_DBS::ReceiveTheListOfPeers() {
     // {{{
 
     boost::array<char, 6> buffer;
@@ -201,7 +200,7 @@ namespace p2psp {
     // }}}
   }
 
-  void PeerDBS::ListenToTheTeam() {
+  void Peer_DBS::ListenToTheTeam() {
     // {{{
 
     ip::udp::endpoint endpoint(ip::address_v4::any(),
@@ -218,7 +217,7 @@ namespace p2psp {
     // }}}
   }
 
-  int PeerDBS::ProcessMessage
+  int Peer_DBS::ProcessMessage
   (const std::vector<char> &message,
    const ip::udp::endpoint &sender) {
     // {{{
@@ -454,7 +453,7 @@ namespace p2psp {
     // }}}
   }
   
-  float PeerDBS::CalcBufferCorrectness() {
+  float Peer_DBS::CalcBufferCorrectness() {
     // {{{
 
     std::vector<char> zerochunk(chunk_size_, 0);
@@ -478,7 +477,7 @@ namespace p2psp {
     // }}}
   }
 
-  float PeerDBS::CalcBufferFilling() {
+  float Peer_DBS::CalcBufferFilling() {
     // {{{
 
     int chunks = 0;
@@ -496,7 +495,7 @@ namespace p2psp {
     // }}}
   }
 
-  void PeerDBS::PoliteFarewell() {
+  void Peer_DBS::PoliteFarewell() {
     // {{{
 
     std::vector<char> message(message_size_);
@@ -532,7 +531,7 @@ namespace p2psp {
     // }}}
   }
 
-  void PeerDBS::BufferData() {
+  void Peer_DBS::BufferData() {
     // {{{
 
     // Number of times that the previous received chunk has been sent to the team.
@@ -555,21 +554,21 @@ namespace p2psp {
 
     waiting_for_goodbye_ = true;
 
-    Peer_core::BufferData();
+    Peer_DBS::BufferData();
 
     // }}}
   }
 
-  void PeerDBS::Start() {
+  void Peer_DBS::Start() {
     // {{{
 
     thread_group_.interrupt_all();
-    thread_group_.add_thread(new boost::thread(&PeerDBS::Run, this));
+    thread_group_.add_thread(new boost::thread(&Peer_DBS::Run, this));
 
     // }}}
   }
 
-  void PeerDBS::Run() {
+  void Peer_DBS::Run() {
     // {{{
 
     std::vector<char> message(message_size_);
@@ -592,7 +591,7 @@ namespace p2psp {
     // }}}
   }
 
-  bool PeerDBS::AmIAMonitor() {
+  bool Peer_DBS::AmIAMonitor() {
     // {{{
 
     // Only the first peers of the team are monitor peers
@@ -607,7 +606,7 @@ namespace p2psp {
     // }}}
   }
 
-  int PeerDBS::GetNumberOfPeers() {
+  int Peer_DBS::GetNumberOfPeers() {
     // {{{
 
     return number_of_peers_;
@@ -615,7 +614,7 @@ namespace p2psp {
     // }}}
   }
 
-  void PeerDBS::SetMaxChunkDebt(int max_chunk_debt) {
+  void Peer_DBS::SetMaxChunkDebt(int max_chunk_debt) {
     // {{{
 
     max_chunk_debt_ = max_chunk_debt;
@@ -623,7 +622,7 @@ namespace p2psp {
     // }}}
   }
 
-  int PeerDBS::GetMaxChunkDebt() {
+  int Peer_DBS::GetMaxChunkDebt() {
     // {{{
 
     return max_chunk_debt_;
@@ -631,7 +630,7 @@ namespace p2psp {
     // }}}
   }
 
-  int PeerDBS::GetDefaultMaxChunkDebt() {
+  int Peer_DBS::GetDefaultMaxChunkDebt() {
     // {{{
 
     return kMaxChunkDebt;

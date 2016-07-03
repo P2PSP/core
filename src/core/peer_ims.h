@@ -13,11 +13,22 @@
 #ifndef P2PSP_CORE_PEER_IMS_H
 #define P2PSP_CORE_PEER_IMS_H
 
+/* #include <arpa/inet.h> */
+/* #include <boost/array.hpp> */
+/* #include <boost/asio.hpp> */
+/* #include <boost/date_time/posix_time/posix_time.hpp> */
+/* #include <boost/thread/thread.hpp> */
+/* #include <ctime> */
+/* #include <fstream> */
+/* #include <string> */
+/* #include <tuple> */
+/* #include <vector> */
+/* #include "../util/trace.h" */
 #include "peer_core.h"
 
 namespace p2psp {
 
-  class Peer_IMS {
+  class Peer_IMS : public Peer_core {
 
   protected:
 
@@ -25,8 +36,8 @@ namespace p2psp {
 
   public:
 
-    PeerIMS();
-    ~PeerIMS();
+    Peer_IMS();
+    ~Peer_IMS();
     void Init();
     void ReceiveTheMcastChannel();
     void ListenToTheTeam();
