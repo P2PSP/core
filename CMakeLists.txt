@@ -109,6 +109,7 @@ if(NOT BUILD_REDUCED_LIB)
   )
 else()
   file(GLOB P2PSP_SOURCES
+    "src/core/peer_core.cc"
     "src/core/peer_ims.cc"
     "src/core/peer_dbs.cc"
     "src/core/python.cc"
