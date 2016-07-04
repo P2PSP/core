@@ -40,7 +40,7 @@ namespace p2psp {
     void ListenToTheTeam();
     int ProcessMessage(const std::vector<char>&,
 		       const ip::udp::endpoint&) override;
-    ip::address GetMcastAddr();
+    //ip::address GetMcastAddr();
 
   };
 }

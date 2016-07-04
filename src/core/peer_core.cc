@@ -1,5 +1,5 @@
 //
-//  peer_core.cc - P2PSP's core stuff implementation
+//  peer_core.cc - P2PSP's core implementation
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
@@ -70,7 +70,6 @@ namespace p2psp {
 
     // }}}
   }
-
 
   void Peer_core::ConnectToTheSplitter() throw(boost::system::system_error) {
     // {{{
@@ -206,6 +205,9 @@ namespace p2psp {
     // }}}
   }
 
+  int Peer_core::ProcessMessage(const std::vector<char>&,
+				const ip::udp::endpoint&) { return 0; }
+  
   void Peer_core::BufferData() {
     // {{{
 
@@ -390,6 +392,9 @@ namespace p2psp {
 
     // }}}
   }
+
+  void Peer_core::PlayChunk(int chunk) {
+  }
   
   void Peer_core::PlayNextChunk(int chunk_number) {
     // {{{
@@ -530,22 +535,9 @@ namespace p2psp {
     // }}}
   }
 
-  /*
-  void Peer_core::SetPlayerPort(uint16_t player_port) {
-    // {{{
-
-    player_port_ = player_port;
-
-    // }}}
+    void Peer_core::SetTeamPort(uint16_t team_port) {
+    team_port_ = team_port;
   }
-
-  uint16_t Peer_core::GetPlayerPort() {
-    // {{{
-
-    return  player_port_;
-
-    // }}}
-    }*/
 
   //void Peer_core::SetSplitterAddr(std::string splitter_addr) {
   void Peer_core::SetSplitterAddr(ip::address splitter_addr) {
@@ -596,6 +588,22 @@ namespace p2psp {
     // }}}
   }
 
+  /*uint16_t Peer_core::GetDefaultPlayerPort() {
+    // {{{
+
+    return kPlayerPort;
+
+    // }}}
+    }*/
+  
+  uint16_t Peer_core::GetDefaultTeamPort() {
+    // {{{
+
+    return kTeamPort;
+
+    // }}}
+  }
+  
   uint16_t Peer_core::GetDefaultSplitterPort() {
     // {{{
 
@@ -621,6 +629,12 @@ namespace p2psp {
     // }}}
   }
 
+  uint16_t Peer_core::GetMcastPort() {
+    // {{{
 
+    return mcast_port_;
+
+    // }}}
+  }
 
 }

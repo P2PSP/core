@@ -1,5 +1,5 @@
 //
-//  peer_core.h - P2PSP's core stuff definition
+//  peer_core.h - P2PSP's core definition
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
@@ -93,8 +93,7 @@ namespace p2psp {
     virtual void ReceiveNextMessage(std::vector<char>& message, ip::udp::endpoint& sender);
     virtual int ProcessNextMessage();
     virtual int ProcessMessage(const std::vector<char>&,
-				const ip::udp::endpoint&);
-    //virtual void PlayChunk(int chunk_index);
+			       const ip::udp::endpoint&);
     virtual void ReceiveMcastChannel();
 
     virtual void BufferData();
@@ -113,26 +112,26 @@ namespace p2psp {
     /**
      *  Getters/setters
      */
-    virtual char GetMagicFlags();
+    //virtual char GetMagicFlags();
     //virtual std::string GetMcastAddr();
     virtual ip::address GetMcastAddr();
+    virtual uint16_t GetMcastPort();
     virtual bool IsPlayerAlive();
     virtual int GetPlayedChunk();
     virtual int GetChunkSize();
-    virtual std::vector<ip::udp::endpoint>* GetPeerList();
     virtual int GetRecvfromCounter();
-    virtual void SetShowBuffer(bool);
+    //virtual void SetShowBuffer(bool);
     virtual void SetSendtoCounter(int);
     virtual int  GetSendtoCounter();
-    virtual void     SetPlayerPort(uint16_t);
-    virtual uint16_t GetPlayerPort();
+    //virtual void     SetPlayerPort(uint16_t);
+    //virtual uint16_t GetPlayerPort();
     //virtual void       SetSplitterAddr(std::string);
     virtual void        SetSplitterAddr(ip::address splitter_addr);
     virtual ip::address GetSplitterAddr();
     virtual void     SetSplitterPort(uint16_t);
     virtual uint16_t GetSplitterPort();
     virtual void     SetTeamPort(uint16_t);
-    virtual uint16_t GetTeamPort();
+    //virtual uint16_t GetTeamPort();
     virtual void SetUseLocalHost(bool);
     bool GetUseLocalHost();
     virtual int GetHeaderSize();
@@ -141,7 +140,7 @@ namespace p2psp {
     // bool AmIAMonitor() { return false; }
     //void ReceiveTheListOfPeers() {}
     
-    static uint16_t GetDefaultPlayerPort();
+    //static uint16_t GetDefaultPlayerPort();
     static uint16_t GetDefaultTeamPort();
     static ip::address GetDefaultSplitterAddr();
     static uint16_t GetDefaultSplitterPort();
