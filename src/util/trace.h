@@ -15,6 +15,7 @@
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <iostream>
+#include <time.h>
 
 namespace p2psp
 {
@@ -90,7 +91,7 @@ namespace p2psp
 #define LOGC(c, a)  {std::cout << a << std::endl;}
 #define WARNING(a)  {std::cout << a << std::endl;}
 #define DEBUG(a)    {std::cout << a << std::endl;}
-#define TRACE(a)    {std::cout  << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a  << _RESET_COLOR() << std::endl;}
+#define TRACE(a)    {std::cout << time(NULL) << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a  << _RESET_COLOR() << std::endl;}
 #define ERROR(a)    {std::cout << a << std::endl;}
 
 #else
