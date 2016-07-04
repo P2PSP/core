@@ -365,7 +365,8 @@ namespace p2psp {
     for (std::vector<ip::udp::endpoint>::iterator it = peer_list_.begin();
          it != peer_list_.end(); ++it) {
       SayGoodbye(*it);
-      team_socket_.receive_from(buffer(message), sender);
+      //usleep(100000);
+      //team_socket_.receive_from(buffer(message), sender);
     }
 
 

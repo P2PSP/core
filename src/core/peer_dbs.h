@@ -25,6 +25,7 @@
 #include <ctime>
 #include "../util/trace.h"
 #include "peer_ims.h"
+#include <unistd.h>
 
 using namespace boost::asio;
 
