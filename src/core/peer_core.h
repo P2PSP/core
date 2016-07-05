@@ -54,7 +54,6 @@ namespace p2psp {
     unsigned int message_size_;
     int chunk_size_;
     std::vector<Chunk> chunks_;
-    int header_size_in_chunks_;
     ip::address mcast_addr_;  // Used to determine if IMS or rest
     int played_chunk_;
     bool player_alive_;
@@ -63,8 +62,6 @@ namespace p2psp {
     int recvfrom_counter_;
     ip::udp::endpoint splitter_;
     io_service io_service_;
-    ip::tcp::acceptor acceptor_; // Acceptor used to listen to incoming connections.
-    ip::tcp::socket player_socket_;
     ip::tcp::socket splitter_socket_;
     ip::udp::socket team_socket_;
     boost::thread_group thread_group_;
@@ -84,24 +81,47 @@ namespace p2psp {
     ~Peer_core();
 
     virtual void Init(void);
-    virtual void ConnectToTheSplitter() throw(boost::system::system_error);
-    virtual void DisconnectFromTheSplitter(void);
-    virtual void ReceiveHeaderSize(void);
+
+    virtual void        SetSplitterAddr(ip::address splitter_addr);
+    virtual ip::address GetSplitterAddr();
+    static  ip::address GetDefaultSplitterAddr();
+    virtual void        SetSplitterPort(uint16_t);
+    static  uint16_t    GetDefaultSplitterPort();
+    virtual uint16_t    GetSplitterPort();
+    virtual void        ConnectToTheSplitter() throw(boost::system::system_error);
+    virtual void        DisconnectFromTheSplitter(void);
+
+    static uint16_t GetDefaultTeamPort();
+    virtual void    SetTeamPort(uint16_t);
+    //virtual uint16_t GetTeamPort();
+
+    /*virtual void ReceiveHeaderSize(void);
     virtual void ReceiveHeader(void);
+    virtual int  GetHeaderSize();*/
+
     virtual void ReceiveChunkSize(void);
+    virtual int GetChunkSize();
+
     virtual void ReceiveBufferSize(void);
+    virtual int  GetBufferSize();
+
     virtual void ReceiveNextMessage(std::vector<char>& message, ip::udp::endpoint& sender);
-    virtual int ProcessNextMessage();
-    virtual int ProcessMessage(const std::vector<char>&,
+
+    virtual void        ReceiveMcastChannel();
+    virtual ip::address GetMcastAddr();
+    virtual uint16_t    GetMcastPort();
+
+    virtual void ReceiveMagicFlags(void);
+    virtual char GetMagicFlags();
+
+    virtual int  ProcessNextMessage();
+    virtual int  ProcessMessage(const std::vector<char>&,
 			       const ip::udp::endpoint&);
-    virtual void ReceiveMcastChannel();
-
     virtual void BufferData();
-    //virtual int FindNextChunk();
-    virtual void PlayNextChunk(int chunk_number);
     virtual void KeepTheBufferFull();
-
-    virtual void PlayChunk(int chunk_number);
+    virtual void PlayNextChunk(int chunk_number); // Ojo, possible overlaping with PlayChunk()
+    virtual void PlayChunk(std::vector<char> chunk); // Ojo, possible overlaping with PlayNextChunk()
+    virtual int  GetPlayedChunk();
 
     virtual void Run();
     virtual void Start();
@@ -109,41 +129,19 @@ namespace p2psp {
     virtual void LogMessage(const std::string&);
     virtual std::string BuildLogMessage(const std::string&);
 
-    /**
-     *  Getters/setters
-     */
-    //virtual char GetMagicFlags();
-    //virtual std::string GetMcastAddr();
-    virtual ip::address GetMcastAddr();
-    virtual uint16_t GetMcastPort();
-    virtual bool IsPlayerAlive();
-    virtual int GetPlayedChunk();
-    virtual int GetChunkSize();
-    virtual int GetRecvfromCounter();
-    //virtual void SetShowBuffer(bool);
+    virtual int  GetRecvfromCounter();
     virtual void SetSendtoCounter(int);
     virtual int  GetSendtoCounter();
-    //virtual void     SetPlayerPort(uint16_t);
-    //virtual uint16_t GetPlayerPort();
-    //virtual void       SetSplitterAddr(std::string);
-    virtual void        SetSplitterAddr(ip::address splitter_addr);
-    virtual ip::address GetSplitterAddr();
-    virtual void     SetSplitterPort(uint16_t);
-    virtual uint16_t GetSplitterPort();
-    virtual void     SetTeamPort(uint16_t);
-    //virtual uint16_t GetTeamPort();
+
+    virtual bool IsPlayerAlive(); // Ojo, defined in Player class?
+    
     virtual void SetUseLocalHost(bool);
     bool GetUseLocalHost();
-    virtual int GetHeaderSize();
-    virtual int GetBufferSize();
     int GetNumberOfPeers() { return 0; }
     // bool AmIAMonitor() { return false; }
     //void ReceiveTheListOfPeers() {}
     
     //static uint16_t GetDefaultPlayerPort();
-    static uint16_t GetDefaultTeamPort();
-    static ip::address GetDefaultSplitterAddr();
-    static uint16_t GetDefaultSplitterPort();
 
   };
 }

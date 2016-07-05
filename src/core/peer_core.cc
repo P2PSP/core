@@ -17,8 +17,6 @@ namespace p2psp {
 
   Peer_core::Peer_core()
     : io_service_(),
-      acceptor_(io_service_),
-      player_socket_(io_service_),
       splitter_socket_(io_service_),
       team_socket_(io_service_) {
     // {{{
@@ -133,49 +131,6 @@ namespace p2psp {
     // {{{
 
     splitter_socket_.close();
-
-    // }}}
-  }
-
-  void Peer_core::ReceiveHeaderSize() {
-    // {{{
-
-    boost::array<char, 2> buffer;
-    read(splitter_socket_, ::buffer(buffer));
-    header_size_in_chunks_ = ntohs(*(short *)(buffer.c_array()));
-    TRACE("header_size (in chunks) = "
-	  << std::to_string(header_size_in_chunks_));
-
-    // }}}
-  }
-
-  void Peer_core::ReceiveHeader() {
-    // {{{
-
-    int header_size_in_bytes = header_size_in_chunks_ * chunk_size_;
-    std::vector<char> header(header_size_in_bytes);
-    boost::system::error_code ec;
-    streambuf chunk;
-    read(splitter_socket_, chunk, transfer_exactly(header_size_in_bytes), ec);
-
-    if (ec) {
-      ERROR(ec.message());
-      splitter_socket_.close();
-      ConnectToTheSplitter();
-    }
-
-    try {
-      write(player_socket_, chunk);
-    } catch (std::exception e) {
-      ERROR(e.what());
-      ERROR("error sending data to the player");
-      TRACE("len(data) =" << std::to_string(chunk.size()));
-      boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
-    }
-
-    TRACE("Received "
-	  << std::to_string(header_size_in_bytes)
-          << " bytes of header");
 
     // }}}
   }
@@ -393,8 +348,7 @@ namespace p2psp {
     // }}}
   }
 
-  void Peer_core::PlayChunk(int chunk) {
-  }
+  void Peer_core::PlayChunk(std::vector<char> chunk) {}
   
   void Peer_core::PlayNextChunk(int chunk_number) {
     // {{{
@@ -413,7 +367,8 @@ namespace p2psp {
     
     for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
       if (chunks_[chunk_number % buffer_size_].received == true){
-	PlayChunk(played_chunk_);
+	//PlayChunk(played_chunk_);
+	PlayChunk(chunks_[played_chunk_ % buffer_size_].data);
 	chunks_[played_chunk_ % buffer_size_].received = false;
 	received_counter_--;
 	LOG("Chunk Consumed at:" << played_chunk_ % buffer_size_)
@@ -467,14 +422,6 @@ namespace p2psp {
 
     thread_group_.interrupt_all();
     thread_group_.add_thread(new boost::thread(&Peer_core::Run, this));
-
-    // }}}
-  }
-
-  int Peer_core::GetHeaderSize() {
-    // {{{
-
-    return header_size_in_chunks_;
 
     // }}}
   }
@@ -635,6 +582,21 @@ namespace p2psp {
     return mcast_port_;
 
     // }}}
+  }
+
+  void Peer_core::ReceiveMagicFlags() {
+    // {{{
+
+    std::vector<char> magic_flags(1);
+    read(splitter_socket_, ::buffer(magic_flags));
+    TRACE("Magic flags = "
+	  << std::bitset<8>(magic_flags[0]));
+
+    // }}}
+ }
+
+  char Peer_core::GetMagicFlags() {
+    return magic_flags_;
   }
 
 }

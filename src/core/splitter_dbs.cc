@@ -400,4 +400,9 @@ namespace p2psp {
   int SplitterDBS::GetDefaultMaxNumberOfMonitors() {
     return kMonitorNumber;
   }
+
+  char SplitterDBS::GetMagicFlags() {
+    return magic_flags_;
+  }
+
 }

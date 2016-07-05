@@ -61,7 +61,7 @@ class SplitterDBS : public SplitterIMS {
  public:
   SplitterDBS();
   ~SplitterDBS();
-  //char GetMagicFlags();
+  char GetMagicFlags();
   /*void SendMagicFlags(
     const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);*/
   void SendTheListSize(

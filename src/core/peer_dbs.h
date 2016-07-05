@@ -54,11 +54,9 @@ namespace p2psp {
   public:
     Peer_DBS();
     ~Peer_DBS();
-    virtual void ReceiveMagicFlags(void);
     virtual void Init() override;
     virtual void SayHello(const ip::udp::endpoint&);
     virtual void SayGoodbye(const ip::udp::endpoint&);
-    //void ReceiveMagicFlags();
     virtual void ReceiveTheListOfPeers();
     virtual void ReceiveTheNumberOfPeers();
     virtual void ListenToTheTeam()/* override*/;

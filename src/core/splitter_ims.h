@@ -39,7 +39,6 @@ namespace p2psp {
     void SendChunkSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     void SendMcastChannel(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     void SendHeaderSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-    char GetMagicFlags();
     void SendMagicFlags(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     virtual void SendConfiguration(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
     virtual void HandleAPeerArrival(std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);

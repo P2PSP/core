@@ -21,7 +21,6 @@ namespace p2psp {
 
     max_chunk_debt_ = kMaxChunkDebt;
     magic_flags_ = Common::kDBS;
-    received_flag_ = std::vector<bool>();
 
     // }}}
   }
@@ -70,17 +69,6 @@ namespace p2psp {
     TRACE("me = (" << me_.address().to_string() << ","
           << std::to_string(me_.port()) << ")");
   }
-
-
-  void Peer_DBS::ReceiveMagicFlags() {
-    // {{{
-
-    std::vector<char> magic_flags(1);
-    read(splitter_socket_, ::buffer(magic_flags));
-    TRACE("Magic flags = " << std::bitset<8>(magic_flags[0]));
-
-    // }}}
- }
 
   void Peer_DBS::SayHello(const ip::udp::endpoint &node) {
     // {{{

@@ -333,10 +333,6 @@ namespace p2psp {
     serve_socket->close();
   }
 
-  char SplitterIMS::GetMagicFlags() {
-    return magic_flags_;
-  }
-
   void SplitterIMS::HandleArrivals() {
     std::shared_ptr<asio::ip::tcp::socket> peer_serve_socket;
     thread_group threads;
@@ -493,4 +489,5 @@ namespace p2psp {
   int SplitterIMS::GetDefaultTTL() {
     return kTTL;
   }
+
 }
