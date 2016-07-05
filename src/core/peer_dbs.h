@@ -52,7 +52,7 @@ namespace p2psp {
     int debt_memory_;
     bool waiting_for_goodbye_;
     bool modified_list_;
-
+    bool ready_to_leave_the_team_;
 
   public:
     PeerDBS();
@@ -80,7 +80,7 @@ namespace p2psp {
     virtual int GetMaxChunkDebt();
 
     static int GetDefaultMaxChunkDebt();
-
+    virtual bool IsReadyToLeaveTheTeam();
   };
 }
 

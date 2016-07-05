@@ -19,6 +19,7 @@ void PeerSTRPEDS::Init() {
   magic_flags_ = Common::kSTRPE;
   played_ = 0;
   losses_ = 0;
+  ready_to_leave_the_team_ = false;
   LOG("Initialized");
 }
 
@@ -310,9 +311,4 @@ void PeerSTRPEDS::SetLogging(bool enabled) { logging_ = enabled; }
 uint32_t PeerSTRPEDS::GetCurrentRound(){return current_round_;}
 void PeerSTRPEDS::SetCurrentRound(uint32_t current_round){current_round_=current_round;}
 void PeerSTRPEDS::SetPlayerAlive(bool status){player_alive_ = status;}
-  
 }
-
-
-
-
