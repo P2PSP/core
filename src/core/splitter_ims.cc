@@ -314,11 +314,11 @@ namespace p2psp {
   }
 
   void SplitterIMS::SendConfiguration(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
-    SendMagicFlags(sock);
+    //SendMagicFlags(sock);
     SendMcastChannel(sock);
-    SendHeaderSize(sock);
+    //SendHeaderSize(sock);
     SendChunkSize(sock);
-    SendHeader(sock);
+    //SendHeader(sock);
     SendBufferSize(sock);
   }
 
