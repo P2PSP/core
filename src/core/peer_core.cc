@@ -348,7 +348,7 @@ namespace p2psp {
     // }}}
   }
 
-  void Peer_core::PlayChunk(std::vector<char> chunk) {}
+  bool Peer_core::PlayChunk(std::vector<char> chunk) { return true; }
   
   void Peer_core::PlayNextChunk(int chunk_number) {
     // {{{
@@ -368,7 +368,7 @@ namespace p2psp {
     for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
       if (chunks_[chunk_number % buffer_size_].received == true){
 	//PlayChunk(played_chunk_);
-	PlayChunk(chunks_[played_chunk_ % buffer_size_].data);
+	player_alive_ = PlayChunk(chunks_[played_chunk_ % buffer_size_].data);
 	chunks_[played_chunk_ % buffer_size_].received = false;
 	received_counter_--;
 	LOG("Chunk Consumed at:" << played_chunk_ % buffer_size_)

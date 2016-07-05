@@ -120,7 +120,7 @@ namespace p2psp {
     virtual void BufferData();
     virtual void KeepTheBufferFull();
     virtual void PlayNextChunk(int chunk_number); // Ojo, possible overlaping with PlayChunk()
-    virtual void PlayChunk(std::vector<char> chunk); // Ojo, possible overlaping with PlayNextChunk()
+    virtual bool PlayChunk(std::vector<char> chunk); // Ojo, possible overlaping with PlayNextChunk()
     virtual int  GetPlayedChunk();
 
     virtual void Run();
