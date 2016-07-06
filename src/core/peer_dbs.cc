@@ -21,7 +21,8 @@ namespace p2psp {
 
     max_chunk_debt_ = kMaxChunkDebt;
     magic_flags_ = Common::kDBS;
-
+    ready_to_leave_the_team_ = false;
+      
     // }}}
   }
 
@@ -510,9 +511,10 @@ namespace p2psp {
     
     for (std::vector<ip::udp::endpoint>::iterator it = peer_list_.begin(); it != peer_list_.end(); ++it) {
       SayGoodbye(*it);
-      team_socket_.receive_from(buffer(message), sender);
+      //team_socket_.receive_from(buffer(message), sender);
     }
-    
+
+    ready_to_leave_the_team_ = true;
     TRACE("Ready to leave the team!");
 
     // }}}
@@ -625,4 +627,7 @@ namespace p2psp {
     // }}}
   }
 
+  bool PeerDBS::IsReadyToLeaveTheTeam(){
+    return ready_to_leave_the_team_;
+  }
 }

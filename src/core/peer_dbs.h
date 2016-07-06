@@ -10,8 +10,8 @@
 //  DBS: Data Broadcasting Set of rules
 //
 
-//#ifndef P2PSP_CORE_PEER_DBS_H
-//#define P2PSP_CORE_PEER_DBS_H
+#ifndef P2PSP_CORE_PEER_DBS_H
+#define P2PSP_CORE_PEER_DBS_H
 
 /* #include <vector> */
 /* #include <string> */
@@ -50,6 +50,7 @@ namespace p2psp {
     bool modified_list_;
     std::vector<ip::udp::endpoint> peer_list_;
     int number_of_peers_;
+    bool ready_to_leave_the_team_;
 
   public:
     Peer_DBS();
@@ -76,9 +77,8 @@ namespace p2psp {
     virtual std::vector<ip::udp::endpoint> *GetPeerList();
     static int GetDefaultMaxChunkDebt();
     virtual void ReceiveMyEndpoint();
-
-    
+    virtual bool IsReadyToLeaveTheTeam();
   };
 }
 
-//#endif  // P2PSP_CORE_PEER_DBS_H
+#endif  // P2PSP_CORE_PEER_DBS_H
