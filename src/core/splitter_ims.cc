@@ -20,7 +20,7 @@ namespace p2psp {
   const int SplitterIMS::kBufferSize = 256;                 // Buffer size in chunks
   const std::string SplitterIMS::kChannel = "test.ogg";     // Default channel
   const int SplitterIMS::kChunkSize = 1024;                 // Chunk size in bytes (larger than MTU)
-  const int SplitterIMS::kHeaderSize = 10;                  // Chunks/header
+  //const int SplitterIMS::kHeaderSize = 10;                  // Chunks/header
   const unsigned short SplitterIMS::kPort = 8001;           // Listening port
   const std::string SplitterIMS::kSourceAddr = "127.0.0.1"; // Streaming server's host
   const int SplitterIMS::kSourcePort = 8000;                // Streaming server's listening port
@@ -37,7 +37,7 @@ namespace p2psp {
     buffer_size_ = kBufferSize;
     channel_ = kChannel;
     chunk_size_ = kChunkSize;
-    header_size_ = kHeaderSize;
+    //header_size_ = kHeaderSize;
     team_port_ = kPort;
     source_addr_ = kSourceAddr;
     source_port_ = kSourcePort;
@@ -55,7 +55,7 @@ namespace p2psp {
     // Initialize counters
     recvfrom_counter_ = 0;
     sendto_counter_ = 0;
-    header_load_counter_ = 0;
+    //header_load_counter_ = 0;
 
     magic_flags_ = Common::kIMS;
 
@@ -178,26 +178,28 @@ namespace p2psp {
   size_t SplitterIMS::ReceiveChunk(asio::streambuf &chunk) {
     size_t bytes_transferred = ReceiveNextChunk(chunk);
 
-    if (header_load_counter_ > 0) {
+    /*if (header_load_counter_ > 0) {
       ostream header_stream_(&header_);
       header_stream_.write(asio::buffer_cast<const char *>(chunk.data()), chunk.size());
       header_load_counter_--;
       TRACE("Loaded"
 	    << to_string(chunk.size())
 	    << " bytes of header");
-    }
+	    }*/
     recvfrom_counter_++;
 
     return bytes_transferred;
   }
 
+  /*
   void SplitterIMS::LoadTheVideoHeader() {
     TRACE("Loading the video header");
     for (int i = 0; i < header_size_; i++) {
       ReceiveNextChunk(header_);
     }
   }
-
+  */
+  /*
   void SplitterIMS::ReceiveTheHeader() {
     TRACE("Requesting the stream header ...");
 
@@ -207,7 +209,8 @@ namespace p2psp {
 
     TRACE("Stream header received!");
   }
-
+  */
+  
   void SplitterIMS::SendChunk(const vector<char> &message, const asio::ip::udp::endpoint &destination) {
     system::error_code ec;
 
@@ -245,6 +248,7 @@ namespace p2psp {
     peer_serve_socket->send(asio::buffer(message));
   }
 
+  /*
   void SplitterIMS::SendHeaderSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     TRACE("Communicating the header size "
 	  << to_string(header_size_));
@@ -258,7 +262,8 @@ namespace p2psp {
       ERROR(ec.message());
     }
   }
-
+  */
+  
   void SplitterIMS::SendChunkSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     TRACE("Sending a chunk_size of "
 	  << to_string(chunk_size_)
@@ -274,6 +279,7 @@ namespace p2psp {
     }
   }
 
+  /*
   void SplitterIMS::SendHeader(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     TRACE("Sending a header of "
 	  << to_string(header_.size())
@@ -286,6 +292,7 @@ namespace p2psp {
       ERROR(ec.message());
     }
   }
+  */
 
   void SplitterIMS::SendBufferSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     TRACE("Sending a buffer_size of "
@@ -350,7 +357,9 @@ namespace p2psp {
   void SplitterIMS::Run() {
     TRACE("Run");
 
-    ReceiveTheHeader();
+    //ReceiveTheHeader();
+    ConfigureSockets();
+    RequestTheVideoFromTheSource();
 
     // asio::ip::tcp::socket serve_socket(io_service_);
     std::shared_ptr<asio::ip::tcp::socket> serve_socket =
@@ -409,9 +418,9 @@ namespace p2psp {
     return channel_;
   }
 
-  int SplitterIMS::GetHeaderSize() {
+  /*int SplitterIMS::GetHeaderSize() {
     return header_size_;
-  }
+    }*/
 
   std::string SplitterIMS::GetMcastAddr() {
     return mcast_addr_;
@@ -439,7 +448,7 @@ namespace p2psp {
 
   void SplitterIMS::SetChunkSize(int chunk_size) { chunk_size_ = chunk_size; }
 
-  void SplitterIMS::SetHeaderSize(int header_size) { header_size_ = header_size; }
+  /*void SplitterIMS::SetHeaderSize(int header_size) { header_size_ = header_size; }*/
 
   void SplitterIMS::SetTeamPort(int team_port) { team_port_ = team_port; }
 
@@ -470,9 +479,9 @@ namespace p2psp {
     return kChannel;
   }
 
-  int SplitterIMS::GetDefaultHeaderSize() {
+  /*int SplitterIMS::GetDefaultHeaderSize() {
     return kHeaderSize;
-  }
+    }*/
 
   std::string SplitterIMS::GetDefaultMcastAddr() {
     return kMCastAddr;

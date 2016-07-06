@@ -309,7 +309,9 @@ namespace p2psp {
   }
 
   void SplitterDBS::Run() {
-    ReceiveTheHeader();
+    //ReceiveTheHeader();
+    ConfigureSockets();
+    RequestTheVideoFromTheSource();
 
     /* A DBS splitter runs 4 threads. The main one and the
        "handle_arrivals" thread are equivalent to the daemons used

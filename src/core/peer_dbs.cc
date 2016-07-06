@@ -1,16 +1,12 @@
 //
-//  peer_dbs.h
-//  P2PSP
+//  peer_dbs.h - Data Broadcasting Set of rules implementation.
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 //  Copyright (C) 2016, the P2PSP team.
+//
 //  http://www.p2psp.org
 //
-//  DBS: Data Broadcasting Set of rules
-//
-
-
 
 #include "peer_dbs.h"
 
@@ -627,7 +623,11 @@ namespace p2psp {
     // }}}
   }
 
-  bool PeerDBS::IsReadyToLeaveTheTeam(){
+  bool Peer_DBS::IsReadyToLeaveTheTeam(){
+    // {{{
+    
     return ready_to_leave_the_team_;
+
+    // }}}
   }
 }

@@ -107,6 +107,8 @@ if(NOT BUILD_REDUCED_LIB)
     "src/core/peer_core.cc"
     "src/core/peer_ims.cc"
     "src/core/peer_dbs.cc"
+    "src/core/splitter_ims.cc"
+    "src/core/splitter_dbs.cc"
     "src/util/*.cc"
   )
 else()
@@ -114,7 +116,8 @@ else()
     "src/core/peer_core.cc"
     "src/core/peer_ims.cc"
     "src/core/peer_dbs.cc"
-    "src/core/python.cc"
+    "src/core/splitter_ims.cc"
+    "src/core/splitter_dbs.cc"
     "src/util/*.cc"
   )
 endif()

@@ -39,7 +39,7 @@ namespace p2psp {
   protected:
 
     static constexpr char kSplitterAddr[] = "127.0.0.1";
-    static const uint16_t kSplitterPort = 4552;
+    static const uint16_t kSplitterPort = 8001;
     static const uint16_t kTeamPort = 0;
     static const bool kUseLocalhost = false; // Default use localhost instead the IP of the addapter
     static const int kChunkIndexSize = 2;
@@ -107,7 +107,7 @@ namespace p2psp {
 
     virtual void ReceiveNextMessage(std::vector<char>& message, ip::udp::endpoint& sender);
 
-    virtual void        ReceiveMcastChannel();
+    virtual void        ReceiveMcastGroup();
     virtual ip::address GetMcastAddr();
     virtual uint16_t    GetMcastPort();
 

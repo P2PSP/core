@@ -48,7 +48,7 @@ namespace p2psp {
 
   void Peer_core::Init() {};
 
-  void Peer_core::ReceiveMcastChannel() {
+  void Peer_core::ReceiveMcastGroup() {
     // {{{
 
     boost::array<char, 6> buffer;
