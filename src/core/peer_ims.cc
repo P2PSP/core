@@ -1,15 +1,11 @@
-  
-
 //
-//  peer_ims.cc
-//  P2PSP
+//  peer_ims.cc -- IMS implementation.
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 //  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
 //
-//  IMS: Ip Multicasting Set of rules
 //
 
 #include "peer_ims.h"
