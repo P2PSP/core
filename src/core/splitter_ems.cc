@@ -67,7 +67,26 @@ namespace p2psp {
   }
 
   //TODO: implement removePeer
+  void SplitterEMS::RemovePeer(const asio::ip::udp::endpoint &peer) {
+    // If peer_list_ contains the peer, remove it
+    if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
+      peer_list_.erase(remove(peer_list_.begin(), peer_list_.end(), peer),
+                       peer_list_.end());
 
+      peer_pairs_.erase(peer);
+
+      // In order to avoid negative peer_number_ value while peer_list_ still
+      // contains any peer (in Python this is not necessary because negative
+      // indexes can be used)
+      if (peer_list_.size() > 0) {
+        peer_number_ = (peer_number_ - 1) % peer_list_.size();
+      } else {
+        peer_number_--;
+      }
+    }
+
+    losses_.erase(peer);
+  }
 
 
   void SplitterEMS::HandleAPeerArrival(
@@ -108,13 +127,5 @@ namespace p2psp {
     InsertPeer(boost::asio::ip::udp::endpoint(incoming_peer.address(),
                                               incoming_peer.port()));
   }
-
-  
-
-  std::vector<boost::asio::ip::udp::endpoint> SplitterEMS::GetPeerList() {
-    return peer_list_;
-  }
-
-
 
 }

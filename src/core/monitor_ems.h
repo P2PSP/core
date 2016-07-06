@@ -18,13 +18,10 @@
 
 namespace p2psp {
 
-class MonitorEMS : public PeerEMS {
+class MonitorEMS : public PeerDBS {
  public:
   MonitorEMS();
   ~MonitorEMS();
-  virtual void Init() override;
-  virtual void Complain(uint16_t);
-  virtual int FindNextChunk() override;
 };
 }
 

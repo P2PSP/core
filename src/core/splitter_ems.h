@@ -43,10 +43,9 @@ class SplitterEMS : public SplitterDBS {
   virtual void HandleAPeerArrival(
       std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) override;
 
+  virtual void RemovePeer(const boost::asio::ip::udp::endpoint &peer) override;
 
 
-  // Getters
-  std::vector<boost::asio::ip::udp::endpoint> GetPeerList();
 
 };
 }
