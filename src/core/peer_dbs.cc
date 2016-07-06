@@ -357,7 +357,7 @@ namespace p2psp {
 
     while (receive_and_feed_counter_ < (int) peer_list_.size()) {
     	team_socket_.send_to(buffer(receive_and_feed_previous_), peer_list_[receive_and_feed_counter_]);
-    	team_socket_.receive_from(buffer(message), sender);
+    	//team_socket_.receive_from(buffer(message), sender);
     	TRACE("(" << team_socket_.local_endpoint().address().to_string() << "," << std::to_string(team_socket_.local_endpoint().port()) << ")" << "-" << std::to_string(ntohs(*(uint16_t*)receive_and_feed_previous_.data())) << "->" << "(" << peer_list_[receive_and_feed_counter_].address().to_string() << "," << std::to_string(peer_list_[receive_and_feed_counter_].port()) << ")");
     	receive_and_feed_counter_++;
     }
@@ -365,10 +365,10 @@ namespace p2psp {
     for (std::vector<ip::udp::endpoint>::iterator it = peer_list_.begin();
          it != peer_list_.end(); ++it) {
       SayGoodbye(*it);
-      team_socket_.receive_from(buffer(message), sender);
+      //team_socket_.receive_from(buffer(message), sender);
     }
 
-
+    ready_to_leave_the_team_ = true;
     TRACE("Ready to leave the team!");
   }
 
@@ -449,4 +449,7 @@ namespace p2psp {
     return kMaxChunkDebt;
   }
 
+  bool PeerDBS::IsReadyToLeaveTheTeam(){
+    return ready_to_leave_the_team_;
+  }
 }

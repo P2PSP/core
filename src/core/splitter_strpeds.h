@@ -11,14 +11,9 @@
 #ifndef P2PSP_CORE_SPLITTER_STRPEDS_H_
 #define P2PSP_CORE_SPLITTER_STRPEDS_H_
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <boost/asio.hpp>
-#include <boost/unordered_map.hpp>
 #include <fstream>
-#include "../util/trace.h"
 #include "splitter_dbs.h"
-#include "common.h"
 #include "openssl/dsa.h"
 #include <exception>
 #include <boost/tokenizer.hpp>

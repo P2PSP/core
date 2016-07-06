@@ -9,7 +9,7 @@ option(BUILD_TEST "Build the test" ON)
 #option(BUILD_PEER "Build the peer" ON)
 #option(BUILD_SPLITTER "Build the splitter" ON)
 
-option(BUILD_PYTHON_WRAPPER "Build the Python wrapper" OFF)
+option(BUILD_PYTHON_WRAPPER "Build the Python wrapper" ON)
 
 option(BUILD_WITH_CLANG "Build using the Clang compiler" OFF)
 
@@ -40,9 +40,11 @@ if(BUILD_PYTHON_WRAPPER)
   if("${py34}" STREQUAL "0")
     # on Ubuntu, python-py34 is available
     list(APPEND BOOST_REQUIRED_COMPONENTS python-py34)
+    set(Python_ADDITIONAL_VERSIONS 3.4)
   elseif("${py35}" STREQUAL "0")
     # Cristóbal has python-py35 available
     list(APPEND BOOST_REQUIRED_COMPONENTS python-py35)
+    set(Python_ADDITIONAL_VERSIONS 3.5)
   else()
     # on Arch, python3 is available
     list(APPEND BOOST_REQUIRED_COMPONENTS python3)
