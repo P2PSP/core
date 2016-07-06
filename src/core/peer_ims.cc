@@ -490,10 +490,12 @@ namespace p2psp {
     thread_group_.add_thread(new boost::thread(&PeerIMS::Run, this));
   }
 
+  /*
   char PeerIMS::GetMagicFlags() {
     return magic_flags_;
   }
-
+  */
+  
   //std::string PeerIMS::GetMcastAddr() {
   ip::address PeerIMS::GetMcastAddr() {
     //return mcast_addr_.to_string();
