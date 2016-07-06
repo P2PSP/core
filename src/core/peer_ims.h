@@ -1,5 +1,5 @@
 //
-//  peer_ims.h -- P2PSP's IP multicast transmission
+//  peer_ims.h -- IP multicast transmission
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).

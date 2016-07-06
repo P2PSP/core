@@ -15,7 +15,6 @@ namespace p2psp {
     // {{{
 
     max_chunk_debt_ = kMaxChunkDebt;
-    magic_flags_ = Common::kDBS;
     ready_to_leave_the_team_ = false;
       
     // }}}

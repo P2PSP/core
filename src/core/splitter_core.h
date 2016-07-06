@@ -7,8 +7,8 @@
 //  http://www.p2psp.org
 //
 
-#ifndef P2PSP_CORE_SPLITTER_IMS_CORE_
-#define P2PSP_CORE_SPLITTER_IMS_CORE_
+#ifndef P2PSP_CORE_SPLITTER_CORE_H_
+#define P2PSP_CORE_SPLITTER_CORE_H_
 
 #include <arpa/inet.h>
 #include <stdio.h>
@@ -31,12 +31,8 @@ namespace p2psp {
     Splitter_core();
     ~Splitter_core();
 
-    //void SendHeader(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     void SendBufferSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     void SendChunkSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-    void SendMcastGroup(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-    //void SendHeaderSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-    //void SendMagicFlags(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     virtual void SendConfiguration(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
     virtual void HandleAPeerArrival(std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);
     void HandleArrivals();
@@ -44,11 +40,9 @@ namespace p2psp {
     virtual void SetupTeamSocket();
     void RequestTheVideoFromTheSource();
     void ConfigureSockets();
-    //void LoadTheVideoHeader();
     size_t ReceiveNextChunk(boost::asio::streambuf &chunk); // Ojo con ReceiveChunk
     virtual size_t ReceiveChunk(boost::asio::streambuf &chunk);
     virtual void SendChunk(const std::vector<char> &message, const boost::asio::ip::udp::endpoint &destination);
-    //void ReceiveTheHeader();
 
     // TODO: SendChunk can be used instead if the increment of sendto_counter
     // doesn't matter
@@ -59,23 +53,19 @@ namespace p2psp {
     // Getters
     bool isAlive();
     int GetRecvFromCounter();
-    int GetSendToCounter();
     int GetChunkSize();
     int GetTeamPort(); // GetPort()
     int GetBufferSize();
     std::string GetChannel();
-    //int GetHeaderSize();
-    std::string GetMcastAddr();
     std::string GetSourceAddr();
     int GetSourcePort();
-    int GetTTL();
-
+    int GetSendToCounter();
+    
     // Setters
     void SetAlive(bool alive);
     void SetBufferSize(int buffer_size);
     void SetChannel(std::string channel);
     void SetChunkSize(int chunk_size);
-    //void SetHeaderSize(int header_size);
     void SetTeamPort(int team_port);
     void SetSourceAddr(std::string source_addr);
     void SetSourcePort(int source_port);
@@ -86,37 +76,26 @@ namespace p2psp {
     static int GetDefaultTeamPort(); // GetDefaultPort()
     static int GetDefaultBufferSize();
     static std::string GetDefaultChannel();
-    //static int GetDefaultHeaderSize();
-    static std::string GetDefaultMcastAddr();
     static std::string GetDefaultSourceAddr();
     static int GetDefaultSourcePort();
-    static int GetDefaultTTL();
 
   protected:
     static const int kBufferSize;          // Buffer size in chunks
     static const std::string kChannel;     // Default channel
     static const int kChunkSize;           // Chunk size in bytes (larger than MTU)
-    //static const int kHeaderSize;          // Chunks/header
     static const unsigned short kPort;     // Listening port
-    static const std::string kSourceAddr; // Streaming server's host
+    static const std::string kSourceAddr;  // Streaming server's host
     static const int kSourcePort;          // Streaming server's listening port
-    static const std::string kMCastAddr;   // All Systems on this subnet
-    static const int kTTL;                 // Time To Live of multicast packets
 
     int buffer_size_;
     std::string channel_;
     int chunk_size_;
-    //int header_size_;
     unsigned short team_port_;
     std::string source_addr_;
     unsigned short source_port_;
-    std::string mcast_addr_;
-    int ttl_;
-
-    char magic_flags_;
     
     /*
-      An IMS splitter runs 2 threads. The main one serves the chunks to
+      An splitter runs 2 threads. The main one serves the chunks to
       the team. The other controls peer arrivals. This variable is true
       while the consumer is receiving data.
     */
@@ -140,18 +119,13 @@ namespace p2psp {
     // Used to talk to the source
     boost::asio::ip::tcp::socket source_socket_;
 
-    // The video header
-    //boost::asio::streambuf header_;
-
     // Some other useful definitions.
     std::tuple<std::string, int> source_;
     std::string GET_message_;
     std::string chunk_number_format_;
-    boost::asio::ip::udp::endpoint mcast_channel_;
 
     int recvfrom_counter_;
     int sendto_counter_;
-    //int header_load_counter_;
 
     // Thread to start the Splitter
     std::unique_ptr<boost::thread> thread_;
@@ -162,4 +136,4 @@ namespace p2psp {
   };
 }
 
-#endif  // defined P2PSP_CORE_SPLITTER_IMS_H_
+#endif  // defined P2PSP_CORE_SPLITTER_CORE_H_
