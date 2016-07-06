@@ -1,13 +1,10 @@
 //
-//  splitter_dbs.h
-//  P2PSP
+//  splitter_dbs.h -- DBS definition
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 //  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
-//
-//  DBS: Data Broadcasting Set of rules
 //
 
 #ifndef P2PSP_CORE_SPLITTER_DBS_H_

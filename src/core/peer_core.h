@@ -1,5 +1,5 @@
 //
-//  peer_core.h - P2PSP's core definition
+//  peer_core.h - P2PSP's peer core definition
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).

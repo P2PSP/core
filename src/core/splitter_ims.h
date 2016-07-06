@@ -1,5 +1,5 @@
 //
-//  splitter_ims.h
+//  splitter_ims.h -- IMS definition
 //  P2PSP
 //
 //  This code is distributed under the GNU General Public License (see
@@ -7,13 +7,12 @@
 //  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
 //
-//  IMS: IP Multicast Set of rules.
-//
 
 #ifndef P2PSP_CORE_SPLITTER_IMS_H_
 #define P2PSP_CORE_SPLITTER_IMS_H_
 
-#include <arpa/inet.h>
+#include "core/splitter_core.h"
+/*#include <arpa/inet.h>
 #include <stdio.h>
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
@@ -23,7 +22,7 @@
 #include <string>
 #include <tuple>
 #include "../util/trace.h"
-#include "common.h"
+#include "common.h"*/
 
 namespace p2psp {
 

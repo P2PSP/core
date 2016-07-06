@@ -1,17 +1,14 @@
 //
-//  splitter_ims.h
-//  P2PSP
+//  splitter_core.h -- Core definition
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
 //  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
 //
-//  IMS: IP Multicast Set of rules.
-//
 
-#ifndef P2PSP_CORE_SPLITTER_IMS_H_
-#define P2PSP_CORE_SPLITTER_IMS_H_
+#ifndef P2PSP_CORE_SPLITTER_IMS_CORE_
+#define P2PSP_CORE_SPLITTER_IMS_CORE_
 
 #include <arpa/inet.h>
 #include <stdio.h>
@@ -27,19 +24,19 @@
 
 namespace p2psp {
 
-  class SplitterIMS {
+  class Splitter_core {
 
   public:
 
-    SplitterIMS();
-    ~SplitterIMS();
+    Splitter_core();
+    ~Splitter_core();
 
     //void SendHeader(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     void SendBufferSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     void SendChunkSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-    void SendMcastChannel(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    void SendMcastGroup(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     //void SendHeaderSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-    void SendMagicFlags(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    //void SendMagicFlags(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     virtual void SendConfiguration(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
     virtual void HandleAPeerArrival(std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);
     void HandleArrivals();
@@ -48,7 +45,7 @@ namespace p2psp {
     void RequestTheVideoFromTheSource();
     void ConfigureSockets();
     //void LoadTheVideoHeader();
-    size_t ReceiveNextChunk(boost::asio::streambuf &chunk);
+    size_t ReceiveNextChunk(boost::asio::streambuf &chunk); // Ojo con ReceiveChunk
     virtual size_t ReceiveChunk(boost::asio::streambuf &chunk);
     virtual void SendChunk(const std::vector<char> &message, const boost::asio::ip::udp::endpoint &destination);
     //void ReceiveTheHeader();
