@@ -1,5 +1,5 @@
 //
-//  peer_core.cc - P2PSP's core implementation
+//  peer_core.cc - Peer core implementation
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
@@ -47,27 +47,6 @@ namespace p2psp {
   Peer_core::~Peer_core() {}
 
   void Peer_core::Init() {};
-
-  void Peer_core::ReceiveMcastGroup() {
-    // {{{
-
-    boost::array<char, 6> buffer;
-    read(splitter_socket_, ::buffer(buffer));
-
-    char *raw_data = buffer.data();
-
-    in_addr ip_raw = *(in_addr *)(raw_data);
-    mcast_addr_ = ip::address::from_string(inet_ntoa(ip_raw));
-    mcast_port_ = ntohs(*(short *)(raw_data + 4));
-
-    TRACE("mcast_endpoint = ("
-	  << mcast_addr_.to_string()
-	  << ","
-          << std::to_string(mcast_port_)
-	  << ")");
-
-    // }}}
-  }
 
   void Peer_core::ConnectToTheSplitter() throw(boost::system::system_error) {
     // {{{
@@ -567,24 +546,7 @@ namespace p2psp {
     // }}}
   }
 
-  ip::address Peer_core::GetMcastAddr() {
-    // {{{
-
-    //return mcast_addr_.to_string();
-    return mcast_addr_;
-
-    // }}}
-  }
-
-  uint16_t Peer_core::GetMcastPort() {
-    // {{{
-
-    return mcast_port_;
-
-    // }}}
-  }
-
-  void Peer_core::ReceiveMagicFlags() {
+  /*void Peer_core::ReceiveMagicFlags() {
     // {{{
 
     std::vector<char> magic_flags(1);
@@ -593,10 +555,10 @@ namespace p2psp {
 	  << std::bitset<8>(magic_flags[0]));
 
     // }}}
- }
+    }
 
   char Peer_core::GetMagicFlags() {
     return magic_flags_;
-  }
+    }*/
 
 }

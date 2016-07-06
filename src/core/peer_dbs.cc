@@ -62,8 +62,11 @@ namespace p2psp {
 
     me_ = ip::udp::endpoint(ip_addr, port);
 
-    TRACE("me = (" << me_.address().to_string() << ","
-          << std::to_string(me_.port()) << ")");
+    TRACE("me = ("
+	  << me_.address().to_string()
+	  << ","
+          << std::to_string(me_.port())
+	  << ")");
   }
 
   void Peer_DBS::SayHello(const ip::udp::endpoint &node) {
@@ -74,8 +77,10 @@ namespace p2psp {
     team_socket_.send_to(buffer(hello), node);
 
     TRACE("[Hello] sent to "
-          << "(" << node.address().to_string() << ","
-          << std::to_string(node.port()) << ")");
+          << "(" << node.address().to_string()
+	  << ","
+          << std::to_string(node.port())
+	  << ")");
 
     // }}}
   }
@@ -435,7 +440,7 @@ namespace p2psp {
 
     // }}}
   }
-  
+
   float Peer_DBS::CalcBufferCorrectness() {
     // {{{
 

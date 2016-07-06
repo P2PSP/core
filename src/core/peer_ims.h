@@ -21,6 +21,9 @@ namespace p2psp {
 
   protected:
 
+    ip::address mcast_addr_;
+    uint16_t mcast_port_;
+
   public:
 
     Peer_IMS();
@@ -29,7 +32,9 @@ namespace p2psp {
     void ListenToTheTeam();
     int ProcessMessage(const std::vector<char>&,
 		       const ip::udp::endpoint&) override;
-    //ip::address GetMcastAddr();
+    virtual void        ReceiveMcastGroup();
+    virtual ip::address GetMcastAddr();
+    virtual uint16_t    GetMcastPort();
 
   };
 }

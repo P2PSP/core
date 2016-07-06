@@ -54,7 +54,6 @@ namespace p2psp {
     unsigned int message_size_;
     int chunk_size_;
     std::vector<Chunk> chunks_;
-    ip::address mcast_addr_;  // Used to determine if IMS or rest
     int played_chunk_;
     bool player_alive_;
     int received_counter_;
@@ -72,8 +71,7 @@ namespace p2psp {
     bool logging_;
     std::ofstream log_file_;
     ip::udp::endpoint me_;
-    uint16_t mcast_port_;
-    char magic_flags_;
+    //char magic_flags_;
 
   public:
 
@@ -107,12 +105,8 @@ namespace p2psp {
 
     virtual void ReceiveNextMessage(std::vector<char>& message, ip::udp::endpoint& sender);
 
-    virtual void        ReceiveMcastGroup();
-    virtual ip::address GetMcastAddr();
-    virtual uint16_t    GetMcastPort();
-
-    virtual void ReceiveMagicFlags(void);
-    virtual char GetMagicFlags();
+    /*virtual void ReceiveMagicFlags(void);
+      virtual char GetMagicFlags();*/
 
     virtual int  ProcessNextMessage();
     virtual int  ProcessMessage(const std::vector<char>&,
