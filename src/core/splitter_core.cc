@@ -17,10 +17,11 @@ namespace p2psp {
   const int Splitter_core::kBufferSize = 256;                 // Buffer size in chunks
   const std::string Splitter_core::kChannel = "test.ogg";     // Default channel
   const int Splitter_core::kChunkSize = 1024;                 // Chunk size in bytes (larger than MTU)
-  const unsigned short Splitter_core::kPort = 8001;           // Listening port
+  const unsigned short Splitter_core::kSplitterPort = 8001;   // Listening port
   const std::string Splitter_core::kSourceAddr = "127.0.0.1"; // Streaming server's host
   const int Splitter_core::kSourcePort = 8000;                // Streaming server's listening port
-
+  const int Splitter_core::kHeaderLength = 4000;
+  
   Splitter_core::Splitter_core()
     : io_service_(),
       peer_connection_socket_(io_service_),
@@ -30,10 +31,11 @@ namespace p2psp {
     buffer_size_ = kBufferSize;
     channel_ = kChannel;
     chunk_size_ = kChunkSize;
-    team_port_ = kPort;
+    splitter_port_ = kSplitterPort;
     source_addr_ = kSourceAddr;
     source_port_ = kSourcePort;
-
+    header_length_ = kHeaderLength;
+    
     alive_ = true;
     chunk_number_ = 0;
 
@@ -51,12 +53,27 @@ namespace p2psp {
 
   Splitter_core::~Splitter_core() {}
 
+  int Splitter_core::GetDefaultHeaderLength() {
+    return kHeaderLength;
+  }
+  
   void Splitter_core::SetupPeerConnectionSocket() {
-    asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), team_port_);
+    asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), splitter_port_);
     acceptor_.open(endpoint.protocol());
     acceptor_.set_option(asio::ip::tcp::acceptor::reuse_address(true));
     acceptor_.bind(endpoint);
     acceptor_.listen();
+  }
+
+  void Splitter_core::SendChannel(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    /*boost::system::error_code ignored_error;
+    boost::asio::write(peer_serve_socket,
+		       boost::asio::buffer(channel_),
+		       boost::asio::transfer_all(), ignored_error);*/
+    //char message[80];
+    peer_serve_socket->send(asio::buffer(channel_));
+    TRACE("Transmitted channel =  "
+	  << channel_);
   }
 
   void Splitter_core::ConfigureSockets() {
@@ -66,7 +83,7 @@ namespace p2psp {
       ERROR(error.what());
       ERROR(acceptor_.local_endpoint().address().to_string()
 	    + "\b: unable to bind the port "
-	    + to_string(team_port_));
+	    + to_string(splitter_port_));
       exit(-1);
     }
 
@@ -231,7 +248,25 @@ namespace p2psp {
     }
   }
 
+  void Splitter_core::SendHeaderLength(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    TRACE("Sending a header length of "
+	  << to_string(header_length_)
+	  << " bytes");
+
+    system::error_code ec;
+    char message[2];
+    (*(uint16_t *)&message) = htons(header_length_);
+    peer_serve_socket->send(asio::buffer(message), 0, ec);
+
+    if (ec) {
+      ERROR(ec.message());
+    }
+  }
+
   void Splitter_core::SendConfiguration(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
+    SendSourceEndpoint(sock);
+    SendChannel(sock);
+    SendHeaderLength(sock);
     SendChunkSize(sock);
     SendBufferSize(sock);
   }
@@ -252,6 +287,21 @@ namespace p2psp {
     TRACE("Exiting handle arrivals");
   }
 
+  void Splitter_core::SendSourceEndpoint(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    TRACE("Communicating the source endpoing ("
+	  << source_addr_
+	  << ", "
+	  << to_string(source_port_)
+	  << ")");
+
+    char message[6];
+    in_addr addr;
+    inet_aton(source_addr_.c_str(), &addr);
+    (*(in_addr *)&message) = addr;
+    (*(uint16_t *)(message + 4)) = htons(source_port_);
+    peer_serve_socket->send(asio::buffer(message));
+  }
+
   bool Splitter_core::isAlive() { return alive_; }
 
   void Splitter_core::SetAlive(bool alive) { alive_ = alive; }
@@ -262,7 +312,7 @@ namespace p2psp {
 
   int Splitter_core::GetChunkSize() { return chunk_size_; }
 
-  int Splitter_core::GetTeamPort() { return team_port_; };
+  int Splitter_core::GetSplitterPort() { return splitter_port_; };
 
   void Splitter_core::SetBufferSize(int buffer_size) { buffer_size_ = buffer_size; }
 
@@ -295,7 +345,7 @@ namespace p2psp {
 
   void Splitter_core::SetChunkSize(int chunk_size) { chunk_size_ = chunk_size; }
 
-  void Splitter_core::SetTeamPort(int team_port) { team_port_ = team_port; }
+  void Splitter_core::SetSplitterPort(int splitter_port) { splitter_port_ = splitter_port; }
 
   void Splitter_core::SetSourceAddr(std::string source_addr) {
     source_addr_ = source_addr;
@@ -314,8 +364,8 @@ namespace p2psp {
     return kChunkSize;
   }
 
-  int Splitter_core::GetDefaultTeamPort() {
-    return kPort;
+  int Splitter_core::GetDefaultSplitterPort() {
+    return kSplitterPort;
   }
 
   int Splitter_core::GetDefaultBufferSize() {

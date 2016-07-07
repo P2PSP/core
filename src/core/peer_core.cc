@@ -281,6 +281,56 @@ namespace p2psp {
     // }}}
   }
 
+  void Peer_core::ReceiveChannel() {
+    //boost::array<char, 80> buffer;
+    
+    //boost::system::error_code error;
+    splitter_socket_.receive(boost::asio::buffer(channel_)/*, error*/);
+
+    //channel_ = std::string(buffer);
+    
+    /*if (error == boost::asio::error::eof)
+      break; // Connection closed cleanly by peer.
+    else if (error)
+    throw boost::system::system_error(error); // Some other error.*/
+
+    /*char message[80];
+    read(splitter_socket_, ::buffer(message));
+    return std::string(inet_ntoa(message));*/
+    
+  }
+  
+  void Peer_core::ReceiveSourceEndpoint() {
+    // {{{
+
+    boost::array<char, 6> buffer;
+    read(splitter_socket_, ::buffer(buffer));
+
+    char *raw_data = buffer.data();
+
+    in_addr ip_raw = *(in_addr *)(raw_data);
+    source_addr_ = ip::address::from_string(inet_ntoa(ip_raw));
+    source_port_ = ntohs(*(short *)(raw_data + 4));
+
+    TRACE("source_endpoint = ("
+	  << source_addr_.to_string()
+	  << ","
+          << std::to_string(source_port_)
+	  << ")");
+
+    // }}}
+  }
+  
+  void Peer_core::ReceiveHeaderLength() {
+    boost::array<char, 2> buffer;
+    read(splitter_socket_, ::buffer(buffer));
+    
+    header_length_ = ntohs(*(short *)(buffer.c_array()));
+
+    TRACE("header_length (in bytes) = "
+	  << std::to_string(header_length_));
+  }
+  
   void Peer_core::KeepTheBufferFull() {
     // {{{
 
@@ -445,6 +495,14 @@ namespace p2psp {
     // }}}
   }
 
+  std::string Peer_core::GetSourceAddr() {
+    return source_addr_.to_string();
+  }
+
+  uint16_t Peer_core::GetSourcePort() {
+    return source_port_;
+  }
+  
   int Peer_core::GetSendtoCounter() {
     // {{{
 

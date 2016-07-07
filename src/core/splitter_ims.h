@@ -25,9 +25,11 @@ namespace p2psp {
     //int GetRecvFromCounter();
     //int GetSendToCounter();
     std::string GetMcastAddr();
+    unsigned short GetMcastPort();
     int GetTTL();
     static int GetDefaultTTL();
     static std::string GetDefaultMcastAddr();
+    unsigned short GetDefaultMcastPort();
     void SetupTeamSocket();
     virtual void SendConfiguration(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
     virtual void HandleAPeerArrival(std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);
@@ -35,11 +37,12 @@ namespace p2psp {
     virtual void Start();
     
   protected:
-    static const std::string kMCastAddr;   // All Systems on this subnet
-    static const uint16_t kMcastPort;
-    static const int kTTL;                 // Time To Live of multicast packets
+    static const std::string kMCastAddr;
+    static const unsigned short kMcastPort;
+    static const int kTTL;
 
     std::string mcast_addr_;
+    unsigned short mcast_port_;
     int ttl_;
 
     boost::asio::ip::udp::endpoint mcast_channel_;

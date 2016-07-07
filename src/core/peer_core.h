@@ -72,7 +72,11 @@ namespace p2psp {
     std::ofstream log_file_;
     ip::udp::endpoint me_;
     //char magic_flags_;
-
+    ip::address source_addr_;
+    uint16_t source_port_;
+    int header_length_;
+    boost::array<char, 80> channel_;
+      
   public:
 
     Peer_core();
@@ -88,15 +92,17 @@ namespace p2psp {
     virtual uint16_t    GetSplitterPort();
     virtual void        ConnectToTheSplitter() throw(boost::system::system_error);
     virtual void        DisconnectFromTheSplitter(void);
-
+    std::string GetSourceAddr();
+    uint16_t GetSourcePort();
     static uint16_t GetDefaultTeamPort();
     virtual void    SetTeamPort(uint16_t);
     //virtual uint16_t GetTeamPort();
 
-    /*virtual void ReceiveHeaderSize(void);
-    virtual void ReceiveHeader(void);
+    virtual void ReceiveHeaderLength(void);
+    /*virtual void ReceiveHeader(void);
     virtual int  GetHeaderSize();*/
 
+    void ReceiveChannel();
     virtual void ReceiveChunkSize(void);
     virtual int GetChunkSize();
 
@@ -132,6 +138,7 @@ namespace p2psp {
     virtual void SetUseLocalHost(bool);
     bool GetUseLocalHost();
     int GetNumberOfPeers() { return 0; }
+    void  ReceiveSourceEndpoint();
     // bool AmIAMonitor() { return false; }
     //void ReceiveTheListOfPeers() {}
     

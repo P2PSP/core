@@ -15,13 +15,14 @@ namespace p2psp {
   using namespace boost;
 
   const std::string Splitter_IMS::kMCastAddr = "224.0.0.1";  // All Systems on this subnet
-  const uint16_t Splitter_IMS::kMcastPort = 8001;
+  const unsigned short Splitter_IMS::kMcastPort = 8001;
   const int Splitter_IMS::kTTL = 1;                          // Time To Live of multicast packets
 
   Splitter_IMS::Splitter_IMS()
     : mcast_channel_(boost::asio::ip::address::from_string(kMCastAddr), kMcastPort) {
 
     mcast_addr_ = kMCastAddr;
+    mcast_port_ = kMcastPort;
     ttl_ = kTTL;
 
     TRACE("IMS initialized");
@@ -53,17 +54,16 @@ namespace p2psp {
     TRACE("Communicating the multicast channel ("
 	  << mcast_addr_
 	  << ", "
-	  << to_string(team_port_)
+	  << to_string(mcast_port_)
 	  << ")");
 
     char message[6];
     in_addr addr;
     inet_aton(mcast_addr_.c_str(), &addr);
     (*(in_addr *)&message) = addr;
-    (*(uint16_t *)(message + 4)) = htons(team_port_);
+    (*(uint16_t *)(message + 4)) = htons(mcast_port_);
     peer_serve_socket->send(asio::buffer(message));
   }
-
 
   void Splitter_IMS::SendConfiguration(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
     Splitter_core::SendConfiguration(sock);
@@ -122,6 +122,10 @@ namespace p2psp {
     return mcast_addr_;
   }
 
+  unsigned short Splitter_IMS::GetMcastPort() {
+    return mcast_port_;
+  }
+
   int Splitter_IMS::GetTTL() {
     return ttl_;
   }
@@ -137,6 +141,10 @@ namespace p2psp {
 
   int Splitter_IMS::GetDefaultTTL() {
     return kTTL;
+  }
+
+  unsigned short Splitter_IMS::GetDefaultMcastPort() {
+    return kMcastPort;
   }
 
 }

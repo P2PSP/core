@@ -32,7 +32,7 @@ namespace p2psp {
 
   Splitter_DBS::~Splitter_DBS() {}
 
-  void Splitter_DBS::SendTheListSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+  void Splitter_DBS::SendTheNumberOfPeers(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     char message[2];
 
     TRACE("Sending the number of monitors "
@@ -47,7 +47,7 @@ namespace p2psp {
   }
 
   void Splitter_DBS::SendTheListOfPeers(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
-    SendTheListSize(peer_serve_socket);
+    SendTheNumberOfPeers(peer_serve_socket);
 
     int counter = 0;
     char message[6];
@@ -67,7 +67,7 @@ namespace p2psp {
     }
   }
 
-  void Splitter_DBS::SendThePeerEndpoint(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+  /*void Splitter_DBS::SendThePeerEndpoint(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     asio::ip::tcp::endpoint peer_endpoint = peer_serve_socket->remote_endpoint();
 
     char message[6];
@@ -76,11 +76,13 @@ namespace p2psp {
     (*(in_addr *)&message) = addr;
     (*(uint16_t *)(message + 4)) = htons(peer_endpoint.port());
     peer_serve_socket->send(asio::buffer(message));
-  }
+    }*/
 
   void Splitter_DBS::SendConfiguration(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
     Splitter_core::SendConfiguration(sock);
-    SendThePeerEndpoint(sock);
+    SendTheListOfPeers(sock);
+
+    //SendThePeerEndpoint(sock);
   }
 
   void Splitter_DBS::InsertPeer(const boost::asio::ip::udp::endpoint &peer) {
@@ -107,7 +109,7 @@ namespace p2psp {
 	  << incoming_peer);
 
     SendConfiguration(serve_socket);
-    SendTheListOfPeers(serve_socket);
+    //SendTheListOfPeers(serve_socket);
     serve_socket->close();
     boost::asio::ip::udp::endpoint incoming_peer_udp(incoming_peer.address(), incoming_peer.port());
     InsertPeer(incoming_peer_udp);
@@ -268,7 +270,7 @@ namespace p2psp {
 
   void Splitter_DBS::SetupTeamSocket() {
     system::error_code ec;
-    asio::ip::udp::endpoint endpoint(asio::ip::udp::v4(), team_port_);
+    asio::ip::udp::endpoint endpoint(asio::ip::udp::v4(), splitter_port_);
 
     team_socket_.open(asio::ip::udp::v4());
 

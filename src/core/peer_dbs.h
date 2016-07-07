@@ -46,7 +46,7 @@ namespace p2psp {
     virtual void SayHello(const ip::udp::endpoint&);
     virtual void SayGoodbye(const ip::udp::endpoint&);
     virtual void ReceiveTheListOfPeers();
-    virtual void ReceiveTheNumberOfPeers();
+    void ReceiveTheNumberOfPeers();
     virtual void ListenToTheTeam()/* override*/;
     virtual int ProcessMessage(const std::vector<char>&,
                                const ip::udp::endpoint&) override;

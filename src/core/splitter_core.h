@@ -33,6 +33,9 @@ namespace p2psp {
 
     void SendBufferSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     void SendChunkSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    void SendChannel(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    void SendSourceEndpoint(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    void SendHeaderLength(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     virtual void SendConfiguration(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
     virtual void HandleAPeerArrival(std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);
     void HandleArrivals();
@@ -54,7 +57,7 @@ namespace p2psp {
     bool isAlive();
     int GetRecvFromCounter();
     int GetChunkSize();
-    int GetTeamPort(); // GetPort()
+    int GetSplitterPort();
     int GetBufferSize();
     std::string GetChannel();
     std::string GetSourceAddr();
@@ -66,33 +69,36 @@ namespace p2psp {
     void SetBufferSize(int buffer_size);
     void SetChannel(std::string channel);
     void SetChunkSize(int chunk_size);
-    void SetTeamPort(int team_port);
+    void SetSplitterPort(int splitter_port);
     void SetSourceAddr(std::string source_addr);
     void SetSourcePort(int source_port);
     void SetGETMessage(std::string channel);
 
     // Default getters
     static int GetDefaultChunkSize();
-    static int GetDefaultTeamPort(); // GetDefaultPort()
+    static int GetDefaultSplitterPort();
     static int GetDefaultBufferSize();
     static std::string GetDefaultChannel();
     static std::string GetDefaultSourceAddr();
     static int GetDefaultSourcePort();
-
+    static int GetDefaultHeaderLength();
+    
   protected:
     static const int kBufferSize;          // Buffer size in chunks
     static const std::string kChannel;     // Default channel
     static const int kChunkSize;           // Chunk size in bytes (larger than MTU)
-    static const unsigned short kPort;     // Listening port
+    static const unsigned short kSplitterPort;     // Listening port
     static const std::string kSourceAddr;  // Streaming server's host
     static const int kSourcePort;          // Streaming server's listening port
+    static const int kHeaderLength;        // Bytes/header
 
     int buffer_size_;
     std::string channel_;
     int chunk_size_;
-    unsigned short team_port_;
+    unsigned short splitter_port_;
     std::string source_addr_;
     unsigned short source_port_;
+    int header_length_;
     
     /*
       An splitter runs 2 threads. The main one serves the chunks to

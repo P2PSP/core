@@ -54,9 +54,9 @@ namespace p2psp {
   public:
     Splitter_DBS();
     ~Splitter_DBS();
-    void SendTheListSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    void SendTheNumberOfPeers(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     virtual void SendTheListOfPeers(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-    void SendThePeerEndpoint(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    //void SendThePeerEndpoint(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     void SendConfiguration(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) override;
     virtual void InsertPeer(const boost::asio::ip::udp::endpoint &peer);
     virtual void HandleAPeerArrival(std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) override;

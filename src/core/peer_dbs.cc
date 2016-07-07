@@ -47,6 +47,7 @@ namespace p2psp {
     return kTeamPort;
     }*/
 
+  // Unused in this layer!
   void Peer_DBS::ReceiveMyEndpoint() {
     boost::array<char, 6> buffer;
     char *raw_data = buffer.data();
@@ -148,6 +149,8 @@ namespace p2psp {
     ip::udp::endpoint peer;
     int port;
 
+    ReceiveTheNumberOfPeers();
+    
     // sys.stdout.write(Color.green)
     TRACE("Requesting"
 	  << number_of_peers_
