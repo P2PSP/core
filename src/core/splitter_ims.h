@@ -24,8 +24,10 @@ namespace p2psp {
     void SendMcastGroup(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     //int GetRecvFromCounter();
     //int GetSendToCounter();
+    void SetMcastAddr(std::string);
     std::string GetMcastAddr();
     unsigned short GetMcastPort();
+    void SetMcastPort(unsigned short);
     int GetTTL();
     static int GetDefaultTTL();
     static std::string GetDefaultMcastAddr();

@@ -147,4 +147,12 @@ namespace p2psp {
     return kMcastPort;
   }
 
+  void Splitter_IMS::SetMcastAddr(std::string mcast_addr) {
+    mcast_addr_ = mcast_addr;
+  }
+
+  void Splitter_IMS::SetMcastPort(unsigned short mcast_port) {
+    mcast_port_ = mcast_port;
+  }
+
 }
