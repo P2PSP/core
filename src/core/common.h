@@ -12,8 +12,11 @@
 #define P2PSP_CORE_COMMON_H
 
 #include <chrono>
-#include <openssl/sha.h>
+#include <openssl/sha.h> // Sure this is here?
 #include <vector>
+
+#define PORT unsigned short
+#define HEADER_SIZE int
 
 namespace p2psp {
 
