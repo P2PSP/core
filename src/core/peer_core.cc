@@ -281,6 +281,7 @@ namespace p2psp {
     // }}}
   }
 
+#ifdef _2_  
   void Peer_core::ReceiveChannel() {
     //boost::array<char, 80> buffer;
     
@@ -299,8 +300,8 @@ namespace p2psp {
     return std::string(inet_ntoa(message));*/
     
   }
-  
-  void Peer_core::ReceiveSourceEndpoint() {
+#endif
+  /*void Peer_core::ReceiveSourceEndpoint() {
     // {{{
 
     boost::array<char, 6> buffer;
@@ -319,9 +320,9 @@ namespace p2psp {
 	  << ")");
 
     // }}}
-  }
+  }*/
   
-  void Peer_core::ReceiveHeaderLength() {
+  /*void Peer_core::ReceiveHeaderLength() {
     boost::array<char, 2> buffer;
     read(splitter_socket_, ::buffer(buffer));
     
@@ -329,7 +330,7 @@ namespace p2psp {
 
     TRACE("header_length (in bytes) = "
 	  << std::to_string(header_length_));
-  }
+	  }*/
   
   void Peer_core::KeepTheBufferFull() {
     // {{{

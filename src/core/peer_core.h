@@ -74,8 +74,8 @@ namespace p2psp {
     //char magic_flags_;
     ip::address source_addr_;
     uint16_t source_port_;
-    int header_length_;
-    boost::array<char, 80> channel_;
+    //int header_length_;
+    //boost::array<char, 80> channel_;
       
   public:
 
@@ -98,11 +98,11 @@ namespace p2psp {
     virtual void    SetTeamPort(uint16_t);
     //virtual uint16_t GetTeamPort();
 
-    virtual void ReceiveHeaderLength(void);
+    //virtual void ReceiveHeaderLength(void);
     /*virtual void ReceiveHeader(void);
     virtual int  GetHeaderSize();*/
 
-    void ReceiveChannel();
+    //void ReceiveChannel();
     virtual void ReceiveChunkSize(void);
     virtual int GetChunkSize();
 
@@ -138,7 +138,7 @@ namespace p2psp {
     virtual void SetUseLocalHost(bool);
     bool GetUseLocalHost();
     int GetNumberOfPeers() { return 0; }
-    void  ReceiveSourceEndpoint();
+    //void  ReceiveSourceEndpoint();
     // bool AmIAMonitor() { return false; }
     //void ReceiveTheListOfPeers() {}
     
