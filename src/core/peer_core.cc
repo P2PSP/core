@@ -168,8 +168,10 @@ namespace p2psp {
     received_counter_ = 0;
 
     // Wall time (execution time plus waiting time).
+#ifdef DEBUG
     clock_t start_time = clock();
-
+#endif
+    
     // We will send a chunk to the player when a new chunk is
     // received. Besides, those slots in the buffer that have not been
     // filled by a new chunk will not be send to the
