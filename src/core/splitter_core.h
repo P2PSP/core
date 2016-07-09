@@ -35,7 +35,7 @@ namespace p2psp {
     void SendChunkSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     void SendChannel(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     void SendSourceEndpoint(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
-    void SendHeaderLength(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+    void SendHeaderSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     virtual void SendConfiguration(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
     virtual void HandleAPeerArrival(std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket);
     void HandleArrivals();
@@ -81,7 +81,10 @@ namespace p2psp {
     static std::string GetDefaultChannel();
     static std::string GetDefaultSourceAddr();
     static int GetDefaultSourcePort();
-    static int GetDefaultHeaderLength();
+
+    static HEADER_SIZE_TYPE GetDefaultHeaderSize();
+    void SetHeaderSize(HEADER_SIZE_TYPE header_size);
+    HEADER_SIZE_TYPE GetHeaderSize();
     
   protected:
     static const int kBufferSize;          // Buffer size in chunks
@@ -90,7 +93,7 @@ namespace p2psp {
     static const unsigned short kSplitterPort;     // Listening port
     static const std::string kSourceAddr;  // Streaming server's host
     static const int kSourcePort;          // Streaming server's listening port
-    static const int kHeaderLength;        // Bytes/header
+    static const int kHeaderSize;        // Bytes/header
 
     int buffer_size_;
     std::string channel_;
@@ -98,7 +101,7 @@ namespace p2psp {
     unsigned short splitter_port_;
     std::string source_addr_;
     unsigned short source_port_;
-    int header_length_;
+    int header_size_;
     
     /*
       An splitter runs 2 threads. The main one serves the chunks to

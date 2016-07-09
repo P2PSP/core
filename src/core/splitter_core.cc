@@ -7,6 +7,8 @@
 //  http://www.p2psp.org
 //
 
+#define __DEBUG_CHUNKS__
+
 #include "splitter_core.h"
 #include "../util/trace.h"
 
@@ -20,7 +22,7 @@ namespace p2psp {
   const unsigned short Splitter_core::kSplitterPort = 8001;   // Listening port
   const std::string Splitter_core::kSourceAddr = "127.0.0.1"; // Streaming server's host
   const int Splitter_core::kSourcePort = 8000;                // Streaming server's listening port
-  const int Splitter_core::kHeaderLength = 4000;
+  const int Splitter_core::kHeaderSize = 4000;
   
   Splitter_core::Splitter_core()
     : io_service_(),
@@ -34,7 +36,7 @@ namespace p2psp {
     splitter_port_ = kSplitterPort;
     source_addr_ = kSourceAddr;
     source_port_ = kSourcePort;
-    header_length_ = kHeaderLength;
+    header_size_ = kHeaderSize;
     
     alive_ = true;
     chunk_number_ = 0;
@@ -53,8 +55,8 @@ namespace p2psp {
 
   Splitter_core::~Splitter_core() {}
 
-  int Splitter_core::GetDefaultHeaderLength() {
-    return kHeaderLength;
+  int Splitter_core::GetDefaultHeaderSize() {
+    return kHeaderSize;
   }
   
   void Splitter_core::SetupPeerConnectionSocket() {
@@ -66,13 +68,33 @@ namespace p2psp {
   }
 
   void Splitter_core::SendChannel(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
-    /*boost::system::error_code ignored_error;
-    boost::asio::write(peer_serve_socket,
-		       boost::asio::buffer(channel_),
-		       boost::asio::transfer_all(), ignored_error);*/
+
+    //system::error_code ec;
+    char message[2];
+
+    TRACE("channel size = "
+	  << channel_.length());
+    
+    (*(uint16_t *)&message) = htons(channel_.length());
+    //peer_serve_socket->send(asio::buffer(message), 0, ec);
+
+    /*if (ec) {
+      ERROR(ec.message());
+      }*/
+    boost::asio::write(*peer_serve_socket, boost::asio::buffer(message, 2));
+    //char data[19];
+    //boost::asio::write(*peer_serve_socket, boost::asio::buffer(data,19));
+
+    TRACE("channel ="
+	  << channel_);
+
+    //boost::system::error_code ignored_error;
+    boost::asio::write(*peer_serve_socket, boost::asio::buffer(channel_,channel_.length())/*,boost::asio::transfer_all(), ignored_error*/);
+    
     //char message[80];
-    peer_serve_socket->send(asio::buffer(channel_));
-    TRACE("Transmitted channel =  "
+
+    //peer_serve_socket->send(asio::buffer(channel_));
+    TRACE("Transmitted channel = "
 	  << channel_);
   }
 
@@ -204,10 +226,12 @@ namespace p2psp {
     // size_t bytes_transferred =
     team_socket_.send_to(asio::buffer(message), destination, 0, ec);
 
+#if defined __DEBUG_CHUNKS__
     TRACE(chunk_number_
 	  << " -> "
 	  << destination);
-
+#endif
+    
     // TRACE("Bytes transferred: " << to_string(bytes_transferred));
 
     if (ec) {
@@ -248,14 +272,22 @@ namespace p2psp {
     }
   }
 
-  void Splitter_core::SendHeaderLength(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
-    TRACE("Sending a header length of "
-	  << to_string(header_length_)
+  void Splitter_core::SetHeaderSize(HEADER_SIZE_TYPE header_size) {
+    this->header_size_ = header_size;
+  }
+
+  HEADER_SIZE_TYPE Splitter_core::GetHeaderSize(void) {
+    return this->header_size_;
+  }
+  
+  void Splitter_core::SendHeaderSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    TRACE("Sending a header size of "
+	  << to_string(header_size_)
 	  << " bytes");
 
     system::error_code ec;
     char message[2];
-    (*(uint16_t *)&message) = htons(header_length_);
+    (*(uint16_t *)&message) = htons(header_size_);
     peer_serve_socket->send(asio::buffer(message), 0, ec);
 
     if (ec) {
@@ -266,7 +298,7 @@ namespace p2psp {
   void Splitter_core::SendConfiguration(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
     SendSourceEndpoint(sock);
     SendChannel(sock);
-    SendHeaderLength(sock);
+    SendHeaderSize(sock);
     SendChunkSize(sock);
     SendBufferSize(sock);
   }

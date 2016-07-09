@@ -15,8 +15,8 @@
 #include <openssl/sha.h> // Sure this is here?
 #include <vector>
 
-#define PORT unsigned short
-#define HEADER_SIZE int
+#define PORT_TYPE unsigned short
+#define HEADER_SIZE_TYPE int
 
 namespace p2psp {
 

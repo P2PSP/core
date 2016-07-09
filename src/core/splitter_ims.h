@@ -43,11 +43,11 @@ namespace p2psp {
     static const unsigned short kMcastPort;
     static const int kTTL;
 
-    std::string mcast_addr_;
-    unsigned short mcast_port_;
+    //std::string mcast_addr_;
+    //unsigned short mcast_port_;
     int ttl_;
 
-    boost::asio::ip::udp::endpoint mcast_channel_;
+    boost::asio::ip::udp::endpoint mcast_group_;
 
   };
 }

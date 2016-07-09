@@ -182,9 +182,12 @@ namespace p2psp {
     // waiting for traveling the player, we wil fill only the half
     // of the circular queue.
 
-    TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
-          << std::to_string(team_socket_.local_endpoint().port()) << ")"
-          << "\b: buffering = 000.00%");
+    TRACE("("
+	  << team_socket_.local_endpoint().address().to_string()
+	  << ","
+          << std::to_string(team_socket_.local_endpoint().port())
+	  << ")"
+          << "\n: buffering = 000.00%");
     TraceSystem::Flush();
 
     // First chunk to be sent to the player.  The
@@ -198,10 +201,14 @@ namespace p2psp {
       TRACE(std::to_string(chunk_number));
     }
     played_chunk_ = chunk_number;
-    TRACE("First chunk to play " << std::to_string(played_chunk_));
-    TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
-          << std::to_string(team_socket_.local_endpoint().port()) << ")"
-          << "\b: buffering (\b" << std::to_string(100.0 / buffer_size_));
+    TRACE("First chunk to play "
+	  << std::to_string(played_chunk_));
+    TRACE("("
+	  << team_socket_.local_endpoint().address().to_string()
+	  << ","
+          << std::to_string(team_socket_.local_endpoint().port())
+	  << ")"
+          << "\n: buffering (\b" << std::to_string(100.0 / buffer_size_));
     // TODO: Justify: .rjust(4)
 
     // Now, fill up to the half of the buffer.

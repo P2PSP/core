@@ -19,10 +19,10 @@ namespace p2psp {
   const int Splitter_IMS::kTTL = 1;                          // Time To Live of multicast packets
 
   Splitter_IMS::Splitter_IMS()
-    : mcast_channel_(boost::asio::ip::address::from_string(kMCastAddr), kMcastPort) {
+    : mcast_group_(boost::asio::ip::address::from_string(kMCastAddr), kMcastPort) {
 
-    mcast_addr_ = kMCastAddr;
-    mcast_port_ = kMcastPort;
+    /*mcast_addr_ = kMCastAddr;
+      mcast_port_ = kMcastPort;*/
     ttl_ = kTTL;
 
     TRACE("IMS initialized");
@@ -34,7 +34,8 @@ namespace p2psp {
   void Splitter_IMS::SetupTeamSocket() {
     system::error_code ec;
 
-    team_socket_.open(mcast_channel_.protocol());
+    TRACE("mcast_group = " << mcast_group_);
+    team_socket_.open(mcast_group_.protocol());
 
     // Implements the IPPROTO_IP/IP_MULTICAST_TTL socket option.
     asio::ip::multicast::hops ttl(ttl_);
@@ -51,17 +52,17 @@ namespace p2psp {
   }
 
   void Splitter_IMS::SendMcastGroup(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
-    TRACE("Communicating the multicast channel ("
-	  << mcast_addr_
+    TRACE("Communicating the multicast group ("
+	  << mcast_group_.address().to_string()//mcast_addr_
 	  << ", "
-	  << to_string(mcast_port_)
+	  << to_string(mcast_group_.port())
 	  << ")");
 
     char message[6];
     in_addr addr;
-    inet_aton(mcast_addr_.c_str(), &addr);
+    inet_aton(/*mcast_addr_*/mcast_group_.address().to_string().c_str(), &addr);
     (*(in_addr *)&message) = addr;
-    (*(uint16_t *)(message + 4)) = htons(mcast_port_);
+    (*(uint16_t *)(message + 4)) = htons(mcast_group_.port());
     peer_serve_socket->send(asio::buffer(message));
   }
 
@@ -102,7 +103,6 @@ namespace p2psp {
 
     while (alive_) {
       bytes_transferred = ReceiveChunk(chunk);
-      TRACE(to_string(bytes_transferred) << " bytes received");
 
       (*(uint16_t *)message.data()) = htons(chunk_number_);
 
@@ -110,20 +110,20 @@ namespace p2psp {
            asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
 	   message.data() + sizeof(uint16_t));
 
-      SendChunk(message, mcast_channel_);
+      TRACE("---- > mcast_group = " << mcast_group_);
+      SendChunk(message, mcast_group_);
 
       chunk_number_ = (chunk_number_ + 1) % Common::kMaxChunkNumber;
-      TRACE("Chunk number: " << to_string(chunk_number_));
       chunk.consume(bytes_transferred);
     }
   }
 
   std::string Splitter_IMS::GetMcastAddr() {
-    return mcast_addr_;
+    return mcast_group_.address().to_string()/*mcast_addr_*/;
   }
 
   unsigned short Splitter_IMS::GetMcastPort() {
-    return mcast_port_;
+    return mcast_group_.port();
   }
 
   int Splitter_IMS::GetTTL() {
@@ -147,12 +147,23 @@ namespace p2psp {
     return kMcastPort;
   }
 
-  void Splitter_IMS::SetMcastAddr(std::string mcast_addr) {
-    mcast_addr_ = mcast_addr;
+  void Splitter_IMS::SetMcastAddr(std::string addr) {
+    //mcast_addr_ = mcast_addr;
+    /*boost::asio::ip::udp::endpoint
+      tmp(boost::asio::ip::address::from_string(addr),
+	  mcast_group_.port());
+	  mcast_group_ = tmp;*/
+    mcast_group_.address(boost::asio::ip::address::from_string(addr));
   }
 
-  void Splitter_IMS::SetMcastPort(unsigned short mcast_port) {
-    mcast_port_ = mcast_port;
+  void Splitter_IMS::SetMcastPort(unsigned short port) {
+    //mcast_port_ = mcast_port;
+    /*mcast_group_.port() = port;
+    boost::asio::ip::udp::endpoint
+      tmp(mcast_group_.address(),
+	  port);
+	  mcast_group_ = tmp;*/
+    mcast_group_.port(port);
   }
 
 }
