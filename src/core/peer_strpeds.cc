@@ -193,8 +193,8 @@ int PeerSTRPEDS::HandleBadPeersRequest() {
   LOG("Message List: " << s);
   TRACE("Bad Header sent to the splitter");
 
-
-  //bad_peers_.clear();
+  player_alive_ = false;
+  bad_peers_.clear();
 
   return -1;
 }
@@ -234,7 +234,7 @@ int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
   } else {
     ProcessBadMessage(message, sender);
     //Informing to the splitter ASAP. Only TP will be taking into account.
-    return HandleBadPeersRequest();
+    //return HandleBadPeersRequest();
   }
 
   return -1;

@@ -29,6 +29,13 @@ namespace p2psp {
 
     peer_number_ = 0;
     destination_of_chunk_.reserve(buffer_size_);
+    for (int i = 0; i < buffer_size_; i++){
+      boost::asio::ip::address address = boost::asio::ip::address::from_string("0.0.0.0");
+      uint16_t port = 0;
+      boost::asio::ip::udp::endpoint ep = boost::asio::ip::udp::endpoint(address, port);
+      destination_of_chunk_[i] = ep;
+      i++;
+    }
     magic_flags_ = Common::kDBS;
 
     TRACE("max_number_of_chunk_loss = " << max_number_of_chunk_loss_);
@@ -192,6 +199,7 @@ namespace p2psp {
   }
 
   asio::ip::udp::endpoint SplitterDBS::GetLosser(int lost_chunk_number) {
+    TRACE("lost_chunk_number= " << lost_chunk_number << " buffer_size_ = " << buffer_size_ << " MOD= " << lost_chunk_number % buffer_size_);
     return destination_of_chunk_[lost_chunk_number % buffer_size_];
   }
 

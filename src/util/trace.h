@@ -91,9 +91,9 @@ namespace p2psp
 #define LOGC(c, a)  {std::cout << a << std::endl;}
 #define WARNING(a)  {std::cout << a << std::endl;}
 #define DEBUG(a)    {std::cout << a << std::endl;}
-#define TRACE(a)    {struct timeval tp;gettimeofday(&tp, NULL);long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;std::cout << ms << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a  << _RESET_COLOR() << std::endl;}
+#define TRACE(a)    {std::cout << a  << std::endl;}
 #define ERROR(a)    {std::cout << a << std::endl;}
-
+//#define TRACE(a)    {struct timeval tp;gettimeofday(&tp, NULL);long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;std::cout << ms << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a  << _RESET_COLOR() << std::endl << std::flush;}
 #else
 
 #define LOG(a)      {}

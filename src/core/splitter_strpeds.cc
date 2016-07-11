@@ -82,17 +82,17 @@ void SplitterSTRPEDS::SendDsaKey(
 void SplitterSTRPEDS::GatherBadPeers() {
 	while (alive_) {
 		if (peer_list_.size() > 0) {
-			boost::asio::ip::udp::endpoint peer = GetPeerForGathering();
-			RequestBadPeers(peer);
-			sleep(2);
+		  //boost::asio::ip::udp::endpoint peer = GetPeerForGathering();
+		  //RequestBadPeers(peer);
+		  //sleep(2);
 			try {
 				boost::asio::ip::udp::endpoint tp =
 						GetTrustedPeerForGathering();
-				if (tp != peer)
-					RequestBadPeers(tp);
+				//if (tp != peer)
+				RequestBadPeers(tp);
 			} catch (const null e) {}
 		}
-		sleep(gather_bad_peers_sleep_);
+		//sleep(gather_bad_peers_sleep_);
 	}
 }
 
@@ -166,6 +166,7 @@ void SplitterSTRPEDS::Run() {
 			TRACE("sending a message with size " << message.size());
 			SendChunk(message, peer);
 
+			TRACE("Chunk_Number= " << chunk_number_ << " Buffer size: " << buffer_size_ << " Peer: " << peer.address().to_string() << ":" << peer.port());
 			destination_of_chunk_[chunk_number_ % buffer_size_] = peer;
 			chunk_number_ = (chunk_number_ + 1) % Common::kMaxChunkNumber;
 
@@ -466,7 +467,7 @@ void SplitterSTRPEDS::PunishPeer(const boost::asio::ip::udp::endpoint &peer,
 		LOG("!!! bad peer " << peer);
 
 		RemovePeer(peer);
-		LOG("Peer: " << peer << " removed");
+		LOG("Peer: " << peer << " removed" << message);
 
 	}
 }
@@ -475,6 +476,7 @@ void SplitterSTRPEDS::OnRoundBeginning(){
 	RefreshTPs();
 	PunishPeers();
 	PunishTPs();
+	GatherBadPeers();
 }
 
 void SplitterSTRPEDS::RefreshTPs(){
@@ -523,8 +525,10 @@ void SplitterSTRPEDS::PunishTPs(){
 				r = rand() % 100 + 1;
 				if (r <= p_tpl_){
 					PunishPeer(trusted_peers_discovered_[i], "by splitter");
+					ProcessGoodbye(trusted_peers_discovered_[i]);
 					trusted_peers_discovered_.erase(remove(trusted_peers_discovered_.begin(), trusted_peers_discovered_.end(), trusted_peers_discovered_[i]),
 							trusted_peers_discovered_.end());
+					
 				}
 	}
 
