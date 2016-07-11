@@ -166,35 +166,37 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 }
 
 int PeerSTRPEDS::HandleBadPeersRequest() {
-  std::string bad("B");
-  std::vector<char> msg(bad.size() + sizeof(uint16_t) + (bad_peers_.size()*6) + 1);
-  ip::udp::endpoint peer;
+  if (bad_peers_.size() > 0){
+    std::string bad("B");
+    std::vector<char> msg(bad.size() + sizeof(uint16_t) + (bad_peers_.size()*6) + 1);
+    ip::udp::endpoint peer;
 
-  std::copy(bad.begin(), bad.end(), msg.data());
+    std::copy(bad.begin(), bad.end(), msg.data());
 
-  *((uint16_t *)(msg.data() + bad.size())) = htons((uint16_t)bad_peers_.size());
+    *((uint16_t *)(msg.data() + bad.size())) = htons((uint16_t)bad_peers_.size());
 
-  TRACE("SIZE: " << ntohs(*((uint16_t *)(msg.data() + bad.size()))));
-  for (unsigned int i = 0; i < bad_peers_.size(); i++){
-	peer = bad_peers_.at(i);
-    in_addr net_ip;
-    inet_aton(peer.address().to_string().c_str(), &net_ip);
-    (*(in_addr *) (msg.data() + bad.size() + sizeof(uint16_t) + (6*i))) = net_ip;
-    uint16_t port = htons(peer.port());
-    (*(uint16_t *)(msg.data() + bad.size() + sizeof(uint16_t) + (6*i) + sizeof(net_ip))) = port;
-    uint16_t p = ntohs(*(uint16_t *)(msg.data() + 1 + sizeof(uint16_t) + (6*i) + sizeof(net_ip)));
-    TRACE("P " << p);
+    TRACE("SIZE: " << ntohs(*((uint16_t *)(msg.data() + bad.size()))));
+    for (unsigned int i = 0; i < bad_peers_.size(); i++){
+      peer = bad_peers_.at(i);
+      in_addr net_ip;
+      inet_aton(peer.address().to_string().c_str(), &net_ip);
+      (*(in_addr *) (msg.data() + bad.size() + sizeof(uint16_t) + (6*i))) = net_ip;
+      uint16_t port = htons(peer.port());
+      (*(uint16_t *)(msg.data() + bad.size() + sizeof(uint16_t) + (6*i) + sizeof(net_ip))) = port;
+      uint16_t p = ntohs(*(uint16_t *)(msg.data() + 1 + sizeof(uint16_t) + (6*i) + sizeof(net_ip)));
+      TRACE("P " << p);
+    }
+
+    msg.at(msg.size()-1) = 0;
+    team_socket_.send_to(buffer(msg), splitter_);
+
+    std::string s(msg.begin(), msg.end());
+    LOG("Message List: " << s);
+    TRACE("Bad Header sent to the splitter");
+
+    player_alive_ = false;
+    bad_peers_.clear();
   }
-
-  msg.at(msg.size()-1) = 0;
-  team_socket_.send_to(buffer(msg), splitter_);
-
-  std::string s(msg.begin(), msg.end());
-  LOG("Message List: " << s);
-  TRACE("Bad Header sent to the splitter");
-
-  player_alive_ = false;
-  bad_peers_.clear();
 
   return -1;
 }

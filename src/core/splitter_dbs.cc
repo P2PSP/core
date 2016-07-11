@@ -34,7 +34,6 @@ namespace p2psp {
       uint16_t port = 0;
       boost::asio::ip::udp::endpoint ep = boost::asio::ip::udp::endpoint(address, port);
       destination_of_chunk_[i] = ep;
-      i++;
     }
     magic_flags_ = Common::kDBS;
 
