@@ -13,12 +13,13 @@
 #ifndef P2PSP_CORE_MONITOR_EMS_H
 #define P2PSP_CORE_MONITOR_EMS_H
 
+#include "monitor_nts.h"
 #include "peer_ems.h"
 #include "../util/trace.h"
 
 namespace p2psp {
 
-class MonitorEMS : public PeerDBS {
+    class MonitorEMS : public PeerEMS {
  public:
   MonitorEMS();
   ~MonitorEMS();

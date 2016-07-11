@@ -23,13 +23,13 @@
 #include <arpa/inet.h>
 #include <ctime>
 #include "../util/trace.h"
-#include "peer_dbs.h"
+#include "peer_nts.h"
 
 using namespace boost::asio;
 
 namespace p2psp {
 
-  class PeerEMS : public PeerDBS {
+  class PeerEMS : public PeerNTS {
   /* the only extension is a slightly modified connect to splitter method*/
 
   public:

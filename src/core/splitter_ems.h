@@ -17,14 +17,14 @@
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/unordered_map.hpp>
-#include "splitter_dbs.h"
+#include "splitter_nts.h"
 #include "common.h"
 #include <boost/tuple/tuple.hpp>
 
 
 
 namespace p2psp {
-class SplitterEMS : public SplitterDBS {
+class SplitterEMS : public SplitterNTS {
  protected:
 
   // HashTable of public to private endpoints
@@ -37,8 +37,9 @@ class SplitterEMS : public SplitterDBS {
  public:
   SplitterEMS();
   ~SplitterEMS();
-  virtual void SendTheListOfPeers(
-      const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
+  virtual void SendTheListOfPeers2(
+          const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket,
+          const boost::asio::ip::udp::endpoint& peer) override;
   
   virtual void HandleAPeerArrival(
       std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) override;

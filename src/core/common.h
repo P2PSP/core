@@ -30,10 +30,10 @@ namespace p2psp {
 
     // IMS is enables by defining an IP multicast address
     static const char kDBS = 0;  // DBS magic number
-    static const char kEMS= 1;  // EMS magic number
-    static const char kACS = 2;  // ACS magic number
-    static const char kLRS = 4;  // LRS magic number
-    static const char kNTS = 8;  // NIS magic number
+    static const char kACS = 1;  // ACS magic number
+    static const char kLRS = 2;  // LRS magic number
+    static const char kNTS = 4;  // NIS magic number
+    static const char kEMS = 8;  // EMS magic number
     static const char kDIS = 16;  // DIS magic number
     static const char kSTRPE= 32;  // STRPE magic number
 
