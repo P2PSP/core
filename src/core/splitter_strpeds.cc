@@ -185,8 +185,6 @@ void SplitterSTRPEDS::Run() {
 				}
 
 				outgoing_peer_list_.clear();
-
-
 			}
 
 			//TODO: Here or before logging?
@@ -315,25 +313,23 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 		size_t bytes_transferred = ReceiveMessage(message, sender);
 
 		if (bytes_transferred == 2) {
-			/*
-			 The peer complains about a lost chunk.
+		  /*
+		    The peer complains about a lost chunk.
 
-			 In this situation, the splitter counts the number of
-			 complains. If this number exceeds a threshold, the
-			 unsupportive peer is expelled from the
-			 team.
-			 */
-			if (find(trusted_peers_.begin(), trusted_peers_.end(), sender)
-								!= trusted_peers_.end()) {
-
-				//uint16_t lost_chunk_number = GetLostChunkNumber(message);
-				//asio::ip::udp::endpoint bad_peer = GetLosser(lost_chunk_number);
-				//HandleBadPeerFromTrusted(bad_peer, sender);
-				//LOG("Complaint from TP (" << sender.port() <<") about lost chunk " << lost_chunk_number << " by " << bad_peer.port());
-				uint16_t lost_chunk_number = GetLostChunkNumber(message);
-				//trusted_peers_discovered_.push_back(sender);
-				ProcessLostChunk(lost_chunk_number, sender);
-			}
+		    In this situation, the splitter counts the number of
+		    complains. If this number exceeds a threshold, the
+		    unsupportive peer is expelled from the
+		    team.
+		  */
+		  if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) != trusted_peers_.end()) {
+		    //uint16_t lost_chunk_number = GetLostChunkNumber(message);
+		    //asio::ip::udp::endpoint bad_peer = GetLosser(lost_chunk_number);
+		    //HandleBadPeerFromTrusted(bad_peer, sender);
+		    //LOG("Complaint from TP (" << sender.port() <<") about lost chunk " << lost_chunk_number << " by " << bad_peer.port());
+		    uint16_t lost_chunk_number = GetLostChunkNumber(message);
+		    //trusted_peers_discovered_.push_back(sender);
+		    ProcessLostChunk(lost_chunk_number, sender);
+		  }
 
 		} else {
 			/*
@@ -346,8 +342,7 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 			if (message.at(0) == 'B'){
 				LOG("Bad complaint received");
 
-				if (find(trusted_peers_.begin(), trusted_peers_.end(), sender)
-						!= trusted_peers_.end()) {
+				if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) != trusted_peers_.end()) {
 					LOG("Complaint about bad peer from " << sender.address().to_string() << ":" << sender.port());
 					trusted_peers_discovered_.push_back(sender);
 					ProcessBadPeersMessage(message, sender);
@@ -356,7 +351,9 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 
 			// 'G'oodbye
 			if (message.at(0) == 'G') {
+			   if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) == trusted_peers_.end()) {
 				ProcessGoodbye(sender);
+			   }
 			}
 		}
 	}
@@ -515,11 +512,15 @@ void SplitterSTRPEDS::PunishTPs(){
 	for (unsigned int i = 0; i<trusted_peers_discovered_.size(); i++) {
 				r = rand() % 100 + 1;
 				if (r <= p_tpl_){
-					PunishPeer(trusted_peers_discovered_[i], "by splitter");
-					ProcessGoodbye(trusted_peers_discovered_[i]);
-					trusted_peers_discovered_.erase(remove(trusted_peers_discovered_.begin(), trusted_peers_discovered_.end(), trusted_peers_discovered_[i]),
-							trusted_peers_discovered_.end());
-					
+				  //PunishPeer(trusted_peers_discovered_[i], "by splitter");
+				  //trusted_peers_discovered_.erase(remove(trusted_peers_discovered_.begin(), trusted_peers_discovered_.end(), trusted_peers_discovered_[i]),
+				  //trusted_peers_discovered_.end());
+				  ProcessGoodbye(trusted_peers_discovered_[i]);
+				  trusted_peers_discovered_.erase(remove(trusted_peers_discovered_.begin(), trusted_peers_discovered_.end(), trusted_peers_discovered_[i]), trusted_peers_discovered_.end());
+				  if (logging_) {
+				    LogMessage("bad peer " + trusted_peers_discovered_[i].address().to_string() + ":"+ to_string(trusted_peers_discovered_[i].port()) + "(by splitter)");
+				  }
+				  LOG("Peer: " << trusted_peers_discovered_[i] << " removed" << "(by splitter)");
 				}
 	}
 
