@@ -168,7 +168,7 @@ namespace p2psp {
     received_counter_ = 0;
 
     // Wall time (execution time plus waiting time).
-#ifdef DEBUG
+#ifdef __DEBUG__
     clock_t start_time = clock();
 #endif
     
@@ -405,15 +405,17 @@ namespace p2psp {
     //}*/
     
     for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
-      if (chunks_[chunk_number % buffer_size_].received == true){
+      if (chunks_[chunk_number % buffer_size_].received == true) {
 	//PlayChunk(played_chunk_);
 	player_alive_ = PlayChunk(chunks_[played_chunk_ % buffer_size_].data);
 	chunks_[played_chunk_ % buffer_size_].received = false;
 	received_counter_--;
-	LOG("Chunk Consumed at:" << played_chunk_ % buffer_size_)
-	  }else{
-	LOG("Chunk lost at: " << played_chunk_ % buffer_size_)
-	  }
+	LOG("Chunk Consumed at:"
+	    << played_chunk_ % buffer_size_);
+      } else {
+	LOG("Chunk lost at: "
+	    << played_chunk_ % buffer_size_);
+      }
       
       played_chunk_++;
     }

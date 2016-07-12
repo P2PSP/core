@@ -180,8 +180,10 @@ namespace p2psp {
     if (ec) {
       ERROR("Error receiving next chunk: "
 	    << ec.message()
-	    << " bytes transferred: "
-	    << bytes_transferred);
+	    << " bytes received: "
+	    << bytes_transferred
+	    << " != "
+	    << chunk_size_);
       TRACE("No data in the server!");
       source_socket_.close();
       /*

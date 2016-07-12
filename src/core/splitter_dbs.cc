@@ -15,12 +15,12 @@ namespace p2psp {
   using namespace boost;
 
   const int Splitter_DBS::kMaxChunkLoss = 32;  // Chunk losses threshold to reject a peer from the team
-  const int Splitter_DBS::kMonitorNumber = 1;
+  const int Splitter_DBS::kMonitorsNumber = 1;
 
   Splitter_DBS::Splitter_DBS() : Splitter_core(), losses_(0, &Splitter_DBS::GetHash) {
     // TODO: Check if there is a better way to replace kMcastAddr with 0.0.0.0
     max_number_of_chunk_loss_ = kMaxChunkLoss;
-    max_number_of_monitors_ = kMonitorNumber;
+    monitors_number_ = kMonitorsNumber;
 
     peer_number_ = 0;
     destination_of_chunk_.reserve(buffer_size_);
@@ -36,10 +36,10 @@ namespace p2psp {
     char message[2];
 
     TRACE("Sending the number of monitors "
-	  << max_number_of_monitors_);
-    (*(uint16_t *)&message) = htons(max_number_of_monitors_);
+	  << monitors_number_);
+    (*(uint16_t *)&message) = htons(monitors_number_);
     peer_serve_socket->send(asio::buffer(message));
-
+    
     TRACE("Sending a list of peers of size "
 	  << to_string(peer_list_.size()));
     (*(uint16_t *)&message) = htons(peer_list_.size());
@@ -169,7 +169,7 @@ namespace p2psp {
 	  << " sent to "
 	  << destination);
 
-    if (find(peer_list_.begin() + max_number_of_monitors_, peer_list_.end(), destination) != peer_list_.end()) {
+    if (find(peer_list_.begin() + monitors_number_, peer_list_.end(), destination) != peer_list_.end()) {
       TRACE("Lost chunk index = "
 	    << lost_chunk_number);
     }
@@ -375,12 +375,20 @@ namespace p2psp {
     return max_number_of_chunk_loss_;
   }
 
-  void Splitter_DBS::SetMaxNumberOfMonitors(int max_number_of_monitors) {
-    max_number_of_monitors_ = max_number_of_monitors;
+  int Splitter_DBS::GetDefaultMaxNumberOfChunkLoss() {
+    return kMaxChunkLoss;
   }
 
-  int Splitter_DBS::GetMaxNumberOfMonitors() {
-    return max_number_of_monitors_;
+  void Splitter_DBS::SetMonitorsNumber(int monitors_number) {
+    monitors_number_ = monitors_number;
+  }
+
+  int Splitter_DBS::GetMonitorsNumber() {
+    return monitors_number_;
+  }
+
+  int Splitter_DBS::GetDefaultMonitorsNumber() {
+    return kMonitorsNumber;
   }
 
   void Splitter_DBS::Start() {
@@ -388,12 +396,5 @@ namespace p2psp {
     thread_.reset(new boost::thread(boost::bind(&Splitter_DBS::Run, this)));
   }
 
-  int Splitter_DBS::GetDefaultMaxNumberOfChunkLoss() {
-    return kMaxChunkLoss;
-  }
-
-  int Splitter_DBS::GetDefaultMaxNumberOfMonitors() {
-    return kMonitorNumber;
-  }
 
 }

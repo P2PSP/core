@@ -25,7 +25,9 @@ namespace p2psp {
   void Peer_DBS::Init() {
     // {{{
 
-    TRACE("max_chunk_debt =" + std::to_string(kMaxChunkDebt));
+    //TRACE("max_chunk_debt = " + std::to_string(kMaxChunkDebt));
+    TRACE("max_chunk_debt = "
+	  << max_chunk_debt_);
     TRACE("Initialized");
 
     // }}}
@@ -127,10 +129,12 @@ namespace p2psp {
 	  << ","
           << std::to_string(splitter_socket_.remote_endpoint().port())
 	  << ")");
+
     read(splitter_socket_, ::buffer(buffer));
     number_of_monitors_ = ntohs(*(short *)(buffer.c_array()));
     TRACE("The number of monitors is "
 	  << number_of_monitors_);
+    
     read(splitter_socket_, ::buffer(buffer));
     number_of_peers_ = ntohs(*(short *)(buffer.c_array()));
     TRACE("The size of the team is "
@@ -545,7 +549,7 @@ namespace p2psp {
 
     waiting_for_goodbye_ = true;
 
-    Peer_DBS::BufferData();
+    Peer_core::BufferData();
 
     // }}}
   }
