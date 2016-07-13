@@ -70,20 +70,10 @@ void SplitterSTRPEDS::SendDsaKey(
 }
 
 void SplitterSTRPEDS::GatherBadPeers() {
-	while (alive_) {
-		if (peer_list_.size() > 0) {
-			boost::asio::ip::udp::endpoint peer = GetPeerForGathering();
-			RequestBadPeers(peer);
-			sleep(2);
-			try {
-				boost::asio::ip::udp::endpoint tp =
-						GetTrustedPeerForGathering();
-				if (tp != peer)
-					RequestBadPeers(tp);
-			} catch (const null e) {}
-		}
-		sleep(gather_bad_peers_sleep_);
-	}
+  for (unsigned int i=0; i<trusted_peers_.size(); i++) {
+     boost::asio::ip::udp::endpoint tp = trusted_peers_[i];
+     RequestBadPeers(tp);
+  }
 }
 
 asio::ip::udp::endpoint SplitterSTRPEDS::GetPeerForGathering() {
@@ -151,10 +141,12 @@ void SplitterSTRPEDS::Run() {
 			TRACE("sending a message with size " << message.size());
 			SendChunk(message, peer);
 
+			TRACE("Chunk_Number= " << chunk_number_ << " Buffer size: " << buffer_size_ << " Peer: " << peer.address().to_string() << ":" << peer.port());
 			destination_of_chunk_[chunk_number_ % buffer_size_] = peer;
 			chunk_number_ = (chunk_number_ + 1) % Common::kMaxChunkNumber;
 
 			if (logging_) {
+			  TRACE("PEER_NUMBER_ = " << peer_number_);
 				if (peer_number_ == 0) {
 					current_round_++;
 					std::string message = to_string(current_round_)
@@ -163,7 +155,7 @@ void SplitterSTRPEDS::Run() {
 					for (unsigned int i=0; i<peer_list_.size(); i++){
 						message	= message + " " + peer_list_.at(i).address().to_string() + ":" + std::to_string(peer_list_.at(i).port());
 					}
-
+					TRACE("LOG: " << message);
 					LogMessage(message);
 				}
 
@@ -260,6 +252,7 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 		size_t bytes_transferred = ReceiveMessage(message, sender);
 
 		if (bytes_transferred == 2) {
+<<<<<<< HEAD
 			/*
 			 The peer complains about a lost chunk.
 
@@ -274,6 +267,25 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 				uint16_t lost_chunk_number = GetLostChunkNumber(message);
 				ProcessLostChunk(lost_chunk_number, sender);
 			}
+=======
+		  /*
+		    The peer complains about a lost chunk.
+
+		    In this situation, the splitter counts the number of
+		    complains. If this number exceeds a threshold, the
+		    unsupportive peer is expelled from the
+		    team.
+		  */
+		  if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) != trusted_peers_.end()) {
+		    //uint16_t lost_chunk_number = GetLostChunkNumber(message);
+		    //asio::ip::udp::endpoint bad_peer = GetLosser(lost_chunk_number);
+		    //HandleBadPeerFromTrusted(bad_peer, sender);
+		    //LOG("Complaint from TP (" << sender.port() <<") about lost chunk " << lost_chunk_number << " by " << bad_peer.port());
+		    uint16_t lost_chunk_number = GetLostChunkNumber(message);
+		    //trusted_peers_discovered_.push_back(sender);
+		    ProcessLostChunk(lost_chunk_number, sender);
+		  }
+>>>>>>> 9e5f6a2e711f01933933dc3985e0259c24f26e61
 
 		} else {
 			/*
@@ -286,17 +298,17 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 			if (message.at(0) == 'B'){
 				LOG("Bad complaint received");
 
-				if (find(trusted_peers_.begin(), trusted_peers_.end(), sender)
-						!= trusted_peers_.end()) {
+				if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) != trusted_peers_.end()) {
 					LOG("Complaint about bad peer from " << sender.address().to_string() << ":" << sender.port());
-					trusted_peers_discovered_.push_back(sender);
 					ProcessBadPeersMessage(message, sender);
 				}
 			}
 
 			// 'G'oodbye
 			if (message.at(0) == 'G') {
+			   if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) == trusted_peers_.end()) {
 				ProcessGoodbye(sender);
+			   }
 			}
 		}
 	}
@@ -347,12 +359,15 @@ void SplitterSTRPEDS::ProcessBadPeersMessage(const std::vector<char> &message,
 void SplitterSTRPEDS::HandleBadPeerFromTrusted(
 		const boost::asio::ip::udp::endpoint &bad_peer,
 		const boost::asio::ip::udp::endpoint &sender) {
+  if (std::find(peer_list_.begin(), peer_list_.end(), bad_peer) == peer_list_.end()) {
 	AddComplain(bad_peer, sender);
-	if (std::find(bad_peers_.begin(), bad_peers_.end(), bad_peer) ==
-	      bad_peers_.end()) {
+	if (std::find(bad_peers_.begin(), bad_peers_.end(), bad_peer) == bad_peers_.end()) {
 		bad_peers_.push_back(bad_peer);
+		trusted_peers_discovered_.push_back(sender);
+		LOG("TP discovered" << sender);
 	}
 	//PunishPeer(bad_peer, "by trusted");
+  }
 }
 
 void SplitterSTRPEDS::HandleBadPeerFromRegular(
@@ -400,7 +415,7 @@ void SplitterSTRPEDS::PunishPeer(const boost::asio::ip::udp::endpoint &peer,
 		LOG("!!! bad peer " << peer);
 
 		RemovePeer(peer);
-		LOG("Peer: " << peer << " removed");
+		LOG("Peer: " << peer << " removed" << message);
 
 	}
 }
@@ -409,7 +424,11 @@ void SplitterSTRPEDS::OnRoundBeginning(){
 	RefreshTPs();
 	PunishPeers();
 	PunishTPs();
+<<<<<<< HEAD
 	RunTMS();
+=======
+	GatherBadPeers();
+>>>>>>> 9e5f6a2e711f01933933dc3985e0259c24f26e61
 }
 
 void SplitterSTRPEDS::RefreshTPs(){
@@ -457,9 +476,15 @@ void SplitterSTRPEDS::PunishTPs(){
 	for (unsigned int i = 0; i<trusted_peers_discovered_.size(); i++) {
 				r = rand() % 100 + 1;
 				if (r <= p_tpl_){
-					PunishPeer(trusted_peers_discovered_[i], "by splitter");
-					trusted_peers_discovered_.erase(remove(trusted_peers_discovered_.begin(), trusted_peers_discovered_.end(), trusted_peers_discovered_[i]),
-							trusted_peers_discovered_.end());
+				  //PunishPeer(trusted_peers_discovered_[i], "by splitter");
+				  //trusted_peers_discovered_.erase(remove(trusted_peers_discovered_.begin(), trusted_peers_discovered_.end(), trusted_peers_discovered_[i]),
+				  //trusted_peers_discovered_.end());
+				  ProcessGoodbye(trusted_peers_discovered_[i]);
+				  trusted_peers_discovered_.erase(remove(trusted_peers_discovered_.begin(), trusted_peers_discovered_.end(), trusted_peers_discovered_[i]), trusted_peers_discovered_.end());
+				  if (logging_) {
+				    LogMessage("bad peer " + trusted_peers_discovered_[i].address().to_string() + ":"+ to_string(trusted_peers_discovered_[i].port()) + "(by splitter)");
+				  }
+				  LOG("Peer: " << trusted_peers_discovered_[i] << " removed" << "(by splitter)");
 				}
 	}
 
@@ -504,14 +529,16 @@ int SplitterSTRPEDS::GetPTPL(){
 	return p_tpl_;
 }
 void SplitterSTRPEDS::SetLogFile(const std::string &filename) {
-  log_file_.open(filename);
+  filename_ = filename;
 }
 
 void SplitterSTRPEDS::SetLogging(bool enabled) { logging_ = enabled; }
 
 void SplitterSTRPEDS::LogMessage(const std::string &message) {
+  log_file_.open(filename_, ofstream::out | ofstream::app);
 	log_file_ << BuildLogMessage(message+"\n");
 	log_file_.flush();
+	log_file_.close();
 	// TODO: Where to close the ofstream?
 }
 

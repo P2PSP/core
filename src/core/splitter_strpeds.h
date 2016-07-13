@@ -43,6 +43,7 @@ class SplitterSTRPEDS : public SplitterDBS {
   int digest_size_;
   int gather_bad_peers_sleep_;
   bool logging_;
+  std::string filename_;
   std::ofstream log_file_;
   std::ifstream trusted_file_;
   int current_round_;
