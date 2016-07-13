@@ -31,6 +31,7 @@ class PeerSTRPEDS: public PeerDBS {
   DSA* dsa_key;
   uint32_t current_round_;
   int losses_;
+  int played_;
 
  public:
 
@@ -62,6 +63,7 @@ class PeerSTRPEDS: public PeerDBS {
 
   virtual uint32_t GetCurrentRound();
   virtual void SetCurrentRound(uint32_t current_round);
+  virtual void SetPlayerAlive(bool status);
 };
 }
 

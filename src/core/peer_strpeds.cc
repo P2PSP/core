@@ -17,6 +17,9 @@ void PeerSTRPEDS::Init() {
   // self.message_format += '40s40s'
   bad_peers_ = std::vector<ip::udp::endpoint>();
   magic_flags_ = Common::kSTRPE;
+  played_ = 0;
+  losses_ = 0;
+  ready_to_leave_the_team_ = false;
   LOG("Initialized");
 }
 
@@ -212,10 +215,13 @@ int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
 	  if (logging_ and latest_chunk_number_ != 0) {
 		LogMessage("buffer correctnes " + std::to_string(CalcBufferCorrectness()));
 	    LogMessage("buffer filling " + std::to_string(CalcBufferFilling()));
-	    if (peer_list_.size() > 0)
-	    	LogMessage("buffer fullness " + std::to_string((losses_/(float)peer_list_.size())));
+	    if (played_ > 0 and played_ >= peer_list_.size()){
+	      TRACE("Losses in the previous round: " << losses_ << " played " << played_);
+	      LogMessage("buffer fullness " + std::to_string((float)losses_ / (float)played_));
+	      losses_ = 0;
+	      played_ = 0;
+	    }
 	  }
-	  losses_ = 0;
   }
   //---------------------
 
@@ -241,7 +247,7 @@ void PeerSTRPEDS::PlayNextChunk(int chunk_number) {
 	    	//PlayChunk(played_chunk_);
 	    	chunks_[played_chunk_ % buffer_size_].received = false;
 	    	received_counter_--;
-	    	LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
+	    	LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_);	       
 	    }else{
 	    	Complain(played_chunk_);
 	    	losses_++;
@@ -250,10 +256,10 @@ void PeerSTRPEDS::PlayNextChunk(int chunk_number) {
 	    		  LogMessage("chunk lost at " + std::to_string(played_chunk_ % buffer_size_));
 	    	}
 	    	*/
-	    	LOG("Chunk lost at: " << played_chunk_ % buffer_size_)
+	    	LOG("Chunk lost at: " << played_chunk_ % buffer_size_);
 	    }
-
-		played_chunk_++;
+	    played_++;
+	 played_chunk_++;
 	}
 
 	if ((latest_chunk_number_ % Common::kMaxChunkNumber) < chunk_number)
@@ -304,9 +310,5 @@ void PeerSTRPEDS::SetLogging(bool enabled) { logging_ = enabled; }
 
 uint32_t PeerSTRPEDS::GetCurrentRound(){return current_round_;}
 void PeerSTRPEDS::SetCurrentRound(uint32_t current_round){current_round_=current_round;}
-
+void PeerSTRPEDS::SetPlayerAlive(bool status){player_alive_ = status;}
 }
-
-
-
-
