@@ -24,18 +24,19 @@ namespace p2psp {
     static const int kMaxChunkNumber = 65536;
     // MAX_CHUNK_NUMBER = 2048
     // COUNTERS_TIMING = 0.1
-    static const int kCountersTiming = 1;
+    static const int kCountersTiming = 1; // In seconds
 
     static const bool kConsoleMode = true;
 
-    // IMS is enables by defining an IP multicast address
-    static const char kDBS   = 0x00;  // DBS magic number
-    static const char kACS   = 0x01;  // ACS magic number
-    static const char kLRS   = 0x02;  // LRS magic number
-    static const char kNTS   = 0x04;  // NIS magic number
-    static const char kDIS   = 0x08;  // DIS magic number
-    static const char kSTRPE = 0x10;  // STRPE magic number
-
+    // Set of rules flags
+    static const char kIMS = 0x00; // IMS
+    static const char kDBS = 0x01; // DBS
+    static const char kACS = 0x02; // ACS
+    static const char kLRS = 0x04; // LRS
+    static const char kNTS = 0x08; // NIS
+    //static const char kDIS = 0x10; // DIS
+    static const char kSTRPE = 0x10; // This should be renamed to kCIS
+    
     // TODO: Use colors
     // IMS_COLOR = Color.red
     // DBS_COLOR = Color.green
