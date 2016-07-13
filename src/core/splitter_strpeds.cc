@@ -403,7 +403,7 @@ void SplitterSTRPEDS::ProcessBadPeersMessage(const std::vector<char> &message,
 void SplitterSTRPEDS::HandleBadPeerFromTrusted(
 		const boost::asio::ip::udp::endpoint &bad_peer,
 		const boost::asio::ip::udp::endpoint &sender) {
-  if (std::find(peer_list_.begin(), peer_list_.end(), bad_peer) == peer_list_.end()) {
+  if (std::find(peer_list_.begin(), peer_list_.end(), bad_peer) != peer_list_.end()) {
 	AddComplain(bad_peer, sender);
 	if (std::find(bad_peers_.begin(), bad_peers_.end(), bad_peer) == bad_peers_.end()) {
 		bad_peers_.push_back(bad_peer);
