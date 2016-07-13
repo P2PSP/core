@@ -1,3 +1,4 @@
+
 //
 //  splitter_strpe.cc
 //  P2PSP
@@ -408,7 +409,7 @@ void SplitterSTRPEDS::HandleBadPeerFromTrusted(
 	if (std::find(bad_peers_.begin(), bad_peers_.end(), bad_peer) == bad_peers_.end()) {
 		bad_peers_.push_back(bad_peer);
 		trusted_peers_discovered_.push_back(sender);
-		LOG("TP discovered" << sender);
+		LOG("TP discovered " << sender);
 	}
 	//PunishPeer(bad_peer, "by trusted");
   }
@@ -488,7 +489,7 @@ void SplitterSTRPEDS::RefreshTPs(){
 			  AddTrustedPeer(boost::asio::ip::udp::endpoint(address,port));
 
 			}
-		TRACE("TP list updated");
+		TRACE("TP list updated. Size: " << trusted_peers_.size());
 		trusted_file_.close();
 	}else{
 			ERROR("trusted.txt doesn't exist");
