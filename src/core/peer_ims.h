@@ -32,7 +32,7 @@ namespace p2psp {
 
   struct Chunk {
     std::vector<char> data;
-    bool received;
+    int received;
   };
 
   class PeerIMS {

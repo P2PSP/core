@@ -353,7 +353,7 @@ namespace p2psp {
     chunks_[chunk_number % buffer_size_] = {
       std::vector<char>(message.data() + sizeof(uint16_t),
                         message.data() + message.size()),
-      true};
+      chunk_number};
 
     received_counter_++;
 
@@ -419,9 +419,9 @@ namespace p2psp {
 
 
   for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
-	    if (chunks_[chunk_number % buffer_size_].received == true){
+	    if (chunks_[chunk_number % buffer_size_].received){
 	    	PlayChunk(played_chunk_);
-			chunks_[played_chunk_ % buffer_size_].received = false;
+			chunks_[played_chunk_ % buffer_size_].received = -1;
 			received_counter_--;
 			LOG("Chunk Consumed at:" << played_chunk_ % buffer_size_)
 	    }else{
