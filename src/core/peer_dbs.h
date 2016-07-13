@@ -11,17 +11,6 @@
 #ifndef P2PSP_CORE_PEER_DBS_H
 #define P2PSP_CORE_PEER_DBS_H
 
-/* #include <vector> */
-/* #include <string> */
-/* #include <map> */
-/* #include <fstream> */
-/* #include <boost/asio.hpp> */
-/* #include <boost/array.hpp> */
-/* #include <boost/date_time/posix_time/posix_time.hpp> */
-/* #include <boost/thread/thread.hpp> */
-/* #include <arpa/inet.h> */
-/* #include <ctime> */
-/* #include "../util/trace.h" */
 #include "peer_core.h"
 
 using namespace boost::asio;
@@ -57,7 +46,7 @@ namespace p2psp {
     virtual void SayHello(const ip::udp::endpoint&);
     virtual void SayGoodbye(const ip::udp::endpoint&);
     virtual void ReceiveTheListOfPeers();
-    virtual void ReceiveTheNumberOfPeers();
+    void ReceiveTheNumberOfPeers();
     virtual void ListenToTheTeam()/* override*/;
     virtual int ProcessMessage(const std::vector<char>&,
                                const ip::udp::endpoint&) override;

@@ -1,5 +1,5 @@
 //
-//  peer_core.cc - P2PSP's core implementation
+//  peer_core.cc - Peer core implementation
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
@@ -47,27 +47,6 @@ namespace p2psp {
   Peer_core::~Peer_core() {}
 
   void Peer_core::Init() {};
-
-  void Peer_core::ReceiveMcastGroup() {
-    // {{{
-
-    boost::array<char, 6> buffer;
-    read(splitter_socket_, ::buffer(buffer));
-
-    char *raw_data = buffer.data();
-
-    in_addr ip_raw = *(in_addr *)(raw_data);
-    mcast_addr_ = ip::address::from_string(inet_ntoa(ip_raw));
-    mcast_port_ = ntohs(*(short *)(raw_data + 4));
-
-    TRACE("mcast_endpoint = ("
-	  << mcast_addr_.to_string()
-	  << ","
-          << std::to_string(mcast_port_)
-	  << ")");
-
-    // }}}
-  }
 
   void Peer_core::ConnectToTheSplitter() throw(boost::system::system_error) {
     // {{{
@@ -189,8 +168,10 @@ namespace p2psp {
     received_counter_ = 0;
 
     // Wall time (execution time plus waiting time).
+#ifdef __DEBUG__
     clock_t start_time = clock();
-
+#endif
+    
     // We will send a chunk to the player when a new chunk is
     // received. Besides, those slots in the buffer that have not been
     // filled by a new chunk will not be send to the
@@ -203,9 +184,12 @@ namespace p2psp {
     // waiting for traveling the player, we wil fill only the half
     // of the circular queue.
 
-    TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
-          << std::to_string(team_socket_.local_endpoint().port()) << ")"
-          << "\b: buffering = 000.00%");
+    TRACE("("
+	  << team_socket_.local_endpoint().address().to_string()
+	  << ","
+          << std::to_string(team_socket_.local_endpoint().port())
+	  << ")"
+          << "\n: buffering = 000.00%");
     TraceSystem::Flush();
 
     // First chunk to be sent to the player.  The
@@ -219,10 +203,14 @@ namespace p2psp {
       TRACE(std::to_string(chunk_number));
     }
     played_chunk_ = chunk_number;
-    TRACE("First chunk to play " << std::to_string(played_chunk_));
-    TRACE("(" << team_socket_.local_endpoint().address().to_string() << ","
-          << std::to_string(team_socket_.local_endpoint().port()) << ")"
-          << "\b: buffering (\b" << std::to_string(100.0 / buffer_size_));
+    TRACE("First chunk to play "
+	  << std::to_string(played_chunk_));
+    TRACE("("
+	  << team_socket_.local_endpoint().address().to_string()
+	  << ","
+          << std::to_string(team_socket_.local_endpoint().port())
+	  << ")"
+          << "\n: buffering (\b" << std::to_string(100.0 / buffer_size_));
     // TODO: Justify: .rjust(4)
 
     // Now, fill up to the half of the buffer.
@@ -302,6 +290,57 @@ namespace p2psp {
     // }}}
   }
 
+#ifdef _2_  
+  void Peer_core::ReceiveChannel() {
+    //boost::array<char, 80> buffer;
+    
+    //boost::system::error_code error;
+    splitter_socket_.receive(boost::asio::buffer(channel_)/*, error*/);
+
+    //channel_ = std::string(buffer);
+    
+    /*if (error == boost::asio::error::eof)
+      break; // Connection closed cleanly by peer.
+    else if (error)
+    throw boost::system::system_error(error); // Some other error.*/
+
+    /*char message[80];
+    read(splitter_socket_, ::buffer(message));
+    return std::string(inet_ntoa(message));*/
+    
+  }
+#endif
+  /*void Peer_core::ReceiveSourceEndpoint() {
+    // {{{
+
+    boost::array<char, 6> buffer;
+    read(splitter_socket_, ::buffer(buffer));
+
+    char *raw_data = buffer.data();
+
+    in_addr ip_raw = *(in_addr *)(raw_data);
+    source_addr_ = ip::address::from_string(inet_ntoa(ip_raw));
+    source_port_ = ntohs(*(short *)(raw_data + 4));
+
+    TRACE("source_endpoint = ("
+	  << source_addr_.to_string()
+	  << ","
+          << std::to_string(source_port_)
+	  << ")");
+
+    // }}}
+  }*/
+  
+  /*void Peer_core::ReceiveHeaderLength() {
+    boost::array<char, 2> buffer;
+    read(splitter_socket_, ::buffer(buffer));
+    
+    header_length_ = ntohs(*(short *)(buffer.c_array()));
+
+    TRACE("header_length (in bytes) = "
+	  << std::to_string(header_length_));
+	  }*/
+  
   void Peer_core::KeepTheBufferFull() {
     // {{{
 
@@ -366,15 +405,17 @@ namespace p2psp {
     //}*/
     
     for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
-      if (chunks_[chunk_number % buffer_size_].received == true){
+      if (chunks_[chunk_number % buffer_size_].received == true) {
 	//PlayChunk(played_chunk_);
 	player_alive_ = PlayChunk(chunks_[played_chunk_ % buffer_size_].data);
 	chunks_[played_chunk_ % buffer_size_].received = false;
 	received_counter_--;
-	LOG("Chunk Consumed at:" << played_chunk_ % buffer_size_)
-	  }else{
-	LOG("Chunk lost at: " << played_chunk_ % buffer_size_)
-	  }
+	LOG("Chunk Consumed at:"
+	    << played_chunk_ % buffer_size_);
+      } else {
+	LOG("Chunk lost at: "
+	    << played_chunk_ % buffer_size_);
+      }
       
       played_chunk_++;
     }
@@ -466,6 +507,14 @@ namespace p2psp {
     // }}}
   }
 
+  std::string Peer_core::GetSourceAddr() {
+    return source_addr_.to_string();
+  }
+
+  uint16_t Peer_core::GetSourcePort() {
+    return source_port_;
+  }
+  
   int Peer_core::GetSendtoCounter() {
     // {{{
 
@@ -567,24 +616,7 @@ namespace p2psp {
     // }}}
   }
 
-  ip::address Peer_core::GetMcastAddr() {
-    // {{{
-
-    //return mcast_addr_.to_string();
-    return mcast_addr_;
-
-    // }}}
-  }
-
-  uint16_t Peer_core::GetMcastPort() {
-    // {{{
-
-    return mcast_port_;
-
-    // }}}
-  }
-
-  void Peer_core::ReceiveMagicFlags() {
+  /*void Peer_core::ReceiveMagicFlags() {
     // {{{
 
     std::vector<char> magic_flags(1);
@@ -593,10 +625,10 @@ namespace p2psp {
 	  << std::bitset<8>(magic_flags[0]));
 
     // }}}
- }
+    }
 
   char Peer_core::GetMagicFlags() {
     return magic_flags_;
-  }
+    }*/
 
 }

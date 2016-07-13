@@ -15,7 +15,6 @@ namespace p2psp {
     // {{{
 
     max_chunk_debt_ = kMaxChunkDebt;
-    magic_flags_ = Common::kDBS;
     ready_to_leave_the_team_ = false;
       
     // }}}
@@ -26,7 +25,9 @@ namespace p2psp {
   void Peer_DBS::Init() {
     // {{{
 
-    TRACE("max_chunk_debt =" + std::to_string(kMaxChunkDebt));
+    //TRACE("max_chunk_debt = " + std::to_string(kMaxChunkDebt));
+    TRACE("max_chunk_debt = "
+	  << max_chunk_debt_);
     TRACE("Initialized");
 
     // }}}
@@ -48,6 +49,7 @@ namespace p2psp {
     return kTeamPort;
     }*/
 
+  // Unused in this layer!
   void Peer_DBS::ReceiveMyEndpoint() {
     boost::array<char, 6> buffer;
     char *raw_data = buffer.data();
@@ -62,8 +64,11 @@ namespace p2psp {
 
     me_ = ip::udp::endpoint(ip_addr, port);
 
-    TRACE("me = (" << me_.address().to_string() << ","
-          << std::to_string(me_.port()) << ")");
+    TRACE("me = ("
+	  << me_.address().to_string()
+	  << ","
+          << std::to_string(me_.port())
+	  << ")");
   }
 
   void Peer_DBS::SayHello(const ip::udp::endpoint &node) {
@@ -74,8 +79,10 @@ namespace p2psp {
     team_socket_.send_to(buffer(hello), node);
 
     TRACE("[Hello] sent to "
-          << "(" << node.address().to_string() << ","
-          << std::to_string(node.port()) << ")");
+          << "(" << node.address().to_string()
+	  << ","
+          << std::to_string(node.port())
+	  << ")");
 
     // }}}
   }
@@ -122,10 +129,12 @@ namespace p2psp {
 	  << ","
           << std::to_string(splitter_socket_.remote_endpoint().port())
 	  << ")");
+
     read(splitter_socket_, ::buffer(buffer));
     number_of_monitors_ = ntohs(*(short *)(buffer.c_array()));
     TRACE("The number of monitors is "
 	  << number_of_monitors_);
+    
     read(splitter_socket_, ::buffer(buffer));
     number_of_peers_ = ntohs(*(short *)(buffer.c_array()));
     TRACE("The size of the team is "
@@ -144,6 +153,8 @@ namespace p2psp {
     ip::udp::endpoint peer;
     int port;
 
+    ReceiveTheNumberOfPeers();
+    
     // sys.stdout.write(Color.green)
     TRACE("Requesting"
 	  << number_of_peers_
@@ -435,7 +446,7 @@ namespace p2psp {
 
     // }}}
   }
-  
+
   float Peer_DBS::CalcBufferCorrectness() {
     // {{{
 
@@ -538,7 +549,7 @@ namespace p2psp {
 
     waiting_for_goodbye_ = true;
 
-    Peer_DBS::BufferData();
+    Peer_core::BufferData();
 
     // }}}
   }

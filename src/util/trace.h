@@ -1,9 +1,9 @@
 //
 //  trace.h
-//  P2PSP
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+//
 //  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
 //
@@ -72,8 +72,9 @@ namespace p2psp
 
 #ifndef TRACE_SILENT_MODE
 
-#ifndef NDEBUG
-/*
+//#ifndef NDEBUG
+#ifdef __DEBUG__
+
 #define LOG(a)  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) << a; }
 
 #define LOGC(c, a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) << _SET_COLOR(c) << a << _RESET_COLOR(); }
@@ -85,14 +86,15 @@ namespace p2psp
 #define DEBUG(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::debug) << __FILE__ << ":" << __LINE__ << ": DEBUG: " << a; }
 
 #define TRACE(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::trace) << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a << _RESET_COLOR(); }
-*/
 
+/*
 #define LOG(a)      {std::cout << a << std::endl;}
 #define LOGC(c, a)  {std::cout << a << std::endl;}
 #define WARNING(a)  {std::cout << a << std::endl;}
 #define DEBUG(a)    {std::cout << a << std::endl;}
 #define TRACE(a)    {struct timeval tp;gettimeofday(&tp, NULL);long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;std::cout << ms << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a  << _RESET_COLOR() << std::endl;}
 #define ERROR(a)    {std::cout << a << std::endl;}
+*/
 
 #else
 

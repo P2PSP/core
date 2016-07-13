@@ -1,5 +1,5 @@
 //
-//  peer_core.h - P2PSP's core definition
+//  peer_core.h - P2PSP's peer core definition
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
@@ -54,7 +54,6 @@ namespace p2psp {
     unsigned int message_size_;
     int chunk_size_;
     std::vector<Chunk> chunks_;
-    ip::address mcast_addr_;  // Used to determine if IMS or rest
     int played_chunk_;
     bool player_alive_;
     int received_counter_;
@@ -72,9 +71,12 @@ namespace p2psp {
     bool logging_;
     std::ofstream log_file_;
     ip::udp::endpoint me_;
-    uint16_t mcast_port_;
-    char magic_flags_;
-
+    //char magic_flags_;
+    ip::address source_addr_;
+    uint16_t source_port_;
+    //int header_length_;
+    //boost::array<char, 80> channel_;
+      
   public:
 
     Peer_core();
@@ -90,15 +92,17 @@ namespace p2psp {
     virtual uint16_t    GetSplitterPort();
     virtual void        ConnectToTheSplitter() throw(boost::system::system_error);
     virtual void        DisconnectFromTheSplitter(void);
-
+    std::string GetSourceAddr();
+    uint16_t GetSourcePort();
     static uint16_t GetDefaultTeamPort();
     virtual void    SetTeamPort(uint16_t);
     //virtual uint16_t GetTeamPort();
 
-    /*virtual void ReceiveHeaderSize(void);
-    virtual void ReceiveHeader(void);
+    //virtual void ReceiveHeaderLength(void);
+    /*virtual void ReceiveHeader(void);
     virtual int  GetHeaderSize();*/
 
+    //void ReceiveChannel();
     virtual void ReceiveChunkSize(void);
     virtual int GetChunkSize();
 
@@ -107,12 +111,8 @@ namespace p2psp {
 
     virtual void ReceiveNextMessage(std::vector<char>& message, ip::udp::endpoint& sender);
 
-    virtual void        ReceiveMcastGroup();
-    virtual ip::address GetMcastAddr();
-    virtual uint16_t    GetMcastPort();
-
-    virtual void ReceiveMagicFlags(void);
-    virtual char GetMagicFlags();
+    /*virtual void ReceiveMagicFlags(void);
+      virtual char GetMagicFlags();*/
 
     virtual int  ProcessNextMessage();
     virtual int  ProcessMessage(const std::vector<char>&,
@@ -138,6 +138,7 @@ namespace p2psp {
     virtual void SetUseLocalHost(bool);
     bool GetUseLocalHost();
     int GetNumberOfPeers() { return 0; }
+    //void  ReceiveSourceEndpoint();
     // bool AmIAMonitor() { return false; }
     //void ReceiveTheListOfPeers() {}
     
