@@ -344,7 +344,6 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 
 				if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) != trusted_peers_.end()) {
 					LOG("Complaint about bad peer from " << sender.address().to_string() << ":" << sender.port());
-					trusted_peers_discovered_.push_back(sender);
 					ProcessBadPeersMessage(message, sender);
 				}
 			}
@@ -404,12 +403,15 @@ void SplitterSTRPEDS::ProcessBadPeersMessage(const std::vector<char> &message,
 void SplitterSTRPEDS::HandleBadPeerFromTrusted(
 		const boost::asio::ip::udp::endpoint &bad_peer,
 		const boost::asio::ip::udp::endpoint &sender) {
+  if (std::find(peer_list_.begin(), peer_list_.end(), bad_peer) == peer_list_.end()) {
 	AddComplain(bad_peer, sender);
-	if (std::find(bad_peers_.begin(), bad_peers_.end(), bad_peer) ==
-	      bad_peers_.end()) {
+	if (std::find(bad_peers_.begin(), bad_peers_.end(), bad_peer) == bad_peers_.end()) {
 		bad_peers_.push_back(bad_peer);
+		trusted_peers_discovered_.push_back(sender);
+		LOG("TP discovered" << sender);
 	}
 	//PunishPeer(bad_peer, "by trusted");
+  }
 }
 
 void SplitterSTRPEDS::HandleBadPeerFromRegular(
