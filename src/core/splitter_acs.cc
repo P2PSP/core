@@ -18,10 +18,10 @@ namespace p2psp {
   using namespace boost;
 
   Splitter_ACS::Splitter_ACS()
-    : SplitterDBS(),
-      period_(0, &SplitterDBS::GetHash),
-      period_counter_(0, &SplitterACS::GetHash),
-      number_of_sent_chunks_per_peer_(0, &SplitterACS::GetHash) {
+    : Splitter_DBS(),
+      period_(0, &Splitter_DBS::GetHash),
+      period_counter_(0, &Splitter_ACS::GetHash),
+      number_of_sent_chunks_per_peer_(0, &Splitter_ACS::GetHash) {
     //magic_flags_ = Common::kACS;
     TRACE("Initialized ACS");
   }
@@ -37,8 +37,8 @@ namespace p2psp {
     TRACE("Inserted " << peer);
   }
 
-  void SplitterACS::IncrementUnsupportivityOfPeer(const boost::asio::ip::udp::endpoint &peer) {
-    Splitter_DBS::IncrementUnsupportivityOfPeer(peer);
+  void Splitter_ACS::IncrementPeerUnsupportivity(const boost::asio::ip::udp::endpoint &peer) {
+    Splitter_DBS::IncrementPeerUnsupportivity(peer);
     try {
       if (peer != peer_list_[0]) {
 	period_[peer] += 1;
@@ -100,7 +100,7 @@ namespace p2psp {
     return number_of_sent_chunks_per_peer_[peer];
   }
 
-  void SplitterACS::SetNumberOfSentChunksPerPeer(const boost::asio::ip::udp::endpoint &peer, int number_of_sent_chunks) {
+  void Splitter_ACS::SetNumberOfSentChunksPerPeer(const boost::asio::ip::udp::endpoint &peer, int number_of_sent_chunks) {
     number_of_sent_chunks_per_peer_[peer] = number_of_sent_chunks;
   }
 }

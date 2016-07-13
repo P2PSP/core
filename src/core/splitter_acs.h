@@ -36,7 +36,7 @@ namespace p2psp {
     Splitter_ACS();
     ~Splitter_ACS();
     void InsertPeer(const boost::asio::ip::udp::endpoint &peer) override;
-    void IncrementUnsupportivityOfPeer(const boost::asio::ip::udp::endpoint &peer) override;
+    void IncrementPeerUnsupportivity(const boost::asio::ip::udp::endpoint &peer) override;
     void RemovePeer(const boost::asio::ip::udp::endpoint &peer) override;
     void ResetCounters() override;
     virtual void SendChunk(const std::vector<char> &message,
