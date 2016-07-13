@@ -252,7 +252,6 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 		size_t bytes_transferred = ReceiveMessage(message, sender);
 
 		if (bytes_transferred == 2) {
-<<<<<<< HEAD
 			/*
 			 The peer complains about a lost chunk.
 
@@ -267,25 +266,6 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 				uint16_t lost_chunk_number = GetLostChunkNumber(message);
 				ProcessLostChunk(lost_chunk_number, sender);
 			}
-=======
-		  /*
-		    The peer complains about a lost chunk.
-
-		    In this situation, the splitter counts the number of
-		    complains. If this number exceeds a threshold, the
-		    unsupportive peer is expelled from the
-		    team.
-		  */
-		  if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) != trusted_peers_.end()) {
-		    //uint16_t lost_chunk_number = GetLostChunkNumber(message);
-		    //asio::ip::udp::endpoint bad_peer = GetLosser(lost_chunk_number);
-		    //HandleBadPeerFromTrusted(bad_peer, sender);
-		    //LOG("Complaint from TP (" << sender.port() <<") about lost chunk " << lost_chunk_number << " by " << bad_peer.port());
-		    uint16_t lost_chunk_number = GetLostChunkNumber(message);
-		    //trusted_peers_discovered_.push_back(sender);
-		    ProcessLostChunk(lost_chunk_number, sender);
-		  }
->>>>>>> 9e5f6a2e711f01933933dc3985e0259c24f26e61
 
 		} else {
 			/*
@@ -424,11 +404,8 @@ void SplitterSTRPEDS::OnRoundBeginning(){
 	RefreshTPs();
 	PunishPeers();
 	PunishTPs();
-<<<<<<< HEAD
 	RunTMS();
-=======
 	GatherBadPeers();
->>>>>>> 9e5f6a2e711f01933933dc3985e0259c24f26e61
 }
 
 void SplitterSTRPEDS::RefreshTPs(){
