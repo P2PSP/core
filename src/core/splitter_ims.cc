@@ -1,5 +1,5 @@
 //
-//  splitter_ims.cc -- IMS splitter implementation.
+//  splitter_ims.cc -- Ip Multicast Set of rules
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).

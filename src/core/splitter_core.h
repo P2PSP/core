@@ -1,5 +1,5 @@
 //
-//  splitter_core.h -- Core definition
+//  splitter_core.h -- Core
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).

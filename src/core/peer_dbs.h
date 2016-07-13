@@ -1,5 +1,5 @@
 //
-//  peer_dbs.h - Data Broadcasting Set of rules definition.
+//  peer_dbs.h - Data Broadcasting Set of rules.
 //
 //  This code is distributed under the GNU General Public License (see
 //  the THE_GENERAL_GNU_PUBLIC_LICENSE.txt file for extending this

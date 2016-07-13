@@ -1,5 +1,5 @@
 //
-//  splitter_dbs.h -- DBS definition
+//  splitter_dbs.h -- Data Broadcasting Set of rules
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).

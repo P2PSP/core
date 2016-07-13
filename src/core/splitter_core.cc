@@ -1,5 +1,5 @@
 //
-//  splitter_core.cc -- Core splitter implementation.
+//  splitter_core.cc -- Core
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
