@@ -21,7 +21,7 @@ namespace p2psp {
     ~Monitor_DBS();
     virtual void Init() override;
     virtual void Complain(uint16_t);
-    virtual int FindNextChunk() override;
+    //virtual int FindNextChunk() override;
     virtual void PlayNextChunk(int chunk_number) override;
   };
 }

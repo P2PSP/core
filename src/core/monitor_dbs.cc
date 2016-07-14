@@ -30,7 +30,7 @@ namespace p2psp {
 	  << std::to_string(chunk_number));
   };
 
-  int Monitor_DBS::FindNextChunk() {
+  /*int Monitor_DBS::FindNextChunk() {
     uint16_t chunk_number = (played_chunk_ + 1) % Common::kMaxChunkNumber;
 
     while (!chunks_[chunk_number % buffer_size_].received) {
@@ -38,7 +38,7 @@ namespace p2psp {
       chunk_number = (chunk_number + 1) % Common::kMaxChunkNumber;
     }
     return chunk_number;
-  }
+    }*/
 
   void Monitor_DBS::PlayNextChunk(int chunk_number) {
     for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
