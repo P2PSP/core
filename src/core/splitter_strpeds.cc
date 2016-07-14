@@ -268,20 +268,18 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 			}
 
 		} else {
-			/*
-			 The peer wants to leave the team.
 
-			 A !2-length payload means that the peer wants to go
-			 away.
-			 */
-
+			// 'B'ad peer
 			if (message.at(0) == 'B'){
 				LOG("Bad complaint received");
 
 				if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) != trusted_peers_.end()) {
-					LOG("Complaint about bad peer from " << sender.address().to_string() << ":" << sender.port());
-					ProcessBadPeersMessage(message, sender);
+					LOG("Complaint about bad peer from " << sender.address().to_string() << ":" << sender.port() << " (TP)");
+				} else {
+					LOG("Complaint about bad peer from " << sender.address().to_string() << ":" << sender.port() << " (WIP)");
 				}
+
+				ProcessBadPeersMessage(message, sender);
 			}
 
 			// 'G'oodbye
@@ -296,19 +294,20 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 	LOG("Exiting moderate the team");
 }
 
-void SplitterSTRPEDS::ProcessBadPeersMessage(const std::vector<char> &message,
-		const boost::asio::ip::udp::endpoint &sender) {
+void SplitterSTRPEDS::ProcessBadPeersMessage(
+	const std::vector<char> &message,
+	const boost::asio::ip::udp::endpoint &sender) {
 
 	std::string bad("B");
 	boost::asio::ip::udp::endpoint bad_peer;
 
 	boost::asio::ip::address ip_addr;
-    uint16_t port;
+  uint16_t port;
 
 	uint16_t bad_number = ntohs(*(uint16_t *) (message.data() + bad.size()));
 
-	 std::string s(message.begin(), message.end());
-	  LOG("Message List: " << s);
+	std::string s(message.begin(), message.end());
+	LOG("Message List: " << s);
 
 	LOG("Number of BAD: "+ std::to_string(bad_number));
 
@@ -340,24 +339,20 @@ void SplitterSTRPEDS::HandleBadPeerFromTrusted(
 		const boost::asio::ip::udp::endpoint &bad_peer,
 		const boost::asio::ip::udp::endpoint &sender) {
   if (std::find(peer_list_.begin(), peer_list_.end(), bad_peer) == peer_list_.end()) {
-	AddComplain(bad_peer, sender);
-	if (std::find(bad_peers_.begin(), bad_peers_.end(), bad_peer) == bad_peers_.end()) {
-		bad_peers_.push_back(bad_peer);
-		trusted_peers_discovered_.push_back(sender);
-		LOG("TP discovered" << sender);
-	}
-	//PunishPeer(bad_peer, "by trusted");
+		AddComplain(bad_peer, sender);
+		if (std::find(bad_peers_.begin(), bad_peers_.end(), bad_peer) == bad_peers_.end()) {
+			bad_peers_.push_back(bad_peer);
+			trusted_peers_discovered_.push_back(sender);
+			LOG("TP discovered" << sender);
+		}
   }
 }
 
 void SplitterSTRPEDS::HandleBadPeerFromRegular(
 		const boost::asio::ip::udp::endpoint &bad_peer,
 		const boost::asio::ip::udp::endpoint &sender) {
-	AddComplain(bad_peer, sender);
-	int x = complains_[complains_map_[bad_peer]].size()
-			/ std::max(1, (int) (peer_list_.size() - 1));
-	if (x >= majority_ratio_) {
-		//PunishPeer(bad_peer, "by majority decision");
+	if (std::find(peer_list_.begin(), peer_list_.end(), bad_peer) == peer_list_.end()) {
+		AddComplain(bad_peer, sender);
 	}
 }
 
