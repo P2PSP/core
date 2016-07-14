@@ -101,5 +101,4 @@ namespace p2psp {
     // }}}
   }
 
-  //std::string Peer_IMS::GetMcastAddr() {
 }
