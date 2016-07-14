@@ -31,10 +31,9 @@ int MaliciousPeer::ProcessMessage(const std::vector<char> &message,
 
     uint16_t chunk_number = ntohs(*(short *)message.data());
 
-    chunks_[chunk_number % buffer_size_] = {
-        std::vector<char>(message.data() + sizeof(uint16_t),
-                          message.data() + message.size()),
-        true};
+    chunk_ptr[chunk_number % buffer_size_].data = std::vector<char>(message.data() + sizeof(uint16_t),
+                                                         message.data() + message.size());
+    chunk_ptr[chunk_number % buffer_size_].received = chunk_number;
 
     received_counter_++;
 

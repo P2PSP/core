@@ -61,6 +61,7 @@ namespace p2psp {
     unsigned int message_size_;
     int chunk_size_;
     std::vector<Chunk> chunks_;
+    Chunk *chunk_ptr;
     int header_size_in_chunks_;
     ip::address mcast_addr_;
     uint16_t mcast_port_;
@@ -127,7 +128,6 @@ namespace p2psp {
     virtual void PlayChunk(int);
     virtual void PlayNextChunk(int chunk_number);
     virtual void KeepTheBufferFull();
-    virtual void SendEmptyChunk();
 
     /**
      *  Thread management

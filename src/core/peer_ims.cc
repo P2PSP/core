@@ -239,7 +239,11 @@ namespace p2psp {
     // ratio. However, for the sake of simpliticy, all peers will use
     // the same buffer size.
 
-    chunks_.resize(buffer_size_);
+
+    chunks_.resize(buffer_size_+1);
+    chunk_ptr = &chunks_[1];
+    chunks_[0].data=std::vector<char>(chunk_size_,0);
+    //chunks_[0] will store an empty chunk.
     received_counter_ = 0;
 
     // Wall time (execution time plus waiting time).
@@ -350,10 +354,9 @@ namespace p2psp {
 
     uint16_t chunk_number = ntohs(*(short *)message.data());
 
-    chunks_[chunk_number % buffer_size_] = {
-      std::vector<char>(message.data() + sizeof(uint16_t),
-                        message.data() + message.size()),
-      chunk_number};
+    chunk_ptr[chunk_number % buffer_size_].data = std::vector<char>(message.data() + sizeof(uint16_t),
+                                                     message.data() + message.size());
+    chunk_ptr[chunk_number % buffer_size_].received = chunk_number;
 
     received_counter_++;
 
@@ -388,7 +391,7 @@ namespace p2psp {
     std::string bf="";
     if (show_buffer_) {
       for (int i = 0; i<buffer_size_; i++) {
-        if (chunks_[i].received) {
+        if (chunk_ptr[i].received>0) {
           // TODO: Avoid line feed in LOG function
           //TRACE(std::to_string(i % 10));
         	bf=bf+"1";
@@ -419,29 +422,24 @@ namespace p2psp {
 
 
   for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
-	    if (chunks_[chunk_number % buffer_size_].received){
+	    /*if (chunks_[chunk_number % buffer_size_].received){
 	    	PlayChunk(played_chunk_);
 			chunks_[played_chunk_ % buffer_size_].received = -1;
 			received_counter_--;
 			LOG("Chunk Consumed at:" << played_chunk_ % buffer_size_)
 	    }else{
 	    	LOG("Chunk lost at: " << played_chunk_ % buffer_size_)
-	    	SendEmptyChunk();
-	    }
+	    }*/
+      PlayChunk(chunk_ptr[played_chunk_ % buffer_size_].received);
+      LOG("Chunk "<<chunk_ptr[played_chunk_ % buffer_size_].received<<" consumed at :"<<played_chunk_ % buffer_size_);
+      chunk_ptr[played_chunk_ % buffer_size_].received=-1;
 
 		played_chunk_++;
 	}
 
 	if ((latest_chunk_number_ % Common::kMaxChunkNumber) < chunk_number)
 			latest_chunk_number_=chunk_number;
-  }
-  void PeerIMS::SendEmptyChunk() {
-  try{
-  write(player_socket_, buffer(std::vector<char>(chunk_size_,0)));
-  }
-  catch(std::exception e)
-  {}
-  }
+}
   // Tiene pinta de que los tres siguientes metodos pueden simplificarse...
   int PeerIMS::FindNextChunk() {
     // print (".")
@@ -449,7 +447,7 @@ namespace p2psp {
 
     int chunk_number = (played_chunk_ + 1) % Common::kMaxChunkNumber;
 
-    while (!chunks_[chunk_number % buffer_size_].received) {
+    while (!chunk_ptr[chunk_number % buffer_size_].received) {
       // sys.stdout.write(Color.cyan)
       TRACE("lost chunk " << std::to_string(chunk_number));
       PlayChunk(-1);
@@ -466,7 +464,7 @@ namespace p2psp {
   void PeerIMS::PlayChunk(int chunk) {
 #ifdef _1_
     try {
-      write(player_socket_, buffer(chunks_[chunk % buffer_size_].data));
+      write(player_socket_, buffer(chunk_ptr[chunk % buffer_size_].data));
       }
       catch (std::exception e) {
       TRACE("Player disconnected!");
@@ -504,7 +502,7 @@ namespace p2psp {
     return magic_flags_;
   }
   */
-  
+
   //std::string PeerIMS::GetMcastAddr() {
   ip::address PeerIMS::GetMcastAddr() {
     //return mcast_addr_.to_string();
