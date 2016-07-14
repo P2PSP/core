@@ -82,7 +82,7 @@ namespace p2psp {
     Peer_core();
     ~Peer_core();
 
-    virtual void Init(void);
+    virtual void Init();
 
     virtual void        SetSplitterAddr(ip::address splitter_addr);
     virtual ip::address GetSplitterAddr();
