@@ -143,6 +143,7 @@ namespace p2psp {
     //void ReceiveTheListOfPeers() {}
     
     //static uint16_t GetDefaultPlayerPort();
+    virtual void Complain(unsigned short);
 
   };
 }

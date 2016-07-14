@@ -19,17 +19,19 @@ namespace p2psp {
 
   void Monitor_DBS::Init() { TRACE("Initialized"); }
 
-  void Monitor_DBS::Complain(uint16_t chunk_number) {
+  void Monitor_DBS::Complain(uint16_t chunk_position) {
     std::vector<char> message(2);
-    uint16_t chunk_number_network = htons(chunk_number);
+    uint16_t chunk_number_network = htons(chunk_position);
     std::memcpy(message.data(), &chunk_number_network, sizeof(uint16_t));
 
     team_socket_.send_to(buffer(message), splitter_);
 
     TRACE("lost chunk:"
-	  << std::to_string(chunk_number));
+	  << std::to_string(chunk_position));
   };
 
+#ifdef _1_
+  
   /*int Monitor_DBS::FindNextChunk() {
     uint16_t chunk_number = (played_chunk_ + 1) % Common::kMaxChunkNumber;
 
@@ -61,4 +63,7 @@ namespace p2psp {
     if ((latest_chunk_number_ % Common::kMaxChunkNumber) < chunk_number)
       latest_chunk_number_ = chunk_number;
   }
+
+#endif
+  
 }

@@ -391,18 +391,6 @@ namespace p2psp {
   
   void Peer_core::PlayNextChunk(int chunk_number) {
     // {{{
-
-    /*played_chunk_ = FindNextChunk();
-      
-    //played_chunk_++;
-    //if (chunks_[played_chunk_ % buffer_size_].received){
-    PlayChunk(played_chunk_);
-    chunks_[played_chunk_ % buffer_size_].received = false;
-    received_counter_--;
-    LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_)
-    //}else{
-    //TRACE("lost chunk " << std::to_string(played_chunk_));
-    //}*/
     
     for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
       if (chunks_[chunk_number % buffer_size_].received == true) {
@@ -413,6 +401,7 @@ namespace p2psp {
 	LOG("Chunk Consumed at:"
 	    << played_chunk_ % buffer_size_);
       } else {
+	Complain(chunk_number); // <- Monitor specific 
 	LOG("Chunk lost at: "
 	    << played_chunk_ % buffer_size_);
       }
@@ -615,6 +604,8 @@ namespace p2psp {
 
     // }}}
   }
+
+  void Peer_core::Complain(unsigned short x) {}
 
   /*void Peer_core::ReceiveMagicFlags() {
     // {{{

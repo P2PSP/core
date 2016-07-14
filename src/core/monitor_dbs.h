@@ -20,9 +20,9 @@ namespace p2psp {
     Monitor_DBS();
     ~Monitor_DBS();
     virtual void Init() override;
-    virtual void Complain(uint16_t);
+    virtual void Complain(unsigned short chunk_position /* in buffer */) override;
     //virtual int FindNextChunk() override;
-    virtual void PlayNextChunk(int chunk_number) override;
+    //virtual void PlayNextChunk(int chunk_number) override;
   };
 }
 

@@ -114,6 +114,7 @@ if(NOT BUILD_REDUCED_LIB)
     "src/core/splitter_ims.cc"
     "src/core/splitter_dbs.cc"
     "src/core/splitter_acs.cc"
+    "src/core/monitor_dbs.cc"
     "src/util/*.cc"
   )
 else()
@@ -125,7 +126,8 @@ else()
     "src/core/splitter_ims.cc"
     "src/core/splitter_dbs.cc"
     "src/core/splitter_acs.cc"
-    "src/util/*.cc"
+     "src/core/monitor_dbs.cc"
+   "src/util/*.cc"
   )
 endif()
 
