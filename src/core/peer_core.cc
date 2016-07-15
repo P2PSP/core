@@ -622,4 +622,8 @@ namespace p2psp {
     return magic_flags_;
     }*/
 
+  /*int Peer_core::GetNumberOfPeers() {
+    return 0;
+    }*/
+  
 }

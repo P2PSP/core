@@ -137,7 +137,7 @@ namespace p2psp {
     
     virtual void SetUseLocalHost(bool);
     bool GetUseLocalHost();
-    int GetNumberOfPeers() { return 0; }
+    //virtual int GetNumberOfPeers();// { return 0; }
     //void  ReceiveSourceEndpoint();
     // bool AmIAMonitor() { return false; }
     //void ReceiveTheListOfPeers() {}
