@@ -32,7 +32,7 @@ namespace p2psp {
 
   struct Chunk {
     std::vector<char> data;
-    bool received;
+    int received;
   };
 
   class PeerIMS {
@@ -61,6 +61,7 @@ namespace p2psp {
     unsigned int message_size_;
     int chunk_size_;
     std::vector<Chunk> chunks_;
+    Chunk *chunk_ptr;
     int header_size_in_chunks_;
     ip::address mcast_addr_;
     uint16_t mcast_port_;
