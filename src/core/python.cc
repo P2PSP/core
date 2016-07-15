@@ -134,13 +134,14 @@ public:
     return team_socket_.send_to(::buffer(msg), boost::asio::ip::udp::endpoint(address,port));
   }
 
-  
+
 
   void InsertChunk(int position, boost::python::object chunk){//boost::python::list chunk){
     boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
     boost::python::stl_input_iterator<unsigned char> begin(chunk), end;
     std::vector<char> chunk_(begin, end);
-    chunks_[position] = {chunk_, true};
+    chunk_ptr[position].data = chunk_;
+    chunk_ptr[position].received = position;
   }
 
   boost::python::object GetReceiveAndFeedPrevious(){
@@ -285,13 +286,13 @@ public:
     releaseGIL unlock;
     PeerSTRPEDS::Run();
   }
-  
+
   int ProcessMessage(const std::vector<char> &message, const ip::udp::endpoint &sender) {
     acquireGIL lock;
-    if (override ProcessMessage = get_override("ProcessMessage")){     
+    if (override ProcessMessage = get_override("ProcessMessage")){
       std::string address = sender.address().to_string();
       uint16_t port = sender.port();
-      
+
       boost::python::object memoryView(boost::python::handle<>(PyMemoryView_FromMemory((char*)message.data(), message.size(), PyBUF_READ)));
       return ProcessMessage(memoryView, boost::python::make_tuple(address, port));
     }
@@ -301,11 +302,11 @@ public:
   bool CheckMessage(boost::python::object message, boost::python::tuple peer) {
        ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
        uint16_t port = boost::python::extract<uint16_t>(peer[1]);
-       
+
        boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
        boost::python::stl_input_iterator<unsigned char> begin(message), end;
        std::vector<char> msg(begin, end);
-      
+
      return PeerSTRPEDS::CheckMessage(msg, boost::asio::ip::udp::endpoint(address,port));
   }
 
@@ -316,10 +317,10 @@ public:
     boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
     boost::python::stl_input_iterator<unsigned char> begin(message), end;
     std::vector<char> msg(begin, end);
-   
+
     PeerSTRPEDS::ProcessBadMessage(msg, boost::asio::ip::udp::endpoint(address,port));
   }
-  
+
   bool IsControlMessage(boost::python::object message){
     boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
     boost::python::stl_input_iterator<unsigned char> begin(message), end;
@@ -335,7 +336,7 @@ public:
     boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
     boost::python::stl_input_iterator<unsigned char> begin(message), end;
     std::vector<char> msg(begin, end);
-   
+
     return team_socket_.send_to(::buffer(msg), boost::asio::ip::udp::endpoint(address,port));
   }
   /*
@@ -358,12 +359,13 @@ public:
     boost::python::object locals(boost::python::borrowed(PyEval_GetLocals()));
     boost::python::stl_input_iterator<unsigned char> begin(chunk), end;
     std::vector<char> chunk_(begin, end);
-    chunks_[position] = {chunk_, true};
+    chunk_ptr[position].data = chunk_;
+    chunk_ptr[position].received = position;
   }
 
   boost::python::object GetReceiveAndFeedPrevious(){
      boost::python::object receive_and_fedd_previous(boost::python::handle<>(PyMemoryView_FromMemory((char*)receive_and_feed_previous_.data(), receive_and_feed_previous_.size(), PyBUF_READ)));
-    return receive_and_fedd_previous; 
+    return receive_and_fedd_previous;
   }
 
   void SetReceiveAndFeedPrevious(boost::python::object receive_and_fedd_previous){
@@ -436,7 +438,7 @@ public:
   std::string GetMcastAddr_(){
     return mcast_addr_.to_string();
   }
-  
+
   void SetMcastAddr_(std::string address){
     mcast_addr_ = ip::address::from_string(address);
   }
@@ -448,7 +450,7 @@ public:
   void SetRecvfromCounter(int recvfrom_counter){
     recvfrom_counter_ = recvfrom_counter;
   }
-  
+
   std::string GetSplitterAddr_(){
     return splitter_addr_.to_string();
   }
@@ -456,19 +458,19 @@ public:
   void SetSplitterAddr_(std::string address){
     splitter_addr_ = ip::address::from_string(address);
   }
-  
+
   uint16_t GetPlayerPort(){
     return player_port_;
   }
-  
+
   int GetMaxChunkDebt(){
 	  return max_chunk_debt_;
   }
-  
+
   bool GetUseLocalhost(){
     return use_localhost_;
   }
-  
+
   bool GetShowBuffer(){
     return show_buffer_;
   }
@@ -510,11 +512,11 @@ public:
   }
 };
 
-  
+
 //Splitter
 class PySplitterDBS: public SplitterDBS  {
 public:
-  
+
   list GetPeerList_() {
     list l;
     std::string address;
@@ -576,7 +578,7 @@ public:
     }
     return l;
   }
-  
+
   int GetLoss_(boost::python::tuple peer){
     ip::address address = boost::asio::ip::address::from_string(boost::python::extract<std::string>(peer[0]));
     uint16_t port = boost::python::extract<uint16_t>(peer[1]);
@@ -586,15 +588,15 @@ public:
   std::string GetChannel(){
     return channel_;
   }
-  
+
   std::string GetSourceAddr(){
     return source_addr_;
   }
-    
+
   int GetBufferSize(){
     return buffer_size_;
   }
-  
+
   int GetHeaderSize(){
     return header_size_;
   }
@@ -690,7 +692,7 @@ BOOST_PYTHON_MODULE(libp2psp)
 
 
   class_<PyPeerSTRPEDS, boost::noncopyable>("PeerSTRPEDS")
-    
+
     //variables
     .add_property("splitter_addr", &PyPeerSTRPEDS::GetSplitterAddr_, &PyPeerSTRPEDS::SetSplitterAddr_)
     .add_property("splitter_port", &PyPeerSTRPEDS::GetSplitterPort, &PyPeerSTRPEDS::SetSplitterPort)
@@ -709,13 +711,13 @@ BOOST_PYTHON_MODULE(libp2psp)
     .add_property("sendto_counter", &PyPeerSTRPEDS::GetSendtoCounter, &PyPeerSTRPEDS::SetSendtoCounter)
     .add_property("recvfrom_counter", &PyPeerSTRPEDS::GetRecvfromCounter, &PyPeerSTRPEDS::SetRecvfromCounter)
 	.add_property("current_round", &PyPeerSTRPEDS::GetCurrentRound, &PyPeerSTRPEDS::SetCurrentRound)
-    
+
     //IMS
     .def("Init", &PeerSTRPEDS::Init) //used
     .def("WaitForThePlayer", &PeerSTRPEDS::WaitForThePlayer)
     .def("ConnectToTheSplitter", &PeerSTRPEDS::ConnectToTheSplitter)
     .def("DisconnectFromTheSplitter", &PeerSTRPEDS::DisconnectFromTheSplitter)
-    .def("ReceiveTheMcastEndpoint", &PeerSTRPEDS::ReceiveTheMcastEndpoint) 
+    .def("ReceiveTheMcastEndpoint", &PeerSTRPEDS::ReceiveTheMcastEndpoint)
     .def("ReceiveTheHeader", &PeerSTRPEDS::ReceiveTheHeader)
     .def("ReceiveTheChunkSize", &PeerSTRPEDS::ReceiveTheChunkSize)
     .def("ReceiveTheHeaderSize", &PeerSTRPEDS::ReceiveTheHeaderSize)
@@ -733,7 +735,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("IsPlayerAlive", &PeerSTRPEDS::IsPlayerAlive)
     .def("GetPlayedChunk", &PeerSTRPEDS::GetPlayedChunk)
     .def("GetPeerList", &PyPeerSTRPEDS::GetPeerList_) //Modified here
-    
+
     //DBS
     .def("SayHello", &PyPeerSTRPEDS::SayHello)
     .def("SayGoodbye", &PyPeerSTRPEDS::SayGoodbye)
@@ -757,12 +759,12 @@ BOOST_PYTHON_MODULE(libp2psp)
     .def("GetDebt", &PyPeerSTRPEDS::GetDebt)
     .def("RemoveDebt", &PyPeerSTRPEDS::RemoveDebt)
     .def("SetDebt", &PyPeerSTRPEDS::SetDebt)
-	 
+
     //Overrides
     .def("ProcessMessage", &PyPeerSTRPEDS::ProcessMessage)
     .def("SendChunk", &PyPeerSTRPEDS::SendChunk)
-    .def("InsertChunk", &PyPeerSTRPEDS::InsertChunk)    
-    
+    .def("InsertChunk", &PyPeerSTRPEDS::InsertChunk)
+
     //STRPEDS
     .def("ReceiveDsaKey", &PyPeerSTRPEDS::ReceiveDsaKey)
     .def("GetBadPeerList", &PyPeerSTRPEDS::GetBadPeerList)
@@ -777,7 +779,7 @@ BOOST_PYTHON_MODULE(libp2psp)
     //.def("SendFakeChunk", &PyPeerSTRPEDS::SendFakeChunk)
     ;
 
-   
+
 
   class_<PyMonitorDBS, boost::noncopyable>("MonitorDBS")
     //variables

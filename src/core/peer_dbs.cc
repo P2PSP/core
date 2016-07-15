@@ -210,6 +210,7 @@ namespace p2psp {
     team_socket_.set_option(socket_base::linger(true, 30));
 
     // }}}
+
   }
 
   int Peer_DBS::ProcessMessage(const std::vector<char> &message,
@@ -228,11 +229,15 @@ namespace p2psp {
 	ip::udp::endpoint peer;
 	
 	uint16_t chunk_number = ntohs(*(uint16_t *) message.data());
-	
-	chunks_[chunk_number % buffer_size_] = {
+
+	chunk_ptr[chunk_number % buffer_size_].data = std::vector<char>(message.data() + sizeof(uint16_t),
+									message.data() + message.size());
+	chunk_ptr[chunk_number % buffer_size_].received = chunk_number;
+
+	/*chunks_[chunk_number % buffer_size_] = {
 	  std::vector<char>(message.data() + sizeof(uint16_t),
 			    message.data() + sizeof(uint16_t) + chunk_size_),
-	  true};
+			    true};*/
 	
 	received_counter_++;
 	

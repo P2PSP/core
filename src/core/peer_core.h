@@ -31,7 +31,7 @@ namespace p2psp {
 
   struct Chunk {
     std::vector<char> data;
-    bool received;
+    int received;
   };
 
   class Peer_core {
@@ -76,7 +76,8 @@ namespace p2psp {
     uint16_t source_port_;
     //int header_length_;
     //boost::array<char, 80> channel_;
-      
+    Chunk *chunk_ptr;
+
   public:
 
     Peer_core();

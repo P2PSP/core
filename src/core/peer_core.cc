@@ -164,7 +164,11 @@ namespace p2psp {
     // ratio. However, for the sake of simpliticy, all peers will use
     // the same buffer size.
 
-    chunks_.resize(buffer_size_);
+    chunks_.resize(buffer_size_+1);
+    chunk_ptr = &chunks_[1];
+    chunks_[0].data=std::vector<char>(chunk_size_,0);
+    //chunks_[0] will store an empty chunk.
+    //chunks_.resize(buffer_size_);
     received_counter_ = 0;
 
     // Wall time (execution time plus waiting time).
@@ -369,7 +373,7 @@ namespace p2psp {
 #ifdef _SHOW_BUFFER_
     std::string bf="";
     for (int i = 0; i<buffer_size_; i++) {
-      if (chunks_[i].received) {
+      if (chunk_ptr[i].received) {
 	// TODO: Avoid line feed in LOG function
 	//TRACE(std::to_string(i % 10));
 	bf=bf+"1";
@@ -393,19 +397,9 @@ namespace p2psp {
     // {{{
     
     for (int i = 0; i < (chunk_number-latest_chunk_number_);i++) {
-      if (chunks_[chunk_number % buffer_size_].received == true) {
-	//PlayChunk(played_chunk_);
-	player_alive_ = PlayChunk(chunks_[played_chunk_ % buffer_size_].data);
-	chunks_[played_chunk_ % buffer_size_].received = false;
-	received_counter_--;
-	LOG("Chunk Consumed at:"
-	    << played_chunk_ % buffer_size_);
-      } else {
-	Complain(chunk_number); // <- Monitor specific 
-	LOG("Chunk lost at: "
-	    << played_chunk_ % buffer_size_);
-      }
-      
+      player_alive_ = PlayChunk(chunks_[chunk_ptr[played_chunk_ % buffer_size_].received].data);
+      LOG("Chunk "<<chunk_ptr[played_chunk_ % buffer_size_].received<<" consumed at :"<<played_chunk_ % buffer_size_);
+      chunk_ptr[played_chunk_ % buffer_size_].received = -1;
       played_chunk_++;
     }
     
