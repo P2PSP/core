@@ -351,9 +351,13 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 
 			// 'G'oodbye
 			if (message.at(0) == 'G') {
-			   if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) == trusted_peers_.end()) {
-				ProcessGoodbye(sender);
-			   }
+			  for (unsigned int i = 0; i<trusted_peers_.size(); i++) LOG(trusted_peers_[i]);
+			  if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) == trusted_peers_.end()) {
+			     LOG("Goodbye from WIP: " << sender);
+			     ProcessGoodbye(sender);
+			  }else{
+			     LOG("Goodbye from TP: " << sender); 
+			  }
 			}
 		}
 	}
@@ -472,23 +476,23 @@ void SplitterSTRPEDS::OnRoundBeginning(){
 
 void SplitterSTRPEDS::RefreshTPs(){
 
-	trusted_peers_.clear();
 	trusted_file_.open("trusted.txt");
 	if(trusted_file_.is_open()){
 		std::string str;
-		while (std::getline(trusted_file_, str))
-			{
-
-			  boost::char_separator<char> sep{":"};
-			  boost::tokenizer<boost::char_separator<char>> tok{str, sep};
-			  boost::tokenizer< boost::char_separator<char> >::iterator t = tok.begin();
-			  boost::asio::ip::address address = boost::asio::ip::address::from_string(*t);
-			  t++;
-			  uint16_t port = atoi((*t).c_str());
-			  //LOG("IP: " + address.to_string() + ":" + std::to_string(port));
-			  AddTrustedPeer(boost::asio::ip::udp::endpoint(address,port));
-
-			}
+		int index = 0;
+		while (std::getline(trusted_file_, str)){
+		  if (index >= (int) trusted_peers_.size()){
+		    boost::char_separator<char> sep{":"};
+		    boost::tokenizer<boost::char_separator<char>> tok{str, sep};
+		    boost::tokenizer< boost::char_separator<char> >::iterator t = tok.begin();
+		    boost::asio::ip::address address = boost::asio::ip::address::from_string(*t);
+		    t++;
+		    uint16_t port = atoi((*t).c_str());
+		    //LOG("IP: " + address.to_string() + ":" + std::to_string(port));
+		    AddTrustedPeer(boost::asio::ip::udp::endpoint(address,port));
+		  }
+		  index++;
+		}
 		TRACE("TP list updated. Size: " << trusted_peers_.size());
 		trusted_file_.close();
 	}else{
@@ -519,11 +523,11 @@ void SplitterSTRPEDS::PunishTPs(){
 				  //trusted_peers_discovered_.erase(remove(trusted_peers_discovered_.begin(), trusted_peers_discovered_.end(), trusted_peers_discovered_[i]),
 				  //trusted_peers_discovered_.end());
 				  ProcessGoodbye(trusted_peers_discovered_[i]);
-				  trusted_peers_discovered_.erase(remove(trusted_peers_discovered_.begin(), trusted_peers_discovered_.end(), trusted_peers_discovered_[i]), trusted_peers_discovered_.end());
 				  if (logging_) {
 				    LogMessage("bad peer " + trusted_peers_discovered_[i].address().to_string() + ":"+ to_string(trusted_peers_discovered_[i].port()) + "(by splitter)");
 				  }
 				  LOG("Peer: " << trusted_peers_discovered_[i] << " removed" << "(by splitter)");
+				  trusted_peers_discovered_.erase(remove(trusted_peers_discovered_.begin(), trusted_peers_discovered_.end(), trusted_peers_discovered_[i]), trusted_peers_discovered_.end());
 				}
 	}
 

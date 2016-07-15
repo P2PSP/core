@@ -17,6 +17,7 @@ void PeerStrpeDsMalicious::Init() {
 
 void PeerStrpeDsMalicious::FirstMainTarget(){
 	main_target_ = ChooseMainTarget();
+	LOG("MainTarget selected: " << main_target_);
 }
 
 boost::asio::ip::udp::endpoint PeerStrpeDsMalicious::ChooseMainTarget(){
@@ -80,8 +81,9 @@ boost::asio::ip::udp::endpoint PeerStrpeDsMalicious::ChooseMainTarget(){
 	}
 
 	std::ofstream attacked_ofile;
-	attacked_ofile.open ("attacked.txt");
+	attacked_ofile.open ("attacked.txt", std::ofstream::out | std::ofstream::app);
 	attacked_ofile << re.address().to_string() << ":" << re.port() << "\n";
+	attacked_ofile.flush();
 	attacked_ofile.close();
 
 	return re;
@@ -94,8 +96,9 @@ boost::asio::ip::udp::endpoint PeerStrpeDsMalicious::ChooseMainTarget(){
 	regular_peers_.clear();
 
 	std::ofstream regular_ofile;
-	regular_ofile.open ("regular.txt");
+	regular_ofile.open ("regular.txt", std::ofstream::out | std::ofstream::app);
 	regular_ofile << main_target_.address().to_string() << ":" << main_target_.port() << "\n";
+	regular_ofile.flush();
 	regular_ofile.close();
 
   }
