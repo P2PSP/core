@@ -198,6 +198,9 @@ namespace p2psp {
   void Peer_DBS::ListenToTheTeam() {
     // {{{
 
+    TRACE("splitter port = "
+	  << splitter_socket_.local_endpoint().port());
+    
     ip::udp::endpoint endpoint(ip::address_v4::any(),
                                splitter_socket_.local_endpoint().port());
 

@@ -41,6 +41,8 @@ namespace p2psp {
     sendto_counter_ = -1;
     received_flag_ = std::vector<bool>();
 
+    TRACE("Peer_core::Peer_core() executed");
+
     // }}}
   }
 
