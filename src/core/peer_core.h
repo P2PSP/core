@@ -35,8 +35,6 @@ namespace p2psp {
   };
 
   class Peer_core {
-  public:
-    ip::tcp::socket splitter_socket_;
 
   protected:
 
@@ -63,7 +61,7 @@ namespace p2psp {
     int recvfrom_counter_;
     ip::udp::endpoint splitter_;
     io_service io_service_;
-    //ip::tcp::socket splitter_socket_;
+    ip::tcp::socket splitter_socket_;
     ip::udp::socket team_socket_;
     boost::thread_group thread_group_;
     int previous_chunk_number_ = 0;
@@ -148,6 +146,10 @@ namespace p2psp {
     //static uint16_t GetDefaultPlayerPort();
     virtual void Complain(unsigned short);
 
+    unsigned int GetRealSplitterPort() {
+      return splitter_socket_.local_endpoint().port();
+    }
+    
   };
 }
 
