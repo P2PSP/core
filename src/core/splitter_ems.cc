@@ -139,6 +139,7 @@ namespace p2psp {
 
     boost::asio::ip::tcp::endpoint new_peer_tcp = serve_socket->remote_endpoint();
     boost::asio::ip::udp::endpoint new_peer(new_peer_tcp.address(), new_peer_tcp.port());
+
     LOG("Accepted connection from peer " << new_peer);
     boost::array<char, 6> buf;
     char *raw_data = buf.data();
