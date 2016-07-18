@@ -15,12 +15,12 @@ namespace p2psp {
   using namespace boost;
 
   const int Splitter_DBS::kMaxChunkLoss = 32;  // Chunk losses threshold to reject a peer from the team
-  const int Splitter_DBS::kMonitorsNumber = 1;
+  const int Splitter_DBS::kNumberOfMonitors = 1;
 
   Splitter_DBS::Splitter_DBS() : Splitter_core(), losses_(0, &Splitter_DBS::GetHash) {
     // TODO: Check if there is a better way to replace kMcastAddr with 0.0.0.0
     max_number_of_chunk_loss_ = kMaxChunkLoss;
-    monitors_number_ = kMonitorsNumber;
+    number_of_monitors_ = kNumberOfMonitors;
 
     peer_number_ = 0;
     destination_of_chunk_.reserve(buffer_size_);
@@ -36,8 +36,8 @@ namespace p2psp {
     char message[2];
 
     TRACE("Sending the number of monitors "
-	  << monitors_number_);
-    (*(uint16_t *)&message) = htons(monitors_number_);
+	  << number_of_monitors_);
+    (*(uint16_t *)&message) = htons(number_of_monitors_);
     peer_serve_socket->send(asio::buffer(message));
     
     TRACE("Sending a list of peers of size "
@@ -169,7 +169,7 @@ namespace p2psp {
 	  << " sent to "
 	  << destination);
 
-    if (find(peer_list_.begin() + monitors_number_, peer_list_.end(), destination) != peer_list_.end()) {
+    if (find(peer_list_.begin() + number_of_monitors_, peer_list_.end(), destination) != peer_list_.end()) {
       TRACE("Lost chunk index = "
 	    << lost_chunk_number);
     }
@@ -379,16 +379,16 @@ namespace p2psp {
     return kMaxChunkLoss;
   }
 
-  void Splitter_DBS::SetMonitorsNumber(int monitors_number) {
-    monitors_number_ = monitors_number;
+  void Splitter_DBS::SetNumberOfMonitors(int number_of_monitors) {
+    number_of_monitors_ = number_of_monitors;
   }
 
-  int Splitter_DBS::GetMonitorsNumber() {
-    return monitors_number_;
+  int Splitter_DBS::GetNumberOfMonitors() {
+    return number_of_monitors_;
   }
 
-  int Splitter_DBS::GetDefaultMonitorsNumber() {
-    return kMonitorsNumber;
+  int Splitter_DBS::GetDefaultNumberOfMonitors() {
+    return kNumberOfMonitors;
   }
 
   void Splitter_DBS::Start() {

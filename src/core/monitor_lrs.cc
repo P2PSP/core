@@ -16,7 +16,7 @@ namespace p2psp {
 
   void Monitor_LRS::Init() { TRACE("Initialized"); }
   
-  void Monitor_LRS::ReceiveTheBufferSize() {
+  void Monitor_LRS::ReceiveBufferSize() {
     boost::array<char, 2> buffer;
     read(splitter_socket_, ::buffer(buffer));
     

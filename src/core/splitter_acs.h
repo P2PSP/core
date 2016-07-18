@@ -15,7 +15,7 @@
 #include <boost/asio.hpp>
 #include <boost/unordered_map.hpp>
 #include "splitter_dbs.h"
-#include "common.h"
+//#include "common.h"
 
 namespace p2psp {
   class Splitter_ACS : public Splitter_DBS {

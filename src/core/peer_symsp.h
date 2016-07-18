@@ -20,23 +20,23 @@
 
 namespace p2psp {
 
-class PeerSYMSP : public PeerNTS {
- protected:
-  unsigned int port_step_;
-  std::list<boost::asio::ip::udp::endpoint> endpoints_;
-  std::mutex endpoints_mutex_;
+  class Peer_SYMSP : public Peer_NTS {
+  protected:
+    unsigned int port_step_;
+    std::list<boost::asio::ip::udp::endpoint> endpoints_;
+    std::mutex endpoints_mutex_;
 
-  virtual void SendMessage(std::string message,
-      boost::asio::ip::udp::endpoint endpoint) override;
+    virtual void SendMessage(std::string message,
+			     boost::asio::ip::udp::endpoint endpoint) override;
 
- public:
-  PeerSYMSP();
-  ~PeerSYMSP();
-  virtual void Init() override;
+  public:
+    Peer_SYMSP();
+    ~Peer_SYMSP();
+    virtual void Init() override;
 
-  unsigned int GetPortStep();
-  void SetPortStep(unsigned int port_step);
-};
+    unsigned int GetPortStep();
+    void SetPortStep(unsigned int port_step);
+  };
 }
 
 #endif  // P2PSP_CORE_PEER_SYMSP_H

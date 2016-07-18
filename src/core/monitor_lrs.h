@@ -23,15 +23,15 @@ namespace p2psp {
 
   using namespace boost::asio;
   
-  class Monitor_LRS : public MonitorDBS {
+  class Monitor_LRS : public Monitor_DBS {
   protected:
   public:
     Monitor_LRS(){
       //magic_flags_ = Common::kLRS;
     };
-  ~MonitorLRS(){};
+  ~Monitor_LRS(){};
   virtual void Init() override;
-  virtual void ReceiveTheBufferSize() override;
+  virtual void ReceiveBufferSize() override;
 };
 }
 

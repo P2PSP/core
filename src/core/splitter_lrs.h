@@ -20,22 +20,22 @@
 #include "common.h"
 
 namespace p2psp {
-class SplitterLRS : public SplitterACS {
- protected:
-  /* Massively lost chunks are retransmitted. So, the splitter
-   needs to remember the chunks sent recently. Buffer is A
-   circular array of messages (chunk_number, chunk) in network
-   endian format. */
-  std::vector<std::vector<char>> buffer_;
-
- public:
-  SplitterLRS();
-  ~SplitterLRS();
-  void ProcessLostChunk(int lost_chunk_number,
-                        const boost::asio::ip::udp::endpoint &sender) override;
-  void SendChunk(const std::vector<char> &message,
-                 const boost::asio::ip::udp::endpoint &destination) override;
-};
+  class Splitter_LRS : public Splitter_ACS {
+  protected:
+    /* Massively lost chunks are retransmitted. So, the splitter
+       needs to remember the chunks sent recently. Buffer is A
+       circular array of messages (chunk_number, chunk) in network
+       endian format. */
+    std::vector<std::vector<char>> buffer_;
+    
+  public:
+    Splitter_LRS();
+    ~Splitter_LRS();
+    void ProcessLostChunk(int lost_chunk_number,
+			  const boost::asio::ip::udp::endpoint &sender) override;
+    void SendChunk(const std::vector<char> &message,
+		   const boost::asio::ip::udp::endpoint &destination) override;
+  };
 }
 
 #endif  // defined P2PSP_CORE_SPLITTER_LRS_H_

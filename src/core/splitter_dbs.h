@@ -17,11 +17,11 @@ namespace p2psp {
   class Splitter_DBS : public Splitter_core {
   protected:
     static const int kMaxChunkLoss; // Chunk losses threshold to reject a peer from the team
-    static const int kMonitorsNumber;
+    static const int kNumberOfMonitors;
 
     int max_number_of_chunk_loss_;
     //int max_number_of_monitors_;
-    int monitors_number_;
+    int number_of_monitors_;
 
     int peer_number_;
 
@@ -81,16 +81,16 @@ namespace p2psp {
     // Getters
     std::vector<boost::asio::ip::udp::endpoint> GetPeerList();
     int GetMaxNumberOfChunkLoss();
-    int GetMonitorsNumber();
+    int GetNumberOfMonitors();
     int GetLoss(const boost::asio::ip::udp::endpoint &peer);
     //int GetSendToCounter();
 
     void SetMaxNumberOfChunkLoss(int max_number_of_chunk_loss);
-    void SetMonitorsNumber(int monitors_number);
+    void SetNumberOfMonitors(int number_of_monitors);
 
     // Default getters
     static int GetDefaultMaxNumberOfChunkLoss();
-    static int GetDefaultMonitorsNumber();
+    static int GetDefaultNumberOfMonitors();
   };
 }
 
