@@ -92,7 +92,7 @@ namespace p2psp {
     static  uint16_t    GetDefaultSplitterPort();
     virtual uint16_t    GetSplitterPort();
     virtual void        ConnectToTheSplitter() throw(boost::system::system_error);
-    virtual void        DisconnectFromTheSplitter(void);
+    virtual void        DisconnectFromTheSplitter();
     std::string GetSourceAddr();
     uint16_t GetSourcePort();
     static uint16_t GetDefaultTeamPort();
