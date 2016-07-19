@@ -93,8 +93,7 @@ boost::asio::ip::udp::endpoint PeerStrpeDsMalicious::ChooseMainTarget(){
 
   void PeerStrpeDsMalicious::AllAttack(){
 	TRACE("All Attack Mode");
-	regular_peers_.clear();
-
+	
 	std::ofstream regular_ofile;
 	regular_ofile.open ("regular.txt", std::ofstream::out | std::ofstream::app);
 	regular_ofile << main_target_.address().to_string() << ":" << main_target_.port() << "\n";
@@ -107,6 +106,7 @@ boost::asio::ip::udp::endpoint PeerStrpeDsMalicious::ChooseMainTarget(){
 	std::ifstream regular_file;
 	regular_file.open("regular.txt");
 	if(regular_file.is_open()){
+	        regular_peers_.clear();
 		std::string str;
 		while (std::getline(regular_file, str))
 		{
@@ -121,6 +121,7 @@ boost::asio::ip::udp::endpoint PeerStrpeDsMalicious::ChooseMainTarget(){
 
 			if (std::find(peer_list_.begin(), peer_list_.end(), boost::asio::ip::udp::endpoint(address,port)) != peer_list_.end()){
 				regular_peers_.push_back(boost::asio::ip::udp::endpoint(address,port));
+				TRACE("Added to regular: " << port);
 			}
 
 			if (regular_peers_.size() * 2 > peer_list_.size()){
@@ -183,14 +184,17 @@ void PeerStrpeDsMalicious::SendChunk(const ip::udp::endpoint &peer) {
 		  AllAttack();
 		  team_socket_.send_to(buffer(chunk), peer);
 		  sendto_counter_++;
+		  TRACE("Last MainTarget Attack: " << peer.address().to_string() << ":" << peer.port());
 		  main_target_ = ChooseMainTarget();
+		  TRACE("New MainTarget: " << main_target_.address().to_string() << ":" << main_target_.port());
 	  } else if (std::find(regular_peers_.begin(), regular_peers_.end(), peer) != regular_peers_.end()) {
 		  team_socket_.send_to(buffer(chunk), peer);
 		  sendto_counter_++;
-		  TRACE("AllAttackC attack: " << peer.address().to_string() << ":" << peer.port());
+		  TRACE("Regular list attack: " << peer.address().to_string() << ":" << peer.port());
 	  }else{
 		  team_socket_.send_to(buffer(receive_and_feed_previous_), peer);
 		  sendto_counter_++;
+		  TRACE("Size of Regular list: " << regular_peers_.size());
 		  TRACE("No attack");
 	  }
 
@@ -404,7 +408,7 @@ int PeerStrpeDsMalicious::ProcessMessage(const std::vector<char> &message,
 
   if (IsCurrentMessageFromSplitter() || CheckMessage(message, sender)) {
 
-	  if (IsCurrentMessageFromSplitter() and all_attack_c_){
+	  if (IsCurrentMessageFromSplitter()){
 		  RefreshRegularPeers();
 	  }
 
