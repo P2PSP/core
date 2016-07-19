@@ -97,7 +97,7 @@ namespace p2psp {
     uint16_t GetSourcePort();
     static uint16_t GetDefaultTeamPort();
     virtual void    SetTeamPort(uint16_t);
-    //virtual uint16_t GetTeamPort();
+    virtual uint16_t GetTeamPort();
 
     //virtual void ReceiveHeaderLength(void);
     /*virtual void ReceiveHeader(void);

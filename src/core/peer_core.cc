@@ -516,10 +516,14 @@ namespace p2psp {
     // }}}
   }
 
-    void Peer_core::SetTeamPort(uint16_t team_port) {
+  void Peer_core::SetTeamPort(uint16_t team_port) {
     team_port_ = team_port;
   }
 
+  uint16_t Peer_core::GetTeamPort() {
+    return team_port_;
+  }
+  
   //void Peer_core::SetSplitterAddr(std::string splitter_addr) {
   void Peer_core::SetSplitterAddr(ip::address splitter_addr) {
     // {{{
