@@ -190,12 +190,12 @@ void PeerStrpeDsMalicious::SendChunk(const ip::udp::endpoint &peer) {
 	  } else if (std::find(regular_peers_.begin(), regular_peers_.end(), peer) != regular_peers_.end()) {
 		  team_socket_.send_to(buffer(chunk), peer);
 		  sendto_counter_++;
-		  TRACE("Regular list attack: " << peer.address().to_string() << ":" << peer.port());
+		  TRACE("Regular List Attack: " << peer.address().to_string() << ":" << peer.port());
 	  }else{
 		  team_socket_.send_to(buffer(receive_and_feed_previous_), peer);
 		  sendto_counter_++;
-		  TRACE("Size of Regular list: " << regular_peers_.size());
-		  TRACE("No attack");
+		  TRACE("Size of Regular List: " << regular_peers_.size());
+		  TRACE("No Attack");
 	  }
 
     return;
