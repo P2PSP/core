@@ -157,8 +157,10 @@ namespace p2psp {
 
     this->number_of_peers_ = Common_NTS::Receive<uint16_t>(this->splitter_socket_)
       + this->number_of_monitors_;
-    LOG("The size of the team is " << this->number_of_peers_
-	<< " (apart from me)");
+
+    TRACE("The size of the team is "
+	  << this->number_of_peers_
+	  << " (apart from me)");
 
     // Skip the monitor peers
     for (int i = 0; i < this->number_of_peers_ - this->number_of_monitors_; i++) {
@@ -183,13 +185,13 @@ namespace p2psp {
 	}
       }
       this->SendHello(peer, probable_source_ports);
-      LOG("[hello] sent to " << peer);
+      TRACE("[hello] sent to " << peer);
     }
 
     // Directly start packet sending
     this->hello_messages_event_.notify_all();
 
-    LOG("List of peers received");
+    TRACE("List of peers received");
   }
 
   void Peer_NTS::DisconnectFromTheSplitter() {
