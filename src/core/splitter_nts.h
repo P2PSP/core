@@ -108,8 +108,6 @@ namespace p2psp {
 
     virtual void EnqueueMessage(unsigned int count, const message_t& message);
 
-    virtual size_t ReceiveChunk(boost::asio::streambuf &chunk) override;
-
     // Before sending a message, wait for a chunk from source to avoid network
     // congestion
     virtual void SendMessageThread();
@@ -137,10 +135,6 @@ namespace p2psp {
     // allocated source port of incorporated peers behind SYMSP NATs
     virtual void ListenExtraSocketThread();
 
-    // This method implements the NAT traversal algorithms.
-    virtual void HandleAPeerArrival(
-				    std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) override;
-
     virtual void IncorporatePeer(const std::string& peer_id);
     virtual void SendNewPeer(const std::string& peer_id,
 			     const boost::asio::ip::udp::endpoint& new_peer,
@@ -151,12 +145,18 @@ namespace p2psp {
 				uint16_t source_port);
     virtual void UpdatePortStep(const boost::asio::ip::udp::endpoint peer,
 				uint16_t& port_step, uint16_t source_port);
-    virtual void RemovePeer(const boost::asio::ip::udp::endpoint& peer) override;
-    virtual void ModerateTheTeam() override;
 
   public:
     Splitter_NTS();
     ~Splitter_NTS();
+
+    virtual size_t ReceiveChunk(boost::asio::streambuf &chunk) override;
+
+    // This method implements the NAT traversal algorithms.
+    virtual void HandleAPeerArrival(
+				    std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) override;
+    virtual void RemovePeer(const boost::asio::ip::udp::endpoint& peer) override;
+    virtual void ModerateTheTeam() override;
   };
 }
 
