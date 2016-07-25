@@ -132,14 +132,13 @@ namespace p2psp {
 
     read(splitter_socket_, ::buffer(buffer));
     number_of_monitors_ = ntohs(*(short *)(buffer.c_array()));
-    TRACE("The number of monitors is "
+    TRACE("The number of monitors = "
 	  << number_of_monitors_);
     
     read(splitter_socket_, ::buffer(buffer));
     number_of_peers_ = ntohs(*(short *)(buffer.c_array()));
-    TRACE("The size of the team is "
-	  << number_of_peers_
-	  << " (apart from me)");
+    TRACE("Total number of peers in the team (excluding me) = "
+	  << number_of_peers_);
 
     // }}}
   }

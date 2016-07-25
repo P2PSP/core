@@ -30,7 +30,7 @@ namespace p2psp {
     static const int kCountersTiming = 1; // In seconds
 
     //static const bool kConsoleMode = true;
-
+#ifdef _1_
     // Set of rules flags
     static const char kIMS = 0x00; // IMS
     static const char kDBS = 0x01; // DBS
@@ -39,7 +39,7 @@ namespace p2psp {
     static const char kNTS = 0x08; // NIS
     static const char kSTRPE = 0x10; // This should be renamed to kCIS
     //static const char kDIS = 0x11; // DIS
-    
+#endif
     // TODO: Use colors
     // IMS_COLOR = Color.red
     // DBS_COLOR = Color.green
