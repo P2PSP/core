@@ -33,7 +33,7 @@ namespace p2psp {
   };
 
   class Peer_NTS : public Peer_DBS {
-  protected:
+  public:
     std::string peer_id_;
     std::mutex hello_messages_lock_;
     std::list<HelloMessage> hello_messages_;

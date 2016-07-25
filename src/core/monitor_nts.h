@@ -19,7 +19,7 @@
 namespace p2psp {
 
   class Monitor_NTS : public Peer_NTS {
-  protected:
+  public:
     // These two are from Monitor_DBS:
     virtual void Complain(uint16_t);
     //virtual int FindNextChunk() override;
