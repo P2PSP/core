@@ -33,7 +33,7 @@ namespace p2psp {
   };
 
   class Peer_NTS : public Peer_DBS {
-  public:
+  protected:
     std::string peer_id_;
     std::mutex hello_messages_lock_;
     std::list<HelloMessage> hello_messages_;
@@ -45,7 +45,6 @@ namespace p2psp {
 
     std::thread send_hello_thread_;
 
-    virtual void SayHello(const ip::udp::endpoint& peer) override;
     virtual void SendHello(const ip::udp::endpoint& peer,
 			   std::vector<uint16_t> additional_ports = {});
 
@@ -59,7 +58,6 @@ namespace p2psp {
 			     boost::asio::ip::udp::endpoint endpoint);
     virtual void StartSendHelloThread();
     virtual void ReceiveTheListOfPeers2();
-    virtual void DisconnectFromTheSplitter() override;
     virtual void TryToDisconnectFromTheSplitter();
 
     virtual std::set<uint16_t> GetFactors(uint16_t n);
@@ -77,14 +75,16 @@ namespace p2psp {
 							 uint16_t source_port_to_splitter, uint16_t port_diff,
 							 uint16_t peer_number);
 
-    // Handle NTS messages; pass other messages to base class
-    virtual int ProcessMessage(const std::vector<char>& message,
-			       const ip::udp::endpoint& sender) override;
-
   public:
     Peer_NTS();
     ~Peer_NTS();
     virtual void Init() override;
+
+    virtual void SayHello(const ip::udp::endpoint& peer) override;
+    virtual void DisconnectFromTheSplitter() override;
+    // Handle NTS messages; pass other messages to base class
+    virtual int ProcessMessage(const std::vector<char>& message,
+			       const ip::udp::endpoint& sender) override;
   };
 }
 

@@ -20,8 +20,12 @@ namespace p2psp {
 
   class Monitor_NTS : public Peer_NTS {
   public:
+    Monitor_NTS();
+    ~Monitor_NTS();
+    virtual void Init() override;
+
     // These two are from Monitor_DBS:
-    virtual void Complain(uint16_t);
+    virtual void Complain(uint16_t) override;
     //virtual int FindNextChunk() override;
 
     // Receive the generated ID for this peer from splitter and disconnect
@@ -30,11 +34,6 @@ namespace p2psp {
     // Handle NTS messages; pass other messages to base class
     virtual int ProcessMessage(const std::vector<char>& message_bytes,
 			       const ip::udp::endpoint& sender) override;
-
-  public:
-    Monitor_NTS();
-    ~Monitor_NTS();
-    virtual void Init() override;
   };
 }
 

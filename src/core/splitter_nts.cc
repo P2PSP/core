@@ -329,7 +329,6 @@ namespace p2psp {
     ip::udp::endpoint new_peer(new_peer_tcp.address(), new_peer_tcp.port());
     LOG("Accepted connection from peer " << new_peer);
     this->SendConfiguration(serve_socket);
-    this->SendTheListOfPeers(serve_socket);
     // Send the generated ID to peer
     std::string peer_id = this->GenerateId();
     LOG("Sending ID " << peer_id << " to peer " << new_peer);
