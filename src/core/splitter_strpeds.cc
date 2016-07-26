@@ -285,7 +285,6 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 
 			// 'G'oodbye
 			if (message.at(0) == 'G') {
-			  for (unsigned int i = 0; i<trusted_peers_.size(); i++) LOG(trusted_peers_[i]);
 			  if (find(trusted_peers_.begin(), trusted_peers_.end(), sender) == trusted_peers_.end()) {
 			     LOG("Goodbye from WIP: " << sender);
 			     ProcessGoodbye(sender);
