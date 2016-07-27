@@ -220,11 +220,14 @@ namespace p2psp {
     // {{{
     
     // Now, receive and send.
-    
+
+#if defined __DEBUG_MESSAGES__
     TRACE("Size: "
 	  << message.size()
 	  << " vs "
 	  << message_size_)
+#endif
+    
       // TODO: remove hardcoded values
       if (message.size() == message_size_) {
 	// A video chunk has been received
@@ -242,16 +245,19 @@ namespace p2psp {
 			    true};*/
 	
 	received_counter_++;
+
+#if defined __DEBUG_BUFFER__
+	TRACE("Chunk Inserted at: "
+	      << (chunk_number%buffer_size_));
+#endif
 	
-	LOG("Chunk Inserted at: "
-	    << (chunk_number%buffer_size_));
-	  
 	if (sender == splitter_) {
 	  
 	  // Send the previous chunk in burst sending
 	  // mode if the chunk has not been sent to all
 	  // the peers of the list of peers.
-	  
+
+#if defined __DEBUG_CHUNKS__
 	  TRACE("("
 		<< team_socket_.local_endpoint().address().to_string()
 		<< ","
@@ -265,14 +271,16 @@ namespace p2psp {
 		<< ","
 		<< std::to_string(sender.port())
 		<< ")");
-	    
+#endif
+	  
 	  while (receive_and_feed_counter_ < (int) peer_list_.size()
 		 && (receive_and_feed_counter_ > 0 or modified_list_)) {
 	    peer = peer_list_[receive_and_feed_counter_];
 	    
 	    team_socket_.send_to(buffer(receive_and_feed_previous_), peer);
 	    sendto_counter_++;
-	    
+
+#if defined __DEBUG_CHUNKS__
 	    TRACE("("
 		  << team_socket_.local_endpoint().address().to_string()
 		  << ","
@@ -285,7 +293,8 @@ namespace p2psp {
 		  << ","
 		  << std::to_string(peer.port())
 		  << ")");
-	      
+#endif
+
 	    debt_[peer]++;
 	      
 	    if (debt_[peer] > max_chunk_debt_/*kMaxChunkDebt*/) {
@@ -313,13 +322,16 @@ namespace p2psp {
 	  // --------------------------------------------- //
 	    
 	  modified_list_ = false;
+
+#if defined __DEBUG_BURST_MODE__
 	  TRACE("Sent "
 		<< receive_and_feed_counter_
 		<< " of "
 		<< peer_list_.size());
-	  receive_and_feed_counter_ = 0;
 	  TRACE("Last Chunk saved in receive and feed: "
 		<< ntohs(*(uint16_t *)message.data()));
+#endif
+	  receive_and_feed_counter_ = 0;
 	  receive_and_feed_previous_ = message;
 	} else {
 	  TRACE("("

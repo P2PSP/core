@@ -73,7 +73,7 @@ namespace p2psp
 #ifndef TRACE_SILENT_MODE
 
 //#ifndef NDEBUG
-#ifdef __DEBUG__
+#if defined __DEBUG__ || defined __DEBUG_LOST_CHUNKS__
 
 #define LOG(a)  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) << a; }
 

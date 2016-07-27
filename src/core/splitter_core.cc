@@ -7,7 +7,7 @@
 //  http://www.p2psp.org
 //
 
-#define __DEBUG_CHUNKS__
+//#define __DEBUG_CHUNKS__
 
 #include "splitter_core.h"
 #include "../util/trace.h"

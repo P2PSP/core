@@ -71,7 +71,6 @@ namespace p2psp {
     bool logging_;
     std::ofstream log_file_;
     ip::udp::endpoint me_;
-    //char magic_flags_;
     ip::address source_addr_;
     uint16_t source_port_;
     //int header_length_;
