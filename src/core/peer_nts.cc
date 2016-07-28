@@ -330,8 +330,8 @@ namespace p2psp {
   }
 
   std::vector<uint16_t> Peer_NTS::GetProbableSourcePorts(
-							uint16_t source_port_to_splitter, uint16_t port_diff,
-							uint16_t peer_number) {
+							 uint16_t source_port_to_splitter, uint16_t port_diff,
+							 uint16_t peer_number) {
     // Predict probable source ports that the arriving peer will use
     // to communicate with this peer
 

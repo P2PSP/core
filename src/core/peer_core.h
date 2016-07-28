@@ -31,7 +31,7 @@ namespace p2psp {
 
   struct Chunk {
     std::vector<char> data;
-    int received;
+    int /*short*/ received;
   };
 
   class Peer_core {
@@ -57,7 +57,7 @@ namespace p2psp {
     int played_chunk_;
     bool player_alive_;
     int received_counter_;
-    std::vector<bool> received_flag_;
+    //std::vector<bool> received_flag_;
     int recvfrom_counter_;
     ip::udp::endpoint splitter_;
     io_service io_service_;
