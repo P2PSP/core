@@ -216,7 +216,7 @@ namespace p2psp {
 #if defined __DEBUG_TRAFFIC__
     TRACE("List of peers received");
 #endif
-    
+
     // }}}
   }
 
@@ -258,6 +258,8 @@ namespace p2psp {
     
       // TODO: remove hardcoded values
       if (message.size() == message_size_) {
+	// {{{
+
 	// A video chunk has been received
 	ip::udp::endpoint peer;
 	
@@ -265,22 +267,23 @@ namespace p2psp {
 
 	chunk_ptr[chunk_number % buffer_size_].data
 	  = std::vector<char>(message.data() + sizeof(uint16_t), message.data() + message.size());
-	chunk_ptr[chunk_number % buffer_size_].received = chunk_number;
+	chunk_ptr[chunk_number % buffer_size_].received = chunk_number % buffer_size_;
 
 	/*chunks_[chunk_number % buffer_size_] = {
 	  std::vector<char>(message.data() + sizeof(uint16_t),
 			    message.data() + sizeof(uint16_t) + chunk_size_),
 			    true};*/
 	
-	received_counter_++;
-
 #if defined __DEBUG_BUFFERING__
 	TRACE("Chunk Inserted at: "
 	      << (chunk_number%buffer_size_));
 #endif
 	
+	received_counter_++;
+
 	if (sender == splitter_) {
-	  
+	  // {{{
+
 	  // Send the previous chunk in burst sending
 	  // mode if the chunk has not been sent to all
 	  // the peers of the list of peers.
@@ -303,6 +306,8 @@ namespace p2psp {
 	  
 	  while (receive_and_feed_counter_ < (int) peer_list_.size()
 		 && (receive_and_feed_counter_ > 0 or modified_list_)) {
+	    // {{{
+
 	    peer = peer_list_[receive_and_feed_counter_];
 	    
 	    team_socket_.send_to(buffer(receive_and_feed_previous_), peer);
@@ -340,16 +345,22 @@ namespace p2psp {
 	    }
 	    
 	    receive_and_feed_counter_++;
+
+	    // }}}
 	  }
 
 	  // Start playback with the first chunk received from the splitter //
 	  std::vector<char> empty(message_size_, 0);
 	  if (receive_and_feed_previous_ == empty) {
+	    // {{{
+
 	    played_chunk_ = ntohs(*(uint16_t *)message.data());
 #if defined __DEBUG_BUFFERING__
 	    TRACE("First chunk to play modified "
 		  << std::to_string(played_chunk_));
 #endif
+
+	    // }}}
 	  }
 	  // --------------------------------------------- //
 	    
@@ -365,7 +376,11 @@ namespace p2psp {
 #endif
 	  receive_and_feed_counter_ = 0;
 	  receive_and_feed_previous_ = message;
+
+	  // }}}
 	} else {
+	  // {{{
+
 #if defined __DEBUG_TRAFFIC__
 	  TRACE("("
 		<< team_socket_.local_endpoint().address().to_string()
@@ -381,6 +396,8 @@ namespace p2psp {
 		<< ")");
 #endif
 	  if (peer_list_.end() == std::find(peer_list_.begin(), peer_list_.end(), sender)) {
+	    // {{{
+
 	    peer_list_.push_back(sender);
 	    debt_[sender] = 0;
 #if defined __DEBUG_CHURN__
@@ -392,9 +409,17 @@ namespace p2psp {
 		  << " added by chunk "
 		  << std::to_string(chunk_number));
 #endif
+
+	    // }}}
 	  } else {
+	    // {{{
+
 	    debt_[sender]--;
+
+	    // }}}
 	  }
+
+	  // }}}
 	}
 	
 	// A new chunk has arrived and the previous must be forwarded
@@ -403,6 +428,8 @@ namespace p2psp {
 	std::vector<char> empty(message_size_, 0);
 	
 	if (receive_and_feed_counter_ < (int) peer_list_.size() && receive_and_feed_previous_!=empty) {
+	  // {{{
+
 	  // Send the previous chunk in congestion avoiding mode.
 	  
 	  peer = peer_list_[receive_and_feed_counter_];
@@ -420,6 +447,8 @@ namespace p2psp {
 	  debt_[peer]++;
 	  
 	  if (debt_[peer] > max_chunk_debt_/*kMaxChunkDebt*/) {
+	    // {{{
+
 #if defined __DEBUG_CHURN__
 	    TRACE("("
 		  << peer.address().to_string()
@@ -431,6 +460,8 @@ namespace p2psp {
 	    debt_.erase(peer);
 	    peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), peer));
 	    //receive_and_feed_counter_--;
+
+	    // }}}
 	  }
 
 #if defined __DEBUG_TRAFFIC__
@@ -450,16 +481,26 @@ namespace p2psp {
 #endif
 	  
 	  receive_and_feed_counter_++;
+
+	  // }}}
 	}
 	
 	return chunk_number;
+
+	// }}}
       } else {
+	// {{{
+
 	// A control chunk has been received
 #if defined __DEBUG_CHURN__
 	TRACE("Control message received");
 #endif
 	if (message[0] == 'H') {
+	  // {{{
+
 	  if (peer_list_.end() == std::find(peer_list_.begin(), peer_list_.end(), sender)) {
+	    // {{{
+
 	    // The peer is new
 	    peer_list_.push_back(sender);
 	    debt_[sender] = 0;
@@ -471,9 +512,17 @@ namespace p2psp {
 		  << ")"
 		  << " added by [hello] ");
 #endif
+
+	    // }}}
 	  }
+
+	  // }}}
 	} else {
+	  // {{{
+
 	  if (peer_list_.end() != std::find(peer_list_.begin(), peer_list_.end(), sender)) {
+	    // {{{
+
 #if defined __DEBUG_CHURN__
 	    TRACE("("
 		  << team_socket_.local_endpoint().address().to_string()
@@ -489,21 +538,38 @@ namespace p2psp {
 	    peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(),sender));
 	    debt_.erase(sender);
 	    if (receive_and_feed_counter_ > 0){
+	      // {{{
+
 	      modified_list_ = true;
 	      receive_and_feed_counter_--;
+
+	      // }}}
 	    }
+
+	    // }}}
 	  } else {
+	    // {{{
+
 	    if (sender == splitter_){
+	      // {{{
+
 #if defined __DEBUG_CHURN__
 	      TRACE("Goodbye received from splitter");
 #endif
 	      waiting_for_goodbye_ = false;
+
+	      // }}}
 	    }
+
+	    // }}}
 	  }
-	  
+
+	  // }}}
 	}
 	
 	return -1;
+
+	// }}}
       }
     
     return -1;

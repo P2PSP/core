@@ -133,7 +133,7 @@ namespace p2psp {
     boost::array<char, 2> buffer;
     read(splitter_socket_, ::buffer(buffer));
     chunk_size_ = ntohs(*(short *)(buffer.c_array()));
-    message_size_=kChunkIndexSize+chunk_size_;
+    message_size_ = kChunkIndexSize + chunk_size_;
 #if defined __DEBUG_PARAMS__
     TRACE("chunk_size (bytes) = "
 	  << std::to_string(chunk_size_));
@@ -188,6 +188,10 @@ namespace p2psp {
     //chunks_.resize(buffer_size_);
     received_counter_ = 0;
 
+    for (int i=0; i<buffer_size_; i++) {
+      chunk_ptr[i].received = -1;
+    }
+    
     // Wall time (execution time plus waiting time).
     //#ifdef __DEBUG__
     clock_t start_time = clock();
@@ -249,13 +253,12 @@ namespace p2psp {
     // Now, fill up to the half of the buffer.
 
     // float BUFFER_STATUS = 0.0f;
-    while (((chunk_number  % buffer_size_) - played_chunk_) < buffer_size_/2) {
+    while (((chunk_number  - played_chunk_) % buffer_size_) < buffer_size_/2) {
       std::cout
-	<< "-------------"
-	<< ((chunk_number  % buffer_size_) - played_chunk_)
-	<< " "
+	<< ((chunk_number - played_chunk_) % buffer_size_)
+	<< "/"
 	<< (buffer_size_/2)
-	<< std::endl;
+	<< '\r';
       //static int x = 0;
       /*std::cout
 	<< std::setw(4)
@@ -394,7 +397,7 @@ namespace p2psp {
     for (int i = 0; i < (chunk_number-latest_chunk_number_); i++) {
       player_alive_ = PlayChunk(chunk_ptr[played_chunk_ /*% buffer_size_*/].received);
 #ifdef __DEBUG_LOST_CHUNKS__
-      if (chunk_ptr[played_chunk_ /*% buffer_size_*/].received < 0) {
+      if (chunk_ptr[played_chunk_ /*% buffer_size_*/].received == -1) {
 	TRACE
 	  ("Lost chunk "
 	   << chunk_number);
@@ -403,11 +406,11 @@ namespace p2psp {
 #ifdef __DEBUG_TRAFFIC__
       TRACE
 	("Chunk "
-	 << chunk_ptr[played_chunk_ /*% buffer_size_*/].received
+	 << chunk_number
 	 << " consumed at buffer position "
 	 << played_chunk_ /*% buffer_size_*/);
 #endif
-      //chunk_ptr[played_chunk_ /*% buffer_size_*/].received = -1;
+      chunk_ptr[played_chunk_ /*% buffer_size_*/].received = -1;
       played_chunk_ = (played_chunk_ + 1) % buffer_size_;
       //played_chunk_++;
     }
