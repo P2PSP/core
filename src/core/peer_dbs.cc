@@ -85,7 +85,7 @@ namespace p2psp {
 
     team_socket_.send_to(buffer(hello), node);
 
-#if defined __DEBUG_NETWORK__
+#if defined __DEBUG_HELLOS__
     TRACE("[Hello] sent to "
           << "(" << node.address().to_string()
 	  << ","
@@ -194,7 +194,7 @@ namespace p2psp {
       port = ntohs(*(short *)(raw_data + 4));
 
       peer = ip::udp::endpoint(ip_addr, port);
-#if defined __DEBUG_NETWORK__
+#if defined __DEBUG_HELLOS__
       TRACE("[hello] sent to ("
 	    << peer.address().to_string()
 	    << ","
@@ -203,9 +203,9 @@ namespace p2psp {
 #endif
       SayHello(peer);
 
-#if defined __DEBUG_NETWORK__
+      /*#if defined __DEBUG_NETWORK__
       TRACE(std::to_string((number_of_peers_ - tmp) / number_of_peers_));
-#endif
+      #endif*/
       
       peer_list_.push_back(peer);
       debt_[peer] = 0;
@@ -463,7 +463,7 @@ namespace p2psp {
 	    // The peer is new
 	    peer_list_.push_back(sender);
 	    debt_[sender] = 0;
-#if defined __DEBUG_PROTO__
+#if defined __DEBUG_HELLOS__
 	    TRACE("("
 		  << sender.address().to_string()
 		  << ","
@@ -474,7 +474,7 @@ namespace p2psp {
 	  }
 	} else {
 	  if (peer_list_.end() != std::find(peer_list_.begin(), peer_list_.end(), sender)) {
-#if defined __DEBUG_PROTO__
+#if defined __DEBUG_HELLOS__
 	    TRACE("("
 		  << team_socket_.local_endpoint().address().to_string()
 		  << ","
@@ -589,7 +589,7 @@ namespace p2psp {
     }
 
     ready_to_leave_the_team_ = true;
-#if defined __DEBUG_PROTO__
+#if defined __DEBUG_HELLOS__
     TRACE("Ready to leave the team!");
 #endif
     
