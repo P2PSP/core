@@ -68,7 +68,7 @@ namespace p2psp {
   }
 
   size_t Splitter_NTS::ReceiveChunk(boost::asio::streambuf &chunk) {
-    size_t bytes_transferred = Splitter_LRS::ReceiveChunk(chunk);
+    size_t bytes_transferred = Splitter_core/*_LRS*/::ReceiveChunk(chunk);
     this->chunk_received_event_.notify_all();
     return bytes_transferred;
   }
@@ -550,7 +550,7 @@ namespace p2psp {
   }
 
   void Splitter_NTS::RemovePeer(const ip::udp::endpoint& peer) {
-    Splitter_LRS::RemovePeer(peer);
+    Splitter_DBS/*_LRS*/::RemovePeer(peer);
 
     try {
       this->peers_.erase(peer);

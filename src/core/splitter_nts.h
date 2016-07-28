@@ -62,7 +62,7 @@ namespace p2psp {
     uint16_t last_source_port_;
   };
 
-  class Splitter_NTS : public Splitter_LRS {
+  class Splitter_NTS : public Splitter_LRS /*Splitter_DBS*/ {
   protected:
     const int max_message_size_;
 
