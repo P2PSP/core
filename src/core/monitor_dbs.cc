@@ -17,7 +17,11 @@ namespace p2psp {
 
   Monitor_DBS::~Monitor_DBS(){};
 
-  void Monitor_DBS::Init() { TRACE("Initialized"); }
+  void Monitor_DBS::Init() {
+#if defined __DEBUG_SORS__
+    TRACE("Initialized");
+#endif
+  }
 
   void Monitor_DBS::Complain(uint16_t chunk_position) {
     std::vector<char> message(2);
