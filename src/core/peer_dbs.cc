@@ -249,12 +249,12 @@ namespace p2psp {
     
     // Now, receive and send.
 
-#if defined __DEBUG_TRAFFIC__
+      /*#if defined __DEBUG_TRAFFIC__
     TRACE("Size: "
 	  << message.size()
 	  << " vs "
 	  << message_size_)
-#endif
+	  #endif*/
     
       // TODO: remove hardcoded values
       if (message.size() == message_size_) {
@@ -492,9 +492,9 @@ namespace p2psp {
 	      modified_list_ = true;
 	      receive_and_feed_counter_--;
 	    }
-	  }else{
+	  } else {
 	    if (sender == splitter_){
-#if defined __DEBUG_PROTO__
+#if defined __DEBUG_CHURN__
 	      TRACE("Goodbye received from splitter");
 #endif
 	      waiting_for_goodbye_ = false;

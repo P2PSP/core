@@ -229,10 +229,10 @@ namespace p2psp {
       TRACE(std::to_string(chunk_number));
 #endif
     }
-    played_chunk_ = chunk_number;
+    played_chunk_ = chunk_number % buffer_size_;
 #if defined __DEBUG_BUFFERING__
-    TRACE("First chunk to play "
-	  << std::to_string(played_chunk_));
+    TRACE("Position in the buffer of the first chunk to play "
+	  << std::to_string(played_chunk_ % buffer_size_));
 #endif
 #if defined __DEBUG_TRAFFIC__
     TRACE("("
@@ -249,12 +249,18 @@ namespace p2psp {
     // Now, fill up to the half of the buffer.
 
     // float BUFFER_STATUS = 0.0f;
-    while ((chunk_number - played_chunk_)< buffer_size_/2) {
-      static int x = 0;
+    while (((chunk_number  % buffer_size_) - played_chunk_) < buffer_size_/2) {
       std::cout
+	<< "-------------"
+	<< ((chunk_number  % buffer_size_) - played_chunk_)
+	<< " "
+	<< (buffer_size_/2)
+	<< std::endl;
+      //static int x = 0;
+      /*std::cout
 	<< std::setw(4)
 	<< float(x)/(buffer_size_/2);
-      std::cout.flush();
+	std::cout.flush();*/
       // TODO Format string
       // LOG("{:.2%}\r".format((1.0*x)/(buffer_size_/2)), end='');
       // BUFFER_STATUS = (100 * x) / (buffer_size_ / 2.0f) + 1;
@@ -286,7 +292,7 @@ namespace p2psp {
   void Peer_core::ReceiveNextMessage(std::vector<char> &message, ip::udp::endpoint &sender) {
     // {{{
 
-#if defined __DEBUG_CHUNKS__
+#if defined __DEBUG_TRAFFIC__
     TRACE("Waiting for a chunk at ("
           << team_socket_.local_endpoint().address().to_string()
 	  << ","
@@ -298,7 +304,7 @@ namespace p2psp {
     message.resize(bytes_transferred);
     recvfrom_counter_++;
 
-#if defined __DEBUG_CHUNKS__
+#if defined __DEBUG_TRAFFIC__
     TRACE("Received a message from ("
           << sender.address().to_string()
 	  << ","
@@ -386,23 +392,24 @@ namespace p2psp {
     // {{{
     
     for (int i = 0; i < (chunk_number-latest_chunk_number_); i++) {
-      player_alive_ = PlayChunk(chunk_ptr[played_chunk_ % buffer_size_].received);
+      player_alive_ = PlayChunk(chunk_ptr[played_chunk_ /*% buffer_size_*/].received);
 #ifdef __DEBUG_LOST_CHUNKS__
-      if (chunk_ptr[played_chunk_ % buffer_size_].received < 0) {
+      if (chunk_ptr[played_chunk_ /*% buffer_size_*/].received < 0) {
 	TRACE
 	  ("Lost chunk "
 	   << chunk_number);
       }
 #endif
-#ifdef __DEBUG_CHUNKS__
+#ifdef __DEBUG_TRAFFIC__
       TRACE
 	("Chunk "
-	 << chunk_ptr[played_chunk_ % buffer_size_].received
-	 << " consumed at :"
-	 << played_chunk_ % buffer_size_);
+	 << chunk_ptr[played_chunk_ /*% buffer_size_*/].received
+	 << " consumed at buffer position "
+	 << played_chunk_ /*% buffer_size_*/);
 #endif
-      chunk_ptr[played_chunk_ % buffer_size_].received = -1;
-      played_chunk_++;
+      //chunk_ptr[played_chunk_ /*% buffer_size_*/].received = -1;
+      played_chunk_ = (played_chunk_ + 1) % buffer_size_;
+      //played_chunk_++;
     }
     
     if ((latest_chunk_number_ % Common::kMaxChunkNumber) < chunk_number)

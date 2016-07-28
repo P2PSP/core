@@ -31,7 +31,7 @@ namespace p2psp {
 
   struct Chunk {
     std::vector<char> data;
-    int /*short*/ received;
+    int /*BUFFER_INDEX_TYPE*/ received;
   };
 
   class Peer_core {
@@ -54,7 +54,7 @@ namespace p2psp {
     unsigned int message_size_;
     int chunk_size_;
     std::vector<Chunk> chunks_;
-    int played_chunk_;
+    /*BUFFER_INDEX_TYPE*/ int played_chunk_;
     bool player_alive_;
     int received_counter_;
     //std::vector<bool> received_flag_;
