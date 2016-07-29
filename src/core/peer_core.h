@@ -31,7 +31,7 @@ namespace p2psp {
 
   struct Chunk {
     std::vector<char> data;
-    int /*BUFFER_INDEX_TYPE*/ received;
+    int /*BUFFER_INDEX_TYPE*/ chunk_number;
   };
 
   class Peer_core {

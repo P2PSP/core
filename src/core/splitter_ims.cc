@@ -52,12 +52,13 @@ namespace p2psp {
   }
 
   void Splitter_IMS::SendMcastGroup(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+#if defined __DEBUG__ || defined __CHURN__
     TRACE("Communicating the multicast group ("
 	  << mcast_group_.address().to_string()//mcast_addr_
 	  << ", "
 	  << to_string(mcast_group_.port())
 	  << ")");
-
+#endif
     char message[6];
     in_addr addr;
     inet_aton(/*mcast_addr_*/mcast_group_.address().to_string().c_str(), &addr);
@@ -72,12 +73,13 @@ namespace p2psp {
   }
 
   void Splitter_IMS::HandleAPeerArrival(std::shared_ptr<asio::ip::tcp::socket> serve_socket) {
+#if defined __DEBUG__ || defined __CHURN__
     TRACE(serve_socket->local_endpoint().address().to_string()
 	  << "\b: IMS: accepted connection from peer ("
           << serve_socket->remote_endpoint().address().to_string() << ", "
           << to_string(serve_socket->remote_endpoint().port())
 	  << ")");
-
+#endif
     SendConfiguration(serve_socket);
     serve_socket->close();
   }
@@ -109,8 +111,9 @@ namespace p2psp {
       copy(asio::buffer_cast<const char *>(chunk.data()),
            asio::buffer_cast<const char *>(chunk.data()) + chunk.size(),
 	   message.data() + sizeof(uint16_t));
-
-      TRACE("---- > mcast_group = " << mcast_group_);
+#if defined __DEBUG__ || defined __CHURN__
+      TRACE("mcast_group = " << mcast_group_);
+#endif
       SendChunk(message, mcast_group_);
 
       chunk_number_ = (chunk_number_ + 1) % Common::kMaxChunkNumber;

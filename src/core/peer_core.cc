@@ -41,14 +41,18 @@ namespace p2psp {
     sendto_counter_ = -1;
     //received_flag_ = std::vector<bool>();
 
-#if defined __DEBUG_SORS__
-    TRACE("Peer_core::Peer_core() executed");
+#if defined __DEBUG__ || defined __SORS__
+    TRACE("Peer_core constructor");
 #endif
 
     // }}}
   }
 
-  Peer_core::~Peer_core() {}
+  Peer_core::~Peer_core() {
+#if defined __DEBUG__ || defined __SORS__
+    TRACE("Peer_core destructor");
+#endif
+  }
 
   void Peer_core::Init() {};
 
@@ -65,7 +69,7 @@ namespace p2psp {
 
     ip::tcp::endpoint tcp_endpoint;
 
-#if defined __DEBUG_PARAMS__
+#if defined __DEBUG_ || defined __PARAMS__
     TRACE("use_localhost = " << std::string((use_localhost_ ? "True" : "False")));
 #endif
 
@@ -85,7 +89,7 @@ namespace p2psp {
 
     splitter_socket_.open(splitter_tcp_endpoint.protocol());
 
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
     TRACE("Connecting to the splitter at ("
           << splitter_tcp_endpoint.address().to_string()
 	  << ","
@@ -95,7 +99,7 @@ namespace p2psp {
 #endif
     
     if (team_port_ != 0) {
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
       TRACE("I'm using port"
 	    << std::to_string(team_port_));
 #endif
@@ -110,7 +114,7 @@ namespace p2psp {
     // Could throw an exception
     splitter_socket_.connect(splitter_tcp_endpoint);
 
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
     TRACE("Connected to the splitter at ("
           << splitter_tcp_endpoint.address().to_string() << ","
           << std::to_string(splitter_tcp_endpoint.port()) << ")");
@@ -134,7 +138,7 @@ namespace p2psp {
     read(splitter_socket_, ::buffer(buffer));
     chunk_size_ = ntohs(*(short *)(buffer.c_array()));
     message_size_ = kChunkIndexSize + chunk_size_;
-#if defined __DEBUG_PARAMS__
+#if defined __DEBUG__ || defined __PARAMS__
     TRACE("chunk_size (bytes) = "
 	  << std::to_string(chunk_size_));
 #endif
@@ -148,7 +152,7 @@ namespace p2psp {
     boost::array<char, 2> buffer;
     read(splitter_socket_, ::buffer(buffer));
     buffer_size_ = ntohs(*(short *)(buffer.c_array()));
-#if defined __DEBUG_PARAMS__
+#if defined __DEBUG__ || defined __PARAMS__
     TRACE("buffer_size_ = "
 	  << std::to_string(buffer_size_));
 #endif
@@ -189,7 +193,7 @@ namespace p2psp {
     received_counter_ = 0;
 
     for (int i=0; i<buffer_size_; i++) {
-      chunk_ptr[i].received = -1;
+      chunk_ptr[i].chunk_number = -1;
     }
     
     // Wall time (execution time plus waiting time).
@@ -209,7 +213,7 @@ namespace p2psp {
     // waiting for traveling the player, we wil fill only the half
     // of the circular queue.
 
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
     TRACE("("
 	  << team_socket_.local_endpoint().address().to_string()
 	  << ","
@@ -218,8 +222,8 @@ namespace p2psp {
     TraceSystem::Flush();
 #endif
 
-    std::cout
-      << "000.00%";
+    /*std::cout
+      << "000.00%";*/
 
     // First chunk to be sent to the player.  The
     // process_next_message() procedure returns the chunk number if a
@@ -229,27 +233,29 @@ namespace p2psp {
     int chunk_number = ProcessNextMessage();
     while (chunk_number < 0) {
       chunk_number = ProcessNextMessage();
-#if defined __DEBUG_BUFFERING__
+#if defined __DEBUG__ || defined __TRAFFIC__
       TRACE(std::to_string(chunk_number));
 #endif
     }
     played_chunk_ = chunk_number % buffer_size_;
-#if defined __DEBUG_BUFFERING__
+#if defined __DEBUG__ || defined __TRAFFIC__
     TRACE("Position in the buffer of the first chunk to play "
 	  << std::to_string(played_chunk_ % buffer_size_));
 #endif
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
     TRACE("("
 	  << team_socket_.local_endpoint().address().to_string()
 	  << ","
           << std::to_string(team_socket_.local_endpoint().port())
 	  << ")");
 #endif
+#ifdef _1_
     std::cout
       << std::setw(4)
       << /*std::to_string(*/100.0 / buffer_size_/*)*/;
     // TODO: Justify: .rjust(4)
-
+#endif
+    
     // Now, fill up to the half of the buffer.
 
     // float BUFFER_STATUS = 0.0f;
@@ -258,7 +264,8 @@ namespace p2psp {
 	<< ((chunk_number - played_chunk_) % buffer_size_)
 	<< "/"
 	<< (buffer_size_/2)
-	<< '\r';
+	<< '\r'
+	<< std::flush;
       //static int x = 0;
       /*std::cout
 	<< std::setw(4)
@@ -295,7 +302,7 @@ namespace p2psp {
   void Peer_core::ReceiveNextMessage(std::vector<char> &message, ip::udp::endpoint &sender) {
     // {{{
 
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
     TRACE("Waiting for a chunk at ("
           << team_socket_.local_endpoint().address().to_string()
 	  << ","
@@ -307,7 +314,7 @@ namespace p2psp {
     message.resize(bytes_transferred);
     recvfrom_counter_++;
 
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
     TRACE("Received a message from ("
           << sender.address().to_string()
 	  << ","
@@ -315,7 +322,7 @@ namespace p2psp {
           << ") of length " << std::to_string(message.size()));
 #endif
 
-#ifdef __DEBUG_CONTENT__
+#if defined __DEBUG__ || defined __TRAFFIC__
     if (message.size() < 10) {
       TRACE("Message content = " << std::string(message.data()));
     }
@@ -368,10 +375,10 @@ namespace p2psp {
      */
 
     PlayNextChunk(chunk_number);
-#ifdef __DEBUG_BUFFERING__
+#if defined __DEBUG__ || defined __BUFFERING__
     std::string bf="";
     for (int i = 0; i<buffer_size_; i++) {
-      if (chunk_ptr[i].received != -1) {
+      if (chunk_ptr[i].chunk_number != -1) {
 	// TODO: Avoid line feed in LOG function
 	//TRACE(std::to_string(i % 10));
 	bf=bf+"1";
@@ -395,23 +402,23 @@ namespace p2psp {
     // {{{
     
     for (int i = 0; i < (chunk_number-latest_chunk_number_); i++) {
-      //if (chunk_ptr[played_chunk_ /*% buffer_size_*/].received != -1)
-      player_alive_ = PlayChunk(chunk_ptr[played_chunk_ % buffer_size_].received);
-#ifdef __DEBUG_LOST_CHUNKS__
-      if (chunk_ptr[played_chunk_ % buffer_size_].received == -1) {
+      //if (chunk_ptr[played_chunk_ /*% buffer_size_*/].chunk_number != -1)
+      player_alive_ = PlayChunk(chunk_ptr[played_chunk_ % buffer_size_].chunk_number);
+#if defined __DEBUG__|| defined __LOST_CHUNKS__
+      if (chunk_ptr[played_chunk_ % buffer_size_].chunk_number == -1) {
 	TRACE
 	  ("Lost chunk at buffer position "
 	   << played_chunk_);
       }
 #endif
-#ifdef __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
       TRACE
 	("Chunk "
 	 << chunk_number
 	 << " consumed at buffer position "
 	 << played_chunk_ % buffer_size_);
 #endif
-      chunk_ptr[played_chunk_ % buffer_size_].received = -1;
+      chunk_ptr[played_chunk_ % buffer_size_].chunk_number = -1;
       played_chunk_ = (played_chunk_ + 1) % Common::kMaxChunkNumber;
       //played_chunk_++;
     }
@@ -421,7 +428,7 @@ namespace p2psp {
 
     // }}}
   }
-
+#ifdef _1_
   // Delete?
   void Peer_core::LogMessage(const std::string &message) {
     // {{{
@@ -433,7 +440,7 @@ namespace p2psp {
 
 	// }}}
   }
-
+  
   std::string Peer_core::BuildLogMessage(const std::string &message) {
     // {{{
 
@@ -442,6 +449,7 @@ namespace p2psp {
 
 	  // }}}
   }
+#endif
 
   void Peer_core::Run() {
     // {{{

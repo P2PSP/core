@@ -25,10 +25,10 @@ namespace p2psp {
   void Peer_DBS::Init() {
     // {{{
 
-#if defined __DEBUG_SORS__
+#if defined __DEBUG__ || defined __SORS__
     TRACE("Initialized");
 #endif
-#if defined __DEBUG_PARAMS__
+#if defined __DEBUG__ || defined __PARAMS__
     //TRACE("max_chunk_debt = " + std::to_string(kMaxChunkDebt));
     TRACE("max_chunk_debt = "
 	  << max_chunk_debt_);
@@ -68,7 +68,7 @@ namespace p2psp {
 
     me_ = ip::udp::endpoint(ip_addr, port);
 
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
     TRACE("me = ("
 	  << me_.address().to_string()
 	  << ","
@@ -85,7 +85,7 @@ namespace p2psp {
 
     team_socket_.send_to(buffer(hello), node);
 
-#if defined __DEBUG_CHURN__
+#if defined __DEBUG__ || defined __CHURN__
     TRACE("[Hello] sent to "
           << "(" << node.address().to_string()
 	  << ","
@@ -103,7 +103,7 @@ namespace p2psp {
 
     team_socket_.send_to(buffer(goodbye), node);
 
-#if defined __DEBUT_TRAFFIC__
+#if defined __DEBUT__ || defined __TRAFFIC__
     TRACE("[Goodbye] sent to "
           << "(" << node.address().to_string()
 	  << ","
@@ -134,7 +134,7 @@ namespace p2psp {
 
     boost::array<char, 2> buffer;
 
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
     // sys.stdout.write(Color.green)
     TRACE("Requesting the number of monitors and peers to ("
           << splitter_socket_.remote_endpoint().address().to_string()
@@ -145,14 +145,14 @@ namespace p2psp {
     
     read(splitter_socket_, ::buffer(buffer));
     number_of_monitors_ = ntohs(*(short *)(buffer.c_array()));
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
     TRACE("The number of monitors = "
 	  << number_of_monitors_);
 #endif
     
     read(splitter_socket_, ::buffer(buffer));
     number_of_peers_ = ntohs(*(short *)(buffer.c_array()));
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
     TRACE("Total number of peers in the team (excluding me) = "
 	  << number_of_peers_);
 #endif
@@ -171,7 +171,7 @@ namespace p2psp {
 
     ReceiveTheNumberOfPeers();
     
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
     // sys.stdout.write(Color.green)
     TRACE("Requesting"
 	  << number_of_peers_
@@ -194,7 +194,7 @@ namespace p2psp {
       port = ntohs(*(short *)(raw_data + 4));
 
       peer = ip::udp::endpoint(ip_addr, port);
-#if defined __DEBUG_CHURN__
+#if defined __DEBUG__ ||  defined __CHURN__
       TRACE("[hello] sent to ("
 	    << peer.address().to_string()
 	    << ","
@@ -213,7 +213,7 @@ namespace p2psp {
       //}
     }
 
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
     TRACE("List of peers received");
 #endif
 
@@ -223,7 +223,7 @@ namespace p2psp {
   void Peer_DBS::ListenToTheTeam() {
     // {{{
 
-#if defined __DEBUG_PARAMS__
+#if defined __DEBUG__ || defined __PARAMS__
     TRACE("splitter port = "
 	  << splitter_socket_.local_endpoint().port());
 #endif
@@ -267,16 +267,16 @@ namespace p2psp {
 
 	chunk_ptr[chunk_number % buffer_size_].data
 	  = std::vector<char>(message.data() + sizeof(uint16_t), message.data() + message.size());
-	chunk_ptr[chunk_number % buffer_size_].received = chunk_number % buffer_size_;
+	chunk_ptr[chunk_number % buffer_size_].chunk_number = chunk_number /*% buffer_size_*/;
 
 	/*chunks_[chunk_number % buffer_size_] = {
 	  std::vector<char>(message.data() + sizeof(uint16_t),
 			    message.data() + sizeof(uint16_t) + chunk_size_),
 			    true};*/
 	
-#if defined __DEBUG_BUFFERING__
+#if defined __DEBUG__ || defined __BUFFERING__
 	TRACE("Chunk Inserted at: "
-	      << (chunk_number%buffer_size_));
+	      << (chunk_number % buffer_size_));
 #endif
 	
 	received_counter_++;
@@ -288,7 +288,7 @@ namespace p2psp {
 	  // mode if the chunk has not been sent to all
 	  // the peers of the list of peers.
 
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
 	  TRACE("("
 		<< team_socket_.local_endpoint().address().to_string()
 		<< ","
@@ -313,7 +313,7 @@ namespace p2psp {
 	    team_socket_.send_to(buffer(receive_and_feed_previous_), peer);
 	    sendto_counter_++;
 
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
 	    TRACE("("
 		  << team_socket_.local_endpoint().address().to_string()
 		  << ","
@@ -331,7 +331,7 @@ namespace p2psp {
 	    debt_[peer]++;
 	      
 	    if (debt_[peer] > max_chunk_debt_/*kMaxChunkDebt*/) {
-#if defined __DEBUG_CHURN__
+#if defined __DEBUG__ || defined __CHURN__
 	      TRACE("("
 		    << peer.address().to_string()
 		    << ","
@@ -355,7 +355,7 @@ namespace p2psp {
 	    // {{{
 
 	    played_chunk_ = ntohs(*(uint16_t *)message.data());
-#if defined __DEBUG_BUFFERING__
+#if defined __DEBUG__ || defined __BUFFERING__
 	    TRACE("First chunk to play modified "
 		  << std::to_string(played_chunk_));
 #endif
@@ -366,7 +366,7 @@ namespace p2psp {
 	    
 	  modified_list_ = false;
 
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
 	  TRACE("Sent "
 		<< receive_and_feed_counter_
 		<< " of "
@@ -381,7 +381,7 @@ namespace p2psp {
 	} else {
 	  // {{{
 
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
 	  TRACE("("
 		<< team_socket_.local_endpoint().address().to_string()
 		<< ","
@@ -400,7 +400,7 @@ namespace p2psp {
 
 	    peer_list_.push_back(sender);
 	    debt_[sender] = 0;
-#if defined __DEBUG_CHURN__
+#if defined __DEBUG__ || defined __CHURN__
 	    TRACE("("
 		  << sender.address().to_string()
 		  << ","
@@ -433,7 +433,7 @@ namespace p2psp {
 	  // Send the previous chunk in congestion avoiding mode.
 	  
 	  peer = peer_list_[receive_and_feed_counter_];
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
 	  TRACE("Sending in congestion avoiding mode to "
 		<< peer.address().to_string()
 		<< ":"
@@ -449,7 +449,7 @@ namespace p2psp {
 	  if (debt_[peer] > max_chunk_debt_/*kMaxChunkDebt*/) {
 	    // {{{
 
-#if defined __DEBUG_CHURN__
+#if defined __DEBUG__ || defined __CHURN__
 	    TRACE("("
 		  << peer.address().to_string()
 		  << ","
@@ -464,7 +464,7 @@ namespace p2psp {
 	    // }}}
 	  }
 
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
 	  TRACE("("
 		<< team_socket_.local_endpoint().address().to_string()
 		<< ","
@@ -492,7 +492,7 @@ namespace p2psp {
 	// {{{
 
 	// A control chunk has been received
-#if defined __DEBUG_CHURN__
+#if defined __DEBUG__ || defined __CHURN__
 	TRACE("Control message received");
 #endif
 	if (message[0] == 'H') {
@@ -504,7 +504,7 @@ namespace p2psp {
 	    // The peer is new
 	    peer_list_.push_back(sender);
 	    debt_[sender] = 0;
-#if defined __DEBUG_CHURN__
+#if defined __DEBUG__ || defined __CHURN__
 	    TRACE("("
 		  << sender.address().to_string()
 		  << ","
@@ -523,7 +523,7 @@ namespace p2psp {
 	  if (peer_list_.end() != std::find(peer_list_.begin(), peer_list_.end(), sender)) {
 	    // {{{
 
-#if defined __DEBUG_CHURN__
+#if defined __DEBUG__ || defined __CHURN__
 	    TRACE("("
 		  << team_socket_.local_endpoint().address().to_string()
 		  << ","
@@ -553,7 +553,7 @@ namespace p2psp {
 	    if (sender == splitter_){
 	      // {{{
 
-#if defined __DEBUG_CHURN__
+#if defined __DEBUG__ || defined __CHURN__
 	      TRACE("Goodbye received from splitter");
 #endif
 	      waiting_for_goodbye_ = false;
@@ -587,7 +587,7 @@ namespace p2psp {
 
     for (std::vector<Chunk>::iterator it = chunks_.begin(); it != chunks_.end();
          ++it) {
-      if (it->received) {
+      if (it->chunk_number != -1) {
         if (it->data == zerochunk) {
           badchunks++;
         } else {
@@ -608,12 +608,12 @@ namespace p2psp {
 
     for (std::vector<Chunk>::iterator it = chunks_.begin(); it != chunks_.end();
          ++it) {
-      if (it->received) {
+      if (it->chunk_number != -1) {
         chunks++;
       }
     }
 
-#if defined __DEBUG_BUFFERING__
+#if defined __DEBUG__ || defined __BUFFERING__
     TRACE("Chunks in Buffer: " << chunks)
 #endif
     return chunks / (float)buffer_size_;
@@ -627,14 +627,14 @@ namespace p2psp {
     std::vector<char> message(message_size_);
     ip::udp::endpoint sender;
 
-#if defined __DEBUG_CHURN__
+#if defined __DEBUG__ || defined __CHURN__
     TRACE("Goodbye!");
 #endif
     
     while (receive_and_feed_counter_ < (int) peer_list_.size()) {
       team_socket_.send_to(buffer(receive_and_feed_previous_), peer_list_[receive_and_feed_counter_]);
       team_socket_.receive_from(buffer(message), sender);
-#if defined __DEBUG_TRAFFIC__
+#if defined __DEBUG__ || defined __TRAFFIC__
       TRACE("("
 	    << team_socket_.local_endpoint().address().to_string()
 	    << ","
@@ -657,7 +657,7 @@ namespace p2psp {
     }
 
     ready_to_leave_the_team_ = true;
-#if defined __DEBUG_CHURN__
+#if defined __DEBUG__ || defined __CHURN__
     TRACE("Ready to leave the team!");
 #endif
     

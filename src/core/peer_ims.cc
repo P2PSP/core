@@ -89,9 +89,10 @@ namespace p2psp {
 
     uint16_t chunk_number = ntohs(*(short *)message.data());
 
-    chunk_ptr[chunk_number % buffer_size_].data = std::vector<char>(message.data() + sizeof(uint16_t),
-								    message.data() + message.size());
-    chunk_ptr[chunk_number % buffer_size_].received = chunk_number % buffer_size_;
+    chunk_ptr[chunk_number % buffer_size_].data
+      = std::vector<char>(message.data() + sizeof(uint16_t),
+			  message.data() + message.size());
+    chunk_ptr[chunk_number % buffer_size_].chunk_number = chunk_number /*% buffer_size_*/;
 
     received_counter_++;
 
