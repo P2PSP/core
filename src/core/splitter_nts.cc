@@ -28,6 +28,8 @@ namespace p2psp {
 
   Splitter_NTS::Splitter_NTS() : Splitter_LRS(),
 			       max_message_size_(this->chunk_size_ + 2) {
+    // {{{
+
     //this->magic_flags_ = Common::kNTS;
 
     // The thread regularly checks if (peers are waiting to be incorporated
@@ -43,9 +45,13 @@ namespace p2psp {
       std::thread(&Splitter_NTS::SendMessageThread, this);
 
     LOG("Initialized NTS");
+
+    // }}}
   }
 
   Splitter_NTS::~Splitter_NTS() {
+    // {{{
+
     if (this->check_timeout_thread_.joinable()) {
       this->check_timeout_thread_.join();
     }
@@ -55,9 +61,13 @@ namespace p2psp {
     if (this->send_message_thread_.joinable()) {
       this->send_message_thread_.join();
     }
+
+    // }}}
   }
 
   void Splitter_NTS::EnqueueMessage(unsigned int count, const message_t& message) {
+    // {{{
+
     {
       std::unique_lock<std::mutex> lock(this->message_queue_mutex_);
       for (unsigned int i = 0; i < count; i++) {
@@ -65,15 +75,23 @@ namespace p2psp {
       }
     }
     this->message_queue_event_.notify_all();
+
+    // }}}
   }
 
   size_t Splitter_NTS::ReceiveChunk(boost::asio::streambuf &chunk) {
-    size_t bytes_transferred = Splitter_core/*_LRS*/::ReceiveChunk(chunk);
+    // {{{
+
+    size_t bytes_transferred = Splitter_LRS/*_core*/::ReceiveChunk(chunk);
     this->chunk_received_event_.notify_all();
     return bytes_transferred;
+
+    // }}}
   }
 
   void Splitter_NTS::SendMessageThread() {
+    // {{{
+
     while (this->alive_) {
       // Wait for an enqueued message
       message_t message_data;
@@ -96,9 +114,13 @@ namespace p2psp {
       std::unique_lock<std::mutex> lock(chunk_received_mutex_);
       this->chunk_received_event_.wait(lock);
     }
+
+    // }}}
   }
 
   std::string Splitter_NTS::GenerateId() {
+    // {{{
+
     // Generate a random ID for a newly arriving peer
     // This has about the same number of combinations as a 32 bit integer
     static std::random_device rd;
@@ -112,10 +134,14 @@ namespace p2psp {
     }
     std::string id = str.str();
     return id;
+
+    // }}}
   }
 
   void Splitter_NTS::SendTheListOfPeers(
 				       const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
+    // {{{
+
     // For NTS, send only the monitor peers, as the other peers' endpoints
     // are sent together with their IDs when a PeerNTS instance has been
     // created from the PeerDBS instance, in SendTheListOfPeers2()
@@ -142,11 +168,15 @@ namespace p2psp {
       Common_NTS::Write<uint16_t>(msg_str, (uint16_t)peer_iter->port());
       peer_serve_socket->send(buffer(msg_str.str()));
     }
+
+    // }}}
   }
 
   void Splitter_NTS::SendTheListOfPeers2(
 					const std::shared_ptr<ip::tcp::socket> &peer_serve_socket,
 					const ip::udp::endpoint& peer) {
+    // {{{
+
     // Send all peers except the monitor peers with their peer ID
     // plus all peers currently being incorporated
     uint16_t number_of_other_peers = this->peer_list_.size()
@@ -195,9 +225,13 @@ namespace p2psp {
       Common_NTS::Write<uint16_t>(msg_str, peer_info.port_step_);
       peer_serve_socket->send(buffer(msg_str.str()));
     }
+
+    // }}}
   }
 
   void Splitter_NTS::CheckArrivingPeerTime() {
+    // {{{
+
     // Remove peers that are waiting to be incorporated too long
 
     timepoint_t now = std::chrono::steady_clock::now();
@@ -219,9 +253,13 @@ namespace p2psp {
       // Remove peer
       this->arriving_peers_.erase(peer_id);
     }
+
+    // }}}
   }
 
   void Splitter_NTS::CheckIncorporatingPeerTime() {
+    // {{{
+
     // Remove peers that try to connect to the existing peers too long
 
     timepoint_t now = std::chrono::steady_clock::now();
@@ -244,9 +282,13 @@ namespace p2psp {
       // Remove peer
       this->incorporating_peers_.erase(peer_id);
     }
+
+    // }}}
   }
 
   void Splitter_NTS::CheckTimeoutThread() {
+    // {{{
+
     while (this->alive_) {
       std::this_thread::sleep_for(Common_NTS::kMaxPeerArrivingTime);
       // Check timeouts
@@ -254,9 +296,13 @@ namespace p2psp {
       this->CheckArrivingPeerTime();
       this->CheckIncorporatingPeerTime();
     }
+
+    // }}}
   }
 
   void Splitter_NTS::ListenExtraSocketThread() {
+    // {{{
+
     // The thread listens to this->extra_socket_ to determine the currently
     // allocated source port of incorporated peers behind SYMSP NATs
 
@@ -319,10 +365,14 @@ namespace p2psp {
 	      << sender);
       }
     }
+
+    // }}}
   }
 
   void Splitter_NTS::HandleAPeerArrival(
 				       std::shared_ptr<ip::tcp::socket> serve_socket) {
+    // {{{
+
     // This method implements the NAT traversal algorithms.
 
     ip::tcp::endpoint new_peer_tcp = serve_socket->remote_endpoint();
@@ -352,9 +402,13 @@ namespace p2psp {
       // Splitter will continue with IncorporatePeer() as soon as the
       // arriving peer has sent UDP packets to splitter and monitor
     }
+
+    // }}}
   }
 
   void Splitter_NTS::IncorporatePeer(const std::string& peer_id) {
+    // {{{
+
     const ArrivingPeerInfo& peer_info = this->arriving_peers_[peer_id];
 
     LOG("Incorporating the peer " << peer_id << ". Source ports: "
@@ -388,11 +442,14 @@ namespace p2psp {
 		      this->incorporating_peers_[peer_id].port_step_);
 
     this->arriving_peers_.erase(peer_id);
+
+    // }}}
   }
 
   void Splitter_NTS::SendNewPeer(const std::string& peer_id,
 				const ip::udp::endpoint& new_peer,
 				const std::vector<uint16_t>& source_ports_to_monitors, uint16_t port_step) {
+    // {{{
 
     // Recreate this->extra_socket_, listening to a random port
     // TODO: is the extra_socket recreated too often?
@@ -471,9 +528,13 @@ namespace p2psp {
       // Hopefully one of these packets arrives
       this->EnqueueMessage(3, std::make_pair(msg_str.str(), peer));
     }
+
+    // }}}
   }
 
   void Splitter_NTS::RetryToIncorporatePeer(const std::string& peer_id) {
+    // {{{
+
     // Update source port information
     // arriving_incorporating_peers_mutex_ is already locked in ProcessMessage()
     const IncorporatingPeerInfo& peer_info = this->incorporating_peers_[peer_id];
@@ -500,10 +561,14 @@ namespace p2psp {
     } catch (std::exception e) {
       ERROR(e.what());
     }
+
+    // }}}
   }
 
   void Splitter_NTS::UpdatePortStep(const ip::udp::endpoint peer,
 				   uint16_t source_port) {
+    // {{{
+
     if (Common_NTS::Contains(this->peers_, peer)) {
       PeerInfo& peer_info = this->peers_[peer];
       // Set last known source port
@@ -525,10 +590,14 @@ namespace p2psp {
       ERROR("While updating port step: Peer " << peer << " not found.");
       throw new std::exception();
     }
+
+    // }}}
   }
 
   void Splitter_NTS::UpdatePortStep(const ip::udp::endpoint peer,
 				   uint16_t& port_step, uint16_t source_port) {
+    // {{{
+
     // Skip check if (measured port step is 0
     if (port_step == 0) {
       return;
@@ -547,10 +616,14 @@ namespace p2psp {
       LOG("Updated port step of peer " << peer << " from " << previous_port_step
 	  << " to " << port_step);
     }
+
+    // }}}
   }
 
   void Splitter_NTS::RemovePeer(const ip::udp::endpoint& peer) {
-    Splitter_DBS/*_LRS*/::RemovePeer(peer);
+    // {{{
+
+    Splitter_LRS/*_DBS*/::RemovePeer(peer);
 
     try {
       this->peers_.erase(peer);
@@ -558,9 +631,13 @@ namespace p2psp {
       TRACE(e.what());
       // ignore
     }
+
+    // }}}
   }
 
   void Splitter_NTS::ModerateTheTeam() {
+    // {{{
+
     while (this->alive_) {
       std::vector<char> message_bytes(this->max_message_size_);
       ip::udp::endpoint sender;
@@ -794,5 +871,8 @@ namespace p2psp {
 	      << sender);
       }
     }
+
+    // }}}
   }
+
 }

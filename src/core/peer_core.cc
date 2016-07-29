@@ -399,8 +399,8 @@ namespace p2psp {
 #ifdef __DEBUG_LOST_CHUNKS__
       if (chunk_ptr[played_chunk_ /*% buffer_size_*/].received == -1) {
 	TRACE
-	  ("Lost chunk "
-	   << chunk_number);
+	  ("Lost chunk at buffer position "
+	   << played_chunk_);
       }
 #endif
 #ifdef __DEBUG_TRAFFIC__

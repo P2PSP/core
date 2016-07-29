@@ -24,31 +24,59 @@
 namespace p2psp {
 
   Peer_NTS::Peer_NTS(){
+    // {{{
+
     //magic_flags_ = Common::kNTS;
+
+    // }}}
   }
 
   Peer_NTS::~Peer_NTS(){
+    // {{{
+
     if (this->send_hello_thread_.joinable()) {
       this->send_hello_thread_.join();
     }
+
+    // }}}
   }
 
-  void Peer_NTS::Init() { LOG("Initialized"); }
+  void Peer_NTS::Init() {
+    // {{{
+
+    LOG("Initialized");
+
+    // }}}
+  }
 
   bool operator==(const HelloMessage& msg1, const HelloMessage& msg2) {
+    // {{{
+
     return msg1.message_ == msg2.message_;
+
+    // }}}
   }
 
   bool operator==(const HelloMessage& msg1, const message_t& msg2) {
+    // {{{
+
     return msg1.message_ == msg2;
+
+    // }}}
   }
 
   void Peer_NTS::SayHello(const ip::udp::endpoint& peer) {
+    // {{{
+
     // Do nothing, as this is handled later in the program by SendHello
+
+    // }}}
   }
 
   void Peer_NTS::SendHello(const ip::udp::endpoint& peer,
 			  std::vector<uint16_t> additional_ports) {
+    // {{{
+
     std::lock_guard<std::mutex> guard(this->hello_messages_lock_);
     std::string message = this->peer_id_;
     message_t hello_data = std::make_pair(message, peer);
@@ -57,9 +85,13 @@ namespace p2psp {
       this->hello_messages_.push_back(HelloMessage{hello_data,
 	    std::chrono::steady_clock::now(), additional_ports});
     }
+
+    // }}}
   }
 
   void Peer_NTS::SendMessage(const message_t& message_data) {
+    // {{{
+
     std::lock_guard<std::mutex> guard(this->hello_messages_lock_);
     if (!Common_NTS::Contains(this->hello_messages_, message_data)) {
       this->hello_messages_.push_back(HelloMessage{message_data,
@@ -68,18 +100,26 @@ namespace p2psp {
       // Directly start packet sending
       this->hello_messages_event_.notify_all();
     }
+
+    // }}}
   }
 
   void Peer_NTS::ReceiveId() {
+    // {{{
+
     LOG("Requesting peer ID from splitter");
     this->peer_id_ = Common_NTS::ReceiveString(this->splitter_socket_,
 					      Common_NTS::kPeerIdLength);
     LOG("ID received: " << this->peer_id_);
+
+    // }}}
   }
 
   void Peer_NTS::SendHelloThread() {
+    // {{{
+
     while (this->player_alive_) {
-      // Continuously send hello UDP packets to arriving peers
+      // Continuously send [hello] UDP packets to arriving peers
       // until a connection is established
       timepoint_t now = std::chrono::steady_clock::now();
       std::list<HelloMessage> messages_to_remove;
@@ -129,24 +169,36 @@ namespace p2psp {
 					     std::chrono::steady_clock::now() + Common_NTS::kHelloPacketTiming);
 
     }
+
+    // }}}
   }
 
   void Peer_NTS::SendMessage(std::string message,
 			    boost::asio::ip::udp::endpoint endpoint) {
+    // {{{
+
     try {
       this->team_socket_.send_to(buffer(message), endpoint);
     } catch (std::exception e) {
       ERROR(e.what());
     }
+
+    // }}}
   }
 
   void Peer_NTS::StartSendHelloThread() {
+    // {{{
+
     this->player_alive_ = true; // Peer_IMS sets this variable in buffer_data()
     // Start the hello packet sending thread
     this->send_hello_thread_ = std::thread(&Peer_NTS::SendHelloThread, this);
+
+    // }}}
   }
 
   void Peer_NTS::ReceiveTheListOfPeers2() {
+    // {{{
+
     // The monitor peer endpoints have already been received
     if (this->peer_list_.size() != (unsigned int)this->number_of_monitors_) {
       ERROR("this->peer_list_.size() != this->number_of_monitors_");
@@ -192,9 +244,13 @@ namespace p2psp {
     this->hello_messages_event_.notify_all();
 
     TRACE("List of peers received");
+
+    // }}}
   }
 
   void Peer_NTS::DisconnectFromTheSplitter() {
+    // {{{
+
     try {
       this->TryToDisconnectFromTheSplitter();
     } catch(const std::exception& e) {
@@ -203,9 +259,13 @@ namespace p2psp {
       this->player_alive_ = false;
       exit(1);
     }
+
+    // }}}
   }
 
   void Peer_NTS::TryToDisconnectFromTheSplitter() {
+    // {{{
+
     this->StartSendHelloThread();
 
     // Common_NTS::Receive the generated ID for this peer from splitter
@@ -284,9 +344,13 @@ namespace p2psp {
     // The peer is now successfully incorporated; inform the splitter
     this->SendMessage(std::make_pair(this->peer_id_ + 'Y', this->splitter_));
     LOG("Incorporation successful");
+
+    // }}}
   }
 
   std::set<uint16_t> Peer_NTS::GetFactors(uint16_t n) {
+    // {{{
+
     std::set<uint16_t> factors;
     for (int i = (int)sqrtf(n); i>=1; i--) {
       if (n%i == 0) {
@@ -295,9 +359,13 @@ namespace p2psp {
       }
     }
     return factors;
+
+    // }}}
   }
 
   uint16_t Peer_NTS::CountCombinations(const std::set<uint16_t>& factors) {
+    // {{{
+
     // Get the number of possible products of a factor and another integer
     // that are less or equal to the original number n.
     // Example: the number is 10, the factors are 1, 2, 5, 10.
@@ -305,10 +373,14 @@ namespace p2psp {
     // So for each factor there are "n/factor" products:
 
     return std::accumulate(factors.begin(), factors.end(), 0);
+
+    // }}}
   }
 
   std::set<uint16_t> Peer_NTS::GetProbablePortDiffs(uint16_t port_diff,
 						   uint16_t peer_number) {
+    // {{{
+
     // The actual port prediction happens here:
     // port_diff is the measured source port difference so the NAT could have
     // any factor of port_diff as its actual port_step. This function assumes
@@ -327,11 +399,15 @@ namespace p2psp {
       }
     }
     return port_diffs;
+
+    // }}}
   }
 
   std::vector<uint16_t> Peer_NTS::GetProbableSourcePorts(
 							 uint16_t source_port_to_splitter, uint16_t port_diff,
 							 uint16_t peer_number) {
+    // {{{
+
     // Predict probable source ports that the arriving peer will use
     // to communicate with this peer
 
@@ -350,10 +426,14 @@ namespace p2psp {
       }
     }
     return probable_source_ports;
+
+    // }}}
   }
 
   int Peer_NTS::ProcessMessage(const std::vector<char>& message_bytes,
 			      const ip::udp::endpoint& sender) {
+    // {{{
+
     // Handle NTS messages; pass other messages to base class
     std::string message(message_bytes.data(), message_bytes.size());
     std::istringstream msg_str(message);
@@ -468,6 +548,8 @@ namespace p2psp {
 
     // No chunk number, as no chunk was received
     return -1;
+
+    // }}}
   }
 
 }
