@@ -379,8 +379,8 @@ namespace p2psp {
 	//TRACE(".");
 	bf=bf+"0";
       }
-      LOG("Buffer state: "+bf);
     }
+    LOG("Buffer state: "+bf);
 #endif
     
     // print (self.team_socket.getsockname(),)
@@ -395,9 +395,10 @@ namespace p2psp {
     // {{{
     
     for (int i = 0; i < (chunk_number-latest_chunk_number_); i++) {
-      player_alive_ = PlayChunk(chunk_ptr[played_chunk_ /*% buffer_size_*/].received);
+      //if (chunk_ptr[played_chunk_ /*% buffer_size_*/].received != -1)
+      player_alive_ = PlayChunk(chunk_ptr[played_chunk_ % buffer_size_].received);
 #ifdef __DEBUG_LOST_CHUNKS__
-      if (chunk_ptr[played_chunk_ /*% buffer_size_*/].received == -1) {
+      if (chunk_ptr[played_chunk_ % buffer_size_].received == -1) {
 	TRACE
 	  ("Lost chunk at buffer position "
 	   << played_chunk_);
@@ -408,10 +409,10 @@ namespace p2psp {
 	("Chunk "
 	 << chunk_number
 	 << " consumed at buffer position "
-	 << played_chunk_ /*% buffer_size_*/);
+	 << played_chunk_ % buffer_size_);
 #endif
-      chunk_ptr[played_chunk_ /*% buffer_size_*/].received = -1;
-      played_chunk_ = (played_chunk_ + 1) % buffer_size_;
+      chunk_ptr[played_chunk_ % buffer_size_].received = -1;
+      played_chunk_ = (played_chunk_ + 1) % Common::kMaxChunkNumber;
       //played_chunk_++;
     }
     
