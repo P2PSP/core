@@ -532,6 +532,10 @@ double SplitterSTRPEDS::ComputePeerTrustValue(const boost::asio::ip::udp::endpoi
 }
 
 void SplitterSTRPEDS::RunTMS() {
+	if (!isTmsEnable) {
+		return;
+	}
+
 	// clear penalties
 	for (auto const &it : peer_penalties_) {
 		peer_penalties_[it.first] = 0.0;
@@ -545,6 +549,10 @@ void SplitterSTRPEDS::RunTMS() {
 			}
 		}
 	}
+}
+
+void SplitterSTRPEDS::setTmsEnable(bool value) {
+	isTmsEnable = value;
 }
 
 void SplitterSTRPEDS::SetMaxTrust(double value) {

@@ -53,6 +53,7 @@ class SplitterSTRPEDS : public SplitterDBS {
   std::vector<boost::asio::ip::udp::endpoint> bad_peers_;
 
 	// P2PSP TMS
+	bool isTmsEnable = false;
 	double maxTrust = 2.;
 	double incr = .05;
 	double decr = .05;
@@ -114,6 +115,7 @@ class SplitterSTRPEDS : public SplitterDBS {
 
   void IncrementUnsupportivityOfPeer(const boost::asio::ip::udp::endpoint &peer) override;
 
+	void setTmsEnable(bool value);
 	double ComputePeerTrustValue(const boost::asio::ip::udp::endpoint &peer);
 	void RunTMS();
 	void SetMaxTrust(double maxTrust);
