@@ -139,7 +139,6 @@ namespace p2psp {
 
     boost::asio::ip::tcp::endpoint new_peer_tcp = serve_socket->remote_endpoint();
     boost::asio::ip::udp::endpoint new_peer(new_peer_tcp.address(), new_peer_tcp.port());
-
     LOG("Accepted connection from peer " << new_peer);
     boost::array<char, 6> buf;
     char *raw_data = buf.data();
@@ -182,6 +181,108 @@ namespace p2psp {
                                                         std::chrono::steady_clock::now()};
       // Splitter will continue with IncorporatePeer() as soon as the
       // arriving peer has sent UDP packets to splitter and monitor
+    }
+  }
+
+
+  //mostly identical to same method in NTS, with addition EMS checks
+  void SplitterEMS::SendNewPeer(const std::string& peer_id,
+                                const ip::udp::endpoint& new_peer,
+                                const std::vector<uint16_t>& source_ports_to_monitors, uint16_t port_step) {
+
+    // Recreate this->extra_socket_, listening to a random port
+    // TODO: is the extra_socket recreated too often?
+    if (this->extra_socket_)
+    {
+      this->extra_socket_->close();
+    }
+    this->extra_socket_.reset(new ip::udp::socket(this->io_service_));
+    this->extra_socket_->open(ip::udp::v4());
+    try {
+      this->extra_socket_->bind(ip::udp::endpoint(ip::udp::v4(), 0));
+    } catch (std::exception e) {
+      ERROR(e.what());
+    }
+    // Do not block the thread forever:
+    this->extra_socket_->set_option(socket_base::linger(true, 1));
+    uint16_t extra_listen_port = this->extra_socket_->local_endpoint().port();
+    DEBUG("Listening to the extra port " << extra_listen_port);
+    DEBUG("Sending [send hello to " << new_peer << ']');
+    // The peers start port prediction at the minimum known source port,
+    // counting up using their peer_number
+    std::vector<uint16_t> source_ports(source_ports_to_monitors);
+    source_ports.push_back(new_peer.port());
+    uint16_t min_known_source_port = *std::min_element(source_ports.begin(),
+                                                       source_ports.end());
+    // Send packets to all peers;
+    unsigned int peer_number = 0;
+    for (auto peer_iter = this->peer_list_.begin();
+         peer_iter != this->peer_list_.end(); ++peer_iter, ++peer_number) {
+      std::ostringstream msg_str;
+      msg_str << peer_id;
+      if (peer_number < (unsigned int) this->max_number_of_monitors_) {
+        // Send only the endpoint of the peer to the monitor,
+        // as the arriving peer and the monitor already communicated
+        CommonNTS::Write<uint32_t>(msg_str,
+                                   (uint32_t)new_peer.address().to_v4().to_ulong());
+        CommonNTS::Write<uint16_t>(msg_str,
+                                   source_ports_to_monitors[peer_number]);
+      } else {
+        // Send all information necessary for port prediction to the
+        // existing peers
+
+        //EMS check
+        ip::udp::endpoint sent_peer = new_peer;
+        if (new_peer.address() == peer_iter->address())
+        {
+          sent_peer = peer_pairs_[new_peer];
+        }
+
+        CommonNTS::Write<uint32_t>(msg_str,
+                                   (uint32_t) sent_peer.address().to_v4().to_ulong());
+        CommonNTS::Write<uint16_t>(msg_str, min_known_source_port);
+        CommonNTS::Write<uint16_t>(msg_str, port_step);
+        // Splitter is "peer number 0", thus add 1
+        CommonNTS::Write<uint16_t>(msg_str, peer_number+1);
+        if (this->peers_[*peer_iter].port_step_ != 0) {
+          // Send the port of this->extra_socket_ to determine the
+          // currently allocated source port of the incorporated peer
+          CommonNTS::Write<uint16_t>(msg_str, extra_listen_port);
+        }
+      }
+
+      // Hopefully one of these packets arrives
+      this->EnqueueMessage(3, std::make_pair(msg_str.str(), *peer_iter));
+    }
+
+    // Send packets to peers currently being incorporated
+    for (const auto& peer_iter : this->incorporating_peers_) {
+      const std::string& inc_peer_id = peer_iter.first;
+      if (inc_peer_id == peer_id) {
+        // Do not send the peer endpoint to the peer itself
+        continue;
+      }
+
+      LOG("Sending peer " << new_peer << " to " << inc_peer_id);
+      const ip::udp::endpoint& peer = peer_iter.second.peer_;
+
+      //EMS check
+      ip::udp::endpoint sent_peer = new_peer;
+      if (new_peer.address() == peer.address())
+      {
+        sent_peer = peer_pairs_[new_peer];
+      }
+
+      std::ostringstream msg_str;
+      msg_str << peer_id;
+      CommonNTS::Write<uint32_t>(msg_str,
+                                 (uint32_t)sent_peer.address().to_v4().to_ulong());
+      CommonNTS::Write<uint16_t>(msg_str, min_known_source_port);
+      CommonNTS::Write<uint16_t>(msg_str, port_step);
+      // Send the length of the peer_list as peer_number
+      CommonNTS::Write<uint16_t>(msg_str, this->peer_list_.size()+1);
+      // Hopefully one of these packets arrives
+      this->EnqueueMessage(3, std::make_pair(msg_str.str(), peer));
     }
   }
 

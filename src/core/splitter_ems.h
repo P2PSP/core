@@ -46,6 +46,11 @@ class SplitterEMS : public SplitterNTS {
 
   virtual void RemovePeer(const boost::asio::ip::udp::endpoint &peer) override;
 
+  virtual void SendNewPeer(const std::string& peer_id,
+                           const boost::asio::ip::udp::endpoint& new_peer,
+                           const std::vector<uint16_t>& source_ports_to_monitors,
+                           uint16_t port_step) override ;
+
 
 
 };
