@@ -131,6 +131,7 @@ namespace p2psp {
     
     SendConfiguration(serve_socket);
     //SendTheListOfPeers(serve_socket);
+    ReceiveReadyForReceivingChunks(serve_socket);
     serve_socket->close();
     boost::asio::ip::udp::endpoint incoming_peer_udp(incoming_peer.address(), incoming_peer.port());
     InsertPeer(incoming_peer_udp);

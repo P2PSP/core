@@ -14,11 +14,13 @@
 #include <stdio.h>
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/buffer.hpp>
 #include <boost/thread/thread.hpp>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <tuple>
+//include <vector>
 #include "../util/trace.h"
 #include "common.h"
 
@@ -141,6 +143,8 @@ namespace p2psp {
 
     // Thread management
     virtual void Run();
+
+    void ReceiveReadyForReceivingChunks(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock);
 
   };
 }

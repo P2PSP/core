@@ -325,6 +325,11 @@ namespace p2psp {
     SendBufferSize(sock);
   }
 
+  void Splitter_core::ReceiveReadyForReceivingChunks(const std::shared_ptr<boost::asio::ip::tcp::socket> &sock) {
+    boost::array<char, 1> buffer;
+    boost::asio::read(*sock, boost::asio::buffer(buffer));
+  }
+  
   void Splitter_core::HandleAPeerArrival(std::shared_ptr<boost::asio::ip::tcp::socket>) {}
 
   void Splitter_core::HandleArrivals() {

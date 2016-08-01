@@ -160,6 +160,14 @@ namespace p2psp {
     // }}}
   }
 
+  void Peer_core::SendReadyForReceivingChunks() {
+    std::string x = "R";
+    boost::asio::write
+      (splitter_socket_,
+       boost::asio::buffer(x,x.length())
+       );
+  }
+  
   int Peer_core::ProcessMessage(const std::vector<char>&,
 				const ip::udp::endpoint&) { return 0; }
   
@@ -375,7 +383,7 @@ namespace p2psp {
      */
 
     PlayNextChunk(chunk_number);
-#if defined __DEBUG__ || defined __BUFFERING__
+#if defined __DEBUG__ || defined __BUFFER__
     std::string bf="";
     for (int i = 0; i<buffer_size_; i++) {
       if (chunk_ptr[i].chunk_number != -1) {
@@ -428,8 +436,7 @@ namespace p2psp {
 
     // }}}
   }
-#ifdef _1_
-  // Delete?
+
   void Peer_core::LogMessage(const std::string &message) {
     // {{{
 
@@ -449,7 +456,6 @@ namespace p2psp {
 
 	  // }}}
   }
-#endif
 
   void Peer_core::Run() {
     // {{{

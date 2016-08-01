@@ -81,6 +81,7 @@ namespace p2psp {
 	  << ")");
 #endif
     SendConfiguration(serve_socket);
+    ReceiveReadyForReceivingChunks(serve_socket);
     serve_socket->close();
   }
 

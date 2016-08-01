@@ -111,6 +111,8 @@ namespace p2psp {
 
     virtual void ReceiveNextMessage(std::vector<char>& message, ip::udp::endpoint& sender);
 
+    void SendReadyForReceivingChunks(void);
+    
     /*virtual void ReceiveMagicFlags(void);
       virtual char GetMagicFlags();*/
 
