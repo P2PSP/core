@@ -35,7 +35,7 @@ namespace p2psp {
 
 
 
-
+//method mostly identical to the NTS variant, with slight change to include public->private endpoint matching and lookup when peers are sent out
   void SplitterEMS::SendTheListOfPeers2(
           const std::shared_ptr<ip::tcp::socket> &peer_serve_socket,
           const ip::udp::endpoint& peer) {
@@ -132,7 +132,7 @@ namespace p2psp {
   }
 
 
-
+//Method mostly identical to NTS variant, with small change to include receiving of private endpoint message from incoming peer
   void SplitterEMS::HandleAPeerArrival(
           std::shared_ptr<boost::asio::ip::tcp::socket> serve_socket) {
     // This method implements the NAT traversal algorithms.
