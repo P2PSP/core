@@ -17,6 +17,9 @@
 #include "openssl/dsa.h"
 #include <exception>
 #include <boost/tokenizer.hpp>
+#include <map>
+#include <vector>
+#include <set>
 
 namespace p2psp {
 
@@ -29,7 +32,6 @@ public:
 
 class SplitterSTRPEDS : public SplitterDBS {
  protected:
-  
   const int kDigestSize = 40;
   const int kGatherBadPeersSleep = 5;
   const bool kLogging = false;
@@ -45,10 +47,19 @@ class SplitterSTRPEDS : public SplitterDBS {
   std::ofstream log_file_;
   std::ifstream trusted_file_;
   int current_round_;
- 
+
   std::vector<boost::asio::ip::udp::endpoint> trusted_peers_;
   std::vector<boost::asio::ip::udp::endpoint> trusted_peers_discovered_;
   std::vector<boost::asio::ip::udp::endpoint> bad_peers_;
+
+	// P2PSP TMS
+	bool isTmsEnable = false;
+	double maxTrust = 2.;
+	double incr = .05;
+	double decr = .05;
+	std::map<boost::asio::ip::udp::endpoint, int> peer_lifetimes_;
+	std::map<boost::asio::ip::udp::endpoint, std::set<boost::asio::ip::udp::endpoint> > peer_unique_complains_;
+	std::map<boost::asio::ip::udp::endpoint, double> peer_penalties_;
 
   int gathering_counter_;
   int trusted_gathering_counter_;
@@ -57,7 +68,7 @@ class SplitterSTRPEDS : public SplitterDBS {
   int majority_ratio_;
 
   DSA* dsa_key;
-  
+
   //endpoint -> position in the complains_ vector.
   std::map<boost::asio::ip::udp::endpoint, int> complains_map_;
 
@@ -92,7 +103,7 @@ class SplitterSTRPEDS : public SplitterDBS {
   void RefreshTPs();
   void PunishPeers();
   void PunishTPs();
-  
+
   void SetLogging(bool enabled);
   void SetPMPL(int probability);
   int GetPMPL();
@@ -103,9 +114,16 @@ class SplitterSTRPEDS : public SplitterDBS {
   std::string BuildLogMessage(const std::string &message);
 
   void IncrementUnsupportivityOfPeer(const boost::asio::ip::udp::endpoint &peer) override;
-  
-  //void SetLogging(bool enabled);
-  //void SetLogFile(const std::string &filename);
+
+	void setTmsEnable(bool value);
+	double ComputePeerTrustValue(const boost::asio::ip::udp::endpoint &peer);
+	void RunTMS();
+	void SetMaxTrust(double maxTrust);
+	double GetMaxTrust();
+	void SetIncr(double incr);
+	double GetIncr();
+	void SetDecr(double decr);
+	double GetDecr();
 
   // Thread management
   void Start();
