@@ -5,8 +5,8 @@ BRIDGES="localNet publicNet"
 
 # Namespace addresses
 pc1="192.168.56.4"
-pc2="192.168.58.5"
-nat1="192.168.56.5"
+pc2="192.168.56.5"
+nat1="192.168.56.6"
 splitter="192.168.57.6"
 monitor="192.168.57.7"
 # NAT addresses towards the "internet"
@@ -23,7 +23,7 @@ for NAMESPACE in $NAMESPACES; do
     # Enable loopback device
     ip netns exec $NAMESPACE ip link set dev lo up
 done
-echo "here"
+
 
 # Create bridges
 for BRIDGE in $BRIDGES; do
@@ -70,7 +70,7 @@ done
 
 # Run sshd
 for NAMESPACE in $NAMESPACES; do
-    ip netns exec $NAMESPACE /usr/bin/sshd
+    ip netns exec $NAMESPACE /usr/sbin/sshd
 done
 
 # Configure packet forwarding
