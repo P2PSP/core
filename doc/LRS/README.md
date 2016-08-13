@@ -38,7 +38,7 @@ that
 		\label{eq:buffer_size_peers_LRS}
 	\end{equation}
 
-if LRS is used and the buffer size of monitors peers is B/2.
+if LRS is used, the buffer size of monitors peers is B/2.
 
 Rules
 -----
