@@ -21,6 +21,7 @@ namespace p2psp {
     Splitter_IMS();
     ~Splitter_IMS();
 
+    void Init();
     void SendMcastGroup(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     //int GetRecvFromCounter();
     //int GetSendToCounter();

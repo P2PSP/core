@@ -33,6 +33,7 @@ namespace p2psp {
     Splitter_core();
     ~Splitter_core();
 
+    void Init();
     void SendBufferSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     void SendChunkSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);
     void SendChannel(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket);

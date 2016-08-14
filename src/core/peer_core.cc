@@ -204,11 +204,6 @@ namespace p2psp {
       chunk_ptr[i].chunk_number = -1;
     }
     
-    // Wall time (execution time plus waiting time).
-    //#ifdef __DEBUG__
-    clock_t start_time = clock();
-    //#endif
-    
     // We will send a chunk to the player when a new chunk is
     // received. Besides, those slots in the buffer that have not been
     // filled by a new chunk will not be send to the
@@ -257,12 +252,6 @@ namespace p2psp {
           << std::to_string(team_socket_.local_endpoint().port())
 	  << ")");
 #endif
-#ifdef _1_
-    std::cout
-      << std::setw(4)
-      << /*std::to_string(*/100.0 / buffer_size_/*)*/;
-    // TODO: Justify: .rjust(4)
-#endif
     
     // Now, fill up to the half of the buffer.
 
@@ -294,13 +283,12 @@ namespace p2psp {
       while ((chunk_number = ProcessNextMessage()) < 0);
     }
 
-    latest_chunk_number_ = chunk_number;
+    std::cout
+      << std::endl;
+    
+    prev_received_chunk_ = chunk_number;
 
     //TRACE("");
-    std::cout
-      << "latency = "
-      << std::to_string((clock() - start_time) / (float)CLOCKS_PER_SEC)
-      << " seconds" << std::endl;
     //TRACE("buffering done.");
     //TraceSystem::Flush();
 
@@ -367,9 +355,9 @@ namespace p2psp {
     //    if chunk_number >= 0:
     //        break
 
-    int chunk_number = ProcessNextMessage();
-    while (chunk_number < 0) {
-      chunk_number = ProcessNextMessage();
+    int last_received_chunk = ProcessNextMessage();
+    while (last_received_chunk < 0) {
+      last_received_chunk = ProcessNextMessage();
     }
     // while ((chunk_number - self.played_chunk) % self.buffer_size) <
     // self.buffer_size/2:
@@ -382,7 +370,7 @@ namespace p2psp {
     }
      */
 
-    PlayNextChunk(chunk_number);
+    PlayNextChunks(last_received_chunk);
 #if defined __DEBUG__ || defined __BUFFER__
     std::string bf="";
     for (int i = 0; i<buffer_size_; i++) {
@@ -406,12 +394,17 @@ namespace p2psp {
 
   bool Peer_core::PlayChunk(/*std::vector<char> chunk*/int chunk_number) { return true; }
   
-  void Peer_core::PlayNextChunk(int chunk_number) {
+  void Peer_core::PlayNextChunks(int last_received_chunk) {
     // {{{
     
-    for (int i = 0; i < (chunk_number-latest_chunk_number_); i++) {
+    for (int i = 0; i < (last_received_chunk-prev_received_chunk_); i++) {
       //if (chunk_ptr[played_chunk_ /*% buffer_size_*/].chunk_number != -1)
       player_alive_ = PlayChunk(chunk_ptr[played_chunk_ % buffer_size_].chunk_number);
+#if defined __DEBUG__ || defined __TRAFFIC__
+      TRACE
+	("Chunk consumed at buffer position "
+	 << played_chunk_ % buffer_size_);
+#endif
 #if defined __DEBUG__|| defined __LOST_CHUNKS__
       if (chunk_ptr[played_chunk_ % buffer_size_].chunk_number == -1) {
 	TRACE
@@ -419,20 +412,13 @@ namespace p2psp {
 	   << played_chunk_);
       }
 #endif
-#if defined __DEBUG__ || defined __TRAFFIC__
-      TRACE
-	("Chunk "
-	 << chunk_number
-	 << " consumed at buffer position "
-	 << played_chunk_ % buffer_size_);
-#endif
       chunk_ptr[played_chunk_ % buffer_size_].chunk_number = -1;
       played_chunk_ = (played_chunk_ + 1) % Common::kMaxChunkNumber;
       //played_chunk_++;
     }
     
-    if ((latest_chunk_number_ % Common::kMaxChunkNumber) < chunk_number)
-      latest_chunk_number_ = chunk_number;
+    if ((prev_received_chunk_ % Common::kMaxChunkNumber) < last_received_chunk)
+      prev_received_chunk_ = last_received_chunk;
 
     // }}}
   }

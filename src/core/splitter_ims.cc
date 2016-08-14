@@ -30,7 +30,9 @@ namespace p2psp {
 
   Splitter_IMS::~Splitter_IMS() {}
 
-
+  void Splitter_IMS::Init() {
+  }
+  
   void Splitter_IMS::SetupTeamSocket() {
     system::error_code ec;
 

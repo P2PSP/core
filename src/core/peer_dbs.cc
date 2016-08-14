@@ -224,7 +224,7 @@ namespace p2psp {
     // {{{
 
 #if defined __DEBUG__ || defined __PARAMS__
-    TRACE("splitter port = "
+    TRACE("connecting to the splitter using port = "
 	  << splitter_socket_.local_endpoint().port());
 #endif
     
@@ -247,208 +247,86 @@ namespace p2psp {
 			       const ip::udp::endpoint &sender) {
     // {{{
     
-    // Now, receive and send.
+    if (message.size() == message_size_) {
+      // {{{ A media chunk has been received
 
-      /*#if defined __DEBUG_TRAFFIC__
-    TRACE("Size: "
-	  << message.size()
-	  << " vs "
-	  << message_size_)
-	  #endif*/
-    
-      // TODO: remove hardcoded values
-      if (message.size() == message_size_) {
+      ip::udp::endpoint peer;	
+      uint16_t chunk_number = ntohs(*(uint16_t *) message.data());
+
+      chunk_ptr[chunk_number % buffer_size_].data
+	= std::vector<char>(message.data() + sizeof(uint16_t), message.data() + message.size());
+      chunk_ptr[chunk_number % buffer_size_].chunk_number = chunk_number /*% buffer_size_*/;
+
+      /*chunks_[chunk_number % buffer_size_] = {
+	std::vector<char>(message.data() + sizeof(uint16_t),
+	message.data() + sizeof(uint16_t) + chunk_size_),
+	true};*/
+	
+#if defined __DEBUG__ || defined __TRAFFIC__
+      TRACE("Chunk "
+	    << chunk_number
+	    << " received from "
+	    << "("
+	    << sender.address().to_string()
+	    << ","
+	    << std::to_string(sender.port())
+	    << ")"
+	    << " inserted at position "
+	    << (chunk_number % buffer_size_));
+#endif
+	
+      received_counter_++;
+	
+      if (sender == splitter_) {
 	// {{{
 
-	// A video chunk has been received
-	ip::udp::endpoint peer;
-	
-	uint16_t chunk_number = ntohs(*(uint16_t *) message.data());
-
-	chunk_ptr[chunk_number % buffer_size_].data
-	  = std::vector<char>(message.data() + sizeof(uint16_t), message.data() + message.size());
-	chunk_ptr[chunk_number % buffer_size_].chunk_number = chunk_number /*% buffer_size_*/;
-
-	/*chunks_[chunk_number % buffer_size_] = {
-	  std::vector<char>(message.data() + sizeof(uint16_t),
-			    message.data() + sizeof(uint16_t) + chunk_size_),
-			    true};*/
-	
-#if defined __DEBUG__ || defined __BUFFERING__
-	TRACE("Chunk Inserted at: "
-	      << (chunk_number % buffer_size_));
-#endif
-	
-	received_counter_++;
-
-	if (sender == splitter_) {
-	  // {{{
-
-	  // Send the previous chunk in burst sending
-	  // mode if the chunk has not been sent to all
-	  // the peers of the list of peers.
-
-#if defined __DEBUG__ || defined __TRAFFIC__
+	// Send the previous chunk in burst sending
+	// mode if the chunk has not been sent to all
+	// the peers of the list of peers.
+	/*
+	  #if defined __DEBUG__ || defined __TRAFFIC__
 	  TRACE("("
-		<< team_socket_.local_endpoint().address().to_string()
-		<< ","
-		<< std::to_string(team_socket_.local_endpoint().port())
-		<< ")"
-		<< "<-"
-		<< std::to_string(chunk_number)
-		<< "-"
-		<< "("
-		<< sender.address().to_string()
-		<< ","
-		<< std::to_string(sender.port())
-		<< ")");
-#endif
-	  
-	  while (receive_and_feed_counter_ < (int) peer_list_.size()
-		 && (receive_and_feed_counter_ > 0 or modified_list_)) {
-	    // {{{
-
-	    peer = peer_list_[receive_and_feed_counter_];
-	    
-	    team_socket_.send_to(buffer(receive_and_feed_previous_), peer);
-	    sendto_counter_++;
-
-#if defined __DEBUG__ || defined __TRAFFIC__
-	    TRACE("("
-		  << team_socket_.local_endpoint().address().to_string()
-		  << ","
-		  << std::to_string(team_socket_.local_endpoint().port())
-		  << ")"
-		  << "-"
-		  << std::to_string(ntohs(*(uint16_t *)receive_and_feed_previous_.data()))
-		  << "->"
-		  << "(" << peer.address().to_string()
-		  << ","
-		  << std::to_string(peer.port())
-		  << ")");
-#endif
-
-	    debt_[peer]++;
-	      
-	    if (debt_[peer] > max_chunk_debt_/*kMaxChunkDebt*/) {
-#if defined __DEBUG__ || defined __CHURN__
-	      TRACE("("
-		    << peer.address().to_string()
-		    << ","
-		    << std::to_string(peer.port())
-		    << ")"
-		    << " removed by unsupportive (" + std::to_string(debt_[peer]) + " lossess)");
-#endif
-	      debt_.erase(peer);
-	      peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), peer));
-	      //receive_and_feed_counter_--;
-	    }
-	    
-	    receive_and_feed_counter_++;
-
-	    // }}}
-	  }
-
-	  // Start playback with the first chunk received from the splitter //
-	  std::vector<char> empty(message_size_, 0);
-	  if (receive_and_feed_previous_ == empty) {
-	    // {{{
-
-	    played_chunk_ = ntohs(*(uint16_t *)message.data());
-#if defined __DEBUG__ || defined __BUFFERING__
-	    TRACE("First chunk to play modified "
-		  << std::to_string(played_chunk_));
-#endif
-
-	    // }}}
-	  }
-	  // --------------------------------------------- //
-	    
-	  modified_list_ = false;
-
-#if defined __DEBUG__ || defined __TRAFFIC__
-	  TRACE("Sent "
-		<< receive_and_feed_counter_
-		<< " of "
-		<< peer_list_.size());
-	  TRACE("Last Chunk saved in receive and feed: "
-		<< ntohs(*(uint16_t *)message.data()));
-#endif
-	  receive_and_feed_counter_ = 0;
-	  receive_and_feed_previous_ = message;
-
-	  // }}}
-	} else {
+	  << team_socket_.local_endpoint().address().to_string()
+	  << ","
+	  << std::to_string(team_socket_.local_endpoint().port())
+	  << ")"
+	  << "<-"
+	  << std::to_string(chunk_number)
+	  << "-"
+	  << "("
+	  << sender.address().to_string()
+	  << ","
+	  << std::to_string(sender.port())
+	  << ")");
+	  #endif
+	*/
+	while (receive_and_feed_counter_ < (int) peer_list_.size()
+	       && (receive_and_feed_counter_ > 0 or modified_list_)) {
 	  // {{{
 
-#if defined __DEBUG__ || defined __TRAFFIC__
-	  TRACE("("
-		<< team_socket_.local_endpoint().address().to_string()
-		<< ","
-		<< std::to_string(team_socket_.local_endpoint().port())
-		<< ")"
-		<< "<-"
-		<< std::to_string(chunk_number)
-		<< "-"
-		<< "(" << sender.address().to_string()
-		<< ","
-		<< std::to_string(sender.port())
-		<< ")");
-#endif
-	  if (peer_list_.end() == std::find(peer_list_.begin(), peer_list_.end(), sender)) {
-	    // {{{
-
-	    peer_list_.push_back(sender);
-	    debt_[sender] = 0;
-#if defined __DEBUG__ || defined __CHURN__
-	    TRACE("("
-		  << sender.address().to_string()
-		  << ","
-		  << std::to_string(sender.port())
-		  << ")"
-		  << " added by chunk "
-		  << std::to_string(chunk_number));
-#endif
-
-	    // }}}
-	  } else {
-	    // {{{
-
-	    debt_[sender]--;
-
-	    // }}}
-	  }
-
-	  // }}}
-	}
-	
-	// A new chunk has arrived and the previous must be forwarded
-	// to next peer of the list of peers.
-	
-	std::vector<char> empty(message_size_, 0);
-	
-	if (receive_and_feed_counter_ < (int) peer_list_.size() && receive_and_feed_previous_!=empty) {
-	  // {{{
-
-	  // Send the previous chunk in congestion avoiding mode.
-	  
 	  peer = peer_list_[receive_and_feed_counter_];
-#if defined __DEBUG__ || defined __TRAFFIC__
-	  TRACE("Sending in congestion avoiding mode to "
-		<< peer.address().to_string()
-		<< ":"
-		<< peer.port()
-		<< "/ counter "
-		<< receive_and_feed_counter_);
-#endif
+	    
 	  team_socket_.send_to(buffer(receive_and_feed_previous_), peer);
 	  sendto_counter_++;
-	  
-	  debt_[peer]++;
-	  
-	  if (debt_[peer] > max_chunk_debt_/*kMaxChunkDebt*/) {
-	    // {{{
 
+#if defined __DEBUG__ || defined __TRAFFIC__
+	  TRACE("("
+		<< team_socket_.local_endpoint().address().to_string()
+		<< ","
+		<< std::to_string(team_socket_.local_endpoint().port())
+		<< ")"
+		<< "-"
+		<< std::to_string(ntohs(*(uint16_t *)receive_and_feed_previous_.data()))
+		<< "->"
+		<< "(" << peer.address().to_string()
+		<< ","
+		<< std::to_string(peer.port())
+		<< ")");
+#endif
+
+	  debt_[peer]++;
+	      
+	  if (debt_[peer] > max_chunk_debt_/*kMaxChunkDebt*/) {
 #if defined __DEBUG__ || defined __CHURN__
 	    TRACE("("
 		  << peer.address().to_string()
@@ -460,119 +338,236 @@ namespace p2psp {
 	    debt_.erase(peer);
 	    peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), peer));
 	    //receive_and_feed_counter_--;
-
-	    // }}}
 	  }
-
-#if defined __DEBUG__ || defined __TRAFFIC__
-	  TRACE("("
-		<< team_socket_.local_endpoint().address().to_string()
-		<< ","
-		<< std::to_string(team_socket_.local_endpoint().port())
-		<< ")"
-		<< "-"
-		<< std::to_string(ntohs(*(short *)receive_and_feed_previous_.data()))
-		<< "->"
-		<< "("
-		<< peer.address().to_string()
-		<< ","
-		<< std::to_string(peer.port())
-		<< ")");
-#endif
-	  
+	    
 	  receive_and_feed_counter_++;
 
 	  // }}}
 	}
-	
-	return chunk_number;
+
+	// Start playback with the first chunk received from the splitter //
+	std::vector<char> empty(message_size_, 0);
+	if (receive_and_feed_previous_ == empty) {
+	  // {{{
+
+	  played_chunk_ = ntohs(*(uint16_t *)message.data());
+#if defined __DEBUG__ || defined __BUFFERING__
+	  TRACE("First chunk to play modified "
+		<< std::to_string(played_chunk_));
+#endif
+
+	  // }}}
+	}
+	// --------------------------------------------- //
+	    
+	modified_list_ = false;
+
+#if defined __DEBUG__ || defined __TRAFFIC__
+	TRACE("Sent "
+	      << receive_and_feed_counter_
+	      << " of "
+	      << peer_list_.size());
+	TRACE("Last Chunk saved in receive and feed: "
+	      << ntohs(*(uint16_t *)message.data()));
+#endif
+	receive_and_feed_counter_ = 0;
+	receive_and_feed_previous_ = message;
 
 	// }}}
       } else {
 	// {{{
 
-	// A control chunk has been received
-#if defined __DEBUG__ || defined __CHURN__
-	TRACE("Control message received");
+#if defined __DEBUG__ || defined __TRAFFIC__
+	TRACE("("
+	      << team_socket_.local_endpoint().address().to_string()
+	      << ","
+	      << std::to_string(team_socket_.local_endpoint().port())
+	      << ")"
+	      << "<-"
+	      << std::to_string(chunk_number)
+	      << "-"
+	      << "(" << sender.address().to_string()
+	      << ","
+	      << std::to_string(sender.port())
+	      << ")");
 #endif
-	if (message[0] == 'H') {
+	if (peer_list_.end() == std::find(peer_list_.begin(), peer_list_.end(), sender)) {
 	  // {{{
 
-	  if (peer_list_.end() == std::find(peer_list_.begin(), peer_list_.end(), sender)) {
+	  peer_list_.push_back(sender);
+	  debt_[sender] = 0;
+#if defined __DEBUG__ || defined __CHURN__
+	  TRACE("("
+		<< sender.address().to_string()
+		<< ","
+		<< std::to_string(sender.port())
+		<< ")"
+		<< " added by chunk "
+		<< std::to_string(chunk_number));
+#endif
+
+	  // }}}
+	} else {
+	  // {{{
+
+	  debt_[sender]--;
+
+	  // }}}
+	}
+
+	// }}}
+      }
+	
+      // A new chunk has arrived and the previous must be forwarded
+      // to next peer of the list of peers.
+	
+      std::vector<char> empty(message_size_, 0);
+	
+      if (receive_and_feed_counter_ < (int) peer_list_.size() && receive_and_feed_previous_!=empty) {
+	// {{{
+
+	// Send the previous chunk in congestion avoiding mode.
+	  
+	peer = peer_list_[receive_and_feed_counter_];
+#if defined __DEBUG__ || defined __TRAFFIC__
+	TRACE("Sending in congestion avoiding mode to "
+	      << peer.address().to_string()
+	      << ":"
+	      << peer.port()
+	      << "/ counter "
+	      << receive_and_feed_counter_);
+#endif
+	team_socket_.send_to(buffer(receive_and_feed_previous_), peer);
+	sendto_counter_++;
+	  
+	debt_[peer]++;
+	  
+	if (debt_[peer] > max_chunk_debt_/*kMaxChunkDebt*/) {
+	  // {{{
+
+#if defined __DEBUG__ || defined __CHURN__
+	  TRACE("("
+		<< peer.address().to_string()
+		<< ","
+		<< std::to_string(peer.port())
+		<< ")"
+		<< " removed by unsupportive (" + std::to_string(debt_[peer]) + " lossess)");
+#endif
+	  debt_.erase(peer);
+	  peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), peer));
+	  //receive_and_feed_counter_--;
+
+	  // }}}
+	}
+
+#if defined __DEBUG__ || defined __TRAFFIC__
+	TRACE("("
+	      << team_socket_.local_endpoint().address().to_string()
+	      << ","
+	      << std::to_string(team_socket_.local_endpoint().port())
+	      << ")"
+	      << "-"
+	      << std::to_string(ntohs(*(short *)receive_and_feed_previous_.data()))
+	      << "->"
+	      << "("
+	      << peer.address().to_string()
+	      << ","
+	      << std::to_string(peer.port())
+	      << ")");
+#endif
+	  
+	receive_and_feed_counter_++;
+
+	// }}}
+      }
+	
+      return chunk_number;
+
+      // }}}
+    } else {
+      // {{{ A control message has been received
+
+#if defined __DEBUG__ || defined __CHURN__
+      TRACE("Control message received");
+#endif
+      if (message[0] == 'H') {
+	// {{{ [hello] received
+
+	if (peer_list_.end() == std::find(peer_list_.begin(), peer_list_.end(), sender)) {
+	  // {{{ The peer is new
+
+	  peer_list_.push_back(sender);
+	  debt_[sender] = 0;
+#if defined __DEBUG__ || defined __CHURN__
+	  TRACE("("
+		<< sender.address().to_string()
+		<< ","
+		<< std::to_string(sender.port())
+		<< ")"
+		<< " added by [hello] ");
+#endif
+
+	  // }}}
+	}
+
+	// }}}
+      } else {
+	// {{{ [goodbye] received
+
+	if (peer_list_.end() != std::find(peer_list_.begin(), peer_list_.end(), sender)) {
+	  // {{{ If the peer is in the list of peers
+
+#if defined __DEBUG__ || defined __CHURN__
+	  TRACE("("
+		<< team_socket_.local_endpoint().address().to_string()
+		<< ","
+		<< std::to_string(team_socket_.local_endpoint().port())
+		<< ") \b: received \"goodbye\" from ("
+		<< sender.address().to_string()
+		<< ","
+		<< std::to_string(sender.port())
+		<< ")");
+#endif
+	  // sys.stdout.write(Color.none)
+	  peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(),sender));
+	  debt_.erase(sender);
+	  if (receive_and_feed_counter_ > 0){
 	    // {{{
 
-	    // The peer is new
-	    peer_list_.push_back(sender);
-	    debt_[sender] = 0;
-#if defined __DEBUG__ || defined __CHURN__
-	    TRACE("("
-		  << sender.address().to_string()
-		  << ","
-		  << std::to_string(sender.port())
-		  << ")"
-		  << " added by [hello] ");
-#endif
+	    modified_list_ = true;
+	    receive_and_feed_counter_--;
 
 	    // }}}
 	  }
 
 	  // }}}
 	} else {
-	  // {{{
+	  // {{{ the peer is not in the list of peers and should be ignored, but the [goodbye] could came from the splitter
 
-	  if (peer_list_.end() != std::find(peer_list_.begin(), peer_list_.end(), sender)) {
+	  if (sender == splitter_){
 	    // {{{
 
 #if defined __DEBUG__ || defined __CHURN__
-	    TRACE("("
-		  << team_socket_.local_endpoint().address().to_string()
-		  << ","
-		  << std::to_string(team_socket_.local_endpoint().port())
-		  << ") \b: received \"goodbye\" from ("
-		  << sender.address().to_string()
-		  << ","
-		  << std::to_string(sender.port())
-		  << ")");
+	    TRACE("Goodbye received from splitter");
 #endif
-	    // sys.stdout.write(Color.none)
-	    peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(),sender));
-	    debt_.erase(sender);
-	    if (receive_and_feed_counter_ > 0){
-	      // {{{
-
-	      modified_list_ = true;
-	      receive_and_feed_counter_--;
-
-	      // }}}
-	    }
-
-	    // }}}
-	  } else {
-	    // {{{
-
-	    if (sender == splitter_){
-	      // {{{
-
-#if defined __DEBUG__ || defined __CHURN__
-	      TRACE("Goodbye received from splitter");
-#endif
-	      waiting_for_goodbye_ = false;
-
-	      // }}}
-	    }
+	    waiting_for_goodbye_ = false;
 
 	    // }}}
 	  }
 
 	  // }}}
 	}
-	
-	return -1;
 
 	// }}}
       }
-    
-    return -1;
+	
+      return -1;
+
+      // }}}
+    }
+
+    TRACE("This message never should be printed")
+      //return -1;
 
     // }}}
   }

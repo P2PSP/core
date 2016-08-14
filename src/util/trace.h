@@ -70,16 +70,16 @@ namespace p2psp
 
 #endif // TRACE_NO_COLORS
 
-#ifndef TRACE_SILENT_MODE
-
-//#ifndef NDEBUG
-#if defined __DEBUG__ || defined __DEBUG_LOST_CHUNKS__
-
 #define LOG(a)  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) << a; }
 
 #define LOGC(c, a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) << _SET_COLOR(c) << a << _RESET_COLOR(); }
 
-#define ERROR(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::error) << _SET_COLOR(_RED) << __FILE__ << ":" << __LINE__ << ": ERROR: " << a << _RESET_COLOR(); }
+//#define ERROR(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::error) << _SET_COLOR(_RED) << __FILE__ << ":" << __LINE__ << ": ERROR: " << a << _RESET_COLOR(); }
+
+#define ERROR(a)    \
+  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::error)  \
+    << _SET_COLOR(_RED) << __FILE__ << ":" << __LINE__ << ": ERROR: " \
+    << a << _RESET_COLOR(); }
 
 #define WARNING(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::warning) << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": WARNING: " << a << _RESET_COLOR(); }
 
@@ -95,32 +95,5 @@ namespace p2psp
 #define TRACE(a)    {struct timeval tp;gettimeofday(&tp, NULL);long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;std::cout << ms << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a  << _RESET_COLOR() << std::endl;}
 #define ERROR(a)    {std::cout << a << std::endl;}
 */
-
-#else
-
-#define LOG(a)      {}
-#define LOGC(c, a)  {}
-#define WARNING(a)  {}
-#define DEBUG(a)    {}
-
-#define ERROR(a)    \
-  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::error)  \
-    << _SET_COLOR(_RED) << __FILE__ << ":" << __LINE__ << ": ERROR: " \
-    << a << _RESET_COLOR(); }
-
-#define TRACE(a)    {}
-
-#endif // NDEBUG
-
-#else // TRACE_SILENT_MODE
-
-#define LOG(a)      {}
-#define LOGC(c, a)  {}
-#define ERROR(a)    {}
-#define WARNING(a)  {}
-#define DEBUG(a)    {}
-#define TRACE(a)    {}
-
-#endif // TRACE_SILENT_MODE
 
 #endif // P2PSP_UTIL_TRACE_H

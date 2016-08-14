@@ -64,8 +64,8 @@ namespace p2psp {
     ip::tcp::socket splitter_socket_;
     ip::udp::socket team_socket_;
     boost::thread_group thread_group_;
-    int previous_chunk_number_ = 0;
-    int latest_chunk_number_ = 0;
+    //int previous_chunk_number_ = 0;
+    int prev_received_chunk_ = 0;
     bool kLogging = false;
     std::string kLogFile;
     bool logging_;
@@ -121,8 +121,8 @@ namespace p2psp {
 			       const ip::udp::endpoint&);
     virtual void BufferData();
     virtual void KeepTheBufferFull();
-    virtual void PlayNextChunk(int chunk_number); // Ojo, possible overlaping with PlayChunk()
-    virtual bool PlayChunk(/*std::vector<char> chunk*/int chunk_number); // Ojo, possible overlaping with PlayNextChunk()
+    virtual void PlayNextChunks(int last_received_chunk);
+    virtual bool PlayChunk(int chunk);
     virtual int  GetPlayedChunk();
 
     virtual void Run();
