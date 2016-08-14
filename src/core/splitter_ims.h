@@ -22,7 +22,7 @@
 #include <sstream>
 #include <string>
 #include <tuple>
-//#include "../util/trace.h"
+#include "../util/trace.h"
 #include "common.h"
 
 namespace p2psp {
@@ -54,7 +54,6 @@ namespace p2psp {
 
     // TODO: SendChunk can be used instead if the increment of sendto_counter
     // doesn't matter
-    void SayGoodbye();
 
     // Thread management
     virtual void Start();

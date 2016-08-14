@@ -24,9 +24,10 @@ namespace p2psp {
     static const int kMaxChunkNumber = 65536;
     // MAX_CHUNK_NUMBER = 2048
     // COUNTERS_TIMING = 0.1
-    static const int kCountersTiming = 1;
+    static const int kCountersTiming = 1; // In seconds
 
     static const bool kConsoleMode = true;
+
 
     // IMS is enables by defining an IP multicast address
     static const char kDBS = 0;  // DBS magic number
@@ -36,6 +37,7 @@ namespace p2psp {
     static const char kEMS = 8;  // EMS magic number
     static const char kDIS = 16;  // DIS magic number
     static const char kSTRPE= 32;  // STRPE magic number
+
 
     // TODO: Use colors
     // IMS_COLOR = Color.red
@@ -47,7 +49,7 @@ namespace p2psp {
 
     static void sha256(std::vector<char> string, std::vector<char> &digest) {
       SHA256((unsigned char *)string.data(), string.size(),
-             (unsigned char *)digest.data());
+    		  (unsigned char *)digest.data());
     }
   };
 }

@@ -16,22 +16,34 @@
 
 #include "trusted_peer.h"
 #include "../util/trace.h"
+#include "openssl/dsa.h"
+#include "common.h"
 
 namespace p2psp {
 
 using namespace boost::asio;
 
-class PeerStrpeDs : public TrustedPeer {
+class PeerSTRPEDS: public PeerDBS {
  protected:
   std::vector<ip::udp::endpoint> bad_peers_;
+  ip::udp::endpoint current_sender_;
+
+  DSA* dsa_key;
+  uint32_t current_round_;
+  int losses_;
+  int played_;
 
  public:
-  PeerStrpeDs(){
-    magic_flags_ = Common::kSTRPE;
+
+  PeerSTRPEDS(){
+  magic_flags_ = Common::kSTRPE;
   };
-  ~PeerStrpeDs(){};
+  ~PeerSTRPEDS(){};
+
   virtual void Init() override;
   virtual bool IsCurrentMessageFromSplitter();
+  void SetLogging(bool enabled);
+  void SetLogFile(const std::string &filename);
   virtual void ReceiveTheNextMessage(std::vector<char> &,
                                      ip::udp::endpoint &) override;
   virtual void ReceiveDsaKey();
@@ -42,6 +54,16 @@ class PeerStrpeDs : public TrustedPeer {
   virtual int HandleBadPeersRequest();
   virtual int ProcessMessage(const std::vector<char> &,
                              const ip::udp::endpoint &) override;
+  virtual void PlayNextChunk(int chunk_number) override;
+  virtual void Complain(int chunk_number);
+  virtual std::string BuildLogMessage(const std::string &message) override;
+
+  virtual void WaitForThePlayer() override;
+  virtual void ReceiveTheHeader() override;
+
+  virtual uint32_t GetCurrentRound();
+  virtual void SetCurrentRound(uint32_t current_round);
+  virtual void SetPlayerAlive(bool status);
 };
 }
 

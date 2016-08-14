@@ -19,6 +19,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/thread.hpp>
 #include <ctime>
+#include <fstream>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -31,7 +32,7 @@ namespace p2psp {
 
   struct Chunk {
     std::vector<char> data;
-    bool received;
+    int received;
   };
 
   class PeerIMS {
@@ -60,6 +61,7 @@ namespace p2psp {
     unsigned int message_size_;
     int chunk_size_;
     std::vector<Chunk> chunks_;
+    Chunk *chunk_ptr;
     int header_size_in_chunks_;
     ip::address mcast_addr_;
     uint16_t mcast_port_;
@@ -76,6 +78,12 @@ namespace p2psp {
     ip::udp::socket team_socket_;                         // Used to communicate with the rest of the team
     boost::thread_group thread_group_;                    // Thread group to join all threads
     std::vector<ip::udp::endpoint> peer_list_;            // DBS variables
+    int previous_chunk_number_=0;
+    int latest_chunk_number_ = 0;
+    bool kLogging = false;
+    std::string kLogFile;
+    bool logging_;
+    std::ofstream log_file_;
 
   public:
 
@@ -118,7 +126,7 @@ namespace p2psp {
     virtual void BufferData();
     virtual int FindNextChunk();
     virtual void PlayChunk(int);
-    virtual void PlayNextChunk();
+    virtual void PlayNextChunk(int chunk_number);
     virtual void KeepTheBufferFull();
 
     /**
@@ -128,9 +136,15 @@ namespace p2psp {
     virtual void Start();
 
     /**
+     * Log Messages
+     */
+    virtual void LogMessage(const std::string&);
+    virtual std::string BuildLogMessage(const std::string&);
+
+    /**
      *  Getters/setters
      */
-    virtual char GetMagicFlags();
+    //virtual char GetMagicFlags();
     //virtual std::string GetMcastAddr();
     virtual ip::address GetMcastAddr();
     virtual bool IsPlayerAlive();
