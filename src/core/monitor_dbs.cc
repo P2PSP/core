@@ -18,7 +18,7 @@ namespace p2psp {
   Monitor_DBS::~Monitor_DBS(){};
 
   void Monitor_DBS::Init() {
-#if defined __DEBUG_SORS__
+#if defined __D__ || defined __D_SORS__
     TRACE("Initialized");
 #endif
   }

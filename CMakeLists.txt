@@ -82,10 +82,10 @@ link_directories(${Boost_LIBRARY_DIR})
 
 # Initialize CXXFLAGS
 set(CMAKE_CXX_FLAGS                "-Wall -std=c++11")
-set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
+#set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
 #set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g -D__D__")
 #set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g -D__D__ -D__D_CHURN__ -D__D_LOST_CHUNKS__ -D__D_TRAFFIC__ -D__D_BUFFERING__")
-#set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g -D__D__ -D__D_CHURN__ -D__D_LOST_CHUNKS__")
+set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g -D__D__ -D__D_CHURN__ -D__D_LOST_CHUNKS__")
 #set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os")
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os")
 #set(CMAKE_CXX_FLAGS_RELEASE        "-O4")
