@@ -21,6 +21,22 @@ namespace p2psp {
       team_socket_(io_service_) {
     // {{{
 
+#if defined __D__
+    TRACE("Compiled with directive: __D__");
+#endif
+#if defined __D_CHURN__
+    TRACE("Compiled with directive: __D_CHURN__");
+#endif
+#if defined __D_CHURN__
+    TRACE("Compiled with directive: __D_LOST_CHUNKS__");
+#endif
+#if defined __D_CHURN__
+    TRACE("Compiled with directive: __D_TRAFFIC__");
+#endif
+#if defined __D_CHURN__
+    TRACE("Compiled with directive: __D_BUFFER__");
+#endif
+        
     //player_port_ = kPlayerPort;
     splitter_addr_ = ip::address::from_string(kSplitterAddr);
     splitter_port_ = kSplitterPort;
@@ -42,26 +58,18 @@ namespace p2psp {
     //received_flag_ = std::vector<bool>();
 
 #if defined __D__ || defined __D_SORS__
-    TRACE("Peer_core constructor");
+    TRACE("Peer_core constructor executed");
 #endif
-
     // }}}
   }
 
   Peer_core::~Peer_core() {
 #if defined __D__ || defined __D_SORS__
-    TRACE("Peer_core destructor");
+    TRACE("Peer_core destructor executed");
 #endif
   }
 
   void Peer_core::Init() {
-#if defined __D__
-    TRACE("Compiled with: __D__");
-#endif
-#if defined __D_CHURN__
-    TRACE("Compiled with: __D_CHURN__");
-#endif
-
   };
 
   void Peer_core::ConnectToTheSplitter() throw(boost::system::system_error) {
@@ -385,10 +393,10 @@ namespace p2psp {
       if (chunk_ptr[i].chunk_number != -1) {
 	// TODO: Avoid line feed in LOG function
 	//TRACE(std::to_string(i % 10));
-	bf=bf+"1";
+	bf=bf+"O";
       } else {
 	//TRACE(".");
-	bf=bf+"0";
+	bf=bf+".";
       }
     }
     LOG("Buffer state: "+bf);

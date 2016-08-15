@@ -144,8 +144,6 @@ namespace p2psp {
 	  << incoming_peer);
 #endif
 
-    std::cout << "HandleAPeerArrival" << std::endl;
-    
     SendConfiguration(serve_socket);
     //SendTheListOfPeers(serve_socket);
     ReceiveReadyForReceivingChunks(serve_socket);

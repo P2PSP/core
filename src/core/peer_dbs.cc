@@ -351,7 +351,7 @@ namespace p2psp {
 	  // {{{
 
 	  played_chunk_ = ntohs(*(uint16_t *)message.data());
-#if defined __D__ || defined __D_BUFFERING__
+#if defined __D__ || defined __D_BUFFER__
 	  TRACE("First chunk to play modified "
 		<< std::to_string(played_chunk_));
 #endif
@@ -608,7 +608,7 @@ namespace p2psp {
       }
     }
 
-#if defined __D__ || defined __D_BUFFERING__
+#if defined __D__ || defined __D_BUFFER__
     TRACE("Chunks in Buffer: " << chunks)
 #endif
     return chunks / (float)buffer_size_;

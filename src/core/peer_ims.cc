@@ -35,11 +35,13 @@ namespace p2psp {
     mcast_addr_ = ip::address::from_string(inet_ntoa(ip_raw));
     mcast_port_ = ntohs(*(short *)(raw_data + 4));
 
+#if defined __D__ || defined __D_CHURN__    
     TRACE("mcast_endpoint = ("
 	  << mcast_addr_.to_string()
 	  << ","
           << std::to_string(mcast_port_)
 	  << ")");
+#endif
 
     // }}}
   }
@@ -70,11 +72,13 @@ namespace p2psp {
     team_socket_.bind(endpoint);
     team_socket_.set_option(ip::multicast::join_group(mcast_addr_));
 
+#if defined __D__ || defined __D_CHURN__    
     TRACE("Listening to the mcast_channel = ("
 	  << mcast_addr_.to_string()
 	  << ","
           << std::to_string(mcast_port_)
           << ")");
+#endif
 
     // }}}
   }
