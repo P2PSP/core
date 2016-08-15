@@ -412,7 +412,6 @@ namespace p2psp {
     // {{{
 
     ConfigureSockets();
-    RequestTheVideoFromTheSource();
 
     /* A DBS splitter runs 4 threads. The main one and the
        "handle_arrivals" thread are equivalent to the daemons used
@@ -427,6 +426,7 @@ namespace p2psp {
     std::shared_ptr<asio::ip::tcp::socket> connection = make_shared<asio::ip::tcp::socket>(boost::ref(io_service_));
     acceptor_.accept(*connection);
     HandleAPeerArrival(connection);
+    RequestTheVideoFromTheSource();
 
     // Threads
     thread t1(bind(&Splitter_core::HandleArrivals, this));

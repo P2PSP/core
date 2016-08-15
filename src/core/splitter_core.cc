@@ -199,8 +199,16 @@ namespace p2psp {
 
     size_t bytes_transferred = asio::read(source_socket_, chunk, asio::transfer_exactly(chunk_size_), ec);
 
-    // TRACE("Success! Bytes transferred: " << bytes_transferred);
-
+#if defined __D__ || defined __D_SOURCE__ || defined __D_TRAFFIC__ || defined __D_BUFFER__
+    if ((int)bytes_transferred != (int)chunk_size_) {
+      WARNING("Warning. Received "
+	      << bytes_transferred
+	      << " while "
+	      << chunk_size_
+	      << "bytes should have been!" );
+    }
+#endif
+    
     if (ec) {
       ERROR("Error receiving next chunk: "
 	    << ec.message()

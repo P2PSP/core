@@ -91,13 +91,13 @@ namespace p2psp {
     TRACE("Run");
 
     ConfigureSockets();
-    RequestTheVideoFromTheSource();
 
     // asio::ip::tcp::socket serve_socket(io_service_);
     std::shared_ptr<asio::ip::tcp::socket> serve_socket =
       make_shared<asio::ip::tcp::socket>(boost::ref(io_service_));
     acceptor_.accept(*serve_socket);
     HandleAPeerArrival(serve_socket);
+    RequestTheVideoFromTheSource();
 
     thread t(bind(&Splitter_IMS::HandleArrivals, this));
 
