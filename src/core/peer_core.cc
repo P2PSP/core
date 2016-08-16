@@ -415,17 +415,18 @@ namespace p2psp {
     
     for (int i = 0; i < (last_received_chunk-prev_received_chunk_); i++) {
       //if (chunk_ptr[played_chunk_ /*% buffer_size_*/].chunk_number != -1)
-      player_alive_ = PlayChunk(chunk_ptr[played_chunk_ % buffer_size_].chunk_number);
+      player_alive_ = PlayChunk(/*chunk_ptr[played_chunk_ % buffer_size_].chunk_number*/played_chunk_);
 #if defined __D__ || defined __D_TRAFFIC__
       TRACE
 	("Chunk consumed at buffer position "
 	 << played_chunk_ % buffer_size_);
 #endif
-#if defined __D__|| defined __D__LOST_CHUNKS__
+#if defined __D__ || defined __D_LOST_CHUNKS__
+      std::cout << chunk_ptr[played_chunk_ % buffer_size_].chunk_number << std::endl;
       if (chunk_ptr[played_chunk_ % buffer_size_].chunk_number == -1) {
-	TRACE
+	WARNING
 	  ("Lost chunk at buffer position "
-	   << played_chunk_);
+	   << played_chunk_ % buffer_size_);
       }
 #endif
       chunk_ptr[played_chunk_ % buffer_size_].chunk_number = -1;

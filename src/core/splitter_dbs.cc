@@ -425,8 +425,8 @@ namespace p2psp {
     
     std::shared_ptr<asio::ip::tcp::socket> connection = make_shared<asio::ip::tcp::socket>(boost::ref(io_service_));
     acceptor_.accept(*connection);
-    HandleAPeerArrival(connection);
     RequestTheVideoFromTheSource();
+    HandleAPeerArrival(connection);
 
     // Threads
     thread t1(bind(&Splitter_core::HandleArrivals, this));
