@@ -347,6 +347,7 @@ void SplitterSTRPEDS::ProcessBadPeersMessage(
 void SplitterSTRPEDS::HandleBadPeerFromTrusted(
 		const boost::asio::ip::udp::endpoint &bad_peer,
 		const boost::asio::ip::udp::endpoint &sender) {
+	peer_unique_complains_[sender].insert(bad_peer);
   if (std::find(peer_list_.begin(), peer_list_.end(), bad_peer) == peer_list_.end()) {
 		AddComplain(bad_peer, sender);
 		if (std::find(bad_peers_.begin(), bad_peers_.end(), bad_peer) == bad_peers_.end()) {
@@ -362,6 +363,7 @@ void SplitterSTRPEDS::HandleBadPeerFromTrusted(
 void SplitterSTRPEDS::HandleBadPeerFromRegular(
 		const boost::asio::ip::udp::endpoint &bad_peer,
 		const boost::asio::ip::udp::endpoint &sender) {
+	peer_unique_complains_[sender].insert(bad_peer);
 	if (std::find(peer_list_.begin(), peer_list_.end(), bad_peer) == peer_list_.end()) {
 		AddComplain(bad_peer, sender);
 	}
@@ -383,8 +385,6 @@ void SplitterSTRPEDS::AddComplain(
 						complains_.size() - 1));
 
 	}
-
-	peer_unique_complains_[sender].insert(bad_peer);
 }
 
 void SplitterSTRPEDS::PunishPeer(const boost::asio::ip::udp::endpoint &peer,
