@@ -216,6 +216,10 @@ namespace p2psp {
     //chunks_.resize(buffer_size_);
     received_counter_ = 0;
 
+#if defined __D__ || defined __D_BUFFER__
+    DEBUG("Buffer size = " << this->buffer_size_);
+#endif
+    
     for (int i=0; i<buffer_size_; i++) {
       chunk_ptr[i].chunk_number = -1;
     }
@@ -250,11 +254,11 @@ namespace p2psp {
     // arised.
 
     int chunk_number = ProcessNextMessage();
+#if defined __D__ || defined __D_TRAFFIC__
+      DEBUG(std::to_string(chunk_number));
+#endif
     while (chunk_number < 0) {
       chunk_number = ProcessNextMessage();
-#if defined __D__ || defined __D_TRAFFIC__
-      TRACE(std::to_string(chunk_number));
-#endif
     }
     played_chunk_ = chunk_number % buffer_size_;
 #if defined __D__ || defined __D_TRAFFIC__
@@ -270,8 +274,6 @@ namespace p2psp {
 #endif
     
     // Now, fill up to the half of the buffer.
-
-    // float BUFFER_STATUS = 0.0f;
     while (((chunk_number  - played_chunk_) % buffer_size_) < buffer_size_/2) {
       std::cout
 	<< ((chunk_number - played_chunk_) % buffer_size_)
@@ -279,22 +281,6 @@ namespace p2psp {
 	<< (buffer_size_/2)
 	<< '\r'
 	<< std::flush;
-      //static int x = 0;
-      /*std::cout
-	<< std::setw(4)
-	<< float(x)/(buffer_size_/2);
-	std::cout.flush();*/
-      // TODO Format string
-      // LOG("{:.2%}\r".format((1.0*x)/(buffer_size_/2)), end='');
-      // BUFFER_STATUS = (100 * x) / (buffer_size_ / 2.0f) + 1;
-
-      //if (!Common::kConsoleMode) {
-        // GObject.idle_add(buffering_adapter.update_widget,BUFFER_STATUS)
-      //} else {
-        // pass
-      //}
-      //TRACE("!");
-      //TraceSystem::Flush();
 
       while ((chunk_number = ProcessNextMessage()) < 0);
     }

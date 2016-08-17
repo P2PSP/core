@@ -106,7 +106,7 @@ namespace p2psp {
     //boost::asio::write(*peer_serve_socket, boost::asio::buffer(data,19));
 
 #if defined __D__ || defined __D_CHURN__    
-    TRACE("channel ="
+    TRACE("channel = "
 	  << channel_);
 #endif
     
