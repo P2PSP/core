@@ -44,7 +44,7 @@ namespace p2psp {
     this->send_message_thread_ =
       std::thread(&Splitter_NTS::SendMessageThread, this);
 
-    LOG("Initialized NTS");
+    INFO("Initialized NTS");
 
     // }}}
   }
@@ -146,7 +146,7 @@ namespace p2psp {
     // are sent together with their IDs when a PeerNTS instance has been
     // created from the PeerDBS instance, in SendTheListOfPeers2()
 
-    LOG("Sending the monitors as the list of peers");
+    INFO("Sending the monitors as the list of peers");
     // Send the number of monitors
     std::ostringstream msg_str;
     Common_NTS::Write<uint16_t>(msg_str, this->number_of_monitors_);
@@ -186,7 +186,7 @@ namespace p2psp {
       // Do not send the peer endpoint to itself
       number_of_other_peers = std::max(0, number_of_other_peers - 1);
     }
-    LOG("Sending the list of peers except monitors (" << number_of_other_peers
+    INFO("Sending the list of peers except monitors (" << number_of_other_peers
 	<< " peers)");
     std::ostringstream msg_str;
     Common_NTS::Write<uint16_t>(msg_str, number_of_other_peers);
@@ -214,7 +214,7 @@ namespace p2psp {
 	  && peer_id == this->peers_[peer].id_) {
 	continue;
       }
-      LOG("Sending peer " << peer_id << " to " << peer);
+      INFO("Sending peer " << peer_id << " to " << peer);
       const ip::udp::endpoint& peer = peer_iter.second.peer_;
       const PeerInfo& peer_info = this->peers_[peer];
       msg_str.str(std::string());
@@ -246,7 +246,7 @@ namespace p2psp {
     }
     // Actually remove the peers
     for (const std::string& peer_id : peers_to_remove) {
-      LOG("Removed arriving peer " << peer_id << " due to timeout");
+      INFO("Removed arriving peer " << peer_id << " due to timeout");
       ArrivingPeerInfo& peer_info = this->arriving_peers_[peer_id];
       // Close socket
       peer_info.serve_socket_->close();
@@ -274,7 +274,7 @@ namespace p2psp {
     }
     // Actually remove the peers
     for (const std::string& peer_id : peers_to_remove) {
-      LOG("Removed incorporating peer " << peer_id << " due to timeout");
+      INFO("Removed incorporating peer " << peer_id << " due to timeout");
       IncorporatingPeerInfo& peer_info =
         this->incorporating_peers_[peer_id];
       // Close TCP socket
@@ -357,7 +357,7 @@ namespace p2psp {
 	  continue;
 	}
 	// Update source port information
-	LOG("Received current source port " << sender.port() << " of peer "
+	INFO("Received current source port " << sender.port() << " of peer "
 	    << peer_id);
 	this->UpdatePortStep(*peer, sender.port());
       } else {
@@ -377,11 +377,11 @@ namespace p2psp {
 
     ip::tcp::endpoint new_peer_tcp = serve_socket->remote_endpoint();
     ip::udp::endpoint new_peer(new_peer_tcp.address(), new_peer_tcp.port());
-    LOG("Accepted connection from peer " << new_peer);
+    INFO("Accepted connection from peer " << new_peer);
     this->SendConfiguration(serve_socket);
     // Send the generated ID to peer
     std::string peer_id = this->GenerateId();
-    LOG("Sending ID " << peer_id << " to peer " << new_peer);
+    INFO("Sending ID " << peer_id << " to peer " << new_peer);
     serve_socket->send(buffer(peer_id));
     std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
     if (this->peer_list_.size() < (unsigned int) this->number_of_monitors_) {
@@ -411,7 +411,7 @@ namespace p2psp {
 
     const ArrivingPeerInfo& peer_info = this->arriving_peers_[peer_id];
 
-    LOG("Incorporating the peer " << peer_id << ". Source ports: "
+    INFO("Incorporating the peer " << peer_id << ". Source ports: "
 	<< peer_info.source_port_to_splitter_ << ", "
 	<< Common_NTS::Join(peer_info.source_ports_to_monitors_, ", "));
 
@@ -515,7 +515,7 @@ namespace p2psp {
 	// Do not send the peer endpoint to the peer itself
 	continue;
       }
-      LOG("Sending peer " << new_peer << " to " << inc_peer_id);
+      INFO("Sending peer " << new_peer << " to " << inc_peer_id);
       const ip::udp::endpoint& peer = peer_iter.second.peer_;
       std::ostringstream msg_str;
       msg_str << peer_id;
@@ -613,7 +613,7 @@ namespace p2psp {
 	  << ". Port diff: " << peer.port() << " - " << source_port
 	  << ". New port step: " << port_step);
     if (port_step != previous_port_step) {
-      LOG("Updated port step of peer " << peer << " from " << previous_port_step
+      INFO("Updated port step of peer " << peer << " from " << previous_port_step
 	  << " to " << port_step);
     }
 
@@ -675,7 +675,7 @@ namespace p2psp {
 	// Packet is from the arriving peer itself
 	std::string peer_id = message;
 
-	LOG("Received [hello, I'm " << peer_id << "] from " << sender);
+	INFO("Received [hello, I'm " << peer_id << "] from " << sender);
 
 	// Send acknowledge
 	this->EnqueueMessage(1, std::make_pair(message, sender));
@@ -696,12 +696,12 @@ namespace p2psp {
 	ArrivingPeerInfo& peer_info = this->arriving_peers_[peer_id];
 
 	// Update peer information
-	LOG("Updating peer " << peer_id);
+	INFO("Updating peer " << peer_id);
 
 	peer_info.source_port_to_splitter_ = source_port_to_splitter;
 
-	LOG("source port to splitter = " << peer_info.source_port_to_splitter_)
-	  LOG("source ports to monitors = "
+	INFO("source port to splitter = " << peer_info.source_port_to_splitter_)
+	  INFO("source ports to monitors = "
 	      << Common_NTS::Join(peer_info.source_ports_to_monitors_, ", "));
 
 	if (peer_info.source_port_to_splitter_ != 0
@@ -718,7 +718,7 @@ namespace p2psp {
 	// Message is from monitor
 	std::string peer_id =
           Common_NTS::ReceiveString(msg_str, Common_NTS::kPeerIdLength);
-	LOG("Received forwarded hello (ID " << peer_id << ") from " << sender);
+	INFO("Received forwarded hello (ID " << peer_id << ") from " << sender);
 
 	// Send acknowledge
 	this->EnqueueMessage(1, std::make_pair(message, sender));
@@ -749,7 +749,7 @@ namespace p2psp {
 	// Received source port of a peer from another peer
 	std::string peer_id =
           Common_NTS::ReceiveString(msg_str, Common_NTS::kPeerIdLength);
-	LOG("Received source port of peer " << peer_id << " from " << sender);
+	INFO("Received source port of peer " << peer_id << " from " << sender);
 
 	// Send acknowledge
 	this->EnqueueMessage(1, std::make_pair(message, sender));
@@ -798,7 +798,7 @@ namespace p2psp {
 	}
 
 	if (message[message.size() - 1] == 'Y') {
-	  LOG("Peer " << peer_id << " successfully incorporated");
+	  INFO("Peer " << peer_id << " successfully incorporated");
 
 	  // Close TCP socket
 	  this->incorporating_peers_[peer_id].serve_socket_->close();
@@ -820,7 +820,7 @@ namespace p2psp {
 	    continue;
 	  }
 
-	  LOG("Peer " << peer_id << " retries incorporation from " << sender);
+	  INFO("Peer " << peer_id << " retries incorporation from " << sender);
 
 	  uint16_t source_port_to_splitter = sender.port();
 
@@ -842,7 +842,7 @@ namespace p2psp {
 	// Message is from monitor
 	std::string peer_id =
           Common_NTS::ReceiveString(msg_str, Common_NTS::kPeerIdLength);
-	LOG("Received forwarded retry hello (ID " << peer_id << ')');
+	INFO("Received forwarded retry hello (ID " << peer_id << ')');
 
 	// Send acknowledge
 	this->EnqueueMessage(1, std::make_pair(message, sender));

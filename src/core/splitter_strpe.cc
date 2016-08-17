@@ -17,7 +17,7 @@ using namespace boost;
 SplitterSTRPE::SplitterSTRPE()
     : SplitterLRS(), logging_(kLogging), current_round_(kCurrentRound) {
   magic_flags_ = Common::kSTRPE;
-  LOG("STrPe");
+  INFO("STrPe");
 }
 
 SplitterSTRPE::~SplitterSTRPE() {}
@@ -71,7 +71,7 @@ void SplitterSTRPE::ModerateTheTeam() {
     }
   }
 
-  LOG("Exiting moderate the team");
+  INFO("Exiting moderate the team");
 }
 
 void SplitterSTRPE::AddTrustedPeer(const boost::asio::ip::udp::endpoint &peer) {
@@ -84,7 +84,7 @@ void SplitterSTRPE::PunishMaliciousPeer(const boost::asio::ip::udp::endpoint &pe
                to_string(peer.port()));
   }
 
-  LOG("!!! malicious peer " << peer);
+  INFO("!!! malicious peer " << peer);
 
   RemovePeer(peer);
 }
@@ -138,7 +138,7 @@ void SplitterSTRPE::Run() {
    "reset_counters_thread" are new.
    */
 
-  LOG("waiting for the monitor peers ...");
+  INFO("waiting for the monitor peers ...");
 
   std::shared_ptr<asio::ip::tcp::socket> connection =
       make_shared<asio::ip::tcp::socket>(boost::ref(io_service_));
@@ -182,7 +182,7 @@ void SplitterSTRPE::Run() {
         }
       }
     } catch (const std::out_of_range &oor) {
-      LOG("The monitor peer has died!");
+      INFO("The monitor peer has died!");
       exit(-1);
     }
 
@@ -191,7 +191,7 @@ void SplitterSTRPE::Run() {
 }
 
 void SplitterSTRPE::Start() {
-  LOG("Start");
+  INFO("Start");
   thread_.reset(new boost::thread(boost::bind(&SplitterSTRPE::Run, this)));
 }
 }

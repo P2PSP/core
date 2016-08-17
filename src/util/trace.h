@@ -70,7 +70,9 @@ namespace p2psp
 
 #endif // TRACE_NO_COLORS
 
-#define LOG(a)  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) << a; }
+#if defined __D__
+
+#define INFO(a)  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) << a; }
 
 #define LOGC(c, a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) << _SET_COLOR(c) << a << _RESET_COLOR(); }
 
@@ -95,5 +97,16 @@ namespace p2psp
 #define TRACE(a)    {struct timeval tp;gettimeofday(&tp, NULL);long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;std::cout << ms << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a  << _RESET_COLOR() << std::endl;}
 #define ERROR(a)    {std::cout << a << std::endl;}
 */
+
+#else
+
+#define INFO(a)     {}
+#define LOGC(c, a) {}
+#define ERROR(a)   {}
+#define WARNING(a) {}
+#define DEBUG(a)   {}
+#define TRACE(a)   {}
+
+#endif /* __D__ */
 
 #endif // P2PSP_UTIL_TRACE_H

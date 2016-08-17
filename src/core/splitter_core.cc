@@ -47,7 +47,7 @@ namespace p2psp {
     recvfrom_counter_ = 0;
     sendto_counter_ = 0;
 
-#if defined __D__ || defined __D_SORS__
+#if defined __D_SORS__
     TRACE("Splitter_core constructor");
 #endif
 
@@ -90,7 +90,7 @@ namespace p2psp {
     //system::error_code ec;
     char message[2];
 
-#if defined __D__ || defined __D_CHURN__    
+#if defined __D_CHURN__    
     TRACE("channel name length = "
 	  << channel_.length());
 #endif
@@ -105,7 +105,7 @@ namespace p2psp {
     //char data[19];
     //boost::asio::write(*peer_serve_socket, boost::asio::buffer(data,19));
 
-#if defined __D__ || defined __D_CHURN__    
+#if defined __D_CHURN__    
     TRACE("channel = "
 	  << channel_);
 #endif
@@ -116,7 +116,7 @@ namespace p2psp {
     //char message[80];
 
     //peer_serve_socket->send(asio::buffer(channel_));
-#if defined __D__ || defined __D_CHURN__
+#if defined __D_CHURN__
     TRACE("Transmitted channel = "
 	  << channel_);
 #endif    
@@ -172,7 +172,7 @@ namespace p2psp {
       exit(-1);
     }
 
-#if defined __D__ || defined __D_SOURCE__
+#if defined __D_SOURCE__
     TRACE(source_socket_.local_endpoint().address().to_string()
 	  << " connected to ("
 	  << source_addr_
@@ -183,7 +183,7 @@ namespace p2psp {
     
     source_socket_.send(asio::buffer(GET_message_));
 
-#if defined __D__ || defined __D_SOURCE__
+#if defined __D_SOURCE__
     TRACE(source_socket_.local_endpoint().address().to_string()
 	  << " GET_message = "
 	  << GET_message_);
@@ -199,7 +199,7 @@ namespace p2psp {
 
     size_t bytes_transferred = asio::read(source_socket_, chunk, asio::transfer_exactly(chunk_size_), ec);
 
-#if defined __D__ || defined __D_SOURCE__ || defined __D_TRAFFIC__ || defined __D_BUFFER__
+#if defined __D_SOURCE__ || defined __D_TRAFFIC__ || defined __D_BUFFER__
     if ((int)bytes_transferred != (int)chunk_size_) {
       WARNING("Warning. Received "
 	      << bytes_transferred
@@ -216,7 +216,7 @@ namespace p2psp {
 	    << bytes_transferred
 	    << " != "
 	    << chunk_size_);
-#if defined __D__ || defined __D_SOURCE__
+#if defined __D_SOURCE__
       TRACE("No data in the server!");
 #endif
       source_socket_.close();
@@ -269,7 +269,7 @@ namespace p2psp {
     // size_t bytes_transferred =
     team_socket_.send_to(asio::buffer(message), destination, 0, ec);
 
-#if defined __D__ || defined __D_TRAFFIC__
+#if defined __D_TRAFFIC__
     TRACE(chunk_number_
 	  << " -> "
 	  << destination);
@@ -290,7 +290,7 @@ namespace p2psp {
   void Splitter_core::SendChunkSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     // {{{
 
-#if defined __D__ || defined __D_TRAFFIC__
+#if defined __D_TRAFFIC__
     TRACE("Sending a chunk_size of "
 	  << to_string(chunk_size_)
 	  << " bytes");
@@ -310,7 +310,7 @@ namespace p2psp {
   void Splitter_core::SendBufferSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     // {{{
 
-#if defined __D__ || defined __D_CHURN__
+#if defined __D_CHURN__
     TRACE("Sending a buffer_size of "
 	  << to_string(buffer_size_)
 	  << " bytes");
@@ -346,7 +346,7 @@ namespace p2psp {
   void Splitter_core::SendHeaderSize(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     // {{{
 
-#if defined __D__ || defined __D_TRAFFIC__
+#if defined __D_TRAFFIC__
     TRACE("Sending a header size of "
 	  << to_string(header_size_)
 	  << " bytes");
@@ -406,7 +406,7 @@ namespace p2psp {
   void Splitter_core::SendSourceEndpoint(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     // {{{
 
-#if defined __D__ || defined __D_SOURCE__
+#if defined __D_SOURCE__
     TRACE("Communicating the source endpoint \"("
 	  << source_addr_
 	  << ", "

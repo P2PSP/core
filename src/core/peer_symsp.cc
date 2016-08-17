@@ -22,7 +22,7 @@ namespace p2psp {
 
   Peer_SYMSP::~Peer_SYMSP(){}
 
-  void Peer_SYMSP::Init() { LOG("Initialized"); }
+  void Peer_SYMSP::Init() { INFO("Initialized"); }
 
   void Peer_SYMSP::SendMessage(std::string message,
 			       boost::asio::ip::udp::endpoint endpoint) {

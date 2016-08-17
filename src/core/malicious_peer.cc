@@ -17,7 +17,7 @@ MaliciousPeer::MaliciousPeer(){
 };
 MaliciousPeer::~MaliciousPeer(){};
 
-void MaliciousPeer::Init() { LOG("Initialized"); }
+void MaliciousPeer::Init() { INFO("Initialized"); }
 
 int MaliciousPeer::ProcessMessage(const std::vector<char> &message,
                                   const ip::udp::endpoint &sender) {
@@ -68,7 +68,7 @@ int MaliciousPeer::ProcessMessage(const std::vector<char> &message,
         debt_[peer]++;
 
         if (debt_[peer] > kMaxChunkDebt) {
-          LOG("(" << peer.address().to_string() << ","
+          INFO("(" << peer.address().to_string() << ","
                   << std::to_string(peer.port()) << ")"
                   << " removed by unsupportive (" +
                          std::to_string(debt_[peer]) + " lossess)");
@@ -97,7 +97,7 @@ int MaliciousPeer::ProcessMessage(const std::vector<char> &message,
           std::find(peer_list_.begin(), peer_list_.end(), sender)) {
         peer_list_.push_back(sender);
         debt_[sender] = 0;
-        LOG("(" << sender.address().to_string() << ","
+        INFO("(" << sender.address().to_string() << ","
                 << std::to_string(sender.port()) << ")"
                 << " added by chunk " << std::to_string(chunk_number));
       } else {
@@ -121,7 +121,7 @@ int MaliciousPeer::ProcessMessage(const std::vector<char> &message,
       debt_[peer]++;
 
       if (debt_[peer] > kMaxChunkDebt) {
-        LOG("DBS:(" << peer.address().to_string() << ","
+        INFO("DBS:(" << peer.address().to_string() << ","
                     << std::to_string(peer.port()) << ")"
                     << " removed by unsupportive (" +
                            std::to_string(debt_[peer]) + " lossess)");
@@ -144,7 +144,7 @@ int MaliciousPeer::ProcessMessage(const std::vector<char> &message,
   } else {
     // A control chunk has been received
 
-    LOG("DBS: Control message received");
+    INFO("DBS: Control message received");
 
     if (message[0] == 'H') {
       if (peer_list_.end() ==
@@ -152,14 +152,14 @@ int MaliciousPeer::ProcessMessage(const std::vector<char> &message,
         // The peer is new
         peer_list_.push_back(sender);
         debt_[sender] = 0;
-        LOG("(" << sender.address().to_string() << ","
+        INFO("(" << sender.address().to_string() << ","
                 << std::to_string(sender.port()) << ")"
                 << " added by [hello] ");
       } else {
         if (peer_list_.end() !=
             std::find(peer_list_.begin(), peer_list_.end(), sender)) {
           // sys.stdout.write(Color.red)
-          LOG("DBS: (" << team_socket_.local_endpoint().address().to_string()
+          INFO("DBS: (" << team_socket_.local_endpoint().address().to_string()
                        << ","
                        << std::to_string(team_socket_.local_endpoint().port())
                        << ") \b: received \"goodbye\" from ("

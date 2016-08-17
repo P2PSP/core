@@ -21,7 +21,7 @@ namespace p2psp {
 
   Monitor_NTS::~Monitor_NTS(){}
 
-  void Monitor_NTS::Init() { LOG("Initialized"); }
+  void Monitor_NTS::Init() { INFO("Initialized"); }
 
   // This is from Monitor_DBS
   void Monitor_NTS::Complain(uint16_t chunk_number) {
@@ -66,12 +66,12 @@ namespace p2psp {
 	(message.size() == Common_NTS::kPeerIdLength ||
 	 message.size() == Common_NTS::kPeerIdLength+1)) {
       // Hello message received from peer
-      LOG("Received hello (ID "
+      INFO("Received hello (ID "
 	  << message.substr(0, Common_NTS::kPeerIdLength) << ") from " << sender);
       // Send acknowledge
       this->SendMessage(message, sender);
 
-      LOG("Forwarding ID " << message.substr(0, Common_NTS::kPeerIdLength)
+      INFO("Forwarding ID " << message.substr(0, Common_NTS::kPeerIdLength)
 	  << " and source port " << sender.port() << " to splitter");
       std::ostringstream msg_str;
       msg_str << message;
@@ -87,10 +87,10 @@ namespace p2psp {
       ip::address IP_addr = ip::address_v4(Common_NTS::Receive<uint32_t>(msg_str));
       uint16_t port = Common_NTS::Receive<uint16_t>(msg_str);
       ip::udp::endpoint peer(IP_addr, port);
-      LOG("Received peer ID " << peer_id << ' ' << peer);
+      INFO("Received peer ID " << peer_id << ' ' << peer);
       // Sending hello not needed as monitor and peer already communicated
       if (!Common_NTS::Contains(this->peer_list_, peer)) {
-	LOG("Appending peer " << peer_id << ' ' << peer << " to list");
+	INFO("Appending peer " << peer_id << ' ' << peer << " to list");
 	this->peer_list_.push_back(peer);
 	this->debt_[peer] = 0;
       }

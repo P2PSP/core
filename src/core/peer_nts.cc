@@ -44,7 +44,7 @@ namespace p2psp {
   void Peer_NTS::Init() {
     // {{{
 
-    LOG("Initialized");
+    INFO("Initialized");
 
     // }}}
   }
@@ -107,10 +107,10 @@ namespace p2psp {
   void Peer_NTS::ReceiveId() {
     // {{{
 
-    LOG("Requesting peer ID from splitter");
+    INFO("Requesting peer ID from splitter");
     this->peer_id_ = Common_NTS::ReceiveString(this->splitter_socket_,
 					      Common_NTS::kPeerIdLength);
-    LOG("ID received: " << this->peer_id_);
+    INFO("ID received: " << this->peer_id_);
 
     // }}}
   }
@@ -155,7 +155,7 @@ namespace p2psp {
 	std::lock_guard<std::mutex> guard(this->hello_messages_lock_);
 	for (const HelloMessage& hello_message : messages_to_remove) {
 	  if (Common_NTS::Contains(this->hello_messages_, hello_message)) {
-	    LOG("Removed message "
+	    INFO("Removed message "
 		<< hello_message.message_.first.substr(0,
 						       Common_NTS::kPeerIdLength) << " to "
 		<< hello_message.message_.second << " due to timeout");
@@ -204,7 +204,7 @@ namespace p2psp {
       ERROR("this->peer_list_.size() != this->number_of_monitors_");
     }
 
-    LOG("Requesting the number of peers from splitter");
+    INFO("Requesting the number of peers from splitter");
     // Add number_of_monitors as the monitor peers were already received
 
     this->number_of_peers_ = Common_NTS::Receive<uint16_t>(this->splitter_socket_)
@@ -298,7 +298,7 @@ namespace p2psp {
       if (std::chrono::steady_clock::now() - incorporation_time
 	  > Common_NTS::kMaxPeerArrivingTime) {
 	// Retry incorporation into the team
-	LOG("Retrying incorporation with " << this->initial_peer_list_.size()
+	INFO("Retrying incorporation with " << this->initial_peer_list_.size()
 	    << " peers left: "
 	    << boost::algorithm::join(this->initial_peer_list_, ", "));
 	incorporation_time = std::chrono::steady_clock::now();
@@ -343,7 +343,7 @@ namespace p2psp {
     Peer_DBS::DisconnectFromTheSplitter();
     // The peer is now successfully incorporated; inform the splitter
     this->SendMessage(std::make_pair(this->peer_id_ + 'Y', this->splitter_));
-    LOG("Incorporation successful");
+    INFO("Incorporation successful");
 
     // }}}
   }
@@ -450,9 +450,9 @@ namespace p2psp {
 
       // Endpoint to splitter
       ip::udp::endpoint peer(IP_addr, source_port_to_splitter);
-      LOG("Received [send hello to " << peer_id << ' ' << peer << ']');
-      LOG("port_diff = " << port_diff);
-      LOG("peer_number = " << peer_number);
+      INFO("Received [send hello to " << peer_id << ' ' << peer << ']');
+      INFO("port_diff = " << port_diff);
+      INFO("peer_number = " << peer_number);
       // Here the port prediction happens:
       std::vector<uint16_t> additional_ports = this->GetProbableSourcePorts(
 									    source_port_to_splitter, port_diff, peer_number);
@@ -474,9 +474,9 @@ namespace p2psp {
 
       // Endpoint to splitter
       ip::udp::endpoint peer(IP_addr, source_port_to_splitter);
-      LOG("Received [send hello to " << peer_id << ' ' << peer << ']');
-      LOG("port_diff = " << port_diff);
-      LOG("peer_number = " << peer_number);
+      INFO("Received [send hello to " << peer_id << ' ' << peer << ']');
+      INFO("port_diff = " << port_diff);
+      INFO("peer_number = " << peer_number);
       // Here the port prediction happens:
       std::vector<uint16_t> additional_ports = this->GetProbableSourcePorts(
 									    source_port_to_splitter, port_diff, peer_number);
@@ -514,14 +514,14 @@ namespace p2psp {
     } else if (message.size() == Common_NTS::kPeerIdLength) {
       std::string peer_id =
         Common_NTS::ReceiveString(msg_str, Common_NTS::kPeerIdLength);
-      LOG("Received [hello (ID " << message << ")] from " << sender);
+      INFO("Received [hello (ID " << message << ")] from " << sender);
       // Send acknowledge
       this->SendMessage(message, sender);
 
       std::ostringstream msg_str2;
       msg_str2 << message;
       if (!Common_NTS::Contains(this->peer_list_, sender)) {
-	LOG("Appending peer " << peer_id << ' ' << sender << " to list");
+	INFO("Appending peer " << peer_id << ' ' << sender << " to list");
 	this->peer_list_.push_back(sender);
 	this->debt_[sender] = 0;
 	// Send source port information to splitter
@@ -534,7 +534,7 @@ namespace p2psp {
 	}
       }
     } else if (message == "H") {
-      LOG("Received [DBS hello] from " << sender);
+      INFO("Received [DBS hello] from " << sender);
       // Ignore hello messages that are sent by Peer_DBS instances in
       // Common_NTS::ReceiveTheListOfPeers() before a Peer_NTS instance is created
     } else if (sender != this->splitter_

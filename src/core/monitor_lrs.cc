@@ -30,6 +30,6 @@ namespace p2psp {
     // in order to complains before the rest of peers reach them in
     // their buffers.
     buffer_size_ /= 2;
-    LOG("buffer_size_ = " << std::to_string(buffer_size_));
+    INFO("buffer_size_ = " << std::to_string(buffer_size_));
   }
 }

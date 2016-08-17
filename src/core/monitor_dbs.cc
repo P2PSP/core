@@ -53,11 +53,11 @@ namespace p2psp {
 	player_alive_ = PlayChunk(chunks_[played_chunk_ % buffer_size_].data);
 	chunks_[played_chunk_ % buffer_size_].received = false;
 	received_counter_--;
-	LOG("Chunk Consumed at: "
+	INFO("Chunk Consumed at: "
 	    << played_chunk_ % buffer_size_);
       } else {
 	Complain(chunk_number); // <- Monitor specific 
-	LOG("Chunk lost at: "
+	INFO("Chunk lost at: "
 	    << played_chunk_ % buffer_size_);
       }
 
