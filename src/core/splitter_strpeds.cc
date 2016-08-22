@@ -71,10 +71,15 @@ void SplitterSTRPEDS::SendDsaKey(
 }
 
 void SplitterSTRPEDS::GatherBadPeers() {
-  for (unsigned int i=0; i<trusted_peers_.size(); i++) {
-     boost::asio::ip::udp::endpoint tp = trusted_peers_[i];
-     RequestBadPeers(tp);
-  }
+	if (isTmsEnable) {
+		boost::asio::ip::udp::endpoint p = GetPeerForGathering();
+		RequestBadPeers(p);
+	} else {
+		for (unsigned int i=0; i<trusted_peers_.size(); i++) {
+			 boost::asio::ip::udp::endpoint tp = trusted_peers_[i];
+			 RequestBadPeers(tp);
+		}
+	}
 }
 
 asio::ip::udp::endpoint SplitterSTRPEDS::GetPeerForGathering() {
@@ -342,12 +347,15 @@ void SplitterSTRPEDS::ProcessBadPeersMessage(
 void SplitterSTRPEDS::HandleBadPeerFromTrusted(
 		const boost::asio::ip::udp::endpoint &bad_peer,
 		const boost::asio::ip::udp::endpoint &sender) {
+	peer_unique_complains_[sender].insert(bad_peer);
   if (std::find(peer_list_.begin(), peer_list_.end(), bad_peer) == peer_list_.end()) {
 		AddComplain(bad_peer, sender);
 		if (std::find(bad_peers_.begin(), bad_peers_.end(), bad_peer) == bad_peers_.end()) {
 			bad_peers_.push_back(bad_peer);
-			trusted_peers_discovered_.push_back(sender);
-			LOG("TP discovered" << sender);
+			if (sender.port() != peer_list_[0].port()) {
+				trusted_peers_discovered_.push_back(sender);
+				LOG("TP discovered" << sender);
+			}
 		}
   }
 }
@@ -355,6 +363,7 @@ void SplitterSTRPEDS::HandleBadPeerFromTrusted(
 void SplitterSTRPEDS::HandleBadPeerFromRegular(
 		const boost::asio::ip::udp::endpoint &bad_peer,
 		const boost::asio::ip::udp::endpoint &sender) {
+	peer_unique_complains_[sender].insert(bad_peer);
 	if (std::find(peer_list_.begin(), peer_list_.end(), bad_peer) == peer_list_.end()) {
 		AddComplain(bad_peer, sender);
 	}
@@ -376,8 +385,6 @@ void SplitterSTRPEDS::AddComplain(
 						complains_.size() - 1));
 
 	}
-
-	peer_unique_complains_[sender].insert(bad_peer);
 }
 
 void SplitterSTRPEDS::PunishPeer(const boost::asio::ip::udp::endpoint &peer,

@@ -69,3 +69,18 @@ To run bad-mouth attack you can use:
 $ ./peer.py --strpeds --malicious --bad_mouth "127.0.0.1:1234" "127.0.0.1:4321"
 ```
 Malicious peer will complain on given peers.
+
+## P2PSP TMS (Trust Management System)
+
+Current implementation of P2PSP protocol has its own Trust Management System. In order to enable it, you should run STrPe-DS splitter with `--tms` option.
+
+With TMS enabled, splitter remembers all unique complains about poisoned chunks from all the team, and remembers each peer's lifetime value. Using information above splitter makes decision about expelling malicious peer.
+
+Peer's lifetime value is a number of rounds in the team. It updates every round.
+Every round TMS runs. It sums all the unique complains for each peer (multiplied by complainer's trust value), and if this sum will be greater than some threshold value, peer is considered as malicious and will be expelled from the team.
+
+Current implementation of P2PSP has next parameters:
+- `isTmsEnable` - flag for enabling TMS
+- `maxTrust` - maximum trust value for each peer. Trust value can't be greater than this value.
+- `incr` - increment value for trust value. It affects on speed when the peer achieving maximum trust value.
+- `decr` - decrement value for trust value. This value is deducted from TV each time when peer complains about other peer.
