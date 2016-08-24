@@ -1,9 +1,9 @@
 //
 //  trace.h
-//  P2PSP
 //
 //  This code is distributed under the GNU General Public License (see
 //  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+//
 //  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
 //
@@ -70,55 +70,43 @@ namespace p2psp
 
 #endif // TRACE_NO_COLORS
 
-#ifndef TRACE_SILENT_MODE
+#if defined __D__
 
-#ifndef NDEBUG
-/*
-#define LOG(a)  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) << a; }
+#define INFO(a)  { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) << a; }
 
 #define LOGC(c, a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::info) << _SET_COLOR(c) << a << _RESET_COLOR(); }
 
-#define ERROR(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::error) << _SET_COLOR(_RED) << __FILE__ << ":" << __LINE__ << ": ERROR: " << a << _RESET_COLOR(); }
-
-#define WARNING(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::warning) << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": WARNING: " << a << _RESET_COLOR(); }
-
-#define DEBUG(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::debug) << __FILE__ << ":" << __LINE__ << ": DEBUG: " << a; }
-
-#define TRACE(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::trace) << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a << _RESET_COLOR(); }
-*/
-
-#define LOG(a)      {std::cout << a << std::endl;}
-#define LOGC(c, a)  {std::cout << a << std::endl;}
-#define WARNING(a)  {std::cout << a << std::endl;}
-#define DEBUG(a)    {std::cout << a << std::endl;}
-#define TRACE(a)    {struct timeval tp;gettimeofday(&tp, NULL);long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;std::cout << ms << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a  << _RESET_COLOR() << std::endl;}
-#define ERROR(a)    {std::cout << a << std::endl;}
-
-#else
-
-#define LOG(a)      {}
-#define LOGC(c, a)  {}
-#define WARNING(a)  {}
-#define DEBUG(a)    {}
+//#define ERROR(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::error) << _SET_COLOR(_RED) << __FILE__ << ":" << __LINE__ << ": ERROR: " << a << _RESET_COLOR(); }
 
 #define ERROR(a)    \
   { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::error)  \
     << _SET_COLOR(_RED) << __FILE__ << ":" << __LINE__ << ": ERROR: " \
     << a << _RESET_COLOR(); }
 
-#define TRACE(a)    {}
+#define WARNING(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::warning) << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": WARNING: " << a << _RESET_COLOR(); }
 
-#endif // NDEBUG
+#define DEBUG(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::debug) << __FILE__ << ":" << __LINE__ << ": DEBUG: " << a; }
 
-#else // TRACE_SILENT_MODE
+#define TRACE(a) { BOOST_LOG_SEV(p2psp::TraceSystem::logger(), boost::log::trivial::trace) << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a << _RESET_COLOR(); }
 
-#define LOG(a)      {}
-#define LOGC(c, a)  {}
-#define ERROR(a)    {}
-#define WARNING(a)  {}
-#define DEBUG(a)    {}
-#define TRACE(a)    {}
+/*
+#define LOG(a)      {std::cout << a << std::endl;}
+#define LOGC(c, a)  {std::cout << a << std::endl;}
+#define WARNING(a)  {std::cout << a << std::endl;}
+#define DEBUG(a)    {std::cout << a << std::endl;}
+#define TRACE(a)    {struct timeval tp;gettimeofday(&tp, NULL);long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;std::cout << ms << _SET_COLOR(_YELLOW) << __FILE__ << ":" << __LINE__ << ": TRACE: " << a  << _RESET_COLOR() << std::endl;}
+#define ERROR(a)    {std::cout << a << std::endl;}
+*/
 
-#endif // TRACE_SILENT_MODE
+#else
+
+#define INFO(a)     {}
+#define LOGC(c, a) {}
+#define ERROR(a)   {}
+#define WARNING(a) {}
+#define DEBUG(a)   {}
+#define TRACE(a)   {}
+
+#endif /* __D__ */
 
 #endif // P2PSP_UTIL_TRACE_H

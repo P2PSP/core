@@ -1,37 +1,23 @@
 //
-//  peer_dbs.h
-//  P2PSP
+//  peer_dbs.h - Data Broadcasting Set of rules.
 //
 //  This code is distributed under the GNU General Public License (see
-//  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
-//  Copyright (C) 2016, the P2PSP team.
-//  http://www.p2psp.org
+//  the THE_GENERAL_GNU_PUBLIC_LICENSE.txt file for extending this
+//  information).  Copyright (C) 2016, the P2PSP team.
 //
-//  DBS: Data Broadcasting Set of rules
+//  http://www.p2psp.org
 //
 
 #ifndef P2PSP_CORE_PEER_DBS_H
 #define P2PSP_CORE_PEER_DBS_H
 
-#include <vector>
-#include <string>
-#include <map>
-#include <fstream>
-#include <boost/asio.hpp>
-#include <boost/array.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread/thread.hpp>
-#include <arpa/inet.h>
-#include <ctime>
-#include "../util/trace.h"
-#include "peer_ims.h"
-#include <unistd.h>
+#include "peer_core.h"
 
 using namespace boost::asio;
 
 namespace p2psp {
 
-  class PeerDBS : public PeerIMS {
+  class Peer_DBS : public Peer_core {
   protected:
     static const int kMaxChunkDebt = 128;  // Peer's rejecting threshold
 
@@ -41,30 +27,27 @@ namespace p2psp {
     std::map<ip::udp::endpoint, int> debt_;
 
     int number_of_monitors_;
-    int number_of_peers_;
     int max_chunk_debt_;
 
     int receive_and_feed_counter_;
     std::vector<char> receive_and_feed_previous_;
 
-    ip::udp::endpoint me_;
-
     int debt_memory_;
     bool waiting_for_goodbye_;
     bool modified_list_;
+    std::vector<ip::udp::endpoint> peer_list_;
+    int number_of_peers_;
     bool ready_to_leave_the_team_;
 
   public:
-    PeerDBS();
-    ~PeerDBS();
+    Peer_DBS();
+    ~Peer_DBS();
     virtual void Init() override;
     virtual void SayHello(const ip::udp::endpoint&);
     virtual void SayGoodbye(const ip::udp::endpoint&);
-    virtual void ReceiveMagicFlags();
-    virtual void ReceiveTheNumberOfPeers();
     virtual void ReceiveTheListOfPeers();
-    virtual void ReceiveMyEndpoint();
-    virtual void ListenToTheTeam() override;
+    void ReceiveTheNumberOfPeers();
+    void ListenToTheTeam()/* override*/;
     virtual int ProcessMessage(const std::vector<char>&,
                                const ip::udp::endpoint&) override;
     virtual float CalcBufferCorrectness();
@@ -73,13 +56,14 @@ namespace p2psp {
     virtual void BufferData() override;
     virtual void Start() override;
     virtual void Run() override;
-    virtual bool AmIAMonitor();
+    bool AmIAMonitor();
 
-    virtual int GetNumberOfPeers();
+    int GetNumberOfPeers();
     virtual void SetMaxChunkDebt(int);
     virtual int GetMaxChunkDebt();
-
+    virtual std::vector<ip::udp::endpoint> *GetPeerList();
     static int GetDefaultMaxChunkDebt();
+    virtual void ReceiveMyEndpoint();
     virtual bool IsReadyToLeaveTheTeam();
   };
 }

@@ -10,13 +10,12 @@
 
 #include "common_nts.h"
 
-namespace p2psp
-{
-
-const std::chrono::seconds CommonNTS::kHelloPacketTiming{1};
-
-const std::chrono::seconds CommonNTS::kMaxPeerArrivingTime{15};
-
-const std::chrono::seconds CommonNTS::kMaxTotalIncorporationTime{60};
+namespace p2psp {
+  
+  const std::chrono::seconds Common_NTS::kHelloPacketTiming{1};
+  
+  const std::chrono::seconds Common_NTS::kMaxPeerArrivingTime{15};
+  
+  const std::chrono::seconds Common_NTS::kMaxTotalIncorporationTime{60};
 
 }

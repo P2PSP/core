@@ -14,37 +14,36 @@
 #include "../util/trace.h"
 
 namespace p2psp {
-using namespace std;
-using namespace boost;
+  using namespace std;
+  using namespace boost;
 
-SplitterLRS::SplitterLRS() : SplitterACS(), buffer_(buffer_size_) {
-  magic_flags_ = Common::kLRS;
-  TRACE("Initialized LRS");
-}
-
-SplitterLRS::~SplitterLRS() {}
-
-void SplitterLRS::ProcessLostChunk(
-    int lost_chunk_number, const boost::asio::ip::udp::endpoint &sender) {
-  SplitterDBS::ProcessLostChunk(lost_chunk_number, sender);
-  std::vector<char> message = buffer_.at(lost_chunk_number % buffer_size_);
-  asio::ip::udp::endpoint peer = peer_list_.at(0);
-
-  system::error_code ec;
-
-  // Send always to monitor peer
-  team_socket_.send_to(asio::buffer(message), peer, 0, ec);
-
-  if (ec) {
-    ERROR("LRS - Error sending chunk: " << ec.message());
+  Splitter_LRS::Splitter_LRS() : Splitter_ACS(), buffer_(buffer_size_) {
+    //magic_flags_ = Common::kLRS;
+    TRACE("Initialized LRS");
   }
 
-  TRACE("Re-sending " << to_string(lost_chunk_number) << " to " << peer);
-}
+  Splitter_LRS::~Splitter_LRS() {}
 
-void SplitterLRS::SendChunk(const std::vector<char> &message,
-                            const boost::asio::ip::udp::endpoint &destination) {
-  SplitterDBS::SendChunk(message, destination);
-  buffer_[chunk_number_ % buffer_size_] = message;
-}
+  void Splitter_LRS::ProcessLostChunk(int lost_chunk_number, const boost::asio::ip::udp::endpoint &sender) {
+    Splitter_DBS::ProcessLostChunk(lost_chunk_number, sender);
+    std::vector<char> message = buffer_.at(lost_chunk_number % buffer_size_);
+    asio::ip::udp::endpoint peer = peer_list_.at(0);
+    
+    system::error_code ec;
+    
+    // Send always to monitor peer
+    team_socket_.send_to(asio::buffer(message), peer, 0, ec);
+    
+    if (ec) {
+      ERROR("LRS - Error sending chunk: " << ec.message());
+    }
+    
+    TRACE("Re-sending " << to_string(lost_chunk_number) << " to " << peer);
+  }
+  
+  void Splitter_LRS::SendChunk(const std::vector<char> &message,
+			       const boost::asio::ip::udp::endpoint &destination) {
+    Splitter_DBS::SendChunk(message, destination);
+    buffer_[chunk_number_ % buffer_size_] = message;
+  }
 }

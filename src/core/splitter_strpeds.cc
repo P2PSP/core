@@ -17,7 +17,7 @@ using namespace boost;
 SplitterSTRPEDS::SplitterSTRPEDS() :
 		SplitterDBS(), logging_(kLogging), current_round_(kCurrentRound) {
 	magic_flags_ = Common::kSTRPE;
-	LOG("STrPeDS");
+	INFO("STrPeDS");
 	digest_size_ = kDigestSize;
 	gather_bad_peers_sleep_ = kGatherBadPeersSleep;
 }
@@ -59,11 +59,11 @@ void SplitterSTRPEDS::SendDsaKey(
 	char* q = new char[40];
 	q = BN_bn2hex(dsa_key->q);
 
-	LOG("**** DSA key *****");
-	LOG("pub_key: " << y);
-	LOG("g: " << g);
-	LOG("p: " << p);
-	LOG("q: " << q);
+	INFO("**** DSA key *****");
+	INFO("pub_key: " << y);
+	INFO("g: " << g);
+	INFO("p: " << p);
+	INFO("q: " << q);
 
 	std::stringstream message;
 	message << y << g << p << q;
@@ -239,19 +239,19 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 
 
 	//std::string str(h.begin(), h.end());
-	//LOG("Chunk Number " + std::to_string(chunk_number) + " dest " + dst.address().to_string() + ":"+ std::to_string(dst.port()) +" HASH= " + str);
+	//INFO("Chunk Number " + std::to_string(chunk_number) + " dest " + dst.address().to_string() + ":"+ std::to_string(dst.port()) +" HASH= " + str);
 
 	/*
-	LOG(" ----- MESSAGE ----- ");
+	INFO(" ----- MESSAGE ----- ");
 	std::string b(m.begin(), m.end());
-	LOG(b);
-	LOG(" ---- FIN MESSAGE ----");
+	INFO(b);
+	INFO(" ---- FIN MESSAGE ----");
 	*/
 
 	DSA_SIG *sig = DSA_do_sign((unsigned char*) h.data(), h.size(), dsa_key);
 
-	LOG("R: " << *(sig->r->d));
-	LOG("S: " << *(sig->s->d));
+	INFO("R: " << *(sig->r->d));
+	INFO("S: " << *(sig->s->d));
 
 	char* sigr = new char[40];
 	//char sigr[40];
@@ -261,10 +261,10 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 	sigs = BN_bn2hex(sig->s);
 
 	/*
-    LOG(" ---- SIGNATURES ----");
-    LOG(sigr);
-    LOG(sigs);
-    LOG(" ---- FIN SIGNATURES ----");
+    INFO(" ---- SIGNATURES ----");
+    INFO(sigr);
+    INFO(sigs);
+    INFO(" ---- FIN SIGNATURES ----");
 	*/
 
 	//TRACE("SINGATURE");
@@ -279,10 +279,10 @@ std::vector<char> SplitterSTRPEDS::GetMessage(int chunk_number,
 	(*(uint32_t *) (message.data() + chunk_size_ + sizeof(uint16_t) + 40 + 40)) = htonl(current_round_);
 
 	/*
-	LOG(" ----- MESSAGE CON SIGNATURE ----- ");
+	INFO(" ----- MESSAGE CON SIGNATURE ----- ");
 		std::string c(message.begin(), message.end());
-		LOG(c);
-	LOG(" ---- FIN MESSAGE ----");
+		INFO(c);
+	INFO(" ---- FIN MESSAGE ----");
 	 */
 	delete[] sigr; delete[] sigs;
 
@@ -337,7 +337,7 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 				//uint16_t lost_chunk_number = GetLostChunkNumber(message);
 				//asio::ip::udp::endpoint bad_peer = GetLosser(lost_chunk_number);
 				//HandleBadPeerFromTrusted(bad_peer, sender);
-				//LOG("Complaint from TP (" << sender.port() <<") about lost chunk " << lost_chunk_number << " by " << bad_peer.port());
+				//INFO("Complaint from TP (" << sender.port() <<") about lost chunk " << lost_chunk_number << " by " << bad_peer.port());
 				uint16_t lost_chunk_number = GetLostChunkNumber(message);
 				//trusted_peers_discovered_.push_back(sender);
 				ProcessLostChunk(lost_chunk_number, sender);
@@ -352,11 +352,11 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 			 */
 
 			if (message.at(0) == 'B'){
-				LOG("Bad complaint received");
+				INFO("Bad complaint received");
 
 				if (find(trusted_peers_.begin(), trusted_peers_.end(), sender)
 						!= trusted_peers_.end()) {
-					LOG("Complaint about bad peer from " << sender.address().to_string() << ":" << sender.port());
+					INFO("Complaint about bad peer from " << sender.address().to_string() << ":" << sender.port());
 					trusted_peers_discovered_.push_back(sender);
 					ProcessBadPeersMessage(message, sender);
 				}
@@ -369,7 +369,7 @@ void SplitterSTRPEDS::ModerateTheTeam() {
 		}
 	}
 
-	LOG("Exiting moderate the team");
+	INFO("Exiting moderate the team");
 }
 
 void SplitterSTRPEDS::ProcessBadPeersMessage(const std::vector<char> &message,
@@ -384,9 +384,9 @@ void SplitterSTRPEDS::ProcessBadPeersMessage(const std::vector<char> &message,
 	uint16_t bad_number = ntohs(*(uint16_t *) (message.data() + bad.size()));
 
 	 std::string s(message.begin(), message.end());
-	  LOG("Message List: " << s);
+	  INFO("Message List: " << s);
 
-	LOG("Number of BAD: "+ std::to_string(bad_number));
+	INFO("Number of BAD: "+ std::to_string(bad_number));
 
 	for (int i = 0; i < bad_number; i++) {
 
@@ -463,10 +463,10 @@ void SplitterSTRPEDS::PunishPeer(const boost::asio::ip::udp::endpoint &peer,
 								+ to_string(peer.port()) + "(" + message + ")");
 		}
 
-		LOG("!!! bad peer " << peer);
+		INFO("!!! bad peer " << peer);
 
 		RemovePeer(peer);
-		LOG("Peer: " << peer << " removed");
+		INFO("Peer: " << peer << " removed");
 
 	}
 }
@@ -492,7 +492,7 @@ void SplitterSTRPEDS::RefreshTPs(){
 			  boost::asio::ip::address address = boost::asio::ip::address::from_string(*t);
 			  t++;
 			  uint16_t port = atoi((*t).c_str());
-			  //LOG("IP: " + address.to_string() + ":" + std::to_string(port));
+			  //INFO("IP: " + address.to_string() + ":" + std::to_string(port));
 			  AddTrustedPeer(boost::asio::ip::udp::endpoint(address,port));
 
 			}
@@ -585,7 +585,7 @@ string SplitterSTRPEDS::BuildLogMessage(const std::string &message) {
 }
 
 void SplitterSTRPEDS::Start() {
-	LOG("Start");
+	INFO("Start");
 	thread_.reset(new boost::thread(boost::bind(&SplitterSTRPEDS::Run, this)));
 }
 }

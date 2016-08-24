@@ -3,10 +3,10 @@
 
 int main(int argc, const char* argv[]) 
 {
-    LOG("log 1");
+    INFO("info 1");
     TRACE("trace");
     ERROR("error");
-    LOG("log 2");
+    INFO("info 2");
     
     p2psp::TraceSystem::Flush();
     

@@ -20,7 +20,7 @@ void PeerSTRPEDS::Init() {
   played_ = 0;
   losses_ = 0;
   ready_to_leave_the_team_ = false;
-  LOG("Initialized");
+  INFO("Initialized");
 }
 
 bool PeerSTRPEDS::IsCurrentMessageFromSplitter() {
@@ -44,27 +44,27 @@ void PeerSTRPEDS::ReceiveDsaKey() {
 
   std::string msg(message.begin(), message.end());
 
-  //LOG("message: " + msg);
+  //INFO("message: " + msg);
   // ERROR here: Check if this proccess is correct.
 
-  LOG("**** DSA key *****");
+  INFO("**** DSA key *****");
   dsa_key = DSA_new();
 
   strcpy(y, msg.substr(0,256).c_str());
   BN_hex2bn(&dsa_key->pub_key,y);
-  //LOG("pub_key: " << y);
+  //INFO("pub_key: " << y);
 
   strcpy(g, msg.substr(256,256).c_str());
   BN_hex2bn(&dsa_key->g,g);
-  //LOG("g: " << g);
+  //INFO("g: " << g);
 
   strcpy(p, msg.substr(512,256).c_str());
   BN_hex2bn(&dsa_key->p,p);
-  //LOG("p: " << p);
+  //INFO("p: " << p);
 
   strcpy(q, msg.substr(768,40).c_str());
   BN_hex2bn(&dsa_key->q,q);
-  //LOG("q: " << q);
+  //INFO("q: " << q);
 
   TRACE("DSA key received");
   message_size_=4+kChunkIndexSize+chunk_size_+40+40;
@@ -73,7 +73,7 @@ void PeerSTRPEDS::ReceiveDsaKey() {
 
 void PeerSTRPEDS::ProcessBadMessage(const std::vector<char> &message,
                                     const ip::udp::endpoint &sender) {
-  LOG("bad peer: " << sender);
+  INFO("bad peer: " << sender);
   bad_peers_.push_back(sender);
   peer_list_.erase(std::find(peer_list_.begin(), peer_list_.end(), sender));
 }
@@ -95,7 +95,7 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 
 
   if (!IsControlMessage(message)) {
-	  LOG("MESSAGE SIZE: " << message.size() << " from " << sender.port());
+	  INFO("MESSAGE SIZE: " << message.size() << " from " << sender.port());
 	  uint16_t chunk_number = ntohs(*(short *)message.data());
 	  std::vector<char> chunk(chunk_size_);
 	  std::copy(message.data() + sizeof(uint16_t), message.data() + sizeof(uint16_t) + chunk_size_, chunk.data());
@@ -118,27 +118,27 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  (*(in_addr *)(m.data() + chunk_size_ + sizeof(uint16_t))) = addr;
 	  (*(uint16_t *)(m.data() + chunk_size_ + sizeof(uint16_t) + 4)) = htons(dst.port());
 
-	  //LOG("chunk " + std::to_string(chunk_number) + "dst= " + dst.address().to_string() + ":" + std::to_string(dst.port()));
+	  //INFO("chunk " + std::to_string(chunk_number) + "dst= " + dst.address().to_string() + ":" + std::to_string(dst.port()));
 	  std::vector<char> h(32);
 	  Common::sha256(m, h);
 
-	  //LOG("TAMANO: "+ std::to_string(h.size()));
+	  //INFO("TAMANO: "+ std::to_string(h.size()));
 
 	  /*
 	  std::string str(h.begin(), h.end());
-	  LOG("HASH= " + str);
+	  INFO("HASH= " + str);
 
 
-	  LOG(" ----- MESSAGE ----- ");
+	  INFO(" ----- MESSAGE ----- ");
 	  std::string b(m.begin(), m.end());
-	  LOG(b);
-	  LOG(" ---- FIN MESSAGE ----");
+	  INFO(b);
+	  INFO(" ---- FIN MESSAGE ----");
 
 
-	  LOG(" ---- SIGNATURES ----");
-	  LOG("->" << sigr << "<-");
-	  LOG("->" << sigs << "<-");
-	  LOG(" ---- FIN SIGNATURES ----");
+	  INFO(" ---- SIGNATURES ----");
+	  INFO("->" << sigr << "<-");
+	  INFO("->" << sigs << "<-");
+	  INFO(" ---- FIN SIGNATURES ----");
 	   */
 
 	  DSA_SIG* sig = DSA_SIG_new();
@@ -146,8 +146,8 @@ bool PeerSTRPEDS::CheckMessage(std::vector<char> message,
 	  BN_hex2bn(&sig->r, sigr);
 	  BN_hex2bn(&sig->s, sigs);
 
-	 LOG("Size r: " << *(sig->r->d));
-	 LOG("Size s: " << *(sig->s->d));
+	 INFO("Size r: " << *(sig->r->d));
+	 INFO("Size s: " << *(sig->s->d));
 
 	  if (DSA_do_verify((unsigned char*)h.data(), h.size(), sig, dsa_key)){
 		  TRACE("Sender is clean: sign verified. CN: " + std::to_string(chunk_number));
@@ -190,7 +190,7 @@ int PeerSTRPEDS::HandleBadPeersRequest() {
   team_socket_.send_to(buffer(msg), splitter_);
 
   std::string s(msg.begin(), msg.end());
-  LOG("Message List: " << s);
+  INFO("Message List: " << s);
   TRACE("Bad Header sent to the splitter");
 
 
@@ -211,7 +211,7 @@ int PeerSTRPEDS::ProcessMessage(const std::vector<char> &message,
   // --------------- For current round ---------------------
   if (!IsControlMessage(message) and IsCurrentMessageFromSplitter()){
 	  current_round_ = ntohl(*(uint32_t *)(message.data() + sizeof(uint16_t) + chunk_size_ + 40 + 40));
-  	  LOG("Current Round: " << current_round_);
+  	  INFO("Current Round: " << current_round_);
 	  if (logging_ and latest_chunk_number_ != 0) {
 		LogMessage("buffer correctnes " + std::to_string(CalcBufferCorrectness()));
 	    LogMessage("buffer filling " + std::to_string(CalcBufferFilling()));
@@ -247,7 +247,7 @@ void PeerSTRPEDS::PlayNextChunk(int chunk_number) {
 	    	//PlayChunk(played_chunk_);
 	    	chunks_[played_chunk_ % buffer_size_].received = false;
 	    	received_counter_--;
-	    	LOG("Chunk Consumed at: " << played_chunk_ % buffer_size_);	       
+	    	INFO("Chunk Consumed at: " << played_chunk_ % buffer_size_);	       
 	    }else{
 	    	Complain(played_chunk_);
 	    	losses_++;
@@ -256,7 +256,7 @@ void PeerSTRPEDS::PlayNextChunk(int chunk_number) {
 	    		  LogMessage("chunk lost at " + std::to_string(played_chunk_ % buffer_size_));
 	    	}
 	    	*/
-	    	LOG("Chunk lost at: " << played_chunk_ % buffer_size_);
+	    	INFO("Chunk lost at: " << played_chunk_ % buffer_size_);
 	    }
 	    played_++;
 	 played_chunk_++;

@@ -36,7 +36,7 @@ boost::asio::ip::udp::endpoint PeerStrpeDsMalicious::ChooseMainTarget(){
 			boost::asio::ip::address address = boost::asio::ip::address::from_string(*t);
 			t++;
 			uint16_t port = atoi((*t).c_str());
-			//LOG("IP: " + address.to_string() + ":" + std::to_string(port));
+			//INFO("IP: " + address.to_string() + ":" + std::to_string(port));
 			attacked_peers.push_back(boost::asio::ip::udp::endpoint(address,port));
 
 		}
@@ -60,7 +60,7 @@ boost::asio::ip::udp::endpoint PeerStrpeDsMalicious::ChooseMainTarget(){
 			boost::asio::ip::address address = boost::asio::ip::address::from_string(*t);
 			t++;
 			uint16_t port = atoi((*t).c_str());
-			//LOG("IP: " + address.to_string() + ":" + std::to_string(port));
+			//INFO("IP: " + address.to_string() + ":" + std::to_string(port));
 			malicious_peers.push_back(boost::asio::ip::udp::endpoint(address,port));
 
 		}
@@ -114,7 +114,7 @@ boost::asio::ip::udp::endpoint PeerStrpeDsMalicious::ChooseMainTarget(){
 			boost::asio::ip::address address = boost::asio::ip::address::from_string(*t);
 			t++;
 			uint16_t port = atoi((*t).c_str());
-			//LOG("IP: " + address.to_string() + ":" + std::to_string(port));
+			//INFO("IP: " + address.to_string() + ":" + std::to_string(port));
 
 			if (std::find(peer_list_.begin(), peer_list_.end(), boost::asio::ip::udp::endpoint(address,port)) != peer_list_.end()){
 				regular_peers_.push_back(boost::asio::ip::udp::endpoint(address,port));
@@ -241,7 +241,7 @@ int PeerStrpeDsMalicious::DBSProcessMessage(const std::vector<char> &message,
 
   		received_counter_++;
 
-  		LOG("Chunk Inserted at: " << (chunk_number%buffer_size_));
+  		INFO("Chunk Inserted at: " << (chunk_number%buffer_size_));
 
   		if (sender == splitter_) {
 
