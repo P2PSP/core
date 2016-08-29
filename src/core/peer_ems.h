@@ -29,12 +29,12 @@ using namespace boost::asio;
 
 namespace p2psp {
 
-  class PeerEMS : public PeerNTS {
+  class Peer_EMS : public Peer_NTS {
   /* the only extension is a slightly modified connect to splitter method*/
 
   public:
-    PeerEMS();
-    ~PeerEMS();
+    Peer_EMS();
+    ~Peer_EMS();
 
     virtual void ConnectToTheSplitter() throw(boost::system::system_error)  override;
 

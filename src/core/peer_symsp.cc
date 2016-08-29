@@ -15,42 +15,42 @@
 
 namespace p2psp {
 
-PeerSYMSP::PeerSYMSP(){
-  magic_flags_ = Common::kNTS;
-  this->port_step_ = 1;
-}
+  Peer_SYMSP::Peer_SYMSP(){
+    //magic_flags_ = Common::kNTS;
+    this->port_step_ = 1;
+  }
 
-PeerSYMSP::~PeerSYMSP(){}
+  Peer_SYMSP::~Peer_SYMSP(){}
 
-void PeerSYMSP::Init() { LOG("Initialized"); }
+  void Peer_SYMSP::Init() { INFO("Initialized"); }
 
-void PeerSYMSP::SendMessage(std::string message,
-    boost::asio::ip::udp::endpoint endpoint) {
-  {
-    std::unique_lock<std::mutex> lock(this->endpoints_mutex_);
-    if (!CommonNTS::Contains(this->endpoints_, endpoint)) {
-      this->endpoints_.push_back(endpoint);
-      for (unsigned int i = 0; i < this->port_step_; i++) {
-        ip::udp::socket socket(this->io_service_);
-        socket.open(ip::udp::v4());
-        try {
-          socket.send_to(buffer(std::string()), endpoint);
-        } catch (std::exception e) {
-          ERROR(e.what());
-        }
-        socket.close();
+  void Peer_SYMSP::SendMessage(std::string message,
+			       boost::asio::ip::udp::endpoint endpoint) {
+    {
+      std::unique_lock<std::mutex> lock(this->endpoints_mutex_);
+      if (!Common_NTS::Contains(this->endpoints_, endpoint)) {
+	this->endpoints_.push_back(endpoint);
+	for (unsigned int i = 0; i < this->port_step_; i++) {
+	  ip::udp::socket socket(this->io_service_);
+	  socket.open(ip::udp::v4());
+	  try {
+	    socket.send_to(buffer(std::string()), endpoint);
+	  } catch (std::exception e) {
+	    ERROR(e.what());
+	  }
+	  socket.close();
+	}
       }
     }
+    Peer_NTS::SendMessage(message, endpoint);
   }
-  PeerNTS::SendMessage(message, endpoint);
-}
 
-unsigned int PeerSYMSP::GetPortStep() {
-  return this->port_step_;
-}
+  unsigned int Peer_SYMSP::GetPortStep() {
+    return this->port_step_;
+  }
 
-void PeerSYMSP::SetPortStep(unsigned int port_step) {
-  this->port_step_ = port_step;
-}
+  void Peer_SYMSP::SetPortStep(unsigned int port_step) {
+    this->port_step_ = port_step;
+  }
 
 }

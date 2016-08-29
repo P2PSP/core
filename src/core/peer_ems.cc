@@ -14,16 +14,16 @@
 
 namespace p2psp {
 
-  PeerEMS::PeerEMS() {
-    magic_flags_ = Common::kEMS;
+  Peer_EMS::Peer_EMS() {
+
   }
 
-  PeerEMS::~PeerEMS() {}
+  Peer_EMS::~Peer_EMS() {}
 
   //method from IMS but with sending of local endpoint added
-  void PeerEMS::ConnectToTheSplitter() throw(boost::system::system_error) {
+  void Peer_EMS::ConnectToTheSplitter() throw(boost::system::system_error) {
 
-    PeerIMS::ConnectToTheSplitter();
+    Peer_core::ConnectToTheSplitter();
 
     char message[6];
     in_addr addr;
@@ -32,7 +32,7 @@ namespace p2psp {
     (*(uint16_t *)(message + 4)) = htons(splitter_socket_.local_endpoint().port());
     splitter_socket_.send(boost::asio::buffer(message));
 
-    TRACE("send to splitter local endpoint = (" << splitter_socket_.local_endpoint().address().to_string() << ","
+    INFO("send to splitter local endpoint = (" << splitter_socket_.local_endpoint().address().to_string() << ","
           << std::to_string(splitter_socket_.local_endpoint().port()) << ")");
   }
 

@@ -24,7 +24,7 @@
 
 
 namespace p2psp {
-class SplitterEMS : public SplitterNTS {
+class Splitter_EMS : public Splitter_NTS {
  protected:
 
   // HashTable of public to private endpoints
@@ -35,8 +35,8 @@ class SplitterEMS : public SplitterNTS {
 
 
  public:
-  SplitterEMS();
-  ~SplitterEMS();
+  Splitter_EMS();
+  ~Splitter_EMS();
   virtual void SendTheListOfPeers2(
           const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket,
           const boost::asio::ip::udp::endpoint& peer) override;

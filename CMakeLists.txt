@@ -9,7 +9,7 @@ option(BUILD_TEST "Build the test" ON)
 #option(BUILD_PEER "Build the peer" ON)
 #option(BUILD_SPLITTER "Build the splitter" ON)
 
-option(BUILD_PYTHON_WRAPPER "Build the Python wrapper" ON)
+option(BUILD_PYTHON_WRAPPER "Build the Python wrapper" OFF)
 
 option(BUILD_WITH_CLANG "Build using the Clang compiler" OFF)
 
@@ -82,9 +82,17 @@ link_directories(${Boost_LIBRARY_DIR})
 
 # Initialize CXXFLAGS
 set(CMAKE_CXX_FLAGS                "-Wall -std=c++11")
-set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
-set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG")
+#set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
+#set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g -D__D__")
+#set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g -D__D__ -D__D_CHURN__ -D__D_LOST_CHUNKS__ -D__D_TRAFFIC__ -D__D_BUFFER__")
+#set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g -D__D__ -D__D_CHURN__ -D__D_LOST_CHUNKS__")
+#set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g -D__D_BUFFER__")
+#set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g -D__D_BUFFER__ -D__D_LOST_CHUNKS__")
+set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g -D__D__ -D__D_LOST_CHUNKS__ -D__D_BUFFER__")
+#set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os")
+set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os")
+#set(CMAKE_CXX_FLAGS_RELEASE        "-O4")
+set(CMAKE_CXX_FLAGS_RELEASE        "-O4")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 
 # Compiler-specific C++11 activation
@@ -103,14 +111,47 @@ endif ()
 # Sources
 if(NOT BUILD_REDUCED_LIB)
   file(GLOB P2PSP_SOURCES
-    "src/core/*.cc"
+    #"src/core/*.cc"
+    "src/core/peer_core.cc"
+    "src/core/peer_ims.cc"
+    "src/core/peer_dbs.cc"
+    "src/core/peer_nts.cc"
+    "src/core/peer_symsp.cc"
+    "src/core/peer_ems.cc"
+    "src/core/monitor_dbs.cc"
+    "src/core/monitor_lrs.cc"
+    "src/core/monitor_nts.cc"
+    "src/core/monitor_ems.cc"
+    "src/core/splitter_core.cc"
+    "src/core/splitter_ims.cc"
+    "src/core/splitter_dbs.cc"
+    "src/core/splitter_acs.cc"
+    "src/core/splitter_lrs.cc"
+    "src/core/splitter_nts.cc"
+    "src/core/splitter_ems.cc"
+    "src/core/common_nts.cc"
     "src/util/*.cc"
   )
 else()
   file(GLOB P2PSP_SOURCES
+    "src/core/peer_core.cc"
     "src/core/peer_ims.cc"
     "src/core/peer_dbs.cc"
-    "src/core/python.cc"
+    "src/core/peer_nts.cc"
+    "src/core/peer_symsp.cc"
+    "src/core/peer_ems.cc"
+    "src/core/monitor_dbs.cc"
+    "src/core/monitor_lrs.cc"
+    "src/core/monitor_nts.cc"
+    "src/core/monitor_ems.cc"
+    "src/core/splitter_core.cc"
+    "src/core/splitter_ims.cc"
+    "src/core/splitter_dbs.cc"
+    "src/core/splitter_acs.cc"
+    "src/core/splitter_lrs.cc"
+    "src/core/splitter_nts.cc"
+    "src/core/splitter_ems.cc"
+    "src/core/common_nts.cc"
     "src/util/*.cc"
   )
 endif()
