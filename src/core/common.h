@@ -20,18 +20,18 @@
 
 namespace p2psp {
 
-  class Common {
+    class Common {
 
-  public:
+    public:
 
-    static const int kMaxChunkNumber = 65536;
-    // MAX_CHUNK_NUMBER = 2048
-    // COUNTERS_TIMING = 0.1
-    static const int kCountersTiming = 1; // In seconds
+        static const int kMaxChunkNumber = 65536;
+        // MAX_CHUNK_NUMBER = 2048
+        // COUNTERS_TIMING = 0.1
+        static const int kCountersTiming = 1; // In seconds
 
-    //static const bool kConsoleMode = true;
+        //static const bool kConsoleMode = true;
 #ifdef _1_
-    // Set of rules flags
+        // Set of rules flags
     static const char kIMS = 0x00; // IMS
     static const char kDBS = 0x01; // DBS
     static const char kACS = 0x02; // ACS
@@ -40,19 +40,19 @@ namespace p2psp {
     static const char kSTRPE = 0x10; // This should be renamed to kCIS
     //static const char kDIS = 0x11; // DIS
 #endif
-    // TODO: Use colors
-    // IMS_COLOR = Color.red
-    // DBS_COLOR = Color.green
-    // ACS_COLOR = Color.blue
-    // LRS_COLOR = Color.cyan
-    // NTS_COLOR = Color.purple
-    // DIS_COLOR = Color.yellow
+        // TODO: Use colors
+        // IMS_COLOR = Color.red
+        // DBS_COLOR = Color.green
+        // ACS_COLOR = Color.blue
+        // LRS_COLOR = Color.cyan
+        // NTS_COLOR = Color.purple
+        // DIS_COLOR = Color.yellow
 
-    static void sha256(std::vector<char> string, std::vector<char> &digest) {
-      SHA256((unsigned char *)string.data(), string.size(),
-    		  (unsigned char *)digest.data());
-    }
-  };
+        static void sha256(std::vector<char> string, std::vector<char> &digest) {
+            SHA256((unsigned char *)string.data(), string.size(),
+                   (unsigned char *)digest.data());
+        }
+    };
 }
 
 #endif  // P2PSP_CORE_COMMON_H
