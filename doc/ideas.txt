@@ -1,0 +1,2 @@
+Develop a new DBS module using the idea that peers relays the chunks only to those peers that are close (in hops).
+
