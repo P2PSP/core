@@ -143,7 +143,14 @@ namespace p2psp {
     TRACE("Accepted connection from peer "
 	  << incoming_peer);
 #endif
-
+    asio::ip::udp::endpoint incoming_udp_endpoint(incoming_peer.address(),incoming_peer.port());
+    std::vector<char> message;
+    ReceiveMessage(message,incoming_udp_endpoint);
+    std::string s(message.begin(),message.end());
+    if(s=="M"){
+      number_of_monitors_++;
+      TRACE("The number of monitors increased to "<<number_of_monitors_);
+    }
     SendConfiguration(serve_socket);
     //SendTheListOfPeers(serve_socket);
     ReceiveReadyForReceivingChunks(serve_socket);
