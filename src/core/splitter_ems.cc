@@ -139,7 +139,7 @@ namespace p2psp {
     boost::asio::ip::tcp::endpoint new_peer_tcp = serve_socket->remote_endpoint();
     boost::asio::ip::udp::endpoint new_peer(new_peer_tcp.address(), new_peer_tcp.port());
     INFO("Accepted connection from peer " << new_peer);
-    boost::array<char, 6> buf;
+    boost::array<char, 7> buf;
     char *raw_data = buf.data();
     boost::asio::ip::address ip_addr;
     int port;
@@ -148,7 +148,7 @@ namespace p2psp {
     in_addr ip_raw = *(in_addr *)(raw_data);
     ip_addr = boost::asio::ip::address::from_string(inet_ntoa(ip_raw));
     port = ntohs(*(short *)(raw_data + 4));
-
+    char sig = ntohs(*(char *)(raw_data+6));
     boost::asio::ip::udp::endpoint peer_local_endpoint_ = boost::asio::ip::udp::endpoint(ip_addr, port);
 
     TRACE("peer local endpoint = (" << peer_local_endpoint_.address().to_string() << ","
@@ -156,6 +156,15 @@ namespace p2psp {
 
     Splitter_EMS::peer_pairs_.emplace(boost::asio::ip::udp::endpoint(new_peer_tcp.address(),
                                                                     new_peer_tcp.port()), peer_local_endpoint_);
+    std::vector<char> message;
+    TRACE("Pre ReceiveMessage");
+    //read((*serve_socket),boost::asio::buffer(message));
+    //std::string s(message.begin(),message.end());
+    std::cout<<"Contents of S "<<sig<<"\n";
+    if(sig==0){
+      number_of_monitors_++;
+      TRACE("The number of monitors increased to "<<number_of_monitors_);
+    }
     this->SendConfiguration(serve_socket);
 
     // Send the generated ID to peer
