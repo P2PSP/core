@@ -52,7 +52,7 @@ void Monitor_EMS::ConnectToTheSplitter() throw(boost::system::system_error){
     inet_aton(splitter_socket_.local_endpoint().address().to_string().c_str(), &addr);
     (*(in_addr *)&message) = addr;
     (*(uint16_t *)(message + 4)) = htons(splitter_socket_.local_endpoint().port());
-    (*(char *)(message+6))=htons('M');
+    (*(message+6))='M';
     splitter_socket_.send(boost::asio::buffer(message));
 
     INFO("send to splitter local endpoint = (" << splitter_socket_.local_endpoint().address().to_string() << ","

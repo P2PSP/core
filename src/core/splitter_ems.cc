@@ -148,7 +148,7 @@ namespace p2psp {
     in_addr ip_raw = *(in_addr *)(raw_data);
     ip_addr = boost::asio::ip::address::from_string(inet_ntoa(ip_raw));
     port = ntohs(*(short *)(raw_data + 4));
-    char sig = ntohs(*(char *)(raw_data+6));
+    char sig = *(raw_data+6);
     boost::asio::ip::udp::endpoint peer_local_endpoint_ = boost::asio::ip::udp::endpoint(ip_addr, port);
 
     TRACE("peer local endpoint = (" << peer_local_endpoint_.address().to_string() << ","
@@ -156,14 +156,19 @@ namespace p2psp {
 
     Splitter_EMS::peer_pairs_.emplace(boost::asio::ip::udp::endpoint(new_peer_tcp.address(),
                                                                     new_peer_tcp.port()), peer_local_endpoint_);
-    std::vector<char> message;
-    TRACE("Pre ReceiveMessage");
     //read((*serve_socket),boost::asio::buffer(message));
     //std::string s(message.begin(),message.end());
-    std::cout<<"Contents of S "<<sig<<"\n";
-    if(sig==0){
-      number_of_monitors_++;
-      TRACE("The number of monitors increased to "<<number_of_monitors_);
+    TRACE("Contents of Signalling message: "<<sig);
+    if(sig=='M'){
+      if(number_of_monitors_!=1){
+        number_of_monitors_++;
+        TRACE("The number of monitors increased to "<<number_of_monitors_);
+      }
+      else{
+        if(this->peer_list_.size()>=1)
+          number_of_monitors_++;
+        TRACE("The number of monitors increased to "<<number_of_monitors_);
+      }
     }
     this->SendConfiguration(serve_socket);
 
