@@ -27,7 +27,7 @@ namespace p2psp {
     // These two are from Monitor_DBS:
     virtual void Complain(uint16_t) override;
     //virtual int FindNextChunk() override;
-
+    virtual void ConnectToTheSplitter() throw(boost::system::system_error) override;
     // Receive the generated ID for this peer from splitter and disconnect
     virtual void DisconnectFromTheSplitter() override;
 

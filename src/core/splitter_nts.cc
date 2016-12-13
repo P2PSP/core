@@ -379,7 +379,7 @@ namespace p2psp {
     ip::udp::endpoint new_peer(new_peer_tcp.address(), new_peer_tcp.port());
     INFO("Accepted connection from peer " << new_peer);
     std::vector<char> message;
-    ReceiveMessage(message,new_peer);
+    boost::asio::read((*serve_socket),boost::asio::buffer(message));
     std::string s(message.begin(),message.end());
     if(s=="M"){
       number_of_monitors_++;
@@ -653,7 +653,8 @@ namespace p2psp {
 
   void Splitter_NTS::RemovePeer(const ip::udp::endpoint& peer) {
     // {{{
-
+    if(std::find(peer_list_.begin(),peer_list_.begin()+number_of_monitors_,peer)!=peer_list_.begin()+number_of_monitors_)
+      number_of_monitors_--;
     Splitter_LRS/*_DBS*/::RemovePeer(peer);
 
     try {
