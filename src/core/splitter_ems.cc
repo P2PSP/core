@@ -119,6 +119,8 @@ namespace p2psp {
 
 
   void Splitter_EMS::RemovePeer(const ip::udp::endpoint& peer) {
+    if(std::find(peer_list_.begin(),peer_list_.begin()+number_of_monitors_,peer)!=peer_list_.begin()+number_of_monitors_)
+      number_of_monitors_--;
     Splitter_LRS::RemovePeer(peer);
 
     try {
