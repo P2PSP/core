@@ -56,6 +56,7 @@ namespace p2psp {
     virtual void BufferData() override;
     virtual void Start() override;
     virtual void Run() override;
+    virtual void ConnectToTheSplitter() throw(boost::system::system_error) override;
     bool AmIAMonitor();
 
     int GetNumberOfPeers();

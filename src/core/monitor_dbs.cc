@@ -81,9 +81,7 @@ namespace p2psp {
           << std::to_string(splitter_tcp_endpoint.port()) << ")");
 #endif
     std::string monitor = "M";
-    ip::udp::socket sock(io_service_);
-    sock.send_to(boost::asio::buffer(monitor,monitor.length()),splitter_);
-    sock.close();
+    splitter_socket_.send(boost::asio::buffer(monitor));
     // }}}
   }
 

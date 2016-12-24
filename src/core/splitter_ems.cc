@@ -179,7 +179,7 @@ namespace p2psp {
     INFO("Sending ID " << peer_id << " to peer " << new_peer);
     serve_socket->send(boost::asio::buffer(peer_id));
     std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
-    if (this->peer_list_.size() < (unsigned int) this->number_of_monitors_) {
+    if (this->peer_list_.size() < (unsigned int) this->number_of_monitors_ || sig=='M') {
       // Directly incorporate the monitor peer into the team.
       // The source ports are all set to the same, as the monitor peers
       // should be publicly accessible

@@ -378,12 +378,20 @@ namespace p2psp {
     ip::tcp::endpoint new_peer_tcp = serve_socket->remote_endpoint();
     ip::udp::endpoint new_peer(new_peer_tcp.address(), new_peer_tcp.port());
     INFO("Accepted connection from peer " << new_peer);
-    std::vector<char> message;
-    boost::asio::read((*serve_socket),boost::asio::buffer(message));
-    std::string s(message.begin(),message.end());
-    if(s=="M"){
-      number_of_monitors_++;
-      TRACE("The number of monitors increased to "<<number_of_monitors_);
+    boost::array<char, 1> buf;
+    char *raw_data = buf.data();
+    boost::asio::read((*serve_socket),boost::asio::buffer(buf));
+    char sig=*raw_data;
+    if(sig=='M'){
+      if(number_of_monitors_!=1){
+        number_of_monitors_++;
+        TRACE("The number of monitors increased to "<<number_of_monitors_);
+      }
+      else{
+        if(this->peer_list_.size()>=1)
+          number_of_monitors_++;
+        TRACE("The number of monitors increased to "<<number_of_monitors_);
+      }
     }
     this->SendConfiguration(serve_socket);
     // Send the generated ID to peer
@@ -391,7 +399,7 @@ namespace p2psp {
     INFO("Sending ID " << peer_id << " to peer " << new_peer);
     serve_socket->send(buffer(peer_id));
     std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
-    if (this->peer_list_.size() < (unsigned int) this->number_of_monitors_) {
+    if (this->peer_list_.size() < (unsigned int) this->number_of_monitors_ || sig=='M') {
       // Directly incorporate the monitor peer into the team.
       // The source ports are all set to the same, as the monitor peers
       // should be publicly accessible

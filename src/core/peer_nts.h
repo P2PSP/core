@@ -59,7 +59,6 @@ namespace p2psp {
     virtual void StartSendHelloThread();
     virtual void ReceiveTheListOfPeers2();
     virtual void TryToDisconnectFromTheSplitter();
-
     virtual std::set<uint16_t> GetFactors(uint16_t n);
 
     // Get the number of possible products of a factor and another integer
@@ -79,7 +78,7 @@ namespace p2psp {
     Peer_NTS();
     ~Peer_NTS();
     virtual void Init() override;
-
+    virtual void ConnectToTheSplitter() throw(boost::system::system_error) override;
     virtual void SayHello(const ip::udp::endpoint& peer) override;
     virtual void DisconnectFromTheSplitter() override;
     // Handle NTS messages; pass other messages to base class

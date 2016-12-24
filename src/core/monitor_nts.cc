@@ -107,7 +107,7 @@ namespace p2psp {
           << splitter_tcp_endpoint.address().to_string() << ","
           << std::to_string(splitter_tcp_endpoint.port()) << ")");
 #endif
-    std::string monitor = "M";
+    char monitor[1] = {'M'};
     splitter_socket_.send(boost::asio::buffer(monitor));
     // }}}
   }

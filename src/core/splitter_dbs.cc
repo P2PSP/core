@@ -148,8 +148,15 @@ namespace p2psp {
     boost::asio::read((*serve_socket),boost::asio::buffer(message));
     std::string s(message.begin(),message.end());
     if(s=="M"){
-      number_of_monitors_++;
-      TRACE("The number of monitors increased to "<<number_of_monitors_);
+      if(number_of_monitors_!=1){
+        number_of_monitors_++;
+        TRACE("The number of monitors increased to "<<number_of_monitors_);
+      }
+      else{
+        if(this->peer_list_.size()>=1)
+          number_of_monitors_++;
+        TRACE("The number of monitors increased to "<<number_of_monitors_);
+      }
     }
     SendConfiguration(serve_socket);
     //SendTheListOfPeers(serve_socket);
