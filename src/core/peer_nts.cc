@@ -248,6 +248,12 @@ namespace p2psp {
     // }}}
   }
 
+  void Peer_NTS::ConnectToTheSplitter() throw(boost::system::system_error){
+    Peer_core::ConnectToTheSplitter();
+    char monitor[1] = {'P'};
+    splitter_socket_.send(boost::asio::buffer(monitor));
+  }
+
   void Peer_NTS::DisconnectFromTheSplitter() {
     // {{{
 

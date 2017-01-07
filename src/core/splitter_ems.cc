@@ -119,6 +119,8 @@ namespace p2psp {
 
 
   void Splitter_EMS::RemovePeer(const ip::udp::endpoint& peer) {
+    if(std::find(peer_list_.begin(),peer_list_.begin()+number_of_monitors_,peer)!=peer_list_.begin()+number_of_monitors_)
+      number_of_monitors_--;
     Splitter_LRS::RemovePeer(peer);
 
     try {
@@ -139,7 +141,7 @@ namespace p2psp {
     boost::asio::ip::tcp::endpoint new_peer_tcp = serve_socket->remote_endpoint();
     boost::asio::ip::udp::endpoint new_peer(new_peer_tcp.address(), new_peer_tcp.port());
     INFO("Accepted connection from peer " << new_peer);
-    boost::array<char, 6> buf;
+    boost::array<char, 7> buf;
     char *raw_data = buf.data();
     boost::asio::ip::address ip_addr;
     int port;
@@ -148,7 +150,7 @@ namespace p2psp {
     in_addr ip_raw = *(in_addr *)(raw_data);
     ip_addr = boost::asio::ip::address::from_string(inet_ntoa(ip_raw));
     port = ntohs(*(short *)(raw_data + 4));
-
+    char sig = *(raw_data+6);
     boost::asio::ip::udp::endpoint peer_local_endpoint_ = boost::asio::ip::udp::endpoint(ip_addr, port);
 
     TRACE("peer local endpoint = (" << peer_local_endpoint_.address().to_string() << ","
@@ -156,6 +158,20 @@ namespace p2psp {
 
     Splitter_EMS::peer_pairs_.emplace(boost::asio::ip::udp::endpoint(new_peer_tcp.address(),
                                                                     new_peer_tcp.port()), peer_local_endpoint_);
+    //read((*serve_socket),boost::asio::buffer(message));
+    //std::string s(message.begin(),message.end());
+    TRACE("Contents of Signalling message: "<<sig);
+    if(sig=='M'){
+      if(number_of_monitors_!=1){
+        number_of_monitors_++;
+        TRACE("The number of monitors increased to "<<number_of_monitors_);
+      }
+      else{
+        if(this->peer_list_.size()>=1)
+          number_of_monitors_++;
+        TRACE("The number of monitors increased to "<<number_of_monitors_);
+      }
+    }
     this->SendConfiguration(serve_socket);
 
     // Send the generated ID to peer
@@ -163,7 +179,7 @@ namespace p2psp {
     INFO("Sending ID " << peer_id << " to peer " << new_peer);
     serve_socket->send(boost::asio::buffer(peer_id));
     std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
-    if (this->peer_list_.size() < (unsigned int) this->number_of_monitors_) {
+    if (this->peer_list_.size() < (unsigned int) this->number_of_monitors_ || sig=='M') {
       // Directly incorporate the monitor peer into the team.
       // The source ports are all set to the same, as the monitor peers
       // should be publicly accessible

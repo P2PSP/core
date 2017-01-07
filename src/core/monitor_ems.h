@@ -28,7 +28,7 @@ class Monitor_EMS : public Peer_EMS {
   // These two are from MonitorDBS:
   virtual void Complain(uint16_t);
   //virtual int FindNextChunk() override;
-
+  virtual void ConnectToTheSplitter() throw(boost::system::system_error) override;
   // Receive the generated ID for this peer from splitter and disconnect
   virtual void DisconnectFromTheSplitter() override;
 

@@ -243,6 +243,12 @@ namespace p2psp {
 
   }
 
+  void Peer_DBS::ConnectToTheSplitter() throw(boost::system::system_error){
+  	Peer_core::ConnectToTheSplitter();
+    char monitor[1] = {'P'};
+    splitter_socket_.send(boost::asio::buffer(monitor));
+  }
+
   int Peer_DBS::ProcessMessage(const std::vector<char> &message,
 			       const ip::udp::endpoint &sender) {
     // {{{

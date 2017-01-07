@@ -42,6 +42,31 @@ DEBUG("lost chunk:" << std::to_string(chunk_number));
 //return chunk_number;
 //}
 
+void Monitor_EMS::ConnectToTheSplitter() throw(boost::system::system_error){
+    // {{{
+
+    Peer_core::ConnectToTheSplitter();
+
+    char message[7];
+    in_addr addr;
+    inet_aton(splitter_socket_.local_endpoint().address().to_string().c_str(), &addr);
+    (*(in_addr *)&message) = addr;
+    (*(uint16_t *)(message + 4)) = htons(splitter_socket_.local_endpoint().port());
+    (*(message+6))='M';
+    splitter_socket_.send(boost::asio::buffer(message));
+
+    INFO("send to splitter local endpoint = (" << splitter_socket_.local_endpoint().address().to_string() << ","
+          << std::to_string(splitter_socket_.local_endpoint().port()) << ")");
+    std::string monitor = "M";
+    //ip::udp::socket sock(io_service_);
+    //sock.connect(splitter_);
+    TRACE("Sending monitor signal to splitter");
+    //splitter_socket_.send(boost::asio::buffer(monitor));
+    TRACE("Sent");
+    //sock.close();
+    // }}}
+  }
+
 //this is from monitorNTS
 void Monitor_EMS::DisconnectFromTheSplitter() {
     this->StartSendHelloThread();

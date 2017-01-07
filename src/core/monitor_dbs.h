@@ -21,6 +21,7 @@ namespace p2psp {
     ~Monitor_DBS();
     virtual void Init() override;
     virtual void Complain(unsigned short chunk_position /* in buffer */) override;
+    virtual void ConnectToTheSplitter() throw(boost::system::system_error) override;
     //virtual int FindNextChunk() override;
     //virtual void PlayNextChunk(int chunk_number) override;
   };

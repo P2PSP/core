@@ -143,7 +143,21 @@ namespace p2psp {
     TRACE("Accepted connection from peer "
 	  << incoming_peer);
 #endif
-
+    asio::ip::udp::endpoint incoming_udp_endpoint(incoming_peer.address(),incoming_peer.port());
+	std::vector<char> message;
+    boost::asio::read((*serve_socket),boost::asio::buffer(message));
+    std::string s(message.begin(),message.end());
+    if(s=="M"){
+      if(number_of_monitors_!=1){
+        number_of_monitors_++;
+        TRACE("The number of monitors increased to "<<number_of_monitors_);
+      }
+      else{
+        if(this->peer_list_.size()>=1)
+          number_of_monitors_++;
+        TRACE("The number of monitors increased to "<<number_of_monitors_);
+      }
+    }
     SendConfiguration(serve_socket);
     //SendTheListOfPeers(serve_socket);
     ReceiveReadyForReceivingChunks(serve_socket);
@@ -258,6 +272,8 @@ namespace p2psp {
     // {{{
 
     // If peer_list_ contains the peer, remove it
+    if(std::find(peer_list_.begin(),peer_list_.begin()+number_of_monitors_,peer)!=peer_list_.begin()+number_of_monitors_)
+      number_of_monitors_--;
     if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
       peer_list_.erase(remove(peer_list_.begin(), peer_list_.end(), peer), peer_list_.end());
 

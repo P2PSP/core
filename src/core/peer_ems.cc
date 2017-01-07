@@ -25,11 +25,12 @@ namespace p2psp {
 
     Peer_core::ConnectToTheSplitter();
 
-    char message[6];
+    char message[7];
     in_addr addr;
     inet_aton(splitter_socket_.local_endpoint().address().to_string().c_str(), &addr);
     (*(in_addr *)&message) = addr;
     (*(uint16_t *)(message + 4)) = htons(splitter_socket_.local_endpoint().port());
+    (*(message+6))='P';
     splitter_socket_.send(boost::asio::buffer(message));
 
     INFO("send to splitter local endpoint = (" << splitter_socket_.local_endpoint().address().to_string() << ","

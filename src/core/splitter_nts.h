@@ -134,7 +134,8 @@ namespace p2psp {
     // The thread listens to this->extra_socket_ to determine the currently
     // allocated source port of incorporated peers behind SYMSP NATs
     virtual void ListenExtraSocketThread();
-
+    virtual void InsertPeer(const boost::asio::ip::udp::endpoint &peer);
+    virtual void InsertPeer(const boost::asio::ip::udp::endpoint &peer, char sig);
     virtual void IncorporatePeer(const std::string& peer_id);
     virtual void SendNewPeer(const std::string& peer_id,
 			     const boost::asio::ip::udp::endpoint& new_peer,

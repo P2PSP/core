@@ -378,13 +378,28 @@ namespace p2psp {
     ip::tcp::endpoint new_peer_tcp = serve_socket->remote_endpoint();
     ip::udp::endpoint new_peer(new_peer_tcp.address(), new_peer_tcp.port());
     INFO("Accepted connection from peer " << new_peer);
+    boost::array<char, 1> buf;
+    char *raw_data = buf.data();
+    boost::asio::read((*serve_socket),boost::asio::buffer(buf));
+    char sig=*raw_data;
+    if(sig=='M'){
+      if(number_of_monitors_!=1){
+        number_of_monitors_++;
+        TRACE("The number of monitors increased to "<<number_of_monitors_);
+      }
+      else{
+        if(this->peer_list_.size()>=1)
+          number_of_monitors_++;
+        TRACE("The number of monitors increased to "<<number_of_monitors_);
+      }
+    }
     this->SendConfiguration(serve_socket);
     // Send the generated ID to peer
     std::string peer_id = this->GenerateId();
     INFO("Sending ID " << peer_id << " to peer " << new_peer);
     serve_socket->send(buffer(peer_id));
     std::unique_lock<std::mutex> lock(arriving_incorporating_peers_mutex_);
-    if (this->peer_list_.size() < (unsigned int) this->number_of_monitors_) {
+    if (this->peer_list_.size() < (unsigned int) this->number_of_monitors_ || sig=='M') {
       // Directly incorporate the monitor peer into the team.
       // The source ports are all set to the same, as the monitor peers
       // should be publicly accessible
@@ -402,6 +417,30 @@ namespace p2psp {
       // Splitter will continue with IncorporatePeer() as soon as the
       // arriving peer has sent UDP packets to splitter and monitor
     }
+
+    // }}}
+  }
+  void Splitter_NTS::InsertPeer(const boost::asio::ip::udp::endpoint &peer)
+  {
+    Splitter_DBS::InsertPeer(peer);
+  }
+  void Splitter_NTS::InsertPeer(const boost::asio::ip::udp::endpoint &peer,char sig)
+  {
+    // {{{
+    if (find(peer_list_.begin(), peer_list_.end(), peer) != peer_list_.end()) {
+      peer_list_.erase(find(peer_list_.begin(), peer_list_.end(), peer));
+    }
+    if(sig=='M'){
+      peer_list_.insert(peer_list_.begin(),peer);
+    }
+    else{
+    peer_list_.push_back(peer);
+    }
+    losses_[peer] = 0;
+#if defined __D_CHURN__
+    TRACE("Inserted peer "
+    << peer);
+#endif
 
     // }}}
   }
@@ -622,7 +661,8 @@ namespace p2psp {
 
   void Splitter_NTS::RemovePeer(const ip::udp::endpoint& peer) {
     // {{{
-
+    if(std::find(peer_list_.begin(),peer_list_.begin()+number_of_monitors_,peer)!=peer_list_.begin()+number_of_monitors_)
+      number_of_monitors_--;
     Splitter_LRS/*_DBS*/::RemovePeer(peer);
 
     try {

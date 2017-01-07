@@ -17,6 +17,74 @@ namespace p2psp {
 
   Monitor_DBS::~Monitor_DBS(){};
 
+  void Monitor_DBS::ConnectToTheSplitter() throw(boost::system::system_error) {
+    // {{{
+
+    std::string my_ip;
+
+    // TCP endpoint object to connect to splitter
+    ip::tcp::endpoint splitter_tcp_endpoint(splitter_addr_, splitter_port_);
+
+    // UDP endpoint object to connect to splitter
+    splitter_ = ip::udp::endpoint(splitter_addr_, splitter_port_);
+
+    ip::tcp::endpoint tcp_endpoint;
+
+#if defined __D_PARAMS__
+    TRACE("use_localhost = " << std::string((use_localhost_ ? "True" : "False")));
+#endif
+
+    if (use_localhost_) {
+      my_ip = "0.0.0.0";
+    } else {
+      ip::udp::socket s(io_service_);
+      try {
+        s.connect(splitter_);
+      } catch (boost::system::system_error e) {
+        ERROR(e.what());
+      }
+
+      my_ip = s.local_endpoint().address().to_string();
+      s.close();
+    }
+
+    splitter_socket_.open(splitter_tcp_endpoint.protocol());
+
+#if defined __D_TRAFFIC__
+    TRACE("Connecting to the splitter at ("
+          << splitter_tcp_endpoint.address().to_string()
+    << ","
+          << std::to_string(splitter_tcp_endpoint.port())
+    << ") from "
+    << my_ip);
+#endif
+    
+    if (team_port_ != 0) {
+#if defined __D_TRAFFIC__
+      TRACE("I'm using port"
+      << std::to_string(team_port_));
+#endif
+      tcp_endpoint = ip::tcp::endpoint(ip::address::from_string(my_ip), team_port_);
+      splitter_socket_.set_option(ip::udp::socket::reuse_address(true));      
+    } else {    
+      tcp_endpoint = ip::tcp::endpoint(ip::address::from_string(my_ip), 0);
+    }
+
+    splitter_socket_.bind(tcp_endpoint);
+
+    // Could throw an exception
+    splitter_socket_.connect(splitter_tcp_endpoint);
+
+#if defined __D_TRAFFIC__
+    TRACE("Connected to the splitter at ("
+          << splitter_tcp_endpoint.address().to_string() << ","
+          << std::to_string(splitter_tcp_endpoint.port()) << ")");
+#endif
+    std::string monitor = "M";
+    splitter_socket_.send(boost::asio::buffer(monitor));
+    // }}}
+  }
+
   void Monitor_DBS::Init() {
 #if defined __D__ || defined __D_SORS__
     TRACE("Initialized");
