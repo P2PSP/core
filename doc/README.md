@@ -60,7 +60,7 @@ peers must send so many copies of the stream (replication factor) as
 the degree of the tree (usually $R=2$). Like chains, most tree overlays are driven by
 push-based protocols aothough in this case, the latency is proportional to $D=\log_2(N)$ (notice, at the expense of sending each chunk twice than in the previous case). Therefore, the ratio 
 
-3. Meshes. Mesh overlays are more flexible regarding their topology and $R$. However, because chunks can follow different paths, peers need to ask to their neighbors about the their availability. If this happens, we say that the overlay follows a *pull-based* protocol, which obviously, produce more transmission overhead that push-based ones. P2PSP is a push-based fully connected ($D=1$) $R=1$ mesh overlay.
+3. Meshes. Mesh overlays are more flexible regarding their topology and $R$. However, because chunks can follow different paths, peers need to ask to their neighbors about the their availability. If this happens, we say that the overlay follows a *pull-based* protocol, which obviously, produce more transmission overhead than push-based ones. P2PSP is a push-based fully connected ($D=1$) $R=1$ mesh overlay.
 
 ![](http://slides.p2psp.org/2015-06-Barcelona/FIGs/full-mesh.svg)
 
