@@ -15,9 +15,9 @@ This allows to know which chunk was sent from the splitter to $P_j$.
 
 Each peer that has a good relationship with $P_j$ (notice that thanks to the Rule 1, all peers of the team know who should receive from $P_j$) builds a set of peers $H$ sorted by IP:port with the peers that have a good relationship with $P_j$. Thus, the $k$-th peer of $H$ will send the received chunk from $P_j$ to $P_i$ if
 
-\begin{equation}
-  #C % k == 0
-\end{equation}
+  \begin{equation}
+    #C % k == 0
+  \end{equation}
 
 
 <!-- Multiple splitters transmitting the same stream can improve the
