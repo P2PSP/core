@@ -1,7 +1,7 @@
 Error Resilience Set or rules
 =============================
 
-Due to different reasons, peers can lost chunks. This set of rules proposes a distributed recovery mechanism for those missing chunks.
+<!-- Due to different reasons, peers can lost chunks. This set of rules proposes a distributed recovery mechanism for those missing chunks.
 
 ### Rule 1: Peers share with the rest of the team the modifications in their list of peers
 
@@ -19,8 +19,8 @@ Each peer that has a good relationship with `$P_j$` (notice that thanks to the R
       (#C + i) % k == 0
     \end{equation}
     
-where `#C` is the chunk number received from `$P_j$`.
+where `#C` is the chunk number received from `$P_j$`. -->
 
-<!-- Multiple splitters transmitting the same stream can improve the
-performance in contexts where the lost of chunks is quite high.-->
+Multiple splitters transmitting the same stream can improve the
+performance in contexts where the lost of chunks is quite high. Peers can move between teams.
 
