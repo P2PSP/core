@@ -1,6 +1,10 @@
 Team Clustering Set of rules
 ============================
 
+```diff
+-(Not Implemented)-
+```
+
 All peers of a team have the same buffer size, which depends on the
 number of peers of the team. Therefore, the size of the team must be
 limited at configuration time of the team.
