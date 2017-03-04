@@ -1,5 +1,9 @@
 # Content Integrity Set of rules
 
+```diff
+-(Not Implemented)-
+```
+
 ## STrPe (Strategy based on Trusted Peers)
 
 STrPe is a simple approach with a low data overhead in the overall operation of the team. The only difference with respect to an pollution-unaware P2PSP system is an extension of the splitter functionality and the inclusion of anonymous trusted peers (TP) who transparently monitor the behavior of regular peers in the team. Regular peers see a TP as another regular peers.
