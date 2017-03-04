@@ -1,7 +1,7 @@
 LRS (Lost-chunk Recovery Set of rules)
 ======================================
 
-```
+```diff
 +(Implemented)+
 ```
 
