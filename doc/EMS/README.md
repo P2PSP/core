@@ -1,6 +1,10 @@
 End-point Masquerading Set of rules
 ===================================
 
+```diff
++(Implemented)
+```
+
 It is expected that most of the peers are running behind NAT (Network
 Address Translation) devices which connect private address networks to
 the public Internet. When a packet crosses the NAT from a private
