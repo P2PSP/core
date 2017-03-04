@@ -1,6 +1,10 @@
 Data Privacy Set of rules
 =========================
 
+```diff
+-(Not Implemented)-
+```
+
 The following set of rules deals with privacy-related issues. Many
 content providers offer pay-per-view channels as part of their
 services. From a technical point of view, this implies having a Key
