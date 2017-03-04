@@ -1,6 +1,10 @@
 LRS (Lost-chunk Recovery Set of rules)
 ======================================
 
+```
++(Implemented)+
+```
+
 The P2PSP relies on the UDP as the transport protocol and, obviously,
 packet losses can happen. The impact of a packet loss in the
 [QoS](https://en.wikipedia.org/wiki/Quality_of_service) offered by the
