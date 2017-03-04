@@ -1,5 +1,10 @@
 Implementation of Endpoint Masquerading Set of Rules (EMS)
 ==========================================================
+
+```diff
++(Implemented)+
+```
+
 In modern computer networks, NAT (network address translation) routers and some security-motivated features found in them create problems for effective communication in a p2p protocol. EMS aims to solve the problem of communication among two or more peers found behind the same NAT router (in other words the same private router). This document details how this additional functionality was added to the existing p2psp codebase by extending NTS(NAT traversal set of rules) as a part of Google Summer of Code 2016.
 
 
