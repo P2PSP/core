@@ -1,5 +1,5 @@
-DBS (Data Broadcasting Set of rules) <span style="color:blue">(Implemented)</span>
-==================================================
+DBS (Data Broadcasting Set of rules)
+====================================
 
 ```diff
 +(Implemented)+
