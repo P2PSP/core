@@ -2,7 +2,7 @@ DBS (Data Broadcasting Set of rules) <span style="color:blue">(Implemented)</spa
 ==================================================
 
 ```diff
-   + (Implemented)
++ (Implemented)
 ```
 
 DBS emulates IMS behaviour when
