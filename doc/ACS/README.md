@@ -1,6 +1,10 @@
 ACS (Adaptive Chunk-rate Set of rules)
 ======================================
 
+```diff
++(Implemented)
+```
+
 All nodes of a team (peers and splitter) that implements only the DBS
 must transmit exactly the same amount of media (this basically implies
 that if a peer can not fulfill this requirement it will be thrown of
