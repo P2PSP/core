@@ -1,7 +1,7 @@
 Error Resilience Set or rules
 =============================
 
-```
+```diff
 -(Not Implemented)-
 ```
 
