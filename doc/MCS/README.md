@@ -1,6 +1,10 @@
 Multi-Channel Set of rules
 ==========================
 
+```diff
+-(Not Implemented)-
+```
+
 The P2PSP may broadcast different channels (streams) over distinct
 (unconnected) teams and users can run several peers in parallel, one
 peer per channel the user wants to receive. The only essential
