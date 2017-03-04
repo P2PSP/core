@@ -1,6 +1,10 @@
 Error Resilience Set or rules
 =============================
 
+```
+-(Not Implemented)-
+```
+
 <!-- Due to different reasons, peers can lost chunks. This set of rules proposes a distributed recovery mechanism for those missing chunks.
 
 ### Rule 1: Peers share with the rest of the team the modifications in their list of peers
