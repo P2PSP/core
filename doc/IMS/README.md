@@ -1,6 +1,10 @@
 IMS (Ip Multicast Set of rules)
 ===============================
 
+```diff
++(Implemented)+
+```
+
 IMS can be enabled if IP multicast is avaiable for connecting the peers
 of the team.
 
