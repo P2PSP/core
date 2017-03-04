@@ -1,5 +1,5 @@
-DBS (Data Broadcasting Set of rules)
-===============================
+DBS (Data Broadcasting Set of rules) <span style="color:blue">(Implemented)</span>
+==================================================
 
 DBS emulates IMS behaviour when
 [IP multicast](https://en.wikipedia.org/wiki/IP_multicast) it not
