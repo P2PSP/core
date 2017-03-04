@@ -2,7 +2,7 @@ ACS (Adaptive Chunk-rate Set of rules)
 ======================================
 
 ```diff
-+(Implemented)
++(Implemented)+
 ```
 
 All nodes of a team (peers and splitter) that implements only the DBS
