@@ -1,6 +1,14 @@
 DBS (Data Broadcasting Set of rules) <span style="color:blue">(Implemented)</span>
 ==================================================
 
+```html
+   <span style="color:blue">
+```
+(Implemented)
+```html
+   </span>
+```
+
 DBS emulates IMS behaviour when
 [IP multicast](https://en.wikipedia.org/wiki/IP_multicast) it not
 available.
