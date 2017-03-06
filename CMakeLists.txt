@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 option(BUILD_LIB "Build the library" ON)
 option(BUILD_REDUCED_LIB "Build a reduced version" OFF)
 
-option(BUILD_TEST "Build the test" ON)
+option(BUILD_TEST "Build the test" OFF)
 
 #option(BUILD_PEER "Build the peer" ON)
 #option(BUILD_SPLITTER "Build the splitter" ON)
