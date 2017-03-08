@@ -4,6 +4,7 @@ from __future__ import print_function
 import os
 import sys
 import shutil
+import tarfile
 import platform
 import subprocess
 import multiprocessing
@@ -14,6 +15,28 @@ only_cmake = False
 build_debug = False
 cmake = 'cmake'
 make = 'make'
+
+''' replace the url with updated link if any'''
+url = 'https://netix.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.bz2'
+
+print("downloading boost libraries")
+os.system("wget -O boost_1_63_0.tar.bz2 " + url)
+
+''' extracts the downloaded boost libraries'''
+def untar(filename):
+    if (filename.endswith("tar.bz2")):
+        tar = tarfile.open(filename)
+        print("Extracting the files...")
+        tar.extractall()
+        tar.close()
+        print("Successfully extracted in Current Directory")
+    else:
+        print("Not a tar.gz file")
+
+untar("boost_1_63_0.tar.bz2")
+
+'''Installing the boost libraries to a seperate directory '''
+os.system("cd boost_1_63_0 && ./bootstrap.sh --prefix=boost_lib && ./b2 install")
 
 if len(sys.argv) >= 2:
     if sys.argv[1] == '-h':
@@ -57,8 +80,9 @@ if sys_name == 'Linux' or sys_name == 'Darwin':
         print('Building for Debug...\n')
     else:
         print('Building for Release...\n')
-
-    command = 'cd build && ' + cmake + ' .. && echo'
+        
+    ''' below command sets the manually installed libraries rather than the system libraries'''
+    command = 'cd build && cmake -DBOOST_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT="boost_1_63_0" -DBOOST_INCLUDEDIR="boost_1_63_0/boost_lib/include" -DBOOST_LIBRARYDIR="boost_1_63_0/boost_lib/lib" ..'
     if os.system(command) == 0:
         command = 'cd build && make -j' + str(number_of_cores)
         if not only_cmake:
