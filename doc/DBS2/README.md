@@ -12,9 +12,10 @@ The following rules overwrite the corresponding rule in DBS.
 Rules
 -----
 
-2. **Chunk scheduling at the peers:** When a peer $, which not
-    necessary need to be the rest of the team. For example, the
-    following team:
+2. **Chunk scheduling at the peers:** The neighbours of a peers can be
+    a subset of the rest of the team. In other words, peers not
+    necessary need to communicate directly with the rest of the
+    team. For example, in the following team:
 
 	```
 	P$_1$ ---- P$_2$ ---- P$_3$
