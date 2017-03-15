@@ -120,26 +120,32 @@ Rules
 		monitor peer is $0$. However, the transmission rate of the second
 		(first standard) peer, and the monitor peer, is:
 
+        ```
 	    \begin{displymah}
            B/2,
         \end{displaymath}
-		   
+	    ```
+
         where $B$ is the average encoding rate of the stream. When the
         size of the team is $|T|$, the transmission rate of all peers
         (included the monitor peers, obviously) of the team is:
 
+	    ```
 	    \begin{equation}
           B\frac{|T|}{|T|+1}.
         \end{equation}
-		  
+		```
+
 	    Therefore, only the first (monitor) peer is included in the team
         without a initial transmission requirement. Notice also that
 
+	    ```
 	    \begin{equation}
 		  \lim_{|T|\rightarrow\infty}B\frac{|T|}{|T|+1}=B,
         \label{eq:bit-rate-limit}
         \end{equation}
-		
+		```
+
 		which means that when the team is large enough, all the peers
 		of the team will transmit the same amount of data that they
 		receive.
@@ -184,9 +190,11 @@ Rules
 	that, the team size is limited by the buffer size, i.e., in the
 	DBS module it must be hold that
 
+	```
     \begin{equation}
       |T| \leq B.
     \end{equation}
+	```
 
 9.  **Chunk tracking at the splitter:** In order to identify
     unsupportive peers (free-riding), the splitter remembers the
