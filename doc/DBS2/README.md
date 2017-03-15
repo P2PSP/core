@@ -12,7 +12,7 @@ The following rules overwrite the corresponding rule in DBS.
 Rules
 -----
 
-2. **Chunk scheduling at the peers:** The neighbours of a peers can be
+2. **Chunk scheduling at the peers:** The neighbours of a peer can be
     a subset of the rest of the team. In other words, peers not
     necessary need to communicate directly with the rest of the
     team. For example, in the following team:
@@ -45,11 +45,11 @@ Rules
 	* P$_3$.Routing_table = {{P$_1$,P$_2$,2},{P$_2$,P$_2$,1},{P$_3$,P$_3$,0}}.
 
 	When a peer receives a chunk from the splitter, it forwards this
-    chunk to the rest of its neighbours (flooding). In general, a
-    P$_i$ which receives a chunk originated in (which means that the
-    splitters sends to) P$_k$, sends a chunk to all its neighbours
-    P$_j$ if and only if, in P$_j$.Routing_table P$_i$ is in the
-    shortest path between P$_j$ and P$_k$.
+    chunk to the rest of its neighbours (flooding). On the contrary,
+    when a P$_i$ receives a chunk originated in (which means
+    that the splitters sends to) a P$_k$, P$_i$ sends the chunk to all its
+    neighbours P$_j$ if and only if, in P$_j$.Routing_table P$_i$ is
+    in the shortest path between P$_j$ and P$_k$.
 
 	For example, for the previous team, the following sequece of events are generated:
 
