@@ -19,12 +19,14 @@ Rules
 	and
 	[unicast transmissions](https://en.wikipedia.org/wiki/Unicast).
 	The splitter sends the $n$-th chunk to the peer P$_i$ if
-	
+    ```	
     \begin{equation}
 	  (i+n) \bmod |T| = 0, \label{eq:bdist}
     \end{equation}
-
-    where $|T|$ is the number of peers in the team. Next, P$_i$ must
+    ``
+    where $|T|$ is the number of peers in the team.
+    
+2.  Next, P$_i$ must
     forward this chunk to the rest of peers of the team. Chunks
     received from other peers are not retransmitted.
 
