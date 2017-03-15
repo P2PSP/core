@@ -12,23 +12,9 @@ The following rules overwrite the corresponding rule in DBS.
 Rules
 -----
 
-1.  **Chunk scheduling at the splitter:** The splitter sends the
-	stream (of chunks) to the peers using using a
-	[Round-Robing scheduling](https://en.wikipedia.org/wiki/Round-robin_scheduling)
-	and
-	[unicast transmissions](https://en.wikipedia.org/wiki/Unicast).
-	The splitter sends the $n$-th chunk to the peer P$_i$ if
-
-	```
-	\begin{equation}
-	  (i+n) \bmod |T| = 0, \label{eq:bdist}
-	\end{equation}
-	```
-
-	where $|T|$ is the number of peers in the team.
-
-11. **Chunk scheduling at the peers:** When a peer $, which not necessary need to be the rest of the
-    team. For example, the following team:
+2. **Chunk scheduling at the peers:** When a peer $, which not
+    necessary need to be the rest of the team. For example, the
+    following team:
 
 	```
 	P$_1$ ---- P$_2$ ---- P$_3$
