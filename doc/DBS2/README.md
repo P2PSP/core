@@ -51,21 +51,22 @@ Rules
     neighbours P$_j$ if and only if, in P$_j$.Routing_table P$_i$ is
     in the shortest path between P$_j$ and P$_k$.
 
-	For example, for the previous team, the following sequece of events are generated:
+	For example, for the previous team, the following sequece of
+    events are generated:
 
 	1. The splitter sends a chunk to P$_1$.
 	2. P$_1$ floods the chunk towards P$_2$.
 	3. P$_2$ "requests" to P$_3$ its routing table P$_3$.Routing_table
        and finds out that P$_2$ is in the shortest path between P$_3$
-       and P$_1$ (the peer origin). Therefore, P$_2$ forwards the
+       and P$_1$ (the origin peer). Therefore, P$_2$ forwards the
        chunk to P$_3$.
 
 12. **Generation of the routing tables:** The routing tables can be
     populated by using the
     [Bellman-Ford Algorithm](https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm). Note
-    that the routing tables can be transmitted using piggybacking,
-    with the chunks to reduce the overhead.  Note also that, in the
+    that the routing tables can be transmitted using piggybacking
+    (with the chunks) to reduce the overhead.  Note also that, in the
     case of using the Bellman-Ford Algorithm, peers do no need to
     request the routing tables to their neighbours in order to run
-    Rule 11, because each peer receives the routing tables of their
+    Rule 2, because each peer receives the routing tables of their
     neighbours throughout the execution of the algorithm.
