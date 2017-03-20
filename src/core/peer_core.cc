@@ -27,13 +27,13 @@ namespace p2psp {
 #if defined __D_CHURN__
     TRACE("Compiled with directive: __D_CHURN__");
 #endif
-#if defined __D_CHURN__
+#if defined __D_LOST_CHUNKS__
     TRACE("Compiled with directive: __D_LOST_CHUNKS__");
 #endif
-#if defined __D_CHURN__
+#if defined __D_TRAFFIC__
     INFO("Compiled with directive: __D_TRAFFIC__");
 #endif
-#if defined __D_CHURN__
+#if defined __D_BUFFER__
     INFO("Compiled with directive: __D_BUFFER__");
 #endif
         
