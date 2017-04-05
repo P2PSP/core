@@ -51,7 +51,7 @@ Rules
     neighbours P$_j$ if and only if, in P$_j$.Routing_table P$_i$ is
     in the shortest path between P$_j$ and P$_k$.
 
-	For example, for the previous team, the following sequece of
+	For example, for the previous team, the following sequence of
     events are generated:
 
 	1. The splitter sends a chunk to P$_1$.
