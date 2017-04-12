@@ -54,6 +54,8 @@ inserted again in the list of peers of the class-A peer, reseting its
 loss counter. Anyway, an increment of the \texttt{MAX\_LOSS\_COUNTER}
 in class-A peers would improve the performance of the system.
 
+See: https://en.wikipedia.org/wiki/Weighted_round_robin
+
 Rules
 -----
 
