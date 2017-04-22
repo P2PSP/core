@@ -61,7 +61,8 @@ void Peer_SYMSP::SendMessage(std::string message, boost::asio::ip::udp::endpoint
       }
       TRACE("Using source port: " << this->current_port_);
 
-      this->endpoints_.emplace(endpoint, this->io_service_);
+      this->endpoints_.emplace(std::piecewise_construct, std::forward_as_tuple(endpoint),
+        std::forward_as_tuple(this->io_service_));
       ip::udp::socket& socket = this->endpoints_.at(endpoint);
       socket.open(ip::udp::v4());
       socket.set_option(ip::udp::socket::reuse_address(true));
