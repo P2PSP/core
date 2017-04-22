@@ -13,6 +13,8 @@ option(BUILD_PYTHON_WRAPPER "Build the Python wrapper" OFF)
 
 option(BUILD_WITH_CLANG "Build using the Clang compiler" OFF)
 
+option(BUILD_INCORPORATION_TEST "Build library with incorporation test flag" OFF)
+
 if(BUILD_WITH_CLANG)
   set(CMAKE_C_COMPILER clang)
   set(CMAKE_CXX_COMPILER clang++)
@@ -167,6 +169,9 @@ if(BUILD_LIB)
   add_library(p2psp SHARED
     ${P2PSP_SOURCES}
   )
+  if(BUILD_INCORPORATION_TEST)
+    target_compile_definitions(p2psp PUBLIC __incorporation_test__)
+  endif()
 
   # Libraries
   target_link_libraries(p2psp

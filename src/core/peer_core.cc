@@ -51,7 +51,11 @@ namespace p2psp {
     //mcast_addr_ = ip::address::from_string("0.0.0.0");
     //mcast_port_ = 0;
     played_chunk_ = 0;
+#if not defined __incorporation_test__
     player_alive_ = false;
+#else
+    player_alive_ = true;
+#endif
     received_counter_ = 0;
     recvfrom_counter_ = 0;
     sendto_counter_ = -1;

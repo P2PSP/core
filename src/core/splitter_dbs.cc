@@ -441,7 +441,9 @@ namespace p2psp {
     
     std::shared_ptr<asio::ip::tcp::socket> connection = make_shared<asio::ip::tcp::socket>(boost::ref(io_service_));
     acceptor_.accept(*connection);
+#if not defined __incorporation_test__
     RequestTheVideoFromTheSource();
+#endif
     HandleAPeerArrival(connection);
 
     // Threads
@@ -449,6 +451,7 @@ namespace p2psp {
     thread t2(bind(&Splitter_DBS::ModerateTheTeam, this));
     thread t3(bind(&Splitter_DBS::ResetCountersThread, this));
 
+#if not defined __incorporation_test__
     vector<char> message(sizeof(uint16_t) + chunk_size_);
     asio::ip::udp::endpoint peer;
 
@@ -483,6 +486,7 @@ namespace p2psp {
       
       chunk.consume(bytes_transferred);
     }
+#endif
 
     // }}}
   }
