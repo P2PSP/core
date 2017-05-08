@@ -2,7 +2,7 @@
 //  peer_dbs.h - Data Broadcasting Set of rules.
 //
 //  This code is distributed under the GNU General Public License (see
-//  the THE_GENERAL_GNU_PUBLIC_LICENSE.txt file for extending this
+//  the THE_GNU_GENERAL_PUBLIC_LICENSE.txt file for extending this
 //  information).  Copyright (C) 2016, the P2PSP team.
 //
 //  http://www.p2psp.org

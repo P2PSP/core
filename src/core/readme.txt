@@ -46,7 +46,7 @@ Directory contents:
 
 * tests: scripts to test the implementation of the P2PSP.
 
-* THE_GENERAL_GNU_PUBLIC_LICENSE.txt: some that you should know if
+* THE_GNU_GENERAL_PUBLIC_LICENSE.txt: some that you should know if
   yoy are going to use this code.
 
 * tools: some tools.

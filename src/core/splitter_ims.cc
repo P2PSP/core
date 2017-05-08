@@ -2,7 +2,7 @@
 //  splitter_ims.cc -- Ip Multicast Set of rules
 //
 //  This code is distributed under the GNU General Public License (see
-//  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+//  THE_GNU_GENERAL_PUBLIC_LICENSE.txt for extending this information).
 //  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
 //
