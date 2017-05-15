@@ -63,7 +63,7 @@ namespace p2psp {
 
     // }}}
   }
-  
+
   int Splitter_core::GetDefaultHeaderSize() {
     // {{{
 
@@ -90,11 +90,11 @@ namespace p2psp {
     //system::error_code ec;
     char message[2];
 
-#if defined __D_CHURN__    
+#if defined __D_CHURN__
     TRACE("channel name length = "
 	  << channel_.length());
 #endif
-    
+
     (*(uint16_t *)&message) = htons(channel_.length());
     //peer_serve_socket->send(asio::buffer(message), 0, ec);
 
@@ -105,11 +105,11 @@ namespace p2psp {
     //char data[19];
     //boost::asio::write(*peer_serve_socket, boost::asio::buffer(data,19));
 
-#if defined __D_CHURN__    
+#if defined __D_CHURN__
     TRACE("channel = "
 	  << channel_);
 #endif
-    
+
     //boost::system::error_code ignored_error;
     boost::asio::write(*peer_serve_socket, boost::asio::buffer(channel_,channel_.length())/*,boost::asio::transfer_all(), ignored_error*/);
 
@@ -119,7 +119,7 @@ namespace p2psp {
 #if defined __D_CHURN__
     TRACE("Transmitted channel = "
 	  << channel_);
-#endif    
+#endif
 
     // }}}
   }
@@ -180,7 +180,7 @@ namespace p2psp {
 	  << to_string(source_port_)
 	  << ")");
 #endif
-    
+
     source_socket_.send(asio::buffer(GET_message_));
 
 #if defined __D_SOURCE__
@@ -208,7 +208,7 @@ namespace p2psp {
 	      << "bytes should have been!" );
     }
 #endif
-    
+
     if (ec) {
       ERROR("Error receiving next chunk: "
 	    << ec.message()
@@ -252,7 +252,9 @@ namespace p2psp {
 	    << to_string(chunk.size())
 	    << " bytes of header");
 	    }*/
-    recvfrom_counter_++;
+	if(bytes_transferred > 0) {
+		recvfrom_counter_++;
+	}
 
     return bytes_transferred;
 
@@ -280,9 +282,9 @@ namespace p2psp {
     if (ec) {
       ERROR("Error sending chunk: "
 	    << ec.message());
-    }
-
-    sendto_counter_++;
+    } else {
+		sendto_counter_++;
+	}
 
     // }}}
   }
