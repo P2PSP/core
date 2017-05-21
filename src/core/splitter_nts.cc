@@ -110,9 +110,13 @@ namespace p2psp {
       } catch (std::exception e) {
 	ERROR(e.what());
       }
+#if defined __incorporation_test__
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+#else
       // Wait for a chunk from source to avoid network congestion
       std::unique_lock<std::mutex> lock(chunk_received_mutex_);
       this->chunk_received_event_.wait(lock);
+#endif
     }
 
     // }}}
