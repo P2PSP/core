@@ -35,7 +35,7 @@ namespace p2psp {
 	  socket.open(ip::udp::v4());
 	  try {
 	    socket.send_to(buffer(std::string()), endpoint);
-	  } catch (std::exception e) {
+	  } catch (std::exception& e) {
 	    ERROR(e.what());
 	  }
 	  socket.close();
