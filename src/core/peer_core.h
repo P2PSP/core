@@ -73,6 +73,7 @@ namespace p2psp {
     ip::udp::endpoint me_;
     ip::address source_addr_;
     uint16_t source_port_;
+    bool smartSourceClient;
     //int header_length_;
     //boost::array<char, 80> channel_;
     Chunk *chunk_ptr;
@@ -112,7 +113,7 @@ namespace p2psp {
     virtual void ReceiveNextMessage(std::vector<char>& message, ip::udp::endpoint& sender);
 
     void SendReadyForReceivingChunks(void);
-    
+
     /*virtual void ReceiveMagicFlags(void);
       virtual char GetMagicFlags();*/
 
@@ -136,21 +137,23 @@ namespace p2psp {
     virtual int  GetSendtoCounter();
 
     virtual bool IsPlayerAlive(); // Ojo, defined in Player class?
-    
+    bool isSmartSourceClient() const;
+    void setSmartSourceClient(bool isSmart);
+
     virtual void SetUseLocalHost(bool);
     bool GetUseLocalHost();
     //virtual int GetNumberOfPeers();// { return 0; }
     //void  ReceiveSourceEndpoint();
     // bool AmIAMonitor() { return false; }
     //void ReceiveTheListOfPeers() {}
-    
+
     //static uint16_t GetDefaultPlayerPort();
     virtual void Complain(unsigned short);
 
     unsigned int GetRealSplitterPort() {
       return splitter_socket_.local_endpoint().port();
     }
-    
+
   };
 }
 

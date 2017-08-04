@@ -192,6 +192,26 @@ namespace p2psp {
     // }}}
   }
 
+void Splitter_core::AcceptSourceConnection() {
+    // {{{
+    using namespace boost::asio::ip;
+
+    system::error_code error;
+    tcp::acceptor acceptor(io_service_, tcp::endpoint(tcp::v4(), source_port_));
+    acceptor.accept(source_socket_);
+
+    headerBytesBuf.resize(header_size_);
+
+    const auto bytes_transferred = asio::read(source_socket_, asio::buffer(headerBytesBuf),
+                    asio::transfer_exactly(header_size_), error);
+
+    if (error || (bytes_transferred < header_size_)) {
+       ERROR(error.message());
+       exit(-1);
+    }
+    // }}}
+}
+
   size_t Splitter_core::ReceiveNextChunk(asio::streambuf &chunk) {
     // {{{
 
@@ -618,6 +638,14 @@ namespace p2psp {
     return kSourcePort;
 
     // }}}
+  }
+
+  bool Splitter_core::isSmartSourceClient() const {
+    return smartSourceClient;
+  }
+
+  void Splitter_core::setSmartSourceClient(bool isSmart) {
+    smartSourceClient = isSmart;
   }
 
 }
