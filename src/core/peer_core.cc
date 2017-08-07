@@ -36,7 +36,7 @@ namespace p2psp {
 #if defined __D_BUFFER__
     INFO("Compiled with directive: __D_BUFFER__");
 #endif
-        
+
     //player_port_ = kPlayerPort;
     splitter_addr_ = ip::address::from_string(kSplitterAddr);
     splitter_port_ = kSplitterPort;
@@ -113,15 +113,15 @@ namespace p2psp {
 	  << ") from "
 	  << my_ip);
 #endif
-    
+
     if (team_port_ != 0) {
 #if defined __D_TRAFFIC__
       TRACE("I'm using port"
 	    << std::to_string(team_port_));
 #endif
       tcp_endpoint = ip::tcp::endpoint(ip::address::from_string(my_ip), team_port_);
-      splitter_socket_.set_option(ip::udp::socket::reuse_address(true));      
-    } else {    
+      splitter_socket_.set_option(ip::udp::socket::reuse_address(true));
+    } else {
       tcp_endpoint = ip::tcp::endpoint(ip::address::from_string(my_ip), 0);
     }
 
@@ -158,7 +158,7 @@ namespace p2psp {
     TRACE("chunk_size (bytes) = "
 	  << std::to_string(chunk_size_));
 #endif
-    
+
     // }}}
   }
 
@@ -172,7 +172,7 @@ namespace p2psp {
     TRACE("buffer_size_ = "
 	  << std::to_string(buffer_size_));
 #endif
-    
+
     // }}}
   }
 
@@ -183,10 +183,10 @@ namespace p2psp {
        boost::asio::buffer(x,x.length())
        );
   }
-  
+
   int Peer_core::ProcessMessage(const std::vector<char>&,
 				const ip::udp::endpoint&) { return 0; }
-  
+
   void Peer_core::BufferData() {
     // {{{
 
@@ -219,11 +219,11 @@ namespace p2psp {
 #if defined __D_BUFFER__
     DEBUG("Buffer size = " << this->buffer_size_);
 #endif
-    
+
     for (int i=0; i<buffer_size_; i++) {
       chunk_ptr[i].chunk_number = -1;
     }
-    
+
     // We will send a chunk to the player when a new chunk is
     // received. Besides, those slots in the buffer that have not been
     // filled by a new chunk will not be send to the
@@ -302,12 +302,12 @@ namespace p2psp {
 	/* Un-sequenced buffering */
 	played_chunk_ = min_chunk_number;
       }
-      
+
     }
 
     std::cout
       << std::endl;
-    
+
     prev_received_chunk_ = chunk_number;
 
     //TRACE("");
@@ -367,7 +367,7 @@ namespace p2psp {
 
     // }}}
   }
-  
+
   void Peer_core::KeepTheBufferFull() {
     // {{{
 
@@ -407,7 +407,7 @@ namespace p2psp {
     }
     INFO("Buffer state: "+bf);
 #endif
-    
+
     // print (self.team_socket.getsockname(),)
     // sys.stdout.write(Color.none)
 
@@ -415,10 +415,10 @@ namespace p2psp {
   }
 
   bool Peer_core::PlayChunk(/*std::vector<char> chunk*/int chunk_number) { return true; }
-  
+
   void Peer_core::PlayNextChunks(int last_received_chunk) {
     // {{{
-    
+
     for (int i = 0; i < (last_received_chunk-prev_received_chunk_); i++) {
       //if (chunk_ptr[played_chunk_ /*% buffer_size_*/].chunk_number != -1)
       player_alive_ = PlayChunk(/*chunk_ptr[played_chunk_ % buffer_size_].chunk_number*/played_chunk_);
@@ -438,7 +438,7 @@ namespace p2psp {
       played_chunk_ = (played_chunk_ + 1) % Common::kMaxChunkNumber;
       //played_chunk_++;
     }
-    
+
     if ((prev_received_chunk_ % Common::kMaxChunkNumber) < last_received_chunk)
       prev_received_chunk_ = last_received_chunk;
 
@@ -455,7 +455,7 @@ namespace p2psp {
 
 	// }}}
   }
-  
+
   std::string Peer_core::BuildLogMessage(const std::string &message) {
     // {{{
 
@@ -532,7 +532,7 @@ namespace p2psp {
   uint16_t Peer_core::GetSourcePort() {
     return source_port_;
   }
-  
+
   int Peer_core::GetSendtoCounter() {
     // {{{
 
@@ -556,7 +556,7 @@ namespace p2psp {
   uint16_t Peer_core::GetTeamPort() {
     return team_port_;
   }
-  
+
   //void Peer_core::SetSplitterAddr(std::string splitter_addr) {
   void Peer_core::SetSplitterAddr(ip::address splitter_addr) {
     // {{{
@@ -613,7 +613,7 @@ namespace p2psp {
 
     // }}}
     }*/
-  
+
   uint16_t Peer_core::GetDefaultTeamPort() {
     // {{{
 
@@ -621,7 +621,7 @@ namespace p2psp {
 
     // }}}
   }
-  
+
   uint16_t Peer_core::GetDefaultSplitterPort() {
     // {{{
 
@@ -639,5 +639,13 @@ namespace p2psp {
   }
 
   void Peer_core::Complain(unsigned short x) {}
-  
+
+  bool Peer_core::isSmartSourceClient() const {
+    return smartSourceClient;
+  }
+
+  void Peer_core::setSmartSourceClient(bool isSmart) {
+    smartSourceClient = isSmart;
+  }
+
 }
