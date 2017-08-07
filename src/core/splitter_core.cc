@@ -194,6 +194,9 @@ namespace p2psp {
 
 void Splitter_core::AcceptSourceConnection() {
     // {{{
+    static bool hasExecuted = false;
+    if(hasExecuted) return;
+
     using namespace boost::asio::ip;
 
     system::error_code error;
@@ -205,6 +208,7 @@ void Splitter_core::AcceptSourceConnection() {
     const auto bytes_transferred = asio::read(source_socket_, asio::buffer(headerBytesBuf),
                     asio::transfer_exactly(header_size_), error);
 
+    hasExecuted = true;
     if (error || (bytes_transferred < header_size_)) {
        ERROR(error.message());
        exit(-1);
