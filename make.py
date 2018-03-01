@@ -20,7 +20,7 @@ make = 'make'
 boost = "boost_1_63_0.tar.bz2"
 
 print('Enter yes if you want to download the boost libraries and use the updated boost libraries...')
-user_input = raw_input()
+user_input = input()
     
 
 if os.path.isfile(boost) == False:
