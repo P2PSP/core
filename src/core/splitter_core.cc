@@ -2,7 +2,7 @@
 //  splitter_core.cc -- Core
 //
 //  This code is distributed under the GNU General Public License (see
-//  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+//  THE_GNU_GENERAL_PUBLIC_LICENSE.txt for extending this information).
 //  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
 //
@@ -63,7 +63,7 @@ namespace p2psp {
 
     // }}}
   }
-  
+
   int Splitter_core::GetDefaultHeaderSize() {
     // {{{
 
@@ -90,11 +90,11 @@ namespace p2psp {
     //system::error_code ec;
     char message[2];
 
-#if defined __D_CHURN__    
+#if defined __D_CHURN__
     TRACE("channel name length = "
 	  << channel_.length());
 #endif
-    
+
     (*(uint16_t *)&message) = htons(channel_.length());
     //peer_serve_socket->send(asio::buffer(message), 0, ec);
 
@@ -105,11 +105,11 @@ namespace p2psp {
     //char data[19];
     //boost::asio::write(*peer_serve_socket, boost::asio::buffer(data,19));
 
-#if defined __D_CHURN__    
+#if defined __D_CHURN__
     TRACE("channel = "
 	  << channel_);
 #endif
-    
+
     //boost::system::error_code ignored_error;
     boost::asio::write(*peer_serve_socket, boost::asio::buffer(channel_,channel_.length())/*,boost::asio::transfer_all(), ignored_error*/);
 
@@ -119,7 +119,7 @@ namespace p2psp {
 #if defined __D_CHURN__
     TRACE("Transmitted channel = "
 	  << channel_);
-#endif    
+#endif
 
     // }}}
   }
@@ -180,7 +180,7 @@ namespace p2psp {
 	  << to_string(source_port_)
 	  << ")");
 #endif
-    
+
     source_socket_.send(asio::buffer(GET_message_));
 
 #if defined __D_SOURCE__
@@ -191,6 +191,30 @@ namespace p2psp {
 
     // }}}
   }
+
+void Splitter_core::AcceptSourceConnection() {
+    // {{{
+    static bool hasExecuted = false;
+    if(hasExecuted) return;
+
+    using namespace boost::asio::ip;
+
+    system::error_code error;
+    tcp::acceptor acceptor(io_service_, tcp::endpoint(tcp::v4(), source_port_));
+    acceptor.accept(source_socket_);
+
+    headerBytesBuf.resize(header_size_);
+
+    const auto bytes_transferred = asio::read(source_socket_, asio::buffer(headerBytesBuf),
+                    asio::transfer_exactly(header_size_), error);
+
+    hasExecuted = true;
+    if (error || (bytes_transferred < header_size_)) {
+       ERROR(error.message());
+       exit(-1);
+    }
+    // }}}
+}
 
   size_t Splitter_core::ReceiveNextChunk(asio::streambuf &chunk) {
     // {{{
@@ -208,7 +232,7 @@ namespace p2psp {
 	      << "bytes should have been!" );
     }
 #endif
-    
+
     if (ec) {
       ERROR("Error receiving next chunk: "
 	    << ec.message()
@@ -252,7 +276,9 @@ namespace p2psp {
 	    << to_string(chunk.size())
 	    << " bytes of header");
 	    }*/
-    recvfrom_counter_++;
+	if(bytes_transferred > 0) {
+		recvfrom_counter_++;
+	}
 
     return bytes_transferred;
 
@@ -280,9 +306,9 @@ namespace p2psp {
     if (ec) {
       ERROR("Error sending chunk: "
 	    << ec.message());
-    }
-
-    sendto_counter_++;
+    } else {
+		sendto_counter_++;
+	}
 
     // }}}
   }
@@ -616,6 +642,14 @@ namespace p2psp {
     return kSourcePort;
 
     // }}}
+  }
+
+  bool Splitter_core::isSmartSourceClient() const {
+    return smartSourceClient;
+  }
+
+  void Splitter_core::setSmartSourceClient(bool isSmart) {
+    smartSourceClient = isSmart;
   }
 
 }

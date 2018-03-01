@@ -6,7 +6,7 @@ splitter_ims module
 # -*- coding: iso-8859-15 -*-
 
 # This code is distributed under the GNU General Public License (see
-# THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+# THE_GNU_GENERAL_PUBLIC_LICENSE.txt for extending this information).
 # Copyright (C) 2014, the P2PSP team.
 # http://www.p2psp.org
 

@@ -2,7 +2,7 @@
 //  splitter_core.h -- Core
 //
 //  This code is distributed under the GNU General Public License (see
-//  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+//  THE_GNU_GENERAL_PUBLIC_LICENSE.txt for extending this information).
 //  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
 //
@@ -49,6 +49,7 @@ namespace p2psp {
     size_t ReceiveNextChunk(boost::asio::streambuf &chunk); // Ojo con ReceiveChunk
     virtual size_t ReceiveChunk(boost::asio::streambuf &chunk);
     virtual void SendChunk(const std::vector<char> &message, const boost::asio::ip::udp::endpoint &destination);
+    void AcceptSourceConnection();
 
     // TODO: SendChunk can be used instead if the increment of sendto_counter
     // doesn't matter
@@ -66,7 +67,8 @@ namespace p2psp {
     std::string GetSourceAddr();
     int GetSourcePort();
     int GetSendToCounter();
-    
+    bool isSmartSourceClient() const;
+
     // Setters
     void SetAlive(bool alive);
     void SetBufferSize(int buffer_size);
@@ -76,6 +78,7 @@ namespace p2psp {
     void SetSourceAddr(std::string source_addr);
     void SetSourcePort(int source_port);
     void SetGETMessage(std::string channel);
+    void setSmartSourceClient(bool isSmart);
 
     // Default getters
     static int GetDefaultChunkSize();
@@ -88,7 +91,7 @@ namespace p2psp {
     static HEADER_SIZE_TYPE GetDefaultHeaderSize();
     void SetHeaderSize(HEADER_SIZE_TYPE header_size);
     HEADER_SIZE_TYPE GetHeaderSize();
-    
+
   protected:
     static const int kBufferSize;          // Buffer size in chunks
     static const std::string kChannel;     // Default channel
@@ -105,7 +108,7 @@ namespace p2psp {
     std::string source_addr_;
     unsigned short source_port_;
     int header_size_;
-    
+
     /*
       An splitter runs 2 threads. The main one serves the chunks to
       the team. The other controls peer arrivals. This variable is true
@@ -141,6 +144,12 @@ namespace p2psp {
 
     // Thread to start the Splitter
     std::unique_ptr<boost::thread> thread_;
+
+    // used to identify smart sourceClient(can stream content itself)
+    bool smartSourceClient;
+
+    // used to store header bytes - used when smartSourceClient = true
+    std::vector<char> headerBytesBuf;
 
     // Thread management
     virtual void Run();

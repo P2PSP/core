@@ -2,7 +2,7 @@
 //  splitter_dbs.cc -- Data Broadcasting Set of rules
 //
 //  This code is distributed under the GNU General Public License (see
-//  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+//  THE_GNU_GENERAL_PUBLIC_LICENSE.txt for extending this information).
 //  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
 //
@@ -40,7 +40,7 @@ namespace p2psp {
   void Splitter_DBS::Init() {
     destination_of_chunk_.reserve(buffer_size_);
   }
-  
+
   void Splitter_DBS::SendTheNumberOfPeers(const std::shared_ptr<boost::asio::ip::tcp::socket> &peer_serve_socket) {
     // {{{
 
@@ -50,15 +50,15 @@ namespace p2psp {
     TRACE("Sending the number of monitors "
 	  << number_of_monitors_);
 #endif
-    
+
     (*(uint16_t *)&message) = htons(number_of_monitors_);
     peer_serve_socket->send(asio::buffer(message));
-    
+
 #if defined __D_CHURN__
     TRACE("Sending a list of peers of size "
 	  << to_string(peer_list_.size()));
 #endif
-    
+
     (*(uint16_t *)&message) = htons(peer_list_.size());
     peer_serve_socket->send(asio::buffer(message));
 
@@ -78,7 +78,7 @@ namespace p2psp {
     TRACE("Peer list length = "
 	  << peer_list_.size());
 #endif
-    
+
     for (std::vector<asio::ip::udp::endpoint>::iterator it = peer_list_.begin();
          it != peer_list_.end(); ++it) {
       inet_aton(it->address().to_string().c_str(), &addr);
@@ -90,7 +90,7 @@ namespace p2psp {
       TRACE(to_string(counter)
 	    << ", "
 	    << *it);
-#endif      
+#endif
       counter++;
     }
 
@@ -159,7 +159,10 @@ namespace p2psp {
       }
     }
     SendConfiguration(serve_socket);
-    //SendTheListOfPeers(serve_socket);
+    if(isSmartSourceClient()) {
+      AcceptSourceConnection();
+      serve_socket->send(asio::buffer(headerBytesBuf));
+    }
     ReceiveReadyForReceivingChunks(serve_socket);
     serve_socket->close();
     boost::asio::ip::udp::endpoint incoming_peer_udp(incoming_peer.address(), incoming_peer.port());
@@ -211,7 +214,7 @@ namespace p2psp {
 	    << to_string(losses_[peer])
 	    << " chunks");
 #endif
-      
+
       if (losses_[peer] > max_number_of_chunk_loss_) {
 
 #if defined __D_LOST_CHUNKS__
@@ -219,7 +222,7 @@ namespace p2psp {
 	      << peer
 	      << " removed by unsupportive");
 #endif
-	
+
         RemovePeer(peer);
       }
     }
@@ -299,7 +302,7 @@ namespace p2psp {
     TRACE("Received 'goodbye' from "
 	  << peer);
 #endif
-    
+
     // TODO: stdout flush?
 
     if (find(outgoing_peer_list_.begin(), outgoing_peer_list_.end(),peer) == outgoing_peer_list_.end()){
@@ -334,7 +337,7 @@ namespace p2psp {
 #endif
 
     // }}}
-    
+
   }
 
   void Splitter_DBS::ModerateTheTeam() {
@@ -438,10 +441,12 @@ namespace p2psp {
 #if defined __D_CHURN__
     TRACE("waiting for the monitor peers ...");
 #endif
-    
+
     std::shared_ptr<asio::ip::tcp::socket> connection = make_shared<asio::ip::tcp::socket>(boost::ref(io_service_));
     acceptor_.accept(*connection);
-    RequestTheVideoFromTheSource();
+    if(!isSmartSourceClient()) {
+      RequestTheVideoFromTheSource();
+    }
     HandleAPeerArrival(connection);
 
     // Threads
@@ -480,7 +485,7 @@ namespace p2psp {
 	}
 	outgoing_peer_list_.clear();
       }
-      
+
       chunk.consume(bytes_transferred);
     }
 

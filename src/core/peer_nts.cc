@@ -3,7 +3,7 @@
 //  P2PSP
 //
 //  This code is distributed under the GNU General Public License (see
-//  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+//  THE_GNU_GENERAL_PUBLIC_LICENSE.txt for extending this information).
 //  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
 //
@@ -92,13 +92,18 @@ namespace p2psp {
   void Peer_NTS::SendMessage(const message_t& message_data) {
     // {{{
 
-    std::lock_guard<std::mutex> guard(this->hello_messages_lock_);
-    if (!Common_NTS::Contains(this->hello_messages_, message_data)) {
-      this->hello_messages_.push_back(HelloMessage{message_data,
-	    std::chrono::steady_clock::now(),
-	    std::vector<uint16_t>(1, message_data.second.port())});
-      // Directly start packet sending
-      this->hello_messages_event_.notify_all();
+    {
+      std::lock_guard<std::mutex> guard(this->hello_messages_lock_);
+      if (!Common_NTS::Contains(this->hello_messages_, message_data)) {
+        this->hello_messages_.push_back(HelloMessage{message_data,
+        std::chrono::steady_clock::now(),
+        std::vector<uint16_t>(1, message_data.second.port())});
+      }
+    }
+    // Directly start packet sending
+    {
+    std::unique_lock<std::mutex> lock(this->hello_messages_event_mutex_);
+    this->hello_messages_event_.notify_all();
     }
 
     // }}}
@@ -118,6 +123,7 @@ namespace p2psp {
   void Peer_NTS::SendHelloThread() {
     // {{{
 
+    std::unique_lock<std::mutex> lock(this->hello_messages_event_mutex_);
     while (this->player_alive_) {
       // Continuously send [hello] UDP packets to arriving peers
       // until a connection is established
@@ -164,7 +170,6 @@ namespace p2psp {
 	}
       }
 
-      std::unique_lock<std::mutex> lock(this->hello_messages_event_mutex_);
       this->hello_messages_event_.wait_until(lock,
 					     std::chrono::steady_clock::now() + Common_NTS::kHelloPacketTiming);
 
@@ -204,7 +209,7 @@ namespace p2psp {
       ERROR("this->peer_list_.size() != this->number_of_monitors_");
     }
 
-    INFO("Requesting the number of peers from splitter");
+    TRACE("Requesting the number of peers from splitter");
     // Add number_of_monitors as the monitor peers were already received
 
     this->number_of_peers_ = Common_NTS::Receive<uint16_t>(this->splitter_socket_)
@@ -241,7 +246,10 @@ namespace p2psp {
     }
 
     // Directly start packet sending
+    {
+    std::unique_lock<std::mutex> lock(this->hello_messages_event_mutex_);
     this->hello_messages_event_.notify_all();
+    }
 
     TRACE("List of peers received");
 
@@ -282,6 +290,7 @@ namespace p2psp {
     // Send UDP packets to splitter and monitor peers
     // to create working NAT entries and to determine the
     // source port allocation type of the NAT of this peer
+    TRACE("Sending hello to splitter and monitors ...");
     this->SendHello(this->splitter_);
     for (auto peer_iter = this->peer_list_.begin();
 	 peer_iter != peer_list_.end() &&
@@ -290,7 +299,10 @@ namespace p2psp {
       this->SendHello(*peer_iter);
     }
     // Directly start packet sending
+    {
+    std::unique_lock<std::mutex> lock(this->hello_messages_event_mutex_);
     this->hello_messages_event_.notify_all();
+    }
 
     // Common_NTS::Receive the list of peers, except the monitor peer, with their
     // peer IDs and send hello messages
@@ -346,6 +358,7 @@ namespace p2psp {
     }
 
     // Close the TCP socket
+    TRACE("Disconnecting from splitter ...");
     Peer_DBS::DisconnectFromTheSplitter();
     // The peer is now successfully incorporated; inform the splitter
     this->SendMessage(std::make_pair(this->peer_id_ + 'Y', this->splitter_));
@@ -466,7 +479,10 @@ namespace p2psp {
 	    << Common_NTS::Join(additional_ports, ", ") << ']');
       this->SendHello(peer, additional_ports);
       // Directly start packet sending
+      {
+      std::unique_lock<std::mutex> lock(this->hello_messages_event_mutex_);
       this->hello_messages_event_.notify_all();
+      }
     } else if (sender == this->splitter_ &&
 	       message.size() == Common_NTS::kPeerIdLength + 12) {
       // say [hello to (X)] received from splitter
@@ -494,7 +510,10 @@ namespace p2psp {
       this->SendHello(ip::udp::endpoint(this->splitter_.address(),
 					extra_splitter_port));
       // Directly start packet sending
+      {
+      std::unique_lock<std::mutex> lock(this->hello_messages_event_mutex_);
       this->hello_messages_event_.notify_all();
+      }
     } else if (message == this->peer_id_ || (sender == this->splitter_ &&
 					     message.size() == Common_NTS::kPeerIdLength + 2) ||
 	       (sender == this->splitter_ &&

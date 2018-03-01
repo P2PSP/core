@@ -3,7 +3,7 @@
 //  P2PSP
 //
 //  This code is distributed under the GNU General Public License (see
-//  THE_GENERAL_GNU_PUBLIC_LICENSE.txt for extending this information).
+//  THE_GNU_GENERAL_PUBLIC_LICENSE.txt for extending this information).
 //  Copyright (C) 2016, the P2PSP team.
 //  http://www.p2psp.org
 //
@@ -35,7 +35,7 @@ namespace p2psp {
 	  socket.open(ip::udp::v4());
 	  try {
 	    socket.send_to(buffer(std::string()), endpoint);
-	  } catch (std::exception e) {
+	  } catch (std::exception& e) {
 	    ERROR(e.what());
 	  }
 	  socket.close();
