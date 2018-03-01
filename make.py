@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 #from __future__ import print_function
 import os
@@ -21,7 +21,6 @@ boost = "boost_1_63_0.tar.bz2"
 
 print('Enter yes if you want to download the boost libraries and use the updated boost libraries...')
 user_input = input()
-    
 
 if os.path.isfile(boost) == False:
     if user_input == "yes":
