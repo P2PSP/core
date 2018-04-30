@@ -4,26 +4,12 @@ Team Clustering Set of rules
 ```diff
 -(Not Implemented)-
 ```
+In a typical P2PSP configuration, a source (such as an Icecast server) sends a stream X (a channel) to a set of splitters S={S_1, ..., S_n}. All these splitters are basically broadcasting the same stream, with a small time offset among them.
 
-In a typical P2PSP configuration, a source (such as an Icecast server) sends the stream to a set of splitters.
-
-All peers of a team have the same buffer size, which depends on the
-number of peers of the team. Therefore, the size of the team must be
-limited at configuration time of the team.
-
-The entity in charge of controlling the configuration (which peer will
-be part) of the teams is the tracker. An incomming peer should first
-contact the tracker that will specify to the peer a team by means of a
-splitter (each team has a different splitter). The policy used for the
-tracker to decide which team will be assigned should fulfill the
-maximun buffer size constraint. Other factors such as the physical
-network topology or the packet loss ratio of the incomming peer in the
-pass could be also considered. For example, if a peer was rejected
-from a team because is selfish, a less demanding team could be
-assigned. A time-line describing the attaching process is presented next:
+When an incoming peer P_i wants to join a team, P_i must pick a splitter in S. In this situation, a tracker T is an entity in charge of selecting the most convenient splitter for P_i. So, the first P_i must contact T, T will select an S_j and them, P_i will contact S_j. In a timeline:
 
 ```
-Tracker       Peer        Splitter
+[T]racker   [P]eer[_i]  [S]plitter[_j]
    |            |            |
    |<---Hello---+            |
    +--Splitter->|            |
@@ -32,20 +18,9 @@ Tracker       Peer        Splitter
    |            |            |
 
 
-The attaching process of a peer to a team.
+The attaching process of a peer P_i to a team S_j.
 ```
 
-The logical topology used to interconnect the splitters between
-themselves depends on the local capacity of the network. Some 0-level
-splitters could receive the signal directly from the 0-level source
-while a 1-level splitter will be attached to 0-level peer.
+In P2PSP, the main "signal" latency that a peer experiments is caused by the number of chunks that such peer must buffer before it starts to play the stream. It also holds that the buffer size (in chunks) must be equal to the number of peers in the team. Therefore, if N is the number of peers in a team, a delay proportional to N will be generated. In this context, the tracker T should provide load balancing among the teams in order to minimize the variance of the delay produced by the buffering.
 
-The latency of a team is proportional to the team size (the number of
-peers in the team). Therefore, we can say that the latency is $|T|$
-units of time, where $T$ is the set of peers of the team and $|\cdot|$
-is the cardinality operator. Lets suppose that the source have enough
-bandwidth to send up to $|T|$ replicas of the stream. In this case, it
-could be achieved that $|T|=1$. In the opposite case, if the source is
-able to send only one copy of the stream, the replication must be
-performed by the peers and the latency for all peers of the team is
-$|T|$.
+Another important task that should be provided at this set of rules is that the different splitters that are retransmitting a stream should be synchronized. In this way, all splitters in S should include exactly the same data in the same chunks. In other words, if we have two splitters S_* and S_^, both transmitting the same channel, two chunks C*_i and C^_i (where i is the chunk number) should have exactly the same stream content.
