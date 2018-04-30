@@ -5,6 +5,8 @@ Team Clustering Set of rules
 -(Not Implemented)-
 ```
 
+In a typical P2PSP configuration, a source (such as an Icecast server) sends the stream to a set of splitters.
+
 All peers of a team have the same buffer size, which depends on the
 number of peers of the team. Therefore, the size of the team must be
 limited at configuration time of the team.
