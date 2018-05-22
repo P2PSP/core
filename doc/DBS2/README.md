@@ -26,19 +26,19 @@ Rules
     }
     ```
 
-P~i~ is origin of a chunk if it receive this chunk directly from the splitter.
+P<sub>i</sub> is origin of a chunk if it receive this chunk directly from the splitter.
 
 **Forwarding Rules:**
-When a peer P~i~ receives a chunk originated at P~k~, it forwards this chunk to each peer P~z~ in forwarding list of P~k~ of its forwarding table .
-e.g.    forward[P~k~] = [ ........,P~z~,.........] 
+When a peer P<sub>i</sub> receives a chunk originated at P<sub>k</sub>, it forwards this chunk to each peer P<sub>z</sub> in forwarding list of P<sub>k</sub> of its forwarding table .
+e.g.    forward[ P<sub>k</sub> ] = [ ........, P<sub>z</sub> ,.........] 
 
-When a chunk is received from splitter then P~k~ = P~i~.
+When a chunk is received from splitter then P<sub>k</sub> = P<sub>i</sub>.
 
 **Generation of forwarding table:**   
 A forwarding table for a peer is generated following way:
-* Initially forwarding table have only one entry correspond to peer P~i~ itself with empty list.
-* Forwarding list of a peer P~i~ is populated when it :
+* Initially forwarding table have only one entry correspond to peer P<sub>i</sub> itself with empty list.
+* Forwarding list of a peer P<sub>i</sub> is populated when it :
 	* receives a chunk from other peer.
 	* receives hello message from other peer.
-*  When a peer P~i~ receives a chunk request from the peer P~j~ for a chunk originated at P~k~ then peer P~j~ is appended to the forwarding list of P~k~ in the forwarding table.
+*  When a peer P<sub>i</sub> receives a chunk request from the peer P<sub>j</sub> for a chunk originated at P<sub>k</sub> then peer P<sub>j</sub> is appended to the forwarding list of P<sub>k</sub> in the forwarding table.
 
