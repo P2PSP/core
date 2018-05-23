@@ -443,7 +443,7 @@ disturb the communication of a peer once it is incorporated into the
 team.
 
 [1]: http://p2psp.org/en/p2psp-protocol?cap=indexsu9.html
-[2]: http://slides.p2psp.org/BCN-2015
+[2]: https://slides.p2psp.org/2015-06-Barcelona/index.html
 [3]: https://wiki.asterisk.org/wiki/display/TOP/NAT+Traversal+Testing
 [4]: https://tools.ietf.org/id/draft-takeda-symmetric-nat-traversal-00.txt
 [5]: http://samy.pl/pwnat/pwnat.pdf
