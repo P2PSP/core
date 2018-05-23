@@ -3,7 +3,7 @@ DBS2 (Data Broadcasting Set of rules)
 ====================================
 
 ```diff
-+(Implemented)+
++(Implemented in the simulator)+
 ```
 
 DBS2 is a generalization of DBS.
