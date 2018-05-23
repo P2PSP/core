@@ -1,8 +1,9 @@
+
 DBS2 (Data Broadcasting Set of rules)
 ====================================
 
 ```diff
--(Not Implemented)-
++(Implemented)+
 ```
 
 DBS2 is a generalization of DBS.
@@ -12,61 +13,32 @@ The following rules overwrite the corresponding rule in DBS.
 Rules
 -----
 
-2. **Chunk scheduling at the peers:** The neighbours of a peer can be
-    a subset of the rest of the team. In other words, peers not
-    necessary need to communicate directly with the rest of the
-    team. For example, in the following team:
+2. **Chunk scheduling at the peers:**  In this set of rule a peer can forward all those chunks that it received from splitter ( for which this peer is origin) and it can also forward all those chunks that are received from other peers (for which this peer is not an origin).
 
+	Each peer has a forwarding table with the structure:
 	```
-	P$_1$ ---- P$_2$ ---- P$_3$
-	```
-
-	P$_1$ does not communicate with P$_3$ and viceversa. Therefore, P$_1$
-	and P$_3$ are not neighbours.
-
-	Each peer has a routing table with the structure:
-
-	```
-	struct Peer {
-	  IP_addr destination_peer;
-	  IP_addr neighbour_peer;
-	  integer number_of_hops;
-    };
-	  
-    struct Routing_table {
-	  struct Peer[|T|];
-	};
+	  forwading_table{
+	    X: [.....,Z,.....]
+	    Y: [.....,Z',....]
+	    .
+	    .
+	    .
+    }
     ```
-	
-	For example, for the previous team:
 
-	* P$_1$.Routing_table = {{P$_1$,P$_1$,0},{P$_2$,P$_2$,1},{P$_3$,P$_2$,2}}.
-	* P$_2$.Routing_table = {{P$_1$,P$_1$,1},{P$_2$,P$_2$,0},{P$_3$,P$_3$,1}}.
-	* P$_3$.Routing_table = {{P$_1$,P$_2$,2},{P$_2$,P$_2$,1},{P$_3$,P$_3$,0}}.
+P<sub>i</sub> is origin of a chunk if it receive this chunk directly from the splitter.
 
-	When a peer receives a chunk from the splitter, it forwards this
-    chunk to the rest of its neighbours (flooding). On the contrary,
-    when a P$_i$ receives a chunk originated in (which means
-    that the splitters sends to) a P$_k$, P$_i$ sends the chunk to all its
-    neighbours P$_j$ if and only if, in P$_j$.Routing_table P$_i$ is
-    in the shortest path between P$_j$ and P$_k$.
+**Forwarding Rules:**
+When a peer P<sub>i</sub> receives a chunk originated at P<sub>k</sub>, it forwards this chunk to each peer P<sub>z</sub> in forwarding list of P<sub>k</sub> of its forwarding table .
+e.g.    forward[ P<sub>k</sub> ] = [ ........, P<sub>z</sub> ,.........] 
 
-	For example, for the previous team, the following sequence of
-    events are generated:
+When a chunk is received from splitter then P<sub>k</sub> = P<sub>i</sub>.
 
-	1. The splitter sends a chunk to P$_1$.
-	2. P$_1$ floods the chunk towards P$_2$.
-	3. P$_2$ "requests" to P$_3$ its routing table P$_3$.Routing_table
-       and finds out that P$_2$ is in the shortest path between P$_3$
-       and P$_1$ (the origin peer). Therefore, P$_2$ forwards the
-       chunk to P$_3$.
+**Generation of forwarding table:**   
+A forwarding table for a peer is generated following way:
+* Initially forwarding table have only one entry correspond to peer P<sub>i</sub> itself with empty list.
+* Forwarding list of a peer P<sub>i</sub> is populated when it :
+	* receives a chunk from other peer.
+	* receives hello message from other peer.
+*  When a peer P<sub>i</sub> receives a chunk request from the peer P<sub>j</sub> for a chunk originated at P<sub>k</sub> then peer P<sub>j</sub> is appended to the forwarding list of P<sub>k</sub> in the forwarding table.
 
-12. **Generation of the routing tables:** The routing tables can be
-    populated by using the
-    [Bellman-Ford Algorithm](https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm). Note
-    that the routing tables can be transmitted using piggybacking
-    (with the chunks) to reduce the overhead.  Note also that, in the
-    case of using the Bellman-Ford Algorithm, peers do no need to
-    request the routing tables to their neighbours in order to run
-    Rule 2, because each peer receives the routing tables of their
-    neighbours throughout the execution of the algorithm.
